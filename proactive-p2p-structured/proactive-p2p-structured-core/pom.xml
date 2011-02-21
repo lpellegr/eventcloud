@@ -21,6 +21,15 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.objectweb.proactive</groupId>
+			<artifactId>proactive</artifactId>
+			<version>5.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
