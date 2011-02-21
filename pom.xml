@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fr.inria.eventcloud</groupId>
+	<artifactId>event-cloud-parent</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>event-cloud-parent</name>
+
+	<description>Parent module for event-cloud maven related modules.</description>
+
+	<scm>
+		<connection>scm:hg:https://event-cloud.googlecode.com/hg/</connection>
+		<developerConnection>scm:hg:https://event-cloud.googlecode.com/hg/</developerConnection>
+		<url>http://code.google.com/p/event-cloud/source/browse/</url>
+	</scm>
+
+	<ciManagement>
+		<system>Hudson</system>
+		<url>http://hudson-research.petalslink.org/hudson/</url>
+	</ciManagement>
+
+	<issueManagement>
+		<system>google-code</system>
+		<url>http://code.google.com/p/event-cloud/issues/</url>
+	</issueManagement>
+
+	<prerequisites>
+		<maven>2.2.1</maven>
+	</prerequisites>
+
+	<distributionManagement>
+		<repository>
+			<id>dspace-releases</id>
+			<name>dspace releases repository</name>
+			<url>scpexe://scm.gforge.inria.fr/home/groups/dspace/htdocs/maven2/repository/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>dspace-snapshots</id>
+			<name>dspace snapshots repository</name>
+			<url>scpexe://scm.gforge.inria.fr/home/groups/dspace/htdocs/maven2/repository/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>dspace-releases</id>
+			<name>dspace releases repository</name>
+			<url>http://dspace.gforge.inria.fr/maven2/repository/releases</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>proactive-maven-plugin</id>
+			<name>ProActive Maven Plugin</name>
+			<url>http://proactive-maven-plugin.googlecode.com/svn/maven2/repository/releases</url>
+			<layout>default</layout>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<inceptionYear>2011</inceptionYear>
+
+	<licenses>
+		<license>
+			<name>GNU General Public License, Version 3.0</name>
+			<url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>INRIA Sophia Antipolis</name>
+		<url>http://www-sop.inria.fr/</url>
+	</organization>
+
+	<modules>
+		<module>event-cloud</module>
+		<module>proactive-p2p-structured</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.8.2</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<!-- This is the parent, so only define pluginManagement, not plugins. -->
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.2</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.4.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.3.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3.1</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addClasspath>true</addClasspath>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.4.3</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>2.2</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.1.2</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.7.1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+</project>
