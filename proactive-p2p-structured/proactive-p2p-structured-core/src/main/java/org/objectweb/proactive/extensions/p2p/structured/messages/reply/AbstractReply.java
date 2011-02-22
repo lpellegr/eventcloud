@@ -6,7 +6,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Abstra
 
 /**
  * An <code>AbstractReply</code> is an abstract response associated to
- * an abstract {@link AbstractQueryMessage}. This class contains several information
+ * an abstract {@link AbstractRequest}. This class contains several information
  * common to all responses like for example the latency, the hop count, etc.
  * 
  * @author Laurent Pellegrino
