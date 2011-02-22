@@ -152,7 +152,7 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
                                         (Tracker) PAActiveObject.getStubOnThis());
         while (PAGroup.size(resultGroup) > 0) {
             result &= ((BooleanWrapper) PAGroup.waitAndGetOneThenRemoveIt(
-                                               resultGroup)).booleanValue();
+                                               resultGroup)).getBooleanValue();
         }
 
         if (!this.isInGroup) {
