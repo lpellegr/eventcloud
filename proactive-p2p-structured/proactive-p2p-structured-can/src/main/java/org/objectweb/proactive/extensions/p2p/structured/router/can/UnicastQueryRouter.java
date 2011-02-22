@@ -3,6 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.router.can;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Router used to route {@link SynchronousMessage}s from a {@link Peer} to an
+ * Router used to route {@link RequestReplyMessage}s from a {@link Peer} to an
  * another {@link Peer}.
  * 
  * @author Laurent Pellegrino
