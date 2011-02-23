@@ -31,7 +31,7 @@ public class UnicastResponseRouter<T extends AbstractReply<Coordinate>>
 	public void makeDecision(StructuredOverlay overlay, T msg) {
     	if (msg.getHopCount() == 0) {
             overlay.getRepliesReceived().put(
-                    msg.getID(), new PendingReplyEntry(1));
+                    msg.getId(), new PendingReplyEntry(1));
         }
 
         if (((AbstractCANOverlay) overlay).contains(msg.getKeyToReach())) {

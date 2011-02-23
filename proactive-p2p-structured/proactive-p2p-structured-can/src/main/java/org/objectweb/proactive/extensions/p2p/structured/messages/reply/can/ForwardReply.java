@@ -31,7 +31,7 @@ public class ForwardReply extends AbstractReply<Coordinate> {
      */
     public void handle(StructuredOverlay overlay) {
         PendingReplyEntry entry = 
-        	overlay.getRepliesReceived().get(super.getID());
+        	overlay.getRepliesReceived().get(super.getId());
         entry.incrementResponsesNumber(1);
         entry.setResponse(this);
 

@@ -104,7 +104,7 @@ public abstract class QueryManager implements Serializable {
      */
     public AbstractReply<?> process(AbstractRequest<?> request) {
         if (logger.isDebugEnabled()) {
-            logger.debug("QueryManager.process({}) from {}", request.getID(), this.overlay);
+            logger.debug("QueryManager.process({}) from {}", request.getId(), this.overlay);
         }
 
         this.processInitialSent(request);
@@ -121,16 +121,16 @@ public abstract class QueryManager implements Serializable {
             StringBuffer buf = new StringBuffer();
             buf.append("Waiting for ");
             buf.append(this.responsesReceived.get(
-                        msg.getID()).getExpectedRepliesCount());
+                        msg.getId()).getExpectedRepliesCount());
             buf.append(" replies with uuid=");
-            buf.append(msg.getID());
+            buf.append(msg.getId());
             buf.append(" on ");
             buf.append(this.overlay);
             QueryManager.logger.debug(buf.toString());
         }
         
         synchronized (this.responsesReceived) {
-            while (this.responsesReceived.get(msg.getID()).getStatus() 
+            while (this.responsesReceived.get(msg.getId()).getStatus() 
                         != PendingReplyEntry.Status.ALL_RESPONSES_RECEIVED) {
                 try {
                     this.responsesReceived.wait();
@@ -144,13 +144,13 @@ public abstract class QueryManager implements Serializable {
     protected AbstractReply<?> processFinalReception(RequestReplyMessage<?> msg) {
         AbstractReply<?> response = 
         	(AbstractReply<?>) this.responsesReceived
-                .remove(msg.getID()).getResponse();
+                .remove(msg.getId()).getResponse();
         // sets the delivery time for latency computation
         response.setDeliveryTime();
 
         if (logger.isDebugEnabled()) {
             logger.debug(
-                    "Final response received for " + response.getID() 
+                    "Final response received for " + response.getId() 
                     + " on " + this.overlay);
         }
 
@@ -159,7 +159,7 @@ public abstract class QueryManager implements Serializable {
 
     public void putFinalResponseAndNotifyInitialSender(AbstractReply<?> response) {
         PendingReplyEntry entry = this.overlay.getRepliesReceived().get(
-                response.getID());
+                response.getId());
                 
         entry.incrementResponsesNumber(1);
         entry.setResponse(response);

@@ -36,7 +36,7 @@ public class UnicastQueryRouter<T extends AbstractRequest<Coordinate>>
 	public void makeDecision(StructuredOverlay overlay, T msg) {
 		if (msg.getHopCount() == 0) {
 			overlay.getRepliesReceived().put(
-					msg.getID(), new PendingReplyEntry(1));
+					msg.getId(), new PendingReplyEntry(1));
 		}
 
 		if (((AbstractCANOverlay) overlay).contains(msg.getKeyToReach())) {
@@ -50,7 +50,7 @@ public class UnicastQueryRouter<T extends AbstractRequest<Coordinate>>
         if (logger.isDebugEnabled()) {
             logger.debug(
                         "Peer " + overlay + " contains the key to reach " 
-                        + msg.getKeyToReach() + " for message ID " + msg.getID() + ".");
+                        + msg.getKeyToReach() + " for message ID " + msg.getId() + ".");
         }
         this.onDestinationReached(overlay, msg);
         msg.createResponseMessage().route(overlay);
