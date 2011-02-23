@@ -43,7 +43,7 @@ public abstract class AnycastRequest extends AbstractRequest<Coordinate> {
 
     public String toString() {
         StringBuffer buf = new StringBuffer("AnycastQueryMessage ID=");
-        buf.append(this.getID());
+        buf.append(this.getId());
 
         buf.append("\nStack: \n");
         for (AnycastRoutingEntry entry : this.anycastRoutingList) {

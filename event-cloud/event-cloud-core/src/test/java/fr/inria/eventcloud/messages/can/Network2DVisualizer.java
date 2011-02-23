@@ -19,7 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
-import org.objectweb.proactive.extensions.p2p.structured.api.operations.CANOperations;
+import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
@@ -51,7 +51,7 @@ public class Network2DVisualizer extends JFrame {
 			List<Zone> neighbors = new ArrayList<Zone>();
 			for (int dim = 0; dim < 2; dim++) {
 				for (int dir = 0; dir < 2; dir++) {
-					table = CANOperations.getNeighborTable(peer);
+					table = CanOperations.getNeighborTable(peer);
 					for (NeighborEntry entry : table.get(dim, dir).values()) {
 						neighbors.add(entry.getZone());
 					}
@@ -59,7 +59,7 @@ public class Network2DVisualizer extends JFrame {
 			}
 			
 			this.peers.put(
-					CANOperations.getIdAndZoneResponseOperation(peer).getPeerZone(),
+					CanOperations.getIdAndZoneResponseOperation(peer).getPeerZone(),
 					new ZoneEntry(getRandomColor(), neighbors));
 		}
 

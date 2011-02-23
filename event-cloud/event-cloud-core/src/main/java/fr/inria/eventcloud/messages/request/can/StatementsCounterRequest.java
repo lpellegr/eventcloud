@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.ontoware.rdf2go.model.node.URI;
 
@@ -46,7 +46,7 @@ public class StatementsCounterRequest extends AnycastRequest {
         return new AnycastRequestRouter<AnycastRequest>( 
                 new RemoveStatementsConstraintsValidator()) {
             @SuppressWarnings("unchecked")
-            public void onPeerWhichValidatesKeyConstraints(AbstractCANOverlay overlay, AnycastRequest msg) {
+            public void onPeerWhichValidatesKeyConstraints(AbstractCanOverlay overlay, AnycastRequest msg) {
                 ((StatementsCounterRequest) msg).put(
                         overlay.getId(),
                         ((DatastoreResponseOperation<QueryResultTableWrapper>) 

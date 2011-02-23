@@ -1,6 +1,6 @@
 package fr.inria.eventcloud.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.URI;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class RemoveStatementsRequest extends AnycastRequest {
 
     public AnycastRequestRouter<AnycastRequest> getRouter() {
         return new AnycastRequestRouter<AnycastRequest>(new RemoveStatementsConstraintsValidator()) {
-            public void onPeerWhichValidatesKeyConstraints(AbstractCANOverlay overlay, AnycastRequest msg) {
+            public void onPeerWhichValidatesKeyConstraints(AbstractCanOverlay overlay, AnycastRequest msg) {
                 ((SemanticSpaceCanOverlay) overlay).getLocalSemanticSpaceOverlayKernel().send(
                         new RemoveStatementOperation(
                                 ((RemoveStatementsRequest)msg).getSpaceURI(),

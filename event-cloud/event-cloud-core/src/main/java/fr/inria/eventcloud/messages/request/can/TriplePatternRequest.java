@@ -2,7 +2,7 @@ package fr.inria.eventcloud.messages.request.can;
 
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
@@ -65,7 +65,7 @@ public class TriplePatternRequest extends SemanticRequest {
         
         return new AnycastRequestRouter<TriplePatternRequest>(validator) {
             public void onPeerWhichValidatesKeyConstraints(
-                    AbstractCANOverlay overlay, AnycastRequest msg) {
+                    AbstractCanOverlay overlay, AnycastRequest msg) {
             };
         };
     }

@@ -1,11 +1,13 @@
 package fr.inria.eventcloud.validator.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
+import fr.inria.eventcloud.messages.reply.can.RemoveStatementsReply;
+import fr.inria.eventcloud.messages.request.can.RemoveStatementsRequest;
 import fr.inria.eventcloud.validator.AnycastConstraintsValidator;
 
 /**
@@ -19,7 +21,7 @@ public class RemoveStatementsConstraintsValidator implements AnycastConstraintsV
     private static final long serialVersionUID = 1L;
 
     public boolean validatesKeyConstraints(StructuredOverlay overlay, Coordinate key) {
-        return this.validatesKeyConstraints(((AbstractCANOverlay) overlay).getZone(), key);
+        return this.validatesKeyConstraints(((AbstractCanOverlay) overlay).getZone(), key);
     }
 
    public boolean validatesKeyConstraints(Zone zone, Coordinate key) {

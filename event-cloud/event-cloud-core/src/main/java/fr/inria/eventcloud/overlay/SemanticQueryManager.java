@@ -174,7 +174,7 @@ public class SemanticQueryManager extends QueryManager {
      */
     public PendingReplyEntry mergeResponseReceived(AbstractReply<?> response) {
 		PendingReplyEntry entry = 
-			super.getResponsesReceived().get(response.getID());
+			super.getResponsesReceived().get(response.getId());
 
 		synchronized (entry) {
 			if (entry.getResponse() == null) {
