@@ -44,6 +44,19 @@
 	</distributionManagement>
 
 	<repositories>
+		<!--  
+			TODO: removes these repositories as soon as possible! 
+			Instead we must use OSS Sonatype and/or maven central
+			repositories!	
+		-->
+		<repository>
+			<id>sti2-archiva-external</id>
+			<url>http://maven.sti2.at/archiva/repository/external</url>
+		</repository>
+		<repository>
+			<id>sti2-archiva-snapshot</id>
+			<url>http://maven.sti2.at/archiva/repository/snapshots</url>
+		</repository>
 		<repository>
 			<id>dspace-releases</id>
 			<name>dspace releases repository</name>

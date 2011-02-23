@@ -37,7 +37,7 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
      *            the key used in order to route the response to it recipient.
      */
     public AbstractReply(AbstractReply<K> response, K keyToReach) {
-        super(response.getID(), keyToReach);
+        super(response.getId(), keyToReach);
         this.dispatchTimestamp = response.getDispatchTimestamp();
         this.outboundHopCount = response.getOutboundHopCount();
         super.incrementHopCount(response.getInboundHopCount());
@@ -53,7 +53,7 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
      *            the key used in order to route the response to it recipient.
      */
     public AbstractReply(AbstractRequest<K> request, K keyToReach) {
-        super(request.getID(), keyToReach);
+        super(request.getId(), keyToReach);
         this.dispatchTimestamp = request.getDispatchTimestamp();
         this.outboundHopCount = request.getHopCount();
     }
@@ -166,7 +166,7 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
      *         object.
      */
     public String toString() {
-        return this.getID().toString();
+        return this.getId().toString();
     }
 
 }

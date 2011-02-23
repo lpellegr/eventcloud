@@ -60,7 +60,7 @@ public abstract class RequestReplyMessage<K> implements Routable<K>, Serializabl
      * @return the universally unique identifier which identifies
      * 		   the message.
      */
-    public UUID getID() {
+    public UUID getId() {
         return this.uuid;
     }
     
