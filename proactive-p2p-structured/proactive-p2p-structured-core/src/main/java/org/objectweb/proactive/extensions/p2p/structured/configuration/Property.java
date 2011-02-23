@@ -5,7 +5,7 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
  * {@link System#getProperty(String)} and
  * {@link System#setProperty(String, String)}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public abstract class Property {
 

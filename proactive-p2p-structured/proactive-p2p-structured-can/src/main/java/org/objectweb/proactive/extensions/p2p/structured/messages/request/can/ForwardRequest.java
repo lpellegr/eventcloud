@@ -4,7 +4,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Abstract
 import org.objectweb.proactive.extensions.p2p.structured.messages.reply.can.ForwardReply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastQueryRouter;
@@ -15,7 +15,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * order to find a peer which manages a specified coordinate on a CAN 
  * structured peer-to-peer network.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class ForwardRequest extends AbstractRequest<Coordinate> {
 
@@ -55,7 +55,7 @@ public class ForwardRequest extends AbstractRequest<Coordinate> {
      */
     public void route(StructuredOverlay overlay) {
         if (this.senderCoordinate == null) {
-            this.senderCoordinate = ((AbstractCANOverlay) overlay).getZone().getLowerBound();
+            this.senderCoordinate = ((AbstractCanOverlay) overlay).getZone().getLowerBound();
         }
         super.route(overlay);
     }

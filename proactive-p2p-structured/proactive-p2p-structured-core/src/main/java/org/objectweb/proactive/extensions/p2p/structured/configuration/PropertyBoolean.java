@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A Boolean property.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  *
  * @version $Id: PropertyBoolean.java 5079 2010-10-11 11:17:01Z plaurent $
  */

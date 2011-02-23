@@ -15,7 +15,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMe
  * by the {@link Peer} class. Each structured p2p protocol is assumed to be
  * provide a concrete implementation of this class.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public abstract class StructuredOverlay implements Serializable {
 

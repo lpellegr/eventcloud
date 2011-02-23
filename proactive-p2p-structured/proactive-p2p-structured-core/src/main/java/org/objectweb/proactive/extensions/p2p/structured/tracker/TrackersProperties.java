@@ -17,7 +17,7 @@ import org.objectweb.proactive.core.util.ProActiveRandom;
  * {@link TrackersProperties} is used to store and to get trackers bindingNames
  * from a specified properties file.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class TrackersProperties {
 

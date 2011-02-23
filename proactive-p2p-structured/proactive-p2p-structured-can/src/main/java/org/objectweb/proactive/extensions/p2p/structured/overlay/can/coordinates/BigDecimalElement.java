@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 /**
  * Represents a BigDecimal coordinate element.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class BigDecimalElement extends Element {
 

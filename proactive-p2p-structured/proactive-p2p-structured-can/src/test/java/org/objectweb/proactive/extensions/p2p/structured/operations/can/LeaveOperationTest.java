@@ -4,16 +4,16 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.objectweb.proactive.extensions.p2p.structured.api.operations.CANOperations;
+import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 
 /**
- * Test cases for the Join operation in {@link AbstractCANOverlay}.
+ * Test cases for the Join operation in {@link AbstractCanOverlay}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class LeaveOperationTest extends CANNetworkInitializer {
 
@@ -25,7 +25,7 @@ public class LeaveOperationTest extends CANNetworkInitializer {
     @Ignore
     public void testLeave() {
         int second = 
-                CANOperations.getNeighborTable(super.get(1)).size();
+                CanOperations.getNeighborTable(super.get(1)).size();
 
         try {
             Assert.assertTrue(super.get(3).leave());
@@ -33,18 +33,18 @@ public class LeaveOperationTest extends CANNetworkInitializer {
             e.printStackTrace();
         }
 
-        Assert.assertEquals(second - 1, CANOperations.getNeighborTable(super.get(2)).size());
+        Assert.assertEquals(second - 1, CanOperations.getNeighborTable(super.get(2)).size());
 
         // Does the remote reference of the peer which has left has been
         // removed from the neighbors table ?
-        Assert.assertFalse(CANOperations.hasNeighbor(super.get(0), super.get(3).getId()));
-        Assert.assertFalse(CANOperations.hasNeighbor(super.get(1), super.get(3).getId()));
-        Assert.assertFalse(CANOperations.hasNeighbor(super.get(2), super.get(3).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.get(0), super.get(3).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.get(1), super.get(3).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.get(2), super.get(3).getId()));
 
         // Do peers contain themself in neighbor table ?
-        Assert.assertFalse(CANOperations.hasNeighbor(super.get(0), super.get(0).getId()));
-        Assert.assertFalse(CANOperations.hasNeighbor(super.get(1), super.get(1).getId()));
-        Assert.assertFalse(CANOperations.hasNeighbor(super.get(2), super.get(2).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.get(0), super.get(0).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.get(1), super.get(1).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.get(2), super.get(2).getId()));
     }
 
     @After

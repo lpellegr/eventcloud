@@ -4,7 +4,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations;
 /**
  * Defines an empty response operation.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class EmptyResponseOperation implements ResponseOperation {
 

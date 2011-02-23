@@ -7,7 +7,7 @@ package org.objectweb.proactive.extensions.p2p.structured.util;
  * provided are automatically determined at JVM startup.
  * 
  * @author <a href="mailto:dev@avalon.apache.org">Avalon Development Team</a>
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public final class SystemUtil {
 

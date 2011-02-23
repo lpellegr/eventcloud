@@ -7,7 +7,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * is called whereas the peer has not joined a network by using
  * {@link Peer#join(Peer)}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class NetworkNotJoinedException extends StructuredP2PException {
 

@@ -19,7 +19,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTab
 /**
  * Test cases for {@link NeighborTable}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class NeighborTableTest extends CANNetworkInitializer {
 

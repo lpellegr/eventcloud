@@ -10,7 +10,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
  * Represents a set of elements (i.e. a set of values for each component 
  * of the coordinate) used to determine the position of a point in a {@link Zone}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  * 
  * @see Coordinate
  */

@@ -10,7 +10,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 /**
  * Specific network initializer for CAN network.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class CANNetworkInitializer extends NetworkInitializer {
 

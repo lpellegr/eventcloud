@@ -14,7 +14,7 @@ import org.objectweb.proactive.extensions.p2p.structured.util.SystemUtil;
 /**
  * Provides static method to execute a specified number of times a given task.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class Executor {
 

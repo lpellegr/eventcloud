@@ -4,7 +4,7 @@ package org.objectweb.proactive.extensions.p2p.structured.exceptions;
  * An exception thrown when a problem occurs at the structured p2p framework
  * level.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class StructuredP2PException extends Exception {
 

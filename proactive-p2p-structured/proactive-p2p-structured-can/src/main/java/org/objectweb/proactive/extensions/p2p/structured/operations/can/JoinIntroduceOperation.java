@@ -5,17 +5,17 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 
 /**
  * This operation is used to performed the join introduce phase: it consists in
  * retrieving the information (i.e. the zone, the neighbors and the data) the
  * peer which join the network have to set.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  * 
- * @see AbstractCANOverlay#join(Peer)
- * @see AbstractCANOverlay#handleJoinIntroduceMessage(JoinIntroduceOperation)
+ * @see AbstractCanOverlay#join(Peer)
+ * @see AbstractCanOverlay#handleJoinIntroduceMessage(JoinIntroduceOperation)
  */
 public class JoinIntroduceOperation implements Operation {
 
@@ -43,7 +43,7 @@ public class JoinIntroduceOperation implements Operation {
      * {@inheritDoc}
      */
     public JoinIntroduceResponseOperation handle(StructuredOverlay overlay) {
-        return ((AbstractCANOverlay) overlay).handleJoinIntroduceMessage(this);
+        return ((AbstractCanOverlay) overlay).handleJoinIntroduceMessage(this);
     }
 
 }

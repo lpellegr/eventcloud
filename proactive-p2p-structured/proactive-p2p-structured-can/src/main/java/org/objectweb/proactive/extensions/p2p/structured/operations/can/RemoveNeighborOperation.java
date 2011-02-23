@@ -6,7 +6,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanRespo
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 
 /**
@@ -14,7 +14,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTab
  * (by using the given identifier) from the {@link NeighborTable} of the peer
  * which receives this message.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class RemoveNeighborOperation implements Operation {
 
@@ -100,7 +100,7 @@ public class RemoveNeighborOperation implements Operation {
      * {@inheritDoc}
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-    	NeighborTable table = ((AbstractCANOverlay) overlay).getNeighborTable();
+    	NeighborTable table = ((AbstractCanOverlay) overlay).getNeighborTable();
     	boolean result;
     	
     	if (dimension == -1 && direction == -1) {

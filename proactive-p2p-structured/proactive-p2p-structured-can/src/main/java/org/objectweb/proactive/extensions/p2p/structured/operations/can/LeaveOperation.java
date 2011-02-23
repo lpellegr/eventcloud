@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 
@@ -15,7 +15,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTab
  * peer which leaves from their {@link NeighborTable} and to update it with new
  * correct neighbors.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class LeaveOperation implements Operation {
 
@@ -70,7 +70,7 @@ public class LeaveOperation implements Operation {
      * {@inheritDoc}
      */
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        return ((AbstractCANOverlay) overlay).handleLeaveMessage(this);
+        return ((AbstractCanOverlay) overlay).handleLeaveMessage(this);
     }
 
 }

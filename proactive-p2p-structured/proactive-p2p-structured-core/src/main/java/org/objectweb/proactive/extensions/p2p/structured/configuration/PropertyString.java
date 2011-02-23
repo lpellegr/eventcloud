@@ -3,7 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
 /**
  * A String property.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class PropertyString extends Property {
 	

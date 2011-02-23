@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * to the queries dispatching. Therefore, it provides some useful methods
  * for the queries dispatching.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public abstract class QueryManager implements Serializable {
 	

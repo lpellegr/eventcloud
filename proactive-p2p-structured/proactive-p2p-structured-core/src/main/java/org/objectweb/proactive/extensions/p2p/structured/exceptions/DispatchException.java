@@ -7,7 +7,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.QueryManager;
  * An exception thrown when an error occurs while dispatching a {@link Request}
  * from a {@link QueryManager}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class DispatchException extends StructuredP2PException {
 

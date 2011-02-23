@@ -19,7 +19,7 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
-import org.objectweb.proactive.extensions.p2p.structured.api.operations.CANOperations;
+import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.ConcurrentJoinException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
@@ -46,13 +46,13 @@ import org.slf4j.LoggerFactory;
  * composed of a {@link Zone} which indicates the space associated to resources
  * to manage.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
-public abstract class AbstractCANOverlay extends StructuredOverlay {
+public abstract class AbstractCanOverlay extends StructuredOverlay {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractCANOverlay.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractCanOverlay.class);
 
     private ScheduledExecutorService maintenanceTask;
     
@@ -66,7 +66,7 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
     
     private JoinInformation tmpJoinInformation;
     
-    public AbstractCANOverlay() {
+    public AbstractCanOverlay() {
         super();
     }
 
@@ -80,7 +80,7 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
      * @param queryManager
      *            the {@link QueryManager} to use.
      */
-    public AbstractCANOverlay(Peer localPeer, QueryManager queryManager) {
+    public AbstractCanOverlay(Peer localPeer, QueryManager queryManager) {
         super(localPeer, queryManager);
     }
 
@@ -90,7 +90,7 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
      * @param queryManager
      *            the {@link QueryManager} to use.
      */
-    public AbstractCANOverlay(QueryManager queryManager) {
+    public AbstractCanOverlay(QueryManager queryManager) {
         super(queryManager);
     }
 
@@ -103,7 +103,7 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
      * 			the data which have been received when the peer
      * 			has join a network from a landmark node.
      * 
-     * @see AbstractCANOverlay#join(Peer)
+     * @see AbstractCanOverlay#join(Peer)
      */
     protected abstract void affectDataReceived(Object dataReceived);
 
@@ -165,7 +165,7 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
      *         <code>coordinate</code> and which contains the specified coordinate 
      *         on <code>dimension-1</code> dimensions.
      *         
-     * @see AbstractCANOverlay#neighborsVerifyingDimensions(Collection, Coordinate, int)
+     * @see AbstractCanOverlay#neighborsVerifyingDimensions(Collection, Coordinate, int)
      */
     public NeighborEntry nearestNeighbor(Coordinate coordinate, int dimension, int direction) {
         List<NeighborEntry> neighbors = 
@@ -405,11 +405,11 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
         int dimension = 0;
         // TODO: choose the direction according to the number of triples to transfer
         int direction = this.getRandomDirection();
-        int directionInv = AbstractCANOverlay.getOppositeDirection(direction);
+        int directionInv = AbstractCanOverlay.getOppositeDirection(direction);
 
         // gets the next dimension to split onto
         if (!this.splitHistory.isEmpty()) {
-            dimension = AbstractCANOverlay.getNextDimension(
+            dimension = AbstractCanOverlay.getNextDimension(
                     		this.splitHistory.removeLast().getDimension());
         }
 
@@ -496,17 +496,17 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
 					entry = it.next();
 					// we get a neighbor reference which is back the new peer which join
 					if (dim == this.tmpJoinInformation.getDimension() && dir == directionInv) {
-						CANOperations.removeNeighbor(
+						CanOperations.removeNeighbor(
 								entry.getStub(), this.getId(), dim, getOppositeDirection(dir));
 						it.remove();
 					} else if (entry.getZone().neighbors(this.zone) == -1) {
 						// the old neighbor does not neighbors us with the new zone affected
-						CANOperations.removeNeighbor(
+						CanOperations.removeNeighbor(
 								entry.getStub(), this.getId(), dim, getOppositeDirection(dir));
 						it.remove();
 					} else {
 						// the neighbor have to update the zone associated to our id
-						CANOperations.updateNeighborOperation(
+						CanOperations.updateNeighborOperation(
 								entry.getStub(), this.getNeighborEntry(), dim, getOppositeDirection(dir));
 					}
 				}
@@ -580,7 +580,7 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
         		if (dim != this.splitHistory.getLast().getDimension()
         				|| dir != getOppositeDirection(this.splitHistory.getLast().getDirection())) {
 					for (NeighborEntry entry : this.neighborTable.get(dim, dir).values()) {
-						CANOperations.insertNeighbor(entry.getStub(), this.getNeighborEntry(), dim, getOppositeDirection(dir));
+						CanOperations.insertNeighbor(entry.getStub(), this.getNeighborEntry(), dim, getOppositeDirection(dir));
 					}
 				}
         	}
@@ -610,7 +610,7 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
         int lastDirection = lastSplitEntry.getDirection();
 
         Map<UUID, NeighborEntry> neighborsToMergeWith = this.neighborTable.get(lastDimension,
-                AbstractCANOverlay.getOppositeDirection(lastDirection));
+                AbstractCanOverlay.getOppositeDirection(lastDirection));
 
 //        /*
 //         * Notify all the neighbors the current peer is preparing to leave. That
@@ -655,10 +655,10 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
                 for (NeighborEntry entry : neighborsToMergeWith.values()) {
                     try {
                         newZones = zoneToSplit.split(
-                                        AbstractCANOverlay.getNextDimension(lastDimension), 
+                                        AbstractCanOverlay.getNextDimension(lastDimension), 
                                         this.neighborTable.getNeighborEntry(
                                                 entry.getId()).getZone().getUpperBound(
-                                                        AbstractCANOverlay.getNextDimension(lastDimension)));
+                                                        AbstractCanOverlay.getNextDimension(lastDimension)));
                     } catch (ZoneException e) {
                         e.printStackTrace();
                     }
@@ -695,7 +695,7 @@ public abstract class AbstractCANOverlay extends StructuredOverlay {
                     if (!neighborsToMergeWith.containsKey(entry.getId())) {
                         entry.getStub().receiveOperationIS(
                                 new LeaveOperation(this.getId(), new ArrayList<NeighborEntry>(neighborsToMergeWith.
-                                        values()), dim, AbstractCANOverlay
+                                        values()), dim, AbstractCanOverlay
                                         .getOppositeDirection(direction)));
                     }
                 }

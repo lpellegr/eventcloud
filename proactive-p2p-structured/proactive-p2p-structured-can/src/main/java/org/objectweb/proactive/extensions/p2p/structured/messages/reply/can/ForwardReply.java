@@ -12,7 +12,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
 /**
  * Response associated to {@link ForwardRequest}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class ForwardReply extends AbstractReply<Coordinate> {
 

@@ -6,7 +6,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyRespons
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 
@@ -15,7 +15,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
  * another. It consists in transfering data from one peer to another, to merge
  * the two zone and to update the neighbors.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class MergeOperation implements Operation {
 
@@ -99,7 +99,7 @@ public class MergeOperation implements Operation {
      * {@inheritDoc}
      */
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        return ((AbstractCANOverlay) overlay).handleMergeMessage(this);
+        return ((AbstractCanOverlay) overlay).handleMergeMessage(this);
     }
 
 }

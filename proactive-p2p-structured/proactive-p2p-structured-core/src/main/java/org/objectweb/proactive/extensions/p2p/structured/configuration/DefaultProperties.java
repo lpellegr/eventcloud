@@ -5,7 +5,7 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
 /**
  * Defines properties for the structured p2p module.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class DefaultProperties {
 

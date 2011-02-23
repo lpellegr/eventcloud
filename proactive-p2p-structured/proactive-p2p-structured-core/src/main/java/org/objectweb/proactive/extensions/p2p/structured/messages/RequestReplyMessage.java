@@ -9,7 +9,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.RouterStore;
 
 /**
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public abstract class RequestReplyMessage<K> implements Routable<K>, Serializable {
 

@@ -14,7 +14,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * order to find a peer which manages a specified coordinate on a CAN structured
  * peer-to-peer network.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class LookupRequest extends ForwardRequest {
 

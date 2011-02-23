@@ -17,7 +17,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 /**
  * Test case for {@link LookupRequest}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class LookupRequestTest extends CANNetworkInitializer {
 

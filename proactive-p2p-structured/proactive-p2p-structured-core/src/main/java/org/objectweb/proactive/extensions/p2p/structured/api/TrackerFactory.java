@@ -13,7 +13,7 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  * {@link TrackerFactory} provides some static methods in order to ease the
  * creation of tracker active objects.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class TrackerFactory {
 

@@ -7,7 +7,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * Exceptions thrown when a {@link Peer} tries to send a join message 
  * to a peer which is already handling a join operation.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class ConcurrentJoinException extends ProActiveRuntimeException {
 

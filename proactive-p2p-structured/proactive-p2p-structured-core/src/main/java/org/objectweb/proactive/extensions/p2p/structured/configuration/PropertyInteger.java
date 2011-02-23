@@ -5,7 +5,7 @@ import org.objectweb.proactive.core.ProActiveRuntimeException;
 /**
  * An Integer property.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class PropertyInteger extends Property {
 	

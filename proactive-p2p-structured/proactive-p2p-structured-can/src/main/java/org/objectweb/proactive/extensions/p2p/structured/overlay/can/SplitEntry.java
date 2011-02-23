@@ -8,7 +8,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * <code>SplitEntry</code> stores the dimension and the direction of a
  * {@link Zone} when a join operation is performed by a {@link Peer}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class SplitEntry implements Serializable {
 

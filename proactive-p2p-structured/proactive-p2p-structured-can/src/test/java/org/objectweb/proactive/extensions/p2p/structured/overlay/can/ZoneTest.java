@@ -14,7 +14,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates
 /**
  * Test cases for class {@link Zone}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class ZoneTest {
 

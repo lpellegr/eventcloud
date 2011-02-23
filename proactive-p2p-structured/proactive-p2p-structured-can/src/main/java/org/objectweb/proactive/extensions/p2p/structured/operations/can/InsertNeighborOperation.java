@@ -3,7 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 
 /**
@@ -11,7 +11,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEnt
  * <code>dimension</code> and <code>direction</code> of the peer receiving 
  * the message.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class InsertNeighborOperation implements Operation {
 
@@ -74,7 +74,7 @@ public class InsertNeighborOperation implements Operation {
      * {@inheritDoc}
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        ((AbstractCANOverlay) overlay).getNeighborTable().get(
+        ((AbstractCanOverlay) overlay).getNeighborTable().get(
         		this.dimension, this.direction).put(
         				this.entry.getId(), this.entry);
         return new BooleanResponseOperation(true);

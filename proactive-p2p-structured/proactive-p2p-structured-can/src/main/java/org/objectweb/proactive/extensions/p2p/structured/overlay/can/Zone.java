@@ -11,11 +11,11 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates
 
 /**
  * An zone defines a space (rectangle) which is completely logical and managed
- * by an {@link AbstractCANOverlay}. A zone is composed of two coordinates: a
+ * by an {@link AbstractCanOverlay}. A zone is composed of two coordinates: a
  * lower bound coordinate which corresponds to the lower left corner and a upper 
  * bound which corresponds to the upper right corner.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class Zone implements Serializable {
 

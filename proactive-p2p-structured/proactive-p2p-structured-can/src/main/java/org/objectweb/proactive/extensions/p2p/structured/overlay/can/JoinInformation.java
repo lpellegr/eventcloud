@@ -4,7 +4,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
  * The JoinInformation class is used to store temporary data that are compute on the landmark peer which is joined.
  * These information are computed during the join introduce phase and will be used during the join welcome phase.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class JoinInformation {
 

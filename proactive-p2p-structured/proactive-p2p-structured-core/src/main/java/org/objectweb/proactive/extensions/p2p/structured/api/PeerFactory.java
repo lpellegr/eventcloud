@@ -11,7 +11,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  * Provides some static methods in order to ease the creation of peer active
  * objects.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class PeerFactory {
 

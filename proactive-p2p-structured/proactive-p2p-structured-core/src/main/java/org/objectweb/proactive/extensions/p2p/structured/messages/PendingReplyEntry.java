@@ -13,7 +13,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Abstract
  * Each time a new reply is received, it has to be merged with the previous one
  * before to set it as the new value associated to this entry.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class PendingReplyEntry implements Serializable {
 
