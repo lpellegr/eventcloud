@@ -44,11 +44,8 @@
 	</distributionManagement>
 
 	<repositories>
-		<!--  
-			TODO: removes these repositories as soon as possible! 
-			Instead we must use OSS Sonatype and/or maven central
-			repositories!	
-		-->
+		<!-- TODO: removes these repositories as soon as possible! Instead we must 
+			use OSS Sonatype and/or maven central repositories! -->
 		<repository>
 			<id>sti2-archiva-external</id>
 			<url>http://maven.sti2.at/archiva/repository/external</url>
@@ -68,7 +65,7 @@
 		<pluginRepository>
 			<id>proactive-maven-plugin</id>
 			<name>ProActive Maven Plugin</name>
-			<url>http://proactive-maven-plugin.googlecode.com/svn/maven2/repository/releases</url>
+			<url>http://maven.proactive-maven-plugin.googlecode.com/hg/releases</url>
 			<layout>default</layout>
 			<snapshots>
 				<enabled>false</enabled>
