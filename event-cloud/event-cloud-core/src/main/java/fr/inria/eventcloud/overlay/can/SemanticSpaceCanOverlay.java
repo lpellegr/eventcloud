@@ -13,7 +13,7 @@ import org.objectweb.proactive.core.body.UniversalBodyRemoteObjectAdapter;
 import org.objectweb.proactive.core.body.proxy.UniversalBodyProxy;
 import org.objectweb.proactive.core.mop.StubObject;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 import org.ontoware.aifbcommons.collection.ClosableIterable;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
@@ -39,11 +39,11 @@ import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
  * {@link SemanticSpaceCanOverlay} is a concrete implementation of
- * {@link AbstractCANOverlay} for a semantic CAN network.
+ * {@link AbstractCanOverlay} for a semantic CAN network.
  * 
  * @author lpellegr
  */
-public class SemanticSpaceCanOverlay extends AbstractCANOverlay implements
+public class SemanticSpaceCanOverlay extends AbstractCanOverlay implements
 		SemanticStructuredOverlay {
 	
 	private static final long serialVersionUID = 1L;

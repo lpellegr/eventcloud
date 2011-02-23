@@ -3,7 +3,7 @@ package fr.inria.eventcloud.messages.request.can;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
@@ -63,7 +63,7 @@ public class RangeQueryRequest extends SemanticRequest {
     public AnycastRequestRouter<RangeQueryRequest> getRouter() {
         ConstraintsValidator<Coordinate> validator =  new AnycastConstraintsValidator<Coordinate>() {
             public boolean validatesKeyConstraints(StructuredOverlay overlay, Coordinate key) {
-                return this.validatesKeyConstraints(((AbstractCANOverlay) overlay).getZone(), key);
+                return this.validatesKeyConstraints(((AbstractCanOverlay) overlay).getZone(), key);
             }
 
             public boolean validatesKeyConstraints(Zone zone, Coordinate key) {
@@ -90,7 +90,7 @@ public class RangeQueryRequest extends SemanticRequest {
         };
         
         return new AnycastRequestRouter<RangeQueryRequest>(validator) {
-            public void onPeerWhichValidatesKeyConstraints(AbstractCANOverlay overlay,
+            public void onPeerWhichValidatesKeyConstraints(AbstractCanOverlay overlay,
                     AnycastRequest msg) {
 
             }

@@ -9,7 +9,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultPr
 import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
@@ -48,12 +48,12 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
      * constraints of routing just before the next routing step.
      * 
      * @param overlay
-     *            the {@link AbstractCANOverlay} of the peer which validates
+     *            the {@link AbstractCanOverlay} of the peer which validates
      *            constraints.
      * 
      * @param msg the message which is handled.
      */
-    public abstract void onPeerWhichValidatesKeyConstraints(AbstractCANOverlay overlay, AnycastRequest msg);
+    public abstract void onPeerWhichValidatesKeyConstraints(AbstractCanOverlay overlay, AnycastRequest msg);
 
     /**
      * {@inheritDoc}
@@ -63,24 +63,24 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
     		(SemanticQueryManager) ((SemanticSpaceCanOverlay) overlay).getQueryManager();
     	
 		// the current overlay has already received the message
-    	if (queryManager.getQueriesIdentifierMet().contains(msg.getID())) {
+    	if (queryManager.getQueriesIdentifierMet().contains(msg.getId())) {
 			msg.getAnycastRoutingList().removeLast().getPeerStub().route(msg.createResponseMessage());
 			if (logger.isDebugEnabled()) {
 				logger.debug(
 						"On peer " + overlay + " which has already received the query " 
-						+ msg.getID() + ", empty response sent back.");
+						+ msg.getId() + ", empty response sent back.");
 			}
 		} else {
-			queryManager.getQueriesIdentifierMet().add(msg.getID());
+			queryManager.getQueriesIdentifierMet().add(msg.getId());
 			
 			// the current overlay validates the constraints
 			if (super.validatesKeyConstraints(
-					((AbstractCANOverlay) overlay), msg.getKeyToReach())) {
+					((AbstractCanOverlay) overlay), msg.getKeyToReach())) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(
 							"Route on peer " + overlay + " which validates constraints.");
 				}
-				this.onPeerWhichValidatesKeyConstraints(((AbstractCANOverlay) overlay), msg);
+				this.onPeerWhichValidatesKeyConstraints(((AbstractCanOverlay) overlay), msg);
 				
 				// we have to send the message to other neighbors which validates the constraints
 				this.performHandle(overlay, msg);
@@ -102,7 +102,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
         if (((SemanticSpaceCanOverlay) overlay).getNeighborTable().size() == 0) {
             super.onDestinationReached(overlay, msg);
             overlay.getRepliesReceived().put(
-            		msg.getID(), new PendingReplyEntry(1));
+            		msg.getId(), new PendingReplyEntry(1));
             AnycastReply<?> response = msg.createResponseMessage();
             response.queryDataStoreAndStoreData(overlay);
             response.incrementHopCount(1);
@@ -124,7 +124,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
 						.getPeerStub().route(response);
 				} else {
 					System.err.println("AnycastQueryRouter.performHandle() ICI???");
-					overlay.getRepliesReceived().put(msg.getID(),
+					overlay.getRepliesReceived().put(msg.getId(),
 							new PendingReplyEntry(1));
 					overlay.route(response);
 				}
@@ -137,7 +137,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
 				final PendingReplyEntry entry = 
 					new PendingReplyEntry(neighborsToSendTo.size());
 
-				overlay.getRepliesReceived().put(msg.getID(), entry);
+				overlay.getRepliesReceived().put(msg.getId(), entry);
 
 				FutureTask<Object> task = new FutureTask<Object>(new Callable<Object>() {
 					@Override
@@ -148,7 +148,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
 				
 				// memorizes the task that query the datastore
 				((SemanticQueryManager) overlay.getQueryManager())
-					.getPendingQueries().put(msg.getID(), task);
+					.getPendingQueries().put(msg.getId(), task);
 				
 				// performs query datastore while query is sent to neighbors in
 				// order to overlap the network communications.
@@ -230,7 +230,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
 	 *            the message to route.
 	 */
     protected void performRoute(StructuredOverlay overlay, AnycastRequest msg) {
-        AbstractCANOverlay overlayCAN = ((AbstractCANOverlay) overlay);
+        AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Route in order to find a peer which validates constraints.");
@@ -265,7 +265,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
         // sends the message to it
         try {
             overlay.getRepliesReceived().put(
-            		msg.getID(), new PendingReplyEntry(1));
+            		msg.getId(), new PendingReplyEntry(1));
 			msg.getAnycastRoutingList().add(
 					new AnycastRoutingEntry(
 							overlay.getId(),

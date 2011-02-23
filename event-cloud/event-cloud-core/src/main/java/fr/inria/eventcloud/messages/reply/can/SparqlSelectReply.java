@@ -38,7 +38,7 @@ public class SparqlSelectReply extends
         super((SemanticRequest) query, coordinatesToReach);
         this.storeData(queryResultTable);
         if (logger.isDebugEnabled()) {
-            logger.debug("SparqlSelectReply created with some results merged for query {}.", query.getID());
+            logger.debug("SparqlSelectReply created with some results merged for query {}.", query.getId());
         }
     }
 
@@ -46,7 +46,7 @@ public class SparqlSelectReply extends
             Coordinate coordinatesToReach) {
         super(query, coordinatesToReach);
         if (logger.isDebugEnabled()) {
-            logger.debug("SparqlSelectReply created for query {}.", query.getID());
+            logger.debug("SparqlSelectReply created for query {}.", query.getId());
         }
     }
 

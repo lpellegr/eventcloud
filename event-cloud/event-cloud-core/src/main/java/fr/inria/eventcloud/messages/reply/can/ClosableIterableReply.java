@@ -33,8 +33,8 @@ public abstract class ClosableIterableReply extends
         this.storeData(data);
         if (logger.isDebugEnabled()) {
             logger.debug(
-                    "ClosableIterableResponseMessage created for query " +
-                    response.getID() + " with some data retrieved.");
+                    "ClosableIterableReply created for query " +
+                    response.getId() + " with some data retrieved.");
         }
     }
 
@@ -43,8 +43,8 @@ public abstract class ClosableIterableReply extends
         super(query, coordinateToReach);
         if (logger.isDebugEnabled()) {
             logger.debug(
-                    "ClosableIterableResponseMessage created for query " +
-                    query.getID() + " with no data retrieved."); 
+                    "ClosableIterableReply created for query " +
+                    query.getId() + " with no data retrieved."); 
         }
     }
 

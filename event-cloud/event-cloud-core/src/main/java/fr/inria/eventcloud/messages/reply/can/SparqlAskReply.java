@@ -31,7 +31,7 @@ public class SparqlAskReply extends SemanticReply<Boolean> {
         this.storeData(result);
         if (logger.isDebugEnabled()) {
             logger.debug("SparqlAskReply created for query {} with value set to {}", 
-                    query.getID(), result);
+                    query.getId(), result);
         }
     }
 
@@ -39,7 +39,7 @@ public class SparqlAskReply extends SemanticReply<Boolean> {
         super(query, coordinateToReach);
         if (logger.isDebugEnabled()) {
             logger.debug("SparqlAskReply created for query {} with default value (false)",
-                    query.getID());
+                    query.getId());
         }
     }
 

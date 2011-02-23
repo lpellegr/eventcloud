@@ -58,7 +58,7 @@ public class AnycastReplyRouter<T extends AnycastReply<D>, D> extends
 		if (entry.getStatus() == PendingReplyEntry.Status.ALL_RESPONSES_RECEIVED) {
 		    FutureTask<Object> pendingQueryResult = 
                 ((SemanticQueryManager) overlay.getQueryManager())
-                    .getPendingQueries().get(response.getID());
+                    .getPendingQueries().get(response.getId());
 		    // pending query can be null if the response comes
 		    // from a leaf peer. In this case the leaf has already
 		    // queried its datastore, so we have nothing to do
@@ -75,7 +75,7 @@ public class AnycastReplyRouter<T extends AnycastReply<D>, D> extends
 				}
                 // removes the pending query
                 ((SemanticQueryManager) overlay.getQueryManager())
-                	.getPendingQueries().remove(response.getID());
+                	.getPendingQueries().remove(response.getId());
             }
 			
 			// we are on the initiator of the query we need to wake up its
@@ -90,9 +90,9 @@ public class AnycastReplyRouter<T extends AnycastReply<D>, D> extends
 
 				// the response has been handled and sent back so we can remove
 				// it from the table.
-				overlay.getQueryManager().getResponsesReceived().remove(response.getID());
+				overlay.getQueryManager().getResponsesReceived().remove(response.getId());
 				if (logger.isDebugEnabled()) {
-					logger.debug("All responses received on " + overlay + " for msg " + msg.getID() + ".");
+					logger.debug("All responses received on " + overlay + " for msg " + msg.getId() + ".");
 				}
 			}
 		}

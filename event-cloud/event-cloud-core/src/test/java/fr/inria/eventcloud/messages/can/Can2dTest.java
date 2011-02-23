@@ -4,7 +4,7 @@ import junit.framework.Assert;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.api.operations.CANOperations;
+import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -36,12 +36,12 @@ public class Can2dTest {
     	DefaultProperties.TRACKER_STORAGE_PROBABILITY.setValue(1.0);
     	
     	for (Peer peer : spaceNetworkInitializer.getRandomTracker().getStoredPeers()) {
-    		NeighborTable table = CANOperations.getNeighborTable(peer);
+    		NeighborTable table = CanOperations.getNeighborTable(peer);
     		for (int dim=0; dim<DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
     			for (int dir=0; dir<2; dir++) {
     				for (NeighborEntry entry: table.get(dim, dir).values()) {
     					Assert.assertTrue(
-    							CANOperations.getIdAndZoneResponseOperation(peer)
+    							CanOperations.getIdAndZoneResponseOperation(peer)
     								.getPeerZone().neighbors(entry.getZone()) != -1);
     				}
     			}
