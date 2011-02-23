@@ -80,7 +80,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-can</artifactId>
@@ -93,4 +93,29 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.elaunira.pmp</groupId>
+				<artifactId>proactive-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<configuration>
+							<includes>
+								<include>fr.inria.eventcloud.kernel.SemanticSpaceOverlayKernel</include>
+								<include>fr.inria.eventcloud.messages.reply.can.AnycastReply</include>
+								<include>fr.inria.eventcloud.overlay.SemanticPeer</include>
+								<include>fr.inria.eventcloud.tracker.SemanticCanTracker</include>
+							</includes>
+						</configuration>
+						<goals>
+							<goal>stubs</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
