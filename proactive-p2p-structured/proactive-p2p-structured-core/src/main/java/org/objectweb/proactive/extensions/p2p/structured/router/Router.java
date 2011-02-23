@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * A router defines how to route a {@link RequestReplyMessage}. It provides several 
  * methods to customize the routing steps.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  * 
  * @param <T>
  *            the type of message to route.

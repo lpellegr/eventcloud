@@ -7,7 +7,7 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.api.operations.CANOperations;
+import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -15,7 +15,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 /**
  * Test cases for {@link RemoveNeighborOperation}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class RemoveNeighborOperationTest extends CANNetworkInitializer {
 
@@ -32,13 +32,13 @@ public class RemoveNeighborOperationTest extends CANNetworkInitializer {
         UUID firstPeerID = firstPeer.getId();
         UUID secondPeerID = secondPeer.getId();
 
-        Assert.assertTrue(CANOperations.hasNeighbor(firstPeer, secondPeerID));
-        Assert.assertTrue(CANOperations.hasNeighbor(secondPeer, firstPeerID));
+        Assert.assertTrue(CanOperations.hasNeighbor(firstPeer, secondPeerID));
+        Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));
 
-        CANOperations.removeNeighbor(firstPeer, secondPeerID);
+        CanOperations.removeNeighbor(firstPeer, secondPeerID);
 
-        Assert.assertFalse(CANOperations.hasNeighbor(firstPeer, secondPeerID));
-        Assert.assertTrue(CANOperations.hasNeighbor(secondPeer, firstPeerID));
+        Assert.assertFalse(CanOperations.hasNeighbor(firstPeer, secondPeerID));
+        Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));
     }
 
     @After

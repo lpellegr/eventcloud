@@ -27,9 +27,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
  * a communication problem occurs while the operation is dispatched to the
  * remote node.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
-public class CANOperations {
+public class CanOperations {
 
 	public static GetIdAndZoneResponseOperation getIdAndZoneResponseOperation(Peer peer) {
 	    return (GetIdAndZoneResponseOperation) 

@@ -12,14 +12,14 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Abstract
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.QueryManager;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 
 /**
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
-public class BasicCANOverlay extends AbstractCANOverlay {
+public class BasicCANOverlay extends AbstractCanOverlay {
 
 	private static final long serialVersionUID = 1L;
 

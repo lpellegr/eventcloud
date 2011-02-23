@@ -11,7 +11,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 /**
  * NeighborEntry is an entry in a {@link NeighborTable}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class NeighborEntry implements Serializable {
 

@@ -3,7 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 /**
  * Defines what are the types of overlay which are available.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public enum OverlayType {
 

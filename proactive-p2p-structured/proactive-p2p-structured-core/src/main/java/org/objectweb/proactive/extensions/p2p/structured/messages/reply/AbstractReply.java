@@ -9,7 +9,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Abstra
  * an abstract {@link AbstractRequest}. This class contains several information
  * common to all responses like for example the latency, the hop count, etc.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
 

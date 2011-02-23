@@ -5,7 +5,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultPr
 import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class UnicastResponseRouter<T extends AbstractReply<Coordinate>>
         extends Router<T, Coordinate> {
@@ -34,7 +34,7 @@ public class UnicastResponseRouter<T extends AbstractReply<Coordinate>>
                     msg.getId(), new PendingReplyEntry(1));
         }
 
-        if (((AbstractCANOverlay) overlay).contains(msg.getKeyToReach())) {
+        if (((AbstractCanOverlay) overlay).contains(msg.getKeyToReach())) {
             this.handle(overlay, msg);
         } else {
         	this.performRoute(overlay, msg);
@@ -50,7 +50,7 @@ public class UnicastResponseRouter<T extends AbstractReply<Coordinate>>
     }
 
     protected void performRoute(StructuredOverlay overlay, T msg) {
-        AbstractCANOverlay overlayCAN = ((AbstractCANOverlay) overlay);
+        AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
 
         short dimension = 0;
         short direction = NeighborTable.ANY_DIRECTION;

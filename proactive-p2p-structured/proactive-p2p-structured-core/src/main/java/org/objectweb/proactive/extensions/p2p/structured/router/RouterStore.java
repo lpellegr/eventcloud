@@ -11,7 +11,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMe
  * depending from the message to route, so the RouterStore stores an instance of
  * a router for each new type of messages created.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class RouterStore {
 

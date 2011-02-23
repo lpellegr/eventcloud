@@ -11,7 +11,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
  * Response associated to {@link JoinIntroduceOperation}. This response contains 
  * some information that have to be affected to the peer which join the network.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class JoinIntroduceResponseOperation implements ResponseOperation {
 

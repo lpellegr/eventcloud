@@ -7,7 +7,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultPr
 /**
  * Represents a String coordinate element.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class StringElement extends Element {
 

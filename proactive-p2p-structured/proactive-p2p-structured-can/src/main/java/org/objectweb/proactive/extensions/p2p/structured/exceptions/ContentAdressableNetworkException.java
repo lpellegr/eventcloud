@@ -6,7 +6,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  * An exception thrown when an error occurs from a {@link StructuredOverlay} of
  * type CAN.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class ContentAdressableNetworkException extends StructuredP2PException {
 

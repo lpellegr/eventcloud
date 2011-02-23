@@ -8,7 +8,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
  * This interface is assumed to be implemented by all
  * {@link RequestReplyMessage} in order to add router features.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  * 
  * @param <K>
  *            the type of the key used to check if the constraints are validated

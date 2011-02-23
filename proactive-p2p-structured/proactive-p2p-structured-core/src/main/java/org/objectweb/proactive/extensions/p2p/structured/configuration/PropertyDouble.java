@@ -5,7 +5,7 @@ import org.objectweb.proactive.core.ProActiveRuntimeException;
 /**
  * A Double property.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class PropertyDouble extends Property {
 	

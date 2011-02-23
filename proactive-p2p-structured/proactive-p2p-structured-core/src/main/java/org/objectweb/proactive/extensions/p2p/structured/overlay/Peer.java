@@ -31,7 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
  * Warning, this class must not be instantiate directly. In order to create a
  * new active peer you must use the {@link PeerFactory}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class Peer implements InitActive, EndActive, RunActive, Serializable {
 

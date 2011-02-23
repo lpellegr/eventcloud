@@ -7,7 +7,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * {@link Peer} is called whereas it has already been called and it has
  * succeeded.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class NetworkAlreadyJoinedException extends StructuredP2PException {
 

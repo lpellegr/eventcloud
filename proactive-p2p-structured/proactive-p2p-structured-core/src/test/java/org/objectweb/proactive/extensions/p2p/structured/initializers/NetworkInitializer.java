@@ -18,7 +18,7 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  * network for tests. A network initializer maintains reference to ALL peers
  * which have join the network associated to it in order to simplify some tests.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  * 
  * @version $Id: NetworkInitializer.java 5064 2010-09-01 14:21:24Z plaurent $
  */

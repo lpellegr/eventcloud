@@ -6,7 +6,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 /**
  * Response associated to {@link LookupRequest}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class LookupReply extends ForwardReply {
 

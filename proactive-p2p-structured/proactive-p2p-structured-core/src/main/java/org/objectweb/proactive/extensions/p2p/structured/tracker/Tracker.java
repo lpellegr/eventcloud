@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * which already has references to other trackers C and D for example, a
  * reference on tracker B, C and D will be added.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class Tracker implements InitActive, EndActive, RunActive, Serializable {
 

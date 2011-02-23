@@ -12,7 +12,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * Data structure used in order to store the neighbors of a {@link Peer} of type
  * CAN where neighbors are in a specified dimension and direction.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class NeighborTable implements Serializable {
 

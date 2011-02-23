@@ -8,7 +8,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
  * which handles the message validates the constraints associated to key
  * contained by the message.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  * 
  * @param <K>
  *            the type of the key used to check if constraints are validated.

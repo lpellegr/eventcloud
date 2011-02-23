@@ -10,7 +10,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates
 /**
  * Test cases for {@link Element}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class CoordinateElementTest {
 

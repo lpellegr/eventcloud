@@ -4,7 +4,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations;
 /**
  * Response used to returned various type of objects.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class GenericResponseOperation<T> implements ResponseOperation {
 

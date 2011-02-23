@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * An element represents one component from a {@link Coordinate}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public abstract class Element implements Comparable<Element>, Serializable {
 

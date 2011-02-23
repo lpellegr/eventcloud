@@ -6,7 +6,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.ContentAdres
  * An {@code ZoneException} is thrown by certain methods of the {@link Zone}
  * class.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class ZoneException extends ContentAdressableNetworkException {
 

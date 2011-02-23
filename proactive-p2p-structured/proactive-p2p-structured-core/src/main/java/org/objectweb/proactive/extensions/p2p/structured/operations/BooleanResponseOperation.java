@@ -4,7 +4,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations;
 /**
  * Defines a basic response for the {@link ResponseOperation}.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class BooleanResponseOperation implements ResponseOperation {
 

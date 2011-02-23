@@ -10,7 +10,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  * {@link Peer} in one hop by using a RPC call (via ProActive) without routing
  * steps.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public interface Operation extends Serializable {
 

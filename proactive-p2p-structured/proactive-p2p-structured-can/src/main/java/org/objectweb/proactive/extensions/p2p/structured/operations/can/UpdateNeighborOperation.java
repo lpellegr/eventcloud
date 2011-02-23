@@ -3,7 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
@@ -12,7 +12,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
  * Operation used in order to update a {@link Zone} of a neighbor cached in the
  * {@link NeighborTable} of the peer which handles it.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class UpdateNeighborOperation implements Operation {
 
@@ -51,7 +51,7 @@ public class UpdateNeighborOperation implements Operation {
      *            the overlay which handles the message.
      */
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-		((AbstractCANOverlay) overlay).getNeighborTable()
+		((AbstractCanOverlay) overlay).getNeighborTable()
 				.get(this.dimension, this.direction)
 					.replace(this.entry.getId(), this.entry);
 

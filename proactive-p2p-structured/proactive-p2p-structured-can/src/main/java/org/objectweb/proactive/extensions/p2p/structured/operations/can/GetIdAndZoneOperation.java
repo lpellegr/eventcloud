@@ -2,13 +2,13 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 
 /**
  * Operation used to retrieve the identifier and the zone of the peer which
  * handles the message.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class GetIdAndZoneOperation implements Operation {
 
@@ -27,7 +27,7 @@ public class GetIdAndZoneOperation implements Operation {
     public GetIdAndZoneResponseOperation handle(StructuredOverlay overlay) {
         return new GetIdAndZoneResponseOperation(
         				overlay.getLocalPeer().getId(),
-        				((AbstractCANOverlay) overlay).getZone());
+        				((AbstractCanOverlay) overlay).getZone());
     }
 
 }

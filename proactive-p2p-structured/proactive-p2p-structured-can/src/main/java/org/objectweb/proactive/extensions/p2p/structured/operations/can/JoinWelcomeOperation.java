@@ -4,7 +4,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyRespons
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 
 /**
  * This operation is used to performed the join welcome phase: it consists to
@@ -12,10 +12,10 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCAN
  * been received and set. Therefore, it is time to the landmark node to update
  * its information.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  * 
- * @see AbstractCANOverlay#join(Peer)
- * @see AbstractCANOverlay#handleJoinWelcomeMessage(JoinWelcomeOperation)
+ * @see AbstractCanOverlay#join(Peer)
+ * @see AbstractCanOverlay#handleJoinWelcomeMessage(JoinWelcomeOperation)
  */
 public class JoinWelcomeOperation implements Operation {
 
@@ -29,7 +29,7 @@ public class JoinWelcomeOperation implements Operation {
      * {@inheritDoc}
      */
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        return ((AbstractCANOverlay) overlay).handleJoinWelcomeMessage(this);
+        return ((AbstractCanOverlay) overlay).handleJoinWelcomeMessage(this);
     }
 
 }

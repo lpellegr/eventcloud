@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Abstract
  * point depends on the concrete type of query which can implement the desired
  * behavior.
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  * 
  * @see RequestReplyMessage
  * @see AbstractReply

@@ -5,7 +5,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 /**
  * Tests if a peer is activated (i.e. if has joined a network).
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public class IsActivatedOperation implements Operation {
 

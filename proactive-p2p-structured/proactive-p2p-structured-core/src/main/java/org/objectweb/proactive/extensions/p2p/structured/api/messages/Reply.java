@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * 
- * @author Laurent Pellegrino
+ * @author lpellegr
  */
 public interface Reply extends Serializable {
 

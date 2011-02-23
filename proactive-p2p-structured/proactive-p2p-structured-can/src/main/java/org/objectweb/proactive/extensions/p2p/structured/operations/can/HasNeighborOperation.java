@@ -5,15 +5,15 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 
 /**
  * Operation used to know if the peer which handles the operation has a neighbor
  * corresponding to the given UUID.
  * 
- * @author Laurent Pellegrino
-
- * @see AbstractCANOverlay#hasNeighbor(UUID)
+ * @author lpellegr
+ *
+ * @see AbstractCanOverlay#hasNeighbor(UUID)
  */
 public class HasNeighborOperation implements Operation {
 
@@ -29,7 +29,7 @@ public class HasNeighborOperation implements Operation {
      * {@inheritDoc}
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        return new BooleanResponseOperation(((AbstractCANOverlay) overlay).hasNeighbor(this.uuid));
+        return new BooleanResponseOperation(((AbstractCanOverlay) overlay).hasNeighbor(this.uuid));
     }
 
 }
