@@ -47,7 +47,7 @@ public class AnycastReplyRouter<T extends AnycastReply<D>, D> extends
 
     public void makeDecision(StructuredOverlay overlay,
     		                    AnycastReply<D> msg) {
-        PendingReplyEntry entry = overlay.getQueryManager().mergeResponseReceived(msg);
+        PendingReplyEntry entry = overlay.getRequestReplyManager().mergeResponseReceived(msg);
         @SuppressWarnings("unchecked")
 		AnycastReply<D> response = (AnycastReply<D>) entry.getResponse();
         entry.incrementResponsesNumber(1);
@@ -55,9 +55,9 @@ public class AnycastReplyRouter<T extends AnycastReply<D>, D> extends
         // we are on a synchronization point and all responses are received, 
 		// we must ensure that query datastore is terminated before to send 
 		// back the response.
-		if (entry.getStatus() == PendingReplyEntry.Status.ALL_RESPONSES_RECEIVED) {
+		if (entry.getStatus() == PendingReplyEntry.Status.ALL_REPLIES_RECEIVED) {
 		    FutureTask<Object> pendingQueryResult = 
-                ((SemanticQueryManager) overlay.getQueryManager())
+                ((SemanticQueryManager) overlay.getRequestReplyManager())
                     .getPendingQueries().get(response.getId());
 		    // pending query can be null if the response comes
 		    // from a leaf peer. In this case the leaf has already
@@ -74,7 +74,7 @@ public class AnycastReplyRouter<T extends AnycastReply<D>, D> extends
 					logger.error("Error while querying the datastore on " + overlay, e);
 				}
                 // removes the pending query
-                ((SemanticQueryManager) overlay.getQueryManager())
+                ((SemanticQueryManager) overlay.getRequestReplyManager())
                 	.getPendingQueries().remove(response.getId());
             }
 			
@@ -90,7 +90,7 @@ public class AnycastReplyRouter<T extends AnycastReply<D>, D> extends
 
 				// the response has been handled and sent back so we can remove
 				// it from the table.
-				overlay.getQueryManager().getResponsesReceived().remove(response.getId());
+				overlay.getRequestReplyManager().getResponsesReceived().remove(response.getId());
 				if (logger.isDebugEnabled()) {
 					logger.debug("All responses received on " + overlay + " for msg " + msg.getId() + ".");
 				}

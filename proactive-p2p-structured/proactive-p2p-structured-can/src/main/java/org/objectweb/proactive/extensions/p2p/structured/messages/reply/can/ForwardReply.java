@@ -1,6 +1,6 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.reply.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.api.messages.Reply;
+import org.objectweb.proactive.core.body.reply.Reply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;

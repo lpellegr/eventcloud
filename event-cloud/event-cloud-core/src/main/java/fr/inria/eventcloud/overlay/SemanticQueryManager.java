@@ -20,7 +20,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.PreProcessEx
 import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.QueryManager;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestReplyManager;
 import org.openrdf.query.MalformedQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +35,14 @@ import fr.inria.eventcloud.reasoner.SparqlQueryReasoner;
 import fr.inria.eventcloud.util.SparqlQueryFilter;
 
 /**
- * {@link SemanticQueryManager} is an implementation of {@link QueryManager}. It
+ * {@link SemanticQueryManager} is an implementation of {@link RequestReplyManager}. It
  * is used for converting initial query from public API to private API,
  * dispatching query and to create response from public API by using responses
  * retrieved.
  * 
  * @author lpellegr
  */
-public class SemanticQueryManager extends QueryManager {
+public class SemanticQueryManager extends RequestReplyManager {
 
 	private static final long serialVersionUID = 1L;
 

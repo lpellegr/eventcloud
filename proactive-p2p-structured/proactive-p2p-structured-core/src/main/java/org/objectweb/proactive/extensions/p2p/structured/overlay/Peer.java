@@ -9,8 +9,6 @@ import org.objectweb.proactive.InitActive;
 import org.objectweb.proactive.RunActive;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
-import org.objectweb.proactive.extensions.p2p.structured.api.messages.Reply;
-import org.objectweb.proactive.extensions.p2p.structured.api.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
@@ -140,7 +138,7 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
 
         PAActiveObject.setImmediateService("receiveOperationIS");
         
-    	// these methods does not change the state of the peer
+    	// these methods do not change the state of the peer
     	PAActiveObject.setImmediateService("equals");
     	PAActiveObject.setImmediateService("getId");
     	PAActiveObject.setImmediateService("hashCode");
@@ -241,33 +239,21 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
         this.overlay.runActivity(body);
     }
 
-    /**
-     * Sends a {@link Request} on the network from the current peer.
-     * 
-     * @param query
-     *            the query to send.
-     * @return the response in agreement with the type of query sent.
-     * 
-     * @exception DispatchException
-     *                if a problem occurs while the query is dispatched.
-     */
-    public Reply send(Request query) throws DispatchException {
-        return this.overlay.getQueryManager().dispatch(query);
-    }
-
-    /**
-     * Sends a {@link RequestReplyMessage}.
-     * 
-     * @param msg
-     *            the message to send.
-     * @return the response in agreement with the type of query sent.
-     */
-    public AbstractReply<?> send(AbstractRequest<?> msg) {
-        return this.overlay.getQueryManager().process(msg);
+	/**
+	 * Sends a request over the overlay by using message passing.
+	 * 
+	 * @param request
+	 *            the request to handle.
+	 * 
+	 * @return the response in agreement with the type of message sent.
+	 * @throws DispatchException 
+	 */
+    public AbstractReply<?> send(AbstractRequest<?> request) throws DispatchException {
+        return this.overlay.getRequestReplyManager().dispatch(request);
     }
 
     public void route(RequestReplyMessage<?> msg) {
-        this.overlay.getQueryManager().route(msg);
+        this.overlay.getRequestReplyManager().route(msg);
     }
 
     /**

@@ -1,13 +1,12 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.reply;
 
-import org.objectweb.proactive.extensions.p2p.structured.api.messages.Reply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
 
 /**
- * An <code>AbstractReply</code> is an abstract response associated to
- * an abstract {@link AbstractRequest}. This class contains several information
- * common to all responses like for example the latency, the hop count, etc.
+ * An <code>AbstractReply</code> is an responses associated to an 
+ * {@link AbstractRequest}. This class contains several information
+ * common to all replies like for example the latency, the hop count, etc.
  * 
  * @author lpellegr
  */
@@ -58,35 +57,27 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
         this.outboundHopCount = request.getHopCount();
     }
 
-    /**
-     * Converts the current response (from private API) to a response from the
-     * public API.
-     * 
-     * @return a response from the public API.
-     */
-    public abstract Reply createResponse();
-
-    /**
-     * Returns the timestamp of the delivery.
-     * 
-     * @return the timestamp of the delivery.
-     */
+	/**
+	 * Returns the timestamp associated to the delivery of the message.
+	 * 
+	 * @return the timestamp associated to the delivery of the message.
+	 */
     public long getDeliveryTimestamp() {
         return this.deliveryTimestamp;
     }
 
-    /**
-     * Returns the timestamps of the dispatch of the initial query.
-     * 
-     * @return the timestamps of the dispatch of the initial query.
-     */
+	/**
+	 * Returns the timestamp associated to the dispatch of the initial query.
+	 * 
+	 * @return the timestamp associated the dispatch of the initial query.
+	 */
     public long getDispatchTimestamp() {
         return this.dispatchTimestamp;
     }
 
     /**
-     * Returns the latency (in milliseconds). It is the time between the moment
-     * of the creation of the message and when the response has been received.
+     * Returns the latency (in milliseconds). It is the time between 
+     * the creation of the message and when the response has been received.
      * 
      * @return the latency between the moment of the creation of the message
      *         (dispatch) and when the response has been received (delivery).
@@ -103,22 +94,22 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
     }
 
     /**
-     * Returns the number of peers traversed by a response message 
-     * between its source and destination.
+     * Returns the number of peers traversed by a reply
+     * between its source and its destination.
      * 
-     * @return the number of peers traversed by a response message 
-     * 		   between its source and destination.
+     * @return the number of peers traversed by a reply
+     * 		   between its source and its destination.
      */
     public int getInboundHopCount() {
         return super.getHopCount();
     }
 
     /**
-     * Returns the number of peers traversed by a query message 
-     * between its source and destination.
+     * Returns the number of peers traversed by a request 
+     * between its source and its destination.
      * 
-     * @return the number of peers traversed by a query message 
-     * 		   between its source and destination.
+     * @return the number of peers traversed by a request
+     * 		   between its source and its destination.
      */
     public int getOutboundHopCount() {
         return this.outboundHopCount;
@@ -130,7 +121,7 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
      */
     public void setDeliveryTime() {
         if (this.latency != -1) {
-            throw new IllegalStateException("Delivery time has already been set.");
+            throw new IllegalStateException("delivery timestamp is already set");
         }
 
         this.deliveryTimestamp = System.currentTimeMillis();

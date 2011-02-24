@@ -46,7 +46,7 @@ public class UnicastResponseRouter<T extends AbstractReply<Coordinate>>
             logger.debug("The peer " + overlay + " contains the key to reach " + msg.getKeyToReach() + ".");
         }
 
-        overlay.getQueryManager().putFinalResponseAndNotifyInitialSender(msg);
+        overlay.getRequestReplyManager().pushFinalReply(msg);
     }
 
     protected void performRoute(StructuredOverlay overlay, T msg) {
