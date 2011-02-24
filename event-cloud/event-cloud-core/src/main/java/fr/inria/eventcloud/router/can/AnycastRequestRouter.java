@@ -60,7 +60,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
      */
     public void makeDecision(StructuredOverlay overlay, AnycastRequest msg) {
     	SemanticQueryManager queryManager = 
-    		(SemanticQueryManager) ((SemanticSpaceCanOverlay) overlay).getQueryManager();
+    		(SemanticQueryManager) ((SemanticSpaceCanOverlay) overlay).getRequestReplyManager();
     	
 		// the current overlay has already received the message
     	if (queryManager.getQueriesIdentifierMet().contains(msg.getId())) {
@@ -147,7 +147,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest>
 				});
 				
 				// memorizes the task that query the datastore
-				((SemanticQueryManager) overlay.getQueryManager())
+				((SemanticQueryManager) overlay.getRequestReplyManager())
 					.getPendingQueries().put(msg.getId(), task);
 				
 				// performs query datastore while query is sent to neighbors in

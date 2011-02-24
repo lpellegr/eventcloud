@@ -33,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOpe
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.QueryManager;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestReplyManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Element;
@@ -78,9 +78,9 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *            the local peer reference to associate to this overlay.
      * 
      * @param queryManager
-     *            the {@link QueryManager} to use.
+     *            the {@link RequestReplyManager} to use.
      */
-    public AbstractCanOverlay(Peer localPeer, QueryManager queryManager) {
+    public AbstractCanOverlay(Peer localPeer, RequestReplyManager queryManager) {
         super(localPeer, queryManager);
     }
 
@@ -88,9 +88,9 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * Constructs a new overlay with the specified <code>queryManager</code>.
      * 
      * @param queryManager
-     *            the {@link QueryManager} to use.
+     *            the {@link RequestReplyManager} to use.
      */
-    public AbstractCanOverlay(QueryManager queryManager) {
+    public AbstractCanOverlay(RequestReplyManager queryManager) {
         super(queryManager);
     }
 

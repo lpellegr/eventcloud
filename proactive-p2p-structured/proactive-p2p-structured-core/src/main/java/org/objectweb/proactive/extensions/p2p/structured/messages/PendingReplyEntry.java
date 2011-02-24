@@ -24,7 +24,7 @@ public class PendingReplyEntry implements Serializable {
 		 * This status means that the number of replies expected 
 		 * is equals to the number of responses received.
 		 */
-		ALL_RESPONSES_RECEIVED, 
+		ALL_REPLIES_RECEIVED, 
 		/**
 		 * This status means that the number of replies received 
 		 * is smaller than the number of responses expected.
@@ -99,7 +99,7 @@ public class PendingReplyEntry implements Serializable {
 	public synchronized void incrementResponsesNumber(int increment) {
 		this.repliesCount += increment;
 		if (this.repliesCount == this.expectedRepliesCount) {
-			this.status = Status.ALL_RESPONSES_RECEIVED;
+			this.status = Status.ALL_REPLIES_RECEIVED;
 		}
 	}
 

@@ -1,17 +1,8 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
-import java.util.Set;
-
-import org.objectweb.proactive.Service;
-import org.objectweb.proactive.extensions.p2p.structured.api.messages.Reply;
-import org.objectweb.proactive.extensions.p2p.structured.api.messages.Request;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.PostProcessException;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.PreProcessException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.QueryManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 
@@ -24,57 +15,46 @@ public class BasicCANOverlay extends AbstractCanOverlay {
 	private static final long serialVersionUID = 1L;
 
 	public BasicCANOverlay() {
-		super(new QueryManager() {
-
+		super(new RequestReplyManager() {
+			
 			private static final long serialVersionUID = 1L;
 
-			protected AbstractRequest<?> preProcess(Request query)
-					throws PreProcessException {
-				return null;
-			}
-
-			protected Reply postProcess(
-					AbstractReply<?> response)
-					throws PostProcessException {
-				return null;
-			}
-
 			@Override
-			public PendingReplyEntry mergeResponseReceived(
-					AbstractReply<?> msg) {
+			public PendingReplyEntry mergeResponseReceived(AbstractReply<?> msg) {
+				// TODO Auto-generated method stub
 				return null;
 			}
-
 		});
 	}
-
+	
+	@Override
 	protected void affectDataReceived(Object dataReceived) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
+	@Override
 	protected void mergeDataReceived(MergeOperation msg) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
-	public void processRequest(Service service, Request request) {
-		// TODO Auto-generated method stub
-
-	}
-
-	protected Set<? extends Object> retrieveAllData() {
+	@Override
+	protected Object retrieveAllData() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	protected Object getDataIn(Zone zone) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	protected void removeDataIn(Zone zone) {
 		// TODO Auto-generated method stub
+		
 	}
 
 }

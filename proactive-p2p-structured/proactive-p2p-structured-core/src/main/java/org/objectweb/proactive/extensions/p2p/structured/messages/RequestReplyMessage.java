@@ -16,22 +16,22 @@ public abstract class RequestReplyMessage<K> implements Routable<K>, Serializabl
     private static final long serialVersionUID = 1L;
 
     /**
-     * Universally unique identifier used in order to identify the response.
+     * Universally unique identifier used in order to identify the message.
      */
     private final UUID uuid;
 
     /**
-     * The key used in order to route the query on the network.
+     * The key used in order to route the query over the network.
      */
     private K keyToReach;
 
     /**
-     * The number of hops between the source and the destination of this message.
+     * The number of hops between the source and the destination of the message.
      */
     private int hopCount = 0;
 
     /**
-     * Constructs a new SynchronousMessage with the specified identifier and
+     * Constructs a new RequestReplyMessage with the specified identifier and
      * keyToReach.
      * 
      * @param identifier

@@ -26,7 +26,7 @@ public class GetZoneInfoOperation implements Operation {
         return new GetZoneInfoResponseOperation(
         				((SemanticSpaceCanOverlay) overlay).getZone(),
         				((SemanticQueryManager)((SemanticSpaceCanOverlay) overlay)
-        						.getQueryManager()).getQueriesIdentifierMet()
+        						.getRequestReplyManager()).getQueriesIdentifierMet()
         							.contains(this.msgId));
     }
 

@@ -23,7 +23,7 @@ public abstract class StructuredOverlay implements Serializable {
 
     private final UUID identifier;
 
-    private QueryManager queryManager;
+    private RequestReplyManager queryManager;
 
     private Peer localPeer;
 
@@ -39,12 +39,12 @@ public abstract class StructuredOverlay implements Serializable {
      * @param queryManager
      *            the query manager to associate to the overlay.
      */
-    protected StructuredOverlay(Peer peer, QueryManager queryManager) {
+    protected StructuredOverlay(Peer peer, RequestReplyManager queryManager) {
         this(queryManager);
         this.localPeer = peer;
     }
 
-    protected StructuredOverlay(QueryManager queryManager) {
+    protected StructuredOverlay(RequestReplyManager queryManager) {
     	this();
     	this.queryManager = queryManager;
         this.queryManager.setOverlay(this);
@@ -102,7 +102,7 @@ public abstract class StructuredOverlay implements Serializable {
         return this.localPeer.getStub();
     }
 
-    public QueryManager getQueryManager() {
+    public RequestReplyManager getRequestReplyManager() {
         return this.queryManager;
     }
 
