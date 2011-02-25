@@ -1,29 +1,21 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestReplyManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 
 /**
  * 
  * @author lpellegr
  */
-public class BasicCANOverlay extends AbstractCanOverlay {
+public class BasicCanOverlay extends AbstractCanOverlay {
 
 	private static final long serialVersionUID = 1L;
 
-	public BasicCANOverlay() {
-		super(new RequestReplyManager() {
-			
+	public BasicCanOverlay() {
+		super(new CanRequestReplyManager() {
 			private static final long serialVersionUID = 1L;
-
-			@Override
-			public PendingReplyEntry mergeResponseReceived(AbstractReply<?> msg) {
-				// TODO Auto-generated method stub
-				return null;
-			}
 		});
 	}
 	

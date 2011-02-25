@@ -1,6 +1,6 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.reply.can.LookupReply;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -48,7 +48,7 @@ public class LookupRequest extends ForwardRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractReply<Coordinate> createResponseMessage() {
+    public Reply<Coordinate> createResponseMessage() {
         return new LookupReply(this, this.remotePeerReached);
     }
 

@@ -1,16 +1,16 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.reply;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 
 /**
  * An <code>AbstractReply</code> is an responses associated to an 
- * {@link AbstractRequest}. This class contains several information
+ * {@link Request}. This class contains several information
  * common to all replies like for example the latency, the hop count, etc.
  * 
  * @author lpellegr
  */
-public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
+public abstract class Reply<K> extends RequestReplyMessage<K> {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,7 +35,7 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
      * @param keyToReach
      *            the key used in order to route the response to it recipient.
      */
-    public AbstractReply(AbstractReply<K> response, K keyToReach) {
+    public Reply(Reply<K> response, K keyToReach) {
         super(response.getId(), keyToReach);
         this.dispatchTimestamp = response.getDispatchTimestamp();
         this.outboundHopCount = response.getOutboundHopCount();
@@ -51,7 +51,7 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
      * @param keyToReach
      *            the key used in order to route the response to it recipient.
      */
-    public AbstractReply(AbstractRequest<K> request, K keyToReach) {
+    public Reply(Request<K> request, K keyToReach) {
         super(request.getId(), keyToReach);
         this.dispatchTimestamp = request.getDispatchTimestamp();
         this.outboundHopCount = request.getHopCount();
@@ -149,15 +149,19 @@ public abstract class AbstractReply<K> extends RequestReplyMessage<K> {
         this.outboundHopCount = value;
     }
 
-    /**
-     * Returns a string containing a concise, human-readable description of this
-     * object.
-     * 
-     * @return a string containing a concise, human-readable description of this
-     *         object.
-     */
-    public String toString() {
-        return this.getId().toString();
-    }
-
+	/**
+	 * Returns a string containing a concise, human-readable description 
+	 * of this object.
+	 * 
+	 * @return a string containing a concise, human-readable description 
+	 * 		   of this object.
+	 */
+    @Override
+	public String toString() {
+		return "AbstractReply [id=" + super.getId() + ", dispatchTimestamp="
+				+ this.dispatchTimestamp + ", deliveryTimestamp="
+				+ this.deliveryTimestamp + ", inboundHopCount="
+				+ super.getHopCount() + ", outboundHopCount="
+				+ this.outboundHopCount + ", latency=" + this.latency + "]";
+	}
 }

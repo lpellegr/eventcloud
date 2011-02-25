@@ -1,8 +1,8 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.reply.can;
 
 import org.objectweb.proactive.core.body.reply.Reply;
-import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReplyEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
@@ -14,7 +14,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * 
  * @author lpellegr
  */
-public class ForwardReply extends AbstractReply<Coordinate> {
+public class ForwardReply extends Reply<Coordinate> {
 
     private static final long serialVersionUID = 1L;
     
@@ -30,13 +30,13 @@ public class ForwardReply extends AbstractReply<Coordinate> {
      *            the overlay to use in order to handle the response.
      */
     public void handle(StructuredOverlay overlay) {
-        PendingReplyEntry entry = 
-        	overlay.getRepliesReceived().get(super.getId());
-        entry.incrementResponsesNumber(1);
+        ReplyEntry entry = 
+        	overlay.getReplyEntries().get(super.getId());
+        entry.incrementRepliesCount(1);
         entry.setResponse(this);
 
-        synchronized (overlay.getRepliesReceived()) {
-            overlay.getRepliesReceived().notifyAll();
+        synchronized (overlay.getReplyEntries()) {
+            overlay.getReplyEntries().notifyAll();
         }
     }
 

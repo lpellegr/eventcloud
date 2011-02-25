@@ -6,10 +6,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReplyEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +27,7 @@ public abstract class RequestReplyManager implements Serializable {
 
     protected StructuredOverlay overlay;
 
-    private Map<UUID, PendingReplyEntry> repliesReceived = 
-        new ConcurrentHashMap<UUID, PendingReplyEntry>();
+    private Map<UUID, ReplyEntry> repliesReceived = new ConcurrentHashMap<UUID, ReplyEntry>();
 
     public RequestReplyManager() { 
     	
@@ -42,10 +41,10 @@ public abstract class RequestReplyManager implements Serializable {
 	 * 
 	 * @return a reply associated to the type of the request.
 	 * 
-	 * @see #waitForReply(UUID)
+	 * @see #waitForFinalReply(UUID)
 	 * @see #pullReply(UUID)
 	 */
-    public AbstractReply<?> dispatch(AbstractRequest<?> request) throws DispatchException {
+    public Reply<?> dispatch(Request<?> request) throws DispatchException {
     	 if (logger.isDebugEnabled()) {
              logger.debug("Dispatching request " + request.getId() + " from " + this.overlay.toString());
          }
@@ -66,19 +65,19 @@ public abstract class RequestReplyManager implements Serializable {
 	 * 
 	 * @return the reply for the specified requestId.
 	 */
-    protected AbstractReply<?> pullReply(UUID requestId) {
-    	// waits for result
-    	this.waitForReply(requestId);
+    protected Reply<?> pullReply(UUID requestId) {
+    	// waits for the final reply
+    	this.waitForFinalReply(requestId);
     	
-        AbstractReply<?> response = 
-        	(AbstractReply<?>) this.repliesReceived
-                .remove(requestId).getResponse();
+        Reply<?> response = 
+        	(Reply<?>) this.repliesReceived
+                .remove(requestId).getReply();
         // sets the delivery time for latency computation
         response.setDeliveryTime();
 
         if (logger.isDebugEnabled()) {
             logger.debug(
-                    "Reply received for request " + requestId + " on " + this.overlay);
+                    "Final reply received for request " + requestId + " on " + this.overlay);
         }
 
         return response;
@@ -91,12 +90,12 @@ public abstract class RequestReplyManager implements Serializable {
 	 * @param requestId
 	 *            indicates for which request we are waiting a reply.
 	 */
-    protected void waitForReply(UUID requestId) {
+    protected void waitForFinalReply(UUID requestId) {
         if (logger.isDebugEnabled()) {
             StringBuffer log = new StringBuffer();
             log.append("Waiting for ");
             log.append(this.repliesReceived.get(requestId).getExpectedRepliesCount());
-            log.append(" replies with uuid=");
+            log.append(" replies with id ");
             log.append(requestId);
             log.append(" on ");
             log.append(this.overlay);
@@ -105,7 +104,7 @@ public abstract class RequestReplyManager implements Serializable {
         
         synchronized (this.repliesReceived) {
             while (this.repliesReceived.get(requestId).getStatus() 
-                        != PendingReplyEntry.Status.ALL_REPLIES_RECEIVED) {
+                        != ReplyEntry.Status.FINAL_REPLY_RECEIVED) {
                 try {
                     this.repliesReceived.wait();
                 } catch (InterruptedException e) {
@@ -118,26 +117,24 @@ public abstract class RequestReplyManager implements Serializable {
 	/**
 	 * Pushes the final reply and notify the initial sender that a new reply has
 	 * been received. The notification is done to remove the synchronization
-	 * point (which has been previously set by {@link #waitForReply(UUID)}).
+	 * point (which has been previously set by {@link #waitForFinalReply(UUID)}).
 	 * 
 	 * @param reply
 	 *            the reply to add to the list of responses received.
 	 */
-    public void pushFinalReply(AbstractReply<?> reply) {
-        PendingReplyEntry entry = 
-        	this.overlay.getRepliesReceived().get(reply.getId());
+    public void pushFinalReply(Reply<?> reply) {
+        ReplyEntry entry = 
+        	this.overlay.getReplyEntries().get(reply.getId());
                 
-        entry.incrementResponsesNumber(1);
+        entry.incrementRepliesCount(1);
         entry.setResponse(reply);
 
-        synchronized (this.overlay.getRepliesReceived()) {
-            this.overlay.getRepliesReceived().notifyAll();
+        synchronized (this.overlay.getReplyEntries()) {
+            this.overlay.getReplyEntries().notifyAll();
         }
     }
     
-    public abstract PendingReplyEntry mergeResponseReceived(AbstractReply<?> msg);
-
-    public Map<UUID, PendingReplyEntry> getResponsesReceived() {
+    public Map<UUID, ReplyEntry> getRepliesReceived() {
         return this.repliesReceived;
     }
 
@@ -152,7 +149,7 @@ public abstract class RequestReplyManager implements Serializable {
     public <T extends RequestReplyMessage<?>> void route(T msg) {
         msg.route(this.overlay);
     }
-
+    
     public void setOverlay(StructuredOverlay overlay) {
         this.overlay = overlay;
     }

@@ -3,13 +3,13 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.request;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
 
 /**
  * An <code>AbstractRequest</code> is an abstraction of a query that can be sent
  * on a structured peer-to-peer network in order to find some data by a key
  * which is an object of type <code>K</code>. In response an object of type
- * {@link AbstractReply} is returned with the desired data.
+ * {@link Reply} is returned with the desired data.
  * <p>
  * A request is performed step by step by using one-way mechanism. as a
  * consequence of it, we can't say when the response will be returned. Suppose
@@ -26,9 +26,9 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Abstract
  * @author lpellegr
  * 
  * @see RequestReplyMessage
- * @see AbstractReply
+ * @see Reply
  */
-public abstract class AbstractRequest<K> extends RequestReplyMessage<K> {
+public abstract class Request<K> extends RequestReplyMessage<K> {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,7 +43,7 @@ public abstract class AbstractRequest<K> extends RequestReplyMessage<K> {
      * @param keyToReach
      *            the key to reach.
      */
-    public AbstractRequest(K keyToReach) {
+    public Request(K keyToReach) {
         super(UUID.randomUUID(), keyToReach);
     }
 
@@ -58,19 +58,19 @@ public abstract class AbstractRequest<K> extends RequestReplyMessage<K> {
      * @param dispatchTimestamp
      *            the dispatch timestamp of the query.
      */
-    public AbstractRequest(UUID uuid, K keyToReach, long dispatchTimestamp) {
+    public Request(UUID uuid, K keyToReach, long dispatchTimestamp) {
         super(uuid, keyToReach);
         this.dispatchTimestamp = dispatchTimestamp;
     }
 
     /**
-     * Creates an {@link AbstractReply} in accordance to the type of
-     * the current {@link AbstractRequest}.
+     * Creates an {@link Reply} in accordance to the type of
+     * the current {@link Request}.
      * 
-     * @return an {@link AbstractReply} in accordance to the type of
-     * the current {@link AbstractRequest}.
+     * @return an {@link Reply} in accordance to the type of
+     * the current {@link Request}.
      */
-    public abstract AbstractReply<?> createResponseMessage();
+    public abstract Reply<?> createResponseMessage();
 
     /**
      * {@inheritDoc}

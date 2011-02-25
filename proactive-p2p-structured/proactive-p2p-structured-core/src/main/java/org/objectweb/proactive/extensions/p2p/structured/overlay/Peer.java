@@ -14,8 +14,8 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlrea
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 
@@ -248,7 +248,7 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
 	 * @return the response in agreement with the type of message sent.
 	 * @throws DispatchException 
 	 */
-    public AbstractReply<?> send(AbstractRequest<?> request) throws DispatchException {
+    public Reply<?> send(Request<?> request) throws DispatchException {
         return this.overlay.getRequestReplyManager().dispatch(request);
     }
 

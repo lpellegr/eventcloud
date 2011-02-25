@@ -2,10 +2,10 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
 
 /**
- * {@link PendingReplyEntry} is used for storing some information (e.g. the
+ * {@link ReplyEntry} is used for storing some information (e.g. the
  * number of replies expected, the number of replies received, etc.) about a
  * request which is being handled. These information are useful to create a
  * synchronization point.
@@ -15,19 +15,19 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Abstract
  * 
  * @author lpellegr
  */
-public class PendingReplyEntry implements Serializable {
+public class ReplyEntry implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public enum Status {
 		/**
 		 * This status means that the number of replies expected 
-		 * is equals to the number of responses received.
+		 * is equals to the number of replies received.
 		 */
-		ALL_REPLIES_RECEIVED, 
+		FINAL_REPLY_RECEIVED, 
 		/**
 		 * This status means that the number of replies received 
-		 * is smaller than the number of responses expected.
+		 * is smaller than the number of replies expected.
 		 */
 		RECEIPT_IN_PROGRESS
 	};
@@ -35,9 +35,9 @@ public class PendingReplyEntry implements Serializable {
 	private Status status = Status.RECEIPT_IN_PROGRESS;
 
 	/**
-	 * The reply corresponding to the last response which has been merged.
+	 * The reply corresponding to the last reply which has been merged.
 	 */
-	private AbstractReply<?> reply;
+	private Reply<?> reply;
 
 	/**
 	 * The maximum number of replies expected.
@@ -56,7 +56,7 @@ public class PendingReplyEntry implements Serializable {
 	 * @param expectedRepliesCount
 	 * 				the maximum number of responses expected.
 	 */
-	public PendingReplyEntry(int expectedRepliesCount) {
+	public ReplyEntry(int expectedRepliesCount) {
 	    this.expectedRepliesCount = expectedRepliesCount;
 	}
 	
@@ -92,14 +92,14 @@ public class PendingReplyEntry implements Serializable {
 	 * 
 	 * @return the last message merged.
 	 */
-	public AbstractReply<?> getResponse() {
+	public Reply<?> getReply() {
 		return this.reply;
 	}
 
-	public synchronized void incrementResponsesNumber(int increment) {
+	public synchronized void incrementRepliesCount(int increment) {
 		this.repliesCount += increment;
 		if (this.repliesCount == this.expectedRepliesCount) {
-			this.status = Status.ALL_REPLIES_RECEIVED;
+			this.status = Status.FINAL_REPLY_RECEIVED;
 		}
 	}
 
@@ -109,7 +109,7 @@ public class PendingReplyEntry implements Serializable {
 	 * @param response 
 	 * 			the new response to associate to this entry.
 	 */
-	public synchronized void setResponse(AbstractReply<?> response) {
+	public synchronized void setResponse(Reply<?> response) {
 		this.reply = response;
 	}
 

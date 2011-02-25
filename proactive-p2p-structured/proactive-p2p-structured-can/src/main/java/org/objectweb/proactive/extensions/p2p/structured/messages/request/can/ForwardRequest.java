@@ -1,8 +1,8 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.reply.can.ForwardReply;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
@@ -17,7 +17,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * 
  * @author lpellegr
  */
-public class ForwardRequest extends AbstractRequest<Coordinate> {
+public class ForwardRequest extends Request<Coordinate> {
 
     private static final long serialVersionUID = 1L;
 
@@ -63,7 +63,7 @@ public class ForwardRequest extends AbstractRequest<Coordinate> {
     /**
      * {@inheritDoc}
      */
-    public AbstractReply<Coordinate> createResponseMessage() {
+    public Reply<Coordinate> createResponseMessage() {
         return new ForwardReply(this);
     }
 
