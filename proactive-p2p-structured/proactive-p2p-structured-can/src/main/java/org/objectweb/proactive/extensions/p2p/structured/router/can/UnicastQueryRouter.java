@@ -2,9 +2,9 @@ package org.objectweb.proactive.extensions.p2p.structured.router.can;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
-import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReplyEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lpellegr
  */
-public class UnicastQueryRouter<T extends AbstractRequest<Coordinate>> 
+public class UnicastQueryRouter<T extends Request<Coordinate>> 
                                               extends Router<T, Coordinate> {
 
     private static final Logger logger = 
@@ -35,8 +35,8 @@ public class UnicastQueryRouter<T extends AbstractRequest<Coordinate>>
 	@Override
 	public void makeDecision(StructuredOverlay overlay, T msg) {
 		if (msg.getHopCount() == 0) {
-			overlay.getRepliesReceived().put(
-					msg.getId(), new PendingReplyEntry(1));
+			overlay.getReplyEntries().put(
+					msg.getId(), new ReplyEntry(1));
 		}
 
 		if (((AbstractCanOverlay) overlay).contains(msg.getKeyToReach())) {

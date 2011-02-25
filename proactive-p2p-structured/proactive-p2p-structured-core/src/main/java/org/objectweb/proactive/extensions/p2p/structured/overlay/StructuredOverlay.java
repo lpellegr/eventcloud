@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.Service;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.PendingReplyEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReplyEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
 
 /**
@@ -23,7 +23,7 @@ public abstract class StructuredOverlay implements Serializable {
 
     private final UUID identifier;
 
-    private RequestReplyManager queryManager;
+    private RequestReplyManager messagingManager;
 
     private Peer localPeer;
 
@@ -46,8 +46,8 @@ public abstract class StructuredOverlay implements Serializable {
 
     protected StructuredOverlay(RequestReplyManager queryManager) {
     	this();
-    	this.queryManager = queryManager;
-        this.queryManager.setOverlay(this);
+    	this.messagingManager = queryManager;
+        this.messagingManager.setOverlay(this);
     }
 
     public abstract boolean create();
@@ -103,11 +103,15 @@ public abstract class StructuredOverlay implements Serializable {
     }
 
     public RequestReplyManager getRequestReplyManager() {
-        return this.queryManager;
+        return this.messagingManager;
     }
 
-    public Map<UUID, PendingReplyEntry> getRepliesReceived() {
-        return this.queryManager.getResponsesReceived();
+    public ReplyEntry getReplyEntry(UUID replyId) {
+    	return this.messagingManager.getRepliesReceived().get(replyId);
+    }
+    
+    public Map<UUID, ReplyEntry> getReplyEntries() {
+        return this.messagingManager.getRepliesReceived();
     }
 
     public void setLocalPeer(Peer localPeer) {
@@ -115,7 +119,7 @@ public abstract class StructuredOverlay implements Serializable {
     }
 
     public void route(RequestReplyMessage<?> msg) {
-        this.queryManager.route(msg);
+        this.messagingManager.route(msg);
     }
 
     public abstract String dump();

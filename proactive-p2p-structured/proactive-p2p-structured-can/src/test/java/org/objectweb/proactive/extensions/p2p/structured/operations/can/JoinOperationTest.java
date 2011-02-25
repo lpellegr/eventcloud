@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 
@@ -29,10 +29,10 @@ public class JoinOperationTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        firstPeer = PeerFactory.newActivePeer(new BasicCANOverlay());
-        secondPeer = PeerFactory.newActivePeer(new BasicCANOverlay());
-        thirdPeer = PeerFactory.newActivePeer(new BasicCANOverlay());
-        fourthPeer = PeerFactory.newActivePeer(new BasicCANOverlay());
+        firstPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
+        secondPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
+        thirdPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
+        fourthPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
         
         firstPeer.create();
     }

@@ -1,10 +1,10 @@
 package org.objectweb.proactive.extensions.p2p.structured.exceptions;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestReplyManager;
 
 /**
- * An exception thrown when an error occurs while dispatching a {@link AbstractRequest}
+ * An exception thrown when an error occurs while dispatching a {@link Request}
  * from a {@link RequestReplyManager}.
  * 
  * @author lpellegr

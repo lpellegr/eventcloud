@@ -587,7 +587,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         }
         
         if (logger.isDebugEnabled()) {
-            logger.debug("Peer " + this + " has joined the network from " + landmarkPeer + ".");
+            logger.debug("Peer " + this + " has joined the network from " + landmarkPeer);
         }
         
         return true;

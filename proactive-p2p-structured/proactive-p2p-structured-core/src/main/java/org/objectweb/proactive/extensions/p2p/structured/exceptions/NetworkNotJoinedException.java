@@ -4,8 +4,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
  * An exception thrown when the {@link Peer#leave()} method from a {@link Peer}
- * is called whereas the peer has not joined a network by using
- * {@link Peer#join(Peer)}.
+ * is called whereas the peer has not joined the network by using the
+ * {@link Peer#join(Peer)} method.
  * 
  * @author lpellegr
  */

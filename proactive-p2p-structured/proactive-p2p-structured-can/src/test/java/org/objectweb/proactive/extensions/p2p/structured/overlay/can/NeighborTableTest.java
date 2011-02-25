@@ -11,7 +11,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCANOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
@@ -27,13 +27,13 @@ public class NeighborTableTest extends CANNetworkInitializer {
 
     @Before
     public void setUp() throws Exception {
-        this.peer = PeerFactory.newActivePeer(new BasicCANOverlay());
+        this.peer = PeerFactory.newActivePeer(new BasicCanOverlay());
     }
 
     @Test
     public void testAddAll() throws ActiveObjectCreationException, NodeException {
-        Peer firstPeer = PeerFactory.newActivePeer(new BasicCANOverlay());
-        Peer secondPeer = PeerFactory.newActivePeer(new BasicCANOverlay());
+        Peer firstPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
+        Peer secondPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
 
         NeighborTable neighborTable = new NeighborTable();
         neighborTable.add(new NeighborEntry(firstPeer), 0, 1);
@@ -42,17 +42,17 @@ public class NeighborTableTest extends CANNetworkInitializer {
         Assert.assertTrue(neighborTable.contains(firstPeer.getId(), 0, 1));
         Assert.assertTrue(neighborTable.contains(secondPeer.getId(), 0, 0));
 
-        BasicCANOverlay overlay = 
-            ((BasicCANOverlay) PAFuture.getFutureValue(
+        BasicCanOverlay overlay = 
+            ((BasicCanOverlay) PAFuture.getFutureValue(
                     this.peer.getStructuredOverlay()));
         overlay.getNeighborTable().addAll(neighborTable);
         this.peer.setStructuredOverlay(overlay);
 
         Assert.assertTrue(
-                ((BasicCANOverlay) PAFuture.getFutureValue(
+                ((BasicCanOverlay) PAFuture.getFutureValue(
                         this.peer.getStructuredOverlay())).getNeighborTable().contains(
                                 firstPeer.getId(), 0, 1));
-        Assert.assertTrue(((BasicCANOverlay) PAFuture.getFutureValue(
+        Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(
                 this.peer.getStructuredOverlay())).getNeighborTable().contains(
                         secondPeer.getId(), 0, 0));
     }

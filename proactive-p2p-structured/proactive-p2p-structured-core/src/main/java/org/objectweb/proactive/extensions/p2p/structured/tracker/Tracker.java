@@ -204,7 +204,7 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
 			}
             this.storePeer(remotePeer);
             if (logger.isInfoEnabled()) {
-                logger.info("A new peer has created a network.");
+                logger.info("A new peer has created a network");
             }
         } else {
 			try {
@@ -218,7 +218,7 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
 				}
 				
 				if (logger.isInfoEnabled()) {
-					logger.info("Peer managing {} has joined.", remotePeer);
+					logger.info("Peer managing {} has joined", remotePeer);
 				}
 			} catch (NetworkAlreadyJoinedException e) {
 				e.printStackTrace();

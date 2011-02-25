@@ -129,4 +129,13 @@ public abstract class RequestReplyMessage<K> implements Routable<K>, Serializabl
         this.hopCount = value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+	@Override
+	public String toString() {
+		return "RequestReplyMessage [id=" + this.uuid + ", keyToReach="
+				+ this.keyToReach + ", hopCount=" + this.hopCount + "]";
+	}
+
 }

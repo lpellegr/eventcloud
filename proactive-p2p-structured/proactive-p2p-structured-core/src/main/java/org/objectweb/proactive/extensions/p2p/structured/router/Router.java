@@ -114,7 +114,7 @@ public abstract class Router<T extends RequestReplyMessage<K>, K> {
     protected abstract void performHandle(StructuredOverlay overlay, T msg);
 
     /**
-     * Make decision to route the message to an another peer or to handle it by
+     * Makes decision to route the message to an another peer or to handle it by
      * calling {@link #handle(StructuredOverlay, RequestReplyMessage)}. The
      * message must be handled if the constraints are validated by using the
      * {@link ConstraintsValidator}.
@@ -127,21 +127,18 @@ public abstract class Router<T extends RequestReplyMessage<K>, K> {
      */
     protected abstract void performRoute(StructuredOverlay overlay, T msg);
 
-    /**
-     * Validates the contraints by using the specified {@link StructuredOverlay}
-     * and key K.
-     * 
-     * @param overlay
-     *            the {@link StructuredOverlay} on which the constraints are
-     *            checked.
-     * @param key
-     *            the key to use to check the constraints.
-     * @return <code>true</code> if the constraints are validated,
-     *         <code>false</code> otherwise.
-     * 
-     * @see ConstraintsValidator#validatesKeyConstraints(StructuredOverlay,
-     *      Object)
-     */
+	/**
+	 * Indicates if the specified {@code overlay} validates the constraints
+	 * which are denoted by {@code key}.
+	 * 
+	 * @param overlay
+	 *            the overlay on which the constraints are checked.
+	 * @param key
+	 *            the constraints to check.
+	 * 
+	 * @return <code>true</code> if the constraints are validated,
+	 *         <code>false</code> otherwise.
+	 */
     protected boolean validatesKeyConstraints(StructuredOverlay overlay, K key) {
         return this.constraintsValidator.validatesKeyConstraints(overlay, key);
     }
