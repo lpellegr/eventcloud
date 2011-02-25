@@ -22,8 +22,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lpellegr
  */
-public class UnicastQueryRouter<T extends Request<Coordinate>> 
-                                              extends Router<T, Coordinate> {
+public class UnicastQueryRouter<T extends Request<Coordinate>> extends Router<T, Coordinate> {
 
     private static final Logger logger = 
     	 LoggerFactory.getLogger(UnicastQueryRouter.class);
@@ -33,30 +32,30 @@ public class UnicastQueryRouter<T extends Request<Coordinate>>
     }
 
 	@Override
-	public void makeDecision(StructuredOverlay overlay, T msg) {
-		if (msg.getHopCount() == 0) {
+	public void makeDecision(StructuredOverlay overlay, T request) {
+		if (request.getHopCount() == 0) {
 			overlay.getReplyEntries().put(
-					msg.getId(), new ReplyEntry(1));
+					request.getId(), new ReplyEntry(1));
 		}
 
-		if (((AbstractCanOverlay) overlay).contains(msg.getKeyToReach())) {
-			this.handle(overlay, msg);
+		if (((AbstractCanOverlay) overlay).contains(request.getKeyToReach())) {
+			this.handle(overlay, request);
 		} else {
-			this.performRoute(overlay, msg);
+			this.performRoute(overlay, request);
 		}
 	}
     
-    protected void performHandle(StructuredOverlay overlay, T msg) {
+    protected void performHandle(StructuredOverlay overlay, T request) {
         if (logger.isDebugEnabled()) {
             logger.debug(
-                        "Peer " + overlay + " contains the key to reach " 
-                        + msg.getKeyToReach() + " for message ID " + msg.getId() + ".");
+                        "Peer " + overlay + " validates the contraints " 
+                        + request.getKeyToReach() + " specified by request " + request.getId());
         }
-        this.onDestinationReached(overlay, msg);
-        msg.createResponseMessage().route(overlay);
+        this.onDestinationReached(overlay, request);
+        request.createResponseMessage().route(overlay);
     }
 
-    protected void performRoute(StructuredOverlay overlay, T msg) {
+    protected void performRoute(StructuredOverlay overlay, T request) {
         AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
 
 		short dimension = 0;
@@ -64,7 +63,7 @@ public class UnicastQueryRouter<T extends Request<Coordinate>>
 
         // finds the dimension on which the key to reach is not contained
         for (; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            direction = overlayCAN.contains(dimension, msg.getKeyToReach().getElement(dimension));
+            direction = overlayCAN.contains(dimension, request.getKeyToReach().getElement(dimension));
             
             if (direction == -1) {
                 direction = NeighborTable.INFERIOR_DIRECTION;
@@ -76,20 +75,19 @@ public class UnicastQueryRouter<T extends Request<Coordinate>>
         }
 
         // selects one neighbor in the dimension and the direction previously affected
-        NeighborEntry neighborChosen = overlayCAN.nearestNeighbor(msg.getKeyToReach(), dimension, direction);
+        NeighborEntry neighborChosen = overlayCAN.nearestNeighbor(request.getKeyToReach(), dimension, direction);
 
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "The message is routed to a neigbour because the current peer "
                     + "managing " + overlay + " does not contains the key to reach ("
-                    + msg.getKeyToReach() + "). Neighbor is selected from dimension " 
+                    + request.getKeyToReach() + "). Neighbor is selected from dimension " 
                     + dimension + " and direction " + direction + ": " + neighborChosen);
         }
 
-        // sends the message to it
         try {
-            msg.incrementHopCount(1);
-            neighborChosen.getStub().route(msg);
+            request.incrementHopCount(1);
+            neighborChosen.getStub().route(request);
         } catch (ProActiveRuntimeException e) {
             logger.error(
                     "Error while sending the message to the neighbor managing " 
