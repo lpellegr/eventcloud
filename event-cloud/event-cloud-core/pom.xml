@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>event-cloud</artifactId>
+		<groupId>fr.inria.eventcloud</groupId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<groupId>fr.inria.eventcloud</groupId>
+	<artifactId>event-cloud-core</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>event-cloud-core</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<!-- TODO: removes these dependencies as soon as possible -->
+		<dependency>
+			<groupId>eu.soa4all.semanticspaces</groupId>
+			<artifactId>semanticspaces-api</artifactId>
+			<version>0.0.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>eu.soa4all.semanticspaces</groupId>
+			<artifactId>owlim-rdf2go-api</artifactId>
+			<version>0.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.soa4all.semanticspaces</groupId>
+			<artifactId>owlim-rdf2go</artifactId>
+			<version>0.0.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.ontotext.owlim</groupId>
+					<artifactId>big-owlim</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-jdk14</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.ontotext.owlim</groupId>
+			<artifactId>big-owlim</artifactId>
+			<version>3.3.0</version>
+			<classifier>r2660</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+			<artifactId>proactive-p2p-structured-can</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.elaunira.pmp</groupId>
+				<artifactId>proactive-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<configuration>
+							<includes>
+								<include>fr.inria.eventcloud.kernel.SemanticSpaceOverlayKernel</include>
+								<include>fr.inria.eventcloud.messages.reply.can.AnycastReply</include>
+								<include>fr.inria.eventcloud.overlay.SemanticPeer</include>
+								<include>fr.inria.eventcloud.tracker.SemanticCanTracker</include>
+							</includes>
+						</configuration>
+						<goals>
+							<goal>stubs</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
