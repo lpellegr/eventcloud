@@ -59,6 +59,10 @@
 			<name>dspace releases repository</name>
 			<url>http://dspace.gforge.inria.fr/maven2/repository/releases</url>
 		</repository>
+		<repository>
+			<id>semweb4j</id>
+			<url>http://mavenrepo.fzi.de/semweb4j.org/repo/</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
