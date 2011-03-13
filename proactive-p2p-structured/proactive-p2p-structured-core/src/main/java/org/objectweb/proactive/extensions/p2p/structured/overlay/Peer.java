@@ -13,9 +13,9 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchExce
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 
@@ -136,14 +136,14 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
     public void initActivity(Body body) {
         this.stub = (Peer) PAActiveObject.getStubOnThis();
 
-        PAActiveObject.setImmediateService("receiveOperationIS");
+        body.setImmediateService("receiveOperationIS", false);
         
     	// these methods do not change the state of the peer
-    	PAActiveObject.setImmediateService("equals");
-    	PAActiveObject.setImmediateService("getId");
-    	PAActiveObject.setImmediateService("hashCode");
-    	PAActiveObject.setImmediateService("toString");
-    	PAActiveObject.setImmediateService("getType");
+    	body.setImmediateService("equals", false);
+    	body.setImmediateService("getId", false);
+    	body.setImmediateService("hashCode", false);
+    	body.setImmediateService("toString", false);
+    	body.setImmediateService("getType", false);
   
         this.overlay.initActivity(body);
         
@@ -162,6 +162,8 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
 				e.printStackTrace();
 			}
 		}
+		
+		this.overlay.endActivity(body);
     }
     
     /**
@@ -196,7 +198,7 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
      * 
      * @return the {@link StructuredOverlay} which is used by the peer.
      */
-    public StructuredOverlay getStructuredOverlay() {
+    public StructuredOverlay getOverlay() {
         return this.overlay;
     }
 
@@ -248,12 +250,12 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
 	 * @return the response in agreement with the type of message sent.
 	 * @throws DispatchException 
 	 */
-    public Reply<?> send(Request<?> request) throws DispatchException {
-        return this.overlay.getRequestReplyManager().dispatch(request);
+    public Response<?> send(Request<?> request) throws DispatchException {
+        return this.overlay.getRequestResponseManager().dispatch(request);
     }
 
-    public void route(RequestReplyMessage<?> msg) {
-        this.overlay.getRequestReplyManager().route(msg);
+    public void route(RequestResponseMessage<?> msg) {
+        this.overlay.route(msg);
     }
 
     /**
@@ -288,12 +290,12 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
     }
     
     /**
-     * Sets the overlay.
+     * Sets the {@link StructuredOverlay} associated to this peer.
      * 
      * @param structuredOverlay
      *            the new overlay to set.
      */
-    public void setStructuredOverlay(StructuredOverlay structuredOverlay) {
+    public void setOverlay(StructuredOverlay structuredOverlay) {
         this.overlay = structuredOverlay;
     }
 

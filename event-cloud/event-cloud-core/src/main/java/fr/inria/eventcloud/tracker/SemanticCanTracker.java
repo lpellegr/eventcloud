@@ -9,8 +9,9 @@ import java.util.Map.Entry;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.ProActiveRandom;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.can.LookupReply;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
@@ -20,6 +21,7 @@ import org.openrdf.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticFrequencies.Type;
 import fr.inria.eventcloud.util.SemanticHelper;
 
@@ -56,6 +58,11 @@ public class SemanticCanTracker extends Tracker {
         this.initialize();
     }
 	
+    public SemanticPeer getRandomPeer() {
+    	// TODO Auto-generated method stub
+    	return (SemanticPeer)super.getRandomPeer();
+    }
+    
     public String dump() {
     	StringBuffer buf = new StringBuffer();
     	
@@ -105,12 +112,17 @@ public class SemanticCanTracker extends Tracker {
 		StringElement objectElt = objectCharacter == null ? null : new StringElement(objectCharacter.toString());
 		
 		logger.debug("findPeerToJoin return a peer based on the frequency found.");
-		return ((LookupReply)
-				PAFuture.getFutureValue(
-						this.getRandomPeer().send(
-								new LookupRequest(
-										new Coordinate(
-												subjectElt, predicateElt, objectElt))))).getPeerFound();
+		try {
+			return ((LookupResponse)
+					PAFuture.getFutureValue(
+							this.getRandomPeer().send(
+									new LookupRequest(
+											new Coordinate(
+													subjectElt, predicateElt, objectElt))))).getPeerFound();
+		} catch (DispatchException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	/**
@@ -152,19 +164,19 @@ public class SemanticCanTracker extends Tracker {
 
 	public void updateFrequency(Statement stmt) {
 		this.frequencies.get(
-				SemanticHelper.parseTripleForLoadBalancing(
+				SemanticHelper.parseTripleElement(
 						stmt.getSubject().toString()).charAt(0))
 							.getSubjectCharacterFrequency()
 								.incrementOccurencesCount();
 		
 		this.frequencies.get(
-				SemanticHelper.parseTripleForLoadBalancing(
+				SemanticHelper.parseTripleElement(
 						stmt.getPredicate().toString()).charAt(0))
 							.getPredicateCharacterFrequency()
 								.incrementOccurencesCount();
 		
 		this.frequencies.get(
-				SemanticHelper.parseTripleForLoadBalancing(
+				SemanticHelper.parseTripleElement(
 						stmt.getObject().toString()).charAt(0))
 							.getObjectCharacterFrequency()
 								.incrementOccurencesCount();

@@ -7,8 +7,8 @@ import java.util.UUID;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.Service;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ReplyEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 
 /**
  * The StructuredOverlay class contains the logic associated to methods exposed
@@ -23,7 +23,7 @@ public abstract class StructuredOverlay implements Serializable {
 
     private final UUID identifier;
 
-    private RequestReplyManager messagingManager;
+    private RequestResponseManager messagingManager;
 
     private Peer localPeer;
 
@@ -39,12 +39,12 @@ public abstract class StructuredOverlay implements Serializable {
      * @param queryManager
      *            the query manager to associate to the overlay.
      */
-    protected StructuredOverlay(Peer peer, RequestReplyManager queryManager) {
+    protected StructuredOverlay(Peer peer, RequestResponseManager queryManager) {
         this(queryManager);
         this.localPeer = peer;
     }
 
-    protected StructuredOverlay(RequestReplyManager queryManager) {
+    protected StructuredOverlay(RequestResponseManager queryManager) {
     	this();
     	this.messagingManager = queryManager;
         this.messagingManager.setOverlay(this);
@@ -71,6 +71,8 @@ public abstract class StructuredOverlay implements Serializable {
 
     public abstract void initActivity(Body body);
 
+    public abstract void endActivity(Body body);
+    
     public void runActivity(Body body) {
         Service service = new Service(body);
         while (body.isActive()) {
@@ -102,24 +104,24 @@ public abstract class StructuredOverlay implements Serializable {
         return this.localPeer.getStub();
     }
 
-    public RequestReplyManager getRequestReplyManager() {
+    public RequestResponseManager getRequestResponseManager() {
         return this.messagingManager;
     }
 
-    public ReplyEntry getReplyEntry(UUID replyId) {
-    	return this.messagingManager.getRepliesReceived().get(replyId);
+    public ResponseEntry getResponseEntry(UUID responseId) {
+    	return this.messagingManager.getResponsesReceived().get(responseId);
     }
     
-    public Map<UUID, ReplyEntry> getReplyEntries() {
-        return this.messagingManager.getRepliesReceived();
+    public Map<UUID, ResponseEntry> getResponseEntries() {
+        return this.messagingManager.getResponsesReceived();
     }
 
     public void setLocalPeer(Peer localPeer) {
         this.localPeer = localPeer;
     }
 
-    public void route(RequestReplyMessage<?> msg) {
-        this.messagingManager.route(msg);
+    public void route(RequestResponseMessage<?> msg) {
+    	msg.route(this);
     }
 
     public abstract String dump();

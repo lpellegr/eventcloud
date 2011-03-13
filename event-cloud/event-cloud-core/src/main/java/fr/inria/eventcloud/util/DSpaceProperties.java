@@ -5,6 +5,7 @@ import java.io.File;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyInteger;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
 import org.objectweb.proactive.extensions.p2p.structured.util.SystemUtil;
+import org.ontoware.rdf2go.model.node.URI;
 
 /**
  * @author lpellegr
@@ -41,5 +42,7 @@ public class DSpaceProperties {
 	public static File getDefaultPathForConfigurationFiles() {
 		return defaultPathForConfigurationFiles;		
 	}
+	
+	public static final URI DEFAULT_CONTEXT = RDF2GoBuilder.createURI("http://www.inria.fr");
 	
 }

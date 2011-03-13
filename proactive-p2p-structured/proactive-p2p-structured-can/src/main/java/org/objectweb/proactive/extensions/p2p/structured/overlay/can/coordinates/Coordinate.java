@@ -17,7 +17,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 public class Coordinate implements Comparable<Coordinate>, Iterable<Element>, Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	/**
 	 * The set of elements composing the coordinate.
 	 */

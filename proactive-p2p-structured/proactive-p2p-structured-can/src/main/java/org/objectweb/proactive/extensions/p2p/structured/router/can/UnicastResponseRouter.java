@@ -2,54 +2,52 @@ package org.objectweb.proactive.extensions.p2p.structured.router.can;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ReplyEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author lpellegr
  */
-public class UnicastResponseRouter<T extends Reply<Coordinate>>
-        extends Router<T, Coordinate> {
+public class UnicastResponseRouter<T extends Response<Coordinate>> extends Router<T, Coordinate> {
 
     private static final Logger logger =
     	LoggerFactory.getLogger(UnicastResponseRouter.class);
     
-    public UnicastResponseRouter(ConstraintsValidator<Coordinate> validator) {
-        super(validator);
+    public UnicastResponseRouter() {
+        super();
     }
 
     @Override
-	public void makeDecision(StructuredOverlay overlay, T msg) {
-    	if (msg.getHopCount() == 0) {
-            overlay.getReplyEntries().put(
-                    msg.getId(), new ReplyEntry(1));
+	public void makeDecision(StructuredOverlay overlay, T response) {
+    	if (response.getHopCount() == 0) {
+            overlay.getResponseEntries().put(
+                    response.getId(), new ResponseEntry(1));
         }
 
-        if (((AbstractCanOverlay) overlay).contains(msg.getKeyToReach())) {
-            this.handle(overlay, msg);
+    	if (response.validatesKeyConstraints(overlay)) {
+            this.handle(overlay, response);
         } else {
-        	this.performRoute(overlay, msg);
+        	this.doRoute(overlay, response);
         }
 	}
     
-    protected void performHandle(StructuredOverlay overlay, T msg) {
+    protected void doHandle(StructuredOverlay overlay, T response) {
         if (logger.isDebugEnabled()) {
-            logger.debug("The peer " + overlay + " contains the key to reach " + msg.getKeyToReach() + ".");
+            logger.debug("The peer " + overlay + " contains the key to reach " + response.getKey() + ".");
         }
 
-        overlay.getRequestReplyManager().pushFinalReply(msg);
+        overlay.getRequestResponseManager().pushFinalResponse(response);
     }
 
-    protected void performRoute(StructuredOverlay overlay, T msg) {
+    protected void doRoute(StructuredOverlay overlay, T response) {
         AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
 
         short dimension = 0;
@@ -57,7 +55,7 @@ public class UnicastResponseRouter<T extends Reply<Coordinate>>
 
         // finds the dimension on which the key to reach is not contained
         for (; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            direction = overlayCAN.contains(dimension, msg.getKeyToReach().getElement(dimension));
+            direction = overlayCAN.contains(dimension, response.getKey().getElement(dimension));
 
             if (direction == -1) {
                 direction = NeighborTable.INFERIOR_DIRECTION;
@@ -69,20 +67,20 @@ public class UnicastResponseRouter<T extends Reply<Coordinate>>
         }
         
         // selects one neighbor in the dimension and the direction previously affected
-        NeighborEntry neighborChosen = overlayCAN.nearestNeighbor(msg.getKeyToReach(), dimension, direction);
+        NeighborEntry neighborChosen = overlayCAN.nearestNeighbor(response.getKey(), dimension, direction);
 
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "The message is routed to a neigbour because the current peer "
                     + "managing " + overlay + " does not contains the key to reach ("
-                    + msg.getKeyToReach() + "). Neighbor is selected from dimension " 
+                    + response.getKey() + "). Neighbor is selected from dimension " 
                     + dimension + " and direction " + direction + ": " + neighborChosen);
         }
 
         // sends the message to it
         try {
-            msg.incrementHopCount(1);
-            neighborChosen.getStub().route(msg);
+            response.incrementHopCount(1);
+            neighborChosen.getStub().route(response);
         } catch (ProActiveRuntimeException e) {
             logger.error(
                     "Error while sending the message to the neighbor managing " 
