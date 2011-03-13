@@ -6,32 +6,34 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.router.RouterStore;
+import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
+ * Super class that all request/response messages must implement.
+ * 
  * @author lpellegr
  */
-public abstract class RequestReplyMessage<K> implements Routable<K>, Serializable {
+public abstract class RequestResponseMessage<K> implements Routable<K>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Universally unique identifier used in order to identify the message.
      */
-    private final UUID uuid;
+    protected final UUID uuid;
 
     /**
-     * The key used in order to route the query over the network.
+     * Constraints validator used to make the routing decision possible.
      */
-    private K keyToReach;
-
+    protected ConstraintsValidator<K> constraintsValidator; 
+    
     /**
      * The number of hops between the source and the destination of the message.
      */
     private int hopCount = 0;
 
     /**
-     * Constructs a new RequestReplyMessage with the specified identifier and
+     * Constructs a new RequestResponseMessage with the specified identifier and
      * keyToReach.
      * 
      * @param identifier
@@ -41,9 +43,9 @@ public abstract class RequestReplyMessage<K> implements Routable<K>, Serializabl
      *            the key to reach (i.e. routes until reaching the {@link Peer}
      *            managing this key).
      */
-    public RequestReplyMessage(UUID identifier, K keyToReach) {
+    public RequestResponseMessage(UUID identifier, ConstraintsValidator<K> constraintsValidator) {
         this.uuid = identifier;
-        this.keyToReach = keyToReach;
+        this.constraintsValidator = constraintsValidator;
     }
 
     /**
@@ -65,16 +67,14 @@ public abstract class RequestReplyMessage<K> implements Routable<K>, Serializabl
     }
     
     /**
-     * Returns the key to reach (i.e. the peer containing this key is the
-     * receiver of this message).
+     * Returns the key to reach.
      * 
-     * @return the key to reach (i.e. the peer containing this key is the
-     *         receiver of this message).
+     * @return the key to reach.
      */
-    public K getKeyToReach() {
-        return this.keyToReach;
+    public K getKey() {
+    	return this.constraintsValidator.getKey();
     }
-
+    
 	/**
 	 * Returns the number of hops between the source and the destination of this
 	 * message.
@@ -100,26 +100,28 @@ public abstract class RequestReplyMessage<K> implements Routable<K>, Serializabl
     
     @SuppressWarnings("unchecked")
     public void route(StructuredOverlay overlay) {
-        Class<RequestReplyMessage<K>> clazz =
-                (Class<RequestReplyMessage<K>>) this.getClass();
-        RouterStore routerStore = RouterStore.getInstance();
-        if (!routerStore.contains(clazz)) {
-            routerStore.store(clazz, this.getRouter());
-        }
-        ((Router<RequestReplyMessage<K>, K>) routerStore.get(clazz)).makeDecision(overlay, this);
-    }
-    
-    /**
-     * Sets the key to reach.
-     * 
-     * @param keyToReach
-     *            the new key to reach.
-     */
-    public void setKeyToReach(K keyToReach) {
-        this.keyToReach = keyToReach;
+//        RouterStore routerStore = RouterStore.getInstance();
+//
+//		Router<? extends RequestReplyMessage<K>, K> instance = 
+//			(Router<? extends RequestReplyMessage<K>, K>) 
+//				routerStore.get(this.getClass(), this.constraintsValidator.getClass());
+//
+//		if (instance == null) {
+//			instance = this.getRouter();
+//			((Router<RequestReplyMessage<K>, K>) instance).makeDecision(overlay, this);
+//			Router<? extends RequestReplyMessage<?>, ?> oldInstance = routerStore
+//					.store(this.getClass(),
+//							this.constraintsValidator.getClass(), instance);
+//			if (oldInstance != null) {
+//				instance = oldInstance;
+//			}
+//		}
+//
+//		((Router<RequestReplyMessage<K>, K>) instance).makeDecision(overlay, this);
+    	((Router<RequestResponseMessage<K>, K>) this.getRouter()).makeDecision(overlay, this);
     }
 
-    /**
+	/**
      * Sets a new value to the hop count counter.
      * 
      * @param value
@@ -128,14 +130,28 @@ public abstract class RequestReplyMessage<K> implements Routable<K>, Serializabl
     public void setHopCount(int value) {
         this.hopCount = value;
     }
+    
+    /**
+	 * Indicates if the specified {@code overlay} validates the constraints
+	 * which are denoted by {@code key}.
+	 * 
+	 * @param overlay
+	 *            the overlay on which the constraints are checked.
+	 * 
+	 * @return <code>true</code> if the constraints are validated,
+	 *         <code>false</code> otherwise.
+	 */
+    public boolean validatesKeyConstraints(StructuredOverlay overlay) {
+		return this.constraintsValidator.validatesKeyConstraints(overlay);
+	}
 
     /**
      * {@inheritDoc}
      */
 	@Override
 	public String toString() {
-		return "RequestReplyMessage [id=" + this.uuid + ", keyToReach="
-				+ this.keyToReach + ", hopCount=" + this.hopCount + "]";
+		return "RequestResponseMessage [id=" + this.uuid + ", constraintsValidator="
+				+ this.constraintsValidator + ", hopCount=" + this.hopCount + "]";
 	}
 
 }

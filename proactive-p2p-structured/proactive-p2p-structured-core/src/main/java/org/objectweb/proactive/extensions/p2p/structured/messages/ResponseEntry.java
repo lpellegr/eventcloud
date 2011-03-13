@@ -2,31 +2,31 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 
 /**
- * {@link ReplyEntry} is used for storing some information (e.g. the
+ * {@link ResponseEntry} is used for storing some information (e.g. the
  * number of replies expected, the number of replies received, etc.) about a
  * request which is being handled. These information are useful to create a
  * synchronization point.
  * <p>
- * Each time a new reply is received, it has to be merged with the previous one
+ * Each time a new response is received, it has to be merged with the previous one
  * before to set it as the new value associated to this entry.
  * 
  * @author lpellegr
  */
-public class ReplyEntry implements Serializable {
+public class ResponseEntry implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public enum Status {
 		/**
-		 * This status means that the number of replies expected 
+		 * This status means that the number of responses expected 
 		 * is equals to the number of replies received.
 		 */
-		FINAL_REPLY_RECEIVED, 
+		RECEIPT_COMPLETED, 
 		/**
-		 * This status means that the number of replies received 
+		 * This status means that the number of responses received 
 		 * is smaller than the number of replies expected.
 		 */
 		RECEIPT_IN_PROGRESS
@@ -35,29 +35,29 @@ public class ReplyEntry implements Serializable {
 	private Status status = Status.RECEIPT_IN_PROGRESS;
 
 	/**
-	 * The reply corresponding to the last reply which has been merged.
+	 * The response corresponding to the last response which has been merged.
 	 */
-	private Reply<?> reply;
+	private Response<?> response;
 
 	/**
 	 * The maximum number of replies expected.
 	 */
-	private final int expectedRepliesCount;
+	private final int expectedResponsesCount;
 
 	/**
 	 * The current number of responses received.
 	 */
-	private int repliesCount = 0;
+	private int responsesCount = 0;
 
 	/**
 	 * Constructs a new entry with the specified 
 	 * <code>expectedResponsesNumber</code>.
 	 * 
-	 * @param expectedRepliesCount
+	 * @param expectedResponsesCount
 	 * 				the maximum number of responses expected.
 	 */
-	public ReplyEntry(int expectedRepliesCount) {
-	    this.expectedRepliesCount = expectedRepliesCount;
+	public ResponseEntry(int expectedResponsesCount) {
+	    this.expectedResponsesCount = expectedResponsesCount;
 	}
 	
 	/**
@@ -65,8 +65,8 @@ public class ReplyEntry implements Serializable {
 	 * 
 	 * @return the current number of responses received.
 	 */
-	public int getRepliesCount() {
-		return this.repliesCount;
+	public synchronized int getResponsesCount() {
+		return this.responsesCount;
 	}
 
 	/**
@@ -74,8 +74,8 @@ public class ReplyEntry implements Serializable {
 	 * 
 	 * @return the maximum number of responses expected.
 	 */
-	public int getExpectedRepliesCount() {
-		return this.expectedRepliesCount;
+	public int getExpectedResponsesCount() {
+		return this.expectedResponsesCount;
 	}
 
     /**
@@ -83,7 +83,7 @@ public class ReplyEntry implements Serializable {
 	 * 
 	 * @return the current status of the entry.
 	 */
-	public Status getStatus() {
+	public synchronized Status getStatus() {
 		return this.status;
 	}
 
@@ -92,14 +92,14 @@ public class ReplyEntry implements Serializable {
 	 * 
 	 * @return the last message merged.
 	 */
-	public Reply<?> getReply() {
-		return this.reply;
+	public synchronized Response<?> getResponse() {
+		return this.response;
 	}
 
-	public synchronized void incrementRepliesCount(int increment) {
-		this.repliesCount += increment;
-		if (this.repliesCount == this.expectedRepliesCount) {
-			this.status = Status.FINAL_REPLY_RECEIVED;
+	public synchronized void incrementResponsesCount(int increment) {
+		this.responsesCount += increment;
+		if (this.responsesCount == this.expectedResponsesCount) {
+			this.status = Status.RECEIPT_COMPLETED;
 		}
 	}
 
@@ -109,8 +109,8 @@ public class ReplyEntry implements Serializable {
 	 * @param response 
 	 * 			the new response to associate to this entry.
 	 */
-	public synchronized void setResponse(Reply<?> response) {
-		this.reply = response;
+	public synchronized void setResponse(Response<?> response) {
+		this.response = response;
 	}
 
 	/**
@@ -118,9 +118,9 @@ public class ReplyEntry implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "[repliesCount=" 
-			   + this.repliesCount + ", expectedRepliesCount=" 
-			   + this.expectedRepliesCount + "]";
+		return this.getClass().getSimpleName() + "[responsesCount=" 
+			   + this.responsesCount + ", expectedResponsesCount=" 
+			   + this.expectedResponsesCount + "]";
 	}
 	
 }
