@@ -24,15 +24,15 @@ public class SemanticElement extends StringElement {
 	 * @param value the value that will be parsed.
 	 */
 	public SemanticElement(String value) {
-		super(SemanticHelper.parseTripleForLoadBalancing(value));
+		super(SemanticHelper.parseTripleElement(value));
 	}
 	
 	public SemanticElement(Resource value) {
-		this(SemanticHelper.parseTripleForLoadBalancing(value.toString()));
+		super(SemanticHelper.parseTripleElement(value.toString()));
 	}
 	
 	public SemanticElement(Node value) {
-		this(SemanticHelper.parseTripleForLoadBalancing(value.toString()));
+		super(SemanticHelper.parseTripleElement(value.toString()));
 	}
 	
 }

@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * This class provides a means to measure the time taken to construct RDF2Go
+ * objects in parallel.
  * 
  * @author lpellegr
  */

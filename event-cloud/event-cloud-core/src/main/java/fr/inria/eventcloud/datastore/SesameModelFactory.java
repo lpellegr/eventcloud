@@ -13,17 +13,17 @@ import org.openrdf.sail.memory.MemoryStore;
  */
 public class SesameModelFactory {
 
-    public static ModelSet createModelSet() {
-	MemoryStore store = new MemoryStore();
-	store.setPersist(false);
-	final Repository spacesRepository = new SailRepository(store);
-	try {
-	    spacesRepository.initialize();
-	} catch (RepositoryException e) {
-	    e.printStackTrace();
+	public static ModelSet createModelSet() {
+		MemoryStore store = new MemoryStore();
+		store.setPersist(false);
+		final Repository spacesRepository = new SailRepository(store);
+		try {
+			spacesRepository.initialize();
+		} catch (RepositoryException e) {
+			e.printStackTrace();
+		}
+
+		return new RepositoryModelSet(spacesRepository);
 	}
 
-	return new RepositoryModelSet(spacesRepository);
-    }
-    
 }

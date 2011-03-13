@@ -1,9 +1,13 @@
 package org.objectweb.proactive.extensions.p2p.structured.router;
 
-import java.util.HashMap;
-import java.util.Map;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
+import java.util.concurrent.ConcurrentMap;
+
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
+
+import com.google.common.collect.MapMaker;
 
 /**
  * This class stores all {@link Router}s instances in the current JVM. The class
@@ -15,44 +19,39 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMe
  */
 public class RouterStore {
 
-    private Map<Class<? extends RequestReplyMessage<?>>, Router<?, ?>> routersInstances = 
-        new HashMap<Class<? extends RequestReplyMessage<?>>, Router<?, ?>>();
-
+	private ConcurrentMap<String, Router<? extends RequestResponseMessage<?>, ?>> routers;
+	
     private static class LazyInitializer {
     	public static RouterStore instance = new RouterStore();
     }
     
     private RouterStore() {
-        
+    	this.routers = 
+    		new MapMaker()
+    		.concurrencyLevel(8)
+    		.softValues()
+//    		.maximumSize(100)
+    		.makeMap();
     }
 
-    /**
-     * Stores a {@link Router} instance for the specified type of message. If an
-     * instance already exists for the specified type of message, the operation
-     * is ignored.
-     * 
-     * @param key
-     *            the type of message to which the router is associated.
-     * @param value
-     *            the {@link Router} instance to store.
-     */
-    public void store(Class<? extends RequestReplyMessage<?>> key, Router<?, ?> value) {
-        if (!this.routersInstances.containsKey(key)) {
-            this.routersInstances.put(key, value);
-        }
-    }
-
-    /**
-     * Stores a {@link Router} instance for the specified type of message even
-     * if an instance already exists for the specified type of message.
-     * 
-     * @param key
-     *            the type of message to which the router is associated.
-     * @param value
-     *            the {@link Router} instance to store.
-     */
-    public void forceStore(Class<? extends RequestReplyMessage<?>> key, Router<?, ?> value) {
-        this.routersInstances.put(key, value);
+	/**
+	 * Stores a {@link Router} instance.
+	 * 
+	 * @param key
+	 *            the type of message to which the router is associated.
+	 * @param value
+	 *            the {@link Router} instance to store.
+	 * 
+	 * @return the instance which is already contained by the store or
+	 *         {@code null} if there were no existing instance for the specified
+	 *         {@code msgClass} and {@code validatorClass}.
+	 */
+    public Router<? extends RequestResponseMessage<?>, ?> store(
+    					Class<?> msgClass, 
+						Class<?> validatorClass,
+						Router<?, ?> instance) {
+    	return this.routers.putIfAbsent(
+    				buildKey(msgClass, validatorClass), instance);
     }
 
     /**
@@ -60,16 +59,34 @@ public class RouterStore {
      * specified type of message or <code>null</code> if there is no instance
      * available for the specified type of message.
      * 
-     * @param key
-     *            the type of message to look for.
+     * @param msgClass
+     * 
+     * @param validatorClass
+     * 
      * @return an instance of a {@link Router} previously stored for the
      *         specified type of message or <code>null</code> if there is no
      *         instance available for the specified type of message.
      */
-    public Router<?, ?> get(Class<? extends RequestReplyMessage<?>> key) {
-        return this.routersInstances.get(key);
+    public Router<? extends RequestResponseMessage<?>, ?> get(
+    						Class<?> msgClass, 
+    		  				Class<?> validatorClass) {
+        return this.routers.get(
+        			buildKey(msgClass, validatorClass));
     }
 
+    private static String buildKey(Class<?> msgClass, 
+    							   Class<?> validatorClass) {
+    	checkNotNull(msgClass);
+    	checkNotNull(validatorClass);
+
+    	if (msgClass.getCanonicalName() == null
+    			|| validatorClass.getCanonicalName() == null) {
+    		return null;
+    	} else {
+    		return msgClass.getCanonicalName().concat(
+					validatorClass.getCanonicalName());
+    	}
+    }
     /**
      * Indicates if there is an instance of a {@link Router} available for the
      * specified type of message.
@@ -79,8 +96,10 @@ public class RouterStore {
      * @return <code>true</code> if there an instance of {@link Router}
      *         available, <code>false</code> otherwise.
      */
-    public boolean contains(Class<? extends RequestReplyMessage<?>> key) {
-        return routersInstances.containsKey(key);
+    public boolean contains(Class<? extends RequestResponseMessage<?>> msgClass, 
+    						Class<? extends ConstraintsValidator<?>> validatorClass) {
+        return this.routers.get(
+        			buildKey(msgClass, validatorClass)) != null;
     }
 
     /**

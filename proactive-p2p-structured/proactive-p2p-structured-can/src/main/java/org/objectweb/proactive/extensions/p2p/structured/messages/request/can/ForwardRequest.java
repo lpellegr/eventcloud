@@ -1,23 +1,23 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.can.ForwardReply;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.AbstractRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastQueryRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 /**
- * A <code>ForwardRequest</code> is a query message which may be in
+ * A <code>ForwardRequest</code> is a query message which may be used in
  * order to find a peer which manages a specified coordinate on a CAN 
  * structured peer-to-peer network.
  * 
  * @author lpellegr
  */
-public class ForwardRequest extends AbstractRequest<Coordinate> {
+public class ForwardRequest extends Request<Coordinate> {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,7 +28,7 @@ public class ForwardRequest extends AbstractRequest<Coordinate> {
     private Coordinate senderCoordinate;
 
     public ForwardRequest(Coordinate coordinateToReach) {
-        super(coordinateToReach);
+        super(new UnicastConstraintsValidator(coordinateToReach));
     }
 
     /**
@@ -46,8 +46,7 @@ public class ForwardRequest extends AbstractRequest<Coordinate> {
      * {@inheritDoc}
      */
     public Router<ForwardRequest, Coordinate> getRouter() {
-        return new UnicastQueryRouter<ForwardRequest>(
-                    new UnicastConstraintsValidator());
+        return new UnicastRequestRouter<ForwardRequest>();
     }
 
     /**
@@ -63,8 +62,8 @@ public class ForwardRequest extends AbstractRequest<Coordinate> {
     /**
      * {@inheritDoc}
      */
-    public AbstractReply<Coordinate> createResponseMessage() {
-        return new ForwardReply(this);
+    public Response<Coordinate> createResponse() {
+        return new ForwardResponse(this);
     }
 
 }

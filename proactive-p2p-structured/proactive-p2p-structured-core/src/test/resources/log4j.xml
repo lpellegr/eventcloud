@@ -8,8 +8,11 @@
 		</layout>
 	</appender>
 
-	<logger name="proactive">
+	<logger name="com.ontotext">
 		<level value="off" />
+	</logger>
+	<logger name="proactive">
+		<level value="info" />
 	</logger>
 	<logger name="org.objectweb.proactive.extensions.p2p.structured">
 		<level value="debug" />
