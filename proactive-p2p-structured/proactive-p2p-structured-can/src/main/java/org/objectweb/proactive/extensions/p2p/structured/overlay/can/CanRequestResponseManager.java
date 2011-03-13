@@ -3,13 +3,13 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestReplyManager;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 
 /**
  * 
  * @author lpellegr
  */
-public class CanRequestReplyManager extends RequestReplyManager {
+public class CanRequestResponseManager extends RequestResponseManager {
 
 	private static final long serialVersionUID = 1L;
 

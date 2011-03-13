@@ -1,16 +1,17 @@
-package org.objectweb.proactive.extensions.p2p.structured.messages.reply;
+package org.objectweb.proactive.extensions.p2p.structured.messages.response;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * An <code>AbstractReply</code> is an responses associated to an 
- * {@link Request}. This class contains several information
- * common to all replies like for example the latency, the hop count, etc.
+ * A <code>Response</code> is the response message associated to a
+ * {@link Request}. This class contains several information common to all
+ * responses like for example the latency, the hop count, etc.
  * 
  * @author lpellegr
  */
-public abstract class Reply<K> extends RequestReplyMessage<K> {
+public abstract class Response<K> extends RequestResponseMessage<K> {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,18 +33,18 @@ public abstract class Reply<K> extends RequestReplyMessage<K> {
      * 
      * @param response
      *            the response to merge with.
-     * @param keyToReach
-     *            the key used in order to route the response to it recipient.
+     * @param validator
+     * 			the constraints validator used for routing decisions.
      */
-    public Reply(Reply<K> response, K keyToReach) {
-        super(response.getId(), keyToReach);
+    public Response(Response<K> response, ConstraintsValidator<K> validator) {
+        super(response.getId(), validator);
         this.dispatchTimestamp = response.getDispatchTimestamp();
         this.outboundHopCount = response.getOutboundHopCount();
         super.incrementHopCount(response.getInboundHopCount());
     }
 
     /**
-     * Constructs a new reply with the specified <code>request</code>
+     * Constructs a new response with the specified <code>request</code>
      * and <code>keyToReach</code>.
      * 
      * @param request
@@ -51,8 +52,8 @@ public abstract class Reply<K> extends RequestReplyMessage<K> {
      * @param keyToReach
      *            the key used in order to route the response to it recipient.
      */
-    public Reply(Request<K> request, K keyToReach) {
-        super(request.getId(), keyToReach);
+    public Response(Request<K> request, ConstraintsValidator<K> validator) {
+        super(request.getId(), validator);
         this.dispatchTimestamp = request.getDispatchTimestamp();
         this.outboundHopCount = request.getHopCount();
     }
@@ -94,10 +95,10 @@ public abstract class Reply<K> extends RequestReplyMessage<K> {
     }
 
     /**
-     * Returns the number of peers traversed by a reply
+     * Returns the number of peers traversed by a response
      * between its source and its destination.
      * 
-     * @return the number of peers traversed by a reply
+     * @return the number of peers traversed by a response
      * 		   between its source and its destination.
      */
     public int getInboundHopCount() {
@@ -105,10 +106,10 @@ public abstract class Reply<K> extends RequestReplyMessage<K> {
     }
 
     /**
-     * Returns the number of peers traversed by a request 
+     * Returns the number of peers traversed by a response 
      * between its source and its destination.
      * 
-     * @return the number of peers traversed by a request
+     * @return the number of peers traversed by a response 
      * 		   between its source and its destination.
      */
     public int getOutboundHopCount() {
@@ -158,7 +159,7 @@ public abstract class Reply<K> extends RequestReplyMessage<K> {
 	 */
     @Override
 	public String toString() {
-		return "AbstractReply [id=" + super.getId() + ", dispatchTimestamp="
+		return "Response [id=" + super.getId() + ", dispatchTimestamp="
 				+ this.dispatchTimestamp + ", deliveryTimestamp="
 				+ this.deliveryTimestamp + ", inboundHopCount="
 				+ super.getHopCount() + ", outboundHopCount="
