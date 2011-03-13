@@ -5,19 +5,17 @@ import java.util.Iterator;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ReplyEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.can.AnycastReply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestReplyManager;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +29,15 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Router<AnycastRequest, Coordinate> {
 
-    private static final transient Logger logger = LoggerFactory.getLogger(AnycastRequestRouter.class);
+    private static final Logger logger = LoggerFactory.getLogger(AnycastRequestRouter.class);
 
-    public AnycastRequestRouter(ConstraintsValidator<Coordinate> validator) {
-        super(validator);
+    public AnycastRequestRouter() {
+        super();
     }
     
     /**
      * This method is called just before the next routing step when 
-     * the request reach a peer which validates the routing constraints .
+     * the request reach a peer which validates the routing constraints.
      * 
      * @param overlay
      *            the {@link AbstractCanOverlay} of the peer which validates
@@ -47,38 +45,38 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
      * 
      * @param request the message which is handled.
      */
-    public abstract void onPeerWhichValidatesKeyConstraints(AbstractCanOverlay overlay, AnycastRequest request);
+    public abstract void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay, AnycastRequest request);
 
     /**
      * {@inheritDoc}
      */
     public void makeDecision(StructuredOverlay overlay, AnycastRequest request) {
     	AbstractCanOverlay canOverlay = ((AbstractCanOverlay) overlay);
-    	CanRequestReplyManager messagingManager = (CanRequestReplyManager) canOverlay.getRequestReplyManager();
+    	CanRequestResponseManager messagingManager = (CanRequestResponseManager) canOverlay.getRequestResponseManager();
     	
 		// the current overlay has already received the request
     	if (messagingManager.hasReceivedRequest(request.getId())) {
-			request.getAnycastRoutingList().removeLast().getPeerStub().route(request.createResponseMessage());
+			request.getAnycastRoutingList().removeLast().getPeerStub().route(request.createResponse());
 			if (logger.isDebugEnabled()) {
 				logger.debug(
 						"Request " + request.getId() + " has reach peer " 
 						+ canOverlay + " which has already received it");
 			}
 		} else {
-			messagingManager.markRequestAsReceived(request.getId());
-			
 			// the current overlay validates the constraints
-			if (super.validatesKeyConstraints(canOverlay, request.getKeyToReach())) {
+			if (request.validatesKeyConstraints(canOverlay)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(
 							"Request " + request.getId() + " is on peer " 
-							+ overlay + " which validates constraints");
+							+ overlay + " which validates constraints " + request.getKey());
 				}
 				
-				this.onPeerWhichValidatesKeyConstraints(canOverlay, request);
+				this.onPeerValidatingKeyConstraints(canOverlay, request);
 				
+				messagingManager.markRequestAsReceived(request.getId());
+
 				// sends the message to the other neighbors which validates the constraints
-				this.performHandle(overlay, request);
+				this.doHandle(overlay, request);
 			} else {
 				this.route(overlay, request);
 			}
@@ -90,69 +88,44 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
 	 * <code>overlay</code> validates the constraints. The next step is to
 	 * propagate the request to the neighbors which validates the constraints.
 	 */
-    protected void performHandle(final StructuredOverlay overlay, final AnycastRequest request) {
+    protected void doHandle(final StructuredOverlay overlay, final AnycastRequest request) {
     	AbstractCanOverlay canOverlay = ((AbstractCanOverlay) overlay);
     	
         // the current peer has no neighbor: this means that the query can 
         // only be handled by itself
         if (canOverlay.getNeighborTable().size() == 0) {
             super.onDestinationReached(overlay, request);
-            overlay.getReplyEntries().put(
-            		request.getId(), new ReplyEntry(1));
-            AnycastReply response = request.createResponseMessage();
-//            response.queryDataStoreAndStoreData(overlay);
+            overlay.getResponseEntries().put(request.getId(), new ResponseEntry(1));
+            AnycastResponse response = request.createResponse();
             response.incrementHopCount(1);
             overlay.route(response);
         } else {
         	NeighborTable neighborsToSendTo = getNeighborsToSendTo(overlay, request);
-        	
-			// neighborsToSendTo equals 0 means that we don't have to route the
-			// query anymore: we are on a leaf and the reply must be returned;
+
+        	// neighborsToSendTo equals 0 means that we don't have to route the
+			// query anymore: we are on a leaf and the response must be returned;
 			if (neighborsToSendTo.size() == 0) {
 				super.onDestinationReached(overlay, request);
-				AnycastReply response = 
-					(AnycastReply) request.createResponseMessage();
-//				response.queryDataStoreAndStoreData(overlay);
+				AnycastResponse response = 
+					(AnycastResponse) request.createResponse();
 				response.incrementHopCount(1);
-
-				if (request.getAnycastRoutingList().size() > 0) {
-					response.getAnycastRoutingList()
-						.removeLast().getPeerStub().route(response);
-				} else {
-					overlay.getReplyEntries().put(request.getId(), new ReplyEntry(1));
-					overlay.route(response);
-				}
+				overlay.getResponseEntries().put(response.getId(), new ResponseEntry(1));
+				overlay.route(response);
 			}
 			// neighborsToSendTo > 0 means we have to perform many send
 			// operation and the current peer must await for the number 
 			// of responses sent.
 			else {
 				// adds entry containing the number of responses awaited
-				final ReplyEntry entry = 
-					new ReplyEntry(neighborsToSendTo.size());
+				final ResponseEntry entry = 
+					new ResponseEntry(neighborsToSendTo.size());
 
-				overlay.getReplyEntries().put(request.getId(), entry);
-
-//				FutureTask<Object> task = new FutureTask<Object>(new Callable<Object>() {
-//					@Override
-//					public Object call() throws Exception {
-//						return request.createResponseMessage().queryDataStore(overlay);
-//					}
-//				});
-				
-//				// memorizes the task that query the datastore
-//				((AbstractCanOverlay) overlay.getRequestReplyManager())
-//					.getPendingQueries().put(request.getId(), task);
-				
-				// performs query datastore while query is sent to neighbors in
-				// order to overlap the network communications.
-//				new Thread(task).start();
+				overlay.getResponseEntries().put(request.getId(), entry);
 
 				// constructs the routing list used by responses for return trip
 				request.getAnycastRoutingList().add(
 						new AnycastRoutingEntry(overlay.getId(),
 								overlay.getRemotePeer()));
-				request.incrementHopCount(1);
 
 				for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
 					for (int direction = 0; direction < 2; direction++) {
@@ -163,6 +136,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
 					}
 				}
 			}
+						
 			if (logger.isDebugEnabled()) {
 				logger.debug("Request " + request.getId() + " has been sent to " 
 								+ neighborsToSendTo.size() + " neighbor(s) from " + overlay);
@@ -189,8 +163,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
                      * remote call.
                      */
 					if (entryCommingFromSender == null
-							&& this.validatesKeyConstraints(msg,
-									entry.getZone())) {
+							&& msg.validatesKeyConstraints(entry.getZone())) {
 						neighborsToSendTo.add(entry, dimension, direction);
 					}
 				}
@@ -198,19 +171,6 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
 		}
         
         return neighborsToSendTo;
-    }
-    
-    private boolean validatesKeyConstraints(AnycastRequest msg, Zone zone) {
-        for (int i = 0; i < msg.getKeyToReach().size(); i++) {
-            // if coordinate is null we skip the test
-            if (msg.getKeyToReach().getElement(i) != null) {
-                // the specified overlay does not contains the key
-                if (zone.contains(i, msg.getKeyToReach().getElement(i)) != 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
 	/**
@@ -223,7 +183,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
 	 * @param request
 	 *            the message to route.
 	 */
-    protected void performRoute(StructuredOverlay overlay, AnycastRequest request) {
+    protected void doRoute(StructuredOverlay overlay, AnycastRequest request) {
         AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
 
 		short dimension = 0;
@@ -231,7 +191,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
 
         // finds the dimension on which the key to reach is not contained
         for (; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            direction = overlayCAN.contains(dimension, request.getKeyToReach().getElement(dimension));
+            direction = overlayCAN.contains(dimension, request.getKey().getElement(dimension));
 
             if (direction == -1) {
                 direction = NeighborTable.INFERIOR_DIRECTION;
@@ -243,20 +203,20 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
         }
 
         // selects one neighbor in the dimension and the direction previously affected
-        NeighborEntry neighborChosen = overlayCAN.nearestNeighbor(request.getKeyToReach(), dimension, direction);
+        NeighborEntry neighborChosen = overlayCAN.nearestNeighbor(request.getKey(), dimension, direction);
 
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "The message is routed to a neigbour because the current peer "
                     + "managing " + overlay + " does not contains the key to reach ("
-                    + request.getKeyToReach() + "). Neighbor is selected from dimension " 
+                    + request.getKey() + "). Neighbor is selected from dimension " 
                     + dimension + " and direction " + direction + ": " + neighborChosen);
         }
 
         // sends the message to it
         try {
-            overlay.getReplyEntries().put(
-            		request.getId(), new ReplyEntry(1));
+            overlay.getResponseEntries().put(
+            		request.getId(), new ResponseEntry(1));
 			request.getAnycastRoutingList().add(
 					new AnycastRoutingEntry(
 							overlay.getId(),

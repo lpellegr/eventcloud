@@ -33,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOpe
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestReplyManager;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Element;
@@ -78,9 +78,9 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *            the local peer reference to associate to this overlay.
      * 
      * @param queryManager
-     *            the {@link RequestReplyManager} to use.
+     *            the {@link RequestResponseManager} to use.
      */
-    public AbstractCanOverlay(Peer localPeer, RequestReplyManager queryManager) {
+    public AbstractCanOverlay(Peer localPeer, RequestResponseManager queryManager) {
         super(localPeer, queryManager);
     }
 
@@ -88,9 +88,9 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * Constructs a new overlay with the specified <code>queryManager</code>.
      * 
      * @param queryManager
-     *            the {@link RequestReplyManager} to use.
+     *            the {@link RequestResponseManager} to use.
      */
-    public AbstractCanOverlay(RequestReplyManager queryManager) {
+    public AbstractCanOverlay(RequestResponseManager queryManager) {
         super(queryManager);
     }
 
@@ -849,7 +849,11 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * {@inheritDoc}
      */
     public String toString() {
-        return this.zone.toString();
+    	if (this.zone == null) {
+    		return this.getId().toString();
+    	} else {
+    		return this.zone.toString();
+    	}
     }
 
     /**
@@ -957,11 +961,17 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     /*
      * Specific implementation of ProActive concepts.
      */
+    @Override
     public void initActivity(Body body) {
         // The following methods have to be served as immediate
         // services in order to allow concurrent queries
         PAActiveObject.setImmediateService("send");
         PAActiveObject.setImmediateService("route");
+    }
+    
+    @Override
+    public void endActivity(Body body) {
+    	
     }
 
     public void runActivity(Body body) {

@@ -2,7 +2,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestReplyManager;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 
 /**
@@ -14,7 +14,7 @@ public class BasicCanOverlay extends AbstractCanOverlay {
 	private static final long serialVersionUID = 1L;
 
 	public BasicCanOverlay() {
-		super(new CanRequestReplyManager() {
+		super(new CanRequestResponseManager() {
 			private static final long serialVersionUID = 1L;
 		});
 	}

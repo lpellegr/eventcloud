@@ -192,7 +192,7 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
      * @throws StructuredP2PException 
      */
     public boolean addOnNetwork(Peer remotePeer) {
-        if (remotePeer.getType() != this.type) {
+    	if (remotePeer.getType() != this.type) {
             throw new IllegalArgumentException(
             		"Illegal Peer type. This tracker manages a "
                     + this.type + " network");

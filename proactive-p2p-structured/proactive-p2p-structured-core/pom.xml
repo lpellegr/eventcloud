@@ -26,6 +26,11 @@
 			<version>5.0.1</version>
 		</dependency>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>r08</version>
+		</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
@@ -46,6 +51,7 @@
 						<phase>compile</phase>
 						<configuration>
 							<includes>
+								<include>org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation</include>
 								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.Peer</include>
 								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker</include>
 							</includes>

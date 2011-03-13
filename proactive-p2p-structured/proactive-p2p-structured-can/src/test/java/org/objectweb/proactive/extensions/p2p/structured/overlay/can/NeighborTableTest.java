@@ -44,16 +44,16 @@ public class NeighborTableTest extends CANNetworkInitializer {
 
         BasicCanOverlay overlay = 
             ((BasicCanOverlay) PAFuture.getFutureValue(
-                    this.peer.getStructuredOverlay()));
+                    this.peer.getOverlay()));
         overlay.getNeighborTable().addAll(neighborTable);
-        this.peer.setStructuredOverlay(overlay);
+        this.peer.setOverlay(overlay);
 
         Assert.assertTrue(
                 ((BasicCanOverlay) PAFuture.getFutureValue(
-                        this.peer.getStructuredOverlay())).getNeighborTable().contains(
+                        this.peer.getOverlay())).getNeighborTable().contains(
                                 firstPeer.getId(), 0, 1));
         Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(
-                this.peer.getStructuredOverlay())).getNeighborTable().contains(
+                this.peer.getOverlay())).getNeighborTable().contains(
                         secondPeer.getId(), 0, 0));
     }
 

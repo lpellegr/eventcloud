@@ -11,8 +11,14 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
  * 
  * @author lpellegr
  */
-public interface AnycastConstraintsValidator<K> extends ConstraintsValidator<K> {
+public abstract class AnycastConstraintsValidator<K> extends ConstraintsValidator<K> {
 
-    abstract public boolean validatesKeyConstraints(Zone zone, K key);
+	private static final long serialVersionUID = 1L;
+
+	public AnycastConstraintsValidator(K key) {
+		super(key);
+	}
+
+	abstract public boolean validatesKeyConstraints(Zone zone);
 
 }

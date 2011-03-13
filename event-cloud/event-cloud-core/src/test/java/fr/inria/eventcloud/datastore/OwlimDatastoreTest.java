@@ -12,6 +12,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.objectweb.proactive.extensions.p2p.structured.util.SystemUtil;
 import org.ontoware.aifbcommons.collection.ClosableIterable;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.QueryResultTable;
@@ -21,7 +22,6 @@ import org.ontoware.rdf2go.model.impl.StatementImpl;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 
-import at.sti2.semanticspaces.api.exceptions.SemanticSpaceException;
 import fr.inria.eventcloud.util.RDF2GoBuilder;
 import fr.inria.eventcloud.util.SemanticHelper;
 
@@ -36,9 +36,9 @@ public class OwlimDatastoreTest {
     private static SemanticDatastore datastore;
 
     private static final ExecutorService executor = 
-        Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 4);
+        Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
 
-    private static final URI spaceURI = RDF2GoBuilder.createURI("http://www.inria.fr");
+    private static final URI context = RDF2GoBuilder.createURI("http://www.inria.fr");
 
     private static final int CONCURRENT_RANDOM_OPERATIONS = 500;
     
@@ -63,7 +63,7 @@ public class OwlimDatastoreTest {
                 public void run() {
                     try {
                         datastore.addStatement(
-                                spaceURI, 
+                                context, 
                                 SemanticHelper.generateRandomStatement());
                     } finally {
                         doneSignal.countDown();
@@ -77,8 +77,8 @@ public class OwlimDatastoreTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(CONCURRENT_ADD_OPERATIONS, sparqlConstruct(spaceURI,
-                "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH<" + spaceURI + "> { ?s ?p ?o } . }").size());
+        Assert.assertEquals(CONCURRENT_ADD_OPERATIONS, sparqlConstruct(context,
+                "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH<" + context + "> { ?s ?p ?o } . }").size());
     }
 
     @Test
@@ -90,10 +90,10 @@ public class OwlimDatastoreTest {
                     try {
                         if (ProActiveRandom.nextFloat() > 0.5) {
                             datastore.addStatement(
-                                    spaceURI, 
+                                    context, 
                                     SemanticHelper.generateRandomStatement());
                         } else {
-                            datastore.sparqlConstruct(spaceURI, "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
+                            datastore.sparqlConstruct(context, "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
                         }
                     } finally {
                         doneSignal.countDown();
@@ -112,11 +112,11 @@ public class OwlimDatastoreTest {
     
     @Test
     public void testRemoveAllStatements() {
-        datastore.removeAll(spaceURI);
+        datastore.removeAll(context);
 
         Assert.assertEquals(0, 
-                sparqlConstruct(spaceURI,
-                "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH<" + spaceURI + "> { ?s ?p ?o } . }").size());
+                sparqlConstruct(context,
+                "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH<" + context + "> { ?s ?p ?o } . }").size());
     }
     
     @Test
@@ -132,59 +132,58 @@ public class OwlimDatastoreTest {
     
     public void testAddStatementsSingleThread() {
         for (int i = 0; i < statementsForSingleThread.length; i++) {
-            try {
-                datastore.addStatement(spaceURI, RDF2GoBuilder.toStatement(
-                        statementsForSingleThread[i][0], statementsForSingleThread[i][1],
+        	datastore.addStatement(
+        			context, 
+        			RDF2GoBuilder.createStatementInternal(
+                        statementsForSingleThread[i][0], 
+                        statementsForSingleThread[i][1],
                         statementsForSingleThread[i][2]));
-            } catch (SemanticSpaceException e) {
-                e.printStackTrace();
-            }
         }
-        Assert.assertEquals(statementsForSingleThread.length, sparqlConstruct(spaceURI,
-                "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH<" + spaceURI + "> { ?s ?p ?o } . }").size());
+        Assert.assertEquals(statementsForSingleThread.length, sparqlConstruct(context,
+                "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH<" + context + "> { ?s ?p ?o } . }").size());
     }
     
     public void testSparqlConstructQueries() {
         Assert.assertEquals(3, sparqlConstruct(
-                spaceURI,
+                context,
                 "CONSTRUCT { ?s <" + statementsForSingleThread[0][1] + "> ?o } WHERE { GRAPH<"
-                        + spaceURI + "> { ?s <" + statementsForSingleThread[0][1] + "> ?o } . }")
+                        + context + "> { ?s <" + statementsForSingleThread[0][1] + "> ?o } . }")
                 .size());
 
         Assert.assertEquals(2, sparqlConstruct(
-                spaceURI,
+                context,
                 "CONSTRUCT { ?s ?p <" + statementsForSingleThread[0][2] + "> } WHERE { GRAPH<"
-                        + spaceURI + "> { ?s ?p <" + statementsForSingleThread[0][2] + "> } . }")
+                        + context + "> { ?s ?p <" + statementsForSingleThread[0][2] + "> } . }")
                 .size());
 
         Assert.assertEquals(1, sparqlConstruct(
-                spaceURI,
+                context,
                 "CONSTRUCT { <" + statementsForSingleThread[2][0] + "> ?p ?o } WHERE { GRAPH<"
-                        + spaceURI + "> { <" + statementsForSingleThread[2][0] + "> ?p ?o } . }")
+                        + context + "> { <" + statementsForSingleThread[2][0] + "> ?p ?o } . }")
                 .size());
     }
 
     public void testAskQueryWithData() {
-        Assert.assertEquals(true, datastore.sparqlAsk(spaceURI, "ASK { GRAPH<" + spaceURI
+        Assert.assertEquals(true, datastore.sparqlAsk(context, "ASK { GRAPH<" + context
                 + "> { ?s ?p ?o } . }"));
     }
 
     public void testRemoveStatement() {
-        datastore.removeStatement(spaceURI, 
-                new StatementImpl(spaceURI, 
+        datastore.removeStatement(context, 
+                new StatementImpl(context, 
                         new URIImpl(statementsForSingleThread[0][0]),
                         new URIImpl(statementsForSingleThread[0][1]), 
                         new URIImpl(statementsForSingleThread[0][2])));
 
         Assert.assertEquals(statementsForSingleThread.length - 1, 
-                sparqlConstruct(spaceURI,
-                        "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH<" + spaceURI + "> { ?s ?p ?o } . }").size());
+                sparqlConstruct(context,
+                        "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH<" + context + "> { ?s ?p ?o } . }").size());
     }
 
     public void testAskQueryWithoutData() {
-        datastore.removeAll(spaceURI);
+        datastore.removeAll(context);
         
-        Assert.assertEquals(false, datastore.sparqlAsk(spaceURI, "ASK { GRAPH<" + spaceURI
+        Assert.assertEquals(false, datastore.sparqlAsk(context, "ASK { GRAPH<" + context
                 + "> { ?s ?p ?o} . }"));
     }
 
@@ -202,26 +201,23 @@ public class OwlimDatastoreTest {
         statementsForSingleThread[2][2] = "http://z";
 
         for (int i = 0; i < statementsForSingleThread.length; i++) {
-            datastore.addStatement(spaceURI, new StatementImpl(spaceURI, new URIImpl(
+            datastore.addStatement(context, new StatementImpl(context, new URIImpl(
                     statementsForSingleThread[i][0]), new URIImpl(
                     statementsForSingleThread[i][1]), new URIImpl(
                     statementsForSingleThread[i][2])));
         }
 
-        Assert
-                .assertEquals(
-                        1,
-                        sparqlConstruct(
-                                spaceURI,
-                                "CONSTRUCT { ?s ?p ?o }  WHERE { GRAPH<"
-                                        + spaceURI
-                                        + "> { ?s ?p ?o . FILTER ( str(?s) >= \"http://d\" && str(?s) < \"http://z\" && str(?p) >= \"http://b\" && str(?p) < \"http://y\" && str(?o) >= \"http://f\" && str(?o) < \"http://z\").}}")
-                                .size());
+        Assert.assertEquals(1, 
+        		sparqlConstruct(context,
+        				"CONSTRUCT { ?s ?p ?o }  WHERE { GRAPH<" + context
+        				+ "> { ?s ?p ?o . FILTER ( str(?s) >= \"http://d\" && str(?s) < " 
+        				+ "\"http://z\" && str(?p) >= \"http://b\" && str(?p) < \"http://y\" " 
+        				+ "&& str(?o) >= \"http://f\" && str(?o) < \"http://z\").}}").size());
     }
 
     public void testSparqlSelect() {
         QueryResultTable qtr = null;
-        qtr = datastore.sparqlSelect(spaceURI, "SELECT ?s WHERE { GRAPH<" + spaceURI
+        qtr = datastore.sparqlSelect(context, "SELECT ?s WHERE { GRAPH<" + context
                 + "> { ?s ?p ?o } . }");
 
         /*

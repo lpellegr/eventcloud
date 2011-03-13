@@ -8,8 +8,8 @@ import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.can.LookupReply;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
@@ -27,11 +27,11 @@ public class UnicastLookupRequestTest extends CANNetworkInitializer {
 
     @Test
     public void testLookupQuery() {
-        LookupReply response = null;
+        LookupResponse response = null;
         Peer targetedPeer = super.getRandomPeer();
         
         try {
-            response = (LookupReply) PAFuture.getFutureValue(
+            response = (LookupResponse) PAFuture.getFutureValue(
             				super.get(0).send(new LookupRequest(
             						CanOperations.getIdAndZoneResponseOperation(
             								targetedPeer).getPeerZone().getLowerBound())));

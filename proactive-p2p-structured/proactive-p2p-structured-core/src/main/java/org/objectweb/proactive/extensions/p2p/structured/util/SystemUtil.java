@@ -105,5 +105,18 @@ public final class SystemUtil {
 						Runtime.getRuntime().availableProcessors() 
 							* systemLoad * (1 + ratio));
 	}
+
+	/**
+	 * Returns {@link #getOptimalNumberOfThreads(double, double)} with
+	 * respectively parameters {@code systemLoad} equals to {@code 1} and
+	 * {@code ratio} equals to {@code 0}.
+	 * 
+	 * @return {@link #getOptimalNumberOfThreads(double, double)} with
+	 *         respectively parameters {@code systemLoad} equals to {@code 1}
+	 *         and {@code ratio} equals to {@code 0}.
+	 */
+	public static int getOptimalNumberOfThreads() {
+		return getOptimalNumberOfThreads(1, 0);
+	}
 	
 }

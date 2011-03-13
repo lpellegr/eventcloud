@@ -2,33 +2,34 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.request;
 
 import java.util.UUID;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestReplyMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.Reply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * An <code>AbstractRequest</code> is an abstraction of a query that can be sent
+ * A <code>Request</code> is an abstraction of a query that can be sent
  * on a structured peer-to-peer network in order to find some data by a key
  * which is an object of type <code>K</code>. In response an object of type
- * {@link Reply} is returned with the desired data.
+ * {@link Response} is returned.
  * <p>
- * A request is performed step by step by using one-way mechanism. as a
+ * A request is performed step by step by using one-way mechanism. As a
  * consequence of it, we can't say when the response will be returned. Suppose
  * that the peer A is sending a query in order to reach the peer B managing the
  * key <code>keyToReach</code>. The first step consists in setting the
  * <code>keyToReach</code> to <code>keyToFound</code>. After that the query is
  * sent step by step until the peer managing the <code>keyToReach</code> is
  * found. When it is found, the <code>keyToReach</code> change for
- * <code>keyFromSender</code>. At this time the reply is routed to the sender in
+ * <code>keyFromSender</code>. At this time the response is routed to the sender in
  * the opposite direction without necessarily using the same path. This last
  * point depends on the concrete type of query which can implement the desired
  * behavior.
  * 
  * @author lpellegr
  * 
- * @see RequestReplyMessage
- * @see Reply
+ * @see RequestResponseMessage
+ * @see Response
  */
-public abstract class Request<K> extends RequestReplyMessage<K> {
+public abstract class Request<K> extends RequestResponseMessage<K> {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,11 +41,11 @@ public abstract class Request<K> extends RequestReplyMessage<K> {
     /**
      * Constructs a new query message with the specified <code>keyToReach</code>.
      * 
-     * @param keyToReach
-     *            the key to reach.
+     * @param validator
+     * 			the constraints validator used for routing decisions.
      */
-    public Request(K keyToReach) {
-        super(UUID.randomUUID(), keyToReach);
+    public Request(ConstraintsValidator<K> validator) {
+        super(UUID.randomUUID(), validator);
     }
 
     /**
@@ -53,24 +54,24 @@ public abstract class Request<K> extends RequestReplyMessage<K> {
      * 
      * @param uuid
      *            the universally unique identifier associated to the query.
-     * @param keyToReach
-     *            the key to reach.
+     * @param validator
+     * 			the constraints validator used for routing decisions.
      * @param dispatchTimestamp
      *            the dispatch timestamp of the query.
      */
-    public Request(UUID uuid, K keyToReach, long dispatchTimestamp) {
-        super(uuid, keyToReach);
+    public Request(UUID uuid, ConstraintsValidator<K> validator, long dispatchTimestamp) {
+        super(uuid, validator);
         this.dispatchTimestamp = dispatchTimestamp;
     }
 
     /**
-     * Creates an {@link Reply} in accordance to the type of
+     * Creates an {@link Response} in accordance to the type of
      * the current {@link Request}.
      * 
-     * @return an {@link Reply} in accordance to the type of
+     * @return an {@link Response} in accordance to the type of
      * the current {@link Request}.
      */
-    public abstract Reply<?> createResponseMessage();
+    public abstract Response<?> createResponse();
 
     /**
      * {@inheritDoc}
