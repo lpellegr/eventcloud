@@ -37,10 +37,10 @@ public class RouterStore {
 	/**
 	 * Stores a {@link Router} instance.
 	 * 
-	 * @param key
+	 * @param msgClass
 	 *            the type of message to which the router is associated.
-	 * @param value
-	 *            the {@link Router} instance to store.
+	 * @param validatorClass
+	 *            the validator class used by the router.
 	 * 
 	 * @return the instance which is already contained by the store or
 	 *         {@code null} if there were no existing instance for the specified
@@ -59,9 +59,10 @@ public class RouterStore {
      * specified type of message or <code>null</code> if there is no instance
      * available for the specified type of message.
      * 
-     * @param msgClass
-     * 
-     * @param validatorClass
+	 * @param msgClass
+	 *            the type of message to which the router is associated.
+	 * @param validatorClass
+	 *            the validator class used by the router.
      * 
      * @return an instance of a {@link Router} previously stored for the
      *         specified type of message or <code>null</code> if there is no
@@ -91,8 +92,11 @@ public class RouterStore {
      * Indicates if there is an instance of a {@link Router} available for the
      * specified type of message.
      * 
-     * @param key
-     *            the type of message to look for.
+	 * @param msgClass
+	 *            the type of message to which the router is associated.
+	 * @param validatorClass
+	 *            the validator class used by the router.
+	 *            
      * @return <code>true</code> if there an instance of {@link Router}
      *         available, <code>false</code> otherwise.
      */

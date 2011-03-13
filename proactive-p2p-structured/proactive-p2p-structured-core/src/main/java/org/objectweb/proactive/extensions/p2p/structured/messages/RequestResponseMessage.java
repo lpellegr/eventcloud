@@ -39,9 +39,8 @@ public abstract class RequestResponseMessage<K> implements Routable<K>, Serializ
      * @param identifier
      *            the unique identifier associated to the message.
      *            
-     * @param keyToReach
-     *            the key to reach (i.e. routes until reaching the {@link Peer}
-     *            managing this key).
+     * @param constraintsValidator
+     *            the constraints validator to use for routing the message.
      */
     public RequestResponseMessage(UUID identifier, ConstraintsValidator<K> constraintsValidator) {
         this.uuid = identifier;

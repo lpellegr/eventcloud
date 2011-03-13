@@ -13,12 +13,10 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
 import fr.inria.eventcloud.tracker.SemanticCanTracker;
-import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
  * SemanticFactory can be used to create new instances of Semantic objects like
- * for example {@link SemanticTracker}, {@link SemanticSpaceCanOverlay},
- * {@link SemanticSpaceChordOverlay} or {@link SemanticPeer}.
+ * for example {@link SemanticCanOverlay} or {@link SemanticPeer}.
  * 
  * @author lpellegr
  */
@@ -128,7 +126,7 @@ public class SemanticFactory {
 	 *            parallel.
 	 * @param trackers
 	 *            the trackers which serve as entry point.
-	 * @return the {@link SemanticSpaceOverlayKernel}s created.
+	 * @return the {@link SemanticPeer} created.
 	 */
     public static SemanticPeer[] newActiveSemanticCanPeersInParallel(
     									int number, final SemanticCanTracker... trackers) {

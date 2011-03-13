@@ -44,7 +44,7 @@ public class EventCloudInitializer extends SemanticNetworkInitializer<SemanticCa
 	 * Setup a new space network composed of the specified number of peers of
 	 * type CAN.
 	 * 
-	 * @param nbPeersCAN
+	 * @param nbCanPeers
 	 *            the number of peers to add on the network.
 	 */
 	public void setUpNetworkOnLocalMachine(int nbCanPeers) {

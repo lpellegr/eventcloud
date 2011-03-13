@@ -3,6 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**

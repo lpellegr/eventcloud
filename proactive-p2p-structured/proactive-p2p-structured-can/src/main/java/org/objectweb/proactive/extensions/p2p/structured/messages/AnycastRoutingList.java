@@ -4,13 +4,13 @@ import java.util.LinkedList;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
- * List used by {@link AnycastRequest} and
- * {@link AnycastResponseMessage} to store {@link AnycastRoutingEntry}. It
- * contains an {@link AnycastRoutingEntry} for each {@link Peer} met while
- * routing an {@link AnycastRequest}.
+ * List used by {@link AnycastRequest} and {@link AnycastResponse} to store
+ * {@link AnycastRoutingEntry}. It contains an {@link AnycastRoutingEntry} for
+ * each {@link Peer} met while routing an {@link AnycastRequest}.
  * 
  * @author lpellegr
  */
