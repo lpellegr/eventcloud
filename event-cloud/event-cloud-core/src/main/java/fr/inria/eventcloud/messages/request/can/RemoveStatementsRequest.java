@@ -1,17 +1,17 @@
 package fr.inria.eventcloud.messages.request.can;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.URI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.kernel.operations.datastore.RemoveStatementOperation;
-import fr.inria.eventcloud.messages.reply.can.RemoveStatementsReply;
-import fr.inria.eventcloud.overlay.can.SemanticSpaceCanOverlay;
-import fr.inria.eventcloud.router.can.AnycastRequestRouter;
+import fr.inria.eventcloud.messages.response.can.RemoveStatementsResponse;
+import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
 import fr.inria.eventcloud.util.SemanticHelper;
-import fr.inria.eventcloud.validator.can.RemoveStatementsConstraintsValidator;
 
 /**
  * Removes all statements that validates the specified constraints.
@@ -22,44 +22,28 @@ public class RemoveStatementsRequest extends AnycastRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private static final transient Logger logger = LoggerFactory
-            .getLogger(RemoveStatementRequest.class);
-
-    private URI spaceURI;
+    private URI context;
 
     private Statement statement;
 
-    public RemoveStatementsRequest(final URI space, final Statement statement) {
-        super(SemanticHelper.createCoordinateFrom(statement));
-        this.spaceURI = space;
+    public RemoveStatementsRequest(final URI context, final Statement statement) {
+        super(new DefaultAnycastConstraintsValidator(
+        			SemanticHelper.createCoordinateWithNullValues(statement)));
+        this.context = checkNotNull(context);
         this.statement = statement;
     }
 
     public AnycastRequestRouter<AnycastRequest> getRouter() {
-        return new AnycastRequestRouter<AnycastRequest>(new RemoveStatementsConstraintsValidator()) {
-            public void onPeerWhichValidatesKeyConstraints(AbstractCanOverlay overlay, AnycastRequest msg) {
-                ((SemanticSpaceCanOverlay) overlay).getLocalSemanticSpaceOverlayKernel().send(
-                        new RemoveStatementOperation(
-                                ((RemoveStatementsRequest)msg).getSpaceURI(),
-                                ((RemoveStatementsRequest)msg).getStatement()));
-                
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Remove statements performed on {}", overlay);
-                }
+        return new AnycastRequestRouter<AnycastRequest>() {
+        	@Override
+            public void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay, AnycastRequest msg) {
+        		((SemanticCanOverlay) overlay).getDatastore().removeStatement(context, statement);
             }
         };
     }
 
-    public URI getSpaceURI() {
-        return this.spaceURI;
-    }
-
-    public Statement getStatement() {
-        return this.statement;
-    }
-
-    public RemoveStatementsReply createResponseMessage() {
-        return new RemoveStatementsReply(this, this.getKeyToReach(), true);
+    public RemoveStatementsResponse createResponse() {
+        return new RemoveStatementsResponse(this);
     }
 
 }

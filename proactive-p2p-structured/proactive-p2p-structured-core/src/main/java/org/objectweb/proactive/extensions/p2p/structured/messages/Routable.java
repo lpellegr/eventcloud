@@ -6,7 +6,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 
 /**
  * This interface is assumed to be implemented by all
- * {@link RequestReplyMessage} in order to add router features.
+ * {@link RequestResponseMessage} in order to add router features.
  * 
  * @author lpellegr
  * 
@@ -21,10 +21,10 @@ public interface Routable<K> {
      * 
      * @return the {@link Router} to use in order to route the message.
      */
-    public abstract Router<? extends RequestReplyMessage<K>, K> getRouter();
+    public abstract Router<? extends RequestResponseMessage<K>, K> getRouter();
 
     /**
-     * Route the {@link RequestReplyMessage} to the correct {@link Peer}. If the
+     * Route the {@link RequestResponseMessage} to the correct {@link Peer}. If the
      * current peer contains the key to reach, the query is handled and a
      * response is routed to the sender.
      * 

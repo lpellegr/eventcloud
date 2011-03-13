@@ -48,6 +48,12 @@ public class RDF2GoBuilder {
 		}
 	}
 	
+	public static void main(String[] args) {
+		Statement stmt = RDF2GoBuilder.createStatement(null, null, null);
+		System.out.println("stmt=" + stmt);
+		System.out.println("s=" + stmt.getSubject());
+	}
+	
     public static BlankNode createBlankNode() {
         return LazyInitializer.instance.createBlankNode();
     }
@@ -66,10 +72,6 @@ public class RDF2GoBuilder {
 
     public static PlainLiteral createPlainliteral(String arg0) {
         return LazyInitializer.instance.createPlainLiteral(arg0);
-    }
-
-    public static Statement createStatement(Resource subject, URI predicate, Node object) {
-        return LazyInitializer.instance.createStatement(subject, predicate, object);
     }
 
     public static TriplePattern createTriplePattern(ResourceOrVariable subject,
@@ -91,9 +93,9 @@ public class RDF2GoBuilder {
      * @throws SemanticSpaceException
      *             if subject is null.
      */
-    public static Resource toSubject(String subject) throws SemanticSpaceException {
+    public static Resource toSubject(String subject){
         if (subject == null) {
-            throw new SemanticSpaceException("subject cannot be null");
+        	return null;
         }
 
         Resource mySubject = null;
@@ -108,7 +110,7 @@ public class RDF2GoBuilder {
 
         return mySubject;
     }
-
+    
     /**
      * Parses a specified predicate as String in order to create a new predicate
      * using RDF2Go types.
@@ -119,9 +121,9 @@ public class RDF2GoBuilder {
      * @throws SemanticSpaceException
      *             if predicate is null.
      */
-    public static URI toPredicate(String predicate) throws SemanticSpaceException {
+    public static URI toPredicate(String predicate) {
         if (predicate == null) {
-            throw new SemanticSpaceException("predicate cannot be null");
+            return null;
         }
 
         return LazyInitializer.instance.createURI(predicate);
@@ -137,9 +139,9 @@ public class RDF2GoBuilder {
      * @throws SemanticSpaceException
      *             if object is null.
      */
-    public static Node toObject(String object) throws SemanticSpaceException {
+    public static Node toObject(String object) {
         if (object == null) {
-            throw new SemanticSpaceException("object cannot be null");
+            return null;
         }
 
         Node myObject = null;
@@ -176,13 +178,15 @@ public class RDF2GoBuilder {
      * @throws SemanticSpaceException
      *             if triple is not valid.
      */
-    public static Statement toStatement(String subject, String predicate, String object)
-            throws SemanticSpaceException {
-        if (subject == null || predicate == null || object == null) {
-            throw new SemanticSpaceException("subject, predicate and object cannot be null");
-        }
-
-        return LazyInitializer.instance.createStatement(toSubject(subject), toPredicate(predicate), toObject(object));
+    public static Statement createStatementInternal(String subject, String predicate, String object) {
+        return LazyInitializer.instance.createStatement(
+        			toSubject(subject), 
+        			toPredicate(predicate), 
+        			toObject(object));
+    }
+    
+    public static Statement createStatement(Resource subject, URI predicate, Node object) {
+        return LazyInitializer.instance.createStatement(subject, predicate, object);
     }
 
     public static Model getModel() {

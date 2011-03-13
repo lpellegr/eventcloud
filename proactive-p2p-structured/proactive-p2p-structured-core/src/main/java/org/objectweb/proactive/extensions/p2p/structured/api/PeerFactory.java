@@ -21,16 +21,10 @@ public class PeerFactory {
 	 * 
 	 * @param overlay
 	 *            the overlay to set.
-	 
+	 *
 	 * @return the new active object created.
-	 * 
-	 * @throws ActiveObjectCreationException
-	 *             if a problem occurs during the creation of the active object.
-	 * @throws NodeException
-	 *             if a problem occurs during the deployment.
 	 */
-    public static Peer newActivePeer(StructuredOverlay overlay)
-            throws ActiveObjectCreationException, NodeException {
+    public static Peer newActivePeer(StructuredOverlay overlay) {
         return PeerFactory.newActivePeer(overlay, null);
     }
 
@@ -42,18 +36,20 @@ public class PeerFactory {
 	 *            the overlay to set.
 	 * @param node
 	 *            the node used by the peer.
-	 
+	 *
 	 * @return the new active object created.
-	 * 
-	 * @throws ActiveObjectCreationException
-	 *             if a problem occurs during the creation of the active object.
-	 * @throws NodeException
-	 *             if a problem occurs during the deployment.
 	 */
-    public static Peer newActivePeer(StructuredOverlay overlay, Node node)
-            throws ActiveObjectCreationException, NodeException {
-        return (Peer) PAActiveObject.turnActive(
-        				new Peer(overlay), node);
+    public static Peer newActivePeer(StructuredOverlay overlay, Node node) {
+        try {
+			return (Peer) PAActiveObject.turnActive(
+							new Peer(overlay), node);
+		} catch (ActiveObjectCreationException e) {
+			e.printStackTrace();
+		} catch (NodeException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
     }
 
 }

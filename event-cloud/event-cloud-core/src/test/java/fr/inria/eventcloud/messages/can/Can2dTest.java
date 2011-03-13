@@ -11,20 +11,18 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEnt
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.BigDecimalElement;
 
-import fr.inria.eventcloud.initializers.SpaceNetworkInitializer;
-import fr.inria.eventcloud.util.RDF2GoBuilder;
+import fr.inria.eventcloud.initializers.EventCloudInitializer;
 
 /**
  * Test used to check that all neighbors are correct for each peers 
- * after the join operations have finished in a 2 dimensional CAN
- * network.
+ * when the join operations has finished (in a 2 dimensional CAN
+ * network).
  * 
  * @author lpellegr
  */
 public class Can2dTest {
 
-    private static SpaceNetworkInitializer spaceNetworkInitializer = new SpaceNetworkInitializer(
-            RDF2GoBuilder.createURI("http://www.inria.fr"));
+    private static EventCloudInitializer spaceNetworkInitializer = new EventCloudInitializer();
 
     @BeforeClass
     public static void setUp() {

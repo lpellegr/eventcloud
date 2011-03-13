@@ -32,11 +32,10 @@ import org.ontoware.rdf2go.model.node.UriOrVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.sti2.semanticspaces.api.exceptions.SemanticSpaceException;
 import fr.inria.eventcloud.util.DSpaceProperties;
 
 /**
- * Provides all methods that can be performed on a semantic space data store
+ * Provides all methods that can be performed on a semantic context data store
  * conform to {@link RDF2Go}.
  * 
  * Operations are synchronized by using a {@link ReentrantReadWriteLock} which
@@ -150,32 +149,32 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
     private void loadProperties() {
     	String configurationFile = 
     	    DSpaceProperties.DSPACE_CONFIGURATION_FILE.getValue();
-        File spaceConfigurationFile = null;
+        File contextConfigurationFile = null;
         if (configurationFile != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Loading properties from -D{}={}",
                 			 DSpaceProperties.DSPACE_CONFIGURATION_FILE,
                 			 configurationFile);
             }
-            spaceConfigurationFile = new File(configurationFile);
+            contextConfigurationFile = new File(configurationFile);
             
             try {
-                this.loadPropertiesFrom(spaceConfigurationFile);
+                this.loadPropertiesFrom(contextConfigurationFile);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
-            File defaultSpacePropertiesPath = new File(
+            File defaultcontextPropertiesPath = new File(
             									DSpaceProperties.getDefaultPathForConfigurationFiles(),
-                    							"space.properties");
+                    							"context.properties");
             if (logger.isDebugEnabled()) {
-                logger.debug("Loading properties from default path=" + defaultSpacePropertiesPath);
+                logger.debug("Loading properties from default path=" + defaultcontextPropertiesPath);
             }
-            if (defaultSpacePropertiesPath.exists()) {
-                this.parseProperties(defaultSpacePropertiesPath);
+            if (defaultcontextPropertiesPath.exists()) {
+                this.parseProperties(defaultcontextPropertiesPath);
             } else {
                 this.dataStorePath = new File(
-                						"/tmp/dspace/repositories");
+                						"/tmp/dcontext/repositories");
             }
         }
     }
@@ -183,30 +182,30 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
     /**
      * Loads properties from a specified properties file.
      * 
-     * @param spaceConfigurationFile
+     * @param contextConfigurationFile
      *            the path to the configuration file to load.
      * @throws FileNotFoundException
      *             if specified path doesn't exist.
      */
-    private void loadPropertiesFrom(File spaceConfigurationFile) throws FileNotFoundException {
-        if (spaceConfigurationFile != null && spaceConfigurationFile.exists()) {
-            this.parseProperties(spaceConfigurationFile);
+    private void loadPropertiesFrom(File contextConfigurationFile) throws FileNotFoundException {
+        if (contextConfigurationFile != null && contextConfigurationFile.exists()) {
+            this.parseProperties(contextConfigurationFile);
         } else {
-            throw new FileNotFoundException(spaceConfigurationFile.getAbsolutePath() + " not found");
+            throw new FileNotFoundException(contextConfigurationFile.getAbsolutePath() + " not found");
         }
     }
 
     /**
      * Parses properties file.
      * 
-     * @param spaceConfigurationFile
+     * @param contextConfigurationFile
      *            the properties file to parse.
      */
-    private void parseProperties(File spaceConfigurationFile) {
+    private void parseProperties(File contextConfigurationFile) {
         Properties props = new Properties();
         FileInputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(spaceConfigurationFile);
+            inputStream = new FileInputStream(contextConfigurationFile);
             props.load(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
@@ -227,7 +226,7 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         } else {
             throw new IllegalArgumentException(
                     "'repositories.path' property is not defined in "
-                            + spaceConfigurationFile.getAbsolutePath());
+                            + contextConfigurationFile.getAbsolutePath());
         }
 
         String repositoryID = 
@@ -304,8 +303,8 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void atomicAddAll(URI space, Iterator<? extends Statement> triples) {
-    	Model model = this.rootModel.getModel(space);
+    public void atomicAddAll(URI context, Iterator<? extends Statement> triples) {
+    	Model model = this.rootModel.getModel(context);
     	model.setAutocommit(false);
     	model.addAll(triples);
     	model.commit();
@@ -313,11 +312,10 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
     
     // Interface implementation -------------------------
 
-    public void addAll(URI space, Iterator<? extends Statement> other)
-            throws SemanticSpaceException {
+    public void addAll(URI context, Iterator<? extends Statement> other) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.addAll(other);
             this.updateDirtyTable(model);
         } finally {
@@ -325,10 +323,10 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void addStatement(URI space, Statement statement) {
+    public void addStatement(URI context, Statement statement) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.addStatement(statement);
             this.updateDirtyTable(model);
         } finally {
@@ -336,10 +334,10 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void addStatement(URI space, Resource subject, URI predicate, String literal) {
+    public void addStatement(URI context, Resource subject, URI predicate, String literal) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.addStatement(subject, predicate, literal);
             this.updateDirtyTable(model);
         } finally {
@@ -347,11 +345,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void addStatement(URI space, Resource subject, URI predicate,
+    public void addStatement(URI context, Resource subject, URI predicate,
                              String literal, String languageTag) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.addStatement(subject, predicate, literal, languageTag);
             this.updateDirtyTable(model);
         } finally {
@@ -359,11 +357,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void addStatement(URI space, Resource subject, URI predicate,
+    public void addStatement(URI context, Resource subject, URI predicate,
                              String literal, URI datatypeURI) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.addStatement(subject, predicate, literal, datatypeURI);
             this.updateDirtyTable(model);
         } finally {
@@ -371,11 +369,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void addStatement(URI space, String subjectURIString, URI predicate,
+    public void addStatement(URI context, String subjectURIString, URI predicate,
                              String literal) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.addStatement(subjectURIString, predicate, literal);
             this.updateDirtyTable(model);
         } finally {
@@ -383,11 +381,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void addStatement(URI space, String subjectURIString, URI predicate,
+    public void addStatement(URI context, String subjectURIString, URI predicate,
                              String literal, String languageTag) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.addStatement(subjectURIString, predicate, literal, languageTag);
             this.updateDirtyTable(model);
         } finally {
@@ -395,11 +393,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void addStatement(URI space, String subjectURIString, URI predicate,
+    public void addStatement(URI context, String subjectURIString, URI predicate,
                              String literal, URI datatypeURI) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.addStatement(subjectURIString, predicate, literal, datatypeURI);
             this.updateDirtyTable(model);
         } finally {
@@ -407,58 +405,58 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public boolean contains(URI space, Statement s) {
+    public boolean contains(URI context, Statement s) {
         this.fixConsistency();
 
         this.readLock.lock();
         try {
-            return this.rootModel.getModel(space).contains(s);
+            return this.rootModel.getModel(context).contains(s);
         } finally {
             this.readLock.unlock();
         }
     }
 
-    public boolean contains(URI space, ResourceOrVariable subject,
+    public boolean contains(URI context, ResourceOrVariable subject,
                             UriOrVariable predicate, NodeOrVariable object) {
         this.fixConsistency();
 
         this.readLock.lock();
         try {
-            return this.rootModel.getModel(space).contains(subject, predicate, object);
+            return this.rootModel.getModel(context).contains(subject, predicate, object);
         } finally {
             this.readLock.unlock();
         }
     }
 
-    public boolean contains(URI space, ResourceOrVariable subject,
+    public boolean contains(URI context, ResourceOrVariable subject,
                             UriOrVariable predicate, String plainLiteral) {
         this.fixConsistency();
 
         this.readLock.lock();
         try {
-            return this.rootModel.getModel(space).contains(subject, predicate, plainLiteral);
+            return this.rootModel.getModel(context).contains(subject, predicate, plainLiteral);
         } finally {
             this.readLock.unlock();
         }
     }
 
-    public ClosableIterator<Statement> findStatements(URI space,
+    public ClosableIterator<Statement> findStatements(URI context,
             TriplePattern triplepattern) {
         this.fixConsistency();
 
         this.readLock.lock();
         try {
-            return this.rootModel.getModel(space).findStatements(triplepattern);
+            return this.rootModel.getModel(context).findStatements(triplepattern);
         } finally {
             this.readLock.unlock();
         }
     }
 
-    public void removeAll(URI space) {
+    public void removeAll(URI context) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeAll();
             this.updateDirtyTable(model);
         } finally {
@@ -466,11 +464,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeAll(URI space, Iterator<? extends Statement> statements) {
+    public void removeAll(URI context, Iterator<? extends Statement> statements) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeAll(statements);
             this.updateDirtyTable(model);
         } finally {
@@ -478,11 +476,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatement(URI space, Statement statement) {
+    public void removeStatement(URI context, Statement statement) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatement(statement.getSubject(),
                     statement.getPredicate(), statement.getObject());
             this.updateDirtyTable(model);
@@ -491,12 +489,12 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatement(URI space, Resource subject, URI predicate, 
+    public void removeStatement(URI context, Resource subject, URI predicate, 
                                 String literal) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatement(subject, predicate, literal);
             this.updateDirtyTable(model);
         } finally {
@@ -504,12 +502,12 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatement(URI space, Resource subject, URI predicate,
+    public void removeStatement(URI context, Resource subject, URI predicate,
                                 String literal, String languageTag) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatement(subject, predicate, literal, languageTag);
             this.updateDirtyTable(model);
         } finally {
@@ -517,11 +515,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatement(URI space, Resource subject, URI predicate,
+    public void removeStatement(URI context, Resource subject, URI predicate,
                                 String literal, URI datatypeURI) {
         this.writeLock.lock();
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatement(subject, predicate, literal, datatypeURI);
             this.updateDirtyTable(model);
         } finally {
@@ -529,12 +527,12 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatement(URI space, String subjectURIString, URI predicate,
+    public void removeStatement(URI context, String subjectURIString, URI predicate,
                                 String literal) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatement(subjectURIString, predicate, literal);
             this.updateDirtyTable(model);
         } finally {
@@ -542,12 +540,12 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatement(URI space, String subjectURIString, URI predicate,
+    public void removeStatement(URI context, String subjectURIString, URI predicate,
                                 String literal, String languageTag) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatement(subjectURIString, predicate, literal, languageTag);
             this.updateDirtyTable(model);
         } finally {
@@ -555,13 +553,13 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatement(URI space, String subjectURIString, URI predicate,
+    public void removeStatement(URI context, String subjectURIString, URI predicate,
             String literal,
             URI datatypeURI) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatement(subjectURIString, predicate, literal, datatypeURI);
             this.updateDirtyTable(model);
         } finally {
@@ -569,13 +567,13 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatements(URI space, ResourceOrVariable subject,
+    public void removeStatements(URI context, ResourceOrVariable subject,
             UriOrVariable predicate,
             NodeOrVariable object) {
         this.writeLock.lock();
 
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatements(subject, predicate, object);
             this.updateDirtyTable(model);
         } finally {
@@ -583,11 +581,11 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public void removeStatements(URI space, TriplePattern triplePattern) {
+    public void removeStatements(URI context, TriplePattern triplePattern) {
         this.writeLock.lock();
         
         try {
-            Model model = this.rootModel.getModel(space);
+            Model model = this.rootModel.getModel(context);
             model.removeStatements(triplePattern);
             this.updateDirtyTable(model);
         } finally {
@@ -595,47 +593,47 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         }
     }
 
-    public boolean sparqlAsk(URI space, String query) {
+    public boolean sparqlAsk(URI context, String query) {
         this.fixConsistency();
         
         this.readLock.lock();
         try {
-            return this.rootModel.getModel(space).sparqlAsk(query);
+            return this.rootModel.getModel(context).sparqlAsk(query);
         } finally {
             this.readLock.unlock();
         }
     }
 
-    public ClosableIterable<Statement> sparqlConstruct(URI space, String query) {
+    public ClosableIterable<Statement> sparqlConstruct(URI context, String query) {
         
         this.fixConsistency();
 
         this.readLock.lock();
         try {
-            Model mod = this.rootModel.getModel(space);
+            Model mod = this.rootModel.getModel(context);
             return mod.sparqlConstruct(query);
         } finally {
             this.readLock.unlock();
         }
     }
     
-    public ClosableIterable<Statement> sparqlDescribe(URI space, String query) {
+    public ClosableIterable<Statement> sparqlDescribe(URI context, String query) {
         this.fixConsistency();
 
         this.readLock.lock();
         try {
-            return this.rootModel.getModel(space).sparqlDescribe(query);
+            return this.rootModel.getModel(context).sparqlDescribe(query);
         } finally {
             this.readLock.unlock();
         }
     }
 
-    public QueryResultTable sparqlSelect(URI space, String queryString) {
+    public QueryResultTable sparqlSelect(URI context, String queryString) {
         this.fixConsistency();
 
         this.readLock.lock();
         try {
-            return this.rootModel.getModel(space).sparqlSelect(queryString);
+            return this.rootModel.getModel(context).sparqlSelect(queryString);
         } finally {
             this.readLock.unlock();
         }

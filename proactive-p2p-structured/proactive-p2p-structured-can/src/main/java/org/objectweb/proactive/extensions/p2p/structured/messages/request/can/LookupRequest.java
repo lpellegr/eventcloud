@@ -1,13 +1,12 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.AbstractReply;
-import org.objectweb.proactive.extensions.p2p.structured.messages.reply.can.LookupReply;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastQueryRouter;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 
 /**
  * A <code>LookupRequest</code> is a query message which may be used in
@@ -38,7 +37,7 @@ public class LookupRequest extends ForwardRequest {
      * {@inheritDoc}
      */
     public Router<ForwardRequest, Coordinate> getRouter() {
-        return new UnicastQueryRouter<ForwardRequest>(new UnicastConstraintsValidator()) {
+        return new UnicastRequestRouter<ForwardRequest>() {
             protected void onDestinationReached(StructuredOverlay overlay, ForwardRequest msg) {
                 ((LookupRequest) msg).setRemotePeerReached(overlay.getRemotePeer());
             };
@@ -48,8 +47,8 @@ public class LookupRequest extends ForwardRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractReply<Coordinate> createResponseMessage() {
-        return new LookupReply(this, this.remotePeerReached);
+    public Response<Coordinate> createResponse() {
+        return new LookupResponse(this, this.remotePeerReached);
     }
 
 }

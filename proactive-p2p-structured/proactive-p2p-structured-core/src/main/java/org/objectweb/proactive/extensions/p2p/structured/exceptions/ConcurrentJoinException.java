@@ -4,8 +4,8 @@ import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
- * Exceptions thrown when a {@link Peer} tries to send a join message 
- * to a peer which is already handling a join operation.
+ * Exceptions thrown when a {@link Peer} tries to join a peer 
+ * which is already handling a join operation.
  * 
  * @author lpellegr
  */

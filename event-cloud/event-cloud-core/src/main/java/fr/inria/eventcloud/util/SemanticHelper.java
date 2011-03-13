@@ -1,5 +1,7 @@
 package fr.inria.eventcloud.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,9 +16,7 @@ import org.ontoware.rdf2go.model.QueryResultTable;
 import org.ontoware.rdf2go.model.QueryRow;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.TriplePattern;
-import org.ontoware.rdf2go.model.impl.StatementImpl;
 import org.ontoware.rdf2go.model.impl.TriplePatternImpl;
-import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 
@@ -113,26 +113,25 @@ public class SemanticHelper {
                 .constructTriplePatternFrom(spaceURI, subject, predicate, object));
     }
 
-    /**
-     * Creates a new {@link Statement} from a set of String triples.
-     * 
-     * @param context
-     *            the context associated to the statement to generate.
-     * @param subject
-     *            the subject to use.
-     * @param predicate
-     *            the predicate to use.
-     * @param object
-     *            the object to use.
-     * @return a new {@link Statement}.
-     */
-    public static Statement constructStatementFrom(URI context, String subject, String predicate,
-            String object) {
-        return new StatementImpl(context, subject == null || subject.startsWith("?") ? null
-                : RDF2GoBuilder.createURI(subject), predicate == null || predicate.startsWith("?") ? null
-                : RDF2GoBuilder.createURI(predicate), object == null || object.startsWith("?") ? null
-                : RDF2GoBuilder.createURI(object));
-    }
+//    /**
+//     * Creates a new {@link Statement} from a set of String triples.
+//     * 
+//     * @param context
+//     *            the context associated to the statement to generate.
+//     * @param subject
+//     *            the subject to use.
+//     * @param predicate
+//     *            the predicate to use.
+//     * @param object
+//     *            the object to use.
+//     * @return a new {@link Statement}.
+//     */
+//    public static Statement constructStatementFrom(URI context, String subject, String predicate, String object) {
+//        return new StatementImpl(context, subject == null || subject.startsWith("?") ? null
+//                : RDF2GoBuilder.createURI(subject), predicate == null || predicate.startsWith("?") ? null
+//                : RDF2GoBuilder.createURI(predicate), object == null || object.startsWith("?") ? null
+//                : RDF2GoBuilder.createURI(object));
+//    }
 
     /**
      * Creates a new {@link TriplePattern} from a set of String triples.
@@ -279,81 +278,75 @@ public class SemanticHelper {
             }
         };
     }
-    
-//    /**
-//	 * Parses the specified {@link Node} to remove some information from it in
-//	 * order to improve load balancing.
-//	 * 
-//	 * The information which are removed are the prefix (i.e. the namespace
-//	 * shared by several IRI), the blank node identifier (_:) and the double
-//	 * quote for literals.
-//	 * 
-//	 * @param node
-//	 *            the Node to parse.
-//	 * @return a String representing the initial node without some information
-//	 *         in order to improve the load balancing.
-//	 */
-//	public static String parseNodeForLoadBalancing(Node node) {
-//		if (node.isURI()) {
-//			if (node.toString().contains("#")) {
-//				return node.toString().split("#")[1];
-//			} else if (node.toString().startsWith("http://www.")) {
-//				return node.toString().substring(11);
-//			} else {
-//				return node.toString();
-//			}
-//		} else if (node.isBlank()) {
-//			return node.getBlankNodeLabel();
-//		} else if (node.isLiteral()) {
-//			return node.getLiteralLexicalForm();
-//		} else {
-//			return node.toString();
-//		}
-//	}
 
-	public static String parseTripleForLoadBalancing(String triple) {
+	/**
+	 * Parses a triple element to remove prefixes and some characters specific
+	 * to the RDF syntax used. This suppression is done to improve the load
+	 * balancing (i.e. especially to avoid to have some values with popular
+	 * prefixes managed by the same zone).
+	 */
+	public static String parseTripleElement(String value) {
 		try {
-			new java.net.URI(triple);
+			java.net.URI uri = new java.net.URI(value);
 			
-			if (triple.contains("#")) {
-				return triple.split("#")[1];
-			} else if (triple.startsWith("http://www.")) {
-				return triple.substring(11);
-			} else if (triple.startsWith("http://")) {
-				return triple.substring(7);
-			} else {
-				return triple;
+			int slashIndex = value.lastIndexOf("/");
+			int sharpIndex = value.lastIndexOf("#");
+
+			// # or / is the last character
+			if (slashIndex == value.length() - 1
+					|| sharpIndex == value.length() - 1) {
+				value = value.substring(0, value.length() - 1);
+				slashIndex = value.lastIndexOf("/");
+				sharpIndex = value.lastIndexOf("#");
 			}
+
+			if (slashIndex < 7 && sharpIndex == -1) {
+				if (uri.getScheme().equals("http")
+						&& value.startsWith("http://www.")) {
+					return value.substring(11);
+				} 
+				return value.substring(uri.getScheme().length() + 3);
+			} else if (slashIndex > sharpIndex) {
+				return value.substring(slashIndex + 1, value.length());
+			} else if (slashIndex < sharpIndex) {
+				return value.substring(sharpIndex + 1, value.length());
+			} 
+			
+			return "";
 		} catch (URISyntaxException e) {
-			if (triple.startsWith("_:")) {
-				return triple.substring(2);
-			} else if (triple.startsWith("\"")) {
-				return triple.substring(1, triple.length()-1);
+			if (value.startsWith("_:")) {
+				return value.substring(2);
+			} else if (value.startsWith("\"")) {
+				return value.substring(1, value.length() - 1);
 			} else {
-				return triple;
+				return value;
 			}
 		}
 	}
 	
-    public static Coordinate createCoordinateFrom(Statement stmt) {
-        return new Coordinate(
-        		stmt.getSubject() == null ? null : new SemanticElement(stmt.getSubject()),
-        		stmt.getPredicate() == null ? null : new SemanticElement(stmt.getPredicate()),
-        		stmt.getObject() == null ? null : new SemanticElement(stmt.getObject()));
-    }
-
-    public static Coordinate createCoordinateArrayFrom(Resource subject, URI predicate, String object) {
-        return new Coordinate(
-        		subject == null ? null : new SemanticElement(subject),
-        		predicate == null ? null : new SemanticElement(predicate),
-        		object == null ? null : new SemanticElement(object));
-    }
-
-    public static Coordinate createCoordinateArrayFrom(String subject, URI predicate, String object) {
-        return new Coordinate(
-        		subject == null ? null : new SemanticElement(subject),
-        		predicate == null ? null :  new SemanticElement(predicate),
-        		object == null ? null : new SemanticElement(object));
+	public static Coordinate createCoordinateWithNullValues(String subject, String predicate, String object) {
+		return new Coordinate(
+        			 	subject == null ? null : new SemanticElement(subject),
+        			 	predicate == null ? null : new SemanticElement(predicate),
+        			 	object == null ? null : new SemanticElement(object));
+	}
+	
+	public static Coordinate createCoordinateWithNullValues(Statement stmt) {
+		checkNotNull(stmt);
+    	
+    	return new Coordinate(
+    					stmt.getSubject() == null ? null : new SemanticElement(stmt.getSubject()),
+    					stmt.getPredicate() == null ? null : new SemanticElement(stmt.getPredicate()),
+    					stmt.getObject() == null ? null : new SemanticElement(stmt.getObject()));
+	}
+	
+    public static Coordinate createCoordinateWithoutNullValues(Statement stmt) {
+    	checkNotNull(stmt);
+    	
+    	return new Coordinate(
+    					new SemanticElement(checkNotNull(stmt.getSubject())),
+    					new SemanticElement(checkNotNull(stmt.getPredicate())),
+    					new SemanticElement(checkNotNull(stmt.getObject())));
     }
 
     public static String beautifyStatements(ClosableIterable<Statement> statements) {
@@ -423,6 +416,18 @@ public class SemanticHelper {
         return result;
     }
     
+	public static String toNTripleSyntax(String tripleElt) {
+		if (!tripleElt.startsWith("?") && !tripleElt.startsWith("\"")) {
+			StringBuilder triple = new StringBuilder("<");
+			triple.append(tripleElt);
+			triple.append(">");
+			return triple.toString();
+		} else {
+			return tripleElt;
+		}
+	}
+
+    
     public static String toString(ClosableIterable<Statement> collection) {
     	ClosableIterator<Statement> it = collection.iterator();
     	StringBuffer buf = new StringBuffer();
@@ -472,23 +477,18 @@ public class SemanticHelper {
     	return buf.toString();
     }
     
-    public static int size(ClosableIterator<?> it) {
-        int nb = 0;
+    public static long size(ClosableIterator<Statement> it) {
+        long count = 0;
         while (it.hasNext()) {
             it.next();
-            nb++;
+            count++;
         }
-        return nb;
+        it.close();
+        return count;
     }
     
-    public static int size(ClosableIterable<?> iterable) {
-        ClosableIterator<?> it = iterable.iterator();
-        int nb = 0;
-        while (it.hasNext()) {
-            it.next();
-            nb++;
-        }
-        return nb;
+    public static long size(ClosableIterable<Statement> iterable) {
+        return size(iterable.iterator());
     }
     
 }
