@@ -70,10 +70,6 @@
 			<id>proactive-maven-plugin</id>
 			<name>ProActive Maven Plugin</name>
 			<url>http://maven.proactive-maven-plugin.googlecode.com/hg/releases</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
 
@@ -183,6 +179,11 @@
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.7.1</version>
+				</plugin>
+				<plugin>
+					<groupId>com.elaunira.pmp</groupId>
+					<artifactId>proactive-maven-plugin</artifactId>
+					<version>1.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

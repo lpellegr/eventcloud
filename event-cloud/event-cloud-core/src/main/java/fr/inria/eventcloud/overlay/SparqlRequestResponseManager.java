@@ -51,12 +51,15 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
     public SparqlRequestResponseManager() {
     	super();
     }
-    
-    /**
-     * 
-     * @param sparqlAskQuery
-     * @return
-     */
+
+	/**
+	 * Dispatches a SPARQL Ask query over the overlay network.
+	 * 
+	 * @param sparqlAskQuery
+	 *            the SPARQL ASK query to execute.
+	 *            
+	 * @return a response corresponding to the type of the query dispatched.
+	 */
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
     	List<SparqlResponse> responses = 
     		this.dispatch(this.getReasoner().parseSparql(sparqlAskQuery));
@@ -72,10 +75,13 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
     }
     
     /**
-     * 
-     * @param sparqlConstructQuery
-     * @return
-     */
+	 * Dispatches a SPARQL Construct query over the overlay network.
+	 * 
+	 * @param sparqlConstructQuery
+	 *            the SPARQL CONSTRUCT query to execute.
+	 *            
+	 * @return a response corresponding to the type of the query dispatched.
+	 */
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery) {
     	List<SparqlResponse> responses = 
     		this.dispatch(this.getReasoner().parseSparql(sparqlConstructQuery));
@@ -91,10 +97,13 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
     }
     
     /**
-     * 
-     * @param sparqlDescribeQuery
-     * @return
-     */
+	 * Dispatches a SPARQL DESCRIBE query over the overlay network.
+	 * 
+	 * @param sparqlDescribeQuery
+	 *            the SPARQL DESCRIBE query to execute.
+	 *            
+	 * @return a response corresponding to the type of the query dispatched.
+	 */
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
     	List<SparqlResponse> responses = 
     		this.dispatch(this.getReasoner().parseSparql(sparqlDescribeQuery));
@@ -110,10 +119,12 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
     }
     
     /**
-     * 
-     * @param sparqlSelectQuery
-     * @return
-     */
+	 * Dispatches a SPARQL SELECT query over the overlay network.
+	 * 
+	 * @param sparqlSelectQuery
+	 *            the SPARQL SELECT query to execute.
+	 * @return a response corresponding to the type of the query dispatched.
+	 */
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
     	List<SparqlResponse> responses = 
     		this.dispatch(this.getReasoner().parseSparql(sparqlSelectQuery));

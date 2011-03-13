@@ -22,8 +22,9 @@ import fr.inria.eventcloud.util.DSpaceProperties;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
- * {@link SemanticSpaceCanOverlay} is a concrete implementation of
- * {@link AbstractCanOverlay} for a semantic CAN network.
+ * This class is a concrete implementation of {@link AbstractCanOverlay} for a
+ * semantic CAN network. In particular, it overrides methods that are necessary
+ * to transfer data when peers join or leave.
  * 
  * @author lpellegr
  */
@@ -37,19 +38,15 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 	protected transient SemanticDatastore datastore;
 
 	/**
-	 * Constructs a new overlay by using the specified <code>spaceURI</code> and
-	 * <code>remoteKernelReference</code>.
-	 * 
-	 * @param spaceURI
-	 *            the space to which the overlay belongs to.
-	 * @param remoteKernelReference
-	 *            the remote reference to the kernel in order to have access to
-	 *            a datastore.
+	 * Constructs a new overlay.
 	 */
 	public SemanticCanOverlay() {
 		super(new SparqlRequestResponseManager());
 	}
 	
+	/**
+	 * {@inheritDoc} 
+	 */
 	@Override
 	public void initActivity(Body body) {
 		this.datastore = new OwlimDatastore(true);
@@ -57,11 +54,15 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 		super.initActivity(body);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void endActivity(Body body) {
 		this.datastore.close();
 	}
 
+	@Override
 	protected Object getDataIn(Zone zone) {
 		Set<Statement> statementsToTransfert = new HashSet<Statement>();
 		ClosableIterable<Statement> result = this.datastore.sparqlConstruct(
@@ -104,6 +105,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 				SemanticHelper.generateClosableIterable(statementsToTransfert));
 	}
 
+	@Override
 	protected void removeDataIn(Zone zone) {
 		ClosableIterable<Statement> result = this.datastore.sparqlConstruct(
 				DSpaceProperties.DEFAULT_CONTEXT,
@@ -140,6 +142,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 		}
 	}
 
+	@Override
 	protected void affectDataReceived(Object dataReceived) {
 		ClosableIterator<Statement> data = 
 			((ClosableIterableWrapper) dataReceived).toRDF2Go().iterator();
@@ -155,6 +158,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 		this.datastore.addAll(DSpaceProperties.DEFAULT_CONTEXT, data);
 	}
 
+	@Override
 	protected ClosableIterable<Statement> retrieveAllData() {
 		return this.datastore.sparqlConstruct(
 					DSpaceProperties.DEFAULT_CONTEXT,

@@ -28,28 +28,12 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
     private int latency = -1;
 
     /**
-     * Constructs a new response message with the specified <code>query</code>
-     * and <code>keyToReach</code>.
-     * 
-     * @param response
-     *            the response to merge with.
-     * @param validator
-     * 			the constraints validator used for routing decisions.
-     */
-    public Response(Response<K> response, ConstraintsValidator<K> validator) {
-        super(response.getId(), validator);
-        this.dispatchTimestamp = response.getDispatchTimestamp();
-        this.outboundHopCount = response.getOutboundHopCount();
-        super.incrementHopCount(response.getInboundHopCount());
-    }
-
-    /**
      * Constructs a new response with the specified <code>request</code>
      * and <code>keyToReach</code>.
      * 
      * @param request
-     *            the query which creates the response.
-     * @param keyToReach
+     *            the request associated to the response.
+     * @param validator
      *            the key used in order to route the response to it recipient.
      */
     public Response(Request<K> request, ConstraintsValidator<K> validator) {
