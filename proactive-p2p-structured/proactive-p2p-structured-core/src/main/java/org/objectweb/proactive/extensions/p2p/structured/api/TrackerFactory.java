@@ -104,10 +104,7 @@ public class TrackerFactory {
 	 */
     public static Tracker newActiveTracker(OverlayType type, String networkName, Node node) 
     							throws ActiveObjectCreationException, NodeException {
-        return (Tracker) PAActiveObject.newActive(
-        					Tracker.class,
-        					new Object[] { type, networkName }, 
-        					node);
+        return PAActiveObject.newActive(Tracker.class, new Object[] { type, networkName }, node);
     }
 
     /**
