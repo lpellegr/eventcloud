@@ -194,8 +194,8 @@ public class SemanticCanTracker extends Tracker {
 
 	private List<Character> getIntermediateCharacters(
 			CharactersInterval interval) {
-		int lowerIndex = (int) interval.getLowerBound();
-		int upperIndex = (int) interval.getUpperBound();
+		int lowerIndex = interval.getLowerBound();
+		int upperIndex = interval.getUpperBound();
 		int size = upperIndex - lowerIndex + 1;
 
 		List<Character> result = new ArrayList<Character>(size);

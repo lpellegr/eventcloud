@@ -106,8 +106,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
 			// query anymore: we are on a leaf and the response must be returned;
 			if (neighborsToSendTo.size() == 0) {
 				super.onDestinationReached(overlay, request);
-				AnycastResponse response = 
-					(AnycastResponse) request.createResponse();
+				AnycastResponse response = request.createResponse();
 				response.incrementHopCount(1);
 				overlay.getResponseEntries().put(response.getId(), new ResponseEntry(1));
 				overlay.route(response);

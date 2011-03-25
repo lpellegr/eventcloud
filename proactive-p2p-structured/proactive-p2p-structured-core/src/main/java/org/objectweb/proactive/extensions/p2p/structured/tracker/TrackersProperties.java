@@ -97,7 +97,7 @@ public class TrackersProperties {
         if (value == null) {
             return null;
         }
-        return new ArrayList<String>(Arrays.asList(((String) value).split(";")));
+        return new ArrayList<String>(Arrays.asList((value).split(";")));
     }
 
     public File getPropertiesFilePath() {

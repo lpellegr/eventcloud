@@ -30,8 +30,8 @@ public class RouterStoreTest {
 		RequestB requestB = new RequestB(validatorB);
 		
 		RouterStore store = RouterStore.getInstance();
-		store.store(requestA.getClass(), validatorA.getClass(), routerA);
 
+		store.store(requestA.getClass(), validatorA.getClass(), routerA);
 		assertTrue(store.contains(requestA.getClass(), validatorA.getClass()));
 		assertEquals(routerA.hashCode(), store.get(requestA.getClass(), validatorA.getClass()).hashCode());
 		assertFalse(store.contains(requestA.getClass(), validatorB.getClass()));
@@ -121,6 +121,7 @@ public class RouterStoreTest {
 		public SuperRequest(ConstraintsValidator<String> validator) {
 			super(validator);
 		}
+
 		@Override
 		public Router<SuperRequest, String> getRouter() {
 			return null;

@@ -15,8 +15,8 @@ public class StringUtil {
         StringBuffer buf = new StringBuffer();
 
         for (int i = 0; i < length; i++) {
-            buf.append((char) ((int) inferiorBound + ProActiveRandom.nextInt((int) superiorBound
-                    - (int) inferiorBound)));
+            buf.append((char) (inferiorBound + ProActiveRandom.nextInt(superiorBound
+                    - inferiorBound)));
         }
 
         return buf.toString();
@@ -30,9 +30,9 @@ public class StringUtil {
             lineIndex = ProActiveRandom.nextInt(bounds.length);
 
             buf.append((char) 
-            		((int) bounds[lineIndex][0] + 
+            		(bounds[lineIndex][0] + 
             				ProActiveRandom.nextInt(
-            						(int) bounds[lineIndex][1] - (int) bounds[lineIndex][0])));
+            						bounds[lineIndex][1] - bounds[lineIndex][0])));
         }
 
         return buf.toString();
