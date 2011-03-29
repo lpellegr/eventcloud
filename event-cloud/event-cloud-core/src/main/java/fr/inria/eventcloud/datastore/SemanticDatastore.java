@@ -1,18 +1,15 @@
 package fr.inria.eventcloud.datastore;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -32,7 +29,7 @@ import org.ontoware.rdf2go.model.node.UriOrVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.util.DSpaceProperties;
+import fr.inria.eventcloud.config.EventCloudProperties;
 
 /**
  * Provides all methods that can be performed on a semantic context data store
@@ -47,9 +44,9 @@ import fr.inria.eventcloud.util.DSpaceProperties;
  * In order to assert consistency when read operations are performed, two
  * mechanisms are introduced. First, a Thread periodically check if no write
  * lock is held by an another thread and if it is true it commits pending
- * modifications, otherwise it waits for next round. Secondly, if a read
+ * modifications, otherwise it waits for the next round. Secondly, if a read
  * operation is handled and some modifications must be committed then they are
- * commited before to execute the read operation.
+ * committed before to execute the read operation.
  * 
  * @author lpellegr
  */
@@ -68,42 +65,29 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
     private final ScheduledExecutorService consistencyCheckerThread = 
         Executors.newSingleThreadScheduledExecutor();
 
-    private UUID id;
+    private final UUID id;
 
     protected File dataStorePath;
 
     protected ModelSet rootModel = null;
 
-    private volatile boolean initialized = false;
+    protected AtomicBoolean initialized = new AtomicBoolean(false);
 
-    private boolean loadProperties = true;
-
-    private String repositoryIdToRestore;
-
-    /**
-     * Constructor.
-     * 
-     * @param loadProperties
-     *            indicates if it is necessary to load properties from
-     *            preference file or not.
-     */
-    public SemanticDatastore(boolean loadProperties) {
+	/**
+	 * Constructs a new SemanticDatastore.
+	 */
+    public SemanticDatastore() {
         this.id = UUID.randomUUID();
-        this.loadProperties = loadProperties;
-
+        
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                if (initialized) {
-                    close();
-                }
+            	close();
             }
         });
 
-        logger.debug("New datastore with uuid={} has been created", this.id);
-    }
-
-    public SemanticDatastore() {
-        this(true);
+        if (logger.isDebugEnabled()) {
+        	logger.debug("New datastore with id '" + this.id + "' has been created.");
+        }
     }
 
     /**
@@ -118,19 +102,15 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
     /**
      * Initialize the datastore.
      */
-    public synchronized void open() {
-        if (this.initialized) {
+    public void open() {
+        if (this.initialized.getAndSet(true)) {
             throw new IllegalStateException("SemanticDataStore already initialized");
         }
 
-        File repositoryPath = null;
-        if (this.loadProperties) {
-            this.loadProperties();
-            repositoryPath = new File(this.dataStorePath, this.id.toString());
-            repositoryPath.mkdirs();
-        }
+        this.dataStorePath = new File(EventCloudProperties.REPOSITORIES_PATH.getValue(), this.id.toString());
+        this.dataStorePath.mkdirs();
 
-        this.rootModel = this.createRootModel(repositoryPath);
+        this.rootModel = this.createRootModel(this.dataStorePath);
         this.rootModel.open();
         this.rootModel.setAutocommit(false);
 
@@ -138,125 +118,19 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
             public void run() {
                 tryToFixConsistency();
             }
-        }, 0, DSpaceProperties.DSPACE_CONSISTENCY_TIMEOUT.getValue(), TimeUnit.MILLISECONDS);
-
-        this.initialized = true;
-    }
-
-    /**
-     * Loads properties.
-     */
-    private void loadProperties() {
-    	String configurationFile = 
-    	    DSpaceProperties.DSPACE_CONFIGURATION_FILE.getValue();
-        File contextConfigurationFile = null;
-        if (configurationFile != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Loading properties from -D{}={}",
-                			 DSpaceProperties.DSPACE_CONFIGURATION_FILE,
-                			 configurationFile);
-            }
-            contextConfigurationFile = new File(configurationFile);
-            
-            try {
-                this.loadPropertiesFrom(contextConfigurationFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            File defaultcontextPropertiesPath = new File(
-            									DSpaceProperties.getDefaultPathForConfigurationFiles(),
-                    							"context.properties");
-            if (logger.isDebugEnabled()) {
-                logger.debug("Loading properties from default path=" + defaultcontextPropertiesPath);
-            }
-            if (defaultcontextPropertiesPath.exists()) {
-                this.parseProperties(defaultcontextPropertiesPath);
-            } else {
-                this.dataStorePath = new File(
-                						"/tmp/dcontext/repositories");
-            }
-        }
-    }
-
-    /**
-     * Loads properties from a specified properties file.
-     * 
-     * @param contextConfigurationFile
-     *            the path to the configuration file to load.
-     * @throws FileNotFoundException
-     *             if specified path doesn't exist.
-     */
-    private void loadPropertiesFrom(File contextConfigurationFile) throws FileNotFoundException {
-        if (contextConfigurationFile != null && contextConfigurationFile.exists()) {
-            this.parseProperties(contextConfigurationFile);
-        } else {
-            throw new FileNotFoundException(contextConfigurationFile.getAbsolutePath() + " not found");
-        }
-    }
-
-    /**
-     * Parses properties file.
-     * 
-     * @param contextConfigurationFile
-     *            the properties file to parse.
-     */
-    private void parseProperties(File contextConfigurationFile) {
-        Properties props = new Properties();
-        FileInputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(contextConfigurationFile);
-            props.load(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Properties loaded=" + props.values());
-        }
-
-        if (props.getProperty("repositories.path") != null) {
-            this.dataStorePath = new File(props.getProperty("repositories.path"));
-        } else {
-            throw new IllegalArgumentException(
-                    "'repositories.path' property is not defined in "
-                            + contextConfigurationFile.getAbsolutePath());
-        }
-
-        String repositoryID = 
-            DSpaceProperties.DSPACE_REPOSITORY_RESTORE_ID.getValue();
-        if (repositoryID != null) {
-            this.repositoryIdToRestore = repositoryID;
-            File repositoryToRestore = new File(this.dataStorePath, this.repositoryIdToRestore);
-            if (!repositoryToRestore.exists() || this.repositoryIdToRestore == null) {
-                throw new IllegalArgumentException("Repository '"
-                        + repositoryToRestore.getAbsolutePath() + "' doesn't exist");
-            } else {
-                this.id = UUID.fromString(this.repositoryIdToRestore);
-            }
-        }
-
-        if (!this.dataStorePath.exists()) {
-            this.dataStorePath.mkdirs();
-        }
+        }, 0, EventCloudProperties.CONSISTENCY_TIMEOUT.getValue(), TimeUnit.MILLISECONDS);
     }
 
     /**
      * Shutdown the repository.
      */
     public synchronized void close() {
-        if (this.initialized) {
+        if (this.initialized.get()) {
             this.consistencyCheckerThread.shutdown();
             this.fixConsistency();
             this.dirtyTable.clear();
             this.rootModel.close();
-            this.initialized = false;
+            this.initialized.set(false);
         }
     }
 
@@ -649,18 +523,6 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
 
     public UUID getId() {
         return this.id;
-    }
-
-    public boolean isInitialized() {
-        return this.initialized;
-    }
-
-    public boolean isLoadProperties() {
-        return this.loadProperties;
-    }
-
-    public void setLoadProperties(boolean loadProperties) {
-        this.loadProperties = loadProperties;
     }
 
 }

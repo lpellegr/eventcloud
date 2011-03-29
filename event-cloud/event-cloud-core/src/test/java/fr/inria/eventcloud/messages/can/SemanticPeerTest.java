@@ -1,6 +1,6 @@
 package fr.inria.eventcloud.messages.can;
 
-import static fr.inria.eventcloud.util.DSpaceProperties.DEFAULT_CONTEXT;
+import static fr.inria.eventcloud.config.EventCloudProperties.DEFAULT_CONTEXT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

@@ -20,7 +20,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.ConcurrentJoinException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
@@ -118,7 +118,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      */
     public void removeOutdatedNeighbors() {
     	Iterator<NeighborEntry> it = null;
-		for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+		for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
 			for (int direction = 0; direction < 2; direction++) {
 				it = this.neighborTable.get(dim, direction).values().iterator();
 				while (it.hasNext()) {
@@ -309,12 +309,12 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     /**
      * Gets a random dimension number. The minimum dimension number is
      * <code>0</code>. The maximum dimension number is defined by
-     * {@link DefaultProperties#CAN_NB_DIMENSIONS}.
+     * {@link P2PStructuredProperties#CAN_NB_DIMENSIONS}.
      * 
      * @return a random dimension number.
      */
     public int getRandomDimension() {
-        return ProActiveRandom.nextInt(DefaultProperties.CAN_NB_DIMENSIONS.getValue());
+        return ProActiveRandom.nextInt(P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue());
     }
 
     /**
@@ -372,7 +372,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         buf.append(" has neighbor(s):\n");
 
         
-        for (int dim=0; dim<DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim=0; dim<P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction=0; direction<2; direction++) {
                 for (NeighborEntry neighbor : this.neighborTable.get(dim, direction).values()) {
                     buf.append("  - ");
@@ -424,7 +424,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
         // neighbors affected for the new peer which joins the network
         NeighborTable pendingNewNeighborhood = new NeighborTable();
-        for (int dim=0; dim<DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim=0; dim<P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
         	for (int dir=0; dir<2; dir++) {
         		// the peer which is joining don't have the same neighbors as the
         		// landmark peer in the dimension and direction of the landmark peer
@@ -488,7 +488,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     	// removes the current peer from the neighbors that are back
     	// the new peer which join and updates the zone maintained by 
     	// the others neighbors
-    	for (int dim=0; dim<DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+    	for (int dim=0; dim<P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
         	for (int dir=0; dir<2; dir++) {
         		Iterator<NeighborEntry> it = this.neighborTable.get(dim, dir).values().iterator();
         		NeighborEntry entry = null;
@@ -532,8 +532,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
             public void run() {
                 update();
             }
-        }, DefaultProperties.CAN_REFRESH_TASK_START.getValue(), 
-           DefaultProperties.CAN_REFRESH_TASK_INTERVAL.getValue(), 
+        }, P2PStructuredProperties.CAN_REFRESH_TASK_START.getValue(), 
+           P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.getValue(), 
            TimeUnit.MILLISECONDS);
     }
     
@@ -575,7 +575,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         				new JoinWelcomeOperation()));
         
         // notify the neighbors that the current peer has joined
-        for (int dim=0; dim<DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim=0; dim<P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
         	for (int dir=0; dir<2; dir++) {
         		if (dim != this.splitHistory.getLast().getDimension()
         				|| dir != getOppositeDirection(this.splitHistory.getLast().getDirection())) {
@@ -689,7 +689,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         /*
          * Send LeaveOperation in order to update the neighbors list.
          */
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
                 for (NeighborEntry entry : this.neighborTable.get(dim, direction).values()) {
                     if (!neighborsToMergeWith.containsKey(entry.getId())) {
@@ -730,7 +730,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     public void update() {
     	this.removeOutdatedNeighbors();
 
-    	for (int dimension=0; dimension<DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+    	for (int dimension=0; dimension<P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
 			for (int direction = 0; direction < 2; direction++) {
 				Iterator<NeighborEntry> it = this.neighborTable.get(dimension, direction).values().iterator();
 				while (it.hasNext()) {
@@ -795,7 +795,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
             Operation msg) throws Exception {
         List<ResponseOperation> responses = new ArrayList<ResponseOperation>();
 
-        for (int dimension = 0; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (int direction = 0; direction < 2; direction++) {
                 for (NeighborEntry entry : table.get(dimension, direction).values()) {
                     responses.add(entry.getStub().receiveOperationIS(msg));
@@ -834,7 +834,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         logger.debug("Peer managing " + this.zone);
         NeighborTable neighborTable = this.getNeighborTable();
 
-        for (int dimension = 0; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (int direction = 0; direction < 2; direction++) {
                 for (NeighborEntry entry : neighborTable.get(dimension, direction).values()) {
                     logger.debug("  * " + entry.getZone() + ", dimension=" + dimension
@@ -864,7 +864,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * @return the next dimension following the specified dimension.
      */
     public static int getNextDimension(int dimension) {
-        return (dimension + 1) % DefaultProperties.CAN_NB_DIMENSIONS.getValue();
+        return (dimension + 1) % P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
     }
 
     /**
@@ -889,7 +889,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     public static int getPreviousDimension(int dimension) {
         int dim = dimension - 1;
         if (dim < 0) {
-            dim = DefaultProperties.CAN_NB_DIMENSIONS.getValue();
+            dim = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         }
         return dim;
     }

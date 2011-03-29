@@ -3,7 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.router.can;
 import java.util.Iterator;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
@@ -127,7 +127,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
 						new AnycastRoutingEntry(overlay.getId(),
 								overlay.getRemotePeer()));
 
-				for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+				for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
 					for (int direction = 0; direction < 2; direction++) {
 						Iterator<NeighborEntry> it = neighborsToSendTo.get(dim, direction).values().iterator();
 						while (it.hasNext()) {
@@ -149,7 +149,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
                                                final AnycastRequest msg) {
         NeighborTable neighborsToSendTo = new NeighborTable();
 
-        for (int dimension = 0; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (int direction = 0; direction < 2; direction++) {
                 for (NeighborEntry entry : ((AbstractCanOverlay) overlay).getNeighborTable().get(dimension, direction).values()) {
                     AnycastRoutingEntry entryCommingFromSender = 
@@ -190,7 +190,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Rou
         short direction = NeighborTable.ANY_DIRECTION;
 
         // finds the dimension on which the key to reach is not contained
-        for (; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction = overlayCAN.contains(dimension, request.getKey().getElement(dimension));
 
             if (direction == -1) {

@@ -9,10 +9,10 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
+import fr.inria.eventcloud.config.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
 import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
-import fr.inria.eventcloud.util.DSpaceProperties;
 
 /**
  * A SemanticRequest is a super type used to route a SPARQL query over a CAN
@@ -59,7 +59,7 @@ public abstract class SparqlRequest extends AnycastRequest {
 
     public ClosableIterableWrapper queryDatastore(AbstractCanOverlay overlay) {
     	return new ClosableIterableWrapper(((SemanticCanOverlay) overlay).getDatastore()
-    					.sparqlConstruct(DSpaceProperties.DEFAULT_CONTEXT, this.sparqlConstructQuery));
+    					.sparqlConstruct(EventCloudProperties.DEFAULT_CONTEXT, this.sparqlConstructQuery));
     }
     
 	public AnycastRequestRouter<SparqlRequest> getRouter() {

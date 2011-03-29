@@ -5,7 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -42,13 +42,13 @@ public class NeighborTable implements Serializable {
      */
     @SuppressWarnings("unchecked")
     private ConcurrentMap<UUID, NeighborEntry>[][] entries = 
-    	new ConcurrentHashMap[DefaultProperties.CAN_NB_DIMENSIONS.getValue()][2];
+    	new ConcurrentHashMap[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()][2];
 
     /**
      * Constructs a new NeighborTable.
      */
     public NeighborTable() {
-        for (int i = 0; i < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             this.entries[i][NeighborTable.INFERIOR_DIRECTION] = 
             	new ConcurrentHashMap<UUID, NeighborEntry>();
             this.entries[i][NeighborTable.SUPERIOR_DIRECTION] = 
@@ -64,7 +64,7 @@ public class NeighborTable implements Serializable {
      *            the {@link NeighborEntry} to add.
      * @param dimension
      *            the dimension index (must be in <code>0</code> and
-     *            {@link DefaultProperties#CAN_NB_DIMENSIONS - 1} include).
+     *            {@link P2PStructuredProperties#CAN_NB_DIMENSIONS - 1} include).
      * @param direction
      *            the direction ({@link #INFERIOR_DIRECTION} or
      *            {@link #SUPERIOR_DIRECTION}).
@@ -80,7 +80,7 @@ public class NeighborTable implements Serializable {
      *            the neighbors to add.
      */
     public void addAll(NeighborTable table) {
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
                 this.entries[dim][direction].putAll(table.get(dim, direction));
             }
@@ -93,7 +93,7 @@ public class NeighborTable implements Serializable {
      * 
      * @param dimension
      *            the dimension to use (dimension start to <code>0</code> and
-     *            max is defined by {@link DefaultProperties#CAN_NB_DIMENSIONS} -
+     *            max is defined by {@link P2PStructuredProperties#CAN_NB_DIMENSIONS} -
      *            1).
      * @param direction
      *            the direction ({@link #INFERIOR_DIRECTION} or
@@ -118,7 +118,7 @@ public class NeighborTable implements Serializable {
      * @return the zone found or <code>null</code>.
      */
     public NeighborEntry getNeighborEntry(UUID peerIdentifier) {
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
                     return this.entries[dim][direction].get(peerIdentifier);
@@ -140,7 +140,7 @@ public class NeighborTable implements Serializable {
      *         identifier, <code>false</code> otherwise.
      */
     public boolean contains(UUID peerIdentifier) {
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
                     return true;
@@ -180,7 +180,7 @@ public class NeighborTable implements Serializable {
      *         <code>false</code> otherwise.
      */
     public boolean remove(UUID peerIdentifier) {
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
 				if (this.entries[dim][direction].remove(peerIdentifier) != null) {
 					return true;
@@ -199,7 +199,7 @@ public class NeighborTable implements Serializable {
      * Clears the data structure.
      */
     public void removeAll() {
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
                 this.removeAll(dim, direction);
             }
@@ -211,7 +211,7 @@ public class NeighborTable implements Serializable {
      * 
      * @param dimension
      *            the dimension index (must be in <code>0</code> and
-     *            {@link DefaultProperties#CAN_NB_DIMENSIONS - 1} include).
+     *            {@link P2PStructuredProperties#CAN_NB_DIMENSIONS - 1} include).
      * @param direction
      *            the direction ({@link #INFERIOR_DIRECTION} or
      *            {@link #SUPERIOR_DIRECTION}).
@@ -227,7 +227,7 @@ public class NeighborTable implements Serializable {
      */
     public int size() {
         int nbEntries = 0;
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
                 nbEntries += this.entries[dim][direction].size();
             }
@@ -241,7 +241,7 @@ public class NeighborTable implements Serializable {
     public String toString() {
         StringBuffer buf = new StringBuffer();
 
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
                 buf.append("[");
                 int i = 0;

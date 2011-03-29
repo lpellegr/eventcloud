@@ -3,7 +3,6 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 import java.io.Serializable;
 import java.util.UUID;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;

@@ -6,11 +6,11 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.config.EventCloudProperties;
 import fr.inria.eventcloud.messages.response.can.SparqlConstructResponse;
 import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
 import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
 import fr.inria.eventcloud.reasoner.AtomicSparqlQuery;
-import fr.inria.eventcloud.util.DSpaceProperties;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
@@ -46,7 +46,7 @@ public class SparqlConstructRequest extends SparqlRequest {
 	public ClosableIterableWrapper queryDatastore(AbstractCanOverlay overlay) {
 		return new ClosableIterableWrapper(
 						((SemanticCanOverlay) overlay).getDatastore().sparqlConstruct(
-								DSpaceProperties.DEFAULT_CONTEXT, super.getSparqlConstructQuery()));
+								EventCloudProperties.DEFAULT_CONTEXT, super.getSparqlConstructQuery()));
 	}
 
 }

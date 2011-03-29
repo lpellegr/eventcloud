@@ -22,6 +22,8 @@ public final class SystemUtil {
 	private static final boolean windows;
 
 	private static final boolean linux;
+	
+	private static final boolean osx;
 
 	static {
 		architecture = System.getProperty("os.arch");
@@ -30,8 +32,9 @@ public final class SystemUtil {
 		numProcessors = Runtime.getRuntime().availableProcessors();
 		windows = SystemUtil.operatingSystem().startsWith("Windows");
 		linux = SystemUtil.operatingSystem().startsWith("Linux");
+		osx = SystemUtil.operatingSystem().startsWith("Mac");
 	}
-
+	
 	/**
 	 * Keep utility from being instantiated.
 	 */
@@ -77,6 +80,10 @@ public final class SystemUtil {
 	 */
 	public static final boolean isLinux() {
 		return linux;
+	}
+	
+	public static final boolean isOsX() {
+		return osx;
 	}
 
 	/**

@@ -1,7 +1,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.router.can;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
@@ -63,7 +63,7 @@ public class UnicastRequestRouter<T extends Request<Coordinate>> extends Router<
         short direction = NeighborTable.ANY_DIRECTION;
 
         // finds the dimension on which the key to reach is not contained
-        for (; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction = overlayCAN.contains(dimension, request.getKey().getElement(dimension));
             
             if (direction == -1) {

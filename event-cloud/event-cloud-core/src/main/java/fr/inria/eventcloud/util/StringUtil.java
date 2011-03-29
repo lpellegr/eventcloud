@@ -3,7 +3,7 @@ package fr.inria.eventcloud.util;
 import java.util.Random;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 /**
  * 
@@ -56,23 +56,23 @@ public class StringUtil {
             System.out.println("generateRandomString("
                     + randomNumber
                     + ", '"
-                    + DefaultProperties.CAN_LOWER_BOUND.getValueAsString()
+                    + P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()
                     + "', '"
-                    + DefaultProperties.CAN_UPPER_BOUND.getValueAsString()
+                    + P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()
                     + "')="
-                    + StringUtil.generateRandomString(randomNumber, DefaultProperties.CAN_LOWER_BOUND.getValueAsString().charAt(0),
-                    		DefaultProperties.CAN_UPPER_BOUND.getValueAsString().charAt(0)));
+                    + StringUtil.generateRandomString(randomNumber, P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString().charAt(0),
+                    		P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString().charAt(0)));
         }
 
         System.out.println();
 
         System.out.println("generateRandomString(\"http://\", 15, '"
-                + DefaultProperties.CAN_LOWER_BOUND.getValueAsString()
+                + P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()
                 + "', '"
-                + DefaultProperties.CAN_UPPER_BOUND.getValueAsString()
+                + P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()
                 + "')="
                 + StringUtil
-                        .generateRandomString("http://", 15, DefaultProperties.CAN_LOWER_BOUND.getValueAsString().charAt(0), DefaultProperties.CAN_UPPER_BOUND.getValueAsString().charAt(0)));
+                        .generateRandomString("http://", 15, P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString().charAt(0), P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString().charAt(0)));
 
         System.out.println();
 

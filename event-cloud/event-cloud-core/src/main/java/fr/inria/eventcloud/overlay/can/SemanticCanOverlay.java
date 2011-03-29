@@ -13,12 +13,12 @@ import org.ontoware.rdf2go.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.config.EventCloudProperties;
 import fr.inria.eventcloud.datastore.OwlimDatastore;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.overlay.SemanticStructuredOverlay;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
-import fr.inria.eventcloud.util.DSpaceProperties;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
@@ -66,7 +66,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 	protected Object getDataIn(Zone zone) {
 		Set<Statement> statementsToTransfert = new HashSet<Statement>();
 		ClosableIterable<Statement> result = this.datastore.sparqlConstruct(
-				DSpaceProperties.DEFAULT_CONTEXT,
+				EventCloudProperties.DEFAULT_CONTEXT,
 				"CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
 
 		ClosableIterator<Statement> it = result.iterator();
@@ -108,7 +108,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 	@Override
 	protected void removeDataIn(Zone zone) {
 		ClosableIterable<Statement> result = this.datastore.sparqlConstruct(
-				DSpaceProperties.DEFAULT_CONTEXT,
+				EventCloudProperties.DEFAULT_CONTEXT,
 				"CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
 
 		ClosableIterator<Statement> it = result.iterator();
@@ -133,7 +133,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 					&& predicate.compareTo(zone.getUpperBound(1).toString()) < 0
 					&& object.compareTo(zone.getLowerBound(2).toString()) >= 0
 					&& object.compareTo(zone.getUpperBound(2).toString()) < 0) {
-				this.datastore.removeStatement(DSpaceProperties.DEFAULT_CONTEXT, stmt);
+				this.datastore.removeStatement(EventCloudProperties.DEFAULT_CONTEXT, stmt);
 			}
 		}
 
@@ -147,7 +147,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 		ClosableIterator<Statement> data = 
 			((ClosableIterableWrapper) dataReceived).toRDF2Go().iterator();
 		
-		this.datastore.addAll(DSpaceProperties.DEFAULT_CONTEXT, data);
+		this.datastore.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -155,13 +155,13 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 		ClosableIterator<Statement> data = 
 			((ClosableIterable<Statement>) msg.getDataToReallocate()).iterator();
 		
-		this.datastore.addAll(DSpaceProperties.DEFAULT_CONTEXT, data);
+		this.datastore.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
 	}
 
 	@Override
 	protected ClosableIterable<Statement> retrieveAllData() {
 		return this.datastore.sparqlConstruct(
-					DSpaceProperties.DEFAULT_CONTEXT,
+					EventCloudProperties.DEFAULT_CONTEXT,
 					"CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
 	}
 

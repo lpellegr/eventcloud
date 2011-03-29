@@ -2,7 +2,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinate
 
 import java.util.LinkedList;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 /**
  * Represents a String coordinate element.
@@ -65,7 +65,7 @@ public class StringElement extends Element {
 	 */
 	@Override
 	public String toString() {
-		if (DefaultProperties.CAN_COORDINATE_DISPLAY.getValue().equals("codepoints")) {
+		if (P2PStructuredProperties.CAN_COORDINATE_DISPLAY.getValue().equals("codepoints")) {
 			StringBuffer result = new StringBuffer();
 			LinkedList<Integer> codePoints = fromStringtoUnicode(this);
 			for (int i = 0; i < codePoints.size(); i++) {

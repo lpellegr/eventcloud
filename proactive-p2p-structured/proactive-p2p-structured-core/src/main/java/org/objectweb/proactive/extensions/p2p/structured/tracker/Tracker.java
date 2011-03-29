@@ -18,7 +18,7 @@ import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.mop.ClassNotReifiableException;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
@@ -43,7 +43,7 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
 
     private static final transient Logger logger = LoggerFactory.getLogger(Tracker.class);
 
-    private double probabilityToStorePeer = DefaultProperties.TRACKER_STORAGE_PROBABILITY.getValue();
+    private double probabilityToStorePeer = P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
 
     private String name = UUID.randomUUID().toString();
 
@@ -208,9 +208,11 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
             }
         } else {
 			try {
+				Peer peerToJoin = this.getLandmarkPeerToJoin();
+				
 				// try to join until the operation succeeds (the operation
 				// can fail if a concurrent join is detected).
-				while (!remotePeer.join(this.getLandmarkPeerToJoin()));
+				while (!remotePeer.join(peerToJoin));
 				
 				if (ProActiveRandom.nextDouble() 
 						<= this.getProbabilityToStorePeer()) {
@@ -218,7 +220,7 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
 				}
 				
 				if (logger.isInfoEnabled()) {
-					logger.info("Peer managing {} has joined", remotePeer);
+					logger.info("Peer managing " + remotePeer + " has joined from " + peerToJoin);
 				}
 			} catch (NetworkAlreadyJoinedException e) {
 				e.printStackTrace();

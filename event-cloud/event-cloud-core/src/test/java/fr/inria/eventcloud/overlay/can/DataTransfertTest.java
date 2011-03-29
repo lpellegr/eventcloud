@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 import fr.inria.eventcloud.api.SemanticFactory;
+import fr.inria.eventcloud.config.EventCloudProperties;
 import fr.inria.eventcloud.initializers.EventCloudInitializer;
 import fr.inria.eventcloud.operations.can.SparqlConstructOperation;
 import fr.inria.eventcloud.operations.can.SparqlConstructResponseOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.util.DSpaceProperties;
 import fr.inria.eventcloud.util.RDF2GoBuilder;
 import fr.inria.eventcloud.util.SemanticHelper;
 
@@ -48,7 +48,7 @@ public class DataTransfertTest {
     public void testDataTransfert() {
         for (String[] stmt : statementsToAdd) {
             initializer.getRandomPeer().addStatement(
-            		DSpaceProperties.DEFAULT_CONTEXT, 
+            		EventCloudProperties.DEFAULT_CONTEXT, 
             		RDF2GoBuilder.createStatementInternal(stmt[0], stmt[1], stmt[2]));
         }
         
@@ -68,13 +68,13 @@ public class DataTransfertTest {
         Set<Statement> resultOldPeer = 
         	SemanticHelper.asSet(((SparqlConstructResponseOperation) 
         			PAFuture.getFutureValue(oldPeer.receiveOperation(
-        					new SparqlConstructOperation(DSpaceProperties.DEFAULT_CONTEXT, query))))
+        					new SparqlConstructOperation(EventCloudProperties.DEFAULT_CONTEXT, query))))
         						.getResult().toRDF2Go());
         
         Set<Statement> resultNewPeer = 
         	SemanticHelper.asSet(((SparqlConstructResponseOperation) 
         			PAFuture.getFutureValue(newPeer.receiveOperation(
-        					new SparqlConstructOperation(DSpaceProperties.DEFAULT_CONTEXT, query))))
+        					new SparqlConstructOperation(EventCloudProperties.DEFAULT_CONTEXT, query))))
         						.getResult().toRDF2Go());
 
         Set<Statement> newSet = Sets.intersection(resultOldPeer, resultNewPeer);

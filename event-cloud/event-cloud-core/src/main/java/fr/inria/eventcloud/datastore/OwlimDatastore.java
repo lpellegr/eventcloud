@@ -31,7 +31,7 @@ public class OwlimDatastore extends SemanticDatastore {
      *            indicates if the repository must be removed when it is closed.
      */
     public OwlimDatastore(boolean autoRemove) {
-        super(true);
+        super();
         this.autoRemove = autoRemove;
     }
 

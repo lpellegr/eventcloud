@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
 import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.DefaultProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Element;
 
@@ -26,12 +26,12 @@ public class Zone implements Serializable {
     private Coordinate lowerBound;
 
     /**
-     * Constructs a new zone by using the {@link DefaultProperties#CAN_LOWER_BOUND} and 
-     * {@link DefaultProperties#CAN_UPPER_BOUND} as coordinate elements.
+     * Constructs a new zone by using the {@link P2PStructuredProperties#CAN_LOWER_BOUND} and 
+     * {@link P2PStructuredProperties#CAN_UPPER_BOUND} as coordinate elements.
      */
     public Zone() {
-        this.lowerBound = this.createCoordinate(DefaultProperties.CAN_LOWER_BOUND.getValue());
-        this.upperBound = this.createCoordinate(DefaultProperties.CAN_UPPER_BOUND.getValue());
+        this.lowerBound = this.createCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValue());
+        this.upperBound = this.createCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
     }
     
     /**
@@ -50,15 +50,15 @@ public class Zone implements Serializable {
     /**
      * Creates a new coordinate where each coordinate elements have
      * the specified <code>value</code> and a type from
-     * {@link DefaultProperties#CAN_COORDINATE_TYPE}.
+     * {@link P2PStructuredProperties#CAN_COORDINATE_TYPE}.
      * 
      * @param value the default value for each coordinate element.
      * 
-     * @return a new coordinate with elements of type {@link DefaultProperties#CAN_COORDINATE_TYPE}.
+     * @return a new coordinate with elements of type {@link P2PStructuredProperties#CAN_COORDINATE_TYPE}.
      */
     private Coordinate createCoordinate(String value) {
-    	Element[] elts = new Element[DefaultProperties.CAN_NB_DIMENSIONS.getValue()];
-    	for (int i=0; i<DefaultProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+    	Element[] elts = new Element[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+    	for (int i=0; i<P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
     		elts[i] = this.createElement(value);
     	}
     	return new Coordinate(elts);
@@ -66,17 +66,17 @@ public class Zone implements Serializable {
     
     /**
      * Creates a new {@link CoordinateValue} by using the concrete type
-     * specified in {@link DefaultProperties#CAN_COORDINATE_TYPE}.
+     * specified in {@link P2PStructuredProperties#CAN_COORDINATE_TYPE}.
      * 
      * @param value the coordinate value value.
      * 
      * @return a new {@link CoordinateValue} according to the concrete type
-     *         specified in {@link DefaultProperties#CAN_COORDINATE_TYPE}.
+     *         specified in {@link P2PStructuredProperties#CAN_COORDINATE_TYPE}.
      */
     private Element createElement(String value) {
         try {
             return (Element) Class.forName(
-                            DefaultProperties.CAN_COORDINATE_TYPE.getValueAsString())
+                            P2PStructuredProperties.CAN_COORDINATE_TYPE.getValueAsString())
                                 .getConstructor(String.class).newInstance(value);
         } catch (SecurityException e) {
             e.printStackTrace();
@@ -107,7 +107,7 @@ public class Zone implements Serializable {
      *         <code>false</code> otherwise.
      */
     public boolean contains(Coordinate coordinate) {
-        for (int dim = 0; dim < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             if (this.contains(dim, coordinate.getElement(dim)) != 0) {
                 return false;
             }
@@ -186,7 +186,7 @@ public class Zone implements Serializable {
      *         on all dimensions, <code>false</code> otherwise.
      */
     public boolean overlaps(Zone zone) {
-        for (int i = 0; i < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             if (this.overlaps(zone, i) == false) {
                 return false;
             }
@@ -241,7 +241,7 @@ public class Zone implements Serializable {
         int abuts = 0;
         int abutsDimension = -1;
 
-        for (int dimension = 0; dimension < DefaultProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             if (this.overlaps(zone, dimension)) {
                 overlaps++;
             } else {
@@ -255,7 +255,7 @@ public class Zone implements Serializable {
             }
         }
 
-        if ((abuts != 1) || (overlaps != DefaultProperties.CAN_NB_DIMENSIONS.getValue() - 1)) {
+        if ((abuts != 1) || (overlaps != P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1)) {
             return -1;
         } else {
             return abutsDimension;
