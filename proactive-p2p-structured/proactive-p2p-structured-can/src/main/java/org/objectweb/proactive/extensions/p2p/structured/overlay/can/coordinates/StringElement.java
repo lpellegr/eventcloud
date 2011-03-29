@@ -346,11 +346,11 @@ public class StringElement extends Element {
     
     private static char nearestLegalCharacter(char c) {
     	char nearest = legalCharacters[0];
-    	int distance = Math.abs(((int) c) - ((int) legalCharacters[0])); 
+    	int distance = Math.abs(c - legalCharacters[0]); 
     	
     	int tmpDistance;
     	for (int i=1; i<legalCharacters.length-1; i++) {
-    		if ((tmpDistance = (Math.abs(((int)c) - ((int)legalCharacters[i])))) < distance) {
+    		if ((tmpDistance = (Math.abs(c - legalCharacters[i]))) < distance) {
     			nearest = legalCharacters[i];
     			distance = tmpDistance;
     		} else {
@@ -372,8 +372,8 @@ public class StringElement extends Element {
     }
     
     public static void main(String[] args) {
-		int lowerBound = (int) 'A';
-		int upperBound = (int) 'Z';
+		int lowerBound = 'A';
+		int upperBound = 'Z';
 		
 		for (int i=lowerBound; i<=lowerBound +(upperBound - lowerBound); i++) {
 			System.out.print("'" + (char) i + "'");

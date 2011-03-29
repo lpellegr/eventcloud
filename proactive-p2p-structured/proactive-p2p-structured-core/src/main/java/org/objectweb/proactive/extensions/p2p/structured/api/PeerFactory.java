@@ -41,8 +41,7 @@ public class PeerFactory {
 	 */
     public static Peer newActivePeer(StructuredOverlay overlay, Node node) {
         try {
-			return (Peer) PAActiveObject.turnActive(
-							new Peer(overlay), node);
+			return PAActiveObject.newActive(Peer.class, new Object[] {overlay}, node);
 		} catch (ActiveObjectCreationException e) {
 			e.printStackTrace();
 		} catch (NodeException e) {

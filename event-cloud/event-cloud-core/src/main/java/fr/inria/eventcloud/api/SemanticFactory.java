@@ -70,9 +70,7 @@ public class SemanticFactory {
         }
 
         try {
-			return (SemanticCanTracker) PAActiveObject.newActive(
-											SemanticCanTracker.class,
-											constructorParameters, node);
+			return PAActiveObject.newActive(SemanticCanTracker.class, constructorParameters, node);
 		} catch (ActiveObjectCreationException e) {
 			e.printStackTrace();
 		} catch (NodeException e) {
