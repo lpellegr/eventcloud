@@ -59,13 +59,13 @@ public class SparqlDecomposer {
 
 	public List<AtomicSparqlQuery> parse(ElementPathBlock elt) {
 		List<AtomicSparqlQuery> result = new ArrayList<AtomicSparqlQuery>();
-		ElementPathBlock block = ((ElementPathBlock) elt);
+		ElementPathBlock block = elt;
 		Iterator<TriplePath> it = block.patternElts();
 
 		TriplePath triple;
 		int i=0;
 		while (it.hasNext()) {
-			triple = ((TriplePath) it.next());
+			triple = it.next();
 			
 			// TODO adds support for FilterElement
 			result.add(

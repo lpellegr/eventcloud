@@ -69,9 +69,7 @@ public abstract class RequestResponseManager implements Serializable {
     	// waits for the final response
     	this.waitForFinalResponse(requestId);
     	
-        Response<?> response = 
-        	(Response<?>) this.repliesReceived
-                .remove(requestId).getResponse();
+        Response<?> response = this.repliesReceived.remove(requestId).getResponse();
         // sets the delivery time for latency computation
         response.setDeliveryTime();
 

@@ -165,7 +165,7 @@ public class SemanticHelper {
     public static <T> ClosableIterable<T> generateClosableIterable(final Set<T> statements) {
         return new ClosableIterable<T>() {
             public ClosableIterator<T> iterator() {
-                return (ClosableIterator<T>) generateClosableIterator(statements);
+                return generateClosableIterator(statements);
             }
         };
     }
@@ -248,7 +248,7 @@ public class SemanticHelper {
             }
 
             public ClosableIterator<QueryRow> iterator() {
-                return (ClosableIterator<QueryRow>) generateClosableIterator(queryRows);
+                return generateClosableIterator(queryRows);
             }
 
         };
@@ -274,7 +274,7 @@ public class SemanticHelper {
             }
 
             public ClosableIterator<QueryRow> iterator() {
-                return (ClosableIterator<QueryRow>) generateClosableIterator(queryRows);
+                return generateClosableIterator(queryRows);
             }
         };
     }

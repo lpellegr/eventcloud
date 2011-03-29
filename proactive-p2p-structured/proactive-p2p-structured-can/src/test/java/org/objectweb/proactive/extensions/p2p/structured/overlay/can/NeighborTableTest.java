@@ -5,16 +5,12 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 
 /**
  * Test cases for {@link NeighborTable}.
@@ -31,7 +27,7 @@ public class NeighborTableTest extends CANNetworkInitializer {
     }
 
     @Test
-    public void testAddAll() throws ActiveObjectCreationException, NodeException {
+    public void testAddAll() {
         Peer firstPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
         Peer secondPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
 

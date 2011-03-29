@@ -777,7 +777,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     /**
-     * Send a {@link Operation} to a peers that are in the specified
+     * Send a {@link Operation} to peers that are in the specified
      * {@link NeighborTable}.
      * 
      * @param table
