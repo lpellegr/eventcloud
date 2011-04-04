@@ -183,14 +183,13 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
     protected Peer getLandmarkPeerToJoin() {
     	return this.getRandomPeer();
     }
-    
-    /**
-     * Add on the network that the tracker manages, the given peer.
-     * 
-     * @param remotePeer
-     *            the peer to add on the network.
-     * @throws StructuredP2PException 
-     */
+
+	/**
+	 * Adds the given {@code remotePeer} on the network managed by the tracker.
+	 * 
+	 * @param remotePeer
+	 *            the peer to add on the network.
+	 */
     public boolean addOnNetwork(Peer remotePeer) {
     	if (remotePeer.getType() != this.type) {
             throw new IllegalArgumentException(
@@ -204,7 +203,7 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
 			}
             this.storePeer(remotePeer);
             if (logger.isInfoEnabled()) {
-                logger.info("A new peer has created a network");
+                logger.info("Peer " + remotePeer.getId() + " has created a new network");
             }
         } else {
 			try {
@@ -212,7 +211,18 @@ public class Tracker implements InitActive, EndActive, RunActive, Serializable {
 				
 				// try to join until the operation succeeds (the operation
 				// can fail if a concurrent join is detected).
-				while (!remotePeer.join(peerToJoin));
+				while (!remotePeer.join(peerToJoin)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Retry join operation in "
+								+ P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue()
+								+ " ms because a concurrent join or leave operation has been detected");
+					}
+					try {
+						Thread.sleep(P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				
 				if (ProActiveRandom.nextDouble() 
 						<= this.getProbabilityToStorePeer()) {
