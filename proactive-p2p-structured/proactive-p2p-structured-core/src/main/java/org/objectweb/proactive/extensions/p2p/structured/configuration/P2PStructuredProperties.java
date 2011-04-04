@@ -66,4 +66,7 @@ public class P2PStructuredProperties {
 	public static final PropertyDouble TRACKER_STORAGE_PROBABILITY = 
 							new PropertyDouble("tracker.storage.probability", 1.0);
 	
+	public static final PropertyInteger TRACKER_JOIN_RETRY_INTERVAL = 
+							new PropertyInteger("tracker.join.retry.interval", 500);
+	
 }
