@@ -1,6 +1,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.util.LinkedList;
+import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
@@ -17,6 +18,8 @@ public class JoinIntroduceResponseOperation implements ResponseOperation {
 
 	private static final long serialVersionUID = 1L;
 
+	private final UUID peerId;
+	
 	private final Zone zone;
 	
 	private final LinkedList<SplitEntry> splitHistory;
@@ -25,14 +28,18 @@ public class JoinIntroduceResponseOperation implements ResponseOperation {
 	
 	private final Object data;
 
-	public JoinIntroduceResponseOperation(
+	public JoinIntroduceResponseOperation(UUID peerId, 
 			Zone zone, LinkedList<SplitEntry> splitHistory,
 			NeighborTable neighbors, Object data) {
-		super();
+		this.peerId = peerId;
 		this.zone = zone;
 		this.splitHistory = splitHistory;
 		this.neighbors = neighbors;
 		this.data = data;
+	}
+
+	public UUID getPeerId() {
+		return this.peerId;
 	}
 
 	public Zone getZone() {

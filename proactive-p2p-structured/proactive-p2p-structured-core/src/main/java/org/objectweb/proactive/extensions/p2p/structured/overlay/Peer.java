@@ -2,6 +2,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.EndActive;
@@ -12,7 +13,6 @@ import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -39,13 +39,13 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
     
     protected StructuredOverlay overlay;
 
-    private boolean activated = false;
+    private AtomicBoolean activated;
 
     /**
      * The no-argument constructor as commanded by ProActive.
      */
     public Peer() {
-
+    	this.activated = new AtomicBoolean();
     }
 
     /**
@@ -56,6 +56,7 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
      *            the overlay to set to the new peer.
      */
     public Peer(StructuredOverlay overlay) {
+    	this();
         this.overlay = overlay;
         this.overlay.setLocalPeer(this);
     }
@@ -66,20 +67,16 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
 	 * 
 	 * @return a boolean indicating if the operation has succeeded or not.
 	 * 
-	 * @throws StructuredP2PException
+	 * @throws NetworkAlreadyJoinedException
 	 *             if the peer has already joined or created an existing
 	 *             network.
 	 */
-    public boolean create() throws StructuredP2PException {
-    	if (!this.activated) {
-    		if (this.overlay.create()) {
-        		this.setActivated(true);
-        		return true;
-        	}
-    		return false;
-    	} else {
-    		throw new StructuredP2PException("Peer has already joined or created an existing network.");
-    	}
+    public boolean create() throws NetworkAlreadyJoinedException {
+		if (this.activated.compareAndSet(false, true)) {
+			return this.overlay.create();
+		} else {
+			throw new NetworkAlreadyJoinedException();
+		}
     }
 
 	/**
@@ -90,44 +87,35 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
 	 * 
 	 * @param landmarkPeer
 	 *            the peer used as entry point.
-	 * @return Returns <code>true</code> if the operation has succeeded,
-	 *         <code>false</code> otherwise.
+	 * @return Returns {@code true} if the operation has succeeded,
+	 *         {@code false} otherwise (e.g. if a concurrent join or leave
+	 *         operation is detected).
 	 * @throws NetworkAlreadyJoinedException
 	 *             if the current peer has already joined a network.
 	 */
     public boolean join(Peer landmarkPeer) throws NetworkAlreadyJoinedException {
-        if (this.isActivated()) {
-            throw new NetworkAlreadyJoinedException();
-        }
-
-        if (this.overlay.join(landmarkPeer)) {
-            this.setActivated(true);
-            return true;
-        }
-
-        return false;
+		if (this.activated.compareAndSet(false, true)) {
+			return this.overlay.join(landmarkPeer);
+		} else {
+			throw new NetworkAlreadyJoinedException();
+		}
     }
 
-    /**
-     * Forces the current peer to leave the network it has joined.
-     * 
-     * @return Returns <code>true</code> if the operation has succeeded,
-     *         <code>false</code> otherwise.
-     * @throws NetworkNotJoinedException
-     *             if the current peer try leave without having joined a
-     *             network.
-     */
+	/**
+	 * Forces the current peer to leave the network it has joined.
+	 * 
+	 * @return Returns {@code true} if the operation has succeeded,
+	 *         {@code false} otherwise.
+	 * @throws NetworkNotJoinedException
+	 *             if the current peer try leave without having joined a
+	 *             network.
+	 */
     public boolean leave() throws NetworkNotJoinedException {
-        if (!this.isActivated()) {
-            throw new NetworkNotJoinedException();
-        }
-
-        if (this.overlay.leave()) {
-            this.setActivated(false);
-            return true;
-        }
-
-        return false;
+		if (this.activated.compareAndSet(true, false)) {
+			return this.overlay.leave();
+		} else {
+			throw new NetworkNotJoinedException();
+		}     
     }
 
     /**
@@ -155,7 +143,7 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
      * {@inheritDoc}
      */
     public void endActivity(Body body) {
-		if (this.activated) {
+		if (this.activated.get()) {
 			try {
 				this.leave();
 			} catch (NetworkNotJoinedException e) {
@@ -220,18 +208,13 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
         return this.overlay.getType();
     }
 
-    /**
-     * Indicates whether the join operation has already be performed or not.
-     * 
-     * @return <code>true</code> if the peer is activated, <code>false</code>
-     *         otherwise.
-     */
+	/**
+	 * Indicates whether the join operation has already be performed or not.
+	 * 
+	 * @return {@code true} if the peer is activated, {@code false} otherwise.
+	 */
     public boolean isActivated() {
-        return this.activated;
-    }
-
-    public void setActivated(boolean value) {
-        this.activated = value;
+        return this.activated.get();
     }
 
     /**

@@ -3,6 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.Service;
@@ -21,7 +22,7 @@ import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.ConcurrentJoinException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
@@ -62,26 +63,28 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
     private Zone zone;
 
-    private AtomicBoolean joinInProgress = new AtomicBoolean(false);
+    private AtomicReference<UUID> peerJoiningId;
+    
+    private AtomicReference<UUID> peerLeavingId;
     
     private JoinInformation tmpJoinInformation;
     
-    public AbstractCanOverlay() {
-        super();
-    }
-
     /**
      * Constructs a new overlay with the specified <code>localPeer</code> 
-     * and <code>queryManager</code>.
+     * and <code>requestResponseManager</code>.
      * 
      * @param localPeer
      *            the local peer reference to associate to this overlay.
      * 
-     * @param queryManager
+     * @param requestResponseManager
      *            the {@link RequestResponseManager} to use.
      */
-    public AbstractCanOverlay(Peer localPeer, RequestResponseManager queryManager) {
-        super(localPeer, queryManager);
+    public AbstractCanOverlay(Peer localPeer, RequestResponseManager requestResponseManager) {
+		super(localPeer, requestResponseManager);
+		this.peerJoiningId = new AtomicReference<UUID>();
+		this.peerLeavingId = new AtomicReference<UUID>();
+		this.splitHistory = new LinkedList<SplitEntry>();
+		this.neighborTable = new NeighborTable();
     }
 
     /**
@@ -91,7 +94,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *            the {@link RequestResponseManager} to use.
      */
     public AbstractCanOverlay(RequestResponseManager queryManager) {
-        super(queryManager);
+        this(null, queryManager);
     }
 
     /**
@@ -398,10 +401,13 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      */
     @SuppressWarnings("unchecked")
 	public JoinIntroduceResponseOperation handleJoinIntroduceMessage(JoinIntroduceOperation msg) {
-    	if (!this.joinInProgress.compareAndSet(false, true)) {
-    		throw new ConcurrentJoinException();
-    	}
-    	
+		if (!super.getLocalPeer().isActivated()) {
+			throw new PeerNotActivatedRuntimeException();
+		} else if (this.peerLeavingId.get() != null
+				|| !this.peerJoiningId.compareAndSet(null, msg.getPeerID())) {
+			throw new ConcurrentModificationException();
+		}
+		
         int dimension = 0;
         // TODO: choose the direction according to the number of triples to transfer
         int direction = this.getRandomDirection();
@@ -468,6 +474,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         			new NeighborEntry(msg.getPeerID(), msg.getRemotePeer(), newZones[directionInv]));
         
         return new JoinIntroduceResponseOperation(
+        				this.getId(),
         				newZones[directionInv],
         				historyToTransfert, 
         				pendingNewNeighborhood, 
@@ -515,7 +522,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     	this.neighborTable.add(this.tmpJoinInformation.getEntry(), this.tmpJoinInformation.getDimension(), directionInv);
 
     	this.tmpJoinInformation = null;
-    	this.joinInProgress.set(false);
+    	this.peerJoiningId.set(null);
     	
     	return new EmptyResponseOperation();
     }
@@ -541,29 +548,40 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         this.zone = new Zone();
     	return true;
     }
-    
-    /**
-     * Returns <code>true</code> when the join operation succeed 
-     * and <code>false</code> when the peer receiving the operation
-     * is already handling an another operation.
-     * 
-     * @param landmarkPeer the landmark node to join.
-     * 
-     * @return <code>true</code> when the join operation succeed 
-     * 		   and <code>false</code> when the peer receiving the 
-     *         operation is already handling an another join operation.
-     */
+
+	/**
+	 * Returns <code>true</code> when the join operation succeed and
+	 * <code>false</code> when the peer receiving the operation is already
+	 * handling an another operation.
+	 * 
+	 * @param landmarkPeer
+	 *            the landmark node to join.
+	 * 
+	 * @return <code>true</code> when the join operation succeed and
+	 *         <code>false</code> when the peer receiving the operation is
+	 *         already handling operation is already handling a join or leave
+	 *         operation.
+	 */
     public boolean join(Peer landmarkPeer) {
-    	JoinIntroduceResponseOperation response;
-    	try {
-    		response = 
-    			(JoinIntroduceResponseOperation) PAFuture.getFutureValue(
-                    landmarkPeer.receiveOperationIS(
-                            new JoinIntroduceOperation(this.getId(), this.getRemotePeer())));
-    	} catch (ConcurrentJoinException e) {
-    		e.printStackTrace();
-    		return false;
-    	}
+		JoinIntroduceResponseOperation response = null;
+		try {
+			response = 
+				(JoinIntroduceResponseOperation) PAFuture.getFutureValue(
+						landmarkPeer.receiveOperationIS(
+								new JoinIntroduceOperation(this.getId(), this.getRemotePeer())));
+		} catch (PeerNotActivatedRuntimeException e) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Landmark peer " + landmarkPeer.getId() + " to join is not activated");
+			}
+			return false;
+		} catch (ConcurrentModificationException e) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Peer " + landmarkPeer.getId()
+							+ " is already handling a join operation for peer "
+							+ this.getId());
+			}
+			return false;
+		}
     	
         this.zone = response.getZone();
         this.splitHistory = response.getSplitHistory();
