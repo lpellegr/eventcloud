@@ -35,11 +35,12 @@ public class NeighborTable implements Serializable {
      */
     public static final short SUPERIOR_DIRECTION = 1;
 
-    /**
-     * Contains neighbors categorized by dimension, direction. The neighbors are
-     * in a two-dimensional array of {@link ConcurrentHashMap}. Each line corresponds
-     * to a dimension and the number of columns is always equal to two.
-     */
+	/**
+	 * Contains neighbors categorized by dimension, direction. The neighbors are
+	 * in a two-dimensional array of {@link ConcurrentHashMap}. Each line
+	 * corresponds to a dimension and the number of columns is always equal to
+	 * two (which corresponds to the upper and lower directions).
+	 */
     @SuppressWarnings("unchecked")
     private ConcurrentMap<UUID, NeighborEntry>[][] entries = 
     	new ConcurrentHashMap[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()][2];

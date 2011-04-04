@@ -1,11 +1,20 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
+import static org.junit.Assert.assertFalse;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
@@ -131,7 +140,67 @@ public class JoinOperationTest {
             Assert.assertFalse(CanOperations.hasNeighbor(firstPeer, fourthPeer.getId()));
             Assert.assertFalse(CanOperations.hasNeighbor(fourthPeer, firstPeer.getId()));
         }
-
     }
+    
+        @Test(expected = NetworkAlreadyJoinedException.class)
+        public void testJoinOnPeerWhichHasAlreadyJoined() throws NetworkAlreadyJoinedException {
+        	Peer landmarkPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
+        	landmarkPeer.create();
+        	Peer joiner = PeerFactory.newActivePeer(new BasicCanOverlay());
+        	joiner.join(landmarkPeer);
+    		joiner.join(landmarkPeer);
+        }
+        
+        @Test
+        public void testJoinOnPeerNotActivated() {
+        	Peer landmarkPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
+        	Peer joiner = PeerFactory.newActivePeer(new BasicCanOverlay());
+        	try {
+    			assertFalse(joiner.join(landmarkPeer));
+    		} catch (NetworkAlreadyJoinedException e) {
+    			e.printStackTrace();
+    		}
+        }
+        
+        @Test
+        public void testConcurrentJoin() {
+        	final Peer landmarkPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
+        	try {
+    			landmarkPeer.create();
+    		} catch (StructuredP2PException e) {
+    			e.printStackTrace();
+    		}
+        	
+    		int nbPeersToJoin = 5;
+    		
+    		List<Peer> peers = new ArrayList<Peer>(nbPeersToJoin);
+    		for (int i=0; i<nbPeersToJoin; i++) {
+    			peers.add(PeerFactory.newActivePeer(new BasicCanOverlay()));
+    		}
+    		
+    		ExecutorService threadPool = Executors.newFixedThreadPool(nbPeersToJoin < 20 ? nbPeersToJoin : 20);
+    		
+    		final CountDownLatch doneSignal = new CountDownLatch(nbPeersToJoin);
+    		for (final Peer p : peers) {
+    			threadPool.execute(new Runnable() {
+    				@Override
+    				public void run() {
+    					try {
+    						p.join(landmarkPeer);
+    					} catch (NetworkAlreadyJoinedException e) {
+    						e.printStackTrace();
+    					} finally {
+    						doneSignal.countDown();
+    					}
+    				}
+    			});
+    		}
+    		
+    		try {
+    			doneSignal.await();
+    		} catch (InterruptedException e) {
+    			e.printStackTrace();
+    		}
+        } 
 
 }
