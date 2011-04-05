@@ -31,19 +31,6 @@ public abstract class StructuredOverlay implements Serializable {
     	this.identifier = UUID.randomUUID();
     }
 
-    /**
-     * Constructor.
-     * 
-     * @param peer
-     *            the peer which is associated to the overlay.
-     * @param queryManager
-     *            the query manager to associate to the overlay.
-     */
-    protected StructuredOverlay(Peer peer, RequestResponseManager queryManager) {
-        this(queryManager);
-        this.localPeer = peer;
-    }
-
     protected StructuredOverlay(RequestResponseManager queryManager) {
     	this();
     	this.messagingManager = queryManager;

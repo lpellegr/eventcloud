@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,13 +19,12 @@ import javax.swing.JFrame;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.BigDecimalElement;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Element;
+
+import fr.inria.eventcloud.overlay.can.DualLexicographicZone;
 
 /**
  * 
@@ -42,24 +40,24 @@ public class Network2DVisualizer extends JFrame {
 	
 	private JComponent area;
 
-	private Map<Zone, ZoneEntry> peers;
+	private Map<DualLexicographicZone, ZoneEntry> peers;
 	
 	public Network2DVisualizer(List<Peer> peers) {
-		this.peers = new HashMap<Zone, ZoneEntry>();
+		this.peers = new HashMap<DualLexicographicZone, ZoneEntry>();
 		NeighborTable table = null;
 		for (Peer peer : peers) {
-			List<Zone> neighbors = new ArrayList<Zone>();
+			List<DualLexicographicZone> neighbors = new ArrayList<DualLexicographicZone>();
 			for (int dim = 0; dim < 2; dim++) {
 				for (int dir = 0; dir < 2; dir++) {
 					table = CanOperations.getNeighborTable(peer);
 					for (NeighborEntry entry : table.get(dim, dir).values()) {
-						neighbors.add(entry.getZone());
+						neighbors.add((DualLexicographicZone) entry.getZone());
 					}
 				}
 			}
 			
 			this.peers.put(
-					CanOperations.getIdAndZoneResponseOperation(peer).getPeerZone(),
+					(DualLexicographicZone) CanOperations.getIdAndZoneResponseOperation(peer).getPeerZone(),
 					new ZoneEntry(getRandomColor(), neighbors));
 		}
 
@@ -95,7 +93,7 @@ public class Network2DVisualizer extends JFrame {
 		
 		private static final long serialVersionUID = 1L;
 
-		public Zone zoneClicked = null;
+		public DualLexicographicZone zoneClicked = null;
 
 		public Canvas(int width, int height) {
 			super();
@@ -104,7 +102,7 @@ public class Network2DVisualizer extends JFrame {
 
 			this.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
-					Zone clickedZone = Canvas.this.getClicked(e.getX(), CANVAS_HEIGHT - e.getY());
+					DualLexicographicZone clickedZone = Canvas.this.getClicked(e.getX(), CANVAS_HEIGHT - e.getY());
 					if (e.getButton() == MouseEvent.BUTTON1) {
 //						System.out.println("Clicked in x=" + e.getX() + ", y=" + e.getY());
 						Canvas.this.zoneClicked = clickedZone;
@@ -120,28 +118,20 @@ public class Network2DVisualizer extends JFrame {
 			});
 		}
 
-		public int getXmin(Zone z) {
-			return this.getWidth(
-						((BigDecimalElement) z.getLowerBound().getElement(0))
-							.getValue().doubleValue());
+		public int getXmin(DualLexicographicZone z) {
+			return this.getWidth(z.getIntervals()[0][0]);
 		}
 		
-		public int getXmax(Zone z) {
-			return this.getWidth(
-						((BigDecimalElement) z.getUpperBound().getElement(0))
-							.getValue().doubleValue());
+		public int getXmax(DualLexicographicZone z) {
+			return this.getWidth(z.getIntervals()[0][1]);
 		}
 		
-		public int getYmin(Zone z) {
-			return this.getHeight(
-						((BigDecimalElement) z.getLowerBound().getElement(1))
-							.getValue().doubleValue());
+		public int getYmin(DualLexicographicZone z) {
+			return this.getWidth(z.getIntervals()[1][0]);
 		}
 		
-		public int getYmax(Zone z) {
-			return this.getHeight(
-						((BigDecimalElement) z.getUpperBound().getElement(1))
-							.getValue().doubleValue());
+		public int getYmax(DualLexicographicZone z) {
+			return this.getWidth(z.getIntervals()[1][1]);
 		}
 		
 		public int getHeight(double v) {
@@ -157,7 +147,7 @@ public class Network2DVisualizer extends JFrame {
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			
 			int height, xMin, xMax, yMin, yMax;
-			for (Zone zone : peers.keySet()) {
+			for (DualLexicographicZone zone : peers.keySet()) {
 				xMin = this.getXmin(zone);
 				xMax = this.getXmax(zone);
 				yMin = this.getYmin(zone);
@@ -184,7 +174,7 @@ public class Network2DVisualizer extends JFrame {
 				
 				for (int i = 0; i < 2; i++) {
 					for (int j = 0; j < 2; j++) {
-						for (Zone zone : peers.get(this.zoneClicked).getNeighbors()) {
+						for (DualLexicographicZone zone : peers.get(this.zoneClicked).getNeighbors()) {
 							xMin = this.getXmin(zone);
 							xMax = this.getXmax(zone);
 							yMin = this.getYmin(zone);
@@ -198,31 +188,45 @@ public class Network2DVisualizer extends JFrame {
 			}
 		}
 		
-		public Zone getClicked(int x, int y) {
-			for (Zone zone : peers.keySet()) {
-				if (zone.contains(
-						new Coordinate(
-								new Element[] { 
-										new BigDecimalElement(
-												BigDecimal.valueOf(x).divide(
-														BigDecimal.valueOf(500))), 
-										new BigDecimalElement(
-												BigDecimal.valueOf(y).divide(
-														BigDecimal.valueOf(500))) }))) {
+		public DualLexicographicZone getClicked(int x, int y) {
+			for (DualLexicographicZone zone : peers.keySet()) {
+//				if (zone.contains(
+//						new Coordinate(
+//								new Element[] { 
+//										new BigDecimalElement(
+//												BigDecimal.valueOf(x).divide(
+//														BigDecimal.valueOf(500))), 
+//										new BigDecimalElement(
+//												BigDecimal.valueOf(y).divide(
+//														BigDecimal.valueOf(500))) }))) {
+//					return zone;
+//				}
+				if (contains(zone.getIntervals(), new double[] { x / 500.0, y / 500.0 })) {
 					return zone;
 				}
 			}
 			return null;
 		}
+		
+		public boolean contains(double[][] intervals, double[] coordinates) {
+	        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+	            if ((coordinates[i] < intervals[i][0])
+	                    || (coordinates[i] >= intervals[i][1])) {
+	                return false;
+	            }
+	        }
+
+	        return true;
+	    }
 	}
 	
 	private class ZoneEntry {
 		
 		private Color zoneColor;
 		
-		private final List<Zone> neighbors;
+		private final List<DualLexicographicZone> neighbors;
 
-		public ZoneEntry(final Color zoneColor, final List<Zone> neighbors) {
+		public ZoneEntry(final Color zoneColor, final List<DualLexicographicZone> neighbors) {
 			super();
 			this.zoneColor = zoneColor;
 			this.neighbors = neighbors;
@@ -236,7 +240,7 @@ public class Network2DVisualizer extends JFrame {
 			return this.zoneColor;
 		}
 
-		public List<Zone> getNeighbors() {
+		public List<DualLexicographicZone> getNeighbors() {
 			return this.neighbors;
 		}
 		

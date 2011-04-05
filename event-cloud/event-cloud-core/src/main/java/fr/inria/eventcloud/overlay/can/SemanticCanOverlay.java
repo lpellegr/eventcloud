@@ -41,7 +41,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 	 * Constructs a new overlay.
 	 */
 	public SemanticCanOverlay() {
-		super(new SparqlRequestResponseManager());
+		super(new SparqlRequestResponseManager(), DualLexicographicZone.class);
 	}
 	
 	/**

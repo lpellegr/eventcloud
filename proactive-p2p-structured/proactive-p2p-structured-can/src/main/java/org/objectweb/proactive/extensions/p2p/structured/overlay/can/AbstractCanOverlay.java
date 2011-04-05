@@ -61,42 +61,48 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
     private LinkedList<SplitEntry> splitHistory = new LinkedList<SplitEntry>();
 
-    private Zone zone;
-
     private AtomicReference<UUID> peerJoiningId;
     
     private AtomicReference<UUID> peerLeavingId;
     
     private JoinInformation tmpJoinInformation;
+
+    private Zone zone;
+
+    private final Class<? extends Zone> zoneType;
     
-    /**
-     * Constructs a new overlay with the specified <code>localPeer</code> 
-     * and <code>requestResponseManager</code>.
-     * 
-     * @param localPeer
-     *            the local peer reference to associate to this overlay.
-     * 
-     * @param requestResponseManager
-     *            the {@link RequestResponseManager} to use.
-     */
-    public AbstractCanOverlay(Peer localPeer, RequestResponseManager requestResponseManager) {
-		super(localPeer, requestResponseManager);
-		this.peerJoiningId = new AtomicReference<UUID>();
+	/**
+	 * Constructs a new overlay with the specified
+	 * {@code requestResponseManager}.
+	 * 
+	 * @param requestResponseManager
+	 *            the {@link RequestResponseManager} to use.
+	 */
+    public AbstractCanOverlay(RequestResponseManager requestResponseManager) {
+        this(requestResponseManager, Zone.class);
+    }
+
+	/**
+	 * Constructs a new overlay with the specified
+	 * {@code requestResponseManager}.
+	 * 
+	 * @param requestResponseManager
+	 *            the {@link RequestResponseManager} to use.
+	 * 
+	 * @param zoneType
+	 *            the type of the zone to instantiate when a call to
+	 *            {@link #create()} is performed.
+	 */
+    public AbstractCanOverlay(RequestResponseManager requestResponseManager, Class<? extends Zone> zoneType) {
+        super(requestResponseManager);
+        
+        this.neighborTable = new NeighborTable();
+        this.peerJoiningId = new AtomicReference<UUID>();
 		this.peerLeavingId = new AtomicReference<UUID>();
 		this.splitHistory = new LinkedList<SplitEntry>();
-		this.neighborTable = new NeighborTable();
+		this.zoneType = zoneType;
     }
-
-    /**
-     * Constructs a new overlay with the specified <code>queryManager</code>.
-     * 
-     * @param queryManager
-     *            the {@link RequestResponseManager} to use.
-     */
-    public AbstractCanOverlay(RequestResponseManager queryManager) {
-        this(null, queryManager);
-    }
-
+    
     /**
      * Implements a behavior to execute with the specified 
      * <code>dataReceived</code> (e.g. to store the data in 
@@ -545,8 +551,20 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
     
     public boolean create() {
-        this.zone = new Zone();
-    	return true;
+        try {
+			this.zone = this.zoneType.newInstance();
+			return true;
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		
+    	return false;
     }
 
 	/**

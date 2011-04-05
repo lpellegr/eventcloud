@@ -9,14 +9,12 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.BigDecimalElement;
 
 import fr.inria.eventcloud.initializers.EventCloudInitializer;
 
 /**
- * Test used to check that all neighbors are correct for each peers 
- * when the join operations has finished (in a 2 dimensional CAN
- * network).
+ * Test used to check visually that all neighbors are correct for each peers
+ * when the join operations have finished (in a 2 dimensional CAN network).
  * 
  * @author lpellegr
  */
@@ -26,7 +24,7 @@ public class Can2dTest {
 
     @BeforeClass
     public static void setUp() {
-    	spaceNetworkInitializer.setUpNetworkOnLocalMachine(10);
+    	spaceNetworkInitializer.setUpNetworkOnLocalMachine(20);
     }
     
     @Test
@@ -48,18 +46,15 @@ public class Can2dTest {
     }
 
     public static void main(String[] args) {
-        P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(500);
+        P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue(2);
-        P2PStructuredProperties.CAN_UPPER_BOUND.setValue("1");
-        P2PStructuredProperties.CAN_COORDINATE_TYPE.setValue(BigDecimalElement.class.getCanonicalName());
         spaceNetworkInitializer.setUpNetworkOnLocalMachine(10);
         
         new Thread(new Runnable() {
 			@Override
 			public void run() {
 				new Network2DVisualizer(
-						spaceNetworkInitializer.getRandomTracker().getStoredPeers())
-							.setVisible(true);
+						spaceNetworkInitializer.getRandomTracker().getStoredPeers()).setVisible(true);
 			}
 		}).start();
     }

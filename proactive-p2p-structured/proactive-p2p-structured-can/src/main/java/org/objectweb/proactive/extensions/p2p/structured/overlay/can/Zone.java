@@ -21,17 +21,17 @@ public class Zone implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Coordinate upperBound;
+    private final Coordinate upperBound;
 
-    private Coordinate lowerBound;
+    private final Coordinate lowerBound;
 
     /**
      * Constructs a new zone by using the {@link P2PStructuredProperties#CAN_LOWER_BOUND} and 
      * {@link P2PStructuredProperties#CAN_UPPER_BOUND} as coordinate elements.
      */
     public Zone() {
-        this.lowerBound = this.createCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValue());
-        this.upperBound = this.createCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
+        this.lowerBound = createCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValue());
+        this.upperBound = createCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
     }
     
     /**
@@ -42,7 +42,7 @@ public class Zone implements Serializable {
      * @param upperBound
      *            the maximum coordinates. 
      */
-    public Zone(Coordinate lowerBound, Coordinate upperBound) {
+    protected Zone(Coordinate lowerBound, Coordinate upperBound) {
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
     }
@@ -56,10 +56,10 @@ public class Zone implements Serializable {
      * 
      * @return a new coordinate with elements of type {@link P2PStructuredProperties#CAN_COORDINATE_TYPE}.
      */
-    private Coordinate createCoordinate(String value) {
+    private static Coordinate createCoordinate(String value) {
     	Element[] elts = new Element[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
     	for (int i=0; i<P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-    		elts[i] = this.createElement(value);
+    		elts[i] = createElement(value);
     	}
     	return new Coordinate(elts);
     }
@@ -73,7 +73,7 @@ public class Zone implements Serializable {
      * @return a new {@link CoordinateValue} according to the concrete type
      *         specified in {@link P2PStructuredProperties#CAN_COORDINATE_TYPE}.
      */
-    private Element createElement(String value) {
+    private static Element createElement(String value) {
         try {
             return (Element) Class.forName(
                             P2PStructuredProperties.CAN_COORDINATE_TYPE.getValueAsString())
@@ -304,7 +304,6 @@ public class Zone implements Serializable {
             e.printStackTrace();
         }
         
-
         return new Zone(lowerBound, upperBound);
     }
 
@@ -368,12 +367,10 @@ public class Zone implements Serializable {
                     		(Coordinate) MakeDeepCopy.WithObjectStream
                     						.makeDeepCopy(this.getUpperBound())) };
         } catch (IOException e) {
-        	e.printStackTrace();
+        	throw new ZoneException(e);
         } catch (ClassNotFoundException e) {
-        	e.printStackTrace();
+        	throw new ZoneException(e);
         }
-        
-        throw new ZoneException("An error occured while splitting the zone.");
     }
 
     /**
