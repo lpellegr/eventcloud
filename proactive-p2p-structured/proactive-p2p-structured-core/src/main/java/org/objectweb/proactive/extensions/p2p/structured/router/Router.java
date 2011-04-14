@@ -5,19 +5,14 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * A router defines how to route a {@link RequestResponseMessage}. It provides
- * several methods to customize the routing steps. Do not forget to create a
- * class for each {@link Router} when you plan to reuse them for a given action.
- * Indeed, to avoid to create a {@link Router} object at each routing step, we
- * use a {@link RouterStore} to keep trace of common routers which have already been
- * created.
+ * A router defines how to route a {@link RequestResponseMessage}.
  * 
  * @author lpellegr
  * 
  * @param <T>
- *            the type of message to route.
+ *            the message type to route.
  * @param <K>
- *            the type of the key used to check at each routing step whether the
+ *            the key type used to check at each routing step whether the
  *            constraints are validated or not.
  */
 public abstract class Router<T extends RequestResponseMessage<K>, K> {

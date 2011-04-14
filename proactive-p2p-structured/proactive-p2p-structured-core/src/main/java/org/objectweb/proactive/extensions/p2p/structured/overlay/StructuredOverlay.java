@@ -56,9 +56,13 @@ public abstract class StructuredOverlay implements Serializable {
 
     public abstract String toString();
 
-    public abstract void initActivity(Body body);
+    public void initActivity(Body body) {
+        // to be overridden
+    }
 
-    public abstract void endActivity(Body body);
+    public void endActivity(Body body) {
+        // to be overridden
+    }
     
     public void runActivity(Body body) {
         Service service = new Service(body);

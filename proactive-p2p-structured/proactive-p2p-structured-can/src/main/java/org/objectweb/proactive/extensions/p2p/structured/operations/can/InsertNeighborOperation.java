@@ -1,7 +1,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -13,7 +13,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEnt
  * 
  * @author lpellegr
  */
-public class InsertNeighborOperation implements Operation {
+public class InsertNeighborOperation implements SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 

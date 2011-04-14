@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 
 /**
- * ResponseOperation is the response associated to an {@link Operation}.
+ * A ResponseOperation is a response associated to a {@link SynchronousOperation}.
  * 
  * @author lpellegr
  */

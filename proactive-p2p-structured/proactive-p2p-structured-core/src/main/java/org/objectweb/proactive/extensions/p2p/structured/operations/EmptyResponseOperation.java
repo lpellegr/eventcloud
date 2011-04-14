@@ -1,6 +1,5 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations;
 
-
 /**
  * Defines an empty response operation.
  * 
