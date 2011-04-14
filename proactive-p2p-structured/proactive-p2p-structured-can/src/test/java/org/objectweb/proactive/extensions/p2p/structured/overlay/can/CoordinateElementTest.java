@@ -96,4 +96,5 @@ public class CoordinateElementTest {
         this.coordinateElementC = null;
         this.coordinateElementB = null;
     }
+
 }

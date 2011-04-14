@@ -19,8 +19,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
 /**
@@ -57,6 +57,31 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
         // check that all zones retrieved validate the constraints
         for (Zone zone : response.getZonesValidatingConstraints()) {
         	Assert.assertEquals(0, zone.contains(1, elt));
+        }
+    }
+
+    @Test
+    public void testLookupQueryComponent() {
+        AnycastLookupResponse response = null;
+        StringElement elt = new StringElement("Z");
+        
+        try {
+            response = (AnycastLookupResponse) PAFuture.getFutureValue(
+            				super.getc(0).send(new AnycastLookupRequest(
+            						new Coordinate(null, elt, null))));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertTrue(response.getLatency() > 1);
+        // the peer to reach can be the initiator of the request
+        Assert.assertTrue(response.getHopCount() >= 0);
+        Assert.assertTrue(response.getInboundHopCount() >= 0);
+        Assert.assertTrue(response.getOutboundHopCount() >= 0);
+
+        // check that all zones retrieved validate the constraints
+        for (Zone zone : response.getZonesValidatingConstraints()) {
+            Assert.assertEquals(0, zone.contains(1, elt));
         }
     }
 

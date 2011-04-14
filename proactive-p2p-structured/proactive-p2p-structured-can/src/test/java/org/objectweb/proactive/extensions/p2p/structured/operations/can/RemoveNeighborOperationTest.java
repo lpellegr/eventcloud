@@ -41,6 +41,23 @@ public class RemoveNeighborOperationTest extends CANNetworkInitializer {
         Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));
     }
 
+    @Test
+    public void testMessageComponent() {
+        Peer firstPeer = super.getc(0);
+        Peer secondPeer = super.getc(1);
+
+        UUID firstPeerID = firstPeer.getId();
+        UUID secondPeerID = secondPeer.getId();
+
+        Assert.assertTrue(CanOperations.hasNeighbor(firstPeer, secondPeerID));
+        Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));
+
+        CanOperations.removeNeighbor(firstPeer, secondPeerID);
+
+        Assert.assertFalse(CanOperations.hasNeighbor(firstPeer, secondPeerID));
+        Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));
+    }
+
     @After
     public void tearDown() {
         super.clearNetwork();
