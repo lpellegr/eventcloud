@@ -8,7 +8,9 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * Super class that all request/response messages must implement.
+ * Class that all request/response messages must implement. 
+ * It maintains some standard information that may useful
+ * for any kind of message.
  * 
  * @author lpellegr
  */
@@ -32,8 +34,8 @@ public abstract class RequestResponseMessage<K> implements Routable<K>, Serializ
     private int hopCount = 0;
 
     /**
-     * Constructs a new RequestResponseMessage with the specified identifier and
-     * keyToReach.
+     * Constructs a new RequestResponseMessage with the specified 
+     * {@code identifier} and {@code constraintsValidator}.
      * 
      * @param identifier
      *            the unique identifier associated to the message.

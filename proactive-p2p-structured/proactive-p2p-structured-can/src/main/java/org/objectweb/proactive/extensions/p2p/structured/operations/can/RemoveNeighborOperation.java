@@ -3,7 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
@@ -16,7 +16,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTab
  * 
  * @author lpellegr
  */
-public class RemoveNeighborOperation implements Operation {
+public class RemoveNeighborOperation implements SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 

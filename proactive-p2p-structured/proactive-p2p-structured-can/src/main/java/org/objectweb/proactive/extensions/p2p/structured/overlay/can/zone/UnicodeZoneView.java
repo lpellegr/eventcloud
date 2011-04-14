@@ -4,6 +4,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
+ * A unicode zone view is a zone view maintaining coordinates as {@link StringElement}s.
  * 
  * @author lpellegr
  */

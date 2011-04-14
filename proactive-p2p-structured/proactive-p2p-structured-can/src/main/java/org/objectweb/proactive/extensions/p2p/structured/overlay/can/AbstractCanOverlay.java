@@ -13,9 +13,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.objectweb.proactive.Body;
-import org.objectweb.proactive.Service;
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
@@ -23,8 +20,6 @@ import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOpera
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinWelcomeOperation;
@@ -440,7 +435,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation operation) {
     	int directionInv =  getOppositeDirection(this.tmpJoinInformation.getDirection());
     	
-    	// updates overlay information due to split
+    	// updates overlay information due to the split
     	this.zone = this.tmpJoinInformation.getZone();
     	this.splitHistory.add(
     			new SplitEntry(
@@ -523,7 +518,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 		try {
 			response = 
 				(JoinIntroduceResponseOperation) PAFuture.getFutureValue(
-						landmarkPeer.receiveOperationIS(
+						landmarkPeer.receiveImmediateService(
 								new JoinIntroduceOperation(this.getId(), this.getRemotePeer())));
 		} catch (PeerNotActivatedRuntimeException e) {
 			if (logger.isInfoEnabled()) {
@@ -545,7 +540,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         this.affectDataReceived(response.getData());
         
         PAFuture.waitFor(
-        		landmarkPeer.receiveOperationIS(
+        		landmarkPeer.receiveImmediateService(
         				new JoinWelcomeOperation()));
         
         // notify the neighbors that the current peer has joined
@@ -615,7 +610,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 //                /* We are alone on this pitiless world : nothing to do */
 //                break;
 //            case 1:
-//                neighborsToMergeWith.values().iterator().next().getStub().receiveOperationIS(
+//                neighborsToMergeWith.values().iterator().next().getStub().receive(
 //                        new MergeOperation(lastDimension, lastDirection, this.getId(), this
 //                                .getZone(), new NeighborTable(), this.retrieveAllData()));
 //                break;
@@ -650,7 +645,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 //                    // FIXME The given Data are not good : we give all the
 //                    // resources to each
 //                    // neighbors to merge with
-//                    entry.getStub().receiveOperationIS(
+//                    entry.getStub().receive(
 //                                    new MergeOperation(lastDimension,
 //                                            lastDirection, this.getId(), newZones[0],
 //                                            neighborsOfCurrentNeighbor,
@@ -669,7 +664,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 //            for (int direction = 0; direction < 2; direction++) {
 //                for (NeighborEntry entry : this.neighborTable.get(dim, direction).values()) {
 //                    if (!neighborsToMergeWith.containsKey(entry.getId())) {
-//                        entry.getStub().receiveOperationIS(
+//                        entry.getStub().receive(
 //                                new LeaveOperation(this.getId(), new ArrayList<NeighborEntry>(neighborsToMergeWith.
 //                                        values()), dim, AbstractCanOverlay
 //                                        .getOppositeDirection(direction)));
@@ -710,7 +705,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 			for (int direction = 0; direction < 2; direction++) {
 				Iterator<NeighborEntry> it = this.neighborTable.get(dimension, direction).values().iterator();
 				while (it.hasNext()) {
-					it.next().getStub().receiveOperationIS(
+					it.next().getStub().receiveImmediateService(
 		                    new UpdateNeighborOperation(
 		                    		this.getNeighborEntry(), dimension, getOppositeDirection(direction)));
 				}
@@ -725,61 +720,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      */
     private NeighborEntry getNeighborEntry() {
     	return new NeighborEntry(this.getId(), this.getRemotePeer(), this.zone);
-    }
-
-    /**
-     * Send a {@link Operation} to a list {@link Peer}.
-     * 
-     * @param remotePeers
-     *            the list of peers to which to send the message.
-     * @param msg
-     *            the message to send.
-     * 
-     * @return the list of responses in agreement with the type of message sent.
-     * @throws Exception
-     *             this exception appears when a message cannot be send to a
-     *             peer.
-     */
-    public List<ResponseOperation> sendTo(List<Peer> remotePeers, Operation msg)
-            throws Exception {
-        List<ResponseOperation> responses = new ArrayList<ResponseOperation>(
-                remotePeers.size());
-
-        for (Peer remotePeer : remotePeers) {
-            responses.add(remotePeer.receiveOperationIS(msg));
-        }
-
-        return responses;
-    }
-
-    /**
-     * Send a {@link Operation} to peers that are in the specified
-     * {@link NeighborTable}.
-     * 
-     * @param table
-     *            the peers managed by the data structure to which to send the
-     *            message.
-     * @param msg
-     *            the message to send.
-     * 
-     * @return the list of responses in agreement with the type of message sent.
-     * @throws Exception
-     *             this exception appears when a message cannot be send to a
-     *             peer.
-     */
-    public List<ResponseOperation> sendTo(NeighborTable table,
-            Operation msg) throws Exception {
-        List<ResponseOperation> responses = new ArrayList<ResponseOperation>();
-
-        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            for (int direction = 0; direction < 2; direction++) {
-                for (NeighborEntry entry : table.get(dimension, direction).values()) {
-                    responses.add(entry.getStub().receiveOperationIS(msg));
-                }
-            }
-        }
-
-        return responses;
     }
 
     /**
@@ -929,54 +869,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         this.removeOutdatedNeighbors();
 
         return new EmptyResponseOperation();
-    }
-
-    /*
-     * Specific implementation of ProActive concepts.
-     */
-    @Override
-    public void initActivity(Body body) {
-        // The following methods have to be served as immediate
-        // services in order to allow concurrent queries
-        PAActiveObject.setImmediateService("send");
-        PAActiveObject.setImmediateService("route");
-    }
-    
-    @Override
-    public void endActivity(Body body) {
-    	
-    }
-
-    public void runActivity(Body body) {
-        Service service = new Service(body);
-
-        while (body.isActive()) {
-//            Request request = null;
-//            if (super.getLocalPeer().getPeersWhichArePreparingToLeave().size() > 0) {
-//                /*
-//                 * boolean receiveFromLeaver = false; request =
-//                 * service.blockingRemoveOldest();
-//                 * 
-//                 * for (Peer peer : this.peersWhichAreLeaving) { if
-//                 * (peer.getBody().getID().equals(request.getSender().getID()))
-//                 * { System.out.println("OK FIND !!!"); receiveFromLeaver =
-//                 * true; service.serve(request); break; } }
-//                 * 
-//                 * if (!receiveFromLeaver) { System.out.println("NT FIND");
-//                 */
-//                service.serveOldest("notifyNeighborEndLeave");
-//                // }
-//            } else {
-//                request = service.blockingRemoveOldest(this.getUpdateIntervalTime());
-//
-//                if (request == null) {
-//                    this.update();
-//                } else {
-//                    service.serve(request);
-//                }
-//            }
-        	service.serveOldest();
-        }
     }
 
 }

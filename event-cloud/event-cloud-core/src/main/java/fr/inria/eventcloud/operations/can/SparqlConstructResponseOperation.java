@@ -5,7 +5,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
 
 /**
- * ResponseOperation associated to {@link SparqlConstructOperation}.
+ * Response operation associated to {@link SparqlConstructOperation}.
  * 
  * @author lpellegr
  */

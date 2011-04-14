@@ -1,7 +1,7 @@
 package fr.inria.eventcloud.operations.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.ontoware.rdf2go.model.node.URI;
 
@@ -13,7 +13,7 @@ import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
  * 
  * @author lpellegr
  */
-public class SparqlConstructOperation implements Operation {
+public class SparqlConstructOperation implements SynchronousOperation {
 
 	private static final long serialVersionUID = 1L;
 

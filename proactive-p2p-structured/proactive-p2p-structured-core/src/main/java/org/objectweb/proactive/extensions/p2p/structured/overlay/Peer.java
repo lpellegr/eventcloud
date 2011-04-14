@@ -16,8 +16,9 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJo
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 
 /**
  * A Peer contains all operations which are common to peer-to-peer protocols.
@@ -124,7 +125,7 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
     public void initActivity(Body body) {
         this.stub = (Peer) PAActiveObject.getStubOnThis();
 
-        body.setImmediateService("receiveOperationIS", false);
+        body.setImmediateService("receiveImmediateService", false);
         
     	// these methods do not change the state of the peer
     	body.setImmediateService("equals", false);
@@ -133,10 +134,16 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
     	body.setImmediateService("toString", false);
     	body.setImmediateService("getType", false);
   
+    	// puts the following methods as immediate service in 
+    	// order to have the possibility to handle concurrent
+    	// queries
+    	PAActiveObject.setImmediateService("send");
+        PAActiveObject.setImmediateService("route");
+    	
         this.overlay.initActivity(body);
         
-        // receiveOperation cannot be handled as immediate service
-        PAActiveObject.removeImmediateService("receiveOperation");
+        // receive cannot be handled as immediate service
+        PAActiveObject.removeImmediateService("receive");
     }
 
     /**
@@ -242,34 +249,55 @@ public class Peer implements InitActive, EndActive, RunActive, Serializable {
     }
 
     /**
-     * The current remote object receives the specified operation 
-     * <code>op</code> by handling it as immediate service.
-     * <br>
-     * <b>It completely by-passes the message queue model that 
-     * comes with the active objects, thus breaks the theoretical 
-     * model and can introduce race conditions.</b>
+     * Receives and handles the specified {@code operation} synchronously.
+     *
+     * @param operation the operation to handle.
      * 
-     * @param op
-     *            the operation to handle.
-     * 
-     * @return a response in agreement with the type of operation handled.
+     * @return a response according to the operation type handled.
      */
-    public ResponseOperation receiveOperationIS(Operation op) {
-        return op.handle(this.overlay);
+    public ResponseOperation receive(SynchronousOperation operation) {
+        return operation.handle(this.overlay);
     }
-
+    
     /**
-     * The current remote object receives the specified 
-     * <code>op</code> using the default ProActive message 
-     * queue model.
-     * 
-     * @param op
-     *            the operation to handle.
-     * 
-     * @return a response in agreement with the type of operation handled.
+     * Receives and handles the specified {@code operation} asynchronously.
+     *
+     * @param operation the operation to handle.
      */
-    public ResponseOperation receiveOperation(Operation op) {
-        return op.handle(this.overlay);
+    public void receive(AsynchronousOperation operation) {
+        operation.handle(this.overlay);
+    }
+    
+    /**
+     * Receives in immediate service and handles the specified 
+     * {@code operation} synchronously.
+     * <p>
+     * To receive the operation in immediate service completely 
+     * by-passes the message queue model that comes with the active 
+     * objects, thus breaks the theoretical model and may introduce 
+     * race conditions.
+     * 
+     * @param operation the operation to handle.
+     * 
+     * @return a response according to the operation type handled.
+     */
+    public ResponseOperation receiveImmediateService(SynchronousOperation operation) {
+        return operation.handle(this.overlay);
+    }
+    
+    /**
+     * Receives in immediate service and handles the specified 
+     * {@code operation} synchronously.
+     * <p>
+     * To receive the operation in immediate service completely 
+     * by-passes the message queue model that comes with the active 
+     * objects, thus breaks the theoretical model and may introduce 
+     * race conditions.
+     * 
+     * @param operation the operation to handle.
+     */
+    public void receiveImmediateService(AsynchronousOperation operation) {
+        operation.handle(this.overlay);
     }
     
     /**

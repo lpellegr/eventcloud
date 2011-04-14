@@ -29,7 +29,7 @@ public class NeighborEntry implements Serializable {
 
         GetIdAndZoneResponseOperation response = 
         	(GetIdAndZoneResponseOperation) PAFuture.getFutureValue(
-        			this.neighborStub.receiveOperationIS(new GetIdAndZoneOperation()));
+        			this.neighborStub.receiveImmediateService(new GetIdAndZoneOperation()));
 
         this.neighborIdentifier = response.getPeerIdentifier();
         this.neighborZone = response.getPeerZone();

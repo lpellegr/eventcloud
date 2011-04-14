@@ -67,13 +67,13 @@ public class DataTransfertTest {
         
         Set<Statement> resultOldPeer = 
         	SemanticHelper.asSet(((SparqlConstructResponseOperation) 
-        			PAFuture.getFutureValue(oldPeer.receiveOperation(
+        			PAFuture.getFutureValue(oldPeer.receiveImmediateService(
         					new SparqlConstructOperation(EventCloudProperties.DEFAULT_CONTEXT, query))))
         						.getResult().toRDF2Go());
         
         Set<Statement> resultNewPeer = 
         	SemanticHelper.asSet(((SparqlConstructResponseOperation) 
-        			PAFuture.getFutureValue(newPeer.receiveOperation(
+        			PAFuture.getFutureValue(newPeer.receiveImmediateService(
         					new SparqlConstructOperation(EventCloudProperties.DEFAULT_CONTEXT, query))))
         						.getResult().toRDF2Go());
 

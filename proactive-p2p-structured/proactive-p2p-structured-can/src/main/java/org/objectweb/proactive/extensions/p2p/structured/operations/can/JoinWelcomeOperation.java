@@ -1,7 +1,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
@@ -17,7 +17,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
  * @see AbstractCanOverlay#join(Peer)
  * @see AbstractCanOverlay#handleJoinWelcomeMessage(JoinWelcomeOperation)
  */
-public class JoinWelcomeOperation implements Operation {
+public class JoinWelcomeOperation implements SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
