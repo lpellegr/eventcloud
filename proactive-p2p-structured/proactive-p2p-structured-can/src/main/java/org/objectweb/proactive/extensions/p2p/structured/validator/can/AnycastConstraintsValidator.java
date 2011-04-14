@@ -1,15 +1,18 @@
 package org.objectweb.proactive.extensions.p2p.structured.validator.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * Used by a {@link Router} to known if the current {@link StructuredOverlay}
+ * Used by a {@link Router} to know whether the current {@link StructuredOverlay}
  * which handles the message validates the constraints associated to the key.
  * 
  * @author lpellegr
+ * 
+ * @param <K>
+ *            the key type.
  */
 public abstract class AnycastConstraintsValidator<K> extends ConstraintsValidator<K> {
 

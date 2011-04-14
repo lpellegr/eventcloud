@@ -13,7 +13,7 @@ public class PeerNotActivatedRuntimeException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructs a <code>PeerNotActivatedRuntimeException</code> with no
+	 * Constructs a {@code PeerNotActivatedRuntimeException} with no
 	 * specified detail message.
 	 */
 	public PeerNotActivatedRuntimeException() {
@@ -21,7 +21,7 @@ public class PeerNotActivatedRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * Constructs a <code>PeerNotActivatedRuntimeException</code> with the
+	 * Constructs a {@code PeerNotActivatedRuntimeException} with the
 	 * specified detail message.
 	 * 
 	 * @param message
@@ -32,7 +32,7 @@ public class PeerNotActivatedRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * Constructs a <code>PeerNotActivatedRuntimeException</code> with the
+	 * Constructs a {@code PeerNotActivatedRuntimeException} with the
 	 * specified detail message and nested exception.
 	 * 
 	 * @param message
@@ -45,7 +45,7 @@ public class PeerNotActivatedRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * Constructs a <code>PeerNotActivatedRuntimeException</code> with the
+	 * Constructs a {@code PeerNotActivatedRuntimeException} with the
 	 * specified detail message and nested exception.
 	 * 
 	 * @param cause

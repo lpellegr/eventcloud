@@ -8,15 +8,20 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Router used to route a {@link Response} from a peer to an another.
+ * 
  * @author lpellegr
+ * 
+ * @param <T>
+ *            the response type to route.
  */
-public class UnicastResponseRouter<T extends Response<Coordinate>> extends Router<T, Coordinate> {
+public class UnicastResponseRouter<T extends Response<StringCoordinate>> extends Router<T, StringCoordinate> {
 
     private static final Logger logger =
     	LoggerFactory.getLogger(UnicastResponseRouter.class);

@@ -15,12 +15,13 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.An
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
 /**
@@ -43,7 +44,7 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
         try {
             response = (AnycastLookupResponse) PAFuture.getFutureValue(
             				super.get(0).send(new AnycastLookupRequest(
-            						new Coordinate(null, elt, null))));
+            						new StringCoordinate(null, elt, null))));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -72,7 +73,7 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
 
     	private Set<Zone> zonesValidatingConstraints;
     	
-		public AnycastLookupRequest(Coordinate coordinatesToReach) {
+		public AnycastLookupRequest(StringCoordinate coordinatesToReach) {
 			super(new DefaultAnycastConstraintsValidator(coordinatesToReach));
 			this.zonesValidatingConstraints = new HashSet<Zone>();
 		}
@@ -83,7 +84,7 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
 		}
 
 		@Override
-		public Router<? extends RequestResponseMessage<Coordinate>, Coordinate> getRouter() {
+		public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
 	        return new AnycastRequestRouter<AnycastLookupRequest>() {
 	            public void onPeerValidatingKeyConstraints(
 	                    AbstractCanOverlay overlay, AnycastRequest request) {
@@ -108,7 +109,7 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
 
     	private Set<Zone> zonesValidatingConstraints;
     	
-    	public AnycastLookupResponse(AnycastLookupRequest request, Coordinate keyToReach) {
+    	public AnycastLookupResponse(AnycastLookupRequest request, Coordinate<?,?> keyToReach) {
 			super(request);
 			this.zonesValidatingConstraints = request.getZonesValidatingConstraints();
 		}
@@ -119,7 +120,7 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
 		}
 
 		@Override
-		public Router<? extends RequestResponseMessage<Coordinate>, Coordinate> getRouter() {
+		public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
 			return new AnycastResponseRouter<AnycastResponse>();
 		}
 

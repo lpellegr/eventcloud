@@ -1,18 +1,18 @@
-package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
+package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Element;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
  * Test cases for {@link Element}.
  * 
  * @author lpellegr
  */
-public class CoordinateElementTest {
+public class ElementTest {
 
     private StringElement coordinateElementA;
 
@@ -85,7 +85,7 @@ public class CoordinateElementTest {
     public void testGetMiddle() {
         StringElement middleCoordinate = this.coordinateElementB;
         for (int nbSplit = 0; nbSplit < 500; nbSplit++) {
-            middleCoordinate = Element.middle(middleCoordinate, this.coordinateElementC);
+            middleCoordinate = (StringElement) Element.middle(middleCoordinate, this.coordinateElementC);
             Assert.assertTrue(middleCoordinate.compareTo(this.coordinateElementC) < 0);
         }
     }

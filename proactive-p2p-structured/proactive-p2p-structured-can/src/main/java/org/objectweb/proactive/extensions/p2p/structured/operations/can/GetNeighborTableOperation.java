@@ -21,10 +21,7 @@ public class GetNeighborTableOperation implements Operation {
     }
 
     /**
-     * Handles the message.
-     * 
-     * @param overlay
-     *            the overlay which handles the message.
+     * {@inheritDoc}
      */
     public GenericResponseOperation<NeighborTable> handle(StructuredOverlay overlay) {
         return new GenericResponseOperation<NeighborTable>(

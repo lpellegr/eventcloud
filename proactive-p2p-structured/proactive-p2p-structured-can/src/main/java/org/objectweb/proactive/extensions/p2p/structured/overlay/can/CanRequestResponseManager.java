@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 
 /**
+ * A request manager specific to CAN peers in order to maintain some
+ * information about the routing.
  * 
  * @author lpellegr
  */

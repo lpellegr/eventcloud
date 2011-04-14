@@ -1,6 +1,8 @@
-package org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates;
+package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements;
 
 import java.io.Serializable;
+
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 
 /**
@@ -8,10 +10,16 @@ import java.io.Serializable;
  * 
  * @author lpellegr
  */
-public abstract class Element implements Comparable<Element>, Serializable {
+public abstract class Element<T> implements Comparable<Element<T>>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	protected final T value;
+	
+	public Element(T value) {
+		this.value = value;
+	}
+	
 	/**
 	 * Computes and returns a new {@link Element} with a value 
 	 * being the middle of the current element and the specified element
@@ -23,7 +31,7 @@ public abstract class Element implements Comparable<Element>, Serializable {
 	 * 		   being the middle of the current element 
 	 * 		   the specified element <code>elt</code>.
 	 */
-	public abstract Element computeMiddle(Element elt);
+	public abstract Element<T> middle(Element<T> elt);
 
 	/**
 	 * Returns a boolean indicating if the current element is
@@ -38,7 +46,7 @@ public abstract class Element implements Comparable<Element>, Serializable {
 	 * 		   or  <code>e1 > e2 and this in [e2;e1[</code>, <code>false</code>
 	 * 		   otherwise.
 	 */
-	public boolean isBetween(Element e1, Element e2) {
+	public boolean isBetween(Element<T> e1, Element<T> e2) {
 		if (e1.compareTo(e2) < 0) {
 			return (this.compareTo(e1) >= 0) && (this.compareTo(e2) < 0);
 		} else if (e1.compareTo(e2) > 0) {
@@ -48,25 +56,25 @@ public abstract class Element implements Comparable<Element>, Serializable {
 	}
 
 	/**
-	 * Computes and returns a new {@link Element} with a value 
-	 * being the middle of the specified elements
-	 * <code>e1</code> and <code>e2</code>.
+	 * Computes and returns a new {@link Element} which is the middle of the
+	 * specified elements {@code e1} and {@code e2}.
 	 * 
-	 * @param <T> the type of {@link Element} to use.
+	 * @param <E>
+	 *            the type of {@link Element} to use.
 	 * 
-	 * @param e1 the lower bound.
+	 * @param e1
+	 *            the lower bound.
 	 * 
-	 * @param e2 the upper bound.
+	 * @param e2
+	 *            the upper bound.
 	 * 
-	 * @return a new {@link Element} with a value being the middle 
-	 * 		   of the specified elements <code>e1</code> and
-	 * 		   <code>e2</code>.
+	 * @return a new {@link Element} which is the middle of the specified
+	 *         elements {@code e1} and {@code e2}.
 	 * 
-	 * @see Element#computeMiddle(Element)
+	 * @see Element#middle(Element)
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends Element> T middle(T e1, T e2) {
-		return (T) e1.computeMiddle(e2);
+	public static <T> Element<T> middle(Element<T> e1, Element<T> e2) {
+		return e1.middle(e2);
 	}
 
 	/**
@@ -80,12 +88,8 @@ public abstract class Element implements Comparable<Element>, Serializable {
 	 * @return the maximum among the specified coordinate elements 
 	 * 		   using {@link Element#compareTo(Element)}.
 	 */
-	public static Element max(Element elt1, Element elt2) {
-		if (elt1.compareTo(elt2) > 0) {
-			return elt1;
-		} else {
-			return elt2;
-		}
+	public static <T> Element<T> max(Element<T> elt1, Element<T> elt2) {
+		return elt1.compareTo(elt2) > 0 ? elt1 : elt2;
 	}
 
 	/**
@@ -99,38 +103,44 @@ public abstract class Element implements Comparable<Element>, Serializable {
 	 * @return the minimum among the specified coordinate elements 
 	 * 		   using {@link Element#compareTo(Element)}.
 	 */
-	public static Element min(Element elt1, Element elt2) {
-		if (elt1.compareTo(elt2) < 0) {
-			return elt1;
-		} else {
-			return elt2;
-		}
+	public static <T> Element<T> min(Element<T> elt1, Element<T> elt2) {
+		return elt1.compareTo(elt2) < 0 ? elt1 : elt2;
 	}
 
 	/**
+	 * Returns the representative value of this element.
+	 * 
+	 * @return the representative value of this element.
+	 */
+	public T getValue() {
+		return this.value;
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 */
-	@Override
+    @Override
+    @SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
-		return this.getClass().equals(obj.getClass())
-		&& this.compareTo((Element) obj) == 0;
+		return obj != null
+				&& this.getClass().equals(obj.getClass())
+					&& this.compareTo((Element<T>) obj) == 0;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public abstract int compareTo(Element e);
+	public int hashCode() {
+		return this.value.hashCode();
+	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public abstract int hashCode();
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public abstract String toString();
+	public String toString() {
+		return this.value.toString();
+	}
 	
 }

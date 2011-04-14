@@ -1,23 +1,18 @@
-package org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates;
+package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements;
 
 import java.util.LinkedList;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 /**
- * Represents a String coordinate element.
+ * Embodies a String coordinate element.
  * 
  * @author lpellegr
  */
-public class StringElement extends Element {
+public class StringElement extends Element<String> {
 
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * The value associated to the current element.
-	 */
-	private final String value;
-	
 	/**
 	 * Contains the value's representation as a
 	 * list of unicode code points.
@@ -40,24 +35,16 @@ public class StringElement extends Element {
 	 * @param value the value as string.
 	 */
 	public StringElement(String value) {
-		this.value = value;
+		super(value);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int compareTo(Element elt) {
-		return this.value.compareTo(
+	public int compareTo(Element<String> elt) {
+		return super.value.compareTo(
 					((StringElement) elt).getValue());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int hashCode() {
-		return this.value.hashCode();
 	}
 
 	/**
@@ -77,7 +64,7 @@ public class StringElement extends Element {
 			return result.toString();
 		} else {
 			// removes control characters which are interpreted by the console
-			return this.value.replaceAll("\\p{Cc}", "");
+			return super.value.replaceAll("\\p{Cc}", "");
 		}
 	}
 
@@ -85,7 +72,7 @@ public class StringElement extends Element {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Element computeMiddle(Element elt) {
+	public Element<String> middle(Element<String> elt) {
         LinkedList<Integer> sumCodePoints = 
         	sumUnicodeCodePoints(
         			this.getUnicodeCodePoints(), 
@@ -117,15 +104,6 @@ public class StringElement extends Element {
 	}
 	
 	/**
-	 * Returns the value associated to this coordinate element.
-	 * 
-	 * @return the value associated to this coordinate element.
-	 */
-	public String getValue() {
-		return this.value;
-	}
-	
-	/**
      * Computes the position of the decimal separator. The position is given by
      * the coordinate element that has the shortest string length.
      * 
@@ -140,14 +118,6 @@ public class StringElement extends Element {
         return Math.min(elt1.getValue().length(), elt2.getValue().length());
     }
 
-    public static StringElement add(StringElement e1, StringElement e2) {
-    	return new StringElement(
-    					fromUnicodeToString(
-    							sumUnicodeCodePoints(
-    									e1.getUnicodeCodePoints(), 
-    									e2.getUnicodeCodePoints())));
-    }
-    
     /**
      * Returns the pairwise sum of the code points values. If the two code point
      * lists do not have the same size the remaining elements of the longest
@@ -294,7 +264,7 @@ public class StringElement extends Element {
      *            
      * @return the unicode code points list.
      */
-    public static LinkedList<Integer> getMiddleUnicodes(LinkedList<Integer> codePoints) {
+    private static LinkedList<Integer> getMiddleUnicodes(LinkedList<Integer> codePoints) {
         LinkedList<Integer> middleChrCodePts = new LinkedList<Integer>();
         int cp;
         int remainder;
@@ -361,6 +331,7 @@ public class StringElement extends Element {
     	return nearest;
     }
     
+    @SuppressWarnings("unused")
     private static boolean isLegalCharacter(char c) {
     	for (char legalChar : legalCharacters){
     		if (c == legalChar) {

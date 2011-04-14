@@ -7,7 +7,6 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,8 +35,11 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,8 +71,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
     private Zone zone;
 
-    private final Class<? extends Zone> zoneType;
-    
 	/**
 	 * Constructs a new overlay with the specified
 	 * {@code requestResponseManager}.
@@ -79,28 +79,20 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 	 *            the {@link RequestResponseManager} to use.
 	 */
     public AbstractCanOverlay(RequestResponseManager requestResponseManager) {
-        this(requestResponseManager, Zone.class);
-    }
-
-	/**
-	 * Constructs a new overlay with the specified
-	 * {@code requestResponseManager}.
-	 * 
-	 * @param requestResponseManager
-	 *            the {@link RequestResponseManager} to use.
-	 * 
-	 * @param zoneType
-	 *            the type of the zone to instantiate when a call to
-	 *            {@link #create()} is performed.
-	 */
-    public AbstractCanOverlay(RequestResponseManager requestResponseManager, Class<? extends Zone> zoneType) {
         super(requestResponseManager);
         
         this.neighborTable = new NeighborTable();
         this.peerJoiningId = new AtomicReference<UUID>();
 		this.peerLeavingId = new AtomicReference<UUID>();
 		this.splitHistory = new LinkedList<SplitEntry>();
-		this.zoneType = zoneType;
+    }
+    
+    public short contains(int dimension, StringElement element) {
+        return this.zone.contains(dimension, element);
+    }
+
+    public boolean contains(StringCoordinate coordinate) {
+        return this.zone.contains(coordinate);
     }
     
     /**
@@ -140,22 +132,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     /**
-     * Returns a boolean indicating whether the specified 
-     * <code>coordinate</code> is managed by the {@link Zone} 
-     * affected to the overlay, or not.
-     * 
-     * @param coordinate
-     *            the coordinate to check.
-     * 
-     * @return <code>true</code> if the specified <code>coordinate</code> 
-     * 		   is managed by the {@link Zone} affected to the overlay,
-     *         <code>false</code> otherwise.
-     */
-    public boolean contains(Coordinate coordinate) {
-        return this.zone.contains(coordinate);
-    }
-
-    /**
      * Returns the {@link NeighborEntry} which is the nearest from the specified 
      * <code>coordinate</code> and which contains the specified coordinate on 
      * <code>dimension-1</code> dimensions.
@@ -176,7 +152,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *         
      * @see AbstractCanOverlay#neighborsVerifyingDimensions(Collection, Coordinate, int)
      */
-    public NeighborEntry nearestNeighbor(Coordinate coordinate, int dimension, int direction) {
+    public NeighborEntry nearestNeighbor(StringCoordinate coordinate, int dimension, int direction) {
         List<NeighborEntry> neighbors = 
                 this.neighborsVerifyingDimensions(
                         this.neighborTable.get(dimension, direction).values(), coordinate, dimension);
@@ -223,7 +199,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * 
      * @return a list of neighbors with the best rank
      */
-	private List<NeighborEntry> neighborsWithBestRank(List<NeighborEntry> neighbors, Coordinate coordinate) {
+	private List<NeighborEntry> neighborsWithBestRank(List<NeighborEntry> neighbors, StringCoordinate coordinate) {
     	@SuppressWarnings("unchecked")
 		List<NeighborEntry>[] ranks = new List[coordinate.size() + 1];
     	int nbEltVerified = 0;
@@ -267,7 +243,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 	 * 		   on <code>d-1</code> dimensions where <code>d</code> is the given 
 	 * 		   <code>dimension</code>.
 	 */
-    public List<NeighborEntry> neighborsVerifyingDimensions(Collection<NeighborEntry> neighbors, Coordinate coordinate, int dimension) {
+    public List<NeighborEntry> neighborsVerifyingDimensions(Collection<NeighborEntry> neighbors, StringCoordinate coordinate, int dimension) {
         List<NeighborEntry> result = new ArrayList<NeighborEntry>();
         boolean validatesPrecedingDimensions;
 
@@ -286,25 +262,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         }        
         return result;
     }
-    
-    /**
-     * Indicates if the dimension index of the current zone contains the
-     * specified coordinate.
-     * 
-     * @param dimension
-     *            the dimension index used for the check.
-     * 
-     * @param coordinate
-     *            the coordinate to check.
-     * 
-     * @return <code>0</code> if the coordinate is contained by the zone on the
-     *         specified axe, <code>-1</code> if the coordinate is smaller than
-     *         the line which is managed by the specified dimension,
-     *         <code>1</code> otherwise.
-     */
-    public short contains(int dimension, Element coordinate) {
-        return this.getZone().contains(dimension, coordinate);
-    }
 
     /**
      * Returns the neighbor table for the current zone managed.
@@ -322,7 +279,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * 
      * @return a random dimension number.
      */
-    public int getRandomDimension() {
+    public static int getRandomDimension() {
         return ProActiveRandom.nextInt(P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue());
     }
 
@@ -331,7 +288,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * 
      * @return a random direction number.
      */
-    public int getRandomDirection() {
+    public static int getRandomDirection() {
         return ProActiveRandom.nextInt(2);
     }
 
@@ -416,7 +373,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 		
         int dimension = 0;
         // TODO: choose the direction according to the number of triples to transfer
-        int direction = this.getRandomDirection();
+        int direction = getRandomDirection();
         int directionInv = AbstractCanOverlay.getOppositeDirection(direction);
 
         // gets the next dimension to split onto
@@ -426,13 +383,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         }
 
         // splits the current peer zone to share it
-        Zone[] newZones = null;
-        try {
-            newZones = this.zone.split(dimension);
-        } catch (ZoneException e) {
-            logger.error("An error occured during the split of the zone from peer"
-                         + this.toString(), e);
-        }
+        Pair<Zone> newZones = this.zone.split(dimension);
 
         // neighbors affected for the new peer which joins the network
         NeighborTable pendingNewNeighborhood = new NeighborTable();
@@ -446,7 +397,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 						NeighborEntry entry = it.next();
 						// adds to the new peer neighborhood iff the new peer zone 
 						// neighbors the current neighbor
-						if (newZones[directionInv].neighbors(entry.getZone()) != -1) {
+						if (newZones.get(directionInv).neighbors(entry.getZone()) != -1) {
 							pendingNewNeighborhood.add(entry, dim, dir);
 						}
 					}
@@ -458,7 +409,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
                 new NeighborEntry(
                         this.getId(), 
                         this.getRemotePeer(), 
-                        newZones[direction]), 
+                        newZones.get(direction)), 
                 dimension, direction);
 
         LinkedList<SplitEntry> historyToTransfert = null;
@@ -476,15 +427,15 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
         this.tmpJoinInformation = 
         	new JoinInformation(
-        			dimension, direction, newZones[direction], 
-        			new NeighborEntry(msg.getPeerID(), msg.getRemotePeer(), newZones[directionInv]));
+        			dimension, direction, newZones.get(direction), 
+        			new NeighborEntry(msg.getPeerID(), msg.getRemotePeer(), newZones.get(directionInv)));
         
         return new JoinIntroduceResponseOperation(
         				this.getId(),
-        				newZones[directionInv],
+        				newZones.get(directionInv),
         				historyToTransfert, 
         				pendingNewNeighborhood, 
-        				this.getDataIn(newZones[directionInv]));
+        				this.getDataIn(newZones.get(directionInv)));
     }
 
     public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation operation) {
@@ -551,20 +502,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
     
     public boolean create() {
-        try {
-			this.zone = this.zoneType.newInstance();
-			return true;
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		
-    	return false;
+        this.zone = new Zone();
+        return true;
     }
 
 	/**
@@ -633,134 +572,136 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * {@inheritDoc}
      */
     public boolean leave() {
-        /*
-         * The current peer associated to this overlay is the only peer on the
-         * network.
-         */
-        if (this.neighborTable.size() == 0) {
-            return true;
-        }
-
-        SplitEntry lastSplitEntry = this.splitHistory.pop();
-        int lastDimension = lastSplitEntry.getDimension();
-        int lastDirection = lastSplitEntry.getDirection();
-
-        Map<UUID, NeighborEntry> neighborsToMergeWith = this.neighborTable.get(lastDimension,
-                AbstractCanOverlay.getOppositeDirection(lastDirection));
-
+        // TODO fixes it (does not work) 
+        return false;
 //        /*
-//         * Notify all the neighbors the current peer is preparing to leave. That
-//         * force the neighbors to wait the current peer has finished to leave
-//         * before to handle new requests.
+//         * The current peer associated to this overlay is the only peer on the
+//         * network.
 //         */
-//        for (NeighborEntry entry : this.getNeighborTable()) {
-//            entry.getStub().notifyNeighborStartLeave(this.getIdentifier());
+//        if (this.neighborTable.size() == 0) {
+//            return true;
 //        }
-
-        /*
-         * Terminate the current body in order to notify all the neighbors that
-         * they can't send message to the current remote peer. If they try they
-         * will receive a BlockingRequestReceiverException : this exception is
-         * used by the tracker in order to detect a peer which is preparing to
-         * leave when it have to add a peer on the network.
-         */
-
-        // TODO BlockingRequestReceiver
-        // ((BlockingRequestReceiver) ((MigratableBody)
-        // super.getLocalPeer().getBody())
-        // .getRequestReceiver()).blockReception();
-
-        switch (neighborsToMergeWith.size()) {
-            case 0:
-                /* We are alone on this pitiless world : nothing to do */
-                break;
-            case 1:
-                neighborsToMergeWith.values().iterator().next().getStub().receiveOperationIS(
-                        new MergeOperation(lastDimension, lastDirection, this.getId(), this
-                                .getZone(), new NeighborTable(), this.retrieveAllData()));
-                break;
-            default:
-                Zone zoneToSplit = this.getZone();
-                Zone[] newZones = null;
-
-                /*
-                 * For the last dimension and direction of the split, we split
-                 * N-1 times, where N is the number of neighbors in the last
-                 * dimension and last reverse direction from the current peer.
-                 */
-                for (NeighborEntry entry : neighborsToMergeWith.values()) {
-                    try {
-                        newZones = zoneToSplit.split(
-                                        AbstractCanOverlay.getNextDimension(lastDimension), 
-                                        this.neighborTable.getNeighborEntry(
-                                                entry.getId()).getZone().getUpperBound(
-                                                        AbstractCanOverlay.getNextDimension(lastDimension)));
-                    } catch (ZoneException e) {
-                        e.printStackTrace();
-                    }
-
-                    NeighborTable neighborsOfCurrentNeighbor = new NeighborTable();
-                    neighborsOfCurrentNeighbor.addAll(this.neighborTable);
-
-                    zoneToSplit = newZones[1];
-
-                    /*
-                     * Merge the new zones obtained with the suitable neighbors.
-                     */
-                    // FIXME The given Data are not good : we give all the
-                    // resources to each
-                    // neighbors to merge with
-                    entry.getStub().receiveOperationIS(
-                                    new MergeOperation(lastDimension,
-                                            lastDirection, this.getId(), newZones[0],
-                                            neighborsOfCurrentNeighbor,
-                                            this.retrieveAllData()));
-                }
-                break;
-        }
-
-        // this.neighborsDataStructure.removeAll(lastDimension,
-        // CANOverlay.getOppositeDirection(lastDirection));
-
-        /*
-         * Send LeaveOperation in order to update the neighbors list.
-         */
-        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-            for (int direction = 0; direction < 2; direction++) {
-                for (NeighborEntry entry : this.neighborTable.get(dim, direction).values()) {
-                    if (!neighborsToMergeWith.containsKey(entry.getId())) {
-                        entry.getStub().receiveOperationIS(
-                                new LeaveOperation(this.getId(), new ArrayList<NeighborEntry>(neighborsToMergeWith.
-                                        values()), dim, AbstractCanOverlay
-                                        .getOppositeDirection(direction)));
-                    }
-                }
-            }
-        }
-
-        // TODO BlockingRequestReceiver
-        // ((BlockingRequestReceiver) ((MigratableBody)
-        // super.getLocalPeer().getBody())
-        // .getRequestReceiver()).acceptReception();
-
-        /*
-         * Notify all the old neighbors of the peer which is leaving that it has
-         * terminated the leave operation.
-         */
-
-//        for (NeighborEntry entry : this.getNeighborTable()) {
-//            entry.getStub().notifyNeighborEndLeave(this.getIdentifier());
+//
+//        SplitEntry lastSplitEntry = this.splitHistory.pop();
+//        int lastDimension = lastSplitEntry.getDimension();
+//        int lastDirection = lastSplitEntry.getDirection();
+//
+//        Map<UUID, NeighborEntry> neighborsToMergeWith = this.neighborTable.get(lastDimension,
+//                AbstractCanOverlay.getOppositeDirection(lastDirection));
+//
+////        /*
+////         * Notify all the neighbors the current peer is preparing to leave. That
+////         * force the neighbors to wait the current peer has finished to leave
+////         * before to handle new requests.
+////         */
+////        for (NeighborEntry entry : this.getNeighborTable()) {
+////            entry.getStub().notifyNeighborStartLeave(this.getIdentifier());
+////        }
+//
+//        /*
+//         * Terminate the current body in order to notify all the neighbors that
+//         * they can't send message to the current remote peer. If they try they
+//         * will receive a BlockingRequestReceiverException : this exception is
+//         * used by the tracker in order to detect a peer which is preparing to
+//         * leave when it have to add a peer on the network.
+//         */
+//
+//        // TODO BlockingRequestReceiver
+//        // ((BlockingRequestReceiver) ((MigratableBody)
+//        // super.getLocalPeer().getBody())
+//        // .getRequestReceiver()).blockReception();
+//
+//        switch (neighborsToMergeWith.size()) {
+//            case 0:
+//                /* We are alone on this pitiless world : nothing to do */
+//                break;
+//            case 1:
+//                neighborsToMergeWith.values().iterator().next().getStub().receiveOperationIS(
+//                        new MergeOperation(lastDimension, lastDirection, this.getId(), this
+//                                .getZone(), new NeighborTable(), this.retrieveAllData()));
+//                break;
+//            default:
+//                Zone zoneToSplit = this.getZone();
+//                Pair<Zone> newZones = null;
+//
+//                /*
+//                 * For the last dimension and direction of the split, we split
+//                 * N-1 times, where N is the number of neighbors in the last
+//                 * dimension and last reverse direction from the current peer.
+//                 */
+//                for (NeighborEntry entry : neighborsToMergeWith.values()) {
+//                    try {
+//                        newZones = zoneToSplit.split(
+//                                        AbstractCanOverlay.getNextDimension(lastDimension), 
+//                                        this.neighborTable.getNeighborEntry(
+//                                                entry.getId()).getZone().getUpperBound(
+//                                                        AbstractCanOverlay.getNextDimension(lastDimension)));
+//                    } catch (ZoneException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                    NeighborTable neighborsOfCurrentNeighbor = new NeighborTable();
+//                    neighborsOfCurrentNeighbor.addAll(this.neighborTable);
+//
+//                    zoneToSplit = newZones[1];
+//
+//                    /*
+//                     * Merge the new zones obtained with the suitable neighbors.
+//                     */
+//                    // FIXME The given Data are not good : we give all the
+//                    // resources to each
+//                    // neighbors to merge with
+//                    entry.getStub().receiveOperationIS(
+//                                    new MergeOperation(lastDimension,
+//                                            lastDirection, this.getId(), newZones[0],
+//                                            neighborsOfCurrentNeighbor,
+//                                            this.retrieveAllData()));
+//                }
+//                break;
 //        }
-//        for (NeighborEntry entry : neighborsToMergeWith.values()) {
-//            entry.getStub().notifyNeighborEndLeave(this.getIdentifier());
+//
+//        // this.neighborsDataStructure.removeAll(lastDimension,
+//        // CANOverlay.getOppositeDirection(lastDirection));
+//
+//        /*
+//         * Send LeaveOperation in order to update the neighbors list.
+//         */
+//        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+//            for (int direction = 0; direction < 2; direction++) {
+//                for (NeighborEntry entry : this.neighborTable.get(dim, direction).values()) {
+//                    if (!neighborsToMergeWith.containsKey(entry.getId())) {
+//                        entry.getStub().receiveOperationIS(
+//                                new LeaveOperation(this.getId(), new ArrayList<NeighborEntry>(neighborsToMergeWith.
+//                                        values()), dim, AbstractCanOverlay
+//                                        .getOppositeDirection(direction)));
+//                    }
+//                }
+//            }
 //        }
-
-        /*
-         * Set all neighbors reference to null.
-         */
-        this.neighborTable.removeAll();
-
-        return true;
+//
+//        // TODO BlockingRequestReceiver
+//        // ((BlockingRequestReceiver) ((MigratableBody)
+//        // super.getLocalPeer().getBody())
+//        // .getRequestReceiver()).acceptReception();
+//
+//        /*
+//         * Notify all the old neighbors of the peer which is leaving that it has
+//         * terminated the leave operation.
+//         */
+//
+////        for (NeighborEntry entry : this.getNeighborTable()) {
+////            entry.getStub().notifyNeighborEndLeave(this.getIdentifier());
+////        }
+////        for (NeighborEntry entry : neighborsToMergeWith.values()) {
+////            entry.getStub().notifyNeighborEndLeave(this.getIdentifier());
+////        }
+//
+//        /*
+//         * Set all neighbors reference to null.
+//         */
+//        this.neighborTable.removeAll();
+//
+//        return true;
     }
     
     public void update() {
@@ -965,12 +906,9 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     public EmptyResponseOperation handleMergeMessage(MergeOperation msg) {
-        try {
-            this.setZone(this.zone.merge(msg.getZoneToReallocate()));
+        // TODO related to the #leave operation to reimplement
+//            this.setZone(this.zone.merge(msg.getZoneToReallocate()));
             this.mergeDataReceived(msg);
-        } catch (ZoneException e) {
-            e.printStackTrace();
-        }
 
         int dimension = msg.getDimension();
         int direction = msg.getDirection();

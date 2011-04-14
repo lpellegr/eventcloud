@@ -41,7 +41,7 @@ public class LeaveOperationTest extends CANNetworkInitializer {
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(1), super.get(3).getId()));
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(2), super.get(3).getId()));
 
-        // Do peers contain themself in neighbor table ?
+        // Do peers contain themselves in neighbor table ?
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(0), super.get(0).getId()));
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(1), super.get(1).getId()));
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(2), super.get(2).getId()));

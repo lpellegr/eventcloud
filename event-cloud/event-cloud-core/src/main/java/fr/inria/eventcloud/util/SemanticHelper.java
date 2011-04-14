@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.ontoware.aifbcommons.collection.ClosableIterable;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.QueryResultTable;
@@ -324,26 +324,26 @@ public class SemanticHelper {
 		}
 	}
 	
-	public static Coordinate createCoordinateWithNullValues(String subject, String predicate, String object) {
-		return new Coordinate(
+	public static StringCoordinate createCoordinateWithNullValues(String subject, String predicate, String object) {
+		return new StringCoordinate(
         			 	subject == null ? null : new SemanticElement(subject),
         			 	predicate == null ? null : new SemanticElement(predicate),
         			 	object == null ? null : new SemanticElement(object));
 	}
 	
-	public static Coordinate createCoordinateWithNullValues(Statement stmt) {
+	public static StringCoordinate createCoordinateWithNullValues(Statement stmt) {
 		checkNotNull(stmt);
     	
-    	return new Coordinate(
+    	return new StringCoordinate(
     					stmt.getSubject() == null ? null : new SemanticElement(stmt.getSubject()),
     					stmt.getPredicate() == null ? null : new SemanticElement(stmt.getPredicate()),
     					stmt.getObject() == null ? null : new SemanticElement(stmt.getObject()));
 	}
 	
-    public static Coordinate createCoordinateWithoutNullValues(Statement stmt) {
+    public static StringCoordinate createCoordinateWithoutNullValues(Statement stmt) {
     	checkNotNull(stmt);
     	
-    	return new Coordinate(
+    	return new StringCoordinate(
     					new SemanticElement(checkNotNull(stmt.getSubject())),
     					new SemanticElement(checkNotNull(stmt.getPredicate())),
     					new SemanticElement(checkNotNull(stmt.getObject())));

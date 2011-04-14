@@ -80,8 +80,8 @@ public class SparqlDecomposer {
 	}
 	
 	public static void main(String[] args) {
-		String query1 = "CONSTRUCT { ?s ?p ?o } WHERE { ?s <http://predicate1.com> ?o . ?o <http://predicate2.com> \"hello\" } ";
-		String query2 = "CONSTRUCT { ?s ?p ?o } WHERE { ?s <http://predicate1.com> ?o . } ";
+//		String query1 = "CONSTRUCT { ?s ?p ?o } WHERE { ?s <http://predicate1.com> ?o . ?o <http://predicate2.com> \"hello\" } ";
+//		String query2 = "CONSTRUCT { ?s ?p ?o } WHERE { ?s <http://predicate1.com> ?o . } ";
 
 		// disjunction
 		String query3 = "PREFIX go: <http://purl.org/obo/owl/GO#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX obo: <http://www.obofoundry.org/ro/ro.owl#> SELECT DISTINCT ?label ?process WHERE { { ?process obo:part_of go:GO_0007165 }  UNION  { ?process rdfs:subClassOf go:GO_0007165 } }";

@@ -14,8 +14,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Lo
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.openrdf.model.Statement;
 import org.slf4j.Logger;
@@ -117,7 +117,7 @@ public class SemanticCanTracker extends Tracker {
 					PAFuture.getFutureValue(
 							this.getRandomPeer().send(
 									new LookupRequest(
-											new Coordinate(
+											new StringCoordinate(
 													subjectElt, predicateElt, objectElt))))).getPeerFound();
 		} catch (DispatchException e) {
 			e.printStackTrace();

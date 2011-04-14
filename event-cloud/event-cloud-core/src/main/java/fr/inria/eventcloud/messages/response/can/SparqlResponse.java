@@ -11,7 +11,7 @@ import org.objectweb.proactive.core.util.converter.ObjectToByteConverter;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 
@@ -90,7 +90,7 @@ public abstract class SparqlResponse extends AnycastResponse {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Router<? extends RequestResponseMessage<Coordinate>, Coordinate> getRouter() {
+	public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
 		return new AnycastResponseRouter<AnycastResponse>() {
 			@Override
 			public void makeDecision(StructuredOverlay overlay, AnycastResponse response) {

@@ -13,7 +13,7 @@ public class ContentAdressableNetworkException extends StructuredP2PException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructs a <code>ContentAdressableNetworkException</code> with no
+	 * Constructs a {@code ContentAdressableNetworkException} with no
 	 * specified detail message.
 	 */
 	public ContentAdressableNetworkException() {
@@ -21,7 +21,7 @@ public class ContentAdressableNetworkException extends StructuredP2PException {
 	}
 
 	/**
-	 * Constructs a <code>ContentAdressableNetworkException</code> with the
+	 * Constructs a {@code ContentAdressableNetworkException} with the
 	 * specified detail message.
 	 * 
 	 * @param message
@@ -32,7 +32,7 @@ public class ContentAdressableNetworkException extends StructuredP2PException {
 	}
 
 	/**
-	 * Constructs a <code>ContentAdressableNetworkException</code> with the
+	 * Constructs a {@code ContentAdressableNetworkException} with the
 	 * specified detail message and nested exception.
 	 * 
 	 * @param message
@@ -45,7 +45,7 @@ public class ContentAdressableNetworkException extends StructuredP2PException {
 	}
 
 	/**
-	 * Constructs a <code>ContentAdressableNetworkException</code> with the
+	 * Constructs a {@code ContentAdressableNetworkException} with the
 	 * specified detail message and nested exception.
 	 * 
 	 * @param cause

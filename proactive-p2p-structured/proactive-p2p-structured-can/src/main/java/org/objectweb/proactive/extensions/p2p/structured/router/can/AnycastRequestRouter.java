@@ -14,20 +14,22 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This router is used to route messages of type {@link AnycastRequest}.
+ * The request is supposed to reach one or more peers depending on the 
+ * of the key associated to the request to route.
  * 
  * @author lpellegr
  * 
  * @param <T>
- *            the type of message to route
+ *            the request type to route.
  */
-public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Router<AnycastRequest, Coordinate> {
+public abstract class AnycastRequestRouter<T extends AnycastRequest> extends Router<AnycastRequest, StringCoordinate> {
 
     private static final Logger logger = LoggerFactory.getLogger(AnycastRequestRouter.class);
 
