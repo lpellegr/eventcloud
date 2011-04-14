@@ -10,6 +10,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.ontoware.rdf2go.model.Statement;
@@ -33,7 +34,7 @@ import fr.inria.eventcloud.messages.request.can.RemoveStatementsRequest;
  * 
  * @author lpellegr
  */
-public class SemanticPeer extends Peer {
+public class SemanticPeer extends PeerImpl {
 
     private static final long serialVersionUID = 1L;
 
