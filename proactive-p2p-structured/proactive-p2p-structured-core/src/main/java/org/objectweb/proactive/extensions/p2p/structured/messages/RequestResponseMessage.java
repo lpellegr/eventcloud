@@ -96,26 +96,12 @@ public abstract class RequestResponseMessage<K> implements Routable<K>, Serializ
         this.hopCount += increment;
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @SuppressWarnings("unchecked")
     public void route(StructuredOverlay overlay) {
-//        RouterStore routerStore = RouterStore.getInstance();
-//
-//		Router<? extends RequestReplyMessage<K>, K> instance = 
-//			(Router<? extends RequestReplyMessage<K>, K>) 
-//				routerStore.get(this.getClass(), this.constraintsValidator.getClass());
-//
-//		if (instance == null) {
-//			instance = this.getRouter();
-//			((Router<RequestReplyMessage<K>, K>) instance).makeDecision(overlay, this);
-//			Router<? extends RequestReplyMessage<?>, ?> oldInstance = routerStore
-//					.store(this.getClass(),
-//							this.constraintsValidator.getClass(), instance);
-//			if (oldInstance != null) {
-//				instance = oldInstance;
-//			}
-//		}
-//
-//		((Router<RequestReplyMessage<K>, K>) instance).makeDecision(overlay, this);
     	((Router<RequestResponseMessage<K>, K>) this.getRouter()).makeDecision(overlay, this);
     }
 
