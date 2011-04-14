@@ -5,20 +5,22 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Router used to route {@link AnycastResponse}s.
+ * Router used to route {@link AnycastResponse}s. The path followed by 
+ * the response is the reverse path of the initial path followed by the
+ * request.
  * 
- * @param <T>
- *            the type of response to route.
- *
  * @author lpellegr
+ *
+ * @param <T>
+ *            the response type to route.
  */
-public class AnycastResponseRouter<T extends AnycastResponse> extends Router<AnycastResponse, Coordinate> {
+public class AnycastResponseRouter<T extends AnycastResponse> extends Router<AnycastResponse, StringCoordinate> {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnycastResponseRouter.class);
 

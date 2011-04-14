@@ -4,28 +4,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 
 /**
  * This class is the default validator for {@link AnycastRequestRouter}. This
- * validator assumes that all coordinate set to {@code null} match the
+ * validator assumes that all coordinate elements set to {@code null} match the
  * constraints.
  * 
  * @author lpellegr
  */
-public final class DefaultAnycastConstraintsValidator extends AnycastConstraintsValidator<Coordinate> {
+public final class DefaultAnycastConstraintsValidator extends AnycastConstraintsValidator<StringCoordinate> {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Creates a new {@code DefaultAnycastConstraintsValidator} which a very
-	 * permissive constraints validator (i.e. the valitor validates the
-	 * constraints on any peer).
+	 * Creates a new {@code DefaultAnycastConstraintsValidator} which is 
+	 * a very permissive constraints validator (i.e. the valitor validates 
+	 * the constraints on any peer).
 	 */
 	public DefaultAnycastConstraintsValidator() {
-		super(new Coordinate(null, null, null));
+		super(new StringCoordinate(null, null, null));
 	}
 
 	/**
@@ -35,7 +35,7 @@ public final class DefaultAnycastConstraintsValidator extends AnycastConstraints
 	 * @param key
 	 *            the key to reach.
 	 */
-	public DefaultAnycastConstraintsValidator(Coordinate key) {
+	public DefaultAnycastConstraintsValidator(StringCoordinate key) {
 		super(checkNotNull(key));
 	}
 

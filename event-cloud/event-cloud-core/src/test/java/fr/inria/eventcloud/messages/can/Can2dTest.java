@@ -1,5 +1,7 @@
 package fr.inria.eventcloud.messages.can;
 
+import javax.swing.SwingUtilities;
+
 import junit.framework.Assert;
 
 import org.junit.BeforeClass;
@@ -48,15 +50,15 @@ public class Can2dTest {
     public static void main(String[] args) {
         P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue(2);
-        spaceNetworkInitializer.setUpNetworkOnLocalMachine(10);
+        spaceNetworkInitializer.setUpNetworkOnLocalMachine(20);
         
-        new Thread(new Runnable() {
-			@Override
-			public void run() {
-				new Network2DVisualizer(
-						spaceNetworkInitializer.getRandomTracker().getStoredPeers()).setVisible(true);
-			}
-		}).start();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new Network2DVisualizer(
+                        spaceNetworkInitializer.getRandomTracker()
+                            .getStoredPeers()).setVisible(true);
+            }
+        });
     }
     
 }

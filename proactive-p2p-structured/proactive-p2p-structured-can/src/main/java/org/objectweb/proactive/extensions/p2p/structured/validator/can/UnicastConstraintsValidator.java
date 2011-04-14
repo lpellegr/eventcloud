@@ -4,25 +4,24 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Lo
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * {@link ConstraintsValidator} for {@link LookupRequest} and
- * {@link LookupResponse}.
+ * {@link ConstraintsValidator} for {@link LookupRequest} and {@link LookupResponse}.
  * 
  * @author lpellegr
  */
-public class UnicastConstraintsValidator extends ConstraintsValidator<Coordinate> {
+public class UnicastConstraintsValidator extends ConstraintsValidator<StringCoordinate> {
 
 	private static final long serialVersionUID = 1L;
 
-    public UnicastConstraintsValidator(Coordinate key) {
+    public UnicastConstraintsValidator(StringCoordinate key) {
 		super(key);
 	}
 
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
-        return ((AbstractCanOverlay) overlay).contains(super.key);
+        return ((AbstractCanOverlay) overlay).getZone().contains(super.key);
     }
 
 }

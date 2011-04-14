@@ -3,10 +3,12 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
 /**
  * Response associated to {@link GetIdAndZoneOperation}.
+ * 
+ * @author lpellegr
  */
 public class GetIdAndZoneResponseOperation implements ResponseOperation {
 
@@ -17,7 +19,6 @@ public class GetIdAndZoneResponseOperation implements ResponseOperation {
     private final Zone peerZone;
 
     public GetIdAndZoneResponseOperation(UUID peerIdentifier, Zone peerZone) {
-        super();
         this.peerIdentifier = peerIdentifier;
         this.peerZone = peerZone;
     }

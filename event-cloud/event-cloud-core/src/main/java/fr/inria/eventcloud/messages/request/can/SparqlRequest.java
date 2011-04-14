@@ -4,8 +4,8 @@ import java.util.concurrent.Callable;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
@@ -26,7 +26,7 @@ public abstract class SparqlRequest extends AnycastRequest {
 
     private String sparqlConstructQuery;
 
-    public SparqlRequest(AnycastConstraintsValidator<Coordinate> validator, String sparqlConstructQuery) {
+    public SparqlRequest(AnycastConstraintsValidator<StringCoordinate> validator, String sparqlConstructQuery) {
     	super(validator);
     	this.sparqlConstructQuery = sparqlConstructQuery;
     }
@@ -49,7 +49,7 @@ public abstract class SparqlRequest extends AnycastRequest {
      *         <code>false</code> otherwise.
      */
     public boolean keyToReachNotNullElements() {
-        for (Element elt : super.getKey()) {
+        for (StringElement elt : super.getKey()) {
             if (elt == null) {
                 return false;
             }

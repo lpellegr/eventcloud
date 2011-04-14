@@ -4,7 +4,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
@@ -13,7 +13,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * 
  * @author lpellegr
  */
-public class ForwardResponse extends Response<Coordinate> {
+public class ForwardResponse extends Response<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
     

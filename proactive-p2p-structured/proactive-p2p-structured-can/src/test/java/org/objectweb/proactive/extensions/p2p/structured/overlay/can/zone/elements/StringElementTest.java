@@ -1,17 +1,18 @@
-package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
+package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Element;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Tests for the {@link StringElement} class.
+ * 
+ * @author lpellegr
  */
 public class StringElementTest {
 
@@ -31,7 +32,7 @@ public class StringElementTest {
         logger.info("Test Sum " + StringElement.sumUnicodeCodePoints(al, al2));
 
         StringElement cmax = new StringElement(max);
-        Element c = Element.middle(emin, cmax);
+        StringElement c = (StringElement) Element.middle(emin, cmax);
 
         logger.info("Middle is  : " + c);
 
@@ -97,11 +98,10 @@ public class StringElementTest {
         int nbOfSplit = 3;
         while (nbOfSplit > 0) {
             coord1 = new StringElement(middleCoord.getValue());
-            middleCoord = Element.middle(middleCoord, coord2);
+            middleCoord = (StringElement) Element.middle(middleCoord, coord2);
             System.out.println("[" + coord1.getValue() + "," + middleCoord.getValue() + "[" + ",["
                     + middleCoord.getValue() + "," + coord2.getValue() + "[");
             nbOfSplit--;
-            System.out.println(new Zone(new Coordinate(coord1), new Coordinate(middleCoord)));
         }
     }
 

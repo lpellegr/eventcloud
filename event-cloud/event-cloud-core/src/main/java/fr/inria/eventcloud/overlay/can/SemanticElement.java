@@ -1,6 +1,6 @@
 package fr.inria.eventcloud.overlay.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.Resource;
 

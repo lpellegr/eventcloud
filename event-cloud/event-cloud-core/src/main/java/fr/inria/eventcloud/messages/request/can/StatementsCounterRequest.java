@@ -8,8 +8,8 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
@@ -36,7 +36,7 @@ public class StatementsCounterRequest extends AnycastRequest {
 
     public StatementsCounterRequest(final URI space) {
         super(new DefaultAnycastConstraintsValidator(
-        		new Coordinate(null, null, null)));
+        		new StringCoordinate(null, null, null)));
         this.spaceURI = space;
         this.entries = new HashMap<StatementsCounterRequest.Entry, Long>();
     }

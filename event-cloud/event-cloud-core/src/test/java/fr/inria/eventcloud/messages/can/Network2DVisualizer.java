@@ -23,8 +23,9 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-
-import fr.inria.eventcloud.overlay.can.DualLexicographicZone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
 
 /**
  * 
@@ -34,30 +35,30 @@ public class Network2DVisualizer extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int CANVAS_HEIGHT = 500;
+	private static final int CANVAS_HEIGHT = 800;
 	
-	private static final int CANVAS_WIDTH = 500;
+	private static final int CANVAS_WIDTH = 800;
 	
 	private JComponent area;
 
-	private Map<DualLexicographicZone, ZoneEntry> peers;
+	private Map<Zone, ZoneEntry> peers;
 	
 	public Network2DVisualizer(List<Peer> peers) {
-		this.peers = new HashMap<DualLexicographicZone, ZoneEntry>();
+		this.peers = new HashMap<Zone, ZoneEntry>();
 		NeighborTable table = null;
 		for (Peer peer : peers) {
-			List<DualLexicographicZone> neighbors = new ArrayList<DualLexicographicZone>();
+			List<Zone> neighbors = new ArrayList<Zone>();
 			for (int dim = 0; dim < 2; dim++) {
 				for (int dir = 0; dir < 2; dir++) {
 					table = CanOperations.getNeighborTable(peer);
 					for (NeighborEntry entry : table.get(dim, dir).values()) {
-						neighbors.add((DualLexicographicZone) entry.getZone());
+						neighbors.add((Zone) entry.getZone());
 					}
 				}
 			}
 			
 			this.peers.put(
-					(DualLexicographicZone) CanOperations.getIdAndZoneResponseOperation(peer).getPeerZone(),
+					(Zone) CanOperations.getIdAndZoneResponseOperation(peer).getPeerZone(),
 					new ZoneEntry(getRandomColor(), neighbors));
 		}
 
@@ -93,7 +94,7 @@ public class Network2DVisualizer extends JFrame {
 		
 		private static final long serialVersionUID = 1L;
 
-		public DualLexicographicZone zoneClicked = null;
+		public Zone zoneClicked = null;
 
 		public Canvas(int width, int height) {
 			super();
@@ -102,11 +103,10 @@ public class Network2DVisualizer extends JFrame {
 
 			this.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
-					DualLexicographicZone clickedZone = Canvas.this.getClicked(e.getX(), CANVAS_HEIGHT - e.getY());
+					Zone clickedZone = Canvas.this.getClicked(e.getX(), CANVAS_HEIGHT - e.getY());
 					if (e.getButton() == MouseEvent.BUTTON1) {
-//						System.out.println("Clicked in x=" + e.getX() + ", y=" + e.getY());
 						Canvas.this.zoneClicked = clickedZone;
-						System.out.println("Clicked in zone " + clickedZone);
+						System.out.println("Clicked in (" + e.getX() + "," + e.getY() + ") wich is contained by zone " + clickedZone.getNumericView() + " <-> " + clickedZone);
 						Canvas.this.repaint();
 					} else if (e.getButton() == MouseEvent.BUTTON3) {
 						for (ZoneEntry entry : peers.values()) {
@@ -118,28 +118,28 @@ public class Network2DVisualizer extends JFrame {
 			});
 		}
 
-		public int getXmin(DualLexicographicZone z) {
-			return this.getWidth(z.getIntervals()[0][0]);
+		public int getXmin(Zone z) {
+			return this.getWidth(z.getNumericView().getLowerBound(0).getValue());
 		}
 		
-		public int getXmax(DualLexicographicZone z) {
-			return this.getWidth(z.getIntervals()[0][1]);
+		public int getXmax(Zone z) {
+			return this.getWidth(z.getNumericView().getUpperBound(0).getValue());
 		}
 		
-		public int getYmin(DualLexicographicZone z) {
-			return this.getWidth(z.getIntervals()[1][0]);
+		public int getYmin(Zone z) { 
+			return this.getWidth(z.getNumericView().getLowerBound(1).getValue());
 		}
 		
-		public int getYmax(DualLexicographicZone z) {
-			return this.getWidth(z.getIntervals()[1][1]);
+		public int getYmax(Zone z) {
+			return this.getWidth(z.getNumericView().getUpperBound(1).getValue());
 		}
 		
 		public int getHeight(double v) {
-			return new Long(Math.round(CANVAS_HEIGHT * v)).intValue();
+			return (int) Math.round(CANVAS_HEIGHT * v);
 		}
 
 		public int getWidth(double v) {
-			return new Long(Math.round(CANVAS_WIDTH * v)).intValue(); 
+			return (int) Math.round(CANVAS_WIDTH * v); 
 		}
 		
 		public void paintComponent(Graphics g) {
@@ -147,7 +147,7 @@ public class Network2DVisualizer extends JFrame {
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			
 			int height, xMin, xMax, yMin, yMax;
-			for (DualLexicographicZone zone : peers.keySet()) {
+			for (Zone zone : peers.keySet()) {
 				xMin = this.getXmin(zone);
 				xMax = this.getXmax(zone);
 				yMin = this.getYmin(zone);
@@ -174,7 +174,7 @@ public class Network2DVisualizer extends JFrame {
 				
 				for (int i = 0; i < 2; i++) {
 					for (int j = 0; j < 2; j++) {
-						for (DualLexicographicZone zone : peers.get(this.zoneClicked).getNeighbors()) {
+						for (Zone zone : peers.get(this.zoneClicked).getNeighbors()) {
 							xMin = this.getXmin(zone);
 							xMax = this.getXmax(zone);
 							yMin = this.getYmin(zone);
@@ -188,20 +188,12 @@ public class Network2DVisualizer extends JFrame {
 			}
 		}
 		
-		public DualLexicographicZone getClicked(int x, int y) {
-			for (DualLexicographicZone zone : peers.keySet()) {
-//				if (zone.contains(
-//						new Coordinate(
-//								new Element[] { 
-//										new BigDecimalElement(
-//												BigDecimal.valueOf(x).divide(
-//														BigDecimal.valueOf(500))), 
-//										new BigDecimalElement(
-//												BigDecimal.valueOf(y).divide(
-//														BigDecimal.valueOf(500))) }))) {
-//					return zone;
-//				}
-				if (contains(zone.getIntervals(), new double[] { x / 500.0, y / 500.0 })) {
+		public Zone getClicked(int x, int y) {
+			for (Zone zone : peers.keySet()) {
+				if (zone.getNumericView().contains(
+				        new DoubleCoordinate(
+				                new DoubleElement(x / (double) CANVAS_WIDTH), 
+				                new DoubleElement(y / (double) CANVAS_HEIGHT)))) {
 					return zone;
 				}
 			}
@@ -224,9 +216,9 @@ public class Network2DVisualizer extends JFrame {
 		
 		private Color zoneColor;
 		
-		private final List<DualLexicographicZone> neighbors;
+		private final List<Zone> neighbors;
 
-		public ZoneEntry(final Color zoneColor, final List<DualLexicographicZone> neighbors) {
+		public ZoneEntry(final Color zoneColor, final List<Zone> neighbors) {
 			super();
 			this.zoneColor = zoneColor;
 			this.neighbors = neighbors;
@@ -240,7 +232,7 @@ public class Network2DVisualizer extends JFrame {
 			return this.zoneColor;
 		}
 
-		public List<DualLexicographicZone> getNeighbors() {
+		public List<Zone> getNeighbors() {
 			return this.neighbors;
 		}
 		

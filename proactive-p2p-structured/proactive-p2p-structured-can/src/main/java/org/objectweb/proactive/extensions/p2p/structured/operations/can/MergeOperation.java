@@ -8,11 +8,11 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
 /**
  * A {@code MergeOperation} is used when a {@link Peer} have to merge with an
- * another. It consists in transfering data from one peer to another, to merge
+ * another. It consists in transferring data from one peer to another, to merge
  * the two zone and to update the neighbors.
  * 
  * @author lpellegr

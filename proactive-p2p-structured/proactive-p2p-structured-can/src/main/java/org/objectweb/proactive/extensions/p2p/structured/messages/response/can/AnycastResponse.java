@@ -4,7 +4,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRouting
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 /**
  * Response associated to {@link AnycastRequest}. This kind of response will use
@@ -12,7 +12,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates
  * 
  * @author lpellegr
  */
-public abstract class AnycastResponse extends Response<Coordinate> {
+public abstract class AnycastResponse extends Response<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
 

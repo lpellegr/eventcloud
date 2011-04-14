@@ -6,7 +6,7 @@ import java.util.Set;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.ontoware.aifbcommons.collection.ClosableIterable;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.Statement;
@@ -41,7 +41,7 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticSt
 	 * Constructs a new overlay.
 	 */
 	public SemanticCanOverlay() {
-		super(new SparqlRequestResponseManager(), DualLexicographicZone.class);
+		super(new SparqlRequestResponseManager());
 	}
 	
 	/**

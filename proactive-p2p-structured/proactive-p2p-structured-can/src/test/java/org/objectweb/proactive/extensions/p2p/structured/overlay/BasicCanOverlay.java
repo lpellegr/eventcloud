@@ -3,9 +3,12 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+
 
 /**
+ * A basic implementation of {@link AbstractCanOverlay} which an empty 
+ * behavior for the operations related to the management of the data.
  * 
  * @author lpellegr
  */

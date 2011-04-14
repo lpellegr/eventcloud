@@ -8,7 +8,7 @@ import org.objectweb.proactive.core.util.converter.ByteToObjectConverter;
 import org.objectweb.proactive.core.util.converter.ObjectToByteConverter;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 import org.ontoware.rdf2go.model.Statement;
@@ -47,7 +47,7 @@ public abstract class StatementRequest extends ForwardRequest {
 
 	abstract public void onDestinationReached(StructuredOverlay overlay, URI context, Statement stmt);
 	
-	public Router<ForwardRequest, Coordinate> getRouter() {
+	public Router<ForwardRequest, StringCoordinate> getRouter() {
 		return new UnicastRequestRouter<ForwardRequest>() {
 			@Override
 			protected void onDestinationReached(StructuredOverlay overlay, ForwardRequest msg) {

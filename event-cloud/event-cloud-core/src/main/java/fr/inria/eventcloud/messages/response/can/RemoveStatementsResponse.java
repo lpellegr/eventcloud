@@ -2,7 +2,7 @@ package fr.inria.eventcloud.messages.response.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 
@@ -30,7 +30,7 @@ public class RemoveStatementsResponse extends AnycastResponse {
      * {@inheritDoc}
      */
 	@Override
-	public Router<? extends RequestResponseMessage<Coordinate>, Coordinate> getRouter() {
+	public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
 		return new AnycastResponseRouter<AnycastResponse>();
 	}
 

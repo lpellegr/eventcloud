@@ -120,12 +120,6 @@ public class EventCloudInitializer extends SemanticNetworkInitializer<SemanticCa
 //        }
     }
 
-	private void addOnNetwork(SemanticPeer[] peers) {
-		for (int i = 0; i < peers.length; i++) {
-			this.getRandomTracker().addOnNetwork(peers[i]);
-		}
-	}
-
 	private void addOnNetworkInParallel(final SemanticPeer[] peers) {
 		final CountDownLatch doneSignal = new CountDownLatch(peers.length);
 

@@ -7,6 +7,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
 /**
  * NeighborEntry is an entry in a {@link NeighborTable}.

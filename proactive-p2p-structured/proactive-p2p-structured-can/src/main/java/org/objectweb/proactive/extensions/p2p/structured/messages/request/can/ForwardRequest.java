@@ -5,19 +5,19 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 /**
- * A <code>ForwardRequest</code> is a query message which may be used in
- * order to find a peer which manages a specified coordinate on a CAN 
- * structured peer-to-peer network.
+ * A {@code ForwardRequest} is a query message which may be used in
+ * order to <strong>reach</strong> a peer which manages a specified 
+ * coordinate on a CAN structured peer-to-peer network. 
  * 
  * @author lpellegr
  */
-public class ForwardRequest extends Request<Coordinate> {
+public class ForwardRequest extends Request<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,9 +25,9 @@ public class ForwardRequest extends Request<Coordinate> {
      * The zone which is managed by the sender. It is used in order to send the
      * response when the keyToReach has been reached.
      */
-    private Coordinate senderCoordinate;
+    private StringCoordinate senderCoordinate;
 
-    public ForwardRequest(Coordinate coordinateToReach) {
+    public ForwardRequest(StringCoordinate coordinateToReach) {
         super(new UnicastConstraintsValidator(coordinateToReach));
     }
 
@@ -38,14 +38,14 @@ public class ForwardRequest extends Request<Coordinate> {
      * @return the key which is managed by the sender in order to send the
      *         response when the keyToReach has been reached.
      */
-    public Coordinate getSenderCoordinate() {
+    public StringCoordinate getSenderCoordinate() {
         return this.senderCoordinate;
     }
 
     /**
      * {@inheritDoc}
      */
-    public Router<ForwardRequest, Coordinate> getRouter() {
+    public Router<ForwardRequest, StringCoordinate> getRouter() {
         return new UnicastRequestRouter<ForwardRequest>();
     }
 
@@ -62,7 +62,7 @@ public class ForwardRequest extends Request<Coordinate> {
     /**
      * {@inheritDoc}
      */
-    public Response<Coordinate> createResponse() {
+    public Response<StringCoordinate> createResponse() {
         return new ForwardResponse(this);
     }
 

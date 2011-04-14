@@ -4,8 +4,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRouting
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
 /**
@@ -14,7 +14,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastCo
  * 
  * @author lpellegr
  */
-public abstract class AnycastRequest extends Request<Coordinate> {
+public abstract class AnycastRequest extends Request<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
     
@@ -26,7 +26,7 @@ public abstract class AnycastRequest extends Request<Coordinate> {
      * @param validator
      * 			the constraints validator to use for checking the constraints.
      */
-    public AnycastRequest(AnycastConstraintsValidator<Coordinate> validator) {
+    public AnycastRequest(AnycastConstraintsValidator<StringCoordinate> validator) {
         super(validator);
     }
 
@@ -45,7 +45,7 @@ public abstract class AnycastRequest extends Request<Coordinate> {
     }
 
     public boolean validatesKeyConstraints(Zone zone) {
-    	return ((AnycastConstraintsValidator<Coordinate>) 
+    	return ((AnycastConstraintsValidator<StringCoordinate>) 
     				super.constraintsValidator).validatesKeyConstraints(zone);
     }
     
