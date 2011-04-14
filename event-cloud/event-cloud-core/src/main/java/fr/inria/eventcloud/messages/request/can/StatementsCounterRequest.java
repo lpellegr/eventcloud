@@ -72,7 +72,7 @@ public class StatementsCounterRequest extends AnycastRequest {
         return new StatementsCounterResponse(this);
     }
 
-	public class Entry implements Serializable {
+	public static class Entry implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 

@@ -27,7 +27,7 @@ public class UnicastLookupRequestTest extends CANNetworkInitializer {
 
     @Test
     public void testLookupQuery() {
-        LookupResponse response = null;
+        LookupResponse response;
         Peer targetedPeer = super.getRandomPeer();
         
         try {
@@ -35,17 +35,17 @@ public class UnicastLookupRequestTest extends CANNetworkInitializer {
             				super.get(0).send(new LookupRequest(
             						CanOperations.getIdAndZoneResponseOperation(
             								targetedPeer).getPeerZone().getLowerBound())));
+            
+            Assert.assertTrue(response.getLatency() > 0);
+            // the peer to reach is maybe the initiator of the request
+            Assert.assertTrue(response.getHopCount() >= 0);
+            Assert.assertTrue(response.getInboundHopCount() >= 0);
+            Assert.assertTrue(response.getOutboundHopCount() >= 0);
+             
+            Assert.assertEquals(targetedPeer, response.getPeerFound());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        Assert.assertTrue(response.getLatency() > 1);
-        // the peer to reach is maybe the initiator of the request
-        Assert.assertTrue(response.getHopCount() >= 0);
-        Assert.assertTrue(response.getInboundHopCount() >= 0);
-        Assert.assertTrue(response.getOutboundHopCount() >= 0);
-         
-        Assert.assertEquals(targetedPeer, response.getPeerFound());
     }
 
     @After

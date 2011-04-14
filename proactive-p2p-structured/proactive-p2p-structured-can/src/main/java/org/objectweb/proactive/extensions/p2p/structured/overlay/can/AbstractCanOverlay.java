@@ -417,12 +417,12 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
                 (LinkedList<SplitEntry>) 
                     MakeDeepCopy.WithObjectStream
                         .makeDeepCopy(this.splitHistory);
+            historyToTransfert.add(new SplitEntry(dimension, directionInv));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        historyToTransfert.add(new SplitEntry(dimension, directionInv));
 
         this.tmpJoinInformation = 
         	new JoinInformation(

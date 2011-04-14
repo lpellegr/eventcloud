@@ -15,7 +15,7 @@ public class PropertyInteger extends Property {
 
 	public PropertyInteger(String name, int defaultValue) {
 		this(name);
-		this.setDefaultValue(new Integer(defaultValue).toString());
+		this.setDefaultValue(Integer.valueOf(defaultValue).toString());
 	}
 
 	/**
@@ -41,7 +41,7 @@ public class PropertyInteger extends Property {
 	 *            the new value.
 	 */
 	public void setValue(int value) {
-		super.setValue(new Integer(value).toString());
+		super.setValue(Integer.valueOf(value).toString());
 	}
 
 	@Override

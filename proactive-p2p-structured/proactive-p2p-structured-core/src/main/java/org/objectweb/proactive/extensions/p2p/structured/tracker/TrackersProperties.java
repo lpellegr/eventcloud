@@ -37,12 +37,20 @@ public class TrackersProperties {
             }
         }
         this.properties = new Properties();
+        FileInputStream fis = null;
         try {
-            this.properties.load(new FileInputStream(this.propertiesFilePath));
+            fis = new FileInputStream(this.propertiesFilePath);
+            this.properties.load(fis);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -58,26 +66,42 @@ public class TrackersProperties {
         }
 
         this.properties.put(associatedNetworkName, TrackersProperties.asString(bindingNames));
+        FileOutputStream fis = null;
         try {
-            this.properties.store(new FileOutputStream(this.propertiesFilePath),
+            fis = new FileOutputStream(this.propertiesFilePath);
+            this.properties.store(fis,
                     TrackersProperties.DEFAULT_PROPERTIES_COMMENT);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void store(String associatedNetworkName, List<String> bindingNames) {
         this.properties.put(associatedNetworkName, TrackersProperties.asString(bindingNames));
 
+        FileOutputStream fis = null;
         try {
-            this.properties.store(new FileOutputStream(this.propertiesFilePath),
+            fis = new FileOutputStream(this.propertiesFilePath);
+            this.properties.store(fis,
                     TrackersProperties.DEFAULT_PROPERTIES_COMMENT);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
