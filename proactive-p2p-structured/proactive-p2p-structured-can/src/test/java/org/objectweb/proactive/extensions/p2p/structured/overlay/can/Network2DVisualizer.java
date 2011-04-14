@@ -212,7 +212,7 @@ public class Network2DVisualizer extends JFrame {
 	    }
 	}
 	
-	private class ZoneEntry {
+	private static class ZoneEntry {
 		
 		private Color zoneColor;
 		

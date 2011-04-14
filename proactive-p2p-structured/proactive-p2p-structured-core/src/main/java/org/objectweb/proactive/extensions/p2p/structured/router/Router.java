@@ -150,6 +150,10 @@ public abstract class Router<T extends RequestResponseMessage<K>, K> {
 	 */
     @Override
     public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+         
     	String currentCanonicalName = this.getClass().getCanonicalName();
     	String objCanonicalName = obj.getClass().getCanonicalName();
     	

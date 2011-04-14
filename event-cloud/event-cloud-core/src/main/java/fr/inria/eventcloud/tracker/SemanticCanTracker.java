@@ -107,9 +107,9 @@ public class SemanticCanTracker extends Tracker {
 			return this.getRandomPeer();
 		}
 		
-		StringElement subjectElt = subjectCharacter == null ? null : new StringElement(subjectCharacter.toString());
-		StringElement predicateElt = predicateCharacter == null ? null : new StringElement(predicateCharacter.toString());
-		StringElement objectElt = objectCharacter == null ? null : new StringElement(objectCharacter.toString());
+		StringElement subjectElt = new StringElement(subjectCharacter.toString());
+		StringElement predicateElt = new StringElement(predicateCharacter.toString());
+		StringElement objectElt = new StringElement(objectCharacter.toString());
 		
 		logger.debug("findPeerToJoin return a peer based on the frequency found.");
 		try {

@@ -122,12 +122,10 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>> 
     	try {
 			return (Coordinate<E, T>) MakeDeepCopy.WithObjectStream.makeDeepCopy(this);
 		} catch (IOException e) {
-			e.printStackTrace();
+		    throw new AssertionError(e);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+		    throw new AssertionError(e);
 		}
-		
-		return null;
     }
     
     /**
@@ -162,7 +160,9 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>> 
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
-		return this.compareTo(Coordinate.class.cast(obj)) == 0;
+		return obj != null 
+		        && obj instanceof Coordinate
+		            && this.compareTo((Coordinate<E,T>) obj) == 0;
 	}
     
 }

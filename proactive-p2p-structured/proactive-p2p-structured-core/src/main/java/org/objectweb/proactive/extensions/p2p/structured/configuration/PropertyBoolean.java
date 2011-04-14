@@ -25,7 +25,7 @@ public class PropertyBoolean extends Property {
     
     public PropertyBoolean(String name, boolean defaultValue) {
         this(name);
-        this.setDefaultValue(new Boolean(defaultValue).toString());
+        this.setDefaultValue(Boolean.valueOf(defaultValue).toString());
     }
 
     /**
@@ -45,7 +45,7 @@ public class PropertyBoolean extends Property {
 	 *            the new value.
 	 */
     public void setValue(boolean value) {
-        super.setValue(new Boolean(value).toString());
+        super.setValue(Boolean.valueOf(value).toString());
     }
 
 	/**

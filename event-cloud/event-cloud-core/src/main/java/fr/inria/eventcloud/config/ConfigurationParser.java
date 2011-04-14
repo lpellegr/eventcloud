@@ -166,15 +166,13 @@ public class ConfigurationParser {
 
         @Override
         public void error(SAXParseException e) throws SAXParseException {
-            String errMessage = new String("Error Line " + e.getLineNumber() + ": " + e.getMessage() + "\n");
-            logger.error(errMessage);
+            logger.error("Error Line " + e.getLineNumber() + ": " + e.getMessage() + "\n");
             throw e;
         }
 
         @Override
         public void fatalError(SAXParseException e) throws SAXParseException {
-            String errMessage = new String("Error Line " + e.getLineNumber() + ": " + e.getMessage() + "\n");
-            logger.error(errMessage);
+            logger.error("Error Line " + e.getLineNumber() + ": " + e.getMessage() + "\n");
             throw e;
         }
     }
