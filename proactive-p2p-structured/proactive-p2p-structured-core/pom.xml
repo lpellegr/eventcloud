@@ -52,8 +52,8 @@
 						<configuration>
 							<includes>
 								<include>org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation</include>
-								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.Peer</include>
-								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl</include>
 							</includes>
 						</configuration>
 						<goals>

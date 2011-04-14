@@ -1,11 +1,29 @@
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
+import org.objectweb.proactive.core.component.Fractive;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+
 /**
  * Defines properties for the structured p2p module.
  * 
  * @author lpellegr
  */
 public class P2PStructuredProperties {
+    public static final PropertyString GCM_PROVIDER =
+        new PropertyString("gcm.provider", Fractive.class.getName());
+
+    public static final PropertyString PEER_ADL =
+        new PropertyString("peer.adl", Peer.class.getName());
+
+    public static final PropertyString PEER_SERVICES_ITF =
+        new PropertyString("peer.services.itf", "peer-services");
+
+    public static final PropertyString TRACKER_ADL =
+        new PropertyString("tracker.adl", Tracker.class.getName());
+
+    public static final PropertyString TRACKER_SERVICES_ITF =
+        new PropertyString("tracker.services.itf", "tracker-services");
 
 	public static final PropertyString CAN_COORDINATE_TYPE =
                             new PropertyString(
