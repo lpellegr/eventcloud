@@ -39,7 +39,30 @@ public class UnicastLookupRequestTest extends CANNetworkInitializer {
             e.printStackTrace();
         }
 
-        Assert.assertTrue(response.getLatency() > 1);
+        Assert.assertTrue(response.getLatency() > 0);
+        // the peer to reach is maybe the initiator of the request
+        Assert.assertTrue(response.getHopCount() >= 0);
+        Assert.assertTrue(response.getInboundHopCount() >= 0);
+        Assert.assertTrue(response.getOutboundHopCount() >= 0);
+         
+        Assert.assertEquals(targetedPeer, response.getPeerFound());
+    }
+
+    @Test
+    public void testLookupQueryComponent() {
+        LookupResponse response = null;
+        Peer targetedPeer = super.getRandomComponentPeer();
+        
+        try {
+            response = (LookupResponse) PAFuture.getFutureValue(
+                            super.getc(0).send(new LookupRequest(
+                                    CanOperations.getIdAndZoneResponseOperation(
+                                            targetedPeer).getPeerZone().getLowerBound())));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertTrue(response.getLatency() > 0);
         // the peer to reach is maybe the initiator of the request
         Assert.assertTrue(response.getHopCount() >= 0);
         Assert.assertTrue(response.getInboundHopCount() >= 0);
