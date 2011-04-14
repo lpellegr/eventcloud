@@ -48,12 +48,4 @@ public class DoubleElement extends Element<Double> {
 				(this.value + ((DoubleElement) elt).getValue()) / 2.0);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int compareTo(Element<Double> elt) {
-		return this.value.compareTo(elt.getValue());
-	}
-
 }

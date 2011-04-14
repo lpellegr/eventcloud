@@ -20,7 +20,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @param <E> the {@link Element}s type contained by the coordinate.
  * @param <T> the value type associated to each element.
  */
-public abstract class Coordinate<E extends Element<T>, T> implements Cloneable, Comparable<Coordinate<E,T>>, Iterable<E>, Serializable {
+public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>> implements Cloneable, Comparable<Coordinate<E,T>>, Iterable<E>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	

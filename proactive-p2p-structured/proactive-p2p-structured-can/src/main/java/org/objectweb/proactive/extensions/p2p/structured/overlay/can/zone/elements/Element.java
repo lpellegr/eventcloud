@@ -10,7 +10,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
  * 
  * @author lpellegr
  */
-public abstract class Element<T> implements Comparable<Element<T>>, Serializable {
+public abstract class Element<T extends Comparable<T>> implements Comparable<Element<T>>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -59,21 +59,19 @@ public abstract class Element<T> implements Comparable<Element<T>>, Serializable
 	 * Computes and returns a new {@link Element} which is the middle of the
 	 * specified elements {@code e1} and {@code e2}.
 	 * 
-	 * @param <E>
-	 *            the type of {@link Element} to use.
-	 * 
 	 * @param e1
 	 *            the lower bound.
-	 * 
 	 * @param e2
 	 *            the upper bound.
+	 * @param <T>
+	 *            the value type contained by the element.
 	 * 
 	 * @return a new {@link Element} which is the middle of the specified
 	 *         elements {@code e1} and {@code e2}.
 	 * 
 	 * @see Element#middle(Element)
 	 */
-	public static <T> Element<T> middle(Element<T> e1, Element<T> e2) {
+	public static <T extends Comparable<T>> Element<T> middle(Element<T> e1, Element<T> e2) {
 		return e1.middle(e2);
 	}
 
@@ -84,11 +82,13 @@ public abstract class Element<T> implements Comparable<Element<T>>, Serializable
 	 *            first element.
 	 * @param elt2
 	 *            second element.
-	 *            
+	 * @param <T>
+     *            the value type contained by the element.
+     *            
 	 * @return the maximum among the specified coordinate elements 
 	 * 		   using {@link Element#compareTo(Element)}.
 	 */
-	public static <T> Element<T> max(Element<T> elt1, Element<T> elt2) {
+	public static <T extends Comparable<T>> Element<T> max(Element<T> elt1, Element<T> elt2) {
 		return elt1.compareTo(elt2) > 0 ? elt1 : elt2;
 	}
 
@@ -99,11 +99,13 @@ public abstract class Element<T> implements Comparable<Element<T>>, Serializable
 	 *            first element.
 	 * @param elt2
 	 *            second element.
-	 *            
+	 * @param <T>
+     *            the value type contained by the element.
+     *            
 	 * @return the minimum among the specified coordinate elements 
 	 * 		   using {@link Element#compareTo(Element)}.
 	 */
-	public static <T> Element<T> min(Element<T> elt1, Element<T> elt2) {
+	public static <T extends Comparable<T>> Element<T> min(Element<T> elt1, Element<T> elt2) {
 		return elt1.compareTo(elt2) < 0 ? elt1 : elt2;
 	}
 
@@ -116,6 +118,14 @@ public abstract class Element<T> implements Comparable<Element<T>>, Serializable
 		return this.value;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int compareTo(Element<T> e) {
+	    return this.value.compareTo(e.getValue());
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */

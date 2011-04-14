@@ -21,7 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
  * @param <E> the {@link Element}s type contained by the coordinates.
  * @param <T> the value type associated to each element.
  */
-public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>, T> implements Serializable {
+public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>, T extends Comparable<T>> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -54,7 +54,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
     }
 
     /**
-     * Indicates if the view contains the specified {@code element) on
+     * Indicates if the view contains the specified {@code element} on
      * the specified {@code dimension}.
      * <p>
      * An element value set to {@code null} is supposed to be contained 

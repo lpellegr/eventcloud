@@ -42,15 +42,6 @@ public class StringElement extends Element<String> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int compareTo(Element<String> elt) {
-		return super.value.compareTo(
-					((StringElement) elt).getValue());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public String toString() {
 		if (P2PStructuredProperties.CAN_COORDINATE_DISPLAY.getValue().equals("codepoints")) {
 			StringBuffer result = new StringBuffer();
