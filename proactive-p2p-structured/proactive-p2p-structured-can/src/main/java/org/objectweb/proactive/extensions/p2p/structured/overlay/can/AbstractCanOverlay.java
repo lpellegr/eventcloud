@@ -36,7 +36,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
@@ -150,7 +149,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *         <code>coordinate</code> and which contains the specified coordinate 
      *         on <code>dimension-1</code> dimensions.
      *         
-     * @see AbstractCanOverlay#neighborsVerifyingDimensions(Collection, Coordinate, int)
+     * @see AbstractCanOverlay#neighborsVerifyingDimensions(Collection, StringCoordinate, int)
      */
     public NeighborEntry nearestNeighbor(StringCoordinate coordinate, int dimension, int direction) {
         List<NeighborEntry> neighbors = 

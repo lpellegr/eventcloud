@@ -31,7 +31,7 @@ public class CoordinateFactory {
     }
 
     /**
-     * Creates a new coordinate containing {@link StringElements}s initialized
+     * Creates a new coordinate containing {@link StringElement}s initialized
      * with the specified {@code value}.
      * 
      * @param value
