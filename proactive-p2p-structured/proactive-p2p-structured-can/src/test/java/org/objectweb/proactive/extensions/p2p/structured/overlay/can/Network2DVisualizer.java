@@ -1,4 +1,4 @@
-package fr.inria.eventcloud.messages.can;
+package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

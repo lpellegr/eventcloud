@@ -1,4 +1,4 @@
-package fr.inria.eventcloud.messages.can;
+package fr.inria.eventcloud.overlay.can;
 
 import static fr.inria.eventcloud.config.EventCloudProperties.DEFAULT_CONTEXT;
 import static org.junit.Assert.assertEquals;

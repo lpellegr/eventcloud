@@ -32,15 +32,21 @@ public abstract class NetworkInitializer {
 
     protected abstract Peer createPeer() throws ActiveObjectCreationException, NodeException;
 
-    public void initializeNewNetwork(OverlayType type, int nbPeersToCreate) throws Exception {
-        this.tracker = TrackerFactory.newActiveTracker(type);
-        this.type = type;
-        Peer peerCreated;
+    public void initializeNewNetwork(OverlayType type, int nbPeersToCreate) {
+        try {
+            this.tracker = TrackerFactory.newActiveTracker(type);
+            this.type = type;
+            Peer peerCreated;
 
-        for (int i = 0; i < nbPeersToCreate; i++) {
-            peerCreated = this.createPeer();
-            this.tracker.addOnNetwork(peerCreated);
-            this.peers.add(peerCreated);
+            for (int i = 0; i < nbPeersToCreate; i++) {
+                peerCreated = this.createPeer();
+                this.tracker.addOnNetwork(peerCreated);
+                this.peers.add(peerCreated);
+            }
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+        } catch (NodeException e) {
+            e.printStackTrace();
         }
     }
 
@@ -102,6 +108,10 @@ public abstract class NetworkInitializer {
         }
     }
 
+    public Tracker getTracker() {
+        return this.tracker;
+    }
+    
     public OverlayType getType() {
         return this.type;
     }
