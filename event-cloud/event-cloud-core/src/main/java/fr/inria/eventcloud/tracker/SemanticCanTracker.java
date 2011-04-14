@@ -16,7 +16,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.StringElement;
-import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.openrdf.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ import fr.inria.eventcloud.util.SemanticHelper;
  * 
  * @author lpellegr
  */
-public class SemanticCanTracker extends Tracker {
+public class SemanticCanTracker extends TrackerImpl {
 
 	private static final long serialVersionUID = 1L;
 
