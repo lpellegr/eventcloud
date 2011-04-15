@@ -35,7 +35,7 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker, Compon
     private static final long serialVersionUID = 1L;
 
     static {
-        TrackerComponentImpl.logger = LoggerFactory.getLogger(TrackerComponentImpl.class);
+        logger = LoggerFactory.getLogger(TrackerComponentImpl.class);
     }
 
     /**
@@ -49,7 +49,15 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker, Compon
      */
     public void initComponentActivity(Body body) {
         super.initActivity(body);
+
         this.stub = null;
+        //        try {
+        //            Component tracker = Fractive.getComponentRepresentativeOnThis();
+        //            this.stub = (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF
+        //                    .getValue());
+        //        } catch (NoSuchInterfaceException nsie) {
+        //            logger.error("Cannot get stub of tracker: " + nsie.getMessage(), nsie);
+        //        }
     }
 
     /**
@@ -89,12 +97,14 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker, Compon
      */
     @Override
     public void setStub() {
-        try {
-            Component tracker = Fractive.getComponentRepresentativeOnThis();
-            this.stub = (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
-        } catch (ClassCastException e) {
-        } catch (NullPointerException npe) {
-        } catch (NoSuchInterfaceException nsie) {
+        if (this.stub == null) {
+            try {
+                Component tracker = Fractive.getComponentRepresentativeOnThis();
+                this.stub = (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF
+                        .getValue());
+            } catch (NoSuchInterfaceException nsie) {
+                logger.error("Cannot get stub of tracker: " + nsie.getMessage(), nsie);
+            }
         }
     }
 

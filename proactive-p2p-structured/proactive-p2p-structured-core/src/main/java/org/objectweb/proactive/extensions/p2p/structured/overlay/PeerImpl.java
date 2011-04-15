@@ -19,6 +19,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Reques
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.operations.Operation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Peer contains all operations which are common to peer-to-peer protocols.
@@ -35,6 +37,8 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 public class PeerImpl implements Peer, InitActive, EndActive, RunActive, Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    protected static transient Logger logger = LoggerFactory.getLogger(PeerImpl.class);
     
     protected Peer stub;
     
@@ -77,7 +81,9 @@ public class PeerImpl implements Peer, InitActive, EndActive, RunActive, Seriali
         body.setImmediateService("toString", false);
         body.setImmediateService("getType", false);
   
-        this.overlay.initActivity(body);
+        if (this.overlay != null) {
+            this.overlay.initActivity(body);
+        }
         
         // receiveOperation cannot be handled as immediate service
         PAActiveObject.removeImmediateService("receiveOperation");
