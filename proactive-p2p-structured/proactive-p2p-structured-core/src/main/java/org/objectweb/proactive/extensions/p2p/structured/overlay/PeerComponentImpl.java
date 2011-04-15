@@ -6,13 +6,13 @@ import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.Service;
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.core.component.body.ComponentRunActive;
 import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Peer contains all operations which are common to peer-to-peer protocols.
@@ -31,6 +31,10 @@ public class PeerComponentImpl extends PeerImpl implements Peer, ComponentInitAc
 
     private static final long serialVersionUID = 1L;
 
+    static {
+        logger = LoggerFactory.getLogger(PeerComponentImpl.class);
+    }
+
     /**
      * The no-argument constructor as commanded by ProActive.
      */
@@ -41,29 +45,15 @@ public class PeerComponentImpl extends PeerImpl implements Peer, ComponentInitAc
      * {@inheritDoc}
      */
     public void initComponentActivity(Body body) {
-//      try {
-//          Component peer = Fractive.getComponentRepresentativeOnThis();
-//          this.stub = (Peer) peer.getFcInterface(DefaultProperties.PEER_SERVICES_ITF.getValue());
-//      } catch (ClassCastException e) {
-//      } catch (NullPointerException npe) {
-//      } catch (NoSuchInterfaceException nsie) {
-//      }
+        super.initActivity(body);
 
-        body.setImmediateService("receiveOperationIS", false);
-        
-        // these methods do not change the state of the peer
-        body.setImmediateService("equals", false);
-        body.setImmediateService("getId", false);
-        body.setImmediateService("hashCode", false);
-        body.setImmediateService("toString", false);
-        body.setImmediateService("getType", false);
-
-        if (this.overlay != null) {
-            this.overlay.initActivity(body);
-        }
-        
-        // receiveOperation cannot be handled as immediate service
-        PAActiveObject.removeImmediateService("receiveOperation");
+        this.stub = null;
+        //        try {
+        //            Component peer = Fractive.getComponentRepresentativeOnThis();
+        //            this.stub = (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+        //        } catch (NoSuchInterfaceException nsie) {
+        //            logger.error("Cannot get stub of peer: " + nsie.getMessage(), nsie);
+        //        }
     }
 
     /**
@@ -92,12 +82,14 @@ public class PeerComponentImpl extends PeerImpl implements Peer, ComponentInitAc
      */
     @Override
     public void setStub() {
-        try {
-            Component peer = Fractive.getComponentRepresentativeOnThis();
-            this.stub = (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
-        } catch (ClassCastException e) {
-        } catch (NullPointerException npe) {
-        } catch (NoSuchInterfaceException nsie) {
+        if (this.stub == null) {
+            try {
+                Component peer = Fractive.getComponentRepresentativeOnThis();
+                this.stub = (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF
+                        .getValue());
+            } catch (NoSuchInterfaceException nsie) {
+                logger.error("Cannot get stub of peer: " + nsie.getMessage(), nsie);
+            }
         }
     }
 

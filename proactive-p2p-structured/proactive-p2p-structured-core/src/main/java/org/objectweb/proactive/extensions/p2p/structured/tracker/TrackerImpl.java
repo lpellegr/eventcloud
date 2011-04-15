@@ -46,7 +46,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
 
     private static final long serialVersionUID = 1L;
 
-    protected static transient Logger logger = LoggerFactory.getLogger(Tracker.class);
+    protected static transient Logger logger = LoggerFactory.getLogger(TrackerImpl.class);
 
     private double probabilityToStorePeer = P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
 
