@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * implement.
  * <p>
  * Warning, this class must not be instantiate directly. In order to create a
- * new active peer you must use the {@link PeerFactory}.
+ * new component peer you must use the {@link PeerFactory}.
  * 
  * @author bsauvan
  */
