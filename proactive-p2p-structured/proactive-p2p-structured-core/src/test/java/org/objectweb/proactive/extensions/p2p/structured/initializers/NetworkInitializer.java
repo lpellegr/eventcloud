@@ -19,57 +19,82 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  * which have join the network associated to it in order to simplify some tests.
  * 
  * @author lpellegr
- * 
- * @version $Id: NetworkInitializer.java 5064 2010-09-01 14:21:24Z plaurent $
  */
 public abstract class NetworkInitializer {
 
     private List<Peer> peers = new ArrayList<Peer>();
 
+    private List<Peer> componentPeers = new ArrayList<Peer>();
+
     private Tracker tracker;
+
+    private Tracker componentTracker;
 
     private OverlayType type;
 
-    protected abstract Peer createPeer() throws ActiveObjectCreationException, NodeException;
+    protected abstract Peer createActivePeer();
 
-    public void initializeNewNetwork(OverlayType type, int nbPeersToCreate) {
-        try {
-            this.tracker = TrackerFactory.newActiveTracker(type);
-            this.type = type;
-            Peer peerCreated;
+    protected abstract Peer createComponentPeer();
 
-            for (int i = 0; i < nbPeersToCreate; i++) {
-                peerCreated = this.createPeer();
-                this.tracker.addOnNetwork(peerCreated);
-                this.peers.add(peerCreated);
-            }
-        } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
-        } catch (NodeException e) {
-            e.printStackTrace();
+    public void initializeNewNetwork(OverlayType type, int nbPeersToCreate) throws ActiveObjectCreationException, NodeException {
+        this.type = type;
+        Peer peerCreated;
+
+        this.tracker = TrackerFactory.newActiveTracker(type);
+        for (int i = 0; i < nbPeersToCreate; i++) {
+            peerCreated = this.createActivePeer();
+            this.tracker.addOnNetwork(peerCreated);
+            this.peers.add(peerCreated);
+        }
+
+        this.componentTracker = TrackerFactory.newComponentTracker(type);
+        for (int i = 0; i < nbPeersToCreate; i++) {
+            peerCreated = this.createComponentPeer();
+            this.componentTracker.addOnNetwork(peerCreated);
+            this.componentPeers.add(peerCreated);
         }
     }
 
     public void clearNetwork() {
-		for (Peer peer : this.peers) {
-			try {
-				peer.leave();
-			} catch (StructuredP2PException e) {
-				e.printStackTrace();
-			}
-		}
+        for (Peer peer : this.peers) {
+            try {
+                peer.leave();
+            } catch (StructuredP2PException e) {
+                e.printStackTrace();
+            }
+        }
 
         this.peers.clear();
+
+        for (Peer peer : this.componentPeers) {
+            try {
+                peer.leave();
+            } catch (StructuredP2PException e) {
+                e.printStackTrace();
+            }
+        }
+
+        this.componentPeers.clear();
     }
 
     public List<Peer> getAllPeers() {
-    	for (int i=0; i<this.peers.size(); i++) {
-    		if (!this.checkAlertness(this.peers.get(i))) {
-    			this.peers.remove(i);
-    		}
-    	}
-    	
+        for (int i=0; i<this.peers.size(); i++) {
+            if (!this.checkAlertness(this.peers.get(i))) {
+                this.peers.remove(i);
+            }
+        }
+        
         return this.peers;
+    }
+
+    public List<Peer> getAllComponentPeers() {
+        for (int i=0; i<this.componentPeers.size(); i++) {
+            if (!this.checkAlertness(this.componentPeers.get(i))) {
+                this.componentPeers.remove(i);
+            }
+        }
+        
+        return this.componentPeers;
     }
 
     private boolean checkAlertness(Peer peer) {
@@ -80,35 +105,61 @@ public abstract class NetworkInitializer {
     	}
     }
     
-    public Peer getRandomPeer() {
-    	if (this.peers.size() == 0) {
-    		return null;
-    	}
-    	
-    	int randomPeerIndex = ProActiveRandom.nextInt(this.peers.size());
-        Peer randomPeer = this.peers.get(randomPeerIndex);
-        
-        if (this.checkAlertness(randomPeer)) {
-        	return randomPeer;
-        } else {
-        	this.peers.remove(randomPeerIndex);
-        	return this.getRandomPeer();
-        }
-    }
-
     public Peer get(int index) {
         if (index < 0 || index >= this.peers.size()) {
-        	System.out.println("size=" + this.peers.size());
             throw new IndexOutOfBoundsException();
         }
         if (this.checkAlertness(this.peers.get(index))) {
-        	return this.peers.get(index);
+            return this.peers.get(index);
         } else {
-        	return null;
+            return null;
         }
     }
 
-    public Tracker getTracker() {
+    public Peer getc(int index) {
+        if (index < 0 || index >= this.componentPeers.size()) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (this.checkAlertness(this.componentPeers.get(index))) {
+            return this.componentPeers.get(index);
+        } else {
+            return null;
+        }
+    }
+    
+    public Peer getRandomPeer() {
+        if (this.peers.size() == 0) {
+            return null;
+        }
+        
+        int randomPeerIndex = ProActiveRandom.nextInt(this.peers.size());
+        Peer randomPeer = this.peers.get(randomPeerIndex);
+        
+        if (this.checkAlertness(randomPeer)) {
+            return randomPeer;
+        } else {
+            this.peers.remove(randomPeerIndex);
+            return this.getRandomPeer();
+        }
+    }
+    
+    public Peer getRandomComponentPeer() {
+        if (this.componentPeers.size() == 0) {
+            return null;
+        }
+        
+        int randomPeerIndex = ProActiveRandom.nextInt(this.componentPeers.size());
+        Peer randomPeer = this.componentPeers.get(randomPeerIndex);
+        
+        if (this.checkAlertness(randomPeer)) {
+            return randomPeer;
+        } else {
+            this.componentPeers.remove(randomPeerIndex);
+            return this.getRandomComponentPeer();
+        }
+    }
+
+    public Tracker getTracker(){
         return this.tracker;
     }
     

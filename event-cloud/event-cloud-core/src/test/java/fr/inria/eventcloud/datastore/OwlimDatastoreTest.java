@@ -42,7 +42,7 @@ public class OwlimDatastoreTest {
 
     private static final int CONCURRENT_RANDOM_OPERATIONS = 500;
     
-    private static final int CONCURRENT_ADD_OPERATIONS = 500;
+    private static final int CONCURRENT_ADD_OPERATIONS = 300;
 
     private static String[][] statementsForSingleThread = {
             { "http://chair", "http://made-of", "http://wood" },
@@ -57,6 +57,8 @@ public class OwlimDatastoreTest {
     
     @Test
     public void testAddStatementsMultiThread() {
+        datastore.removeAll(context);
+        
         final CountDownLatch doneSignal = new CountDownLatch(CONCURRENT_ADD_OPERATIONS);
         for (int i = 0; i < CONCURRENT_ADD_OPERATIONS; i++) {
             executor.execute(new Runnable() {

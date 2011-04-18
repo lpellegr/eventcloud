@@ -48,37 +48,37 @@ public class ElementTest {
     public void testIsBetween() {
         this.coordinateElementA = new StringElement("a");
         Assert.assertFalse(
-        		this.coordinateElementA.isBetween(
-        				this.coordinateElementB,
-        				this.coordinateElementC));
+                this.coordinateElementA.isBetween(
+                        this.coordinateElementB,
+                        this.coordinateElementC));
 
         this.coordinateElementA = new StringElement("g");
         Assert.assertTrue(
-        		this.coordinateElementA.isBetween(
-        				this.coordinateElementB,
-        				this.coordinateElementC));
+                this.coordinateElementA.isBetween(
+                        this.coordinateElementB,
+                        this.coordinateElementC));
 
         this.coordinateElementA = new StringElement("eff");
         Assert.assertTrue(
-        		this.coordinateElementA.isBetween(
-        				this.coordinateElementB,
-        				this.coordinateElementC));
+                this.coordinateElementA.isBetween(
+                        this.coordinateElementB,
+                        this.coordinateElementC));
 
         this.coordinateElementA = new StringElement("lee");
         Assert.assertFalse(
-        		this.coordinateElementA.isBetween(
-        				this.coordinateElementB,
-        				this.coordinateElementC));
+                this.coordinateElementA.isBetween(
+                        this.coordinateElementB,
+                        this.coordinateElementC));
     }
 
     @Test
     public void testMiddle() {
         Assert.assertEquals(
-        		new StringElement("h\u0001"), 
-        		Element.middle(this.coordinateElementB, this.coordinateElementC));
+                new StringElement("h\u0001"), 
+                Element.middle(this.coordinateElementB, this.coordinateElementC));
 
         Assert.assertNotSame(new StringElement("e"), 
-        		Element.middle(this.coordinateElementB, this.coordinateElementC));
+                Element.middle(this.coordinateElementB, this.coordinateElementC));
     }
 
     @Test
@@ -96,4 +96,5 @@ public class ElementTest {
         this.coordinateElementC = null;
         this.coordinateElementB = null;
     }
+    
 }

@@ -19,7 +19,7 @@ public class SemanticElement extends StringElement {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructs a new coordinate element with the specified <code>value</code>.
+	 * Constructs a new coordinate element with the specified {@code value}.
 	 * 
 	 * @param value the value that will be parsed.
 	 */
