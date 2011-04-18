@@ -106,7 +106,9 @@ public class Network2DVisualizer extends JFrame {
 					Zone clickedZone = Canvas.this.getClicked(e.getX(), CANVAS_HEIGHT - e.getY());
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						Canvas.this.zoneClicked = clickedZone;
-						System.out.println("Clicked in (" + e.getX() + "," + e.getY() + ") wich is contained by zone " + clickedZone.getNumericView() + " <-> " + clickedZone);
+						System.out.println("Clicked in (" + e.getX() + "," + e.getY() 
+						                    + ") wich is contained by zone " 
+						                    + clickedZone.getNumericView() + " <-> " + clickedZone);
 						Canvas.this.repaint();
 					} else if (e.getButton() == MouseEvent.BUTTON3) {
 						for (ZoneEntry entry : peers.values()) {

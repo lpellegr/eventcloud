@@ -46,7 +46,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<forkMode>once</forkMode>
+<!-- 					<forkMode>once</forkMode> -->
+<!-- <forkMode>pertest</forkMode> -->
 					<systemPropertyVariables>
 						<java.security.policy>${basedir}/src/test/resources/proactive.security.policy</java.security.policy>
 					</systemPropertyVariables>

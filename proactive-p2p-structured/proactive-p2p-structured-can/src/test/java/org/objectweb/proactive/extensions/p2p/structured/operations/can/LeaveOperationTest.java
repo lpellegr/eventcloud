@@ -41,10 +41,35 @@ public class LeaveOperationTest extends CANNetworkInitializer {
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(1), super.get(3).getId()));
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(2), super.get(3).getId()));
 
-        // Do peers contain themselves in neighbor table ?
+        // Do peers contain themself in neighbor table ?
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(0), super.get(0).getId()));
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(1), super.get(1).getId()));
         Assert.assertFalse(CanOperations.hasNeighbor(super.get(2), super.get(2).getId()));
+    }
+
+    @Ignore
+    public void testLeaveComponent() {
+        int second = 
+                CanOperations.getNeighborTable(super.getc(1)).size();
+
+        try {
+            Assert.assertTrue(super.getc(3).leave());
+        } catch (StructuredP2PException e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertEquals(second - 1, CanOperations.getNeighborTable(super.getc(2)).size());
+
+        // Does the remote reference of the peer which has left has been
+        // removed from the neighbors table ?
+        Assert.assertFalse(CanOperations.hasNeighbor(super.getc(0), super.getc(3).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.getc(1), super.getc(3).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.getc(2), super.getc(3).getId()));
+
+        // Do peers contain themself in neighbor table ?
+        Assert.assertFalse(CanOperations.hasNeighbor(super.getc(0), super.getc(0).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.getc(1), super.getc(1).getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(super.getc(2), super.getc(2).getId()));
     }
 
     @After

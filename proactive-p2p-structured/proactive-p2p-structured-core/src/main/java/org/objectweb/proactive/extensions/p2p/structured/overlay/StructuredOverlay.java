@@ -5,10 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.Service;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 
 /**
  * The StructuredOverlay class contains the logic associated to methods exposed
@@ -62,13 +61,6 @@ public abstract class StructuredOverlay implements Serializable {
 
     public void endActivity(Body body) {
         // to be overridden
-    }
-    
-    public void runActivity(Body body) {
-        Service service = new Service(body);
-        while (body.isActive()) {
-            service.serveOldest();
-        }
     }
 
     public abstract OverlayType getType();

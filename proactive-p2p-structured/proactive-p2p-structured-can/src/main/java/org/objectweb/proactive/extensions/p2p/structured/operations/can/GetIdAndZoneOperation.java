@@ -26,8 +26,9 @@ public class GetIdAndZoneOperation implements SynchronousOperation {
      *            the overlay which handles the message.
      */
     public GetIdAndZoneResponseOperation handle(StructuredOverlay overlay) {
-        return new GetIdAndZoneResponseOperation(overlay.getLocalPeer().getId(),
-            ((AbstractCanOverlay) overlay).getZone());
+        return new GetIdAndZoneResponseOperation(
+                    overlay.getLocalPeer().getId(),
+                    ((AbstractCanOverlay) overlay).getZone());
     }
 
 }
