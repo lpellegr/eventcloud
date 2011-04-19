@@ -6,38 +6,38 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
  * @author lpellegr
  */
 public class PropertyString extends Property {
-	
-	public PropertyString(String name) {
-		super(name, PropertyType.STRING);
-	}
 
-	public PropertyString(String name, String defaultValue) {
-		this(name);
-		this.setDefaultValue(defaultValue);
-	}
+    public PropertyString(String name) {
+        super(name, PropertyType.STRING);
+    }
 
-	/**
-	 * Returns the value of this property.
-	 * 
-	 * @return the value of this property.
-	 */
-	public String getValue() {
-		return super.getValueAsString();
-	}
+    public PropertyString(String name, String defaultValue) {
+        this(name);
+        this.setDefaultValue(defaultValue);
+    }
 
-	/**
-	 * Updates the value of this property.
-	 * 
-	 * @param value
-	 *            the new value.
-	 */
-	public void setValue(String value) {
-		super.setValue(value);
-	}
+    /**
+     * Returns the value of this property.
+     * 
+     * @return the value of this property.
+     */
+    public String getValue() {
+        return super.getValueAsString();
+    }
 
-	@Override
-	public boolean isValid(String value) {
-		return value != null;
-	}
-	
+    /**
+     * Updates the value of this property.
+     * 
+     * @param value
+     *            the new value.
+     */
+    public void setValue(String value) {
+        super.setValue(value);
+    }
+
+    @Override
+    public boolean isValid(String value) {
+        return value != null;
+    }
+
 }

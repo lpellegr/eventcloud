@@ -21,24 +21,25 @@ public class UpdateNeighborOperation implements SynchronousOperation {
     private final NeighborEntry entry;
 
     private final int dimension;
-    
+
     private final int direction;
-    
+
     /**
      * Constructs a new UpdateNeighborOperation with the specified
      * <code>entry</code>, <code>dimension</code> and <code>direction</code>.
      * 
-     * @param entry 
-     * 			the entry to containing the identifier of the peer to
-     * 			update and the new information to set.
+     * @param entry
+     *            the entry to containing the identifier of the peer to update
+     *            and the new information to set.
      * 
      * @param dimension
-     * 			the dimension on which the neighbor to update is.
+     *            the dimension on which the neighbor to update is.
      * 
      * @param direction
-     * 			the direction on which the neighbor to update is.	
+     *            the direction on which the neighbor to update is.
      */
-    public UpdateNeighborOperation(NeighborEntry entry, int dimension, int direction) {
+    public UpdateNeighborOperation(NeighborEntry entry, int dimension,
+            int direction) {
         this.entry = entry;
         this.dimension = dimension;
         this.direction = direction;
@@ -51,9 +52,9 @@ public class UpdateNeighborOperation implements SynchronousOperation {
      *            the overlay which handles the message.
      */
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-		((AbstractCanOverlay) overlay).getNeighborTable()
-				.get(this.dimension, this.direction)
-					.replace(this.entry.getId(), this.entry);
+        ((AbstractCanOverlay) overlay).getNeighborTable().get(
+                this.dimension, this.direction).replace(
+                this.entry.getId(), this.entry);
 
         return new EmptyResponseOperation();
     }

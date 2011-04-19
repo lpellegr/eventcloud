@@ -7,13 +7,12 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 
-
 /**
  * Operation used to know if the peer which handles the operation has a neighbor
  * corresponding to the given UUID.
  * 
  * @author lpellegr
- *
+ * 
  * @see AbstractCanOverlay#hasNeighbor(UUID)
  */
 public class HasNeighborOperation implements SynchronousOperation {
@@ -30,7 +29,8 @@ public class HasNeighborOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        return new BooleanResponseOperation(((AbstractCanOverlay) overlay).hasNeighbor(this.uuid));
+        return new BooleanResponseOperation(
+                ((AbstractCanOverlay) overlay).hasNeighbor(this.uuid));
     }
 
 }

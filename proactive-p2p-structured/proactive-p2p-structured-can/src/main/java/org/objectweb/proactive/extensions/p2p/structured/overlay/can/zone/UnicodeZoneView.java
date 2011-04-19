@@ -4,16 +4,19 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
- * A unicode zone view is a zone view maintaining coordinates as {@link StringElement}s.
+ * A unicode zone view is a zone view maintaining coordinates as
+ * {@link StringElement}s.
  * 
  * @author lpellegr
  */
-public class UnicodeZoneView extends ZoneView<StringCoordinate, StringElement, String> {
+public class UnicodeZoneView extends
+        ZoneView<StringCoordinate, StringElement, String> {
 
-	private static final long serialVersionUID = 1L;
-	
-	public UnicodeZoneView(StringCoordinate lowerBound, StringCoordinate upperBound) {
-		super(lowerBound, upperBound);
-	}
-	
+    private static final long serialVersionUID = 1L;
+
+    public UnicodeZoneView(StringCoordinate lowerBound,
+            StringCoordinate upperBound) {
+        super(lowerBound, upperBound);
+    }
+
 }

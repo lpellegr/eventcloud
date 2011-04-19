@@ -31,59 +31,53 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
  */
 public class CanOperations {
 
-	public static GetIdAndZoneResponseOperation getIdAndZoneResponseOperation(Peer peer) {
-	    return (GetIdAndZoneResponseOperation) 
-	                PAFuture.getFutureValue(
-	                        peer.receiveImmediateService(new GetIdAndZoneOperation()));
-	}
-	
-	public static boolean hasNeighbor(Peer peer, UUID neighborID) {
-	    return ((BooleanResponseOperation)
-	                PAFuture.getFutureValue(
-	                        peer.receiveImmediateService(
-	                                new HasNeighborOperation(neighborID)))).getValue();
-	}
-	
-	public static void merge(Peer peer, int dimension, 
-	                         int direction, UUID peerToMergeWith, 
-	                         Zone zone, NeighborTable neighbors, Object data) {
-	    PAFuture.waitFor(
-	            peer.receiveImmediateService(
-	                    new MergeOperation(dimension, direction, peerToMergeWith, zone, neighbors, data)));
-	}
-	
-	public static BooleanResponseOperation insertNeighbor(Peer peer, NeighborEntry entry, int dimension, int direction) {
-	    return (BooleanResponseOperation)
-	                PAFuture.getFutureValue(
-	                        peer.receiveImmediateService(
-	                                new InsertNeighborOperation(entry, dimension, direction)));
-	}
-	
-	public static BooleanResponseOperation removeNeighbor(Peer peer, UUID peerIdentifier) {
-	    return (BooleanResponseOperation)
-	                PAFuture.getFutureValue(
-	                        peer.receiveImmediateService(
-	                                new RemoveNeighborOperation(peerIdentifier)));
-	}
-	
-	public static BooleanResponseOperation removeNeighbor(Peer peer, UUID peerIdentifier, int dimension, int direction) {
-	    return (BooleanResponseOperation)
-	                PAFuture.getFutureValue(
-	                        peer.receiveImmediateService(
-	                                new RemoveNeighborOperation(peerIdentifier, dimension, direction)));
-	}
-	
-	public static void updateNeighborOperation(Peer peer, NeighborEntry entry, int dimension, int direction) {
-	    PAFuture.waitFor(
-	            peer.receiveImmediateService(
-	                    new UpdateNeighborOperation(entry, dimension, direction)));
-	}
-	
-	@SuppressWarnings("unchecked")
+    public static GetIdAndZoneResponseOperation getIdAndZoneResponseOperation(Peer peer) {
+        return (GetIdAndZoneResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new GetIdAndZoneOperation()));
+    }
+
+    public static boolean hasNeighbor(Peer peer, UUID neighborID) {
+        return ((BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new HasNeighborOperation(
+                neighborID)))).getValue();
+    }
+
+    public static void merge(Peer peer, int dimension, int direction,
+                             UUID peerToMergeWith, Zone zone,
+                             NeighborTable neighbors, Object data) {
+        PAFuture.waitFor(peer.receiveImmediateService(new MergeOperation(
+                dimension, direction, peerToMergeWith, zone, neighbors, data)));
+    }
+
+    public static BooleanResponseOperation insertNeighbor(Peer peer,
+                                                          NeighborEntry entry,
+                                                          int dimension,
+                                                          int direction) {
+        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new InsertNeighborOperation(
+                entry, dimension, direction)));
+    }
+
+    public static BooleanResponseOperation removeNeighbor(Peer peer,
+                                                          UUID peerIdentifier) {
+        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new RemoveNeighborOperation(
+                peerIdentifier)));
+    }
+
+    public static BooleanResponseOperation removeNeighbor(Peer peer,
+                                                          UUID peerIdentifier,
+                                                          int dimension,
+                                                          int direction) {
+        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new RemoveNeighborOperation(
+                peerIdentifier, dimension, direction)));
+    }
+
+    public static void updateNeighborOperation(Peer peer, NeighborEntry entry,
+                                               int dimension, int direction) {
+        PAFuture.waitFor(peer.receiveImmediateService(new UpdateNeighborOperation(
+                entry, dimension, direction)));
+    }
+
+    @SuppressWarnings("unchecked")
     public static NeighborTable getNeighborTable(Peer peer) {
-	    return ((GenericResponseOperation<NeighborTable>) 
-	                PAFuture.getFutureValue(
-	                    peer.receiveImmediateService(new GetNeighborTableOperation()))).getValue();
-	}
-	
+        return ((GenericResponseOperation<NeighborTable>) PAFuture.getFutureValue(peer.receiveImmediateService(new GetNeighborTableOperation()))).getValue();
+    }
+
 }

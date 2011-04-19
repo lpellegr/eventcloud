@@ -27,9 +27,8 @@ public class NeighborEntry implements Serializable {
     public NeighborEntry(Peer peerStub) {
         this.neighborStub = peerStub;
 
-        GetIdAndZoneResponseOperation response = 
-        	(GetIdAndZoneResponseOperation) PAFuture.getFutureValue(
-        			this.neighborStub.receiveImmediateService(new GetIdAndZoneOperation()));
+        GetIdAndZoneResponseOperation response =
+                (GetIdAndZoneResponseOperation) PAFuture.getFutureValue(this.neighborStub.receiveImmediateService(new GetIdAndZoneOperation()));
 
         this.neighborIdentifier = response.getPeerIdentifier();
         this.neighborZone = response.getPeerZone();
@@ -55,27 +54,27 @@ public class NeighborEntry implements Serializable {
     }
 
     public void setZone(Zone newZone) {
-    	this.neighborZone = newZone;
+        this.neighborZone = newZone;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public int hashCode() {
-    	return this.neighborIdentifier.hashCode() 
-    				+ 31 * this.neighborZone.hashCode();
+        return this.neighborIdentifier.hashCode() + 31
+                * this.neighborZone.hashCode();
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
-    	return obj instanceof NeighborEntry
-    			&& this.neighborIdentifier.equals(((NeighborEntry) obj).getId())
-    				&& this.neighborZone.equals(((NeighborEntry) obj).getZone());
-    	
+        return obj instanceof NeighborEntry
+                && this.neighborIdentifier.equals(((NeighborEntry) obj).getId())
+                && this.neighborZone.equals(((NeighborEntry) obj).getZone());
+
     }
 
     /**
@@ -83,7 +82,8 @@ public class NeighborEntry implements Serializable {
      */
     @Override
     public String toString() {
-    	return "NeighborEntry[peerId=" + this.neighborIdentifier + ", zone=" + this.neighborZone + "]";
+        return "NeighborEntry[peerId=" + this.neighborIdentifier + ", zone="
+                + this.neighborZone + "]";
     }
-    
+
 }

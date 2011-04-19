@@ -10,32 +10,32 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRespo
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 
 /**
- * Response associated to {@link ShutdownRequest}. 
+ * Response associated to {@link ShutdownRequest}.
  * 
  * @author lpellegr
  */
 public class ShutdownResponse extends AnycastResponse {
 
-	public ShutdownResponse(AnycastRequest request) {
-		super(request);
-	}
+    public ShutdownResponse(AnycastRequest request) {
+        super(request);
+    }
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
-		return new AnycastResponseRouter<AnycastResponse>();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
+        return new AnycastResponseRouter<AnycastResponse>();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void merge(AnycastResponse subResponse) {
-		// no result, no action		
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void merge(AnycastResponse subResponse) {
+        // no result, no action
+    }
 
 }

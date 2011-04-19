@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * PeerImpl is a concrete implementation of {@link Peer}.It is composed of a 
- * {@link StructuredOverlay} which allows to have several implementations of 
+ * PeerImpl is a concrete implementation of {@link Peer}.It is composed of a
+ * {@link StructuredOverlay} which allows to have several implementations of
  * common operations for each peer-to-peer protocol to implement.
  * <p>
  * Warning, this class must not be instantiate directly. In order to create a
@@ -37,9 +37,9 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     private static final long serialVersionUID = 1L;
 
     protected static Logger logger = LoggerFactory.getLogger(PeerImpl.class);
-    
+
     protected Peer stub;
-    
+
     protected StructuredOverlay overlay;
 
     private AtomicBoolean activated;
@@ -71,24 +71,24 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
         this.stub = (Peer) PAActiveObject.getStubOnThis();
 
         body.setImmediateService("receiveImmediateService", false);
-        
+
         // these methods do not change the state of the peer
         body.setImmediateService("equals", false);
         body.setImmediateService("getId", false);
         body.setImmediateService("hashCode", false);
         body.setImmediateService("toString", false);
         body.setImmediateService("getType", false);
-  
-        // puts the following methods as immediate service in 
+
+        // puts the following methods as immediate service in
         // order to have the possibility to handle concurrent
         // queries
         PAActiveObject.setImmediateService("send");
         PAActiveObject.setImmediateService("route");
-        
+
         if (this.overlay != null) {
             this.overlay.initActivity(body);
         }
-        
+
         // receive cannot be handled as immediate service
         PAActiveObject.removeImmediateService("receive");
     }
@@ -104,7 +104,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
                 e.printStackTrace();
             }
         }
-        
+
         this.overlay.endActivity(body);
     }
 
@@ -121,7 +121,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     public Body getBody() {
         return PAActiveObject.getBodyOnThis();
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -149,7 +149,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     public StructuredOverlay getOverlay() {
         return this.overlay;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -203,21 +203,21 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     public ResponseOperation receive(SynchronousOperation operation) {
         return operation.handle(this.overlay);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public void receive(AsynchronousOperation operation) {
         operation.handle(this.overlay);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public ResponseOperation receiveImmediateService(SynchronousOperation operation) {
         return operation.handle(this.overlay);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -231,14 +231,14 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     public void route(RequestResponseMessage<?> msg) {
         this.overlay.route(msg);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public Response<?> send(Request<?> request) throws DispatchException {
         return this.overlay.getRequestResponseManager().dispatch(request);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -252,7 +252,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof PeerImpl
-        && this.getId().equals(((PeerImpl) obj).getId());
+                && this.getId().equals(((PeerImpl) obj).getId());
     }
 
     /**
@@ -262,7 +262,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     public int hashCode() {
         return this.getId().hashCode();
     }
-    
+
     /**
      * {@inheritDoc}
      */

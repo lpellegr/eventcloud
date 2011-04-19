@@ -7,9 +7,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 
 /**
- * This operation is used to insert a {@link NeighborEntry} at the specified 
- * <code>dimension</code> and <code>direction</code> of the peer receiving 
- * the message.
+ * This operation is used to insert a {@link NeighborEntry} at the specified
+ * <code>dimension</code> and <code>direction</code> of the peer receiving the
+ * message.
  * 
  * @author lpellegr
  */
@@ -36,23 +36,24 @@ public class InsertNeighborOperation implements SynchronousOperation {
      * Constructor.
      * 
      * @param neighborEntry
-     * 			  the neighbor entry to insert.
+     *            the neighbor entry to insert.
      * @param dimension
      *            the dimension of the neighbor to remove.
      * @param direction
      *            the direction of the neighbor to remove
      */
-    public InsertNeighborOperation(NeighborEntry neighborEntry, int dimension, int direction) {
-    	this.entry = neighborEntry;
+    public InsertNeighborOperation(NeighborEntry neighborEntry, int dimension,
+            int direction) {
+        this.entry = neighborEntry;
         this.dimension = dimension;
         this.direction = direction;
     }
 
     public NeighborEntry getEntry() {
-		return this.entry;
-	}
+        return this.entry;
+    }
 
-	/**
+    /**
      * Returns the dimension of the neighbor to remove.
      * 
      * @return the dimension of the neighbor to remove.
@@ -75,8 +76,8 @@ public class InsertNeighborOperation implements SynchronousOperation {
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         ((AbstractCanOverlay) overlay).getNeighborTable().get(
-        		this.dimension, this.direction).put(
-        				this.entry.getId(), this.entry);
+                this.dimension, this.direction).put(
+                this.entry.getId(), this.entry);
         return new BooleanResponseOperation(true);
     }
 

@@ -8,50 +8,49 @@ import org.objectweb.proactive.core.ProActiveRuntimeException;
  * @author lpellegr
  */
 public class PropertyInteger extends Property {
-	
-	public PropertyInteger(String name) {
-		super(name, PropertyType.INTEGER);
-	}
 
-	public PropertyInteger(String name, int defaultValue) {
-		this(name);
-		this.setDefaultValue(Integer.valueOf(defaultValue).toString());
-	}
+    public PropertyInteger(String name) {
+        super(name, PropertyType.INTEGER);
+    }
 
-	/**
-	 * Returns the value of this property.
-	 * 
-	 * @return the value of this property.
-	 */
-	public int getValue() {
-		String str = super.getValueAsString();
-		try {
-			return Integer.parseInt(str);
-		} catch (NumberFormatException e) {
-			throw new ProActiveRuntimeException(
-					"Invalid value for property " + super.name
-							+ " must be an integer", e);
-		}
-	}
+    public PropertyInteger(String name, int defaultValue) {
+        this(name);
+        this.setDefaultValue(Integer.valueOf(defaultValue).toString());
+    }
 
-	/**
-	 * Updates the value of this property.
-	 * 
-	 * @param value
-	 *            the new value.
-	 */
-	public void setValue(int value) {
-		super.setValue(Integer.valueOf(value).toString());
-	}
+    /**
+     * Returns the value of this property.
+     * 
+     * @return the value of this property.
+     */
+    public int getValue() {
+        String str = super.getValueAsString();
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            throw new ProActiveRuntimeException("Invalid value for property "
+                    + super.name + " must be an integer", e);
+        }
+    }
 
-	@Override
-	public boolean isValid(String value) {
-		try {
-			Integer.parseInt(value);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-	
+    /**
+     * Updates the value of this property.
+     * 
+     * @param value
+     *            the new value.
+     */
+    public void setValue(int value) {
+        super.setValue(Integer.valueOf(value).toString());
+    }
+
+    @Override
+    public boolean isValid(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
 }

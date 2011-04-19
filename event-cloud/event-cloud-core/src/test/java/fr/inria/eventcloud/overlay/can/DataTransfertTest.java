@@ -24,20 +24,23 @@ import fr.inria.eventcloud.util.RDF2GoBuilder;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
- * Test the data transfert during a join operation for {@link SemanticSpaceCANOverlay}.
+ * Test the data transfert during a join operation for
+ * {@link SemanticSpaceCANOverlay}.
  * 
  * @author lpellegr
  */
 public class DataTransfertTest {
 
-    private final static Logger logger = LoggerFactory.getLogger(DataTransfertTest.class);
+    private final static Logger logger =
+            LoggerFactory.getLogger(DataTransfertTest.class);
 
-    private static EventCloudInitializer initializer = new EventCloudInitializer();
+    private static EventCloudInitializer initializer =
+            new EventCloudInitializer();
 
     private static String[][] statementsToAdd = {
-            { "http://A", "http://A", "http://A" },
-            { "http://U", "http://U", "http://U" },
-            { "http://Z", "http://Z", "http://Z" } };
+            {"http://A", "http://A", "http://A"},
+            {"http://U", "http://U", "http://U"},
+            {"http://Z", "http://Z", "http://Z"}};
 
     @BeforeClass
     public static void setUp() {
@@ -48,15 +51,16 @@ public class DataTransfertTest {
     public void testDataTransfert() {
         for (String[] stmt : statementsToAdd) {
             initializer.getRandomPeer().addStatement(
-            		EventCloudProperties.DEFAULT_CONTEXT, 
-            		RDF2GoBuilder.createStatementInternal(stmt[0], stmt[1], stmt[2]));
+                    EventCloudProperties.DEFAULT_CONTEXT,
+                    RDF2GoBuilder.createStatementInternal(
+                            stmt[0], stmt[1], stmt[2]));
         }
-        
+
         SemanticPeer newPeer = SemanticFactory.newActiveSemanticCanPeer();
         SemanticPeer oldPeer = initializer.getRandomPeer();
-        
-		initializer.getRandomTracker().addOnNetwork(newPeer);
-        
+
+        initializer.getRandomTracker().addOnNetwork(newPeer);
+
         if (logger.isInfoEnabled()) {
             logger.info("Initial peer manages "
                     + initializer.getRandomTracker().getRandomPeer());
@@ -64,28 +68,28 @@ public class DataTransfertTest {
         }
 
         String query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
-        
-        Set<Statement> resultOldPeer = 
-        	SemanticHelper.asSet(((SparqlConstructResponseOperation) 
-        			PAFuture.getFutureValue(oldPeer.receiveImmediateService(
-        					new SparqlConstructOperation(EventCloudProperties.DEFAULT_CONTEXT, query))))
-        						.getResult().toRDF2Go());
-        
-        Set<Statement> resultNewPeer = 
-        	SemanticHelper.asSet(((SparqlConstructResponseOperation) 
-        			PAFuture.getFutureValue(newPeer.receiveImmediateService(
-        					new SparqlConstructOperation(EventCloudProperties.DEFAULT_CONTEXT, query))))
-        						.getResult().toRDF2Go());
+
+        Set<Statement> resultOldPeer =
+                SemanticHelper.asSet(((SparqlConstructResponseOperation) PAFuture.getFutureValue(oldPeer.receiveImmediateService(new SparqlConstructOperation(
+                        EventCloudProperties.DEFAULT_CONTEXT, query)))).getResult()
+                        .toRDF2Go());
+
+        Set<Statement> resultNewPeer =
+                SemanticHelper.asSet(((SparqlConstructResponseOperation) PAFuture.getFutureValue(newPeer.receiveImmediateService(new SparqlConstructOperation(
+                        EventCloudProperties.DEFAULT_CONTEXT, query)))).getResult()
+                        .toRDF2Go());
 
         Set<Statement> newSet = Sets.intersection(resultOldPeer, resultNewPeer);
 
         if (logger.isInfoEnabled()) {
-            logger.info("Initial peer contains " + resultOldPeer.size() + " data");
+            logger.info("Initial peer contains " + resultOldPeer.size()
+                    + " data");
             logger.info("New peer contains " + resultNewPeer.size() + " data");
         }
 
         Assert.assertEquals(0, newSet.size());
-        Assert.assertEquals(statementsToAdd.length, resultOldPeer.size() + resultNewPeer.size());
+        Assert.assertEquals(statementsToAdd.length, resultOldPeer.size()
+                + resultNewPeer.size());
         Assert.assertTrue(resultOldPeer.size() < statementsToAdd.length);
     }
 

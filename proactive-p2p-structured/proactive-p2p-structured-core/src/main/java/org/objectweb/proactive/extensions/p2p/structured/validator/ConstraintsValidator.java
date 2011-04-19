@@ -18,19 +18,19 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
  */
 public abstract class ConstraintsValidator<K> implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * The key used in order to route the query over the network.
-	 */
-	protected final K key;
-	
-	public ConstraintsValidator(K key) {
-		this.key = key;
-	}
-	
+    /**
+     * The key used in order to route the query over the network.
+     */
+    protected final K key;
+
+    public ConstraintsValidator(K key) {
+        this.key = key;
+    }
+
     abstract public boolean validatesKeyConstraints(StructuredOverlay overlay);
-    
+
     /**
      * Returns the key to reach (i.e. the peer containing this key is the
      * receiver of this message).
@@ -39,7 +39,7 @@ public abstract class ConstraintsValidator<K> implements Serializable {
      *         receiver of this message).
      */
     public K getKey() {
-		return this.key;
-	}
-    
+        return this.key;
+    }
+
 }

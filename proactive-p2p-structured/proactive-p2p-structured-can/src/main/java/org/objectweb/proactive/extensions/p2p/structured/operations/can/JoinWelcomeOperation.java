@@ -8,7 +8,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
 
 /**
  * This operation is used to performed the join welcome phase: it consists to
- * acknowledge the landmark peer that the data from the introduce phase have 
+ * acknowledge the landmark peer that the data from the introduce phase have
  * been received and set. Therefore, it is time to the landmark node to update
  * its information.
  * 
@@ -21,11 +21,11 @@ public class JoinWelcomeOperation implements SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
-	public JoinWelcomeOperation() {
-		super();
-	}
+    public JoinWelcomeOperation() {
+        super();
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     public EmptyResponseOperation handle(StructuredOverlay overlay) {

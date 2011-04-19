@@ -23,7 +23,8 @@ public class CoordinateFactory {
      *         {@link DoubleElement}s.
      */
     public static DoubleCoordinate createDoubleCoordinate(double value) {
-        DoubleElement[] elts = new DoubleElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+        DoubleElement[] elts =
+                new DoubleElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             elts[i] = new DoubleElement(value);
         }
@@ -42,11 +43,12 @@ public class CoordinateFactory {
      *         {@link StringElement}s.
      */
     public static StringCoordinate createStringCoordinate(String value) {
-        StringElement[] elts = new StringElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+        StringElement[] elts =
+                new StringElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             elts[i] = new StringElement(value);
         }
         return new StringCoordinate(elts);
     }
-    
+
 }

@@ -24,8 +24,7 @@ import at.sti2.semanticspaces.api.exceptions.SemanticSpaceException;
 import com.ontotext.trree.rdf2go.OwlimModelFactory;
 
 /**
- * Provides some static methods in order to create {@link RDF2Go}
- * objects.
+ * Provides some static methods in order to create {@link RDF2Go} objects.
  * 
  * By default the model is created using the {@link OwlimModelFactory}. It is
  * possible to specify an another factory to use for the model creation by
@@ -35,25 +34,26 @@ import com.ontotext.trree.rdf2go.OwlimModelFactory;
  */
 public class RDF2GoBuilder {
 
-	private static class LazyInitializer {
-	    
-		public static Model instance;
-		
-		static {
-			 org.ontoware.rdf2go.RDF2Go.register("com.ontotext.trree.rdf2go.OwlimModelFactory");
-			 instance = org.ontoware.rdf2go.RDF2Go.getModelFactory().createModel();
-			 // createModel creates a new folder, so removes it
-			 new File(System.getProperty("user.dir") + 
-			         File.separator + ModelFactory.STORAGE_VALUE_MEMORY).delete();
-		}
-	}
-	
-	public static void main(String[] args) {
-		Statement stmt = RDF2GoBuilder.createStatement(null, null, null);
-		System.out.println("stmt=" + stmt);
-		System.out.println("s=" + stmt.getSubject());
-	}
-	
+    private static class LazyInitializer {
+
+        public static Model instance;
+
+        static {
+            org.ontoware.rdf2go.RDF2Go.register("com.ontotext.trree.rdf2go.OwlimModelFactory");
+            instance =
+                    org.ontoware.rdf2go.RDF2Go.getModelFactory().createModel();
+            // createModel creates a new folder, so removes it
+            new File(System.getProperty("user.dir") + File.separator
+                    + ModelFactory.STORAGE_VALUE_MEMORY).delete();
+        }
+    }
+
+    public static void main(String[] args) {
+        Statement stmt = RDF2GoBuilder.createStatement(null, null, null);
+        System.out.println("stmt=" + stmt);
+        System.out.println("s=" + stmt.getSubject());
+    }
+
     public static BlankNode createBlankNode() {
         return LazyInitializer.instance.createBlankNode();
     }
@@ -66,7 +66,8 @@ public class RDF2GoBuilder {
         return LazyInitializer.instance.createDatatypeLiteral(arg0, arg1);
     }
 
-    public static LanguageTagLiteral createLanguageTagLiteral(String arg0, String arg1) {
+    public static LanguageTagLiteral createLanguageTagLiteral(String arg0,
+                                                              String arg1) {
         return LazyInitializer.instance.createLanguageTagLiteral(arg0, arg1);
     }
 
@@ -75,8 +76,10 @@ public class RDF2GoBuilder {
     }
 
     public static TriplePattern createTriplePattern(ResourceOrVariable subject,
-            UriOrVariable predicate, NodeOrVariable object) {
-        return LazyInitializer.instance.createTriplePattern(subject, predicate, object);
+                                                    UriOrVariable predicate,
+                                                    NodeOrVariable object) {
+        return LazyInitializer.instance.createTriplePattern(
+                subject, predicate, object);
     }
 
     public static URI createURI(String uri) {
@@ -93,9 +96,9 @@ public class RDF2GoBuilder {
      * @throws SemanticSpaceException
      *             if subject is null.
      */
-    public static Resource toSubject(String subject){
+    public static Resource toSubject(String subject) {
         if (subject == null) {
-        	return null;
+            return null;
         }
 
         Resource mySubject = null;
@@ -103,14 +106,16 @@ public class RDF2GoBuilder {
         if (subject.equals("_:")) {
             mySubject = LazyInitializer.instance.createBlankNode();
         } else if (subject.startsWith("_:")) {
-            mySubject = LazyInitializer.instance.createBlankNode(subject.replaceFirst("_:", ""));
+            mySubject =
+                    LazyInitializer.instance.createBlankNode(subject.replaceFirst(
+                            "_:", ""));
         } else {
             mySubject = LazyInitializer.instance.createURI(subject);
         }
 
         return mySubject;
     }
-    
+
     /**
      * Parses a specified predicate as String in order to create a new predicate
      * using RDF2Go types.
@@ -130,8 +135,8 @@ public class RDF2GoBuilder {
     }
 
     /**
-     * Parses a specified object as String in order to create a new object
-     * using RDF2Go types.
+     * Parses a specified object as String in order to create a new object using
+     * RDF2Go types.
      * 
      * @param object
      *            the object to parse.
@@ -149,7 +154,9 @@ public class RDF2GoBuilder {
         if (object.equals("_:")) {
             myObject = LazyInitializer.instance.createBlankNode();
         } else if (object.startsWith("_:")) {
-            myObject = LazyInitializer.instance.createBlankNode(object.replaceFirst("_:", ""));
+            myObject =
+                    LazyInitializer.instance.createBlankNode(object.replaceFirst(
+                            "_:", ""));
         } else {
             try {
                 // check if a valid URI
@@ -178,15 +185,17 @@ public class RDF2GoBuilder {
      * @throws SemanticSpaceException
      *             if triple is not valid.
      */
-    public static Statement createStatementInternal(String subject, String predicate, String object) {
+    public static Statement createStatementInternal(String subject,
+                                                    String predicate,
+                                                    String object) {
         return LazyInitializer.instance.createStatement(
-        			toSubject(subject), 
-        			toPredicate(predicate), 
-        			toObject(object));
+                toSubject(subject), toPredicate(predicate), toObject(object));
     }
-    
-    public static Statement createStatement(Resource subject, URI predicate, Node object) {
-        return LazyInitializer.instance.createStatement(subject, predicate, object);
+
+    public static Statement createStatement(Resource subject, URI predicate,
+                                            Node object) {
+        return LazyInitializer.instance.createStatement(
+                subject, predicate, object);
     }
 
     public static Model getModel() {
@@ -195,7 +204,8 @@ public class RDF2GoBuilder {
 
     public static void setModelFactory(String modelFactoryClass) {
         org.ontoware.rdf2go.RDF2Go.register(modelFactoryClass);
-        LazyInitializer.instance = org.ontoware.rdf2go.RDF2Go.getModelFactory().createModel();
+        LazyInitializer.instance =
+                org.ontoware.rdf2go.RDF2Go.getModelFactory().createModel();
     }
 
 }

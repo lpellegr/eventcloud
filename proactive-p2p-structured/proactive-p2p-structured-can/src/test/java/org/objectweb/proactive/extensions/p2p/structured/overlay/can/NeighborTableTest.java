@@ -15,7 +15,6 @@ import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkI
 import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
-
 /**
  * Test cases for {@link NeighborTable}.
  * 
@@ -30,7 +29,8 @@ public class NeighborTableTest extends CANNetworkInitializer {
     @Before
     public void setUp() throws Exception {
         this.peer = PeerFactory.newActivePeer(new BasicCanOverlay());
-        this.componentPeer = PeerFactory.newComponentPeer(new BasicCanOverlay());
+        this.componentPeer =
+                PeerFactory.newComponentPeer(new BasicCanOverlay());
     }
 
     @Test
@@ -45,19 +45,15 @@ public class NeighborTableTest extends CANNetworkInitializer {
         Assert.assertTrue(neighborTable.contains(firstPeer.getId(), 0, 1));
         Assert.assertTrue(neighborTable.contains(secondPeer.getId(), 0, 0));
 
-        BasicCanOverlay overlay = 
-            ((BasicCanOverlay) PAFuture.getFutureValue(
-                    this.peer.getOverlay()));
+        BasicCanOverlay overlay =
+                ((BasicCanOverlay) PAFuture.getFutureValue(this.peer.getOverlay()));
         overlay.getNeighborTable().addAll(neighborTable);
         this.peer.setOverlay(overlay);
 
-        Assert.assertTrue(
-                ((BasicCanOverlay) PAFuture.getFutureValue(
-                        this.peer.getOverlay())).getNeighborTable().contains(
-                                firstPeer.getId(), 0, 1));
-        Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(
-                this.peer.getOverlay())).getNeighborTable().contains(
-                        secondPeer.getId(), 0, 0));
+        Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(this.peer.getOverlay())).getNeighborTable()
+                .contains(firstPeer.getId(), 0, 1));
+        Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(this.peer.getOverlay())).getNeighborTable()
+                .contains(secondPeer.getId(), 0, 0));
     }
 
     @Test
@@ -72,25 +68,22 @@ public class NeighborTableTest extends CANNetworkInitializer {
         Assert.assertTrue(neighborTable.contains(firstPeer.getId(), 0, 1));
         Assert.assertTrue(neighborTable.contains(secondPeer.getId(), 0, 0));
 
-        BasicCanOverlay overlay = 
-            ((BasicCanOverlay) PAFuture.getFutureValue(
-                    this.componentPeer.getOverlay()));
+        BasicCanOverlay overlay =
+                ((BasicCanOverlay) PAFuture.getFutureValue(this.componentPeer.getOverlay()));
         overlay.getNeighborTable().addAll(neighborTable);
         this.componentPeer.setOverlay(overlay);
 
-        Assert.assertTrue(
-                ((BasicCanOverlay) PAFuture.getFutureValue(
-                        this.componentPeer.getOverlay())).getNeighborTable().contains(
-                                firstPeer.getId(), 0, 1));
-        Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(
-                this.componentPeer.getOverlay())).getNeighborTable().contains(
-                        secondPeer.getId(), 0, 0));
+        Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(this.componentPeer.getOverlay())).getNeighborTable()
+                .contains(firstPeer.getId(), 0, 1));
+        Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(this.componentPeer.getOverlay())).getNeighborTable()
+                .contains(secondPeer.getId(), 0, 0));
     }
 
     @After
     public void tearDown() throws Exception {
         PAActiveObject.terminateActiveObject(this.peer, true);
-        GCMLifeCycleController lc = GCM.getGCMLifeCycleController(((Interface) this.componentPeer).getFcItfOwner());
+        GCMLifeCycleController lc =
+                GCM.getGCMLifeCycleController(((Interface) this.componentPeer).getFcItfOwner());
         lc.stopFc();
         lc.terminateGCMComponent();
     }

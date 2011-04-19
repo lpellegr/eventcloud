@@ -28,46 +28,49 @@ import fr.inria.eventcloud.util.SemanticHelper;
  */
 public abstract class StatementRequest extends ForwardRequest {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private byte[] context;
+    private byte[] context;
 
-	private byte[] statement;
+    private byte[] statement;
 
-	public StatementRequest(URI context, Statement stmt) {
-		super(SemanticHelper.createCoordinateWithoutNullValues(stmt));
+    public StatementRequest(URI context, Statement stmt) {
+        super(SemanticHelper.createCoordinateWithoutNullValues(stmt));
 
-		try {
-			this.context = ObjectToByteConverter.ObjectStream.convert(checkNotNull(context));
-			this.statement = ObjectToByteConverter.ObjectStream.convert(stmt);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            this.context =
+                    ObjectToByteConverter.ObjectStream.convert(checkNotNull(context));
+            this.statement = ObjectToByteConverter.ObjectStream.convert(stmt);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	abstract public void onDestinationReached(StructuredOverlay overlay, URI context, Statement stmt);
-	
-	public Router<ForwardRequest, StringCoordinate> getRouter() {
-		return new UnicastRequestRouter<ForwardRequest>() {
-			@Override
-			protected void onDestinationReached(StructuredOverlay overlay, ForwardRequest msg) {
-				URI unserializedContext = null;
-				Statement unserializedStatement = null;
-				try {
-					unserializedContext = 
-						(URI) ByteToObjectConverter.ObjectStream.convert(context);
-					unserializedStatement = 
-						(Statement) ByteToObjectConverter.ObjectStream.convert(statement);
+    abstract public void onDestinationReached(StructuredOverlay overlay,
+                                              URI context, Statement stmt);
 
-					StatementRequest.this.onDestinationReached(
-							overlay, unserializedContext, unserializedStatement);
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			};
-		};
-	}
+    public Router<ForwardRequest, StringCoordinate> getRouter() {
+        return new UnicastRequestRouter<ForwardRequest>() {
+            @Override
+            protected void onDestinationReached(StructuredOverlay overlay,
+                                                ForwardRequest msg) {
+                URI unserializedContext = null;
+                Statement unserializedStatement = null;
+                try {
+                    unserializedContext =
+                            (URI) ByteToObjectConverter.ObjectStream.convert(context);
+                    unserializedStatement =
+                            (Statement) ByteToObjectConverter.ObjectStream.convert(statement);
+
+                    StatementRequest.this.onDestinationReached(
+                            overlay, unserializedContext, unserializedStatement);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            };
+        };
+    }
 
 }

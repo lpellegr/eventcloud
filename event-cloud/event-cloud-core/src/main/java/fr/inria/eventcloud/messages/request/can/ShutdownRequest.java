@@ -19,33 +19,33 @@ import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
  * @author lpellegr
  */
 public class ShutdownRequest extends AnycastRequest {
-	
-	private static final long serialVersionUID = 1L;
 
-	public ShutdownRequest() {
-		super(new DefaultAnycastConstraintsValidator());
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
-		return new AnycastRequestRouter<AnycastRequest>() {
-			@Override
-			public void onPeerValidatingKeyConstraints(
-							AbstractCanOverlay overlay, AnycastRequest request) {
-				((SemanticCanOverlay) overlay).getDatastore().close();
-			}
-		};
-	}
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public AnycastResponse createResponse() {
-		return new ShutdownResponse(this);
-	}
+    public ShutdownRequest() {
+        super(new DefaultAnycastConstraintsValidator());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
+        return new AnycastRequestRouter<AnycastRequest>() {
+            @Override
+            public void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay,
+                                                       AnycastRequest request) {
+                ((SemanticCanOverlay) overlay).getDatastore().close();
+            }
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AnycastResponse createResponse() {
+        return new ShutdownResponse(this);
+    }
 
 }

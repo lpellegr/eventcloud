@@ -16,9 +16,10 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
 public class ForwardResponse extends Response<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
-    
+
     public ForwardResponse(ForwardRequest query) {
-        super(query, new UnicastConstraintsValidator(query.getSenderCoordinate()));
+        super(query, new UnicastConstraintsValidator(
+                query.getSenderCoordinate()));
     }
 
     /**
@@ -29,13 +30,12 @@ public class ForwardResponse extends Response<StringCoordinate> {
      *            the overlay to use in order to handle the response.
      */
     public void handle(StructuredOverlay overlay) {
-        ResponseEntry entry = 
-        	overlay.getResponseEntries().get(super.getId());
-        
+        ResponseEntry entry = overlay.getResponseEntries().get(super.getId());
+
         synchronized (entry) {
-        	entry.incrementResponsesCount(1);
-        	entry.setResponse(this);
-        	entry.notifyAll();
+            entry.incrementResponsesCount(1);
+            entry.setResponse(this);
+            entry.notifyAll();
         }
     }
 

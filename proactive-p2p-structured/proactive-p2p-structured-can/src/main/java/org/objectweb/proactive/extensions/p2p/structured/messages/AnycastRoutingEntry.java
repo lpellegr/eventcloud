@@ -7,7 +7,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.An
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
- * Contains information about {@link Peer}s met while routing an {@link AnycastRequest}. 
+ * Contains information about {@link Peer}s met while routing an
+ * {@link AnycastRequest}.
  * 
  * @author lpellegr
  */

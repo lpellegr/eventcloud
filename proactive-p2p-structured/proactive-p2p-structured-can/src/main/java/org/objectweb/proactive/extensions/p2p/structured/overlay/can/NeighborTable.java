@@ -35,37 +35,38 @@ public class NeighborTable implements Serializable {
      */
     public static final short SUPERIOR_DIRECTION = 1;
 
-	/**
-	 * Contains neighbors categorized by dimension, direction. The neighbors are
-	 * in a two-dimensional array of {@link ConcurrentHashMap}. Each line
-	 * corresponds to a dimension and the number of columns is always equal to
-	 * two (which corresponds to the upper and lower directions).
-	 */
+    /**
+     * Contains neighbors categorized by dimension, direction. The neighbors are
+     * in a two-dimensional array of {@link ConcurrentHashMap}. Each line
+     * corresponds to a dimension and the number of columns is always equal to
+     * two (which corresponds to the upper and lower directions).
+     */
     @SuppressWarnings("unchecked")
-    private ConcurrentMap<UUID, NeighborEntry>[][] entries = 
-    	new ConcurrentHashMap[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()][2];
+    private ConcurrentMap<UUID, NeighborEntry>[][] entries =
+            new ConcurrentHashMap[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()][2];
 
     /**
      * Constructs a new NeighborTable.
      */
     public NeighborTable() {
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            this.entries[i][NeighborTable.INFERIOR_DIRECTION] = 
-            	new ConcurrentHashMap<UUID, NeighborEntry>();
-            this.entries[i][NeighborTable.SUPERIOR_DIRECTION] = 
-            	new ConcurrentHashMap<UUID, NeighborEntry>();
+            this.entries[i][NeighborTable.INFERIOR_DIRECTION] =
+                    new ConcurrentHashMap<UUID, NeighborEntry>();
+            this.entries[i][NeighborTable.SUPERIOR_DIRECTION] =
+                    new ConcurrentHashMap<UUID, NeighborEntry>();
         }
     }
 
     /**
-     * Adds a new neighbor at the specified <code>dimension</code> and 
+     * Adds a new neighbor at the specified <code>dimension</code> and
      * <code>direction</code>.
      * 
      * @param entry
      *            the {@link NeighborEntry} to add.
      * @param dimension
      *            the dimension index (must be in <code>0</code> and
-     *            {@link P2PStructuredProperties#CAN_NB_DIMENSIONS - 1} include).
+     *            {@link P2PStructuredProperties#CAN_NB_DIMENSIONS - 1}
+     *            include).
      * @param direction
      *            the direction ({@link #INFERIOR_DIRECTION} or
      *            {@link #SUPERIOR_DIRECTION}).
@@ -94,8 +95,8 @@ public class NeighborTable implements Serializable {
      * 
      * @param dimension
      *            the dimension to use (dimension start to <code>0</code> and
-     *            max is defined by {@link P2PStructuredProperties#CAN_NB_DIMENSIONS} -
-     *            1).
+     *            max is defined by
+     *            {@link P2PStructuredProperties#CAN_NB_DIMENSIONS} - 1).
      * @param direction
      *            the direction ({@link #INFERIOR_DIRECTION} or
      *            {@link #SUPERIOR_DIRECTION}).
@@ -106,16 +107,16 @@ public class NeighborTable implements Serializable {
     }
 
     public ConcurrentMap<UUID, NeighborEntry>[] get(int dimension) {
-    	return this.entries[dimension];
+        return this.entries[dimension];
     }
-    
+
     /**
      * Returns an entry from the specified {@link Peer} identifier if it is
      * found.
      * 
      * @param peerIdentifier
      *            the identifier used for the lookup.
-     *            
+     * 
      * @return the zone found or <code>null</code>.
      */
     public NeighborEntry getNeighborEntry(UUID peerIdentifier) {
@@ -136,7 +137,7 @@ public class NeighborTable implements Serializable {
      * 
      * @param peerIdentifier
      *            the identifier to use for checking.
-     *            
+     * 
      * @return <code>true</code> if the data structure contains the peer
      *         identifier, <code>false</code> otherwise.
      */
@@ -176,16 +177,16 @@ public class NeighborTable implements Serializable {
      * 
      * @param peerIdentifier
      *            the identifier to use for checking.
-     *            
+     * 
      * @return <code>true</code> if the neighbor has been removed,
      *         <code>false</code> otherwise.
      */
     public boolean remove(UUID peerIdentifier) {
         for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (int direction = 0; direction < 2; direction++) {
-				if (this.entries[dim][direction].remove(peerIdentifier) != null) {
-					return true;
-				}
+                if (this.entries[dim][direction].remove(peerIdentifier) != null) {
+                    return true;
+                }
             }
         }
 
@@ -193,7 +194,7 @@ public class NeighborTable implements Serializable {
     }
 
     public boolean remove(UUID peerIdentifier, int dimension, int direction) {
-    	return this.entries[dimension][direction].remove(peerIdentifier) != null;
+        return this.entries[dimension][direction].remove(peerIdentifier) != null;
     }
 
     /**
@@ -212,7 +213,8 @@ public class NeighborTable implements Serializable {
      * 
      * @param dimension
      *            the dimension index (must be in <code>0</code> and
-     *            {@link P2PStructuredProperties#CAN_NB_DIMENSIONS - 1} include).
+     *            {@link P2PStructuredProperties#CAN_NB_DIMENSIONS - 1}
+     *            include).
      * @param direction
      *            the direction ({@link #INFERIOR_DIRECTION} or
      *            {@link #SUPERIOR_DIRECTION}).

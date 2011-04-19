@@ -54,7 +54,8 @@ public class TrackersProperties {
         }
     }
 
-    public void store(String associatedNetworkName, String bindingName, String type) {
+    public void store(String associatedNetworkName, String bindingName,
+                      String type) {
         List<String> bindingNames;
         if ((bindingNames = this.getBindingNames(associatedNetworkName)) == null) {
             bindingNames = new ArrayList<String>();
@@ -65,12 +66,14 @@ public class TrackersProperties {
             bindingNames.add(bindingName);
         }
 
-        this.properties.put(associatedNetworkName, TrackersProperties.asString(bindingNames));
+        this.properties.put(
+                associatedNetworkName,
+                TrackersProperties.asString(bindingNames));
         FileOutputStream fis = null;
         try {
             fis = new FileOutputStream(this.propertiesFilePath);
-            this.properties.store(fis,
-                    TrackersProperties.DEFAULT_PROPERTIES_COMMENT);
+            this.properties.store(
+                    fis, TrackersProperties.DEFAULT_PROPERTIES_COMMENT);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -85,13 +88,15 @@ public class TrackersProperties {
     }
 
     public void store(String associatedNetworkName, List<String> bindingNames) {
-        this.properties.put(associatedNetworkName, TrackersProperties.asString(bindingNames));
+        this.properties.put(
+                associatedNetworkName,
+                TrackersProperties.asString(bindingNames));
 
         FileOutputStream fis = null;
         try {
             fis = new FileOutputStream(this.propertiesFilePath);
-            this.properties.store(fis,
-                    TrackersProperties.DEFAULT_PROPERTIES_COMMENT);
+            this.properties.store(
+                    fis, TrackersProperties.DEFAULT_PROPERTIES_COMMENT);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -150,7 +155,8 @@ public class TrackersProperties {
                         "The specified network name does not contain the specified bindingName");
             }
         } else {
-            throw new IllegalStateException("The specified network name does not exists");
+            throw new IllegalStateException(
+                    "The specified network name does not exists");
         }
     }
 

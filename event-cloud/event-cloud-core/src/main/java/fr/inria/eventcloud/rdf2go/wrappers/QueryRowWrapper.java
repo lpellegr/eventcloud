@@ -10,7 +10,8 @@ import org.ontoware.rdf2go.model.impl.QueryRowImpl;
 import org.ontoware.rdf2go.model.node.Node;
 
 /**
- * The <code>QueryRowWrapper</code> wraps a value of the RDF2Go type {@link QueryRow}.
+ * The <code>QueryRowWrapper</code> wraps a value of the RDF2Go type
+ * {@link QueryRow}.
  * 
  * @author lpellegr
  */
@@ -43,9 +44,11 @@ public class QueryRowWrapper implements RDF2GoWrapper<QueryRow> {
         return new QueryRowImpl() {
             private static final long serialVersionUID = 1L;
 
-            private final Map<String, Node> values = QueryRowWrapper.this.values;
+            private final Map<String, Node> values =
+                    QueryRowWrapper.this.values;
 
-            public String getLiteralValue(String varname) throws ModelRuntimeException {
+            public String getLiteralValue(String varname)
+                    throws ModelRuntimeException {
                 return this.values.get(varname).toString();
             }
 

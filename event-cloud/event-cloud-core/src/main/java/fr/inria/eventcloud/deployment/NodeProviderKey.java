@@ -9,20 +9,18 @@ import org.objectweb.proactive.core.descriptor.data.VirtualNode;
  */
 public enum NodeProviderKey {
 
-    NODE_PROVIDER("nodeProviderVN"),
-    TRACKERS("trackersVN"),
-    PEERS_CAN("canPeersVN"),
-    PEERS_CHORD("chordPeersVN");
+    NODE_PROVIDER("nodeProviderVN"), TRACKERS("trackersVN"), PEERS_CAN(
+            "canPeersVN"), PEERS_CHORD("chordPeersVN");
 
     private String vnName;
-    
+
     private int maxNodesToAcquire;
-    
+
     /**
-     * Constructs a new node provider key with the specified
-     * virtual node name.
+     * Constructs a new node provider key with the specified virtual node name.
      * 
-     * @param vnName the virtual node name;
+     * @param vnName
+     *            the virtual node name;
      */
     private NodeProviderKey(String vnName) {
         this.vnName = vnName;
@@ -36,7 +34,7 @@ public enum NodeProviderKey {
     public String getVirtualNodeName() {
         return this.vnName;
     }
-    
+
     /**
      * Returns the maximum number of nodes to acquire.
      * 
@@ -50,10 +48,10 @@ public enum NodeProviderKey {
      * Sets the maximum number of nodes to acquire.
      * 
      * @param value
-     *              the new value to set.
+     *            the new value to set.
      */
     public void setMaximumNodesToAcquire(int value) {
         this.maxNodesToAcquire = value;
     }
-    
+
 }

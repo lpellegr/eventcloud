@@ -24,8 +24,8 @@ public class AnycastRoutingList extends LinkedList<AnycastRoutingEntry> {
      * 
      * @param peerID
      *            the {@link UUID} to look for.
-     * @return the {@link AnycastRoutingEntry} found or <code>null</code> if
-     *         not found.
+     * @return the {@link AnycastRoutingEntry} found or <code>null</code> if not
+     *         found.
      */
     public AnycastRoutingEntry getRoutingResponseEntryBy(UUID peerID) {
         for (AnycastRoutingEntry entry : this) {
@@ -36,5 +36,5 @@ public class AnycastRoutingList extends LinkedList<AnycastRoutingEntry> {
 
         return null;
     }
-    
+
 }

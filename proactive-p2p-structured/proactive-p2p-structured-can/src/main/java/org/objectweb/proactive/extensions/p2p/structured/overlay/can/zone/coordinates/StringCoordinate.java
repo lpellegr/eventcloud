@@ -9,10 +9,10 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  */
 public class StringCoordinate extends Coordinate<StringElement, String> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public StringCoordinate(StringElement... elts) {
-		super(elts);
-	}
-	
+    public StringCoordinate(StringElement... elts) {
+        super(elts);
+    }
+
 }

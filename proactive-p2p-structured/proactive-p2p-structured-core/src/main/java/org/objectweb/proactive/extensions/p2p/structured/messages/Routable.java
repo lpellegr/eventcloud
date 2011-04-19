@@ -24,8 +24,8 @@ public interface Routable<K> {
     public abstract Router<? extends RequestResponseMessage<K>, K> getRouter();
 
     /**
-     * Route the {@link RequestResponseMessage} to the correct {@link Peer}. If the
-     * current peer contains the key to reach, the query is handled and a
+     * Route the {@link RequestResponseMessage} to the correct {@link Peer}. If
+     * the current peer contains the key to reach, the query is handled and a
      * response is routed to the sender.
      * 
      * @param overlay

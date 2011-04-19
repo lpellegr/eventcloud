@@ -1,6 +1,5 @@
 package fr.inria.eventcloud.messages.request.can;
 
-
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 import org.slf4j.Logger;
@@ -21,32 +20,33 @@ public class SparqlConstructRequest extends SparqlRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger logger = 
+    private final static Logger logger =
             LoggerFactory.getLogger(SparqlConstructRequest.class);
 
     public SparqlConstructRequest(AtomicSparqlQuery query) {
         super(new DefaultAnycastConstraintsValidator(
-        		SemanticHelper.createCoordinateWithNullValues(
-        				query.getSubjectWithNullVariable(), 
-        				query.getPredicateWithNullVariable(), 
-        				query.getObjectWithNullVariable())), 
-        		query.toConstruct());
+                SemanticHelper.createCoordinateWithNullValues(
+                        query.getSubjectWithNullVariable(),
+                        query.getPredicateWithNullVariable(),
+                        query.getObjectWithNullVariable())),
+                query.toConstruct());
 
         logger.debug("New SparqlConstructRequest created");
     }
 
     public SparqlConstructResponse createResponse() {
-    	return new SparqlConstructResponse(this);
+        return new SparqlConstructResponse(this);
     }
 
     /**
      * {@inheritDoc}
      */
-	@Override
-	public ClosableIterableWrapper queryDatastore(AbstractCanOverlay overlay) {
-		return new ClosableIterableWrapper(
-						((SemanticCanOverlay) overlay).getDatastore().sparqlConstruct(
-								EventCloudProperties.DEFAULT_CONTEXT, super.getSparqlConstructQuery()));
-	}
+    @Override
+    public ClosableIterableWrapper queryDatastore(AbstractCanOverlay overlay) {
+        return new ClosableIterableWrapper(
+                ((SemanticCanOverlay) overlay).getDatastore().sparqlConstruct(
+                        EventCloudProperties.DEFAULT_CONTEXT,
+                        super.getSparqlConstructQuery()));
+    }
 
 }

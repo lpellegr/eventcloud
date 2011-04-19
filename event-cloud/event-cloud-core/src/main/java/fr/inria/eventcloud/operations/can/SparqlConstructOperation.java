@@ -15,26 +15,27 @@ import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
  */
 public class SparqlConstructOperation implements SynchronousOperation {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private URI context;
-	
-	private String sparqlConstructQuery;
+    private URI context;
 
-	public SparqlConstructOperation(URI context, String sparqlConstructQuery) {
-		this.context = context;
-		this.sparqlConstructQuery = sparqlConstructQuery;
-	}
+    private String sparqlConstructQuery;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public ResponseOperation handle(StructuredOverlay overlay) {
-		return new SparqlConstructResponseOperation(
-					new ClosableIterableWrapper(
-							((SemanticCanOverlay) overlay).getDatastore().sparqlConstruct(
-									context, this.sparqlConstructQuery)));
-	}
-	
+    public SparqlConstructOperation(URI context, String sparqlConstructQuery) {
+        this.context = context;
+        this.sparqlConstructQuery = sparqlConstructQuery;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ResponseOperation handle(StructuredOverlay overlay) {
+        return new SparqlConstructResponseOperation(
+                new ClosableIterableWrapper(
+                        ((SemanticCanOverlay) overlay).getDatastore()
+                                .sparqlConstruct(
+                                        context, this.sparqlConstructQuery)));
+    }
+
 }

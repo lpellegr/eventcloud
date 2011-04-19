@@ -8,13 +8,13 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * Class that all request/response messages must implement. 
- * It maintains some standard information that may useful
- * for any kind of message.
+ * Class that all request/response messages must implement. It maintains some
+ * standard information that may useful for any kind of message.
  * 
  * @author lpellegr
  */
-public abstract class RequestResponseMessage<K> implements Routable<K>, Serializable {
+public abstract class RequestResponseMessage<K> implements Routable<K>,
+        Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,24 +26,25 @@ public abstract class RequestResponseMessage<K> implements Routable<K>, Serializ
     /**
      * Constraints validator used to make the routing decision possible.
      */
-    protected ConstraintsValidator<K> constraintsValidator; 
-    
+    protected ConstraintsValidator<K> constraintsValidator;
+
     /**
      * The number of hops between the source and the destination of the message.
      */
     private int hopCount = 0;
 
     /**
-     * Constructs a new RequestResponseMessage with the specified 
+     * Constructs a new RequestResponseMessage with the specified
      * {@code identifier} and {@code constraintsValidator}.
      * 
      * @param identifier
      *            the unique identifier associated to the message.
-     *            
+     * 
      * @param constraintsValidator
      *            the constraints validator to use for routing the message.
      */
-    public RequestResponseMessage(UUID identifier, ConstraintsValidator<K> constraintsValidator) {
+    public RequestResponseMessage(UUID identifier,
+            ConstraintsValidator<K> constraintsValidator) {
         this.uuid = identifier;
         this.constraintsValidator = constraintsValidator;
     }
@@ -56,88 +57,88 @@ public abstract class RequestResponseMessage<K> implements Routable<K>, Serializ
     public abstract long getDispatchTimestamp();
 
     /**
-     * Returns the universally unique identifier which identifies
-     * the message.
+     * Returns the universally unique identifier which identifies the message.
      * 
-     * @return the universally unique identifier which identifies
-     * 		   the message.
+     * @return the universally unique identifier which identifies the message.
      */
     public UUID getId() {
         return this.uuid;
     }
-    
+
     /**
      * Returns the key to reach.
      * 
      * @return the key to reach.
      */
     public K getKey() {
-    	return this.constraintsValidator.getKey();
+        return this.constraintsValidator.getKey();
     }
-    
-	/**
-	 * Returns the number of hops between the source and the destination of this
-	 * message.
-	 * 
-	 * @return the number of hops between the source and the destination of this
-	 *         message.
-	 */
+
+    /**
+     * Returns the number of hops between the source and the destination of this
+     * message.
+     * 
+     * @return the number of hops between the source and the destination of this
+     *         message.
+     */
     public int getHopCount() {
         return this.hopCount;
     }
 
-	/**
-	 * Increments the hop count (i.e. the counter counting the number of hops
-	 * between the source and the destination of this message) by the specified
-	 * <code>increment</code>.
-	 * 
-	 * @param increment
-	 *            the size of the increment.
-	 */
+    /**
+     * Increments the hop count (i.e. the counter counting the number of hops
+     * between the source and the destination of this message) by the specified
+     * <code>increment</code>.
+     * 
+     * @param increment
+     *            the size of the increment.
+     */
     public void incrementHopCount(int increment) {
         this.hopCount += increment;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     @SuppressWarnings("unchecked")
     public void route(StructuredOverlay overlay) {
-    	((Router<RequestResponseMessage<K>, K>) this.getRouter()).makeDecision(overlay, this);
+        ((Router<RequestResponseMessage<K>, K>) this.getRouter()).makeDecision(
+                overlay, this);
     }
 
-	/**
+    /**
      * Sets a new value to the hop count counter.
      * 
      * @param value
-     * 				the new value to set.
+     *            the new value to set.
      */
     public void setHopCount(int value) {
         this.hopCount = value;
     }
-    
+
     /**
-	 * Indicates if the specified {@code overlay} validates the constraints
-	 * which are denoted by {@code key}.
-	 * 
-	 * @param overlay
-	 *            the overlay on which the constraints are checked.
-	 * 
-	 * @return <code>true</code> if the constraints are validated,
-	 *         <code>false</code> otherwise.
-	 */
+     * Indicates if the specified {@code overlay} validates the constraints
+     * which are denoted by {@code key}.
+     * 
+     * @param overlay
+     *            the overlay on which the constraints are checked.
+     * 
+     * @return <code>true</code> if the constraints are validated,
+     *         <code>false</code> otherwise.
+     */
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
-		return this.constraintsValidator.validatesKeyConstraints(overlay);
-	}
+        return this.constraintsValidator.validatesKeyConstraints(overlay);
+    }
 
     /**
      * {@inheritDoc}
      */
-	@Override
-	public String toString() {
-		return "RequestResponseMessage [id=" + this.uuid + ", constraintsValidator="
-				+ this.constraintsValidator + ", hopCount=" + this.hopCount + "]";
-	}
+    @Override
+    public String toString() {
+        return "RequestResponseMessage [id=" + this.uuid
+                + ", constraintsValidator=" + this.constraintsValidator
+                + ", hopCount=" + this.hopCount + "]";
+    }
 
 }

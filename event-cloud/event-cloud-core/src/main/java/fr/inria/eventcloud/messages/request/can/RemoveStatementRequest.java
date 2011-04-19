@@ -17,22 +17,26 @@ public class RemoveStatementRequest extends StatementRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger logger = LoggerFactory.getLogger(RemoveStatementRequest.class);
+    private final static Logger logger =
+            LoggerFactory.getLogger(RemoveStatementRequest.class);
 
     public RemoveStatementRequest(URI context, Statement stmt) {
-    	super(context, stmt);
+        super(context, stmt);
     }
 
     /**
      * {@inheritDoc}
      */
-	@Override
-	public void onDestinationReached(StructuredOverlay overlay, URI context, Statement stmt) {
-		((SemanticCanOverlay) overlay).getDatastore().removeStatement(context, stmt);
+    @Override
+    public void onDestinationReached(StructuredOverlay overlay, URI context,
+                                     Statement stmt) {
+        ((SemanticCanOverlay) overlay).getDatastore().removeStatement(
+                context, stmt);
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Statement (" + context + ", " + stmt + ") removed from " + overlay);
-		}		
-	}
-    
+        if (logger.isDebugEnabled()) {
+            logger.debug("Statement (" + context + ", " + stmt
+                    + ") removed from " + overlay);
+        }
+    }
+
 }

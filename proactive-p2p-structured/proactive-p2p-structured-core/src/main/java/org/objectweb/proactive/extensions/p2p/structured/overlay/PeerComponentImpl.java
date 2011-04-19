@@ -13,9 +13,9 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.slf4j.LoggerFactory;
 
 /**
- * PeerComponentImpl is a component extension of a {@link PeerImpl}. It 
- * is composed of a {@link StructuredOverlay} which allows to have several 
- * implementations of common operations for each peer-to-peer protocol to 
+ * PeerComponentImpl is a component extension of a {@link PeerImpl}. It is
+ * composed of a {@link StructuredOverlay} which allows to have several
+ * implementations of common operations for each peer-to-peer protocol to
  * implement.
  * <p>
  * Warning, this class must not be instantiate directly. In order to create a
@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author bsauvan
  */
-public class PeerComponentImpl extends PeerImpl implements Peer, ComponentInitActive, ComponentEndActive, Serializable {
+public class PeerComponentImpl extends PeerImpl implements Peer,
+        ComponentInitActive, ComponentEndActive, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,19 +43,20 @@ public class PeerComponentImpl extends PeerImpl implements Peer, ComponentInitAc
      */
     public void initComponentActivity(Body body) {
         super.initActivity(body);
-        
-        // sets setOverlay as immediate service to be sure 
+
+        // sets setOverlay as immediate service to be sure
         // that the overlay field is set even if we execute
         // an another method in immediate service on a component peer
         body.setImmediateService("setOverlay", false);
-        
+
         this.stub = null;
-        //        try {
-        //            Component peer = Fractive.getComponentRepresentativeOnThis();
-        //            this.stub = (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
-        //        } catch (NoSuchInterfaceException nsie) {
-        //            logger.error("Cannot get stub of peer: " + nsie.getMessage(), nsie);
-        //        }
+        // try {
+        // Component peer = Fractive.getComponentRepresentativeOnThis();
+        // this.stub = (Peer)
+        // peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+        // } catch (NoSuchInterfaceException nsie) {
+        // logger.error("Cannot get stub of peer: " + nsie.getMessage(), nsie);
+        // }
     }
 
     /**
@@ -72,10 +74,11 @@ public class PeerComponentImpl extends PeerImpl implements Peer, ComponentInitAc
         if (this.stub == null) {
             try {
                 Component peer = Fractive.getComponentRepresentativeOnThis();
-                this.stub = (Peer) peer.getFcInterface(
-                                P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+                this.stub =
+                        (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
             } catch (NoSuchInterfaceException nsie) {
-                logger.error("Cannot get stub of peer: " + nsie.getMessage(), nsie);
+                logger.error(
+                        "Cannot get stub of peer: " + nsie.getMessage(), nsie);
             }
         }
     }
@@ -92,7 +95,7 @@ public class PeerComponentImpl extends PeerImpl implements Peer, ComponentInitAc
             return OverlayType.CAN;
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -104,14 +107,14 @@ public class PeerComponentImpl extends PeerImpl implements Peer, ComponentInitAc
         }
         this.overlay = structuredOverlay;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
-    	return obj instanceof PeerComponentImpl
-    			&& this.getId().equals(((PeerComponentImpl) obj).getId());
+        return obj instanceof PeerComponentImpl
+                && this.getId().equals(((PeerComponentImpl) obj).getId());
     }
 
 }

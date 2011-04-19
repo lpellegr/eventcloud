@@ -28,145 +28,155 @@ import fr.inria.eventcloud.util.SemanticHelper;
  * 
  * @author lpellegr
  */
-public class SemanticCanOverlay extends AbstractCanOverlay implements SemanticStructuredOverlay {
+public class SemanticCanOverlay extends AbstractCanOverlay implements
+        SemanticStructuredOverlay {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final transient Logger logger = 
-			LoggerFactory.getLogger(SemanticCanOverlay.class);
+    private static final transient Logger logger =
+            LoggerFactory.getLogger(SemanticCanOverlay.class);
 
-	protected transient SemanticDatastore datastore;
+    protected transient SemanticDatastore datastore;
 
-	/**
-	 * Constructs a new overlay.
-	 */
-	public SemanticCanOverlay() {
-		super(new SparqlRequestResponseManager());
-	}
-	
-	/**
-	 * {@inheritDoc} 
-	 */
-	@Override
-	public void initActivity(Body body) {
-		this.datastore = new OwlimDatastore(true);
-		this.datastore.open();
-		super.initActivity(body);
-	}
+    /**
+     * Constructs a new overlay.
+     */
+    public SemanticCanOverlay() {
+        super(new SparqlRequestResponseManager());
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void endActivity(Body body) {
-		this.datastore.close();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initActivity(Body body) {
+        this.datastore = new OwlimDatastore(true);
+        this.datastore.open();
+        super.initActivity(body);
+    }
 
-	@Override
-	protected Object getDataIn(Zone zone) {
-		Set<Statement> statementsToTransfert = new HashSet<Statement>();
-		ClosableIterable<Statement> result = this.datastore.sparqlConstruct(
-				EventCloudProperties.DEFAULT_CONTEXT,
-				"CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void endActivity(Body body) {
+        this.datastore.close();
+    }
 
-		ClosableIterator<Statement> it = result.iterator();
-		Statement stmt;
-		String subject;
-		String predicate;
-		String object;
+    @Override
+    protected Object getDataIn(Zone zone) {
+        Set<Statement> statementsToTransfert = new HashSet<Statement>();
+        ClosableIterable<Statement> result =
+                this.datastore.sparqlConstruct(
+                        EventCloudProperties.DEFAULT_CONTEXT,
+                        "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
 
-		while (it.hasNext()) {
-			stmt = it.next();
+        ClosableIterator<Statement> it = result.iterator();
+        Statement stmt;
+        String subject;
+        String predicate;
+        String object;
 
-			subject = SemanticHelper.parseTripleElement(
-						stmt.getSubject().toString());
-			predicate = SemanticHelper.parseTripleElement(
-						stmt.getPredicate().toString());
-			object = SemanticHelper.parseTripleElement(
-						stmt.getObject().toString());
+        while (it.hasNext()) {
+            stmt = it.next();
 
-			// Yeah, manual filtering is really ugly!
-			if (subject.compareTo(zone.getLowerBound(0).toString()) >= 0
-					&& subject.compareTo(zone.getUpperBound(0).toString()) < 0
-					&& predicate.compareTo(zone.getLowerBound(1).toString()) >= 0
-					&& predicate.compareTo(zone.getUpperBound(1).toString()) < 0
-					&& object.compareTo(zone.getLowerBound(2).toString()) >= 0
-					&& object.compareTo(zone.getUpperBound(2).toString()) < 0) {
+            subject =
+                    SemanticHelper.parseTripleElement(stmt.getSubject()
+                            .toString());
+            predicate =
+                    SemanticHelper.parseTripleElement(stmt.getPredicate()
+                            .toString());
+            object =
+                    SemanticHelper.parseTripleElement(stmt.getObject()
+                            .toString());
 
-				statementsToTransfert.add(stmt);
-			}
-		}
+            // Yeah, manual filtering is really ugly!
+            if (subject.compareTo(zone.getLowerBound(0).toString()) >= 0
+                    && subject.compareTo(zone.getUpperBound(0).toString()) < 0
+                    && predicate.compareTo(zone.getLowerBound(1).toString()) >= 0
+                    && predicate.compareTo(zone.getUpperBound(1).toString()) < 0
+                    && object.compareTo(zone.getLowerBound(2).toString()) >= 0
+                    && object.compareTo(zone.getUpperBound(2).toString()) < 0) {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Data have been retrieved for transfert");
-		}
+                statementsToTransfert.add(stmt);
+            }
+        }
 
-		return new ClosableIterableWrapper(
-				SemanticHelper.generateClosableIterable(statementsToTransfert));
-	}
+        if (logger.isDebugEnabled()) {
+            logger.debug("Data have been retrieved for transfert");
+        }
 
-	@Override
-	protected void removeDataIn(Zone zone) {
-		ClosableIterable<Statement> result = this.datastore.sparqlConstruct(
-				EventCloudProperties.DEFAULT_CONTEXT,
-				"CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
+        return new ClosableIterableWrapper(
+                SemanticHelper.generateClosableIterable(statementsToTransfert));
+    }
 
-		ClosableIterator<Statement> it = result.iterator();
-		Statement stmt;
-		String subject;
-		String predicate;
-		String object;
+    @Override
+    protected void removeDataIn(Zone zone) {
+        ClosableIterable<Statement> result =
+                this.datastore.sparqlConstruct(
+                        EventCloudProperties.DEFAULT_CONTEXT,
+                        "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
 
-		while (it.hasNext()) {
-			stmt = it.next();
+        ClosableIterator<Statement> it = result.iterator();
+        Statement stmt;
+        String subject;
+        String predicate;
+        String object;
 
-			subject = SemanticHelper.parseTripleElement(
-						stmt.getSubject().toString());
-			predicate = SemanticHelper.parseTripleElement(
-						stmt.getPredicate().toString());
-			object = SemanticHelper.parseTripleElement(
-						stmt.getObject().toString());
+        while (it.hasNext()) {
+            stmt = it.next();
 
-			if (subject.compareTo(zone.getLowerBound(0).toString()) >= 0
-					&& subject.compareTo(zone.getUpperBound(0).toString()) < 0
-					&& predicate.compareTo(zone.getLowerBound(1).toString()) >= 0
-					&& predicate.compareTo(zone.getUpperBound(1).toString()) < 0
-					&& object.compareTo(zone.getLowerBound(2).toString()) >= 0
-					&& object.compareTo(zone.getUpperBound(2).toString()) < 0) {
-				this.datastore.removeStatement(EventCloudProperties.DEFAULT_CONTEXT, stmt);
-			}
-		}
+            subject =
+                    SemanticHelper.parseTripleElement(stmt.getSubject()
+                            .toString());
+            predicate =
+                    SemanticHelper.parseTripleElement(stmt.getPredicate()
+                            .toString());
+            object =
+                    SemanticHelper.parseTripleElement(stmt.getObject()
+                            .toString());
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Data have been removed due to transfert");
-		}
-	}
+            if (subject.compareTo(zone.getLowerBound(0).toString()) >= 0
+                    && subject.compareTo(zone.getUpperBound(0).toString()) < 0
+                    && predicate.compareTo(zone.getLowerBound(1).toString()) >= 0
+                    && predicate.compareTo(zone.getUpperBound(1).toString()) < 0
+                    && object.compareTo(zone.getLowerBound(2).toString()) >= 0
+                    && object.compareTo(zone.getUpperBound(2).toString()) < 0) {
+                this.datastore.removeStatement(
+                        EventCloudProperties.DEFAULT_CONTEXT, stmt);
+            }
+        }
 
-	@Override
-	protected void affectDataReceived(Object dataReceived) {
-		ClosableIterator<Statement> data = 
-			((ClosableIterableWrapper) dataReceived).toRDF2Go().iterator();
-		
-		this.datastore.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
-	}
+        if (logger.isDebugEnabled()) {
+            logger.debug("Data have been removed due to transfert");
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	protected void mergeDataReceived(MergeOperation msg) {
-		ClosableIterator<Statement> data = 
-			((ClosableIterable<Statement>) msg.getDataToReallocate()).iterator();
-		
-		this.datastore.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
-	}
+    @Override
+    protected void affectDataReceived(Object dataReceived) {
+        ClosableIterator<Statement> data =
+                ((ClosableIterableWrapper) dataReceived).toRDF2Go().iterator();
 
-	@Override
-	protected ClosableIterable<Statement> retrieveAllData() {
-		return this.datastore.sparqlConstruct(
-					EventCloudProperties.DEFAULT_CONTEXT,
-					"CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
-	}
+        this.datastore.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
+    }
 
-	public SemanticDatastore getDatastore() {
-		return this.datastore;
-	}
+    @SuppressWarnings("unchecked")
+    protected void mergeDataReceived(MergeOperation msg) {
+        ClosableIterator<Statement> data =
+                ((ClosableIterable<Statement>) msg.getDataToReallocate()).iterator();
+
+        this.datastore.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
+    }
+
+    @Override
+    protected ClosableIterable<Statement> retrieveAllData() {
+        return this.datastore.sparqlConstruct(
+                EventCloudProperties.DEFAULT_CONTEXT,
+                "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
+    }
+
+    public SemanticDatastore getDatastore() {
+        return this.datastore;
+    }
 
 }

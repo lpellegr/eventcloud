@@ -39,7 +39,8 @@ public class SemanticHelper {
      *            the tripplePatternToUse.
      * @return a construct SPARQL query as String.
      */
-    public static String createConstructSparqlFrom(URI spaceURI, TriplePattern triplePattern) {
+    public static String createConstructSparqlFrom(URI spaceURI,
+                                                   TriplePattern triplePattern) {
         StringBuffer buf = new StringBuffer("CONSTRUCT { ");
 
         if (triplePattern.getSubject() == null) {
@@ -107,31 +108,38 @@ public class SemanticHelper {
         return buf.toString();
     }
 
-    public static String createConstructSparqlFrom(URI spaceURI, String subject, String predicate,
-            String object) {
-        return SemanticHelper.createConstructSparqlFrom(spaceURI, SemanticHelper
-                .constructTriplePatternFrom(spaceURI, subject, predicate, object));
+    public static String createConstructSparqlFrom(URI spaceURI,
+                                                   String subject,
+                                                   String predicate,
+                                                   String object) {
+        return SemanticHelper.createConstructSparqlFrom(
+                spaceURI, SemanticHelper.constructTriplePatternFrom(
+                        spaceURI, subject, predicate, object));
     }
 
-//    /**
-//     * Creates a new {@link Statement} from a set of String triples.
-//     * 
-//     * @param context
-//     *            the context associated to the statement to generate.
-//     * @param subject
-//     *            the subject to use.
-//     * @param predicate
-//     *            the predicate to use.
-//     * @param object
-//     *            the object to use.
-//     * @return a new {@link Statement}.
-//     */
-//    public static Statement constructStatementFrom(URI context, String subject, String predicate, String object) {
-//        return new StatementImpl(context, subject == null || subject.startsWith("?") ? null
-//                : RDF2GoBuilder.createURI(subject), predicate == null || predicate.startsWith("?") ? null
-//                : RDF2GoBuilder.createURI(predicate), object == null || object.startsWith("?") ? null
-//                : RDF2GoBuilder.createURI(object));
-//    }
+    // /**
+    // * Creates a new {@link Statement} from a set of String triples.
+    // *
+    // * @param context
+    // * the context associated to the statement to generate.
+    // * @param subject
+    // * the subject to use.
+    // * @param predicate
+    // * the predicate to use.
+    // * @param object
+    // * the object to use.
+    // * @return a new {@link Statement}.
+    // */
+    // public static Statement constructStatementFrom(URI context, String
+    // subject, String predicate, String object) {
+    // return new StatementImpl(context, subject == null ||
+    // subject.startsWith("?") ? null
+    // : RDF2GoBuilder.createURI(subject), predicate == null ||
+    // predicate.startsWith("?") ? null
+    // : RDF2GoBuilder.createURI(predicate), object == null ||
+    // object.startsWith("?") ? null
+    // : RDF2GoBuilder.createURI(object));
+    // }
 
     /**
      * Creates a new {@link TriplePattern} from a set of String triples.
@@ -146,12 +154,16 @@ public class SemanticHelper {
      *            the object to use.
      * @return a new {@link TriplePattern}.
      */
-    public static TriplePattern constructTriplePatternFrom(URI context, String subject,
-            String predicate, String object) {
-        return new TriplePatternImpl(subject == null || subject.startsWith("?") ? null : RDF2GoBuilder
-                .createURI(subject), predicate == null || predicate.startsWith("?") ? null : RDF2GoBuilder
-                .createURI(predicate), object == null || object.startsWith("?") ? null : RDF2GoBuilder
-                .createURI(object));
+    public static TriplePattern constructTriplePatternFrom(URI context,
+                                                           String subject,
+                                                           String predicate,
+                                                           String object) {
+        return new TriplePatternImpl(subject == null || subject.startsWith("?")
+                ? null : RDF2GoBuilder.createURI(subject), predicate == null
+                || predicate.startsWith("?")
+                ? null : RDF2GoBuilder.createURI(predicate), object == null
+                || object.startsWith("?")
+                ? null : RDF2GoBuilder.createURI(object));
     }
 
     /**
@@ -238,7 +250,7 @@ public class SemanticHelper {
      * @return combined results.
      */
     public static QueryResultTable generateQueryResultTable(final List<String> variables,
-            final Set<QueryRow> queryRows) {
+                                                            final Set<QueryRow> queryRows) {
         return new QueryResultTable() {
 
             private static final long serialVersionUID = 1L;
@@ -264,7 +276,7 @@ public class SemanticHelper {
      * @return combined results.
      */
     public static QueryResultTable generateQueryResultTable(final List<String> variables,
-            final List<QueryRow> queryRows) {
+                                                            final List<QueryRow> queryRows) {
         return new QueryResultTable() {
 
             private static final long serialVersionUID = 1L;
@@ -279,74 +291,79 @@ public class SemanticHelper {
         };
     }
 
-	/**
-	 * Parses a triple element to remove prefixes and some characters specific
-	 * to the RDF syntax used. This suppression is done to improve the load
-	 * balancing (i.e. especially to avoid to have some values with popular
-	 * prefixes managed by the same zone).
-	 */
-	public static String parseTripleElement(String value) {
-		try {
-			java.net.URI uri = new java.net.URI(value);
-			
-			int slashIndex = value.lastIndexOf("/");
-			int sharpIndex = value.lastIndexOf("#");
+    /**
+     * Parses a triple element to remove prefixes and some characters specific
+     * to the RDF syntax used. This suppression is done to improve the load
+     * balancing (i.e. especially to avoid to have some values with popular
+     * prefixes managed by the same zone).
+     */
+    public static String parseTripleElement(String value) {
+        try {
+            java.net.URI uri = new java.net.URI(value);
 
-			// # or / is the last character
-			if (slashIndex == value.length() - 1
-					|| sharpIndex == value.length() - 1) {
-				value = value.substring(0, value.length() - 1);
-				slashIndex = value.lastIndexOf("/");
-				sharpIndex = value.lastIndexOf("#");
-			}
+            int slashIndex = value.lastIndexOf("/");
+            int sharpIndex = value.lastIndexOf("#");
 
-			if (slashIndex < 7 && sharpIndex == -1) {
-				if (uri.getScheme().equals("http")
-						&& value.startsWith("http://www.")) {
-					return value.substring(11);
-				} 
-				return value.substring(uri.getScheme().length() + 3);
-			} else if (slashIndex > sharpIndex) {
-				return value.substring(slashIndex + 1, value.length());
-			} else if (slashIndex < sharpIndex) {
-				return value.substring(sharpIndex + 1, value.length());
-			} 
-			
-			return "";
-		} catch (URISyntaxException e) {
-			if (value.startsWith("_:")) {
-				return value.substring(2);
-			} else if (value.startsWith("\"")) {
-				return value.substring(1, value.length() - 1);
-			} else {
-				return value;
-			}
-		}
-	}
-	
-	public static StringCoordinate createCoordinateWithNullValues(String subject, String predicate, String object) {
-		return new StringCoordinate(
-        			 	subject == null ? null : new SemanticElement(subject),
-        			 	predicate == null ? null : new SemanticElement(predicate),
-        			 	object == null ? null : new SemanticElement(object));
-	}
-	
-	public static StringCoordinate createCoordinateWithNullValues(Statement stmt) {
-		checkNotNull(stmt);
-    	
-    	return new StringCoordinate(
-    					stmt.getSubject() == null ? null : new SemanticElement(stmt.getSubject()),
-    					stmt.getPredicate() == null ? null : new SemanticElement(stmt.getPredicate()),
-    					stmt.getObject() == null ? null : new SemanticElement(stmt.getObject()));
-	}
-	
+            // # or / is the last character
+            if (slashIndex == value.length() - 1
+                    || sharpIndex == value.length() - 1) {
+                value = value.substring(0, value.length() - 1);
+                slashIndex = value.lastIndexOf("/");
+                sharpIndex = value.lastIndexOf("#");
+            }
+
+            if (slashIndex < 7 && sharpIndex == -1) {
+                if (uri.getScheme().equals("http")
+                        && value.startsWith("http://www.")) {
+                    return value.substring(11);
+                }
+                return value.substring(uri.getScheme().length() + 3);
+            } else if (slashIndex > sharpIndex) {
+                return value.substring(slashIndex + 1, value.length());
+            } else if (slashIndex < sharpIndex) {
+                return value.substring(sharpIndex + 1, value.length());
+            }
+
+            return "";
+        } catch (URISyntaxException e) {
+            if (value.startsWith("_:")) {
+                return value.substring(2);
+            } else if (value.startsWith("\"")) {
+                return value.substring(1, value.length() - 1);
+            } else {
+                return value;
+            }
+        }
+    }
+
+    public static StringCoordinate createCoordinateWithNullValues(String subject,
+                                                                  String predicate,
+                                                                  String object) {
+        return new StringCoordinate(subject == null
+                ? null : new SemanticElement(subject), predicate == null
+                ? null : new SemanticElement(predicate), object == null
+                ? null : new SemanticElement(object));
+    }
+
+    public static StringCoordinate createCoordinateWithNullValues(Statement stmt) {
+        checkNotNull(stmt);
+
+        return new StringCoordinate(
+                stmt.getSubject() == null
+                        ? null : new SemanticElement(stmt.getSubject()),
+                stmt.getPredicate() == null
+                        ? null : new SemanticElement(stmt.getPredicate()),
+                stmt.getObject() == null
+                        ? null : new SemanticElement(stmt.getObject()));
+    }
+
     public static StringCoordinate createCoordinateWithoutNullValues(Statement stmt) {
-    	checkNotNull(stmt);
-    	
-    	return new StringCoordinate(
-    					new SemanticElement(checkNotNull(stmt.getSubject())),
-    					new SemanticElement(checkNotNull(stmt.getPredicate())),
-    					new SemanticElement(checkNotNull(stmt.getObject())));
+        checkNotNull(stmt);
+
+        return new StringCoordinate(new SemanticElement(
+                checkNotNull(stmt.getSubject())), new SemanticElement(
+                checkNotNull(stmt.getPredicate())), new SemanticElement(
+                checkNotNull(stmt.getObject())));
     }
 
     public static String beautifyStatements(ClosableIterable<Statement> statements) {
@@ -359,8 +376,8 @@ public class SemanticHelper {
         StringBuffer buf = new StringBuffer();
         while (it.hasNext()) {
             stmt = it.next();
-            buf.append("  - <" + stmt.getSubject() + "," + stmt.getPredicate() + ","
-                    + stmt.getObject() + ">\n");
+            buf.append("  - <" + stmt.getSubject() + "," + stmt.getPredicate()
+                    + "," + stmt.getObject() + ">\n");
         }
         return buf.toString();
     }
@@ -392,22 +409,17 @@ public class SemanticHelper {
 
     public static Statement generateRandomStatement() {
         return RDF2GoBuilder.createStatement(
-        						generateRandomURI(10), 
-        						generateRandomURI(10),
-        						generateRandomURI(10));
+                generateRandomURI(10), generateRandomURI(10),
+                generateRandomURI(10));
     }
 
     public static URI generateRandomURI(int length) {
-        return RDF2GoBuilder.createURI(
-                StringUtil.generateRandomString(
-                        "http://", 
-                        1 + ProActiveRandom.nextInt(length), 
-                        new char[][] { { '0', '9' }, { 'A', 'Z' },
-                        { 'a', 'z' } }));
+        return RDF2GoBuilder.createURI(StringUtil.generateRandomString(
+                "http://", 1 + ProActiveRandom.nextInt(length), new char[][] {
+                        {'0', '9'}, {'A', 'Z'}, {'a', 'z'}}));
     }
 
-    
-    public static Set<Statement> asSet(ClosableIterable<Statement> it)  {
+    public static Set<Statement> asSet(ClosableIterable<Statement> it) {
         Set<Statement> result = new HashSet<Statement>();
         ClosableIterator<Statement> iterator = it.iterator();
         while (iterator.hasNext()) {
@@ -415,68 +427,67 @@ public class SemanticHelper {
         }
         return result;
     }
-    
-	public static String toNTripleSyntax(String tripleElt) {
-		if (!tripleElt.startsWith("?") && !tripleElt.startsWith("\"")) {
-			StringBuilder triple = new StringBuilder("<");
-			triple.append(tripleElt);
-			triple.append(">");
-			return triple.toString();
-		} else {
-			return tripleElt;
-		}
-	}
 
-    
+    public static String toNTripleSyntax(String tripleElt) {
+        if (!tripleElt.startsWith("?") && !tripleElt.startsWith("\"")) {
+            StringBuilder triple = new StringBuilder("<");
+            triple.append(tripleElt);
+            triple.append(">");
+            return triple.toString();
+        } else {
+            return tripleElt;
+        }
+    }
+
     public static String toString(ClosableIterable<Statement> collection) {
-    	ClosableIterator<Statement> it = collection.iterator();
-    	StringBuffer buf = new StringBuffer();
-    	
-    	while (it.hasNext()) {
-    		buf.append(it.next());
-    	}
-    	
-    	return buf.toString();
-    }
-    
-    public static String toString(QueryResultTable table) {
-    	StringBuilder buf = new StringBuilder();
-    	ClosableIterator<QueryRow> it = table.iterator();
-    	
-    	if (!it.hasNext()) {
-    		buf.append("no result");
-    		return buf.toString();
-    	}
-    	
-		for (int i=0; i<table.getVariables().size(); i++) {
-			buf.append("?");
-			buf.append(table.getVariables().get(i));
-			if (i < table.getVariables().size()) {
-				buf.append("\t");
-			}
-		}
-		buf.append("\n");
-		
-		int index = 0;
-		QueryRow row;
+        ClosableIterator<Statement> it = collection.iterator();
+        StringBuffer buf = new StringBuffer();
 
-		while (it.hasNext()) {
-    		index = 0;
-    		row = it.next();
-			for (String var : table.getVariables()) {
-				buf.append(row.getValue(var));
-				if (index < table.getVariables().size()) {
-					buf.append("\t\t");
-				}
-				index++;
-			}
-			
-			buf.append("\n");
-		}
-		
-    	return buf.toString();
+        while (it.hasNext()) {
+            buf.append(it.next());
+        }
+
+        return buf.toString();
     }
-    
+
+    public static String toString(QueryResultTable table) {
+        StringBuilder buf = new StringBuilder();
+        ClosableIterator<QueryRow> it = table.iterator();
+
+        if (!it.hasNext()) {
+            buf.append("no result");
+            return buf.toString();
+        }
+
+        for (int i = 0; i < table.getVariables().size(); i++) {
+            buf.append("?");
+            buf.append(table.getVariables().get(i));
+            if (i < table.getVariables().size()) {
+                buf.append("\t");
+            }
+        }
+        buf.append("\n");
+
+        int index = 0;
+        QueryRow row;
+
+        while (it.hasNext()) {
+            index = 0;
+            row = it.next();
+            for (String var : table.getVariables()) {
+                buf.append(row.getValue(var));
+                if (index < table.getVariables().size()) {
+                    buf.append("\t\t");
+                }
+                index++;
+            }
+
+            buf.append("\n");
+        }
+
+        return buf.toString();
+    }
+
     public static long size(ClosableIterator<Statement> it) {
         long count = 0;
         while (it.hasNext()) {
@@ -486,9 +497,9 @@ public class SemanticHelper {
         it.close();
         return count;
     }
-    
+
     public static long size(ClosableIterable<Statement> iterable) {
         return size(iterable.iterator());
     }
-    
+
 }

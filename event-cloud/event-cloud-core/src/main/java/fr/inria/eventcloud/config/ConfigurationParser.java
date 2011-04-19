@@ -36,37 +36,43 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class ConfigurationParser {
 
-	protected static Logger logger = LoggerFactory.getLogger(ConfigurationParser.class);
-	
-    private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
-    
-    private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
-    
-    private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
-    
+    protected static Logger logger =
+            LoggerFactory.getLogger(ConfigurationParser.class);
+
+    private static final String JAXP_SCHEMA_LANGUAGE =
+            "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+
+    private static final String JAXP_SCHEMA_SOURCE =
+            "http://java.sun.com/xml/jaxp/properties/schemaSource";
+
+    private static final String W3C_XML_SCHEMA =
+            "http://www.w3.org/2001/XMLSchema";
+
     private static final String XPATH_PROPS = "//properties/property";
-    
+
     private static final String ATTR_KEY = "key";
-    
+
     private static final String ATTR_VALUE = "value";
 
     private static Map<String, Property> getProperties() {
-    	 Field[] fields = EventCloudProperties.class.getDeclaredFields();
-         Map<String, Property> properties = new HashMap<String, Property>(fields.length);
-         for (Field field : fields) {
-             if (Property.class.isAssignableFrom(field.getType()) && Modifier.isStatic(field.getModifiers())) {
-                 try {
-                     field.setAccessible(true);
-                     Property prop = Property.class.cast(field.get(null)); 
-                     properties.put(prop.getName(), prop); 
-                 } catch (IllegalAccessException e) {
-                     e.printStackTrace();
-                 }
-             }
-         }
-         return properties;
+        Field[] fields = EventCloudProperties.class.getDeclaredFields();
+        Map<String, Property> properties =
+                new HashMap<String, Property>(fields.length);
+        for (Field field : fields) {
+            if (Property.class.isAssignableFrom(field.getType())
+                    && Modifier.isStatic(field.getModifiers())) {
+                try {
+                    field.setAccessible(true);
+                    Property prop = Property.class.cast(field.get(null));
+                    properties.put(prop.getName(), prop);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return properties;
     }
-    
+
     public static void parse(String filename) {
         InputSource source = null;
         try {
@@ -80,10 +86,13 @@ public class ConfigurationParser {
             domFactory.setNamespaceAware(false);
             domFactory.setValidating(true);
             domFactory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
-            domFactory.setAttribute(JAXP_SCHEMA_SOURCE, 
-            		EventCloudProperties.class.getClass().getResource("/config/xml/EventCloudConfiguration.xsd").toString());
+            domFactory.setAttribute(
+                    JAXP_SCHEMA_SOURCE, EventCloudProperties.class.getClass()
+                            .getResource(
+                                    "/config/xml/EventCloudConfiguration.xsd")
+                            .toString());
             domFactory.setValidating(true);
-            
+
             XPathFactory factory = XPathFactory.newInstance();
 
             xpath = factory.newXPath();
@@ -95,7 +104,9 @@ public class ConfigurationParser {
 
             NodeList nodes;
 
-            nodes = (NodeList) xpath.evaluate(XPATH_PROPS, document, XPathConstants.NODESET);
+            nodes =
+                    (NodeList) xpath.evaluate(
+                            XPATH_PROPS, document, XPathConstants.NODESET);
 
             boolean unknownProperty = false;
             for (int i = 0; i < nodes.getLength(); i++) {
@@ -104,14 +115,15 @@ public class ConfigurationParser {
                 String value = getAttributeValue(node, ATTR_VALUE);
 
                 Map<String, Property> properties = getProperties();
-                
+
                 Property prop = properties.get(key);
                 if (prop != null) {
                     if (prop.isValid(value)) {
-                    	System.setProperty(key, value);
+                        System.setProperty(key, value);
                     } else {
-                        logger.warn("Invalid value, " + value + " for key " + 
-                        			key + ". Must be a " + prop.getType().toString());
+                        logger.warn("Invalid value, " + value + " for key "
+                                + key + ". Must be a "
+                                + prop.getType().toString());
                     }
                 } else {
                     logger.warn("Skipped unknown property: " + key);
@@ -119,9 +131,10 @@ public class ConfigurationParser {
                 }
             }
             if (unknownProperty) {
-                logger.warn("All supported Event-Cloud properties are declared inside " +
-                    PAProperties.class.getName() + ". Please check your Event-Cloud Configuration file: " +
-                    filename);
+                logger.warn("All supported Event-Cloud properties are declared inside "
+                        + PAProperties.class.getName()
+                        + ". Please check your Event-Cloud Configuration file: "
+                        + filename);
             }
         } catch (SAXException e) {
             logger.warn("Invalid Event-Cloud Configuration file: " + source, e);
@@ -130,13 +143,15 @@ public class ConfigurationParser {
         } catch (XPathExpressionException e) {
             logger.warn("Invalid Event-Cloud Configuration file: " + source, e);
         } catch (IOException e) {
-        	logger.error("Error while parsing Event-Cloud Configuration file", e);
+            logger.error(
+                    "Error while parsing Event-Cloud Configuration file", e);
         }
     }
 
     private static String getAttributeValue(Node node, String attributeName) {
         Node namedItem = node.getAttributes().getNamedItem(attributeName);
-        return (namedItem != null) ? namedItem.getNodeValue() : null;
+        return (namedItem != null)
+                ? namedItem.getNodeValue() : null;
     }
 
     private static class MyNamespaceContext implements NamespaceContext {
@@ -144,7 +159,7 @@ public class ConfigurationParser {
             if (prefix == null) {
                 throw new NullPointerException("Null prefix");
             }
-            return XMLConstants.NULL_NS_URI;
+            return XMLConstants.DEFAULT_NS_PREFIX;
         }
 
         // This method isn't necessary for XPath processing.
@@ -161,20 +176,23 @@ public class ConfigurationParser {
     private static class MyDefaultHandler extends DefaultHandler {
         @Override
         public void warning(SAXParseException e) {
-            logger.warn("Warning Line " + e.getLineNumber() + ": " + e.getMessage() + "\n");
+            logger.warn("Warning Line " + e.getLineNumber() + ": "
+                    + e.getMessage() + "\n");
         }
 
         @Override
         public void error(SAXParseException e) throws SAXParseException {
-            logger.error("Error Line " + e.getLineNumber() + ": " + e.getMessage() + "\n");
+            logger.error("Error Line " + e.getLineNumber() + ": "
+                    + e.getMessage() + "\n");
             throw e;
         }
 
         @Override
         public void fatalError(SAXParseException e) throws SAXParseException {
-            logger.error("Error Line " + e.getLineNumber() + ": " + e.getMessage() + "\n");
+            logger.error("Error Line " + e.getLineNumber() + ": "
+                    + e.getMessage() + "\n");
             throw e;
         }
     }
-    
+
 }

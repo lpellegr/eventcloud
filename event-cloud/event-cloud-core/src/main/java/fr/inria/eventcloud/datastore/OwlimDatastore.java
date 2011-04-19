@@ -37,8 +37,10 @@ public class OwlimDatastore extends SemanticDatastore {
 
     public ModelSet createRootModel(File repositoryPath) {
         Properties props = new Properties();
-        props.setProperty(ModelFactory.STORAGE, repositoryPath.getAbsolutePath());
-        props.setProperty("auto-remove", this.autoRemove ? "true" : "false");
+        props.setProperty(
+                ModelFactory.STORAGE, repositoryPath.getAbsolutePath());
+        props.setProperty("auto-remove", this.autoRemove
+                ? "true" : "false");
 
         RDF2Go.register("com.ontotext.trree.rdf2go.OwlimModelFactory");
 

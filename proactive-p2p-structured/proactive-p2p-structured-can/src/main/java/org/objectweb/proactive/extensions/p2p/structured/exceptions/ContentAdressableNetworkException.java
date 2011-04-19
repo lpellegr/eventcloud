@@ -10,49 +10,49 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  */
 public class ContentAdressableNetworkException extends StructuredP2PException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Constructs a {@code ContentAdressableNetworkException} with no
-	 * specified detail message.
-	 */
-	public ContentAdressableNetworkException() {
-		super();
-	}
+    /**
+     * Constructs a {@code ContentAdressableNetworkException} with no specified
+     * detail message.
+     */
+    public ContentAdressableNetworkException() {
+        super();
+    }
 
-	/**
-	 * Constructs a {@code ContentAdressableNetworkException} with the
-	 * specified detail message.
-	 * 
-	 * @param message
-	 *            the detail message.
-	 */
-	public ContentAdressableNetworkException(String message) {
-		super(message);
-	}
+    /**
+     * Constructs a {@code ContentAdressableNetworkException} with the specified
+     * detail message.
+     * 
+     * @param message
+     *            the detail message.
+     */
+    public ContentAdressableNetworkException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructs a {@code ContentAdressableNetworkException} with the
-	 * specified detail message and nested exception.
-	 * 
-	 * @param message
-	 *            the detail message.
-	 * @param cause
-	 *            the nested exception.
-	 */
-	public ContentAdressableNetworkException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * Constructs a {@code ContentAdressableNetworkException} with the specified
+     * detail message and nested exception.
+     * 
+     * @param message
+     *            the detail message.
+     * @param cause
+     *            the nested exception.
+     */
+    public ContentAdressableNetworkException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	/**
-	 * Constructs a {@code ContentAdressableNetworkException} with the
-	 * specified detail message and nested exception.
-	 * 
-	 * @param cause
-	 *            the nested exception.
-	 */
-	public ContentAdressableNetworkException(Throwable cause) {
-		super(cause);
-	}
+    /**
+     * Constructs a {@code ContentAdressableNetworkException} with the specified
+     * detail message and nested exception.
+     * 
+     * @param cause
+     *            the nested exception.
+     */
+    public ContentAdressableNetworkException(Throwable cause) {
+        super(cause);
+    }
 
 }

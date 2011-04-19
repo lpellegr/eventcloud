@@ -6,7 +6,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 
-
 /**
  * Operation used to retrieve the {@link NeighborTable} of the peer which
  * handles the message.
@@ -25,7 +24,8 @@ public class GetNeighborTableOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     public GenericResponseOperation<NeighborTable> handle(StructuredOverlay overlay) {
-        return new GenericResponseOperation<NeighborTable>(((AbstractCanOverlay) overlay).getNeighborTable());
+        return new GenericResponseOperation<NeighborTable>(
+                ((AbstractCanOverlay) overlay).getNeighborTable());
     }
 
 }

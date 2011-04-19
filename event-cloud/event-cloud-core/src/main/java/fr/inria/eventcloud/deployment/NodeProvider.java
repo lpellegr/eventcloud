@@ -28,15 +28,16 @@ public class NodeProvider implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory.getLogger(NodeProvider.class);
-    
+    private static final Logger logger =
+            LoggerFactory.getLogger(NodeProvider.class);
+
     private final static int NODES_ACQUISITION_TIMEOUT = 2000;
 
     private File pathToGCMADescriptor;
 
-    private Map<NodeProviderKey, NodeProviderEntry> entries = 
-		new HashMap<NodeProviderKey, NodeProviderEntry>();
-    
+    private Map<NodeProviderKey, NodeProviderEntry> entries =
+            new HashMap<NodeProviderKey, NodeProviderEntry>();
+
     private String bindingName;
 
     private GCMApplication gcmad;
@@ -60,7 +61,7 @@ public class NodeProvider implements Serializable {
      *            to acquire less node than specified in the GCMA files. To
      *            acquire all possible nodes as specified in the GCMA file you
      *            can use the value <code>-1</code>.
-     *            
+     * 
      * @param maxChordNodesToAcquire
      *            the maximum number of nodes for Chord {@link Peer}s the
      *            {@link NodeProvider} will acquire. However, the GCMA file must
@@ -69,7 +70,7 @@ public class NodeProvider implements Serializable {
      *            to acquire less node than specified in the GCMA files. To
      *            acquire all possible nodes as specified in the GCMA file you
      *            can use the value <code>-1</code>.
-     *            
+     * 
      * @param maxCANNodesToAcquire
      *            the maximum number of nodes for CAN {@link Peer}s the
      *            {@link NodeProvider} will acquire. However, the GCMA file must
@@ -79,10 +80,11 @@ public class NodeProvider implements Serializable {
      *            acquire all possible nodes as specified in the GCMA file you
      *            can use the value <code>-1</code>.
      */
-    public void deploy(int maxTrackerNodesToAcquire, int maxChordNodesToAcquire, int maxCANNodesToAcquire) {
+    public void deploy(int maxTrackerNodesToAcquire,
+                       int maxChordNodesToAcquire, int maxCANNodesToAcquire) {
         try {
-            this.gcmad = PAGCMDeployment.loadApplicationDescriptor(
-                                            this.pathToGCMADescriptor);
+            this.gcmad =
+                    PAGCMDeployment.loadApplicationDescriptor(this.pathToGCMADescriptor);
         } catch (ProActiveException e) {
             e.printStackTrace();
         }
@@ -93,13 +95,14 @@ public class NodeProvider implements Serializable {
         NodeProviderKey.PEERS_CAN.setMaximumNodesToAcquire(maxCANNodesToAcquire);
         NodeProviderKey.PEERS_CHORD.setMaximumNodesToAcquire(maxChordNodesToAcquire);
         NodeProviderKey.TRACKERS.setMaximumNodesToAcquire(maxTrackerNodesToAcquire);
-        
+
         for (NodeProviderKey key : NodeProviderKey.values()) {
-            this.entries.put(key, 
-                    new NodeProviderEntry(
-                            key.getMaximumNodesToAcquire() == -1
+            this.entries.put(key, new NodeProviderEntry(
+                    key.getMaximumNodesToAcquire() == -1
                             ? this.acquireAllNodes(key.getVirtualNodeName())
-                                    : this.acquireNodes(key.getVirtualNodeName(), key.getMaximumNodesToAcquire())));
+                            : this.acquireNodes(
+                                    key.getVirtualNodeName(),
+                                    key.getMaximumNodesToAcquire())));
         }
 
         if (logger.isDebugEnabled()) {
@@ -111,18 +114,18 @@ public class NodeProvider implements Serializable {
             buf.append(", maxChordNodes=");
             buf.append(maxChordNodesToAcquire);
             buf.append(")...\n");
-            
+
             for (NodeProviderKey key : NodeProviderKey.values()) {
-				if (this.entries.get(key).getNodes().size() > 0) {
-					buf.append("* ");
-					buf.append(this.entries.get(key).getNodes().size());
-					buf.append(" nodes available for ");
-					buf.append(key);
-					buf.append("\n");
-					buf.append(this.dump(this.entries.get(key).getNodes()));
-				}
+                if (this.entries.get(key).getNodes().size() > 0) {
+                    buf.append("* ");
+                    buf.append(this.entries.get(key).getNodes().size());
+                    buf.append(" nodes available for ");
+                    buf.append(key);
+                    buf.append("\n");
+                    buf.append(this.dump(this.entries.get(key).getNodes()));
+                }
             }
-            
+
             logger.debug(buf.toString());
         }
     }
@@ -146,9 +149,9 @@ public class NodeProvider implements Serializable {
         for (int i = 0; i < nb; i++) {
             node = virtualNode.getANode(NODES_ACQUISITION_TIMEOUT);
             if (node == null) {
-                throw new IllegalStateException(
-                        "Cannot acquire " + nb + " nodes for virtual node '" 
-                        + virtualNodeId + "' because only " + i + " are available.");
+                throw new IllegalStateException("Cannot acquire " + nb
+                        + " nodes for virtual node '" + virtualNodeId
+                        + "' because only " + i + " are available.");
             } else {
                 nodes.add(node);
             }
@@ -174,7 +177,9 @@ public class NodeProvider implements Serializable {
             }
 
             if (logger.isInfoEnabled()) {
-                logger.info(nodes.size() + " nodes are acquired for virtual node '" + virtualNode + "'");
+                logger.info(nodes.size()
+                        + " nodes are acquired for virtual node '"
+                        + virtualNode + "'");
             }
         }
 
@@ -188,28 +193,27 @@ public class NodeProvider implements Serializable {
     public Node getNextNode(NodeProviderKey key) {
         return this.entries.get(key).getNextNode();
     }
-    
+
     public Node[] getNextNodes(NodeProviderKey key, int nb) {
         List<Node> nodes = new ArrayList<Node>(nb);
-        
-        for (int i=0; i<nb; i++) {
+
+        for (int i = 0; i < nb; i++) {
             nodes.add(this.getNextNode(key));
         }
-        
-        return nodes.toArray(new Node[]{});
+
+        return nodes.toArray(new Node[] {});
     }
 
     public void killAll() {
         this.gcmad.kill();
     }
-    
+
     public String register() {
         if (this.bindingName == null) {
             try {
-                this.bindingName = 
-                    PAActiveObject.registerByName(
-                	    PAActiveObject.getStubOnThis(),
-                            "node-provider");
+                this.bindingName =
+                        PAActiveObject.registerByName(
+                                PAActiveObject.getStubOnThis(), "node-provider");
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -16,5 +16,5 @@ public enum OverlayType {
      * where topology is a ring.
      */
     CHORD
-    
+
 }

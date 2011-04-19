@@ -6,8 +6,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
 /**
- * {@code SplitEntry} stores the dimension and the direction of a
- * {@link Zone} when a join operation is performed by a {@link Peer}.
+ * {@code SplitEntry} stores the dimension and the direction of a {@link Zone}
+ * when a join operation is performed by a {@link Peer}.
  * 
  * @author lpellegr
  */

@@ -31,7 +31,7 @@ public class SemanticFactory {
      */
     public static SemanticCanTracker newActiveSemanticCanTracker(String associatedNetworkName) {
         return SemanticFactory.newActiveSemanticCanTracker(
-					associatedNetworkName, UUID.randomUUID().toString());
+                associatedNetworkName, UUID.randomUUID().toString());
     }
 
     /**
@@ -43,10 +43,10 @@ public class SemanticFactory {
      *            the name of the network to which the tracker is associated.
      * @return the new Tracker object created.
      */
-    public static SemanticCanTracker newActiveSemanticCanTracker(
-    					String associatedNetworkName, String trackerName) {
-		return SemanticFactory.newActiveSemanticCanTracker(
-						associatedNetworkName, trackerName, null);
+    public static SemanticCanTracker newActiveSemanticCanTracker(String associatedNetworkName,
+                                                                 String trackerName) {
+        return SemanticFactory.newActiveSemanticCanTracker(
+                associatedNetworkName, trackerName, null);
     }
 
     /**
@@ -60,24 +60,27 @@ public class SemanticFactory {
      *            the node to use for deployment.
      * @return the new Tracker object created.
      */
-    public static SemanticCanTracker newActiveSemanticCanTracker(
-    					String associatedNetworkName, String trackerName, Node node) {
+    public static SemanticCanTracker newActiveSemanticCanTracker(String associatedNetworkName,
+                                                                 String trackerName,
+                                                                 Node node) {
         Object[] constructorParameters;
         if (trackerName == null) {
-            constructorParameters = new Object[] { associatedNetworkName };
+            constructorParameters = new Object[] {associatedNetworkName};
         } else {
-            constructorParameters = new Object[] { associatedNetworkName, trackerName };
+            constructorParameters =
+                    new Object[] {associatedNetworkName, trackerName};
         }
 
         try {
-			return PAActiveObject.newActive(SemanticCanTracker.class, constructorParameters, node);
-		} catch (ActiveObjectCreationException e) {
-			e.printStackTrace();
-		} catch (NodeException e) {
-			e.printStackTrace();
-		}
-		
-		return null;
+            return PAActiveObject.newActive(
+                    SemanticCanTracker.class, constructorParameters, node);
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+        } catch (NodeException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**
@@ -103,31 +106,33 @@ public class SemanticFactory {
      *            the {@link Tracker}s which serves as entry point.
      * @return the new {@link SemanticPeer} stub object created.
      */
-    public static SemanticPeer newActiveSemanticCanPeer(Node node, SemanticCanTracker... trackers) {
-    	try {
-			return PAActiveObject.newActive(SemanticPeer.class, new Object[] { new SemanticCanOverlay(), trackers }, node);
-		} catch (ActiveObjectCreationException e) {
-			e.printStackTrace();
-		} catch (NodeException e) {
-			e.printStackTrace();
-		}
-		
-		return null;
+    public static SemanticPeer newActiveSemanticCanPeer(Node node,
+                                                        SemanticCanTracker... trackers) {
+        try {
+            return PAActiveObject.newActive(SemanticPeer.class, new Object[] {
+                    new SemanticCanOverlay(), trackers}, node);
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+        } catch (NodeException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
-	/**
-	 * Creates {@link SemanticPeer}s of type CAN in parallel by using one
-	 * {@link Node} by peer object.
-	 * 
-	 * @param number
-	 *            the number of {@link SemanticPeer} of type CAN to create in
-	 *            parallel.
-	 * @param trackers
-	 *            the trackers which serve as entry point.
-	 * @return the {@link SemanticPeer} created.
-	 */
-    public static SemanticPeer[] newActiveSemanticCanPeersInParallel(
-    									int number, final SemanticCanTracker... trackers) {
+    /**
+     * Creates {@link SemanticPeer}s of type CAN in parallel by using one
+     * {@link Node} by peer object.
+     * 
+     * @param number
+     *            the number of {@link SemanticPeer} of type CAN to create in
+     *            parallel.
+     * @param trackers
+     *            the trackers which serve as entry point.
+     * @return the {@link SemanticPeer} created.
+     */
+    public static SemanticPeer[] newActiveSemanticCanPeersInParallel(int number,
+                                                                     final SemanticCanTracker... trackers) {
         return newActiveSemanticCanPeersInParallel(new Node[number], trackers);
     }
 
@@ -141,20 +146,21 @@ public class SemanticFactory {
      *            the {@link Tracker}s which serve as entry point.
      * @return the {@link SemanticPeer}s created.
      */
-    public static SemanticPeer[] newActiveSemanticCanPeersInParallel(Node[] nodes, SemanticCanTracker... trackers) {
-    	Object[][] parameters = new Object[checkNotNull(nodes).length][2];
-    	for (int i=0; i<parameters.length; i++) {
-    		parameters[i][0] = new SemanticCanOverlay();
-    		parameters[i][1] = trackers;
-    	}
-    	
-    	try {
-			return (SemanticPeer[]) PAActiveObject.newActiveInParallel(
-						SemanticPeer.class.getCanonicalName(), parameters, nodes);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		}
+    public static SemanticPeer[] newActiveSemanticCanPeersInParallel(Node[] nodes,
+                                                                     SemanticCanTracker... trackers) {
+        Object[][] parameters = new Object[checkNotNull(nodes).length][2];
+        for (int i = 0; i < parameters.length; i++) {
+            parameters[i][0] = new SemanticCanOverlay();
+            parameters[i][1] = trackers;
+        }
+
+        try {
+            return (SemanticPeer[]) PAActiveObject.newActiveInParallel(
+                    SemanticPeer.class.getCanonicalName(), parameters, nodes);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

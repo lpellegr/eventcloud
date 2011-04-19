@@ -18,40 +18,38 @@ import fr.inria.eventcloud.messages.request.can.StatementsCounterRequest;
  */
 public class StatementsCounterResponse extends AnycastResponse {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final Map<StatementsCounterRequest.Entry, Long> entries;
+    private final Map<StatementsCounterRequest.Entry, Long> entries;
 
-	public StatementsCounterResponse(StatementsCounterRequest request) {
-		super(request);
-		this.entries = request.getNbStatementsByPeer();
-	}
+    public StatementsCounterResponse(StatementsCounterRequest request) {
+        super(request);
+        this.entries = request.getNbStatementsByPeer();
+    }
 
-	public Map<StatementsCounterRequest.Entry, Long> getEntries() {
-		return this.entries;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
-		return new AnycastResponseRouter<StatementsCounterResponse>();
-	}	
+    public Map<StatementsCounterRequest.Entry, Long> getEntries() {
+        return this.entries;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void merge(AnycastResponse subResponse) {
-		for (Entry<StatementsCounterRequest.Entry, Long> entry 
-				: ((StatementsCounterResponse) subResponse).getEntries().entrySet()) {
-			if (!this.entries.containsKey(entry.getKey())) {
-				this.entries.put(entry.getKey(), entry.getValue());
-			}
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
+        return new AnycastResponseRouter<StatementsCounterResponse>();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void merge(AnycastResponse subResponse) {
+        for (Entry<StatementsCounterRequest.Entry, Long> entry : ((StatementsCounterResponse) subResponse).getEntries()
+                .entrySet()) {
+            if (!this.entries.containsKey(entry.getKey())) {
+                this.entries.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
 
 }
-
-

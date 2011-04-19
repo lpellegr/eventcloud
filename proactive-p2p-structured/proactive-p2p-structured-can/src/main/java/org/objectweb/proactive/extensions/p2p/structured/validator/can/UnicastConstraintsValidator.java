@@ -8,17 +8,19 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * {@link ConstraintsValidator} for {@link LookupRequest} and {@link LookupResponse}.
+ * {@link ConstraintsValidator} for {@link LookupRequest} and
+ * {@link LookupResponse}.
  * 
  * @author lpellegr
  */
-public class UnicastConstraintsValidator extends ConstraintsValidator<StringCoordinate> {
+public class UnicastConstraintsValidator extends
+        ConstraintsValidator<StringCoordinate> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     public UnicastConstraintsValidator(StringCoordinate key) {
-		super(key);
-	}
+        super(key);
+    }
 
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
         return ((AbstractCanOverlay) overlay).getZone().contains(super.key);

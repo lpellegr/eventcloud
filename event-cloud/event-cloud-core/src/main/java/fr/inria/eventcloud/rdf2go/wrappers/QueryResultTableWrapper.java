@@ -10,8 +10,8 @@ import org.ontoware.rdf2go.model.QueryRow;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
- * The <code>QueryResultTableWrapper</code> wraps a value of the 
- * RDF2Go type {@link QueryResultTable}.
+ * The <code>QueryResultTableWrapper</code> wraps a value of the RDF2Go type
+ * {@link QueryResultTable}.
  * 
  * @author lpellegr
  */
@@ -41,7 +41,8 @@ public class QueryResultTableWrapper implements RDF2GoWrapper<QueryResultTable> 
             queryRows.add(qrw.toRDF2Go());
         }
 
-        return SemanticHelper.generateQueryResultTable(this.variables, queryRows);
+        return SemanticHelper.generateQueryResultTable(
+                this.variables, queryRows);
     }
 
 }

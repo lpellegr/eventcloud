@@ -1,6 +1,5 @@
 package fr.inria.eventcloud.overlay;
 
-
 /**
  * @author lpellegr
  */

@@ -57,8 +57,8 @@ public class MergeOperation implements SynchronousOperation {
      * @param data
      *            data to reallocate.
      */
-    public MergeOperation(int dimension, int direction, UUID peerToMergeWith, Zone zone,
-            NeighborTable neighbors, Object data) {
+    public MergeOperation(int dimension, int direction, UUID peerToMergeWith,
+            Zone zone, NeighborTable neighbors, Object data) {
         if (zone == null) {
             throw new NullPointerException();
         }

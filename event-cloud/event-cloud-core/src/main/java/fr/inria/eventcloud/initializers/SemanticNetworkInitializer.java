@@ -17,7 +17,7 @@ public abstract class SemanticNetworkInitializer<T> {
     public SemanticNetworkInitializer() {
 
     }
-    
+
     public abstract void tearDownNetwork();
 
     public T getRandomTracker() {

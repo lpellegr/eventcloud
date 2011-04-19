@@ -28,16 +28,18 @@ public class RemoveStatementsRequest extends AnycastRequest {
 
     public RemoveStatementsRequest(final URI context, final Statement statement) {
         super(new DefaultAnycastConstraintsValidator(
-        			SemanticHelper.createCoordinateWithNullValues(statement)));
+                SemanticHelper.createCoordinateWithNullValues(statement)));
         this.context = checkNotNull(context);
         this.statement = statement;
     }
 
     public AnycastRequestRouter<AnycastRequest> getRouter() {
         return new AnycastRequestRouter<AnycastRequest>() {
-        	@Override
-            public void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay, AnycastRequest msg) {
-        		((SemanticCanOverlay) overlay).getDatastore().removeStatement(context, statement);
+            @Override
+            public void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay,
+                                                       AnycastRequest msg) {
+                ((SemanticCanOverlay) overlay).getDatastore().removeStatement(
+                        context, statement);
             }
         };
     }

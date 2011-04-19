@@ -5,51 +5,50 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
-
 /**
- * A basic implementation of {@link AbstractCanOverlay} which an empty 
- * behavior for the operations related to the management of the data.
+ * A basic implementation of {@link AbstractCanOverlay} which an empty behavior
+ * for the operations related to the management of the data.
  * 
  * @author lpellegr
  */
 public class BasicCanOverlay extends AbstractCanOverlay {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public BasicCanOverlay() {
-		super(new CanRequestResponseManager() {
-			private static final long serialVersionUID = 1L;
-		});
-	}
-	
-	@Override
-	protected void affectDataReceived(Object dataReceived) {
-		// TODO Auto-generated method stub
-		
-	}
+    public BasicCanOverlay() {
+        super(new CanRequestResponseManager() {
+            private static final long serialVersionUID = 1L;
+        });
+    }
 
-	@Override
-	protected void mergeDataReceived(MergeOperation msg) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    protected void affectDataReceived(Object dataReceived) {
+        // TODO Auto-generated method stub
 
-	@Override
-	protected Object retrieveAllData() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    }
 
-	@Override
-	protected Object getDataIn(Zone zone) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    protected void mergeDataReceived(MergeOperation msg) {
+        // TODO Auto-generated method stub
 
-	@Override
-	protected void removeDataIn(Zone zone) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
+
+    @Override
+    protected Object retrieveAllData() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected Object getDataIn(Zone zone) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void removeDataIn(Zone zone) {
+        // TODO Auto-generated method stub
+
+    }
 
 }

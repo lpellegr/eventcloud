@@ -6,13 +6,14 @@ import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
  * 
  * @author lpellegr
  */
-public class SparqlDescribeResponse extends SparqlResponse<ClosableIterableWrapper> {
+public class SparqlDescribeResponse extends
+        SparqlResponse<ClosableIterableWrapper> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public SparqlDescribeResponse(long inboundHopCount, long outboundHopCount, 
-								   long latency, ClosableIterableWrapper result) {
-		super(inboundHopCount, outboundHopCount, latency, result);
-	}
-	
+    public SparqlDescribeResponse(long inboundHopCount, long outboundHopCount,
+            long latency, ClosableIterableWrapper result) {
+        super(inboundHopCount, outboundHopCount, latency, result);
+    }
+
 }

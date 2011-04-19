@@ -10,6 +10,6 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  */
 public interface FinalizeTrackersInitialization {
 
-	public void run(Tracker[] trackers);
-	
+    public void run(Tracker[] trackers);
+
 }

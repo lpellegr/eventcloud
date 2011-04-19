@@ -11,9 +11,9 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastReque
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 /**
- * A {@code ForwardRequest} is a query message which may be used in
- * order to <strong>reach</strong> a peer which manages a specified 
- * coordinate on a CAN structured peer-to-peer network. 
+ * A {@code ForwardRequest} is a query message which may be used in order to
+ * <strong>reach</strong> a peer which manages a specified coordinate on a CAN
+ * structured peer-to-peer network.
  * 
  * @author lpellegr
  */
@@ -54,7 +54,8 @@ public class ForwardRequest extends Request<StringCoordinate> {
      */
     public void route(StructuredOverlay overlay) {
         if (this.senderCoordinate == null) {
-            this.senderCoordinate = ((AbstractCanOverlay) overlay).getZone().getLowerBound();
+            this.senderCoordinate =
+                    ((AbstractCanOverlay) overlay).getZone().getLowerBound();
         }
         super.route(overlay);
     }
