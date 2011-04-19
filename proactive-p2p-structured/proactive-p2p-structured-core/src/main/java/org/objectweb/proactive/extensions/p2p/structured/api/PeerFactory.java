@@ -31,7 +31,7 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
  * @author lpellegr
  */
 public class PeerFactory {
-    
+
     private static Factory factory;
 
     static {
@@ -49,7 +49,7 @@ public class PeerFactory {
      * 
      * @param overlay
      *            the overlay to set.
-     *
+     * 
      * @return the new active object created.
      */
     public static Peer newActivePeer(StructuredOverlay overlay) {
@@ -57,19 +57,20 @@ public class PeerFactory {
     }
 
     /**
-     * Creates a new peer active object on the specified {@code node} by
-     * using the given {@code overlay} abstraction.
+     * Creates a new peer active object on the specified {@code node} by using
+     * the given {@code overlay} abstraction.
      * 
      * @param overlay
      *            the overlay to set.
      * @param node
      *            the node used by the peer.
-     *
+     * 
      * @return the new active object created.
      */
     public static Peer newActivePeer(StructuredOverlay overlay, Node node) {
         try {
-            return PAActiveObject.newActive(PeerImpl.class, new Object[] { overlay }, node);
+            return PAActiveObject.newActive(
+                    PeerImpl.class, new Object[] {overlay}, node);
         } catch (ActiveObjectCreationException e) {
             e.printStackTrace();
         } catch (NodeException e) {
@@ -85,23 +86,26 @@ public class PeerFactory {
      * 
      * @param overlay
      *            the overlay to set.
-     *
-     * @return the reference on the {@link Peer} interface of the new component created.
+     * 
+     * @return the reference on the {@link Peer} interface of the new component
+     *         created.
      */
     public static Peer newComponentPeer(StructuredOverlay overlay) {
-        return PeerFactory.createComponentPeer(overlay, new HashMap<String, Object>());
+        return PeerFactory.createComponentPeer(
+                overlay, new HashMap<String, Object>());
     }
 
     /**
-     * Creates a new peer component on the specified {@code node} by
-     * using the given {@code overlay} abstraction.
+     * Creates a new peer component on the specified {@code node} by using the
+     * given {@code overlay} abstraction.
      * 
      * @param overlay
      *            the overlay to set.
      * @param node
      *            the node used by the peer.
-     *
-     * @return the reference on the {@link Peer} interface of the new component created.
+     * 
+     * @return the reference on the {@link Peer} interface of the new component
+     *         created.
      */
     public static Peer newComponentPeer(StructuredOverlay overlay, Node node) {
         Map<String, Object> context = new HashMap<String, Object>();
@@ -121,10 +125,12 @@ public class PeerFactory {
      *            the overlay to set.
      * @param vn
      *            the GCM virtual node used by the peer.
-     *
-     * @return the reference on the {@link Peer} interface of the new component created.
+     * 
+     * @return the reference on the {@link Peer} interface of the new component
+     *         created.
      */
-    public static Peer newComponentPeer(StructuredOverlay overlay, GCMVirtualNode vn) {
+    public static Peer newComponentPeer(StructuredOverlay overlay,
+                                        GCMVirtualNode vn) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (vn != null) {
             context.put(vn.getName(), vn);
@@ -140,10 +146,12 @@ public class PeerFactory {
      *            the overlay to set.
      * @param gcma
      *            the GCM application used by the peer.
-     *
-     * @return the reference on the {@link Peer} interface of the new component created.
+     * 
+     * @return the reference on the {@link Peer} interface of the new component
+     *         created.
      */
-    public static Peer newComponentPeer(StructuredOverlay overlay, GCMApplication gcma) {
+    public static Peer newComponentPeer(StructuredOverlay overlay,
+                                        GCMApplication gcma) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (gcma != null) {
             context.put("deployment-descriptor", gcma);
@@ -151,10 +159,15 @@ public class PeerFactory {
         return createComponentPeer(overlay, context);
     }
 
-    private static Peer createComponentPeer(StructuredOverlay overlay, Map<String, Object> context) {
+    private static Peer createComponentPeer(StructuredOverlay overlay,
+                                            Map<String, Object> context) {
         try {
-            Component peer = (Component) factory.newComponent(P2PStructuredProperties.PEER_ADL.getValue(), context);
-            Peer stub = (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+            Component peer =
+                    (Component) factory.newComponent(
+                            P2PStructuredProperties.PEER_ADL.getValue(),
+                            context);
+            Peer stub =
+                    (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
             stub.setStub();
             stub.setOverlay(overlay);
             GCM.getGCMLifeCycleController(peer).startFc();

@@ -35,16 +35,17 @@ public abstract class AnycastResponse extends Response<StringCoordinate> {
         return this.anycastRoutingList;
     }
 
-	/**
-	 * Merges the specified {@link AnycastResponse} with the current one. This
-	 * methods have to be overridden to merge some results data that are conveyed.
-	 * When the merge operation is terminated, the specified response is discarded.
-	 * 
-	 * @param subResponse
-	 *            the subResponse to merge into the current one.
-	 */
+    /**
+     * Merges the specified {@link AnycastResponse} with the current one. This
+     * methods have to be overridden to merge some results data that are
+     * conveyed. When the merge operation is terminated, the specified response
+     * is discarded.
+     * 
+     * @param subResponse
+     *            the subResponse to merge into the current one.
+     */
     public synchronized void merge(AnycastResponse subResponse) {
-    	// to be overridden
+        // to be overridden
     }
 
 }

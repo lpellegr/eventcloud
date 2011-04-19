@@ -36,7 +36,8 @@ public abstract class NetworkInitializer {
 
     protected abstract Peer createComponentPeer();
 
-    public void initializeNewNetwork(OverlayType type, int nbPeersToCreate) throws ActiveObjectCreationException, NodeException {
+    public void initializeNewNetwork(OverlayType type, int nbPeersToCreate)
+            throws ActiveObjectCreationException, NodeException {
         this.type = type;
         Peer peerCreated;
 
@@ -78,33 +79,33 @@ public abstract class NetworkInitializer {
     }
 
     public List<Peer> getAllPeers() {
-        for (int i=0; i<this.peers.size(); i++) {
+        for (int i = 0; i < this.peers.size(); i++) {
             if (!this.checkAlertness(this.peers.get(i))) {
                 this.peers.remove(i);
             }
         }
-        
+
         return this.peers;
     }
 
     public List<Peer> getAllComponentPeers() {
-        for (int i=0; i<this.componentPeers.size(); i++) {
+        for (int i = 0; i < this.componentPeers.size(); i++) {
             if (!this.checkAlertness(this.componentPeers.get(i))) {
                 this.componentPeers.remove(i);
             }
         }
-        
+
         return this.componentPeers;
     }
 
     private boolean checkAlertness(Peer peer) {
-    	try {
-    		return peer.isActivated();
-    	} catch(ProActiveRuntimeException e) {
-    		return false;
-    	}
+        try {
+            return peer.isActivated();
+        } catch (ProActiveRuntimeException e) {
+            return false;
+        }
     }
-    
+
     public Peer get(int index) {
         if (index < 0 || index >= this.peers.size()) {
             throw new IndexOutOfBoundsException();
@@ -126,15 +127,15 @@ public abstract class NetworkInitializer {
             return null;
         }
     }
-    
+
     public Peer getRandomPeer() {
         if (this.peers.size() == 0) {
             return null;
         }
-        
+
         int randomPeerIndex = ProActiveRandom.nextInt(this.peers.size());
         Peer randomPeer = this.peers.get(randomPeerIndex);
-        
+
         if (this.checkAlertness(randomPeer)) {
             return randomPeer;
         } else {
@@ -142,15 +143,16 @@ public abstract class NetworkInitializer {
             return this.getRandomPeer();
         }
     }
-    
+
     public Peer getRandomComponentPeer() {
         if (this.componentPeers.size() == 0) {
             return null;
         }
-        
-        int randomPeerIndex = ProActiveRandom.nextInt(this.componentPeers.size());
+
+        int randomPeerIndex =
+                ProActiveRandom.nextInt(this.componentPeers.size());
         Peer randomPeer = this.componentPeers.get(randomPeerIndex);
-        
+
         if (this.checkAlertness(randomPeer)) {
             return randomPeer;
         } else {
@@ -159,10 +161,10 @@ public abstract class NetworkInitializer {
         }
     }
 
-    public Tracker getTracker(){
+    public Tracker getTracker() {
         return this.tracker;
     }
-    
+
     public OverlayType getType() {
         return this.type;
     }

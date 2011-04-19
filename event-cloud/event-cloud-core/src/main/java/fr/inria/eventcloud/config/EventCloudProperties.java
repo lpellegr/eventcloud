@@ -24,76 +24,81 @@ import fr.inria.eventcloud.util.RDF2GoBuilder;
  * @author lpellegr
  */
 public class EventCloudProperties {
-	
-	private static final Logger logger = LoggerFactory.getLogger(EventCloudProperties.class);
 
-	public static final PropertyInteger CONSISTENCY_TIMEOUT =
-		new PropertyInteger("repository.consistency.timeout", 500);
+    private static final Logger logger =
+            LoggerFactory.getLogger(EventCloudProperties.class);
 
-	// TODO: remove this property as soon as possible (however 
-	// we need to define how to manage the context part before)
-	public static final URI DEFAULT_CONTEXT = RDF2GoBuilder.createURI("http://www.inria.fr");
+    public static final PropertyInteger CONSISTENCY_TIMEOUT =
+            new PropertyInteger("repository.consistency.timeout", 500);
 
-	public static final String PATH_SEPARATOR = System.getProperty("file.separator");
-	
-	public static final PropertyString REPOSITORIES_PATH = 
-		new PropertyString("repositories.path", getDefaultRepositoriesPath());
+    // TODO: remove this property as soon as possible (however
+    // we need to define how to manage the context part before)
+    public static final URI DEFAULT_CONTEXT =
+            RDF2GoBuilder.createURI("http://www.inria.fr");
 
-	static {
-		File preferencesFile = new File(getPreferencesFilePath());
-		
-		String eventCloudConfigurationProperty = System.getProperty("eventcloud.configuration");
-		if (eventCloudConfigurationProperty != null) {
-			preferencesFile = new File(eventCloudConfigurationProperty);
-		}
-		
-		if (preferencesFile.exists()) {
-			ConfigurationParser.parse(preferencesFile.toString());
-		} else {
-			if (logger.isInfoEnabled()) {
-				logger.info("No Event-Cloud properties loaded because file " + preferencesFile + " not found!");
-			}
-		}
-	}
+    public static final String PATH_SEPARATOR =
+            System.getProperty("file.separator");
 
-	public static final String getPreferencesFilePath() {
-		StringBuilder buffer = new StringBuilder();
-		buffer.append(getPreferencesPath());
-		buffer.append(System.getProperty("file.separator"));
-		buffer.append("preferences");
-		
-		return buffer.toString();
-	}
-	
-	/**
-	 * Returns the default path to the preferences.
-	 *
-	 * @return the default path to the preferences.
-	 */
-	public static final String getPreferencesPath() {
-		StringBuilder buffer = new StringBuilder();
-		buffer.append(System.getProperty("user.home"));
-		buffer.append(System.getProperty("file.separator"));
-		if (!SystemUtil.isWindows()) {
-			buffer.append(".");
-		}
-		buffer.append("eventcloud");
-		
-		return buffer.toString();
-	}
-	
-	/**
-	 * Returns the default path to the repositories.
-	 * 
-	 * @return the default path to the repositories.
-	 */
-	public static final String getDefaultRepositoriesPath() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(getPreferencesPath());
-		buffer.append(System.getProperty("file.separator"));
-		buffer.append("repositories");
-		
-		return buffer.toString(); 
-	}
-	
+    public static final PropertyString REPOSITORIES_PATH = new PropertyString(
+            "repositories.path", getDefaultRepositoriesPath());
+
+    static {
+        File preferencesFile = new File(getPreferencesFilePath());
+
+        String eventCloudConfigurationProperty =
+                System.getProperty("eventcloud.configuration");
+        if (eventCloudConfigurationProperty != null) {
+            preferencesFile = new File(eventCloudConfigurationProperty);
+        }
+
+        if (preferencesFile.exists()) {
+            ConfigurationParser.parse(preferencesFile.toString());
+        } else {
+            if (logger.isInfoEnabled()) {
+                logger.info("No Event-Cloud properties loaded because file "
+                        + preferencesFile + " not found!");
+            }
+        }
+    }
+
+    public static final String getPreferencesFilePath() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(getPreferencesPath());
+        buffer.append(System.getProperty("file.separator"));
+        buffer.append("preferences");
+
+        return buffer.toString();
+    }
+
+    /**
+     * Returns the default path to the preferences.
+     * 
+     * @return the default path to the preferences.
+     */
+    public static final String getPreferencesPath() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(System.getProperty("user.home"));
+        buffer.append(System.getProperty("file.separator"));
+        if (!SystemUtil.isWindows()) {
+            buffer.append(".");
+        }
+        buffer.append("eventcloud");
+
+        return buffer.toString();
+    }
+
+    /**
+     * Returns the default path to the repositories.
+     * 
+     * @return the default path to the repositories.
+     */
+    public static final String getDefaultRepositoriesPath() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(getPreferencesPath());
+        buffer.append(System.getProperty("file.separator"));
+        buffer.append("repositories");
+
+        return buffer.toString();
+    }
+
 }

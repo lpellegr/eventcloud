@@ -17,20 +17,22 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A tracker assists in the communication between peers. It is used in order to
- * help a peer to join an existing network and to store several peers references in
- * order to retrieve them later as an entry point.
+ * help a peer to join an existing network and to store several peers references
+ * in order to retrieve them later as an entry point.
  * <p>
  * A tracker can join an another tracker. When a tracker A join a tracker B
  * which already has references to other trackers C and D for example, a
  * reference on tracker B, C and D will be added.
  * 
- * Warning, this class must not be instantiate directly. It is the implementation
- * of a component tracker. In order to create a new component tracker you must use
- * the {@link TrackerFactory}.
+ * Warning, this class must not be instantiate directly. It is the
+ * implementation of a component tracker. In order to create a new component
+ * tracker you must use the {@link TrackerFactory}.
  * 
  * @author bsauvan
  */
-public class TrackerComponentImpl extends TrackerImpl implements Tracker, ComponentInitActive, ComponentRunActive, ComponentEndActive, Serializable {
+public class TrackerComponentImpl extends TrackerImpl implements Tracker,
+        ComponentInitActive, ComponentRunActive, ComponentEndActive,
+        Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,13 +53,15 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker, Compon
         super.initActivity(body);
 
         this.stub = null;
-        //        try {
-        //            Component tracker = Fractive.getComponentRepresentativeOnThis();
-        //            this.stub = (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF
-        //                    .getValue());
-        //        } catch (NoSuchInterfaceException nsie) {
-        //            logger.error("Cannot get stub of tracker: " + nsie.getMessage(), nsie);
-        //        }
+        // try {
+        // Component tracker = Fractive.getComponentRepresentativeOnThis();
+        // this.stub = (Tracker)
+        // tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF
+        // .getValue());
+        // } catch (NoSuchInterfaceException nsie) {
+        // logger.error("Cannot get stub of tracker: " + nsie.getMessage(),
+        // nsie);
+        // }
     }
 
     /**
@@ -100,10 +104,12 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker, Compon
         if (this.stub == null) {
             try {
                 Component tracker = Fractive.getComponentRepresentativeOnThis();
-                this.stub = (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF
-                        .getValue());
+                this.stub =
+                        (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
             } catch (NoSuchInterfaceException nsie) {
-                logger.error("Cannot get stub of tracker: " + nsie.getMessage(), nsie);
+                logger.error(
+                        "Cannot get stub of tracker: " + nsie.getMessage(),
+                        nsie);
             }
         }
     }
@@ -125,8 +131,10 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker, Compon
     public String register() {
         String bindingName = null;
         try {
-            bindingName = Fractive.registerByName(Fractive.getComponentRepresentativeOnThis(),
-                    this.getBindingName());
+            bindingName =
+                    Fractive.registerByName(
+                            Fractive.getComponentRepresentativeOnThis(),
+                            this.getBindingName());
         } catch (ProActiveException pe) {
             pe.printStackTrace();
         }

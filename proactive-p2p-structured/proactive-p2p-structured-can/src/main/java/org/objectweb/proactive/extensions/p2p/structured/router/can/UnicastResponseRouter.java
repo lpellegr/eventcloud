@@ -21,32 +21,34 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  *            the response type to route.
  */
-public class UnicastResponseRouter<T extends Response<StringCoordinate>> extends Router<T, StringCoordinate> {
+public class UnicastResponseRouter<T extends Response<StringCoordinate>>
+        extends Router<T, StringCoordinate> {
 
     private static final Logger logger =
-    	LoggerFactory.getLogger(UnicastResponseRouter.class);
-    
+            LoggerFactory.getLogger(UnicastResponseRouter.class);
+
     public UnicastResponseRouter() {
         super();
     }
 
     @Override
-	public void makeDecision(StructuredOverlay overlay, T response) {
-    	if (response.getHopCount() == 0) {
+    public void makeDecision(StructuredOverlay overlay, T response) {
+        if (response.getHopCount() == 0) {
             overlay.getResponseEntries().put(
                     response.getId(), new ResponseEntry(1));
         }
 
-    	if (response.validatesKeyConstraints(overlay)) {
+        if (response.validatesKeyConstraints(overlay)) {
             this.handle(overlay, response);
         } else {
-        	this.doRoute(overlay, response);
+            this.doRoute(overlay, response);
         }
-	}
-    
+    }
+
     protected void doHandle(StructuredOverlay overlay, T response) {
         if (logger.isDebugEnabled()) {
-            logger.debug("The peer " + overlay + " contains the key to reach " + response.getKey() + ".");
+            logger.debug("The peer " + overlay + " contains the key to reach "
+                    + response.getKey() + ".");
         }
 
         overlay.getRequestResponseManager().pushFinalResponse(response);
@@ -60,7 +62,9 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>> extends
 
         // finds the dimension on which the key to reach is not contained
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            direction = overlayCAN.contains(dimension, response.getKey().getElement(dimension));
+            direction =
+                    overlayCAN.contains(dimension, response.getKey()
+                            .getElement(dimension));
 
             if (direction == -1) {
                 direction = NeighborTable.INFERIOR_DIRECTION;
@@ -70,16 +74,22 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>> extends
                 break;
             }
         }
-        
-        // selects one neighbor in the dimension and the direction previously affected
-        NeighborEntry neighborChosen = overlayCAN.nearestNeighbor(response.getKey(), dimension, direction);
+
+        // selects one neighbor in the dimension and the direction previously
+        // affected
+        NeighborEntry neighborChosen =
+                overlayCAN.nearestNeighbor(
+                        response.getKey(), dimension, direction);
 
         if (logger.isDebugEnabled()) {
-            logger.debug(
-                    "The message is routed to a neigbour because the current peer "
-                    + "managing " + overlay + " does not contains the key to reach ("
-                    + response.getKey() + "). Neighbor is selected from dimension " 
-                    + dimension + " and direction " + direction + ": " + neighborChosen);
+            logger.debug("The message is routed to a neigbour because the current peer "
+                    + "managing "
+                    + overlay
+                    + " does not contains the key to reach ("
+                    + response.getKey()
+                    + "). Neighbor is selected from dimension "
+                    + dimension
+                    + " and direction " + direction + ": " + neighborChosen);
         }
 
         // sends the message to it
@@ -87,8 +97,7 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>> extends
             response.incrementHopCount(1);
             neighborChosen.getStub().route(response);
         } catch (ProActiveRuntimeException e) {
-            logger.error(
-                    "Error while sending the message to the neighbor managing " 
+            logger.error("Error while sending the message to the neighbor managing "
                     + neighborChosen.getZone());
             e.printStackTrace();
         }

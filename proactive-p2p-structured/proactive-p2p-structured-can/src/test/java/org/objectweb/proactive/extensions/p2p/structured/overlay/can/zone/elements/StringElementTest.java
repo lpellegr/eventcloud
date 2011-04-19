@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
  */
 public class StringElementTest {
 
-	private static final Logger logger = 
-		LoggerFactory.getLogger(StringElementTest.class);
-	
-	@Test
+    private static final Logger logger =
+            LoggerFactory.getLogger(StringElementTest.class);
+
+    @Test
     public void test() {
         LinkedList<Integer> al = this.alpha1();
         String min = StringElement.fromUnicodeToString(al);
@@ -27,7 +27,7 @@ public class StringElementTest {
 
         LinkedList<Integer> al2 = alpha2();
         String max = StringElement.fromUnicodeToString(al2);
-        
+
         logger.info("Second String " + max + " " + al2);
         logger.info("Test Sum " + StringElement.sumUnicodeCodePoints(al, al2));
 
@@ -41,8 +41,8 @@ public class StringElementTest {
 
         logger.info("Compare 'a' and 'b': " + "a".compareTo("b"));
     }
-	
-	public LinkedList<Integer> alpha1() {
+
+    public LinkedList<Integer> alpha1() {
         StringElement elt = new StringElement("a");
         return StringElement.fromStringtoUnicode(elt);
     }
@@ -99,7 +99,8 @@ public class StringElementTest {
         while (nbOfSplit > 0) {
             coord1 = new StringElement(middleCoord.getValue());
             middleCoord = (StringElement) Element.middle(middleCoord, coord2);
-            System.out.println("[" + coord1.getValue() + "," + middleCoord.getValue() + "[" + ",["
+            System.out.println("[" + coord1.getValue() + ","
+                    + middleCoord.getValue() + "[" + ",["
                     + middleCoord.getValue() + "," + coord2.getValue() + "[");
             nbOfSplit--;
         }

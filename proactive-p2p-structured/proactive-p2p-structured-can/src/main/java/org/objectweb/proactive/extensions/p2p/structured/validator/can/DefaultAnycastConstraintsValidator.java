@@ -15,34 +15,35 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastReque
  * 
  * @author lpellegr
  */
-public final class DefaultAnycastConstraintsValidator extends AnycastConstraintsValidator<StringCoordinate> {
+public final class DefaultAnycastConstraintsValidator extends
+        AnycastConstraintsValidator<StringCoordinate> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Creates a new {@code DefaultAnycastConstraintsValidator} which is 
-	 * a very permissive constraints validator (i.e. the valitor validates 
-	 * the constraints on any peer).
-	 */
-	public DefaultAnycastConstraintsValidator() {
-		super(new StringCoordinate(null, null, null));
-	}
+    /**
+     * Creates a new {@code DefaultAnycastConstraintsValidator} which is a very
+     * permissive constraints validator (i.e. the valitor validates the
+     * constraints on any peer).
+     */
+    public DefaultAnycastConstraintsValidator() {
+        super(new StringCoordinate(null, null, null));
+    }
 
-	/**
-	 * Creates a new {@code DefaultAnycastConstraintsValidator} with the
-	 * specified {@code key} to reach.
-	 * 
-	 * @param key
-	 *            the key to reach.
-	 */
-	public DefaultAnycastConstraintsValidator(StringCoordinate key) {
-		super(checkNotNull(key));
-	}
+    /**
+     * Creates a new {@code DefaultAnycastConstraintsValidator} with the
+     * specified {@code key} to reach.
+     * 
+     * @param key
+     *            the key to reach.
+     */
+    public DefaultAnycastConstraintsValidator(StringCoordinate key) {
+        super(checkNotNull(key));
+    }
 
     public final boolean validatesKeyConstraints(StructuredOverlay overlay) {
         return this.validatesKeyConstraints(((AbstractCanOverlay) overlay).getZone());
     }
- 
+
     public final boolean validatesKeyConstraints(Zone zone) {
         for (int i = 0; i < super.key.size(); i++) {
             // if coordinate is null we skip the test
@@ -55,5 +56,5 @@ public final class DefaultAnycastConstraintsValidator extends AnycastConstraints
         }
         return true;
     }
-    
+
 }

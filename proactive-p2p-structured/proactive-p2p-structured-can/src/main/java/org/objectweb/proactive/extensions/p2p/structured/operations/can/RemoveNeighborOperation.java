@@ -10,9 +10,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 
 /**
- * A {@code RemoveNeighborOperation} is used to remove the specified {@link Peer}
- * (by using the given identifier) from the {@link NeighborTable} of the peer
- * which receives this message.
+ * A {@code RemoveNeighborOperation} is used to remove the specified
+ * {@link Peer} (by using the given identifier) from the {@link NeighborTable}
+ * of the peer which receives this message.
  * 
  * @author lpellegr
  */
@@ -36,28 +36,29 @@ public class RemoveNeighborOperation implements SynchronousOperation {
     private final int direction;
 
     /**
-     * Constructs a new RemoveNeighborOperation with the specified 
-     * <code>peerIdentifier</code>, <code>dimension</code> and 
+     * Constructs a new RemoveNeighborOperation with the specified
+     * <code>peerIdentifier</code>, <code>dimension</code> and
      * <code>direction</code>.
      * 
      * @param peerIdentifier
      *            the identifier pointing to the neighbor to remove.
-     *            
+     * 
      * @param dimension
      *            the dimension in which the neighbor to remove is.
-     *            
+     * 
      * @param direction
      *            the direction in which the neighbor to remove is.
      */
-    public RemoveNeighborOperation(UUID peerIdentifier, int dimension, int direction) {
+    public RemoveNeighborOperation(UUID peerIdentifier, int dimension,
+            int direction) {
         this.peerIdentifier = peerIdentifier;
         this.dimension = dimension;
         this.direction = direction;
     }
 
     /**
-     * Constructs a new RemoveNeighborOperation with the specified 
-     * <code>peerIdentifier</code>, <code>dimension</code> and 
+     * Constructs a new RemoveNeighborOperation with the specified
+     * <code>peerIdentifier</code>, <code>dimension</code> and
      * <code>direction</code>.
      * 
      * @param peerIdentifier
@@ -68,7 +69,7 @@ public class RemoveNeighborOperation implements SynchronousOperation {
         this.dimension = -1;
         this.direction = -1;
     }
-    
+
     /**
      * Returns the identifier pointing to the neighbor to remove.
      * 
@@ -100,15 +101,17 @@ public class RemoveNeighborOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-    	NeighborTable table = ((AbstractCanOverlay) overlay).getNeighborTable();
-    	boolean result;
-    	
-    	if (dimension == -1 && direction == -1) {
-    		result = table.remove(this.peerIdentifier);
-    	} else {
-    		result = table.remove(this.peerIdentifier, this.dimension, this.direction);
-    	}
-    	
+        NeighborTable table = ((AbstractCanOverlay) overlay).getNeighborTable();
+        boolean result;
+
+        if (dimension == -1 && direction == -1) {
+            result = table.remove(this.peerIdentifier);
+        } else {
+            result =
+                    table.remove(
+                            this.peerIdentifier, this.dimension, this.direction);
+        }
+
         return new BooleanResponseOperation(result);
     }
 

@@ -19,23 +19,27 @@ import org.ontoware.rdf2go.model.node.UriOrVariable;
 public interface SemanticDatastoreOperations {
 
     // public void addAll(URI space, Iterator<? extends Statement> other)
-    //       throws SemanticSpaceException;
+    // throws SemanticSpaceException;
 
     public void addStatement(URI space, Statement statement);
 
-    public void addStatement(URI space, Resource subject, URI predicate, String literal);
+    public void addStatement(URI space, Resource subject, URI predicate,
+                             String literal);
 
-    public void addStatement(URI space, Resource subject, URI predicate, String literal, String languageTag);
+    public void addStatement(URI space, Resource subject, URI predicate,
+                             String literal, String languageTag);
 
-    public void addStatement(URI space, Resource subject, URI predicate, String literal, URI datatypeURI);
+    public void addStatement(URI space, Resource subject, URI predicate,
+                             String literal, URI datatypeURI);
 
-    public void addStatement(URI space, String subjectURIString, URI predicate, String literal);
+    public void addStatement(URI space, String subjectURIString, URI predicate,
+                             String literal);
 
-    public void addStatement(URI space, String subjectURIString, URI predicate, String literal,
-            String languageTag);
+    public void addStatement(URI space, String subjectURIString, URI predicate,
+                             String literal, String languageTag);
 
-    public void addStatement(URI space, String subjectURIString, URI predicate, String literal,
-            URI datatypeURI);
+    public void addStatement(URI space, String subjectURIString, URI predicate,
+                             String literal, URI datatypeURI);
 
     // query
 
@@ -47,7 +51,8 @@ public interface SemanticDatastoreOperations {
 
     public QueryResultTable sparqlSelect(URI space, String queryString);
 
-    public ClosableIterator<Statement> findStatements(URI space, TriplePattern triplepattern);
+    public ClosableIterator<Statement> findStatements(URI space,
+                                                      TriplePattern triplepattern);
 
     // remove
 
@@ -57,22 +62,27 @@ public interface SemanticDatastoreOperations {
 
     public void removeStatement(URI space, Statement statement);
 
-    public void removeStatement(URI space, Resource subject, URI predicate, String literal);
+    public void removeStatement(URI space, Resource subject, URI predicate,
+                                String literal);
 
-    public void removeStatement(URI space, Resource subject, URI predicate, String literal, String languageTag);
+    public void removeStatement(URI space, Resource subject, URI predicate,
+                                String literal, String languageTag);
 
-    public void removeStatement(URI space, Resource subject, URI predicate, String literal, URI datatypeURI);
+    public void removeStatement(URI space, Resource subject, URI predicate,
+                                String literal, URI datatypeURI);
 
-    public void removeStatement(URI space, String subjectURIString, URI predicate, String literal);
+    public void removeStatement(URI space, String subjectURIString,
+                                URI predicate, String literal);
 
-    public void removeStatement(URI space, String subjectURIString, URI predicate, String literal,
-            String languageTag);
+    public void removeStatement(URI space, String subjectURIString,
+                                URI predicate, String literal,
+                                String languageTag);
 
-    public void removeStatement(URI space, String subjectURIString, URI predicate, String literal,
-            URI datatypeURI);
+    public void removeStatement(URI space, String subjectURIString,
+                                URI predicate, String literal, URI datatypeURI);
 
-    public void removeStatements(URI space, ResourceOrVariable subject, UriOrVariable predicate,
-            NodeOrVariable object);
+    public void removeStatements(URI space, ResourceOrVariable subject,
+                                 UriOrVariable predicate, NodeOrVariable object);
 
     public void removeStatements(URI space, TriplePattern triplePattern);
 
@@ -80,10 +90,10 @@ public interface SemanticDatastoreOperations {
 
     public boolean contains(URI space, Statement s);
 
-    public boolean contains(URI space, ResourceOrVariable subject, UriOrVariable predicate,
-            NodeOrVariable object);
+    public boolean contains(URI space, ResourceOrVariable subject,
+                            UriOrVariable predicate, NodeOrVariable object);
 
-    public boolean contains(URI space, ResourceOrVariable subject, UriOrVariable predicate,
-            String plainLiteral);
+    public boolean contains(URI space, ResourceOrVariable subject,
+                            UriOrVariable predicate, String plainLiteral);
 
 }

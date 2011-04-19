@@ -22,9 +22,11 @@ public class AddStatementRequest extends StatementRequest {
     /**
      * {@inheritDoc}
      */
-	@Override
-	public void onDestinationReached(StructuredOverlay overlay, URI context, Statement stmt) {
-		((SemanticCanOverlay) overlay).getDatastore().addStatement(context, stmt);
-	}
-    
+    @Override
+    public void onDestinationReached(StructuredOverlay overlay, URI context,
+                                     Statement stmt) {
+        ((SemanticCanOverlay) overlay).getDatastore().addStatement(
+                context, stmt);
+    }
+
 }

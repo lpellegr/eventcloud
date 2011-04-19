@@ -11,9 +11,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEnt
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 
 /**
- * A {@code LeaveOperation} is used in order to notify the neighbors to remove the
- * peer which leaves from their {@link NeighborTable} and to update it with new
- * correct neighbors.
+ * A {@code LeaveOperation} is used in order to notify the neighbors to remove
+ * the peer which leaves from their {@link NeighborTable} and to update it with
+ * new correct neighbors.
  * 
  * @author lpellegr
  */
@@ -41,8 +41,8 @@ public class LeaveOperation implements SynchronousOperation {
      * @param direction
      *            the direction of the peer having left.
      */
-    public LeaveOperation(UUID peerHavingLeft, Collection<NeighborEntry> neighborsToMergeWith,
-            int dimension,
+    public LeaveOperation(UUID peerHavingLeft,
+            Collection<NeighborEntry> neighborsToMergeWith, int dimension,
             int direction) {
         this.peerHavingLeft = peerHavingLeft;
         this.neighborsToMergeWith = neighborsToMergeWith;

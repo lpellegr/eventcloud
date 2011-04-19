@@ -11,16 +11,16 @@ import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
  */
 public class SparqlConstructResponseOperation implements ResponseOperation {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final ClosableIterableWrapper result;
+    private final ClosableIterableWrapper result;
 
-	public SparqlConstructResponseOperation(ClosableIterableWrapper result) {
-		this.result = result;
-	}
+    public SparqlConstructResponseOperation(ClosableIterableWrapper result) {
+        this.result = result;
+    }
 
-	public ClosableIterableWrapper getResult() {
-		return this.result;
-	}
-	
+    public ClosableIterableWrapper getResult() {
+        return this.result;
+    }
+
 }

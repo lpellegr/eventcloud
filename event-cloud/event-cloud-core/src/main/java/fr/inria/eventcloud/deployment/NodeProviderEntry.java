@@ -12,13 +12,13 @@ import org.objectweb.proactive.core.node.Node;
 public class NodeProviderEntry {
 
     private int index;
-    
+
     private List<Node> nodes;
-    
+
     public NodeProviderEntry(List<Node> nodes) {
         this.nodes = nodes;
     }
-    
+
     public Node getNextNode() {
         if (this.index > this.nodes.size() - 1) {
             this.index = 0;
@@ -30,5 +30,5 @@ public class NodeProviderEntry {
     public List<Node> getNodes() {
         return this.nodes;
     }
-    
+
 }

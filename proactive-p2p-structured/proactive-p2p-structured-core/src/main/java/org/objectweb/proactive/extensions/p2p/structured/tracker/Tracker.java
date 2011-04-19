@@ -9,8 +9,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
  * A tracker assists in the communication between peers. It is used in order to
- * help a peer to join an existing network and to store several peers references in
- * order to retrieve them later as an entry point.
+ * help a peer to join an existing network and to store several peers references
+ * in order to retrieve them later as an entry point.
  * <p>
  * A tracker can join an another tracker. When a tracker A join a tracker B
  * which already has references to other trackers C and D for example, a
@@ -30,7 +30,6 @@ public interface Tracker {
      */
     public void setName(String name);
 
-
     public String getAssociatedNetworkName();
 
     /**
@@ -40,7 +39,7 @@ public interface Tracker {
      *            the new associated network name.
      */
     public void setAssociatedNetworkName(String networkName);
-    
+
     public void setStub();
 
     public OverlayType getType();
@@ -52,7 +51,7 @@ public interface Tracker {
      *            the new type of peers this tracker works.
      */
     public void setType(OverlayType type);
-    
+
     /**
      * Returns the probability to store a {@link Peer} reference.
      * 
@@ -65,7 +64,7 @@ public interface Tracker {
     public Group<Tracker> getGroup();
 
     public BooleanWrapper addTrackerToGroup(Tracker remoteReference);
-    
+
     /**
      * Returns the number of peers that the tracker manages.
      * 
@@ -79,7 +78,7 @@ public interface Tracker {
      * @return a random and valid peer.
      */
     public Peer getRandomPeer();
-    
+
     /**
      * Returns the {@link Peer} stored at the specified index.
      * 

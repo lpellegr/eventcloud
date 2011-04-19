@@ -17,16 +17,17 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastCo
 public abstract class AnycastRequest extends Request<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
-    
+
     private AnycastRoutingList anycastRoutingList = new AnycastRoutingList();
 
     /**
      * Constructs a new message with the specified coordinates to reach.
      * 
      * @param validator
-     * 			the constraints validator to use for checking the constraints.
+     *            the constraints validator to use for checking the constraints.
      */
-    public AnycastRequest(AnycastConstraintsValidator<StringCoordinate> validator) {
+    public AnycastRequest(
+            AnycastConstraintsValidator<StringCoordinate> validator) {
         super(validator);
     }
 
@@ -45,10 +46,9 @@ public abstract class AnycastRequest extends Request<StringCoordinate> {
     }
 
     public boolean validatesKeyConstraints(Zone zone) {
-    	return ((AnycastConstraintsValidator<StringCoordinate>) 
-    				super.constraintsValidator).validatesKeyConstraints(zone);
+        return ((AnycastConstraintsValidator<StringCoordinate>) super.constraintsValidator).validatesKeyConstraints(zone);
     }
-    
+
     public String toString() {
         StringBuffer buf = new StringBuffer("AnycastQueryMessage ID=");
         buf.append(this.getId());

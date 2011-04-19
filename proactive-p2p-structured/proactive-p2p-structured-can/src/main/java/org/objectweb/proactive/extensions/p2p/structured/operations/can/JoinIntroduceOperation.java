@@ -20,26 +20,26 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
 public class JoinIntroduceOperation implements SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
-    
+
     private final UUID peerID;
 
-	private final Peer remotePeer;
+    private final Peer remotePeer;
 
-	public JoinIntroduceOperation(UUID peerID, Peer remotePeer) {
-		super();
-		this.peerID = peerID;
-		this.remotePeer = remotePeer;
-	}
+    public JoinIntroduceOperation(UUID peerID, Peer remotePeer) {
+        super();
+        this.peerID = peerID;
+        this.remotePeer = remotePeer;
+    }
 
     public UUID getPeerID() {
-		return this.peerID;
-	}
+        return this.peerID;
+    }
 
-	public Peer getRemotePeer() {
-		return this.remotePeer;
-	}
+    public Peer getRemotePeer() {
+        return this.remotePeer;
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     public JoinIntroduceResponseOperation handle(StructuredOverlay overlay) {

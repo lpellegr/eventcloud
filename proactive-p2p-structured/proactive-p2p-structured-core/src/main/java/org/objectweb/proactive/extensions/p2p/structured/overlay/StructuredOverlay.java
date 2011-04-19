@@ -27,28 +27,28 @@ public abstract class StructuredOverlay implements Serializable {
     private Peer localPeer;
 
     protected StructuredOverlay() {
-    	this.identifier = UUID.randomUUID();
+        this.identifier = UUID.randomUUID();
     }
 
     protected StructuredOverlay(RequestResponseManager queryManager) {
-    	this();
-    	this.messagingManager = queryManager;
+        this();
+        this.messagingManager = queryManager;
         this.messagingManager.setOverlay(this);
     }
 
     public abstract boolean create();
 
-	/**
-	 * Forces the current peer to join an existing network by using the
-	 * specified landmark peer.
-	 * 
-	 * @param landmarkPeer
-	 *            the peer (entry point) which is used in order to join the
-	 *            network.
-	 * @return <code>true</code> if join operation has succeeded,
-	 *         <code>false</code> otherwise.
-	 * @throws StructuredP2PException
-	 */
+    /**
+     * Forces the current peer to join an existing network by using the
+     * specified landmark peer.
+     * 
+     * @param landmarkPeer
+     *            the peer (entry point) which is used in order to join the
+     *            network.
+     * @return <code>true</code> if join operation has succeeded,
+     *         <code>false</code> otherwise.
+     * @throws StructuredP2PException
+     */
     public abstract boolean join(Peer landmarkPeer);
 
     public abstract boolean leave();
@@ -92,9 +92,9 @@ public abstract class StructuredOverlay implements Serializable {
     }
 
     public ResponseEntry getResponseEntry(UUID responseId) {
-    	return this.messagingManager.getResponsesReceived().get(responseId);
+        return this.messagingManager.getResponsesReceived().get(responseId);
     }
-    
+
     public Map<UUID, ResponseEntry> getResponseEntries() {
         return this.messagingManager.getResponsesReceived();
     }
@@ -104,9 +104,9 @@ public abstract class StructuredOverlay implements Serializable {
     }
 
     public void route(RequestResponseMessage<?> msg) {
-    	msg.route(this);
+        msg.route(this);
     }
 
     public abstract String dump();
-    
+
 }

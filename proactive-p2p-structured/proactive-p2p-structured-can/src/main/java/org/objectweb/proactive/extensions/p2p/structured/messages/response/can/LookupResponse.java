@@ -11,7 +11,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 public class LookupResponse extends ForwardResponse {
 
     private static final long serialVersionUID = 1L;
-    
+
     private Peer peerFound;
 
     public LookupResponse(LookupRequest query, Peer peerFound) {
@@ -22,5 +22,5 @@ public class LookupResponse extends ForwardResponse {
     public Peer getPeerFound() {
         return this.peerFound;
     }
-    
+
 }

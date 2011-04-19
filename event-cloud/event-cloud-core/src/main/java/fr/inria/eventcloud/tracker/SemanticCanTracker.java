@@ -34,16 +34,17 @@ import fr.inria.eventcloud.util.SemanticHelper;
  */
 public class SemanticCanTracker extends TrackerImpl {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final transient Logger logger = LoggerFactory.getLogger(SemanticCanTracker.class);
-	
-	// The frequency of prefix of data inserted in the network
-	private Map<Character, SemanticFrequencies> frequencies;
+    private static final transient Logger logger =
+            LoggerFactory.getLogger(SemanticCanTracker.class);
 
-	private long occurencesTotalCount = 0;
+    // The frequency of prefix of data inserted in the network
+    private Map<Character, SemanticFrequencies> frequencies;
 
-	public SemanticCanTracker() {
+    private long occurencesTotalCount = 0;
+
+    public SemanticCanTracker() {
         super();
         this.initialize();
     }
@@ -57,247 +58,255 @@ public class SemanticCanTracker extends TrackerImpl {
         super(OverlayType.CAN, associatedNetworkName, trackerName);
         this.initialize();
     }
-	
+
     public SemanticPeer getRandomPeer() {
-    	return (SemanticPeer)super.getRandomPeer();
+        return (SemanticPeer) super.getRandomPeer();
     }
-    
+
     public String dump() {
-    	StringBuffer buf = new StringBuffer();
-    	
-    	for (Entry<Character, SemanticFrequencies> entry : this.frequencies.entrySet()) {
-    		buf.append(entry.getKey());
-    		buf.append(" ");
-    		buf.append(this.computeFrequency(entry.getValue().getSubjectCharacterFrequency().getOccurencesCount()));
-    		buf.append(" ");
-    		buf.append(this.computeFrequency(entry.getValue().getPredicateCharacterFrequency().getOccurencesCount()));
-    		buf.append(" ");
-    		buf.append(this.computeFrequency(entry.getValue().getObjectCharacterFrequency().getOccurencesCount()));
-    		buf.append("\n");
-    	}
-    	return buf.toString();
+        StringBuffer buf = new StringBuffer();
+
+        for (Entry<Character, SemanticFrequencies> entry : this.frequencies.entrySet()) {
+            buf.append(entry.getKey());
+            buf.append(" ");
+            buf.append(this.computeFrequency(entry.getValue()
+                    .getSubjectCharacterFrequency()
+                    .getOccurencesCount()));
+            buf.append(" ");
+            buf.append(this.computeFrequency(entry.getValue()
+                    .getPredicateCharacterFrequency()
+                    .getOccurencesCount()));
+            buf.append(" ");
+            buf.append(this.computeFrequency(entry.getValue()
+                    .getObjectCharacterFrequency()
+                    .getOccurencesCount()));
+            buf.append("\n");
+        }
+        return buf.toString();
     }
-    
+
     private void initialize() {
-    	this.frequencies = new HashMap<Character, SemanticFrequencies>();
+        this.frequencies = new HashMap<Character, SemanticFrequencies>();
 
-		List<Character> legalPrefixes = new ArrayList<Character>();
-		legalPrefixes.addAll(this
-				.getIntermediateCharacters(new CharactersInterval('0', '9')));
-		legalPrefixes.addAll(this
-				.getIntermediateCharacters(new CharactersInterval('A', 'Z')));
-		legalPrefixes.addAll(this
-				.getIntermediateCharacters(new CharactersInterval('a', 'z')));
+        List<Character> legalPrefixes = new ArrayList<Character>();
+        legalPrefixes.addAll(this.getIntermediateCharacters(new CharactersInterval(
+                '0', '9')));
+        legalPrefixes.addAll(this.getIntermediateCharacters(new CharactersInterval(
+                'A', 'Z')));
+        legalPrefixes.addAll(this.getIntermediateCharacters(new CharactersInterval(
+                'a', 'z')));
 
-		for (Character c : legalPrefixes) {
-			this.frequencies.put(c, new SemanticFrequencies());
-		}
+        for (Character c : legalPrefixes) {
+            this.frequencies.put(c, new SemanticFrequencies());
+        }
     }
-    
-	public Peer findPeerToJoin() {
-		double f = ProActiveRandom.nextDouble();
-		
-		Character subjectCharacter = this.findCharacterByFrequency(f, Type.SUBJECT);
-		Character predicateCharacter = this.findCharacterByFrequency(f, Type.PREDICATE);
-		Character objectCharacter = this.findCharacterByFrequency(f, Type.OBJECT);
-		
-		if (subjectCharacter == null || predicateCharacter == null || objectCharacter == null) {
-			logger.debug("findPeerToJoin return a peer elected randomly (no frequency found).");
-			return this.getRandomPeer();
-		}
-		
-		StringElement subjectElt = new StringElement(subjectCharacter.toString());
-		StringElement predicateElt = new StringElement(predicateCharacter.toString());
-		StringElement objectElt = new StringElement(objectCharacter.toString());
-		
-		logger.debug("findPeerToJoin return a peer based on the frequency found.");
-		try {
-			return ((LookupResponse)
-					PAFuture.getFutureValue(
-							this.getRandomPeer().send(
-									new LookupRequest(
-											new StringCoordinate(
-													subjectElt, predicateElt, objectElt))))).getPeerFound();
-		} catch (DispatchException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected Peer getLandmarkPeerToJoin() {
-		return this.findPeerToJoin();
-	}
 
-	private Character findCharacterByFrequency(double f, Type type) {
-		double sum = 0;
-		CharacterFrequency cf = null;
-		
-		for (Entry<Character, SemanticFrequencies> entry : this.frequencies.entrySet()) {
-			switch (type) {
-			case SUBJECT:
-				cf = entry.getValue().getSubjectCharacterFrequency();
-				break;
-			case PREDICATE:
-				cf = entry.getValue().getPredicateCharacterFrequency();
-				break;
-			case OBJECT:
-				cf = entry.getValue().getObjectCharacterFrequency();
-				break;
-			}
-			
-			if (cf.getOccurencesCount() > 0
-					&& f  > sum 
-						&& f <= sum + this.computeFrequency(cf.getOccurencesCount())) {
-					return entry.getKey(); 
-			}
+    public Peer findPeerToJoin() {
+        double f = ProActiveRandom.nextDouble();
 
-			sum += this.computeFrequency(cf.getOccurencesCount());
-		}
-	
-		return null;
-	} 
+        Character subjectCharacter =
+                this.findCharacterByFrequency(f, Type.SUBJECT);
+        Character predicateCharacter =
+                this.findCharacterByFrequency(f, Type.PREDICATE);
+        Character objectCharacter =
+                this.findCharacterByFrequency(f, Type.OBJECT);
 
-	public void updateFrequency(Statement stmt) {
-		this.frequencies.get(
-				SemanticHelper.parseTripleElement(
-						stmt.getSubject().toString()).charAt(0))
-							.getSubjectCharacterFrequency()
-								.incrementOccurencesCount();
-		
-		this.frequencies.get(
-				SemanticHelper.parseTripleElement(
-						stmt.getPredicate().toString()).charAt(0))
-							.getPredicateCharacterFrequency()
-								.incrementOccurencesCount();
-		
-		this.frequencies.get(
-				SemanticHelper.parseTripleElement(
-						stmt.getObject().toString()).charAt(0))
-							.getObjectCharacterFrequency()
-								.incrementOccurencesCount();
+        if (subjectCharacter == null || predicateCharacter == null
+                || objectCharacter == null) {
+            logger.debug("findPeerToJoin return a peer elected randomly (no frequency found).");
+            return this.getRandomPeer();
+        }
 
-		this.occurencesTotalCount++;
-	}
+        StringElement subjectElt =
+                new StringElement(subjectCharacter.toString());
+        StringElement predicateElt =
+                new StringElement(predicateCharacter.toString());
+        StringElement objectElt = new StringElement(objectCharacter.toString());
 
-	private double computeFrequency(long occurences) {
-		if (occurences == 0 || this.occurencesTotalCount == 0) {
-			return 0;
-		}
+        logger.debug("findPeerToJoin return a peer based on the frequency found.");
+        try {
+            return ((LookupResponse) PAFuture.getFutureValue(this.getRandomPeer()
+                    .send(
+                            new LookupRequest(new StringCoordinate(
+                                    subjectElt, predicateElt, objectElt))))).getPeerFound();
+        } catch (DispatchException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-		return (double) occurences / this.occurencesTotalCount;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Peer getLandmarkPeerToJoin() {
+        return this.findPeerToJoin();
+    }
 
-	private List<Character> getIntermediateCharacters(
-			CharactersInterval interval) {
-		int lowerIndex = interval.getLowerBound();
-		int upperIndex = interval.getUpperBound();
-		int size = upperIndex - lowerIndex + 1;
+    private Character findCharacterByFrequency(double f, Type type) {
+        double sum = 0;
+        CharacterFrequency cf = null;
 
-		List<Character> result = new ArrayList<Character>(size);
-		for (int i = lowerIndex; i < lowerIndex + size; i++) {
-			result.add((char) i);
-		}
+        for (Entry<Character, SemanticFrequencies> entry : this.frequencies.entrySet()) {
+            switch (type) {
+                case SUBJECT:
+                    cf = entry.getValue().getSubjectCharacterFrequency();
+                    break;
+                case PREDICATE:
+                    cf = entry.getValue().getPredicateCharacterFrequency();
+                    break;
+                case OBJECT:
+                    cf = entry.getValue().getObjectCharacterFrequency();
+                    break;
+            }
 
-		return result;
-	}
+            if (cf.getOccurencesCount() > 0
+                    && f > sum
+                    && f <= sum
+                            + this.computeFrequency(cf.getOccurencesCount())) {
+                return entry.getKey();
+            }
 
-	public static void main(String[] args) {
-	}
+            sum += this.computeFrequency(cf.getOccurencesCount());
+        }
+
+        return null;
+    }
+
+    public void updateFrequency(Statement stmt) {
+        this.frequencies.get(
+                SemanticHelper.parseTripleElement(stmt.getSubject().toString())
+                        .charAt(0))
+                .getSubjectCharacterFrequency()
+                .incrementOccurencesCount();
+
+        this.frequencies.get(
+                SemanticHelper.parseTripleElement(
+                        stmt.getPredicate().toString()).charAt(0))
+                .getPredicateCharacterFrequency()
+                .incrementOccurencesCount();
+
+        this.frequencies.get(
+                SemanticHelper.parseTripleElement(stmt.getObject().toString())
+                        .charAt(0))
+                .getObjectCharacterFrequency()
+                .incrementOccurencesCount();
+
+        this.occurencesTotalCount++;
+    }
+
+    private double computeFrequency(long occurences) {
+        if (occurences == 0 || this.occurencesTotalCount == 0) {
+            return 0;
+        }
+
+        return (double) occurences / this.occurencesTotalCount;
+    }
+
+    private List<Character> getIntermediateCharacters(CharactersInterval interval) {
+        int lowerIndex = interval.getLowerBound();
+        int upperIndex = interval.getUpperBound();
+        int size = upperIndex - lowerIndex + 1;
+
+        List<Character> result = new ArrayList<Character>(size);
+        for (int i = lowerIndex; i < lowerIndex + size; i++) {
+            result.add((char) i);
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+    }
 }
 
 class SemanticFrequencies implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public enum Type {
-		SUBJECT,
-		PREDICATE,
-		OBJECT
-	}
-	
-	private CharacterFrequency subjectCharacterFrequency;
+    public enum Type {
+        SUBJECT, PREDICATE, OBJECT
+    }
 
-	private CharacterFrequency predicateCharacterFrequency;
+    private CharacterFrequency subjectCharacterFrequency;
 
-	private CharacterFrequency objectCharacterFrequency;
+    private CharacterFrequency predicateCharacterFrequency;
 
-	public SemanticFrequencies() {
-		this.subjectCharacterFrequency = new CharacterFrequency(0);
-		this.predicateCharacterFrequency = new CharacterFrequency(0);
-		this.objectCharacterFrequency = new CharacterFrequency(0);
-	}
+    private CharacterFrequency objectCharacterFrequency;
 
-	public SemanticFrequencies(CharacterFrequency subjectCharacterFrequency,
-			CharacterFrequency predicateCharacterFrequency,
-			CharacterFrequency objectCharacterFrequency) {
-		super();
-		this.subjectCharacterFrequency = subjectCharacterFrequency;
-		this.predicateCharacterFrequency = predicateCharacterFrequency;
-		this.objectCharacterFrequency = objectCharacterFrequency;
-	}
+    public SemanticFrequencies() {
+        this.subjectCharacterFrequency = new CharacterFrequency(0);
+        this.predicateCharacterFrequency = new CharacterFrequency(0);
+        this.objectCharacterFrequency = new CharacterFrequency(0);
+    }
 
-	public CharacterFrequency getSubjectCharacterFrequency() {
-		return this.subjectCharacterFrequency;
-	}
+    public SemanticFrequencies(CharacterFrequency subjectCharacterFrequency,
+            CharacterFrequency predicateCharacterFrequency,
+            CharacterFrequency objectCharacterFrequency) {
+        super();
+        this.subjectCharacterFrequency = subjectCharacterFrequency;
+        this.predicateCharacterFrequency = predicateCharacterFrequency;
+        this.objectCharacterFrequency = objectCharacterFrequency;
+    }
 
-	public CharacterFrequency getPredicateCharacterFrequency() {
-		return this.predicateCharacterFrequency;
-	}
+    public CharacterFrequency getSubjectCharacterFrequency() {
+        return this.subjectCharacterFrequency;
+    }
 
-	public CharacterFrequency getObjectCharacterFrequency() {
-		return this.objectCharacterFrequency;
-	}
+    public CharacterFrequency getPredicateCharacterFrequency() {
+        return this.predicateCharacterFrequency;
+    }
+
+    public CharacterFrequency getObjectCharacterFrequency() {
+        return this.objectCharacterFrequency;
+    }
 
 }
 
 class CharacterFrequency implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	
-	private long occurencesCount;
+    private static final long serialVersionUID = 1L;
 
-	public CharacterFrequency(long occurencesCount) {
-		super();
-		this.occurencesCount = occurencesCount;
-	}
+    private long occurencesCount;
 
-	public long getOccurencesCount() {
-		return this.occurencesCount;
-	}
+    public CharacterFrequency(long occurencesCount) {
+        super();
+        this.occurencesCount = occurencesCount;
+    }
 
-	public void incrementOccurencesCount() {
-		this.occurencesCount++;
-	}
-	
-	@Override
-	public String toString() {
-		return "" + this.occurencesCount;
-	}
+    public long getOccurencesCount() {
+        return this.occurencesCount;
+    }
+
+    public void incrementOccurencesCount() {
+        this.occurencesCount++;
+    }
+
+    @Override
+    public String toString() {
+        return "" + this.occurencesCount;
+    }
 
 }
 
 class CharactersInterval {
 
-	private final char lowerBound;
+    private final char lowerBound;
 
-	private final char upperBound;
+    private final char upperBound;
 
-	public CharactersInterval(char lowerBound, char upperBound) {
-		super();
-		this.lowerBound = lowerBound;
-		this.upperBound = upperBound;
-	}
+    public CharactersInterval(char lowerBound, char upperBound) {
+        super();
+        this.lowerBound = lowerBound;
+        this.upperBound = upperBound;
+    }
 
-	public char getLowerBound() {
-		return this.lowerBound;
-	}
+    public char getLowerBound() {
+        return this.lowerBound;
+    }
 
-	public char getUpperBound() {
-		return this.upperBound;
-	}
+    public char getUpperBound() {
+        return this.upperBound;
+    }
 
 }

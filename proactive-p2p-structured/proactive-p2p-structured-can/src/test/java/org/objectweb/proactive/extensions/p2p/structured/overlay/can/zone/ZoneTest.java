@@ -32,28 +32,27 @@ public class ZoneTest {
     @Test
     public void testZone() {
         Assert.assertEquals(
-                ZoneTest.zone.getLowerBound(), 
+                ZoneTest.zone.getLowerBound(),
                 createStringCoordinate(CAN_LOWER_BOUND.getValue()));
 
         Assert.assertEquals(
-                ZoneTest.zone.getUpperBound(), 
+                ZoneTest.zone.getUpperBound(),
                 createStringCoordinate(CAN_UPPER_BOUND.getValue()));
     }
 
     @Test
     public void testSplitAndMerge() {
-        Zone z = new Zone(
-                    new UnicodeZoneView(
-                            createStringCoordinate("a"), 
-                            createStringCoordinate("z")), 
-                    new NumericZoneView(
-                            createDoubleCoordinate(0.0),
-                            createDoubleCoordinate(1.0)));
-        
+        Zone z =
+                new Zone(new UnicodeZoneView(
+                        createStringCoordinate("a"),
+                        createStringCoordinate("z")), new NumericZoneView(
+                        createDoubleCoordinate(0.0),
+                        createDoubleCoordinate(1.0)));
+
         Pair<Zone> newZones = z.split(AbstractCanOverlay.getRandomDimension());
         Assert.assertEquals(z, newZones.getFirst().merge(newZones.getSecond()));
     }
-    
+
     @AfterClass
     public static void tearDown() {
         ZoneTest.zone = null;

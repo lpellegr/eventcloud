@@ -26,11 +26,13 @@ public abstract class SparqlRequest extends AnycastRequest {
 
     private String sparqlConstructQuery;
 
-    public SparqlRequest(AnycastConstraintsValidator<StringCoordinate> validator, String sparqlConstructQuery) {
-    	super(validator);
-    	this.sparqlConstructQuery = sparqlConstructQuery;
+    public SparqlRequest(
+            AnycastConstraintsValidator<StringCoordinate> validator,
+            String sparqlConstructQuery) {
+        super(validator);
+        this.sparqlConstructQuery = sparqlConstructQuery;
     }
-    
+
     /**
      * Returns the sparql query to handle.
      * 
@@ -39,13 +41,13 @@ public abstract class SparqlRequest extends AnycastRequest {
     public String getSparqlConstructQuery() {
         return this.sparqlConstructQuery;
     }
-    
+
     /**
-     * Indicates if the key to reach has all its coordinate elements 
-     * fixed with a not <code>null</code> value or not.
+     * Indicates if the key to reach has all its coordinate elements fixed with
+     * a not <code>null</code> value or not.
      * 
      * @return <code>true</code> if the key to reach has all its coordinate
-     * 		   elements fixed with a not <code>null</code> value, 
+     *         elements fixed with a not <code>null</code> value,
      *         <code>false</code> otherwise.
      */
     public boolean keyToReachNotNullElements() {
@@ -58,33 +60,33 @@ public abstract class SparqlRequest extends AnycastRequest {
     }
 
     public ClosableIterableWrapper queryDatastore(AbstractCanOverlay overlay) {
-    	return new ClosableIterableWrapper(((SemanticCanOverlay) overlay).getDatastore()
-    					.sparqlConstruct(EventCloudProperties.DEFAULT_CONTEXT, this.sparqlConstructQuery));
+        return new ClosableIterableWrapper(
+                ((SemanticCanOverlay) overlay).getDatastore().sparqlConstruct(
+                        EventCloudProperties.DEFAULT_CONTEXT,
+                        this.sparqlConstructQuery));
     }
-    
-	public AnycastRequestRouter<SparqlRequest> getRouter() {
+
+    public AnycastRequestRouter<SparqlRequest> getRouter() {
         return new AnycastRequestRouter<SparqlRequest>() {
-			@Override
-			public void onPeerValidatingKeyConstraints(
-					final AbstractCanOverlay overlay, final AnycastRequest request) {
-				final SparqlRequestResponseManager messagingManager = 
-						(SparqlRequestResponseManager) overlay.getRequestResponseManager();
-				
-				if (!messagingManager.hasReceivedRequest(request.getId())) {
-					// query the datastore at the same time as the query is propagated
-					messagingManager.getPendingRequestsResult().put(
-							request.getId(),
-							messagingManager.getThreadPool().submit(
-									new Callable<ClosableIterableWrapper>() {
-										public ClosableIterableWrapper call() {
-											return ((SparqlRequest) request)
-													.queryDatastore(overlay);
-										}
-									}
-							)
-					);
-				}
-			}
+            @Override
+            public void onPeerValidatingKeyConstraints(final AbstractCanOverlay overlay,
+                                                       final AnycastRequest request) {
+                final SparqlRequestResponseManager messagingManager =
+                        (SparqlRequestResponseManager) overlay.getRequestResponseManager();
+
+                if (!messagingManager.hasReceivedRequest(request.getId())) {
+                    // query the datastore at the same time as the query is
+                    // propagated
+                    messagingManager.getPendingRequestsResult().put(
+                            request.getId(),
+                            messagingManager.getThreadPool().submit(
+                                    new Callable<ClosableIterableWrapper>() {
+                                        public ClosableIterableWrapper call() {
+                                            return ((SparqlRequest) request).queryDatastore(overlay);
+                                        }
+                                    }));
+                }
+            }
         };
     }
 

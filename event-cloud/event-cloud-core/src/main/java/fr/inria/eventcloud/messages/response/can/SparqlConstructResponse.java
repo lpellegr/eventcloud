@@ -26,16 +26,16 @@ public class SparqlConstructResponse extends SparqlResponse {
     }
 
     public ClosableIterable<Statement> getResults() {
-    	Set<Statement> stmts = new HashSet<Statement>();
-    	
-    	for (ClosableIterableWrapper ciw : super.getDeserializedResults()) {
-    		ClosableIterator<Statement> it = ciw.toRDF2Go().iterator();
-    		while (it.hasNext()) {
-    			stmts.add(it.next());
-    		}
-    	}
-    	
-    	return SemanticHelper.generateClosableIterable(stmts);
+        Set<Statement> stmts = new HashSet<Statement>();
+
+        for (ClosableIterableWrapper ciw : super.getDeserializedResults()) {
+            ClosableIterator<Statement> it = ciw.toRDF2Go().iterator();
+            while (it.hasNext()) {
+                stmts.add(it.next());
+            }
+        }
+
+        return SemanticHelper.generateClosableIterable(stmts);
     }
 
 }

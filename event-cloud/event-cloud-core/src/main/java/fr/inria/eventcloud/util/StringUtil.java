@@ -11,7 +11,8 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  */
 public class StringUtil {
 
-    public static String generateRandomString(int length, char inferiorBound, char superiorBound) {
+    public static String generateRandomString(int length, char inferiorBound,
+                                              char superiorBound) {
         StringBuffer buf = new StringBuffer();
 
         for (int i = 0; i < length; i++) {
@@ -29,22 +30,24 @@ public class StringUtil {
         for (int i = 0; i < length; i++) {
             lineIndex = ProActiveRandom.nextInt(bounds.length);
 
-            buf.append((char) 
-            		(bounds[lineIndex][0] + 
-            				ProActiveRandom.nextInt(
-            						bounds[lineIndex][1] - bounds[lineIndex][0])));
+            buf.append((char) (bounds[lineIndex][0] + ProActiveRandom.nextInt(bounds[lineIndex][1]
+                    - bounds[lineIndex][0])));
         }
 
         return buf.toString();
     }
 
-    public static String generateRandomString(String prefix, int length, char[][] bounds) {
+    public static String generateRandomString(String prefix, int length,
+                                              char[][] bounds) {
         return prefix + StringUtil.generateRandomString(length, bounds);
     }
 
-    public static String generateRandomString(String prefix, int length, char inferiorBound,
-            char superiorBound) {
-        return prefix + StringUtil.generateRandomString(length, inferiorBound, superiorBound);
+    public static String generateRandomString(String prefix, int length,
+                                              char inferiorBound,
+                                              char superiorBound) {
+        return prefix
+                + StringUtil.generateRandomString(
+                        length, inferiorBound, superiorBound);
     }
 
     public static void main(String[] args) {
@@ -60,8 +63,12 @@ public class StringUtil {
                     + "', '"
                     + P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()
                     + "')="
-                    + StringUtil.generateRandomString(randomNumber, P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString().charAt(0),
-                    		P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString().charAt(0)));
+                    + StringUtil.generateRandomString(
+                            randomNumber,
+                            P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()
+                                    .charAt(0),
+                            P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()
+                                    .charAt(0)));
         }
 
         System.out.println();
@@ -71,12 +78,18 @@ public class StringUtil {
                 + "', '"
                 + P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()
                 + "')="
-                + StringUtil
-                        .generateRandomString("http://", 15, P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString().charAt(0), P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString().charAt(0)));
+                + StringUtil.generateRandomString(
+                        "http://",
+                        15,
+                        P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()
+                                .charAt(0),
+                        P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()
+                                .charAt(0)));
 
         System.out.println();
 
-        System.out.println(StringUtil.generateRandomString("http://", 5, new char[][] { { '0', '9' },
-                { 'A', 'Z' }, { 'a', 'z' } }));
+        System.out.println(StringUtil.generateRandomString(
+                "http://", 5,
+                new char[][] { {'0', '9'}, {'A', 'Z'}, {'a', 'z'}}));
     }
 }

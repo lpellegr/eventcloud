@@ -9,9 +9,9 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 
 /**
- * A {@code LookupRequest} is a query message which may be used in
- * order to <strong>find</strong> a peer which manages a specified 
- * coordinate on a CAN structured peer-to-peer network.
+ * A {@code LookupRequest} is a query message which may be used in order to
+ * <strong>find</strong> a peer which manages a specified coordinate on a CAN
+ * structured peer-to-peer network.
  * 
  * @author lpellegr
  */
@@ -38,7 +38,8 @@ public class LookupRequest extends ForwardRequest {
      */
     public Router<ForwardRequest, StringCoordinate> getRouter() {
         return new UnicastRequestRouter<ForwardRequest>() {
-            protected void onDestinationReached(StructuredOverlay overlay, ForwardRequest msg) {
+            protected void onDestinationReached(StructuredOverlay overlay,
+                                                ForwardRequest msg) {
                 ((LookupRequest) msg).setRemotePeerReached(overlay.getRemotePeer());
             };
         };

@@ -139,4 +139,4 @@
 //                "SELECT { ?s ?p ?o } WHERE { ?s ?p ?o. }")) instanceof SparqlAskRequest);
 //    }
 //
-//}
+// }

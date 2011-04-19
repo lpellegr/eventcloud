@@ -12,7 +12,8 @@ import java.util.prefs.*;
 public class PreferencesObject {
     // Max byte count is 3/4 max string length (see Preferences
     // documentation).
-    static private final int pieceLength = ((3 * Preferences.MAX_VALUE_LENGTH) / 4);
+    static private final int pieceLength =
+            ((3 * Preferences.MAX_VALUE_LENGTH) / 4);
 
     static private byte[] object2Bytes(Object o) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -36,7 +37,8 @@ public class PreferencesObject {
         return pieces;
     }
 
-    static private void writePieces(Preferences prefs, String key, byte pieces[][])
+    static private void writePieces(Preferences prefs, String key,
+                                    byte pieces[][])
             throws BackingStoreException {
         Preferences node = prefs.node(key);
         node.clear();
@@ -45,7 +47,8 @@ public class PreferencesObject {
         }
     }
 
-    static private byte[][] readPieces(Preferences prefs, String key) throws BackingStoreException {
+    static private byte[][] readPieces(Preferences prefs, String key)
+            throws BackingStoreException {
         Preferences node = prefs.node(key);
         String keys[] = node.keys();
         int numPieces = keys.length;
@@ -70,22 +73,23 @@ public class PreferencesObject {
         return raw;
     }
 
-    static private Object bytes2Object(byte raw[]) throws IOException, ClassNotFoundException {
+    static private Object bytes2Object(byte raw[]) throws IOException,
+            ClassNotFoundException {
         ByteArrayInputStream bais = new ByteArrayInputStream(raw);
         ObjectInputStream ois = new ObjectInputStream(bais);
         Object o = ois.readObject();
         return o;
     }
 
-    static public void putObject(Preferences prefs, String key, Object o) throws IOException,
-            BackingStoreException, ClassNotFoundException {
+    static public void putObject(Preferences prefs, String key, Object o)
+            throws IOException, BackingStoreException, ClassNotFoundException {
         byte raw[] = object2Bytes(o);
         byte pieces[][] = breakIntoPieces(raw);
         writePieces(prefs, key, pieces);
     }
 
-    static public Object getObject(Preferences prefs, String key) throws IOException,
-            BackingStoreException, ClassNotFoundException {
+    static public Object getObject(Preferences prefs, String key)
+            throws IOException, BackingStoreException, ClassNotFoundException {
         byte pieces[][] = readPieces(prefs, key);
         byte raw[] = combinePieces(pieces);
         Object o = bytes2Object(raw);

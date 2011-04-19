@@ -14,7 +14,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * @author lpellegr
  */
 public class CANNetworkInitializer extends NetworkInitializer {
-    
+
     public void initializeNewNetwork(int nbPeersToCreate) {
         try {
             super.initializeNewNetwork(OverlayType.CAN, nbPeersToCreate);
@@ -24,7 +24,7 @@ public class CANNetworkInitializer extends NetworkInitializer {
             e.printStackTrace();
         }
     }
-    
+
     public Peer createActivePeer() {
         return PeerFactory.newActivePeer(new BasicCanOverlay());
     }
@@ -32,5 +32,5 @@ public class CANNetworkInitializer extends NetworkInitializer {
     public Peer createComponentPeer() {
         return PeerFactory.newComponentPeer(new BasicCanOverlay());
     }
-    
+
 }

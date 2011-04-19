@@ -39,7 +39,7 @@ public class SemanticPeer extends PeerImpl {
     private static final long serialVersionUID = 1L;
 
     private final List<Tracker> remoteTrackers = new ArrayList<Tracker>();
-    
+
     public SemanticPeer() {
         super();
     }
@@ -47,79 +47,77 @@ public class SemanticPeer extends PeerImpl {
     public SemanticPeer(SemanticStructuredOverlay overlay, Tracker... trackers) {
         super((StructuredOverlay) overlay);
         for (Tracker tracker : trackers) {
-        	this.remoteTrackers.add(tracker);
+            this.remoteTrackers.add(tracker);
         }
     }
-    
+
     /*
      * Operations specific to semantic peer
      */
-    
-	public BooleanWrapper addStatement(URI context, Statement stmt) {
-		try {
-			PAFuture.waitFor(super.send(new AddStatementRequest(context, stmt)));
-		} catch (DispatchException e) {
-			e.printStackTrace();
-		}
-		return new BooleanWrapper(true);
-	}
-	
-	public BooleanWrapper removeStatement(URI context, Statement stmt) {
-		try {
-			PAFuture.waitFor(super.send(new RemoveStatementRequest(context, stmt)));
-		} catch (DispatchException e) {
-			e.printStackTrace();
-		}
-		return new BooleanWrapper(true);
-	}
-	
-	public BooleanWrapper removeStatements(URI context, Statement stmt) {
-		try {
-			PAFuture.waitFor(super.send(new RemoveStatementsRequest(context, stmt)));
-		} catch (DispatchException e) {
-			e.printStackTrace();
-		}
-		return new BooleanWrapper(true);
-	}
-	
-	public SparqlAskResponse executeSparqlAsk(String sparqlAsk) {
-	   	return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager())
-					.executeSparqlAsk(checkNotNull(sparqlAsk));
-	}
 
-	public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct) {
-		return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager())
-					.executeSparqlConstruct(checkNotNull(sparqlConstruct));
-	}
+    public BooleanWrapper addStatement(URI context, Statement stmt) {
+        try {
+            PAFuture.waitFor(super.send(new AddStatementRequest(context, stmt)));
+        } catch (DispatchException e) {
+            e.printStackTrace();
+        }
+        return new BooleanWrapper(true);
+    }
 
-	public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribe) {
-		return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager())
-					.executeSparqlDescribe(checkNotNull(sparqlDescribe));
-	}
+    public BooleanWrapper removeStatement(URI context, Statement stmt) {
+        try {
+            PAFuture.waitFor(super.send(new RemoveStatementRequest(
+                    context, stmt)));
+        } catch (DispatchException e) {
+            e.printStackTrace();
+        }
+        return new BooleanWrapper(true);
+    }
 
-	public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
-		return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager())
-					.executeSparqlSelect(checkNotNull(sparqlSelect));
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void initActivity(Body body) {
-		body.setImmediateService("addStatement", false);
-		body.setImmediateService("removeStatement", false);
-		body.setImmediateService("removeStatements", false);
-		body.setImmediateService("executeSparqlAsk", false);
-		body.setImmediateService("executeSparqlConstruct", false);
-		body.setImmediateService("executeSparqlDescribe", false);
-		body.setImmediateService("executeSparqlSelect", false);
-		
-		super.initActivity(body);
-	}
-	
+    public BooleanWrapper removeStatements(URI context, Statement stmt) {
+        try {
+            PAFuture.waitFor(super.send(new RemoveStatementsRequest(
+                    context, stmt)));
+        } catch (DispatchException e) {
+            e.printStackTrace();
+        }
+        return new BooleanWrapper(true);
+    }
+
+    public SparqlAskResponse executeSparqlAsk(String sparqlAsk) {
+        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(checkNotNull(sparqlAsk));
+    }
+
+    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct) {
+        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(checkNotNull(sparqlConstruct));
+    }
+
+    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribe) {
+        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlDescribe(checkNotNull(sparqlDescribe));
+    }
+
+    public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
+        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(checkNotNull(sparqlSelect));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initActivity(Body body) {
+        body.setImmediateService("addStatement", false);
+        body.setImmediateService("removeStatement", false);
+        body.setImmediateService("removeStatements", false);
+        body.setImmediateService("executeSparqlAsk", false);
+        body.setImmediateService("executeSparqlConstruct", false);
+        body.setImmediateService("executeSparqlDescribe", false);
+        body.setImmediateService("executeSparqlSelect", false);
+
+        super.initActivity(body);
+    }
+
     public List<Tracker> getTrackers() {
         return this.remoteTrackers;
     }
-    
+
 }

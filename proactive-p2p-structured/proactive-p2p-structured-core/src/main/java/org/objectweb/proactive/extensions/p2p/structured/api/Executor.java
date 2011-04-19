@@ -38,9 +38,9 @@ public class Executor {
     @SuppressWarnings("unchecked")
     public static <T> T[] execute(Class<T> clazz, Callable<T> task, int nbTasks) {
         T[] result = (T[]) Array.newInstance(clazz, nbTasks);
-        ExecutorService threadPool = 
-        		Executors.newFixedThreadPool(
-        				SystemUtil.getOptimalNumberOfThreads(1, 0));
+        ExecutorService threadPool =
+                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads(
+                        1, 0));
 
         // Run nbTasks tasks in parallel
         List<Future<T>> futures = new ArrayList<Future<T>>();
@@ -62,5 +62,5 @@ public class Executor {
 
         return result;
     }
-    
+
 }

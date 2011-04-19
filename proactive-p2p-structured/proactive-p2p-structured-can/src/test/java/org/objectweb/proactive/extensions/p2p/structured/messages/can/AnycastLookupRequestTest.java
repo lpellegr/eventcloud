@@ -23,7 +23,8 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRespo
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
 /**
- * Tests associated to {@link AnycastRequestRouter} and {@link AnycastResponseRouter}. 
+ * Tests associated to {@link AnycastRequestRouter} and
+ * {@link AnycastResponseRouter}.
  * 
  * @author lpellegr
  */
@@ -38,12 +39,15 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
     public void testLookupQuery() {
         AnycastLookupResponse response = null;
         StringElement elt = new StringElement("Z");
-        
+
         try {
-            response = (AnycastLookupResponse) PAFuture.getFutureValue(
-            				super.get(0).send(new AnycastLookupRequest(
-            						new StringCoordinate(null, elt, null))));
-            
+            response =
+                    (AnycastLookupResponse) PAFuture.getFutureValue(super.get(0)
+                            .send(
+                                    new AnycastLookupRequest(
+                                            new StringCoordinate(
+                                                    null, elt, null))));
+
             Assert.assertTrue(response.getLatency() > 0);
             // the peer to reach can be the initiator of the request
             Assert.assertTrue(response.getHopCount() >= 0);
@@ -63,12 +67,14 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
     public void testLookupQueryComponent() {
         AnycastLookupResponse response = null;
         StringElement elt = new StringElement("Z");
-        
+
         try {
-            response = (AnycastLookupResponse) PAFuture.getFutureValue(
-            				super.getc(0).send(new AnycastLookupRequest(
-            						new StringCoordinate(null, elt, null))));
-            
+            response =
+                    (AnycastLookupResponse) PAFuture.getFutureValue(super.getc(
+                            0).send(
+                            new AnycastLookupRequest(new StringCoordinate(
+                                    null, elt, null))));
+
             Assert.assertTrue(response.getLatency() > 1);
             // the peer to reach can be the initiator of the request
             Assert.assertTrue(response.getHopCount() >= 0);
@@ -89,68 +95,69 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
         // TODO uncomment when CAN leave works
         // super.clearNetwork();
     }
-    
+
     public static class AnycastLookupRequest extends AnycastRequest {
 
-    	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-    	private Set<Zone> zonesValidatingConstraints;
-    	
-		public AnycastLookupRequest(StringCoordinate coordinatesToReach) {
-			super(new DefaultAnycastConstraintsValidator(coordinatesToReach));
-			this.zonesValidatingConstraints = new HashSet<Zone>();
-		}
+        private Set<Zone> zonesValidatingConstraints;
 
-		@Override
-		public AnycastResponse createResponse() {
-			return new AnycastLookupResponse(this);
-		}
+        public AnycastLookupRequest(StringCoordinate coordinatesToReach) {
+            super(new DefaultAnycastConstraintsValidator(coordinatesToReach));
+            this.zonesValidatingConstraints = new HashSet<Zone>();
+        }
 
-		@Override
-		public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
-	        return new AnycastRequestRouter<AnycastLookupRequest>() {
-	            public void onPeerValidatingKeyConstraints(
-	                    AbstractCanOverlay overlay, AnycastRequest request) {
-	            	((AnycastLookupRequest) request).add(overlay.getZone());
-	            };
-	        };
-		}
+        @Override
+        public AnycastResponse createResponse() {
+            return new AnycastLookupResponse(this);
+        }
 
-		public boolean add(Zone zone) {
-			return this.zonesValidatingConstraints.add(zone);
-		}
+        @Override
+        public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
+            return new AnycastRequestRouter<AnycastLookupRequest>() {
+                public void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay,
+                                                           AnycastRequest request) {
+                    ((AnycastLookupRequest) request).add(overlay.getZone());
+                };
+            };
+        }
 
-		public Set<Zone> getZonesValidatingConstraints() {
-			return this.zonesValidatingConstraints;
-		}
+        public boolean add(Zone zone) {
+            return this.zonesValidatingConstraints.add(zone);
+        }
+
+        public Set<Zone> getZonesValidatingConstraints() {
+            return this.zonesValidatingConstraints;
+        }
 
     }
-    
+
     public static class AnycastLookupResponse extends AnycastResponse {
 
-    	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-    	private Set<Zone> zonesValidatingConstraints;
-    	
-    	public AnycastLookupResponse(AnycastLookupRequest request) {
-			super(request);
-			this.zonesValidatingConstraints = request.getZonesValidatingConstraints();
-		}
+        private Set<Zone> zonesValidatingConstraints;
 
-		@Override
-		public void merge(AnycastResponse subResponse) {
-			super.incrementHopCount(subResponse.getHopCount());
-		}
+        public AnycastLookupResponse(AnycastLookupRequest request) {
+            super(request);
+            this.zonesValidatingConstraints =
+                    request.getZonesValidatingConstraints();
+        }
 
-		@Override
-		public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
-			return new AnycastResponseRouter<AnycastResponse>();
-		}
+        @Override
+        public void merge(AnycastResponse subResponse) {
+            super.incrementHopCount(subResponse.getHopCount());
+        }
 
-		public Set<Zone> getZonesValidatingConstraints() {
-			return this.zonesValidatingConstraints;
-		}
-		
+        @Override
+        public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
+            return new AnycastResponseRouter<AnycastResponse>();
+        }
+
+        public Set<Zone> getZonesValidatingConstraints() {
+            return this.zonesValidatingConstraints;
+        }
+
     }
 
 }

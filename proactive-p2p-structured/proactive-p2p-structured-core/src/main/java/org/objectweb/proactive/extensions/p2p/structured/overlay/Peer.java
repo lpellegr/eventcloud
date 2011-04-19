@@ -15,7 +15,6 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.Asynchronous
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 
-
 /**
  * A peer contains all operations which are common to peer-to-peer protocols.
  * 
@@ -25,7 +24,7 @@ public interface Peer extends Serializable {
 
     /**
      * Returns the unique identifier associated to this peer.
-     *  
+     * 
      * @return the unique identifier associated to this peer.
      */
     public UUID getId();
@@ -36,7 +35,7 @@ public interface Peer extends Serializable {
      * @return the ProActive {@link Body} associated to this peer.
      */
     public Body getBody();
-    
+
     /**
      * Returns the stub associated to the current peer.
      * 
@@ -45,8 +44,8 @@ public interface Peer extends Serializable {
     public Peer getStub();
 
     /**
-     * Sets the stub associated to the current peer.
-     * Useful only for component peer to initiate its stub.
+     * Sets the stub associated to the current peer. Useful only for component
+     * peer to initiate its stub.
      */
     public void setStub();
 
@@ -66,7 +65,7 @@ public interface Peer extends Serializable {
 
     /**
      * Sets the overlay associated to the current peer.
-     *
+     * 
      * @param structuredOverlay
      *            the overlay associated to the current peer.
      */
@@ -80,8 +79,8 @@ public interface Peer extends Serializable {
     public boolean isActivated();
 
     /**
-     * This method is used to initialize the state of the peer in 
-     * the special case where it is the first peer on the network.
+     * This method is used to initialize the state of the peer in the special
+     * case where it is the first peer on the network.
      * 
      * @return a boolean indicating if the operation has succeeded or not.
      * 
@@ -99,7 +98,8 @@ public interface Peer extends Serializable {
      * 
      * @param landmarkPeer
      *            the peer used as entry point.
-     * @return {@code true} if the operation has succeeded, {@code false} otherwise.
+     * @return {@code true} if the operation has succeeded, {@code false}
+     *         otherwise.
      * 
      * @throws NetworkAlreadyJoinedException
      *             if the current peer has already joined a network.
@@ -109,17 +109,20 @@ public interface Peer extends Serializable {
     /**
      * Forces the current peer to leave the network it has joined.
      * 
-     * @return {@code true} if the operation has succeeded, {@code false} otherwise.
-     *         
+     * @return {@code true} if the operation has succeeded, {@code false}
+     *         otherwise.
+     * 
      * @throws NetworkNotJoinedException
-     *             if the current peer try leave without having joined a network.
+     *             if the current peer try leave without having joined a
+     *             network.
      */
     public boolean leave() throws NetworkNotJoinedException;
 
     /**
      * Receives and handles the specified {@code operation} synchronously.
-     *
-     * @param operation the operation to handle.
+     * 
+     * @param operation
+     *            the operation to handle.
      * 
      * @return a response according to the operation type handled.
      */
@@ -127,43 +130,45 @@ public interface Peer extends Serializable {
 
     /**
      * Receives and handles the specified {@code operation} asynchronously.
-     *
-     * @param operation the operation to handle.
+     * 
+     * @param operation
+     *            the operation to handle.
      */
     public void receive(AsynchronousOperation operation);
 
     /**
-     * Receives in immediate service and handles the specified 
-     * {@code operation} synchronously.
+     * Receives in immediate service and handles the specified {@code operation}
+     * synchronously.
      * <p>
-     * To receive the operation in immediate service completely 
-     * by-passes the message queue model that comes with the active 
-     * objects, thus breaks the theoretical model and may introduce 
-     * race conditions.
+     * To receive the operation in immediate service completely by-passes the
+     * message queue model that comes with the active objects, thus breaks the
+     * theoretical model and may introduce race conditions.
      * 
-     * @param operation the operation to handle.
+     * @param operation
+     *            the operation to handle.
      * 
      * @return a response according to the operation type handled.
      */
     public ResponseOperation receiveImmediateService(SynchronousOperation operation);
 
     /**
-     * Receives in immediate service and handles the specified 
-     * {@code operation} synchronously.
+     * Receives in immediate service and handles the specified {@code operation}
+     * synchronously.
      * <p>
-     * To receive the operation in immediate service completely 
-     * by-passes the message queue model that comes with the active 
-     * objects, thus breaks the theoretical model and may introduce 
-     * race conditions.
+     * To receive the operation in immediate service completely by-passes the
+     * message queue model that comes with the active objects, thus breaks the
+     * theoretical model and may introduce race conditions.
      * 
-     * @param operation the operation to handle.
+     * @param operation
+     *            the operation to handle.
      */
     public void receiveImmediateService(AsynchronousOperation operation);
 
     /**
      * Routes the specified {@code msg}.
      * 
-     * @param msg the message to route.
+     * @param msg
+     *            the message to route.
      */
     public void route(RequestResponseMessage<?> msg);
 
@@ -175,8 +180,8 @@ public interface Peer extends Serializable {
      * 
      * @return the response in agreement with the request type sent.
      * 
-     * @throws DispatchException if a problem occurs when the query is
-     *                           dispatched.
+     * @throws DispatchException
+     *             if a problem occurs when the query is dispatched.
      */
     public Response<?> send(Request<?> request) throws DispatchException;
 

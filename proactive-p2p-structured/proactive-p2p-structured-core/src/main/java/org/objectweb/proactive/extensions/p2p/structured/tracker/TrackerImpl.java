@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A tracker assists in the communication between peers. It is used in order to
- * help a peer to join an existing network and to store several peers references in
- * order to retrieve them later as an entry point.
+ * help a peer to join an existing network and to store several peers references
+ * in order to retrieve them later as an entry point.
  * <p>
  * A tracker can join an another tracker. When a tracker A join a tracker B
  * which already has references to other trackers C and D for example, a
@@ -42,13 +42,16 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lpellegr
  */
-public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, Serializable {
+public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive,
+        Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected static transient Logger logger = LoggerFactory.getLogger(TrackerImpl.class);
+    protected static transient Logger logger =
+            LoggerFactory.getLogger(TrackerImpl.class);
 
-    private double probabilityToStorePeer = P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
+    private double probabilityToStorePeer =
+            P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
 
     protected String name = UUID.randomUUID().toString();
 
@@ -137,7 +140,8 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
      * @param trackerName
      *            the name of the tracker.
      */
-    public TrackerImpl(OverlayType type, String associatedNetworkName, String trackerName) {
+    public TrackerImpl(OverlayType type, String associatedNetworkName,
+            String trackerName) {
         this.type = type;
         this.associatedNetworkName = associatedNetworkName;
         this.name = trackerName;
@@ -149,7 +153,8 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
     public void initActivity(Body body) {
         this.stub = (Tracker) PAActiveObject.getStubOnThis();
         try {
-            this.trackersGroup = (Tracker) PAGroup.newGroup(Tracker.class.getCanonicalName());
+            this.trackersGroup =
+                    (Tracker) PAGroup.newGroup(Tracker.class.getCanonicalName());
         } catch (ClassNotReifiableException cnre) {
             cnre.printStackTrace();
         } catch (ClassNotFoundException cnfe) {
@@ -259,7 +264,8 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
      * {@inheritDoc}
      */
     public BooleanWrapper addTrackerToGroup(Tracker remoteReference) {
-        return new BooleanWrapper(PAGroup.getGroup(this.trackersGroup).add(remoteReference));
+        return new BooleanWrapper(PAGroup.getGroup(this.trackersGroup).add(
+                remoteReference));
     }
 
     /**
@@ -276,10 +282,10 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
         if (this.storedPeers.size() == 0) {
             return null;
         }
-        
+
         int randomPeerIndex = ProActiveRandom.nextInt(this.storedPeers.size());
         Peer randomPeer = this.storedPeers.get(randomPeerIndex);
-        
+
         if (this.checkAlertness(randomPeer)) {
             return randomPeer;
         } else {
@@ -299,12 +305,12 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
      * {@inheritDoc}
      */
     public List<Peer> getStoredPeers() {
-        for (int i=0; i<this.storedPeers.size(); i++) {
+        for (int i = 0; i < this.storedPeers.size(); i++) {
             if (!this.checkAlertness(this.storedPeers.get(i))) {
                 this.storedPeers.remove(i);
             }
         }
-        
+
         return this.storedPeers;
     }
 
@@ -314,14 +320,14 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
      * 
      * @param peer
      *            the remote peer to check.
-     *            
+     * 
      * @return <code>true</code> if the peer is accessible and activated,
      *         <code>false</code> otherwise.
      */
     private boolean checkAlertness(Peer peer) {
         try {
             return peer.isActivated();
-        } catch(ProActiveRuntimeException e) {
+        } catch (ProActiveRuntimeException e) {
             return false;
         }
     }
@@ -332,8 +338,8 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
     public boolean addOnNetwork(Peer remotePeer) {
         if (remotePeer.getType() != this.type) {
             throw new IllegalArgumentException(
-                    "Illegal Peer type. This tracker manages a "
-                    + this.type + " network");
+                    "Illegal Peer type. This tracker manages a " + this.type
+                            + " network");
         } else if (this.storedPeers.size() == 0) {
             try {
                 remotePeer.create();
@@ -342,7 +348,8 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
             }
             this.storePeer(remotePeer);
             if (logger.isInfoEnabled()) {
-                logger.info("Peer " + remotePeer.getId() + " has created a new network");
+                logger.info("Peer " + remotePeer.getId()
+                        + " has created a new network");
             }
         } else {
             try {
@@ -362,14 +369,14 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
                         e.printStackTrace();
                     }
                 }
-                
-                if (ProActiveRandom.nextDouble() 
-                        <= this.getProbabilityToStorePeer()) {
+
+                if (ProActiveRandom.nextDouble() <= this.getProbabilityToStorePeer()) {
                     this.storePeer(remotePeer);
                 }
-                
+
                 if (logger.isInfoEnabled()) {
-                    logger.info("Peer managing " + remotePeer + " has joined from " + peerToJoin);
+                    logger.info("Peer managing " + remotePeer
+                            + " has joined from " + peerToJoin);
                 }
             } catch (NetworkAlreadyJoinedException e) {
                 e.printStackTrace();
@@ -388,7 +395,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
     protected Peer getLandmarkPeerToJoin() {
         return this.getRandomPeer();
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -430,9 +437,11 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
         result &= trackersGroup.add(remoteTracker);
         trackersGroup.addAll(newTrackersReferences);
 
-        BooleanWrapper resultGroup = this.trackersGroup.addTrackerToGroup(this.stub);
+        BooleanWrapper resultGroup =
+                this.trackersGroup.addTrackerToGroup(this.stub);
         while (PAGroup.size(resultGroup) > 0) {
-            result &= ((BooleanWrapper) PAGroup.waitAndGetOneThenRemoveIt(resultGroup)).getBooleanValue();
+            result &=
+                    ((BooleanWrapper) PAGroup.waitAndGetOneThenRemoveIt(resultGroup)).getBooleanValue();
         }
 
         if (!this.isInGroup) {
@@ -446,16 +455,16 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
      * {@inheritDoc}
      */
     public BooleanWrapper notifyLeave(Tracker trackerReference) {
-        return new BooleanWrapper(PAGroup.getGroup(this.trackersGroup).remove(trackerReference));
+        return new BooleanWrapper(PAGroup.getGroup(this.trackersGroup).remove(
+                trackerReference));
     }
 
     /**
      * {@inheritDoc}
      */
     public String getBindingName() {
-        return (!this.associatedNetworkName.equals("default") ? "/"
-                + this.associatedNetworkName + "/" : "")
-                + this.name;
+        return (!this.associatedNetworkName.equals("default")
+                ? "/" + this.associatedNetworkName + "/" : "") + this.name;
     }
 
     /**
@@ -464,7 +473,9 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
     public String register() {
         String bindingName = null;
         try {
-            bindingName = PAActiveObject.registerByName(this.stub, this.getBindingName());
+            bindingName =
+                    PAActiveObject.registerByName(
+                            this.stub, this.getBindingName());
         } catch (ProActiveException pe) {
             pe.printStackTrace();
         }
@@ -486,10 +497,11 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive, S
     }
 
     public static String registerAndStoreBindingName(Tracker tracker,
-            String pathToTrackersPropertiesFile) {
+                                                     String pathToTrackersPropertiesFile) {
         String bindingName = TrackerImpl.register(tracker);
-        new TrackersProperties(pathToTrackersPropertiesFile).store(tracker
-                .getAssociatedNetworkName(), bindingName, tracker.getType().toString());
+        new TrackersProperties(pathToTrackersPropertiesFile).store(
+                tracker.getAssociatedNetworkName(), bindingName,
+                tracker.getType().toString());
         return bindingName;
     }
 

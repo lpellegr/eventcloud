@@ -18,20 +18,21 @@ public class RemoveStatementsResponse extends AnycastResponse {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a new {@link RemoveStatementsResponse} from the specified {@code request}.
+     * Constructs a new {@link RemoveStatementsResponse} from the specified
+     * {@code request}.
      * 
      * @param request
      */
     public RemoveStatementsResponse(RemoveStatementsRequest request) {
-    	super(request);
+        super(request);
     }
 
     /**
      * {@inheritDoc}
      */
-	@Override
-	public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
-		return new AnycastResponseRouter<AnycastResponse>();
-	}
+    @Override
+    public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
+        return new AnycastResponseRouter<AnycastResponse>();
+    }
 
 }

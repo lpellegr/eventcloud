@@ -2,9 +2,9 @@ package org.objectweb.proactive.extensions.p2p.structured.operations;
 
 import java.io.Serializable;
 
-
 /**
- * A ResponseOperation is a response associated to a {@link SynchronousOperation}.
+ * A ResponseOperation is a response associated to a
+ * {@link SynchronousOperation}.
  * 
  * @author lpellegr
  */
