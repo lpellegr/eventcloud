@@ -12,14 +12,11 @@
 		<level value="off" />
 	</logger>
 	<logger name="proactive">
-		<level value="info" />
-	</logger>
-	<logger name="org.objectweb.proactive.extensions.p2p.structured">
-		<level value="debug" />
+		<level value="off" />
 	</logger>
 
 	<root>
-		<priority value="info" />
+		<priority value="off" />
 		<appender-ref ref="console" />
 	</root>
 </log4j:configuration>
