@@ -553,8 +553,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * 
      * @return <code>true</code> when the join operation succeed and
      *         <code>false</code> when the peer receiving the operation is
-     *         already handling operation is already handling a join or leave
-     *         operation.
+     *         already handling a join/leave operation or when the landmarkPeer
+     *         is not activated.
      */
     public boolean join(Peer landmarkPeer) {
         JoinIntroduceResponseOperation response = null;

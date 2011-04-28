@@ -182,7 +182,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive,
             } catch (IOException e) {
                 // the tracker we try to unregister is not registered
             }
-            PAGroup.waitAll(trackersGroup.notifyLeave(this.stub));
+            PAGroup.waitAll(this.trackersGroup.notifyLeave(this.stub));
             this.isInGroup = false;
         }
     }
@@ -363,6 +363,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive, RunActive,
                                 + P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue()
                                 + " ms because a concurrent join or leave operation has been detected");
                     }
+
                     try {
                         Thread.sleep(P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
                     } catch (InterruptedException e) {

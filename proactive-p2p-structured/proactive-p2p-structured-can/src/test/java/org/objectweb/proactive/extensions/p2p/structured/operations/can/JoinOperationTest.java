@@ -1,80 +1,62 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
+import static org.junit.Assert.assertFalse;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
+import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 
 /**
- * Test cases for the Join operation in {@link AbstractCanOverlay}.
+ * Test cases associated to {@link AbstractCanOverlay#join(Peer)}.
  * 
- * @author Alexandre Trovato
- * @author Fanny Kilanga
  * @author lpellegr
  */
 public class JoinOperationTest {
 
-    private static Peer firstPeer;
+    private CANNetworkInitializer networkInitializer;
 
-    private static Peer secondPeer;
-
-    private static Peer thirdPeer;
-
-    private static Peer fourthPeer;
-
-    private static Peer firstComponentPeer;
-
-    private static Peer secondComponentPeer;
-
-    private static Peer thirdComponentPeer;
-
-    private static Peer fourthComponentPeer;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        firstPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
-        secondPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
-        thirdPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
-        fourthPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
-        firstComponentPeer =
-                PeerFactory.newComponentPeer(new BasicCanOverlay());
-        secondComponentPeer =
-                PeerFactory.newComponentPeer(new BasicCanOverlay());
-        thirdComponentPeer =
-                PeerFactory.newComponentPeer(new BasicCanOverlay());
-        fourthComponentPeer =
-                PeerFactory.newComponentPeer(new BasicCanOverlay());
-
-        firstPeer.create();
-        firstComponentPeer.create();
+    @Before
+    public void setUp() {
+        this.networkInitializer = new CANNetworkInitializer();
     }
 
     @Test
-    public void testSecondPeer() {
-        try {
-            Assert.assertTrue(secondPeer.join(JoinOperationTest.firstPeer));
-        } catch (NetworkAlreadyJoinedException e) {
-            e.printStackTrace();
-        }
+    public void testNeighborsAfterJoinOperationWithTwoPeers() {
+        this.networkInitializer.initializeNewNetwork(2);
 
-        // Check that the peers are neighbors
+        Peer firstPeer = this.networkInitializer.get(0);
+        Peer secondPeer = this.networkInitializer.get(1);
+
+        // checks that the peers are neighbors
         Assert.assertTrue(CanOperations.hasNeighbor(
                 firstPeer, secondPeer.getId()));
         Assert.assertTrue(CanOperations.hasNeighbor(
                 secondPeer, firstPeer.getId()));
 
-        // Check if a peer has itself in it neighbors list
+        // checks whether a peer has itself in its neighbors list
         Assert.assertFalse(CanOperations.hasNeighbor(
                 firstPeer, firstPeer.getId()));
         Assert.assertFalse(CanOperations.hasNeighbor(
                 secondPeer, secondPeer.getId()));
 
-        // Check if the zone of the peers are bordered
+        // checks whether the peers are abuts
         Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
                 firstPeer).getPeerZone().neighbors(
                 CanOperations.getIdAndZoneResponseOperation(secondPeer)
@@ -82,219 +64,117 @@ public class JoinOperationTest {
     }
 
     @Test
-    public void testThirdPeer() {
-        try {
-            Assert.assertTrue(JoinOperationTest.thirdPeer.join(JoinOperationTest.secondPeer));
-        } catch (NetworkAlreadyJoinedException e) {
-            e.printStackTrace();
-        }
+    public void testNeighborsAfterJoinOperationWithTwoPeerComponents() {
+        this.networkInitializer.initializeNewNetwork(2);
 
-        // Check that the peers are neighbors
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                firstPeer, thirdPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                secondPeer, thirdPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                thirdPeer, firstPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                thirdPeer, secondPeer.getId()));
+        Peer firstPeer = this.networkInitializer.getc(0);
+        Peer secondPeer = this.networkInitializer.getc(1);
 
-        // Check if a peer has itself in it neighbors list
+        // checks that the peers are neighbors
+        Assert.assertTrue(CanOperations.hasNeighbor(
+                firstPeer, secondPeer.getId()));
+        Assert.assertTrue(CanOperations.hasNeighbor(
+                secondPeer, firstPeer.getId()));
+
+        // checks whether a peer has itself in its neighbors list
         Assert.assertFalse(CanOperations.hasNeighbor(
-                thirdPeer, thirdPeer.getId()));
+                firstPeer, firstPeer.getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(
+                secondPeer, secondPeer.getId()));
 
-        // Check if the zone of the peers are bordered
+        // checks whether the peers are abuts
         Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
                 firstPeer).getPeerZone().neighbors(
-                CanOperations.getIdAndZoneResponseOperation(thirdPeer)
-                        .getPeerZone()), -1);
-        Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
-                secondPeer).getPeerZone().neighbors(
-                CanOperations.getIdAndZoneResponseOperation(thirdPeer)
+                CanOperations.getIdAndZoneResponseOperation(secondPeer)
                         .getPeerZone()), -1);
     }
 
-    @Test
-    public void testFourthPeer() {
+    @Test(expected = NetworkAlreadyJoinedException.class)
+    public void testJoinWithPeerWhichHasAlreadyJoined()
+            throws NetworkAlreadyJoinedException {
+        Peer landmarkPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
         try {
-            Assert.assertTrue(JoinOperationTest.fourthPeer.join(JoinOperationTest.thirdPeer));
+            landmarkPeer.create();
         } catch (NetworkAlreadyJoinedException e) {
             e.printStackTrace();
         }
+        Peer joiner = PeerFactory.newActivePeer(new BasicCanOverlay());
+        joiner.join(landmarkPeer);
+        joiner.join(landmarkPeer);
+    }
 
-        // Check that the peers are neighbors
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                secondPeer, fourthPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                thirdPeer, fourthPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                fourthPeer, secondPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                fourthPeer, thirdPeer.getId()));
-
-        // Check if a peer has itself in it neighbors list
-        Assert.assertFalse(CanOperations.hasNeighbor(
-                fourthPeer, fourthPeer.getId()));
-
-        // Check if the zone of the peers are bordered
-        Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
-                firstPeer).getPeerZone().neighbors(
-                CanOperations.getIdAndZoneResponseOperation(thirdPeer)
-                        .getPeerZone()), -1);
-
-        if (CanOperations.getIdAndZoneResponseOperation(firstPeer)
-                .getPeerZone()
-                .neighbors(
-                        CanOperations.getIdAndZoneResponseOperation(thirdPeer)
-                                .getPeerZone()) != -1) {
-            Assert.assertTrue(CanOperations.hasNeighbor(
-                    firstPeer, thirdPeer.getId()));
-            Assert.assertTrue(CanOperations.hasNeighbor(
-                    thirdPeer, firstPeer.getId()));
-        } else {
-            Assert.assertFalse(CanOperations.hasNeighbor(
-                    firstPeer, thirdPeer.getId()));
-            Assert.assertFalse(CanOperations.hasNeighbor(
-                    thirdPeer, firstPeer.getId()));
-        }
-
-        if (CanOperations.getIdAndZoneResponseOperation(firstPeer)
-                .getPeerZone()
-                .neighbors(
-                        CanOperations.getIdAndZoneResponseOperation(fourthPeer)
-                                .getPeerZone()) != -1) {
-            Assert.assertTrue(CanOperations.hasNeighbor(
-                    firstPeer, fourthPeer.getId()));
-            Assert.assertTrue(CanOperations.hasNeighbor(
-                    fourthPeer, firstPeer.getId()));
-        } else {
-            Assert.assertFalse(CanOperations.hasNeighbor(
-                    firstPeer, fourthPeer.getId()));
-            Assert.assertFalse(CanOperations.hasNeighbor(
-                    fourthPeer, firstPeer.getId()));
+    @Test
+    public void testJoinOnPeerNotActivated() {
+        Peer landmarkPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
+        Peer joiner = PeerFactory.newActivePeer(new BasicCanOverlay());
+        try {
+            assertFalse(joiner.join(landmarkPeer));
+        } catch (NetworkAlreadyJoinedException e) {
+            e.printStackTrace();
         }
     }
 
     @Test
-    public void testSecondComponentPeer() {
+    public void testConcurrentJoin() {
+        final Peer landmarkPeer =
+                PeerFactory.newActivePeer(new BasicCanOverlay());
         try {
-            Assert.assertTrue(secondComponentPeer.join(JoinOperationTest.firstComponentPeer));
-        } catch (NetworkAlreadyJoinedException e) {
+            landmarkPeer.create();
+        } catch (StructuredP2PException e) {
             e.printStackTrace();
         }
 
-        // Check that the peers are neighbors
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                firstComponentPeer, secondComponentPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                secondComponentPeer, firstComponentPeer.getId()));
+        int nbPeersToJoin = 10;
 
-        // Check if a peer has itself in it neighbors list
-        Assert.assertFalse(CanOperations.hasNeighbor(
-                firstComponentPeer, firstComponentPeer.getId()));
-        Assert.assertFalse(CanOperations.hasNeighbor(
-                secondComponentPeer, secondComponentPeer.getId()));
+        List<Peer> peers = new ArrayList<Peer>(nbPeersToJoin);
+        for (int i = 0; i < nbPeersToJoin; i++) {
+            peers.add(PeerFactory.newActivePeer(new BasicCanOverlay()));
+        }
 
-        // Check if the zone of the peers are bordered
-        Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
-                firstComponentPeer)
-                .getPeerZone()
-                .neighbors(
-                        CanOperations.getIdAndZoneResponseOperation(
-                                secondComponentPeer).getPeerZone()), -1);
-    }
+        ExecutorService threadPool =
+                Executors.newFixedThreadPool(nbPeersToJoin < 20
+                        ? nbPeersToJoin : 20);
 
-    @Test
-    public void testThirdComponentPeer() {
+        boolean joinResult = true;
+
+        List<Future<Boolean>> futures =
+                new ArrayList<Future<Boolean>>(nbPeersToJoin);
+
+        final CountDownLatch doneSignal = new CountDownLatch(nbPeersToJoin);
+        for (final Peer p : peers) {
+            futures.add(threadPool.submit(new Callable<Boolean>() {
+                @Override
+                public Boolean call() {
+                    try {
+                        return p.join(landmarkPeer);
+                    } catch (NetworkAlreadyJoinedException e) {
+                        e.printStackTrace();
+                        return false;
+                    } finally {
+                        doneSignal.countDown();
+                    }
+                }
+            }));
+        }
+
+        for (Future<Boolean> future : futures) {
+            try {
+                joinResult &= future.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // a concurrent join may have occurred.
+        // hence, joinResult must be set to false
+        assertFalse(joinResult);
+
         try {
-            Assert.assertTrue(JoinOperationTest.thirdComponentPeer.join(JoinOperationTest.secondComponentPeer));
-        } catch (NetworkAlreadyJoinedException e) {
+            doneSignal.await();
+        } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-
-        // Check that the peers are neighbors
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                firstComponentPeer, thirdComponentPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                secondComponentPeer, thirdComponentPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                thirdComponentPeer, firstComponentPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                thirdComponentPeer, secondComponentPeer.getId()));
-
-        // Check if a peer has itself in it neighbors list
-        Assert.assertFalse(CanOperations.hasNeighbor(
-                thirdComponentPeer, thirdComponentPeer.getId()));
-
-        // Check if the zone of the peers are bordered
-        Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
-                firstComponentPeer).getPeerZone().neighbors(
-                CanOperations.getIdAndZoneResponseOperation(thirdComponentPeer)
-                        .getPeerZone()), -1);
-        Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
-                secondComponentPeer).getPeerZone().neighbors(
-                CanOperations.getIdAndZoneResponseOperation(thirdComponentPeer)
-                        .getPeerZone()), -1);
-    }
-
-    @Test
-    public void testFourthComponentPeer() {
-        try {
-            Assert.assertTrue(JoinOperationTest.fourthComponentPeer.join(JoinOperationTest.thirdComponentPeer));
-        } catch (NetworkAlreadyJoinedException e) {
-            e.printStackTrace();
-        }
-
-        // Check that the peers are neighbors
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                secondComponentPeer, fourthComponentPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                thirdComponentPeer, fourthComponentPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                fourthComponentPeer, secondComponentPeer.getId()));
-        Assert.assertTrue(CanOperations.hasNeighbor(
-                fourthComponentPeer, thirdComponentPeer.getId()));
-
-        // Check if a peer has itself in it neighbors list
-        Assert.assertFalse(CanOperations.hasNeighbor(
-                fourthComponentPeer, fourthComponentPeer.getId()));
-
-        // Check if the zone of the peers are bordered
-        Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
-                firstComponentPeer).getPeerZone().neighbors(
-                CanOperations.getIdAndZoneResponseOperation(thirdComponentPeer)
-                        .getPeerZone()), -1);
-
-        if (CanOperations.getIdAndZoneResponseOperation(firstComponentPeer)
-                .getPeerZone()
-                .neighbors(
-                        CanOperations.getIdAndZoneResponseOperation(
-                                thirdComponentPeer).getPeerZone()) != -1) {
-            Assert.assertTrue(CanOperations.hasNeighbor(
-                    firstComponentPeer, thirdComponentPeer.getId()));
-            Assert.assertTrue(CanOperations.hasNeighbor(
-                    thirdComponentPeer, firstComponentPeer.getId()));
-        } else {
-            Assert.assertFalse(CanOperations.hasNeighbor(
-                    firstComponentPeer, thirdComponentPeer.getId()));
-            Assert.assertFalse(CanOperations.hasNeighbor(
-                    thirdComponentPeer, firstComponentPeer.getId()));
-        }
-
-        if (CanOperations.getIdAndZoneResponseOperation(firstComponentPeer)
-                .getPeerZone()
-                .neighbors(
-                        CanOperations.getIdAndZoneResponseOperation(
-                                fourthComponentPeer).getPeerZone()) != -1) {
-            Assert.assertTrue(CanOperations.hasNeighbor(
-                    firstComponentPeer, fourthComponentPeer.getId()));
-            Assert.assertTrue(CanOperations.hasNeighbor(
-                    fourthComponentPeer, firstComponentPeer.getId()));
-        } else {
-            Assert.assertFalse(CanOperations.hasNeighbor(
-                    firstComponentPeer, fourthComponentPeer.getId()));
-            Assert.assertFalse(CanOperations.hasNeighbor(
-                    fourthComponentPeer, firstComponentPeer.getId()));
         }
     }
 

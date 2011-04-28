@@ -7,7 +7,6 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -84,11 +83,11 @@ public interface Peer extends Serializable {
      * 
      * @return a boolean indicating if the operation has succeeded or not.
      * 
-     * @throws StructuredP2PException
+     * @throws NetworkAlreadyJoinedException
      *             if the peer has already joined or created an existing
      *             network.
      */
-    public boolean create() throws StructuredP2PException;
+    public boolean create() throws NetworkAlreadyJoinedException;
 
     /**
      * Forces the current peer to join an existing network by using the
@@ -98,9 +97,9 @@ public interface Peer extends Serializable {
      * 
      * @param landmarkPeer
      *            the peer used as entry point.
-     * @return {@code true} if the operation has succeeded, {@code false}
-     *         otherwise.
-     * 
+     * @return Returns {@code true} if the operation has succeeded,
+     *         {@code false} otherwise (e.g. if a concurrent join or leave
+     *         operation is detected).
      * @throws NetworkAlreadyJoinedException
      *             if the current peer has already joined a network.
      */

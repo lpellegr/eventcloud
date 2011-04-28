@@ -89,7 +89,7 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
 
         if (logger.isDebugEnabled()) {
             logger.debug("New datastore with id '" + this.id
-                    + "' has been created.");
+                    + "' has been created");
         }
     }
 
@@ -164,7 +164,7 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         this.writeLock.lock();
         try {
             this.commitPendingModifications();
-            logger.debug("Fix consistency due to read operation.");
+            logger.debug("Fix consistency due to read operation");
         } finally {
             this.writeLock.unlock();
         }

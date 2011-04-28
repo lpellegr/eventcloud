@@ -53,15 +53,8 @@ public class TrackerFactory {
      *            the type of network the tracker manages.
      * 
      * @return the new tracker active object created.
-     * 
-     * @throws ActiveObjectCreationException
-     *             if a problem occurs during the creation of the active object.
-     * @throws NodeException
-     *             if the node on which the tracker must be deployed has some
-     *             problems.
      */
-    public static Tracker newActiveTracker(OverlayType type)
-            throws ActiveObjectCreationException, NodeException {
+    public static Tracker newActiveTracker(OverlayType type) {
         return TrackerFactory.newActiveTracker(type, "default");
     }
 
@@ -75,12 +68,8 @@ public class TrackerFactory {
      *            the name of the network the tracker manages.
      * 
      * @return the new tracker active object created.
-     * 
-     * @throws ActiveObjectCreationException
-     *             if a problem occurs during the creation of the active object.
      */
-    public static Tracker newActiveTracker(OverlayType type, String networkName)
-            throws ActiveObjectCreationException, NodeException {
+    public static Tracker newActiveTracker(OverlayType type, String networkName) {
         return TrackerFactory.newActiveTracker(type, networkName, null);
     }
 
@@ -94,15 +83,8 @@ public class TrackerFactory {
      *            the node to use for deployment.
      * 
      * @return the new tracker active object created.
-     * 
-     * @throws ActiveObjectCreationException
-     *             if a problem occurs during the creation of the active object.
-     * @throws NodeException
-     *             if the node on which the tracker must be deployed has some
-     *             problems.
      */
-    public static Tracker newActiveTracker(OverlayType type, Node node)
-            throws ActiveObjectCreationException, NodeException {
+    public static Tracker newActiveTracker(OverlayType type, Node node) {
         return TrackerFactory.newActiveTracker(type, "default", node);
     }
 
@@ -118,18 +100,19 @@ public class TrackerFactory {
      *            the node to use for deployment.
      * 
      * @return the new tracker active object created.
-     * 
-     * @throws ActiveObjectCreationException
-     *             if a problem occurs during the creation of the active object.
-     * @throws NodeException
-     *             if the node on which the tracker must be deployed has some
-     *             problems.
      */
     public static Tracker newActiveTracker(OverlayType type,
-                                           String networkName, Node node)
-            throws ActiveObjectCreationException, NodeException {
-        return PAActiveObject.newActive(TrackerImpl.class, new Object[] {
-                type, networkName}, node);
+                                           String networkName, Node node) {
+        try {
+            return PAActiveObject.newActive(TrackerImpl.class, new Object[] {
+                    type, networkName}, node);
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+        } catch (NodeException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**
