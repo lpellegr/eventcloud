@@ -45,7 +45,7 @@
 
 	<repositories>
 		<!-- TODO: removes these repositories as soon as possible! Instead we must 
-			use OSS Sonatype and/or maven central repositories! -->
+			use our own private repository or Maven Central via Sonatype OSS -->
 		<repository>
 			<id>sti2-archiva-external</id>
 			<url>http://maven.sti2.at/archiva/repository/external</url>
@@ -60,8 +60,8 @@
 			<url>http://dspace.gforge.inria.fr/maven2/repository/releases</url>
 		</repository>
 		<repository>
-			<id>semweb4j</id>
-			<url>http://mavenrepo.fzi.de/semweb4j.org/repo/</url>
+			<id>semweb4j-repo</id>
+			<url>http://semweb4j.org/repo/</url>
 		</repository>
 	</repositories>
 
@@ -97,8 +97,13 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
+				<artifactId>slf4j-api</artifactId>
 				<version>1.6.1</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>0.9.28</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
@@ -191,6 +196,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- To force goal "eclipse:eclipse" to download javadoc and sources -->
+		<downloadJavadoc>true</downloadJavadoc>
+		<downloadSources>true</downloadSources>
 	</properties>
 
 </project>
