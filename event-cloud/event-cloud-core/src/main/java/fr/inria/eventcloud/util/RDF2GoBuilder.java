@@ -19,8 +19,6 @@ import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.UriOrVariable;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 
-import at.sti2.semanticspaces.api.exceptions.SemanticSpaceException;
-
 import com.ontotext.trree.rdf2go.OwlimModelFactory;
 
 /**

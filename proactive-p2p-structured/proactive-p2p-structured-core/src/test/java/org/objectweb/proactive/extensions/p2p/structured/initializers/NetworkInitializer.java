@@ -3,9 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.initializers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
-import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.api.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
@@ -22,9 +20,9 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  */
 public abstract class NetworkInitializer {
 
-    private List<Peer> peers = new ArrayList<Peer>();
+    private List<Peer> peers;
 
-    private List<Peer> componentPeers = new ArrayList<Peer>();
+    private List<Peer> componentPeers;
 
     private Tracker tracker;
 
@@ -32,16 +30,21 @@ public abstract class NetworkInitializer {
 
     private OverlayType type;
 
+    public NetworkInitializer() {
+        this.peers = new ArrayList<Peer>();
+        this.componentPeers = new ArrayList<Peer>();
+    }
+    
     protected abstract Peer createActivePeer();
 
     protected abstract Peer createComponentPeer();
 
-    public void initializeNewNetwork(OverlayType type, int nbPeersToCreate)
-            throws ActiveObjectCreationException, NodeException {
+    protected void initializeNewNetwork(OverlayType type, int nbPeersToCreate) {
         this.type = type;
         Peer peerCreated;
 
         this.tracker = TrackerFactory.newActiveTracker(type);
+        
         for (int i = 0; i < nbPeersToCreate; i++) {
             peerCreated = this.createActivePeer();
             this.tracker.addOnNetwork(peerCreated);

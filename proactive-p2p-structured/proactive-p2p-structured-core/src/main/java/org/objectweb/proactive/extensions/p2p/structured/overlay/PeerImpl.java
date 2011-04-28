@@ -12,7 +12,6 @@ import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -167,7 +166,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean create() throws StructuredP2PException {
+    public boolean create() throws NetworkAlreadyJoinedException {
         if (this.activated.compareAndSet(false, true)) {
             return this.overlay.create();
         } else {
