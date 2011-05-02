@@ -82,7 +82,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         this.splitHistory = new LinkedList<SplitEntry>();
     }
 
-    public short contains(int dimension, StringElement element) {
+    public byte contains(byte dimension, StringElement element) {
         return this.zone.contains(dimension, element);
     }
 
@@ -114,8 +114,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      */
     public void removeOutdatedNeighbors() {
         Iterator<NeighborEntry> it = null;
-        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-            for (int direction = 0; direction < 2; direction++) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte direction = 0; direction < 2; direction++) {
                 it = this.neighborTable.get(dim, direction).values().iterator();
                 while (it.hasNext()) {
                     if (this.zone.neighbors(it.next().getZone()) == -1) {
@@ -128,8 +128,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
     /**
      * Returns the {@link NeighborEntry} which is the nearest from the specified
-     * <code>coordinate</code> and which contains the specified coordinate on
-     * <code>dimension-1</code> dimensions.
+     * {@code coordinate} and which contains the specified coordinate on
+     * {@code dimension-1} dimensions.
      * <p>
      * Currently, no metric has been chosen to evaluate the nearest peer.
      * Therefore, a peer is randomly selected from the set of peers verifying
@@ -145,14 +145,14 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *            the direction.
      * 
      * @return the {@link NeighborEntry} which is the nearest from the specified
-     *         <code>coordinate</code> and which contains the specified
-     *         coordinate on <code>dimension-1</code> dimensions.
+     *         {@code coordinate} and which contains the specified coordinate on
+     *         {@code dimension-1} dimensions.
      * 
      * @see AbstractCanOverlay#neighborsVerifyingDimensions(Collection,
-     *      StringCoordinate, int)
+     *      StringCoordinate, byte)
      */
     public NeighborEntry nearestNeighbor(StringCoordinate coordinate,
-                                         int dimension, int direction) {
+                                         byte dimension, byte direction) {
         List<NeighborEntry> neighbors =
                 this.neighborsVerifyingDimensions(this.neighborTable.get(
                         dimension, direction).values(), coordinate, dimension);
@@ -215,7 +215,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
         for (int i = 0; i < neighbors.size(); i++) {
             nbEltVerified = 0;
-            for (int j = 0; j < coordinate.size(); j++) {
+            for (byte j = 0; j < coordinate.size(); j++) {
                 if (neighbors.get(i).getZone().contains(
                         j, coordinate.getElement(j)) == 0) {
                     nbEltVerified++;
@@ -258,13 +258,13 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      */
     public List<NeighborEntry> neighborsVerifyingDimensions(Collection<NeighborEntry> neighbors,
                                                             StringCoordinate coordinate,
-                                                            int dimension) {
+                                                            byte dimension) {
         List<NeighborEntry> result = new ArrayList<NeighborEntry>();
         boolean validatesPrecedingDimensions;
 
         for (NeighborEntry entry : neighbors) {
             validatesPrecedingDimensions = true;
-            for (int dim = 0; dim < dimension; dim++) {
+            for (byte dim = 0; dim < dimension; dim++) {
                 if (entry.getZone().contains(dim, coordinate.getElement(dim)) != 0) {
                     validatesPrecedingDimensions = false;
                     break;
@@ -288,14 +288,14 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     /**
-     * Gets a random dimension number. The minimum dimension number is
-     * <code>0</code>. The maximum dimension number is defined by
+     * Gets a random dimension number. The minimum dimension number is {@code 0}
+     * . The maximum dimension number is defined by
      * {@link P2PStructuredProperties#CAN_NB_DIMENSIONS}.
      * 
      * @return a random dimension number.
      */
-    public static int getRandomDimension() {
-        return ProActiveRandom.nextInt(P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue());
+    public static byte getRandomDimension() {
+        return (byte) ProActiveRandom.nextInt(P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue());
     }
 
     /**
@@ -303,8 +303,11 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * 
      * @return a random direction number.
      */
-    public static int getRandomDirection() {
-        return ProActiveRandom.nextInt(2);
+    public static byte getRandomDirection() {
+        if (ProActiveRandom.nextBoolean()) {
+            return 1;
+        }
+        return 0;
     }
 
     /**
@@ -354,8 +357,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         buf.append(this.getId());
         buf.append(" has neighbor(s):\n");
 
-        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-            for (int direction = 0; direction < 2; direction++) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry neighbor : this.neighborTable.get(
                         dim, direction).values()) {
                     buf.append("  - ");
@@ -391,11 +394,11 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
             throw new ConcurrentModificationException();
         }
 
-        int dimension = 0;
+        byte dimension = 0;
         // TODO: choose the direction according to the number of triples to
         // transfer
-        int direction = getRandomDirection();
-        int directionInv = AbstractCanOverlay.getOppositeDirection(direction);
+        byte direction = getRandomDirection();
+        byte directionInv = AbstractCanOverlay.getOppositeDirection(direction);
 
         // gets the next dimension to split onto
         if (!this.splitHistory.isEmpty()) {
@@ -409,8 +412,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
         // neighbors affected for the new peer which joins the network
         NeighborTable pendingNewNeighborhood = new NeighborTable();
-        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-            for (int dir = 0; dir < 2; dir++) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte dir = 0; dir < 2; dir++) {
                 // the peer which is joining don't have the same neighbors as
                 // the
                 // landmark peer in the dimension and direction of the landmark
@@ -465,7 +468,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation operation) {
-        int directionInv =
+        byte directionInv =
                 getOppositeDirection(this.tmpJoinInformation.getDirection());
 
         // updates overlay information due to the split
@@ -478,8 +481,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         // removes the current peer from the neighbors that are back
         // the new peer which join and updates the zone maintained by
         // the others neighbors
-        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-            for (int dir = 0; dir < 2; dir++) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte dir = 0; dir < 2; dir++) {
                 Iterator<NeighborEntry> it =
                         this.neighborTable.get(dim, dir).values().iterator();
                 NeighborEntry entry = null;
@@ -585,8 +588,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         PAFuture.waitFor(landmarkPeer.receiveImmediateService(new JoinWelcomeOperation()));
 
         // notify the neighbors that the current peer has joined
-        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-            for (int dir = 0; dir < 2; dir++) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte dir = 0; dir < 2; dir++) {
                 if (dim != this.splitHistory.getLast().getDimension()
                         || dir != getOppositeDirection(this.splitHistory.getLast()
                                 .getDirection())) {
@@ -612,14 +615,12 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * {@inheritDoc}
      */
     public boolean leave() {
-        // TODO fixes it (does not work)
-        return false;
         // /*
         // * The current peer associated to this overlay is the only peer on the
         // * network.
         // */
         // if (this.neighborTable.size() == 0) {
-        // return true;
+        return true;
         // }
         //
         // SplitEntry lastSplitEntry = this.splitHistory.pop();
@@ -756,8 +757,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     public void update() {
         this.removeOutdatedNeighbors();
 
-        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            for (int direction = 0; direction < 2; direction++) {
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte direction = 0; direction < 2; direction++) {
                 Iterator<NeighborEntry> it =
                         this.neighborTable.get(dimension, direction)
                                 .values()
@@ -806,15 +807,16 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     public void dumpNeighbors() {
-        logger.debug("Peer managing " + this.zone);
+        logger.debug("Peer managing {}", this.zone);
         NeighborTable neighborTable = this.getNeighborTable();
 
-        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            for (int direction = 0; direction < 2; direction++) {
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry entry : neighborTable.get(
                         dimension, direction).values()) {
-                    logger.debug("  * " + entry.getZone() + ", dimension="
-                            + dimension + ", direction=" + direction);
+                    logger.debug(
+                            "  * {}, dimension={}, direction={}", new Object[] {
+                                    entry.getZone(), dimension, direction});
                 }
             }
         }
@@ -838,21 +840,20 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *            the specified dimension.
      * @return the next dimension following the specified dimension.
      */
-    public static int getNextDimension(int dimension) {
-        return (dimension + 1)
-                % P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
+    public static byte getNextDimension(byte dimension) {
+        return (byte) ((dimension + 1) % P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue());
     }
 
     /**
-     * Returns the opposite direction of the specified direction.
+     * Returns the opposite direction of the specified {@code direction}.
      * 
      * @param direction
      *            the specified direction.
      * 
      * @return the opposite direction.
      */
-    public static int getOppositeDirection(int direction) {
-        return (direction + 1) % 2;
+    public static byte getOppositeDirection(byte direction) {
+        return (byte) ((direction + 1) % 2);
     }
 
     /**
@@ -862,8 +863,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *            the specified dimension.
      * @return the previous dimension following the specified dimension.
      */
-    public static int getPreviousDimension(int dimension) {
-        int dim = dimension - 1;
+    public static byte getPreviousDimension(byte dimension) {
+        byte dim = (byte) (dimension - 1);
         if (dim < 0) {
             dim = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         }
@@ -910,8 +911,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         // this.setZone(this.zone.merge(msg.getZoneToReallocate()));
         this.mergeDataReceived(msg);
 
-        int dimension = msg.getDimension();
-        int direction = msg.getDirection();
+        byte dimension = msg.getDimension();
+        byte direction = msg.getDirection();
 
         int index = -1, t = 0;
         for (SplitEntry entry : this.splitHistory) {

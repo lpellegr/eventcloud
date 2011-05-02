@@ -26,13 +26,8 @@ public class P2PStructuredProperties {
     public static final PropertyString TRACKER_SERVICES_ITF =
             new PropertyString("tracker.services.itf", "tracker-services");
 
-    public static final PropertyString CAN_COORDINATE_TYPE =
-            new PropertyString(
-                    "can.coordinate.element.type",
-                    "org.objectweb.proactive.extensions.p2p.structured.overlay.can.coordinates.StringElement");
-
-    public static final PropertyInteger CAN_NB_DIMENSIONS =
-            new PropertyInteger("can.nb.dimensions", 3);
+    public static final PropertyByte CAN_NB_DIMENSIONS = new PropertyByte(
+            "can.nb.dimensions", (byte) 3);
 
     public static final PropertyString CAN_LOWER_BOUND = new PropertyString(
             "can.lower.bound", "0");

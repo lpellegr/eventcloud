@@ -139,8 +139,8 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
                         new AnycastRoutingEntry(
                                 overlay.getId(), overlay.getRemotePeer()));
 
-                for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-                    for (int direction = 0; direction < 2; direction++) {
+                for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+                    for (byte direction = 0; direction < 2; direction++) {
                         Iterator<NeighborEntry> it =
                                 neighborsToSendTo.get(dim, direction)
                                         .values()
@@ -165,8 +165,8 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
                                                final AnycastRequest msg) {
         NeighborTable neighborsToSendTo = new NeighborTable();
 
-        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            for (int direction = 0; direction < 2; direction++) {
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry entry : ((AbstractCanOverlay) overlay).getNeighborTable()
                         .get(dimension, direction)
                         .values()) {
@@ -204,8 +204,8 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
     protected void doRoute(StructuredOverlay overlay, AnycastRequest request) {
         AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
 
-        short dimension = 0;
-        short direction = NeighborTable.ANY_DIRECTION;
+        byte dimension = 0;
+        byte direction = NeighborTable.DIRECTION_ANY;
 
         // finds the dimension on which the key to reach is not contained
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
@@ -214,10 +214,10 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
                             dimension));
 
             if (direction == -1) {
-                direction = NeighborTable.INFERIOR_DIRECTION;
+                direction = NeighborTable.DIRECTION_INFERIOR;
                 break;
             } else if (direction == 1) {
-                direction = NeighborTable.SUPERIOR_DIRECTION;
+                direction = NeighborTable.DIRECTION_SUPERIOR;
                 break;
             }
         }

@@ -15,9 +15,9 @@ public class SplitEntry implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private int dimension = 0;
+    private byte dimension = 0;
 
-    private int direction = 0;
+    private byte direction = 0;
 
     public SplitEntry() {
     }
@@ -30,7 +30,7 @@ public class SplitEntry implements Serializable {
      * @param direction
      *            the direction of the split.
      */
-    public SplitEntry(int dimension, int direction) {
+    public SplitEntry(byte dimension, byte direction) {
         this.dimension = dimension;
         this.direction = direction;
     }
@@ -40,7 +40,7 @@ public class SplitEntry implements Serializable {
      * 
      * @return the dimension of the split.
      */
-    public int getDimension() {
+    public byte getDimension() {
         return this.dimension;
     }
 
@@ -49,7 +49,7 @@ public class SplitEntry implements Serializable {
      * 
      * @return the direction of a split.
      */
-    public int getDirection() {
+    public byte getDirection() {
         return this.direction;
     }
 

@@ -35,7 +35,7 @@ public class NumericZoneView extends
         double distance = 0;
         double projection;
 
-        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             projection =
                     coordinate.getElement(dim).getValue()
                             - this.getCenter().getElement(dim).getValue();
@@ -54,7 +54,7 @@ public class NumericZoneView extends
         DoubleElement[] middleElts =
                 new DoubleElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
 
-        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+        for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             middleElts[i] =
                     (DoubleElement) super.lowerBound.getElement(i).middle(
                             super.upperBound.getElement(i));
@@ -72,7 +72,7 @@ public class NumericZoneView extends
         double area = 1;
 
         // find the percentage of the space for each dimension
-        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+        for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             area *=
                     super.upperBound.getElement(i).getValue()
                             - super.lowerBound.getElement(i).getValue();

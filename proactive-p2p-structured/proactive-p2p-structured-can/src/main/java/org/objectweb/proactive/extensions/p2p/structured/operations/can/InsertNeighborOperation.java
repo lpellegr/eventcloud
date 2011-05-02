@@ -25,12 +25,12 @@ public class InsertNeighborOperation implements SynchronousOperation {
     /**
      * The dimension of the neighbor to remove.
      */
-    private final int dimension;
+    private final byte dimension;
 
     /**
      * The direction of the neighbor to remove.
      */
-    private final int direction;
+    private final byte direction;
 
     /**
      * Constructor.
@@ -42,8 +42,8 @@ public class InsertNeighborOperation implements SynchronousOperation {
      * @param direction
      *            the direction of the neighbor to remove
      */
-    public InsertNeighborOperation(NeighborEntry neighborEntry, int dimension,
-            int direction) {
+    public InsertNeighborOperation(NeighborEntry neighborEntry, byte dimension,
+            byte direction) {
         this.entry = neighborEntry;
         this.dimension = dimension;
         this.direction = direction;
@@ -58,7 +58,7 @@ public class InsertNeighborOperation implements SynchronousOperation {
      * 
      * @return the dimension of the neighbor to remove.
      */
-    public int getDimension() {
+    public byte getDimension() {
         return this.dimension;
     }
 
@@ -67,7 +67,7 @@ public class InsertNeighborOperation implements SynchronousOperation {
      * 
      * @return the direction of the neighbor to remove.
      */
-    public int getDirection() {
+    public byte getDirection() {
         return this.direction;
     }
 

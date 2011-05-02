@@ -48,8 +48,8 @@ public class Network2DVisualizer extends JFrame {
         NeighborTable table = null;
         for (Peer peer : peers) {
             List<Zone> neighbors = new ArrayList<Zone>();
-            for (int dim = 0; dim < 2; dim++) {
-                for (int dir = 0; dir < 2; dir++) {
+            for (byte dim = 0; dim < 2; dim++) {
+                for (byte dir = 0; dir < 2; dir++) {
                     table = CanOperations.getNeighborTable(peer);
                     for (NeighborEntry entry : table.get(dim, dir).values()) {
                         neighbors.add((Zone) entry.getZone());
@@ -124,19 +124,27 @@ public class Network2DVisualizer extends JFrame {
         }
 
         public int getXmin(Zone z) {
-            return this.getWidth(z.getNumericView().getLowerBound(0).getValue());
+            return this.getWidth(z.getNumericView()
+                    .getLowerBound((byte) 0)
+                    .getValue());
         }
 
         public int getXmax(Zone z) {
-            return this.getWidth(z.getNumericView().getUpperBound(0).getValue());
+            return this.getWidth(z.getNumericView()
+                    .getUpperBound((byte) 0)
+                    .getValue());
         }
 
         public int getYmin(Zone z) {
-            return this.getWidth(z.getNumericView().getLowerBound(1).getValue());
+            return this.getWidth(z.getNumericView()
+                    .getLowerBound((byte) 1)
+                    .getValue());
         }
 
         public int getYmax(Zone z) {
-            return this.getWidth(z.getNumericView().getUpperBound(1).getValue());
+            return this.getWidth(z.getNumericView()
+                    .getUpperBound((byte) 1)
+                    .getValue());
         }
 
         public int getHeight(double v) {

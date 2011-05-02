@@ -56,7 +56,7 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
 
             // check that all zones retrieved validate the constraints
             for (Zone zone : response.getZonesValidatingConstraints()) {
-                Assert.assertEquals(0, zone.contains(1, elt));
+                Assert.assertEquals(0, zone.contains((byte) 1, elt));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,7 +83,7 @@ public class AnycastLookupRequestTest extends CANNetworkInitializer {
 
             // check that all zones retrieved validate the constraints
             for (Zone zone : response.getZonesValidatingConstraints()) {
-                Assert.assertEquals(0, zone.contains(1, elt));
+                Assert.assertEquals(0, zone.contains((byte) 1, elt));
             }
         } catch (Exception e) {
             e.printStackTrace();

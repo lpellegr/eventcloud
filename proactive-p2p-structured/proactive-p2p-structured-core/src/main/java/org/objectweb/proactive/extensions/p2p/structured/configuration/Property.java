@@ -10,7 +10,7 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
 public abstract class Property {
 
     public enum PropertyType {
-        STRING, INTEGER, BOOLEAN, DOUBLE;
+        STRING, INTEGER, BYTE, BOOLEAN, DOUBLE;
     }
 
     protected final String name;

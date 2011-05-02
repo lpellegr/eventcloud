@@ -24,12 +24,12 @@ public class MergeOperation implements SynchronousOperation {
     /**
      * The current dimension of the leaving peer.
      */
-    private final int dimension;
+    private final byte dimension;
 
     /**
      * The current direction of the leaving peer.
      */
-    private final int direction;
+    private final byte direction;
 
     /**
      * The neighbors of the leaving peer.
@@ -57,7 +57,7 @@ public class MergeOperation implements SynchronousOperation {
      * @param data
      *            data to reallocate.
      */
-    public MergeOperation(int dimension, int direction, UUID peerToMergeWith,
+    public MergeOperation(byte dimension, byte direction, UUID peerToMergeWith,
             Zone zone, NeighborTable neighbors, Object data) {
         if (zone == null) {
             throw new NullPointerException();
@@ -71,11 +71,11 @@ public class MergeOperation implements SynchronousOperation {
         this.zoneToReallocate = zone;
     }
 
-    public int getDimension() {
+    public byte getDimension() {
         return this.dimension;
     }
 
-    public int getDirection() {
+    public byte getDirection() {
         return this.direction;
     }
 

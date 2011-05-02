@@ -37,8 +37,8 @@ public class Can2dTest {
 
         for (Peer peer : networkInitializer.getTracker().getStoredPeers()) {
             NeighborTable table = CanOperations.getNeighborTable(peer);
-            for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-                for (int dir = 0; dir < 2; dir++) {
+            for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+                for (byte dir = 0; dir < 2; dir++) {
                     for (NeighborEntry entry : table.get(dim, dir).values()) {
                         Assert.assertTrue(CanOperations.getIdAndZoneResponseOperation(
                                 peer)
@@ -52,7 +52,7 @@ public class Can2dTest {
 
     public static void main(String[] args) {
         P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
-        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue(2);
+        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
         networkInitializer.initializeNewNetwork(20);
 
         SwingUtilities.invokeLater(new Runnable() {

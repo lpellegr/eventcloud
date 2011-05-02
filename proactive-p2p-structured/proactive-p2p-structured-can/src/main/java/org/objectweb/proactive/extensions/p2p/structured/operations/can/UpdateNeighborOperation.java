@@ -20,13 +20,13 @@ public class UpdateNeighborOperation implements SynchronousOperation {
 
     private final NeighborEntry entry;
 
-    private final int dimension;
+    private final byte dimension;
 
-    private final int direction;
+    private final byte direction;
 
     /**
-     * Constructs a new UpdateNeighborOperation with the specified
-     * <code>entry</code>, <code>dimension</code> and <code>direction</code>.
+     * Constructs a new UpdateNeighborOperation with the specified {@code entry}
+     * , {@code dimension} and {@code direction}.
      * 
      * @param entry
      *            the entry to containing the identifier of the peer to update
@@ -38,8 +38,8 @@ public class UpdateNeighborOperation implements SynchronousOperation {
      * @param direction
      *            the direction on which the neighbor to update is.
      */
-    public UpdateNeighborOperation(NeighborEntry entry, int dimension,
-            int direction) {
+    public UpdateNeighborOperation(NeighborEntry entry, byte dimension,
+            byte direction) {
         this.entry = entry;
         this.dimension = dimension;
         this.direction = direction;

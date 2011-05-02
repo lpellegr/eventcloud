@@ -39,11 +39,13 @@ public class NeighborTableTest extends CANNetworkInitializer {
         Peer secondPeer = PeerFactory.newActivePeer(new BasicCanOverlay());
 
         NeighborTable neighborTable = new NeighborTable();
-        neighborTable.add(new NeighborEntry(firstPeer), 0, 1);
-        neighborTable.add(new NeighborEntry(secondPeer), 0, 0);
+        neighborTable.add(new NeighborEntry(firstPeer), (byte) 0, (byte) 1);
+        neighborTable.add(new NeighborEntry(secondPeer), (byte) 0, (byte) 0);
 
-        Assert.assertTrue(neighborTable.contains(firstPeer.getId(), 0, 1));
-        Assert.assertTrue(neighborTable.contains(secondPeer.getId(), 0, 0));
+        Assert.assertTrue(neighborTable.contains(
+                firstPeer.getId(), (byte) 0, (byte) 1));
+        Assert.assertTrue(neighborTable.contains(
+                secondPeer.getId(), (byte) 0, (byte) 0));
 
         BasicCanOverlay overlay =
                 ((BasicCanOverlay) PAFuture.getFutureValue(this.peer.getOverlay()));
@@ -51,9 +53,9 @@ public class NeighborTableTest extends CANNetworkInitializer {
         this.peer.setOverlay(overlay);
 
         Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(this.peer.getOverlay())).getNeighborTable()
-                .contains(firstPeer.getId(), 0, 1));
+                .contains(firstPeer.getId(), (byte) 0, (byte) 1));
         Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(this.peer.getOverlay())).getNeighborTable()
-                .contains(secondPeer.getId(), 0, 0));
+                .contains(secondPeer.getId(), (byte) 0, (byte) 0));
     }
 
     @Test
@@ -62,11 +64,13 @@ public class NeighborTableTest extends CANNetworkInitializer {
         Peer secondPeer = PeerFactory.newComponentPeer(new BasicCanOverlay());
 
         NeighborTable neighborTable = new NeighborTable();
-        neighborTable.add(new NeighborEntry(firstPeer), 0, 1);
-        neighborTable.add(new NeighborEntry(secondPeer), 0, 0);
+        neighborTable.add(new NeighborEntry(firstPeer), (byte) 0, (byte) 1);
+        neighborTable.add(new NeighborEntry(secondPeer), (byte) 0, (byte) 0);
 
-        Assert.assertTrue(neighborTable.contains(firstPeer.getId(), 0, 1));
-        Assert.assertTrue(neighborTable.contains(secondPeer.getId(), 0, 0));
+        Assert.assertTrue(neighborTable.contains(
+                firstPeer.getId(), (byte) 0, (byte) 1));
+        Assert.assertTrue(neighborTable.contains(
+                secondPeer.getId(), (byte) 0, (byte) 0));
 
         BasicCanOverlay overlay =
                 ((BasicCanOverlay) PAFuture.getFutureValue(this.componentPeer.getOverlay()));
@@ -74,9 +78,9 @@ public class NeighborTableTest extends CANNetworkInitializer {
         this.componentPeer.setOverlay(overlay);
 
         Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(this.componentPeer.getOverlay())).getNeighborTable()
-                .contains(firstPeer.getId(), 0, 1));
+                .contains(firstPeer.getId(), (byte) 0, (byte) 1));
         Assert.assertTrue(((BasicCanOverlay) PAFuture.getFutureValue(this.componentPeer.getOverlay())).getNeighborTable()
-                .contains(secondPeer.getId(), 0, 0));
+                .contains(secondPeer.getId(), (byte) 0, (byte) 0));
     }
 
     @After

@@ -48,7 +48,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      *         {@code false} otherwise.
      */
     public boolean contains(C coordinate) {
-        for (int dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             if (this.contains(dim, coordinate.getElement(dim)) != 0) {
                 return false;
             }
@@ -76,7 +76,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      *         the zone view and {@code 1} if the coordinate is greater or equal
      *         to the upper bound of the zone view.
      */
-    public short contains(int dimension, E element) {
+    public byte contains(byte dimension, E element) {
         if (element == null) {
             return 0;
         }
@@ -103,7 +103,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      * @return {@code true} if the specified zone overlaps the current zone,
      *         {@code false} otherwise.
      */
-    public boolean overlaps(ZoneView<C, E, T> view, int dimension) {
+    public boolean overlaps(ZoneView<C, E, T> view, byte dimension) {
         E a = this.lowerBound.getElement(dimension);
         E b = this.upperBound.getElement(dimension);
         E c = view.getLowerBound(dimension);
@@ -125,7 +125,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      *         view on all dimensions, {@code false} otherwise.
      */
     public boolean overlaps(ZoneView<C, E, T> view) {
-        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+        for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             if (this.overlaps(view, i) == false) {
                 return false;
             }
@@ -152,7 +152,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      * @return a boolean indicating if the specified {@code view} abuts the
      *         current zone.
      */
-    public boolean abuts(ZoneView<C, E, T> view, int dimension,
+    public boolean abuts(ZoneView<C, E, T> view, byte dimension,
                          boolean direction) {
         return (direction && (this.lowerBound.getElement(dimension).compareTo(
                 view.getUpperBound(dimension)) == 0))
@@ -175,12 +175,12 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      * @return the dimension on which the given {@code view} neighbors the
      *         current one.
      */
-    public int neighbors(ZoneView<C, E, T> view) {
-        int overlaps = 0;
-        int abuts = 0;
-        int abutsDimension = -1;
+    public byte neighbors(ZoneView<C, E, T> view) {
+        byte overlaps = 0;
+        byte abuts = 0;
+        byte abutsDimension = -1;
 
-        for (int dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             if (this.overlaps(view, dimension)) {
                 overlaps++;
             } else {
@@ -213,7 +213,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      *         following the specified {@code dimension}.
      */
     @SuppressWarnings("unchecked")
-    public Pair<ZoneView<C, E, T>> split(int dimension) {
+    public Pair<ZoneView<C, E, T>> split(byte dimension) {
         Element<T> middle =
                 Element.middle(
                         this.lowerBound.getElement(dimension),
@@ -237,7 +237,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
 
     @SuppressWarnings("unchecked")
     public ZoneView<C, E, T> merge(ZoneView<C, E, T> view) {
-        int d = this.neighbors(view);
+        byte d = this.neighbors(view);
 
         try {
             Coordinate<E, T> lowerBoundCopy = this.lowerBound.clone();
@@ -303,11 +303,11 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
         return this.lowerBound;
     }
 
-    public E getLowerBound(int dimension) {
+    public E getLowerBound(byte dimension) {
         return this.lowerBound.getElement(dimension);
     }
 
-    public E getUpperBound(int dimension) {
+    public E getUpperBound(byte dimension) {
         return this.upperBound.getElement(dimension);
     }
 

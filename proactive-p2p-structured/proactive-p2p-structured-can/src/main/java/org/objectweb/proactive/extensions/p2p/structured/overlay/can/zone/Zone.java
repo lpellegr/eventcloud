@@ -67,7 +67,17 @@ public class Zone implements Serializable {
                         createDoubleCoordinate(1.0)));
     }
 
-    public Pair<Zone> split(int dimension) {
+    /**
+     * Returns a new {@link Pair} containing two zone resulting from the split
+     * of the current one on the specified {@code dimension}.
+     * 
+     * @param dimension
+     *            the dimension to split on.
+     * 
+     * @return two zone resulting from the split of the current one on the
+     *         specified {@code dimension}.
+     */
+    public Pair<Zone> split(byte dimension) {
         Pair<ZoneView<StringCoordinate, StringElement, String>> newUnicodeViews =
                 this.unicodeView.split(dimension);
         Pair<ZoneView<DoubleCoordinate, DoubleElement, Double>> newNumViews =
@@ -94,7 +104,7 @@ public class Zone implements Serializable {
         return this.numView;
     }
 
-    public short contains(int dimension, StringElement element) {
+    public byte contains(byte dimension, StringElement element) {
         return this.unicodeView.contains(dimension, element);
     }
 
@@ -103,7 +113,7 @@ public class Zone implements Serializable {
     }
 
     public boolean overlaps(ZoneView<StringCoordinate, StringElement, String> view,
-                            int dimension) {
+                            byte dimension) {
         return this.unicodeView.overlaps(view, dimension);
     }
 
@@ -112,7 +122,7 @@ public class Zone implements Serializable {
     }
 
     public boolean abuts(ZoneView<StringCoordinate, StringElement, String> view,
-                         int dimension, boolean direction) {
+                         byte dimension, boolean direction) {
         return this.unicodeView.abuts(view, dimension, direction);
     }
 
@@ -128,11 +138,11 @@ public class Zone implements Serializable {
         return this.unicodeView.getLowerBound();
     }
 
-    public StringElement getLowerBound(int dimension) {
+    public StringElement getLowerBound(byte dimension) {
         return this.unicodeView.getLowerBound(dimension);
     }
 
-    public StringElement getUpperBound(int dimension) {
+    public StringElement getUpperBound(byte dimension) {
         return this.unicodeView.getUpperBound(dimension);
     }
 

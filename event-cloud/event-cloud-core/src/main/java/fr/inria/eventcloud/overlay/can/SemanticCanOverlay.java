@@ -91,12 +91,15 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements
                             .toString());
 
             // Yeah, manual filtering is really ugly!
-            if (subject.compareTo(zone.getLowerBound(0).toString()) >= 0
-                    && subject.compareTo(zone.getUpperBound(0).toString()) < 0
-                    && predicate.compareTo(zone.getLowerBound(1).toString()) >= 0
-                    && predicate.compareTo(zone.getUpperBound(1).toString()) < 0
-                    && object.compareTo(zone.getLowerBound(2).toString()) >= 0
-                    && object.compareTo(zone.getUpperBound(2).toString()) < 0) {
+            if (subject.compareTo(zone.getLowerBound((byte) 0).toString()) >= 0
+                    && subject.compareTo(zone.getUpperBound((byte) 0)
+                            .toString()) < 0
+                    && predicate.compareTo(zone.getLowerBound((byte) 1)
+                            .toString()) >= 0
+                    && predicate.compareTo(zone.getUpperBound((byte) 1)
+                            .toString()) < 0
+                    && object.compareTo(zone.getLowerBound((byte) 2).toString()) >= 0
+                    && object.compareTo(zone.getUpperBound((byte) 2).toString()) < 0) {
 
                 statementsToTransfert.add(stmt);
             }
@@ -136,12 +139,15 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements
                     SemanticHelper.parseTripleElement(stmt.getObject()
                             .toString());
 
-            if (subject.compareTo(zone.getLowerBound(0).toString()) >= 0
-                    && subject.compareTo(zone.getUpperBound(0).toString()) < 0
-                    && predicate.compareTo(zone.getLowerBound(1).toString()) >= 0
-                    && predicate.compareTo(zone.getUpperBound(1).toString()) < 0
-                    && object.compareTo(zone.getLowerBound(2).toString()) >= 0
-                    && object.compareTo(zone.getUpperBound(2).toString()) < 0) {
+            if (subject.compareTo(zone.getLowerBound((byte) 0).toString()) >= 0
+                    && subject.compareTo(zone.getUpperBound((byte) 0)
+                            .toString()) < 0
+                    && predicate.compareTo(zone.getLowerBound((byte) 1)
+                            .toString()) >= 0
+                    && predicate.compareTo(zone.getUpperBound((byte) 1)
+                            .toString()) < 0
+                    && object.compareTo(zone.getLowerBound((byte) 2).toString()) >= 0
+                    && object.compareTo(zone.getUpperBound((byte) 2).toString()) < 0) {
                 this.datastore.removeStatement(
                         EventCloudProperties.DEFAULT_CONTEXT, stmt);
             }
