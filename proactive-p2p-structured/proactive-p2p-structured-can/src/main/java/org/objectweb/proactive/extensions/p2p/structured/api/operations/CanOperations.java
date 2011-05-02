@@ -40,7 +40,7 @@ public class CanOperations {
                 neighborID)))).getValue();
     }
 
-    public static void merge(Peer peer, int dimension, int direction,
+    public static void merge(Peer peer, byte dimension, byte direction,
                              UUID peerToMergeWith, Zone zone,
                              NeighborTable neighbors, Object data) {
         PAFuture.waitFor(peer.receiveImmediateService(new MergeOperation(
@@ -49,8 +49,8 @@ public class CanOperations {
 
     public static BooleanResponseOperation insertNeighbor(Peer peer,
                                                           NeighborEntry entry,
-                                                          int dimension,
-                                                          int direction) {
+                                                          byte dimension,
+                                                          byte direction) {
         return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new InsertNeighborOperation(
                 entry, dimension, direction)));
     }
@@ -63,14 +63,14 @@ public class CanOperations {
 
     public static BooleanResponseOperation removeNeighbor(Peer peer,
                                                           UUID peerIdentifier,
-                                                          int dimension,
-                                                          int direction) {
+                                                          byte dimension,
+                                                          byte direction) {
         return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new RemoveNeighborOperation(
                 peerIdentifier, dimension, direction)));
     }
 
     public static void updateNeighborOperation(Peer peer, NeighborEntry entry,
-                                               int dimension, int direction) {
+                                               byte dimension, byte direction) {
         PAFuture.waitFor(peer.receiveImmediateService(new UpdateNeighborOperation(
                 entry, dimension, direction)));
     }

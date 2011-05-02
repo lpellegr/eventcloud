@@ -34,7 +34,7 @@ public abstract class NetworkInitializer {
         this.peers = new ArrayList<Peer>();
         this.componentPeers = new ArrayList<Peer>();
     }
-    
+
     protected abstract Peer createActivePeer();
 
     protected abstract Peer createComponentPeer();
@@ -44,7 +44,7 @@ public abstract class NetworkInitializer {
         Peer peerCreated;
 
         this.tracker = TrackerFactory.newActiveTracker(type);
-        
+
         for (int i = 0; i < nbPeersToCreate; i++) {
             peerCreated = this.createActivePeer();
             this.tracker.addOnNetwork(peerCreated);

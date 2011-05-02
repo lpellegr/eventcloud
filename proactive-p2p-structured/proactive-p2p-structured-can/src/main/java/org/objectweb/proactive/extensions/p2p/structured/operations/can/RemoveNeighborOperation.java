@@ -28,17 +28,16 @@ public class RemoveNeighborOperation implements SynchronousOperation {
     /**
      * The dimension in which the neighbor to remove is.
      */
-    private final int dimension;
+    private final byte dimension;
 
     /**
      * The direction in which the neighbor to remove is.
      */
-    private final int direction;
+    private final byte direction;
 
     /**
      * Constructs a new RemoveNeighborOperation with the specified
-     * <code>peerIdentifier</code>, <code>dimension</code> and
-     * <code>direction</code>.
+     * {@code peerIdentifier}, {@code dimension} and {@code direction}.
      * 
      * @param peerIdentifier
      *            the identifier pointing to the neighbor to remove.
@@ -49,8 +48,8 @@ public class RemoveNeighborOperation implements SynchronousOperation {
      * @param direction
      *            the direction in which the neighbor to remove is.
      */
-    public RemoveNeighborOperation(UUID peerIdentifier, int dimension,
-            int direction) {
+    public RemoveNeighborOperation(UUID peerIdentifier, byte dimension,
+            byte direction) {
         this.peerIdentifier = peerIdentifier;
         this.dimension = dimension;
         this.direction = direction;
@@ -84,7 +83,7 @@ public class RemoveNeighborOperation implements SynchronousOperation {
      * 
      * @return the dimension in which the neighbor to remove is.
      */
-    public int getDimension() {
+    public byte getDimension() {
         return this.dimension;
     }
 
@@ -93,7 +92,7 @@ public class RemoveNeighborOperation implements SynchronousOperation {
      * 
      * @return the direction in which the neighbor to remove is.
      */
-    public int getDirection() {
+    public byte getDirection() {
         return this.direction;
     }
 

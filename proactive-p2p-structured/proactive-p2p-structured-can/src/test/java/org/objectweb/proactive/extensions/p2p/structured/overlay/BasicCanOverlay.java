@@ -23,32 +23,24 @@ public class BasicCanOverlay extends AbstractCanOverlay {
 
     @Override
     protected void affectDataReceived(Object dataReceived) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     protected void mergeDataReceived(MergeOperation msg) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     protected Object retrieveAllData() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected Object getDataIn(Zone zone) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected void removeDataIn(Zone zone) {
-        // TODO Auto-generated method stub
-
     }
 
 }

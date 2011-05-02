@@ -45,7 +45,7 @@ public final class DefaultAnycastConstraintsValidator extends
     }
 
     public final boolean validatesKeyConstraints(Zone zone) {
-        for (int i = 0; i < super.key.size(); i++) {
+        for (byte i = 0; i < super.key.size(); i++) {
             // if coordinate is null we skip the test
             if (super.key.getElement(i) != null) {
                 // the specified overlay does not contains the key

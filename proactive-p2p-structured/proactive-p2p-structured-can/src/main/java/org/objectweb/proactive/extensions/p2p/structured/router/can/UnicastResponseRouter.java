@@ -57,8 +57,8 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
     protected void doRoute(StructuredOverlay overlay, T response) {
         AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
 
-        short dimension = 0;
-        short direction = NeighborTable.ANY_DIRECTION;
+        byte dimension = 0;
+        byte direction = NeighborTable.DIRECTION_ANY;
 
         // finds the dimension on which the key to reach is not contained
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
@@ -67,10 +67,10 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
                             .getElement(dimension));
 
             if (direction == -1) {
-                direction = NeighborTable.INFERIOR_DIRECTION;
+                direction = NeighborTable.DIRECTION_INFERIOR;
                 break;
             } else if (direction == 1) {
-                direction = NeighborTable.SUPERIOR_DIRECTION;
+                direction = NeighborTable.DIRECTION_SUPERIOR;
                 break;
             }
         }

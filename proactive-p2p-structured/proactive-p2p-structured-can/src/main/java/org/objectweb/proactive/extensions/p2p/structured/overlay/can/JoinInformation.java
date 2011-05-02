@@ -11,15 +11,15 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
  */
 public class JoinInformation {
 
-    private final int dimension;
+    private final byte dimension;
 
-    private final int direction;
+    private final byte direction;
 
     private final Zone zone;
 
     private final NeighborEntry entry;
 
-    public JoinInformation(int dimension, int direction, Zone zone,
+    public JoinInformation(byte dimension, byte direction, Zone zone,
             NeighborEntry entry) {
         super();
         this.dimension = dimension;
@@ -28,11 +28,11 @@ public class JoinInformation {
         this.entry = entry;
     }
 
-    public int getDimension() {
+    public byte getDimension() {
         return this.dimension;
     }
 
-    public int getDirection() {
+    public byte getDirection() {
         return this.direction;
     }
 

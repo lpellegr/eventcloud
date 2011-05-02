@@ -21,9 +21,9 @@ public class LeaveOperation implements SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
-    private final int dimension;
+    private final byte dimension;
 
-    private final int direction;
+    private final byte direction;
 
     private final Collection<NeighborEntry> neighborsToMergeWith;
 
@@ -42,19 +42,19 @@ public class LeaveOperation implements SynchronousOperation {
      *            the direction of the peer having left.
      */
     public LeaveOperation(UUID peerHavingLeft,
-            Collection<NeighborEntry> neighborsToMergeWith, int dimension,
-            int direction) {
+            Collection<NeighborEntry> neighborsToMergeWith, byte dimension,
+            byte direction) {
         this.peerHavingLeft = peerHavingLeft;
         this.neighborsToMergeWith = neighborsToMergeWith;
         this.dimension = dimension;
         this.direction = direction;
     }
 
-    public int getDimension() {
+    public byte getDimension() {
         return this.dimension;
     }
 
-    public int getDirection() {
+    public byte getDirection() {
         return this.direction;
     }
 

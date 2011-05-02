@@ -60,7 +60,7 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>>
      * 
      * @return the {@link Element} at the given <code>index</code>.
      */
-    public E getElement(int index) {
+    public E getElement(byte index) {
         return this.values[index];
     }
 
@@ -145,7 +145,7 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>>
             return -1;
         }
 
-        for (int i = 0; i < this.size(); i++) {
+        for (byte i = 0; i < this.size(); i++) {
             if (!this.values[i].equals(coord.getElement(i))) {
                 return -1;
             }
