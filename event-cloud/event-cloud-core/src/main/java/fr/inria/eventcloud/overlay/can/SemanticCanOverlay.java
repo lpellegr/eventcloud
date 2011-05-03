@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.ontoware.aifbcommons.collection.ClosableIterable;
@@ -162,14 +161,6 @@ public class SemanticCanOverlay extends AbstractCanOverlay implements
     protected void affectDataReceived(Object dataReceived) {
         ClosableIterator<Statement> data =
                 ((ClosableIterableWrapper) dataReceived).toRDF2Go().iterator();
-
-        this.datastore.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void mergeDataReceived(MergeOperation msg) {
-        ClosableIterator<Statement> data =
-                ((ClosableIterable<Statement>) msg.getDataToReallocate()).iterator();
 
         this.datastore.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
     }

@@ -1,6 +1,5 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
@@ -23,10 +22,6 @@ public class BasicCanOverlay extends AbstractCanOverlay {
 
     @Override
     protected void affectDataReceived(Object dataReceived) {
-    }
-
-    @Override
-    protected void mergeDataReceived(MergeOperation msg) {
     }
 
     @Override

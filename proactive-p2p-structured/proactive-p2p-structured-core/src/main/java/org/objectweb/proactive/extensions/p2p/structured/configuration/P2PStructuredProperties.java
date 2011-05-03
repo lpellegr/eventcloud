@@ -35,6 +35,12 @@ public class P2PStructuredProperties {
     public static final PropertyString CAN_UPPER_BOUND = new PropertyString(
             "can.upper.bound", "{");
 
+    public static final PropertyInteger CAN_LEAVE_RETRY_MIN =
+            new PropertyInteger("can.leave.retry.min", 2000);
+
+    public static final PropertyInteger CAN_LEAVE_RETRY_MAX =
+            new PropertyInteger("can.leave.retry.max", 5000);
+
     public static final PropertyInteger CAN_REFRESH_TASK_START =
             new PropertyInteger("can.task.refresh.start", 0);
 

@@ -104,7 +104,7 @@ public class RemoveNeighborOperation implements SynchronousOperation {
         boolean result;
 
         if (dimension == -1 && direction == -1) {
-            result = table.remove(this.peerIdentifier);
+            result = table.remove(this.peerIdentifier) != null;
         } else {
             result =
                     table.remove(

@@ -7,6 +7,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,7 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntr
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinWelcomeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.ReplaceNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -36,6 +37,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 /**
  * AbstractCANOverlay is an implementation of Content-Addressable Network (CAN)
@@ -102,8 +105,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * @see AbstractCanOverlay#join(Peer)
      */
     protected abstract void affectDataReceived(Object dataReceived);
-
-    protected abstract void mergeDataReceived(MergeOperation msg);
 
     protected abstract Object retrieveAllData();
 
@@ -547,17 +548,16 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     /**
-     * Returns <code>true</code> when the join operation succeed and
-     * <code>false</code> when the peer receiving the operation is already
-     * handling an another operation.
+     * Returns {@code true} when the join operation succeed and {@code false}
+     * when the peer receiving the operation is already handling an another
+     * operation.
      * 
      * @param landmarkPeer
      *            the landmark node to join.
      * 
-     * @return <code>true</code> when the join operation succeed and
-     *         <code>false</code> when the peer receiving the operation is
-     *         already handling a join/leave operation or when the landmarkPeer
-     *         is not activated.
+     * @return {@code true} when the join operation succeed and {@code false}
+     *         when the peer receiving the operation is already handling a
+     *         join/leave operation or when the landmarkPeer is not activated.
      */
     public boolean join(Peer landmarkPeer) {
         JoinIntroduceResponseOperation response = null;
@@ -566,17 +566,14 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
                     (JoinIntroduceResponseOperation) PAFuture.getFutureValue(landmarkPeer.receiveImmediateService(new JoinIntroduceOperation(
                             this.getId(), this.getRemotePeer())));
         } catch (PeerNotActivatedRuntimeException e) {
-            if (logger.isInfoEnabled()) {
-                logger.info("Landmark peer " + landmarkPeer.getId()
-                        + " to join is not activated");
-            }
+            logger.info(
+                    "Landmark peer {} to join is not activated",
+                    landmarkPeer.getId());
             return false;
         } catch (ConcurrentModificationException e) {
-            if (logger.isInfoEnabled()) {
-                logger.info("Peer " + landmarkPeer.getId()
-                        + " is already handling a join operation for peer "
-                        + this.getId());
-            }
+            logger.info(
+                    "Peer {} is already handling a join operation for peer {}",
+                    landmarkPeer.getId(), this.getId());
             return false;
         }
 
@@ -603,10 +600,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
             }
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Peer " + this + " has joined the network from "
-                    + landmarkPeer);
-        }
+        logger.debug(
+                "Peer {} has joined the network from {}", this, landmarkPeer);
 
         return true;
     }
@@ -615,143 +610,106 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * {@inheritDoc}
      */
     public boolean leave() {
-        // /*
-        // * The current peer associated to this overlay is the only peer on the
-        // * network.
-        // */
-        // if (this.neighborTable.size() == 0) {
-        return true;
-        // }
-        //
-        // SplitEntry lastSplitEntry = this.splitHistory.pop();
-        // int lastDimension = lastSplitEntry.getDimension();
-        // int lastDirection = lastSplitEntry.getDirection();
-        //
-        // Map<UUID, NeighborEntry> neighborsToMergeWith =
-        // this.neighborTable.get(lastDimension,
-        // AbstractCanOverlay.getOppositeDirection(lastDirection));
-        //
-        // // /*
-        // // * Notify all the neighbors the current peer is preparing to leave.
-        // That
-        // // * force the neighbors to wait the current peer has finished to
-        // leave
-        // // * before to handle new requests.
-        // // */
-        // // for (NeighborEntry entry : this.getNeighborTable()) {
-        // // entry.getStub().notifyNeighborStartLeave(this.getIdentifier());
-        // // }
-        //
-        // /*
-        // * Terminate the current body in order to notify all the neighbors
-        // that
-        // * they can't send message to the current remote peer. If they try
-        // they
-        // * will receive a BlockingRequestReceiverException : this exception is
-        // * used by the tracker in order to detect a peer which is preparing to
-        // * leave when it have to add a peer on the network.
-        // */
-        //
-        // // TODO BlockingRequestReceiver
-        // // ((BlockingRequestReceiver) ((MigratableBody)
-        // // super.getLocalPeer().getBody())
-        // // .getRequestReceiver()).blockReception();
-        //
-        // switch (neighborsToMergeWith.size()) {
-        // case 0:
-        // /* We are alone on this pitiless world : nothing to do */
-        // break;
-        // case 1:
-        // neighborsToMergeWith.values().iterator().next().getStub().receive(
-        // new MergeOperation(lastDimension, lastDirection, this.getId(), this
-        // .getZone(), new NeighborTable(), this.retrieveAllData()));
-        // break;
-        // default:
-        // Zone zoneToSplit = this.getZone();
-        // Pair<Zone> newZones = null;
-        //
-        // /*
-        // * For the last dimension and direction of the split, we split
-        // * N-1 times, where N is the number of neighbors in the last
-        // * dimension and last reverse direction from the current peer.
-        // */
-        // for (NeighborEntry entry : neighborsToMergeWith.values()) {
-        // try {
-        // newZones = zoneToSplit.split(
-        // AbstractCanOverlay.getNextDimension(lastDimension),
-        // this.neighborTable.getNeighborEntry(
-        // entry.getId()).getZone().getUpperBound(
-        // AbstractCanOverlay.getNextDimension(lastDimension)));
-        // } catch (ZoneException e) {
-        // e.printStackTrace();
-        // }
-        //
-        // NeighborTable neighborsOfCurrentNeighbor = new NeighborTable();
-        // neighborsOfCurrentNeighbor.addAll(this.neighborTable);
-        //
-        // zoneToSplit = newZones[1];
-        //
-        // /*
-        // * Merge the new zones obtained with the suitable neighbors.
-        // */
-        // // FIXME The given Data are not good : we give all the
-        // // resources to each
-        // // neighbors to merge with
-        // entry.getStub().receive(
-        // new MergeOperation(lastDimension,
-        // lastDirection, this.getId(), newZones[0],
-        // neighborsOfCurrentNeighbor,
-        // this.retrieveAllData()));
-        // }
-        // break;
-        // }
-        //
-        // // this.neighborsDataStructure.removeAll(lastDimension,
-        // // CANOverlay.getOppositeDirection(lastDirection));
-        //
-        // /*
-        // * Send LeaveOperation in order to update the neighbors list.
-        // */
-        // for (int dim = 0; dim <
-        // P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-        // for (int direction = 0; direction < 2; direction++) {
-        // for (NeighborEntry entry : this.neighborTable.get(dim,
-        // direction).values()) {
-        // if (!neighborsToMergeWith.containsKey(entry.getId())) {
-        // entry.getStub().receive(
-        // new LeaveOperation(this.getId(), new
-        // ArrayList<NeighborEntry>(neighborsToMergeWith.
-        // values()), dim, AbstractCanOverlay
-        // .getOppositeDirection(direction)));
-        // }
-        // }
-        // }
-        // }
-        //
-        // // TODO BlockingRequestReceiver
-        // // ((BlockingRequestReceiver) ((MigratableBody)
-        // // super.getLocalPeer().getBody())
-        // // .getRequestReceiver()).acceptReception();
-        //
-        // /*
-        // * Notify all the old neighbors of the peer which is leaving that it
-        // has
-        // * terminated the leave operation.
-        // */
-        //
-        // // for (NeighborEntry entry : this.getNeighborTable()) {
-        // // entry.getStub().notifyNeighborEndLeave(this.getIdentifier());
-        // // }
-        // // for (NeighborEntry entry : neighborsToMergeWith.values()) {
-        // // entry.getStub().notifyNeighborEndLeave(this.getIdentifier());
-        // // }
-        //
-        // /*
-        // * Set all neighbors reference to null.
-        // */
-        // this.neighborTable.removeAll();
-        //
-        // return true;
+        if (this.neighborTable.size() == 0) {
+            return true;
+        }
+        
+        synchronized (this) {
+            if (this.peerLeavingId.get() != null
+                    || this.peerJoiningId.get() != null) {
+                retryLeave();
+                return false;
+            } else {
+                this.peerLeavingId.set(this.getId());
+            }
+        }
+
+        NeighborEntry suitableNeighbor =
+                this.neighborTable.getMergeableNeighbor(this.zone);
+
+        if (suitableNeighbor == null) {
+            retryLeave();
+            return false;
+        } else {
+            Pair<Byte> neighborDimDir =
+                    this.neighborTable.findDimensionAndDirection(suitableNeighbor.getId());
+
+            Set<NeighborEntry> neighbors =
+                    Sets.newHashSet(this.neighborTable.get(
+                            neighborDimDir.getFirst(),
+                            neighborDimDir.getSecond()).values());
+
+            PAFuture.waitFor(suitableNeighbor.getStub().receive(
+                    new LeaveOperation(
+                            this.getId(), this.zone, neighbors,
+                            this.retrieveAllData())));
+
+            // updates neighbors NeighborTable
+            for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+                for (byte dir = 0; dir < 2; dir++) {
+                    for (NeighborEntry entry : this.neighborTable.get(dim, dir)
+                            .values()) {
+                        if (dim != neighborDimDir.getFirst()
+                                && dir != neighborDimDir.getSecond()) {
+                            PAFuture.waitFor(entry.getStub().receive(
+                                    new ReplaceNeighborOperation(
+                                            this.getId(), entry)));
+                        }
+                    }
+                }
+            }
+
+            logger.info(
+                    "Peer {} has left the network and the zone has been taken over by {}",
+                    this, suitableNeighbor.getZone());
+            this.peerLeavingId.set(null);
+            return true;
+        }
+    }
+
+    private void retryLeave() {
+        int timeout =
+                ProActiveRandom.nextInt(P2PStructuredProperties.CAN_LEAVE_RETRY_MAX.getValue()
+                        - P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue())
+                        + P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue();
+
+        logger.info("Peer {} cannot leave at this time, retry in {} ms", this, timeout);
+        
+        try {
+            Thread.sleep(timeout);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        this.leave();
+    }
+
+    public EmptyResponseOperation processLeave(LeaveOperation operation) {
+        if (this.peerJoiningId.get() != null
+                || this.peerLeavingId.compareAndSet(
+                        null, operation.getPeerLeavingId())) {
+            byte dim =
+                    this.neighborTable.findDimension(operation.getPeerLeavingId());
+            byte dir =
+                    this.neighborTable.findDirection(operation.getPeerLeavingId());
+
+            this.zone = this.zone.merge(operation.getPeerLeavingZone());
+
+            if (operation.getData() != null) {
+                this.affectDataReceived(operation.getData());
+            }
+
+            this.neighborTable.removeAll(dim, dir);
+            for (NeighborEntry entry : operation.getNewNeighborsToSet()) {
+                this.neighborTable.add(entry, dim, dir);
+            }
+
+            this.peerLeavingId.set(null);
+        } else {
+            throw new ConcurrentModificationException();
+        }
+
+        return new EmptyResponseOperation();
     }
 
     public void update() {
@@ -886,53 +844,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      */
     public boolean hasNeighbor(UUID peerID) {
         return this.neighborTable.contains(peerID);
-    }
-
-    /*
-     * Messages handling
-     */
-
-    public EmptyResponseOperation handleLeaveMessage(LeaveOperation msg) {
-        this.neighborTable.remove(msg.getPeerHavingLeft());
-
-        for (NeighborEntry entry : msg.getNeighborsToMergeWith()) {
-            if (!this.getNeighborTable().contains(entry.getId())) {
-                this.neighborTable.add(
-                        entry, msg.getDimension(), msg.getDirection());
-            }
-        }
-        this.removeOutdatedNeighbors();
-
-        return new EmptyResponseOperation();
-    }
-
-    public EmptyResponseOperation handleMergeMessage(MergeOperation msg) {
-        // TODO related to the #leave operation to reimplement
-        // this.setZone(this.zone.merge(msg.getZoneToReallocate()));
-        this.mergeDataReceived(msg);
-
-        byte dimension = msg.getDimension();
-        byte direction = msg.getDirection();
-
-        int index = -1, t = 0;
-        for (SplitEntry entry : this.splitHistory) {
-            if (entry.getDimension() == dimension
-                    && entry.getDirection() == direction) {
-                index = t;
-            }
-            t++;
-        }
-
-        if (index >= 0) {
-            this.splitHistory.remove(index);
-        }
-
-        this.neighborTable.remove(
-                msg.getPeerToMergeWith(), dimension, direction);
-        this.neighborTable.addAll(msg.getNeighborsToReallocate());
-        this.removeOutdatedNeighbors();
-
-        return new EmptyResponseOperation();
     }
 
 }

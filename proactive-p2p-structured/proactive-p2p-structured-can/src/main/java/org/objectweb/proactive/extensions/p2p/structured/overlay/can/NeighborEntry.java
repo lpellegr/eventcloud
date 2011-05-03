@@ -35,7 +35,6 @@ public class NeighborEntry implements Serializable {
     }
 
     public NeighborEntry(UUID peerIdentifier, Peer peerStub, Zone peerZone) {
-        super();
         this.neighborIdentifier = peerIdentifier;
         this.neighborStub = peerStub;
         this.neighborZone = peerZone;

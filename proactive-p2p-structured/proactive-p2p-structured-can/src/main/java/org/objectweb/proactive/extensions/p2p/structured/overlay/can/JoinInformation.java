@@ -15,6 +15,7 @@ public class JoinInformation {
 
     private final byte direction;
 
+    // zone of the peer maintaining the JoinInformation object
     private final Zone zone;
 
     private final NeighborEntry entry;
