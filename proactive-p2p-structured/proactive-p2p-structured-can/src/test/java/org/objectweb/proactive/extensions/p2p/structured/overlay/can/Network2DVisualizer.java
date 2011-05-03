@@ -4,25 +4,35 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
@@ -41,27 +51,27 @@ public class Network2DVisualizer extends JFrame {
 
     private JComponent area;
 
-    private Map<Zone, ZoneEntry> peers;
+    private JButton joinButton;
+
+    private JButton leaveButton;
+
+    private JButton neighborsModeButton;
+
+    private PeersCache cache;
+
+    private enum Mode {
+        JOIN, LEAVE, SHOW_NEIGHBORS
+    };
+
+    private Mode mode;
 
     public Network2DVisualizer(List<Peer> peers) {
-        this.peers = new HashMap<Zone, ZoneEntry>();
-        NeighborTable table = null;
+        this.cache = new PeersCache();
         for (Peer peer : peers) {
-            List<Zone> neighbors = new ArrayList<Zone>();
-            for (byte dim = 0; dim < 2; dim++) {
-                for (byte dir = 0; dir < 2; dir++) {
-                    table = CanOperations.getNeighborTable(peer);
-                    for (NeighborEntry entry : table.get(dim, dir).values()) {
-                        neighbors.add((Zone) entry.getZone());
-                    }
-                }
-            }
-
-            this.peers.put((Zone) CanOperations.getIdAndZoneResponseOperation(
-                    peer).getPeerZone(), new ZoneEntry(
-                    getRandomColor(), neighbors));
+            this.cache.addEntry(peer);
         }
 
+        this.mode = Mode.SHOW_NEIGHBORS;
         this.createAndShowGUI();
     }
 
@@ -80,7 +90,38 @@ public class Network2DVisualizer extends JFrame {
     public void createAndShowGUI() {
         this.area = new Canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 
+        this.joinButton = new JButton("Join");
+        this.joinButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mode = Mode.JOIN;
+                joinButton.setBackground(new ColorUIResource(127, 238, 38));
+            }
+        });
+        this.leaveButton = new JButton("Leave");
+        this.leaveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mode = Mode.LEAVE;
+            }
+        });
+        this.neighborsModeButton = new JButton("Neighbors Mode");
+        this.neighborsModeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mode = Mode.SHOW_NEIGHBORS;
+            }
+        });
+
+        JPanel toolBar = new JPanel();
+        toolBar.setLayout(new FlowLayout(FlowLayout.CENTER));
+        toolBar.add(this.joinButton);
+        toolBar.add(this.leaveButton);
+        toolBar.add(this.neighborsModeButton);
+
         Container contentPane = super.getContentPane();
+
+        contentPane.add(toolBar, BorderLayout.NORTH);
         contentPane.add(this.area, BorderLayout.CENTER);
 
         super.pack();
@@ -103,19 +144,43 @@ public class Network2DVisualizer extends JFrame {
 
             this.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-                    Zone clickedZone =
-                            Canvas.this.getClicked(e.getX(), CANVAS_HEIGHT
-                                    - e.getY());
+                    PeerEntry entry =
+                            cache.findBy(e.getX(), CANVAS_HEIGHT - e.getY());
+
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        Canvas.this.zoneClicked = clickedZone;
+                        if (mode == Mode.JOIN) {
+                            Peer newPeer =
+                                    PeerFactory.newActivePeer(new BasicCanOverlay());
+                            try {
+                                newPeer.join(entry.getStub());
+                            } catch (NetworkAlreadyJoinedException ex) {
+                                ex.printStackTrace();
+                            }
+
+                            cache.addEntry(newPeer);
+                            cache.invalidate();
+                        } else if (mode == Mode.LEAVE) {
+                            try {
+                                entry.getStub().leave();
+                            } catch (NetworkNotJoinedException e1) {
+                                e1.printStackTrace();
+                            }
+
+                            cache.removeEntry(entry.getId());
+                            cache.invalidate();
+                        } else if (mode == Mode.SHOW_NEIGHBORS) {
+                            Canvas.this.zoneClicked = entry.getZone();
+                        }
+
+                        Canvas.this.repaint();
+
                         System.out.println("Clicked in (" + e.getX() + ","
                                 + e.getY() + ") wich is contained by zone "
-                                + clickedZone.getNumericView() + " <-> "
-                                + clickedZone);
-                        Canvas.this.repaint();
+                                + entry.getZone().getNumericView() + " <-> "
+                                + entry.getZone());
                     } else if (e.getButton() == MouseEvent.BUTTON3) {
-                        for (ZoneEntry entry : peers.values()) {
-                            entry.setColor(getRandomColor());
+                        for (PeerEntry peerEntry : cache) {
+                            peerEntry.setZoneColor(getRandomColor());
                         }
                         Canvas.this.repaint();
                     }
@@ -162,14 +227,14 @@ public class Network2DVisualizer extends JFrame {
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
             int height, xMin, xMax, yMin, yMax;
-            for (Zone zone : peers.keySet()) {
+            for (PeerEntry entry : cache) {
+                Zone zone = entry.getZone();
                 xMin = this.getXmin(zone);
                 xMax = this.getXmax(zone);
                 yMin = this.getYmin(zone);
                 yMax = this.getYmax(zone);
 
-                g2d.setColor(Network2DVisualizer.this.peers.get(zone)
-                        .getZoneColor());
+                g2d.setColor(entry.getZoneColor());
                 height = yMax - yMin;
                 g2d.fillRect(
                         xMin, CANVAS_HEIGHT - yMin - height, xMax - xMin,
@@ -196,7 +261,7 @@ public class Network2DVisualizer extends JFrame {
 
                 for (int i = 0; i < 2; i++) {
                     for (int j = 0; j < 2; j++) {
-                        for (Zone zone : peers.get(this.zoneClicked)
+                        for (Zone zone : cache.findBy(this.zoneClicked)
                                 .getNeighbors()) {
                             xMin = this.getXmin(zone);
                             xMax = this.getXmax(zone);
@@ -215,18 +280,6 @@ public class Network2DVisualizer extends JFrame {
             }
         }
 
-        public Zone getClicked(int x, int y) {
-            for (Zone zone : peers.keySet()) {
-                if (zone.getNumericView().contains(
-                        new DoubleCoordinate(new DoubleElement(x
-                                / (double) CANVAS_WIDTH), new DoubleElement(y
-                                / (double) CANVAS_HEIGHT)))) {
-                    return zone;
-                }
-            }
-            return null;
-        }
-
         public boolean contains(double[][] intervals, double[] coordinates) {
             for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
                 if ((coordinates[i] < intervals[i][0])
@@ -239,28 +292,137 @@ public class Network2DVisualizer extends JFrame {
         }
     }
 
-    private static class ZoneEntry {
+    private static class PeerEntry {
 
         private Color zoneColor;
 
+        private final Zone zone;
+
+        private final UUID id;
+
+        private final Peer stub;
+
         private final List<Zone> neighbors;
 
-        public ZoneEntry(final Color zoneColor, final List<Zone> neighbors) {
-            super();
+        public PeerEntry(final UUID id, final Peer stub, final Zone zone,
+                final Color zoneColor, final List<Zone> neighbors) {
+            this.id = id;
+            this.stub = stub;
+            this.zone = zone;
             this.zoneColor = zoneColor;
             this.neighbors = neighbors;
         }
 
-        public void setColor(Color randomColor) {
-            this.zoneColor = randomColor;
+        public UUID getId() {
+            return this.id;
         }
 
         public Color getZoneColor() {
             return this.zoneColor;
         }
 
+        public void setZoneColor(Color zoneColor) {
+            this.zoneColor = zoneColor;
+        }
+
+        public Zone getZone() {
+            return this.zone;
+        }
+
+        public Peer getStub() {
+            return this.stub;
+        }
+
         public List<Zone> getNeighbors() {
             return this.neighbors;
+        }
+
+    }
+
+    private static class PeersCache implements Iterable<PeerEntry> {
+
+        private Map<UUID, Peer> stubEntries;
+
+        private Map<UUID, PeerEntry> cacheEntries;
+
+        public PeersCache() {
+            this.stubEntries = new HashMap<UUID, Peer>();
+            this.cacheEntries = new HashMap<UUID, PeerEntry>();
+        }
+
+        public void addEntry(Peer peer) {
+            this.stubEntries.put(peer.getId(), peer);
+        }
+
+        public void removeEntry(UUID peerId) {
+            this.stubEntries.remove(peerId);
+        }
+
+        public synchronized void invalidate() {
+            this.cacheEntries.clear();
+        }
+
+        public PeerEntry findBy(Zone zone) {
+            this.fixCacheCoherence();
+
+            for (PeerEntry entry : this.cacheEntries.values()) {
+                if (entry.getZone().equals(zone)) {
+                    return entry;
+                }
+            }
+
+            return null;
+        }
+
+        public PeerEntry findBy(int x, int y) {
+            this.fixCacheCoherence();
+
+            for (PeerEntry entry : this.cacheEntries.values()) {
+                if (entry.getZone().getNumericView().contains(
+                        new DoubleCoordinate(new DoubleElement(x
+                                / (double) CANVAS_WIDTH), new DoubleElement(y
+                                / (double) CANVAS_HEIGHT)))) {
+                    return entry;
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public Iterator<PeerEntry> iterator() {
+            this.fixCacheCoherence();
+            return this.cacheEntries.values().iterator();
+        }
+
+        private void fixCacheCoherence() {
+            if (this.stubEntries.size() != this.cacheEntries.size()) {
+                for (UUID id : this.stubEntries.keySet()) {
+                    if (!this.cacheEntries.containsKey(id)) {
+                        this.populate(id);
+                    }
+                }
+            }
+        }
+
+        private void populate(UUID id) {
+            NeighborTable table = null;
+            List<Zone> neighbors = new ArrayList<Zone>();
+            Peer peerStub = this.stubEntries.get(id);
+
+            for (byte dim = 0; dim < 2; dim++) {
+                for (byte dir = 0; dir < 2; dir++) {
+                    table = CanOperations.getNeighborTable(peerStub);
+                    for (NeighborEntry entry : table.get(dim, dir).values()) {
+                        neighbors.add((Zone) entry.getZone());
+                    }
+                }
+            }
+
+            this.cacheEntries.put(id, new PeerEntry(
+                    id, peerStub, CanOperations.getIdAndZoneResponseOperation(
+                            peerStub).getPeerZone(), getRandomColor(),
+                    neighbors));
         }
 
     }

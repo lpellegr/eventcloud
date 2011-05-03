@@ -25,7 +25,7 @@ public class Can2dTest {
     @BeforeClass
     public static void setUp() {
         try {
-            networkInitializer.initializeNewNetwork(20);
+            networkInitializer.initializeNewNetwork(10);
         } catch (Exception e) {
             e.printStackTrace();
         }
