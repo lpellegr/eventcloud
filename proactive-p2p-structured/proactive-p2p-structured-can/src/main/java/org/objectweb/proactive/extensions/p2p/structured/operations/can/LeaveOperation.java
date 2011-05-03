@@ -8,12 +8,11 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
 /**
- * A {@code LeaveOperation} is used in order to notify the neighbors to remove
- * the peer which leaves from their {@link NeighborTable} and to update it with
- * new correct neighbors.
+ * A {@code LeaveOperation} is used to transfer information from the peer which
+ * left to the peer which takes over the zone.
  * 
  * @author lpellegr
  */
@@ -21,56 +20,43 @@ public class LeaveOperation implements SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
-    private final byte dimension;
+    private final UUID peerLeavingId;
 
-    private final byte direction;
+    private final Zone peerLeavingZone;
 
-    private final Collection<NeighborEntry> neighborsToMergeWith;
+    private final Collection<NeighborEntry> newNeighborsToSet;
 
-    private final UUID peerHavingLeft;
+    private final Object data;
 
-    /**
-     * Constructor.
-     * 
-     * @param peerHavingLeft
-     *            the identifier of the peer having left the network.
-     * @param neighborsToMergeWith
-     *            the neighbors to merge with.
-     * @param dimension
-     *            the dimension of the peer having left.
-     * @param direction
-     *            the direction of the peer having left.
-     */
-    public LeaveOperation(UUID peerHavingLeft,
-            Collection<NeighborEntry> neighborsToMergeWith, byte dimension,
-            byte direction) {
-        this.peerHavingLeft = peerHavingLeft;
-        this.neighborsToMergeWith = neighborsToMergeWith;
-        this.dimension = dimension;
-        this.direction = direction;
+    public LeaveOperation(UUID peerLeavingId, Zone peerLeavingZone,
+            Collection<NeighborEntry> newNeighborsToSet, Object data) {
+        this.peerLeavingId = peerLeavingId;
+        this.peerLeavingZone = peerLeavingZone;
+        this.newNeighborsToSet = newNeighborsToSet;
+        this.data = data;
     }
 
-    public byte getDimension() {
-        return this.dimension;
+    public UUID getPeerLeavingId() {
+        return this.peerLeavingId;
     }
 
-    public byte getDirection() {
-        return this.direction;
+    public Zone getPeerLeavingZone() {
+        return this.peerLeavingZone;
     }
 
-    public Collection<NeighborEntry> getNeighborsToMergeWith() {
-        return this.neighborsToMergeWith;
+    public Collection<NeighborEntry> getNewNeighborsToSet() {
+        return this.newNeighborsToSet;
     }
 
-    public UUID getPeerHavingLeft() {
-        return this.peerHavingLeft;
+    public Object getData() {
+        return this.data;
     }
 
     /**
      * {@inheritDoc}
      */
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        return ((AbstractCanOverlay) overlay).handleLeaveMessage(this);
+        return ((AbstractCanOverlay) overlay).processLeave(this);
     }
 
 }

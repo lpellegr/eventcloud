@@ -22,12 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * PeerImpl is a concrete implementation of {@link Peer}.It is composed of a
+ * PeerImpl is a concrete implementation of {@link Peer}. It is composed of a
  * {@link StructuredOverlay} which allows to have several implementations of
  * common operations for each peer-to-peer protocol to implement.
  * <p>
  * Warning, this class must not be instantiate directly. In order to create a
- * new active peer you must use the {@link PeerFactory}.
+ * new active peer you have to use the {@link PeerFactory}.
  * 
  * @author lpellegr
  */

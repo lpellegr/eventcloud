@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
 
 /**
  * Data structure used in order to store the neighbors of a {@link Peer} of type
@@ -110,6 +112,20 @@ public class NeighborTable implements Serializable {
         return this.entries[dimension];
     }
 
+    public NeighborEntry getMergeableNeighbor(Zone zone) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                for (NeighborEntry entry : this.entries[dim][direction].values()) {
+                    if (zone.canMerge(entry.getZone(), dim)) {
+                        return entry;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Returns an entry from the specified {@link Peer} identifier if it is
      * found.
@@ -170,26 +186,63 @@ public class NeighborTable implements Serializable {
         return this.entries[dimension][direction].containsKey(peerIdentifier);
     }
 
+    public Pair<Byte> findDimensionAndDirection(UUID peerIdentifier) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                if (this.entries[dim][direction].containsKey(peerIdentifier)) {
+                    return new Pair<Byte>(dim, direction);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public byte findDimension(UUID peerIdentifier) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                if (this.entries[dim][direction].containsKey(peerIdentifier)) {
+                    return dim;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    public byte findDirection(UUID peerIdentifier) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                if (this.entries[dim][direction].containsKey(peerIdentifier)) {
+                    return direction;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     /**
      * Removes the {@link NeighborEntry} identified by the specified peer
      * identifier.
      * 
      * @param peerIdentifier
-     *            the identifier to use for checking.
+     *            the identifier to use for the removal operation.
      * 
-     * @return {@code true} if the neighbor has been removed, {@code false}
-     *         otherwise.
+     * @return the dimension and the direction on which the peer was in the
+     *         table or {@code null} if the peer identified with
+     *         {@code peerIdentifier} has not been found in the table.
      */
-    public boolean remove(UUID peerIdentifier) {
+    public Pair<Byte> remove(UUID peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].remove(peerIdentifier) != null) {
-                    return true;
+                    return new Pair<Byte>(dim, direction);
                 }
             }
         }
 
-        return false;
+        return null;
     }
 
     public boolean remove(UUID peerIdentifier, byte dimension, byte direction) {

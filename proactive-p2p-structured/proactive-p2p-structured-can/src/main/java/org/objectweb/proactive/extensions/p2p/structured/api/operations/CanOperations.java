@@ -11,13 +11,11 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAnd
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetNeighborTableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.HasNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.InsertNeighborOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.can.MergeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.RemoveNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
 /**
  * CANOperations provides several static methods to perform operations on a
@@ -38,13 +36,6 @@ public class CanOperations {
     public static boolean hasNeighbor(Peer peer, UUID neighborID) {
         return ((BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new HasNeighborOperation(
                 neighborID)))).getValue();
-    }
-
-    public static void merge(Peer peer, byte dimension, byte direction,
-                             UUID peerToMergeWith, Zone zone,
-                             NeighborTable neighbors, Object data) {
-        PAFuture.waitFor(peer.receiveImmediateService(new MergeOperation(
-                dimension, direction, peerToMergeWith, zone, neighbors, data)));
     }
 
     public static BooleanResponseOperation insertNeighbor(Peer peer,

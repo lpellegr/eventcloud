@@ -3,13 +3,16 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createDoubleCoordinate;
 import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createStringCoordinate;
 
+import java.io.IOException;
 import java.io.Serializable;
 
+import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
 
@@ -88,6 +91,45 @@ public class Zone implements Serializable {
                 (NumericZoneView) newNumViews.getFirst()), new Zone(
                 (UnicodeZoneView) newUnicodeViews.getSecond(),
                 (NumericZoneView) newNumViews.getSecond()));
+    }
+
+    /**
+     * Indicates whether the specified {@code zone} can be merged with the
+     * current zone that abuts on the given {@code neighborDimension}.
+     * 
+     * @param zone
+     *            the zone to check with.
+     * 
+     * @param neighborDimension
+     *            the dimension on which the the given zone neighbor the current
+     *            one.
+     * 
+     * @return {@code true} if the specified zone can merged with the current
+     *         one, {@code false} otherwise.
+     */
+    public boolean canMerge(Zone zone, byte neighborDimension) {
+        NumericZoneView newNumView = null;
+        try {
+            newNumView =
+                    (NumericZoneView) MakeDeepCopy.WithObjectStream.makeDeepCopy(this.numView);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        newNumView.lowerBound.setElement(
+                neighborDimension, (DoubleElement) Element.min(
+                        this.numView.lowerBound.getElement(neighborDimension),
+                        zone.getNumericView().getLowerBound(neighborDimension)));
+
+        newNumView.upperBound.setElement(
+                neighborDimension, (DoubleElement) Element.max(
+                        this.numView.upperBound.getElement(neighborDimension),
+                        zone.getNumericView().getUpperBound(neighborDimension)));
+
+        return newNumView.getArea() == this.numView.getArea()
+                + zone.getNumericView().getArea();
     }
 
     public Zone merge(Zone zone) {

@@ -6,7 +6,6 @@ import java.util.List;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.api.TrackerFactory;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
@@ -60,25 +59,25 @@ public abstract class NetworkInitializer {
     }
 
     public void clearNetwork() {
-        for (Peer peer : this.peers) {
-            try {
-                peer.leave();
-            } catch (StructuredP2PException e) {
-                e.printStackTrace();
-            }
-        }
-
-        this.peers.clear();
-
-        for (Peer peer : this.componentPeers) {
-            try {
-                peer.leave();
-            } catch (StructuredP2PException e) {
-                e.printStackTrace();
-            }
-        }
-
-        this.componentPeers.clear();
+//        for (Peer peer : this.peers) {
+//            try {
+//                peer.leave();
+//            } catch (StructuredP2PException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        this.peers.clear();
+//
+//        for (Peer peer : this.componentPeers) {
+//            try {
+//                peer.leave();
+//            } catch (StructuredP2PException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        this.componentPeers.clear();
     }
 
     public List<Peer> getAllPeers() {
