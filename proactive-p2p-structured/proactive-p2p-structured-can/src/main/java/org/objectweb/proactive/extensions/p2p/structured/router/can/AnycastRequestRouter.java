@@ -10,7 +10,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.An
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
@@ -44,20 +44,20 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
      * reach a peer which validates the routing constraints.
      * 
      * @param overlay
-     *            the {@link AbstractCanOverlay} of the peer which validates
+     *            the {@link CanOverlay} of the peer which validates
      *            constraints.
      * 
      * @param request
      *            the message which is handled.
      */
-    public abstract void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay,
+    public abstract void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                         AnycastRequest request);
 
     /**
      * {@inheritDoc}
      */
     public void makeDecision(StructuredOverlay overlay, AnycastRequest request) {
-        AbstractCanOverlay canOverlay = ((AbstractCanOverlay) overlay);
+        CanOverlay canOverlay = ((CanOverlay) overlay);
         CanRequestResponseManager messagingManager =
                 (CanRequestResponseManager) canOverlay.getRequestResponseManager();
 
@@ -98,7 +98,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
      */
     protected void doHandle(final StructuredOverlay overlay,
                             final AnycastRequest request) {
-        AbstractCanOverlay canOverlay = ((AbstractCanOverlay) overlay);
+        CanOverlay canOverlay = ((CanOverlay) overlay);
 
         // the current peer has no neighbor: this means that the query can
         // only be handled by itself
@@ -108,7 +108,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
                     request.getId(), new ResponseEntry(1));
             AnycastResponse response = request.createResponse();
             response.incrementHopCount(1);
-            overlay.route(response);
+            response.route(overlay);
         } else {
             NeighborTable neighborsToSendTo =
                     getNeighborsToSendTo(overlay, request);
@@ -122,7 +122,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
                 response.incrementHopCount(1);
                 overlay.getResponseEntries().put(
                         response.getId(), new ResponseEntry(1));
-                overlay.route(response);
+                response.route(overlay);
             }
             // neighborsToSendTo > 0 means we have to perform many send
             // operation and the current peer must await for the number
@@ -137,7 +137,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
                 // constructs the routing list used by responses for return trip
                 request.getAnycastRoutingList().add(
                         new AnycastRoutingEntry(
-                                overlay.getId(), overlay.getRemotePeer()));
+                                overlay.getId(), overlay.getStub()));
 
                 for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
                     for (byte direction = 0; direction < 2; direction++) {
@@ -167,7 +167,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry entry : ((AbstractCanOverlay) overlay).getNeighborTable()
+                for (NeighborEntry entry : ((CanOverlay) overlay).getNeighborTable()
                         .get(dimension, direction)
                         .values()) {
                     AnycastRoutingEntry entryCommingFromSender =
@@ -202,7 +202,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
      *            the message to route.
      */
     protected void doRoute(StructuredOverlay overlay, AnycastRequest request) {
-        AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
+        CanOverlay overlayCAN = ((CanOverlay) overlay);
 
         byte dimension = 0;
         byte direction = NeighborTable.DIRECTION_ANY;
@@ -243,9 +243,10 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
         try {
             overlay.getResponseEntries().put(
                     request.getId(), new ResponseEntry(1));
-            request.getAnycastRoutingList().add(
-                    new AnycastRoutingEntry(
-                            overlay.getId(), overlay.getRemotePeer()));
+            request.getAnycastRoutingList()
+                    .add(
+                            new AnycastRoutingEntry(
+                                    overlay.getId(), overlay.getStub()));
             neighborChosen.getStub().route(request);
         } catch (ProActiveRuntimeException e) {
             logger.error("Error while sending the message to the neighbor managing "

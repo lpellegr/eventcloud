@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
@@ -16,8 +16,8 @@ import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.model.QueryRow;
 import org.ontoware.rdf2go.model.node.URI;
 
+import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.messages.response.can.StatementsCounterResponse;
-import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
 
 /**
  * Count the number of statements contained by each datastore associated to a
@@ -47,13 +47,11 @@ public class StatementsCounterRequest extends AnycastRequest {
     public AnycastRequestRouter<AnycastRequest> getRouter() {
         return new AnycastRequestRouter<AnycastRequest>() {
             @Override
-            public void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay,
+            public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                        AnycastRequest msg) {
                 ClosableIterator<QueryRow> it =
-                        ((SemanticCanOverlay) overlay).getDatastore()
-                                .sparqlSelect(
-                                        spaceURI,
-                                        "SELECT ?s WHERE { ?s ?p ?o }")
+                        ((SemanticDatastore) overlay.getDatastore()).sparqlSelect(
+                                spaceURI, "SELECT ?s WHERE { ?s ?p ?o }")
                                 .iterator();
                 long count = 0;
                 while (it.hasNext()) {

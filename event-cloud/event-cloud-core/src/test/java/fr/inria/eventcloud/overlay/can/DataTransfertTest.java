@@ -1,11 +1,12 @@
 package fr.inria.eventcloud.overlay.can;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 import java.util.Set;
 
-import junit.framework.Assert;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.ontoware.rdf2go.model.Statement;
@@ -34,68 +35,73 @@ public class DataTransfertTest {
     private final static Logger logger =
             LoggerFactory.getLogger(DataTransfertTest.class);
 
-    private static EventCloudInitializer initializer =
-            new EventCloudInitializer();
+    private EventCloudInitializer initializer;
 
     private static String[][] statementsToAdd = {
             {"http://A", "http://A", "http://A"},
             {"http://U", "http://U", "http://U"},
             {"http://Z", "http://Z", "http://Z"}};
 
-    @BeforeClass
-    public static void setUp() {
-        initializer.setUpNetworkOnLocalMachine(1);
+    @Before
+    public void setUp() {
+        this.initializer = new EventCloudInitializer();
+        this.initializer.setUpNetworkOnLocalMachine(1);
     }
 
     @Test
     public void testDataTransfert() {
         for (String[] stmt : statementsToAdd) {
-            initializer.getRandomPeer().addStatement(
+            this.initializer.getRandomPeer().addStatement(
                     EventCloudProperties.DEFAULT_CONTEXT,
                     RDF2GoBuilder.createStatementInternal(
                             stmt[0], stmt[1], stmt[2]));
         }
 
-        SemanticPeer newPeer = SemanticFactory.newActiveSemanticCanPeer();
-        SemanticPeer oldPeer = initializer.getRandomPeer();
-
-        initializer.getRandomTracker().addOnNetwork(newPeer);
-
-        if (logger.isInfoEnabled()) {
-            logger.info("Initial peer manages "
-                    + initializer.getRandomTracker().getRandomPeer());
-            logger.info("New peer manages " + newPeer);
-        }
+        SemanticPeer newPeer = SemanticFactory.newActiveSemanticPeer();
+        SemanticPeer oldPeer = this.initializer.getRandomPeer();
 
         String query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
 
-        Set<Statement> resultOldPeer =
+        Set<Statement> dataContainedByOldPeer =
                 SemanticHelper.asSet(((SparqlConstructResponseOperation) PAFuture.getFutureValue(oldPeer.receiveImmediateService(new SparqlConstructOperation(
                         EventCloudProperties.DEFAULT_CONTEXT, query)))).getResult()
                         .toRDF2Go());
 
-        Set<Statement> resultNewPeer =
+        logger.debug(
+                "Before join operation on old peer, the old peer contains {} data",
+                dataContainedByOldPeer.size());
+
+        this.initializer.getRandomTracker().addOnNetwork(newPeer);
+
+        logger.debug("Initial peer manages "
+                + this.initializer.getRandomTracker().getRandomPeer());
+        logger.debug("New peer manages " + newPeer);
+
+        dataContainedByOldPeer =
+                SemanticHelper.asSet(((SparqlConstructResponseOperation) PAFuture.getFutureValue(oldPeer.receiveImmediateService(new SparqlConstructOperation(
+                        EventCloudProperties.DEFAULT_CONTEXT, query)))).getResult()
+                        .toRDF2Go());
+
+        Set<Statement> dataContainedByNewPeer =
                 SemanticHelper.asSet(((SparqlConstructResponseOperation) PAFuture.getFutureValue(newPeer.receiveImmediateService(new SparqlConstructOperation(
                         EventCloudProperties.DEFAULT_CONTEXT, query)))).getResult()
                         .toRDF2Go());
 
-        Set<Statement> newSet = Sets.intersection(resultOldPeer, resultNewPeer);
+        logger.debug(
+                "After join operation on old peer with new peer, the old peer contains {} data whereas the new peer contains {} data",
+                dataContainedByOldPeer.size(), dataContainedByNewPeer.size());
 
-        if (logger.isInfoEnabled()) {
-            logger.info("Initial peer contains " + resultOldPeer.size()
-                    + " data");
-            logger.info("New peer contains " + resultNewPeer.size() + " data");
-        }
-
-        Assert.assertEquals(0, newSet.size());
-        Assert.assertEquals(statementsToAdd.length, resultOldPeer.size()
-                + resultNewPeer.size());
-        Assert.assertTrue(resultOldPeer.size() < statementsToAdd.length);
+        assertEquals(0, Sets.intersection(
+                dataContainedByOldPeer, dataContainedByNewPeer).size());
+        assertEquals(statementsToAdd.length, dataContainedByOldPeer.size()
+                + dataContainedByNewPeer.size());
+        assertTrue(dataContainedByOldPeer.size() < statementsToAdd.length);
+        assertTrue(dataContainedByOldPeer.size() > 0);
     }
 
-    @AfterClass
-    public static void tearDown() {
-        initializer.tearDownNetwork();
+    @After
+    public void tearDown() {
+        this.initializer.tearDownNetwork();
     }
 
 }

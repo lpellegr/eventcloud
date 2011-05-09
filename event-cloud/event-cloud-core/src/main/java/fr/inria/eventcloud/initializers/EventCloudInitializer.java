@@ -1,7 +1,6 @@
 package fr.inria.eventcloud.initializers;
 
 import java.io.File;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,7 +12,7 @@ import fr.inria.eventcloud.api.SemanticFactory;
 import fr.inria.eventcloud.deployment.NodeProvider;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.tracker.SemanticCanTracker;
+import fr.inria.eventcloud.tracker.SemanticTracker;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
@@ -23,7 +22,7 @@ import fr.inria.eventcloud.util.SemanticHelper;
  * @author lpellegr
  */
 public class EventCloudInitializer extends
-        SemanticNetworkInitializer<SemanticCanTracker> {
+        SemanticNetworkInitializer<SemanticTracker> {
 
     private ExecutorService threadsPool;
 
@@ -52,18 +51,15 @@ public class EventCloudInitializer extends
             throw new IllegalStateException("Network already initialized");
         }
 
-        SemanticCanTracker tracker =
-                SemanticFactory.newActiveSemanticCanTracker(UUID.randomUUID()
-                        .toString());
-        super.trackers = new SemanticCanTracker[] {tracker};
+        SemanticTracker tracker = SemanticFactory.newActiveSemanticTracker();
+        super.trackers = new SemanticTracker[] {tracker};
 
         if (this.finalizeTrackerInitialization != null) {
             this.finalizeTrackerInitialization.run(trackers);
         }
 
         SemanticPeer[] peers =
-                SemanticFactory.newActiveSemanticCanPeersInParallel(
-                        nbCanPeers, super.trackers);
+                SemanticFactory.newActiveSemanticPeersInParallel(nbCanPeers);
 
         this.addOnNetworkInParallel(peers);
 

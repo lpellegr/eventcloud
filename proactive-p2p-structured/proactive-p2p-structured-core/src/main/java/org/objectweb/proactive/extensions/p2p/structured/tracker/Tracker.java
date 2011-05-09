@@ -1,99 +1,58 @@
 package org.objectweb.proactive.extensions.p2p.structured.tracker;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
+import org.objectweb.proactive.extensions.p2p.structured.api.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
- * A tracker assists in the communication between peers. It is used in order to
- * help a peer to join an existing network and to store several peers references
- * in order to retrieve them later as an entry point.
+ * A tracker assists in the communication between peers. It serves as an
+ * entry-point in a peer-to-peer network by maintaining several peers
+ * references. These references are stored according to a specified probability
+ * rate. Please also note that a tracker can only maintain reference to peers of
+ * the same type (e.g. peers of type CAN or Chord but not the both at the same
+ * time). Take care of it when you call {@link #addOnNetwork(Peer)}.
  * <p>
  * A tracker can join an another tracker. When a tracker A join a tracker B
  * which already has references to other trackers C and D for example, a
- * reference on tracker B, C and D will be added.
+ * reference on tracker B, C and D will be added. Thus, a tracker has only to
+ * join one tracker in order to be bind to all the trackers which belong to the
+ * same network.
+ * <p>
+ * Warning, this class must not be instantiate directly. In order to create a
+ * new active tracker you must use the {@link TrackerFactory}.
  * 
  * @author lpellegr
  */
-public interface Tracker {
-
-    public String getName();
+public interface Tracker extends Serializable {
 
     /**
-     * Sets the name of the tracker.
+     * The init method is a convenient method for components which is used to
+     * initialize a {@link Tracker}. Once this method is called and the stub
+     * value is set, the next calls perform no action.
      * 
-     * @param name
-     *            the new name of the tracker.
-     */
-    public void setName(String name);
-
-    public String getAssociatedNetworkName();
-
-    /**
-     * Sets the associated network name.
+     * @param stub
+     *            the tracker remote reference.
      * 
      * @param networkName
-     *            the new associated network name.
+     *            the network name to use.
      */
-    public void setAssociatedNetworkName(String networkName);
-
-    public void setStub();
-
-    public OverlayType getType();
+    public void init(Tracker stub, String networkName);
 
     /**
-     * Sets the type of peers this tracker works.
+     * Drives the current tracker to join the specified {@code landmarkTracker}.
      * 
-     * @param type
-     *            the new type of peers this tracker works.
+     * @param landmarkTracker
+     *            the landmark remote tracker to use.
+     * @return {@code true} if the operation has succeeded, {@code false}
+     *         otherwise (e.g. if a join has already be done).
      */
-    public void setType(OverlayType type);
-
-    /**
-     * Returns the probability to store a {@link Peer} reference.
-     * 
-     * @return the probability to store a {@link Peer} reference.
-     */
-    public double getProbabilityToStorePeer();
-
-    public void setProbabilityToStorePeer(double p);
-
-    public Group<Tracker> getGroup();
-
-    public BooleanWrapper addTrackerToGroup(Tracker remoteReference);
-
-    /**
-     * Returns the number of peers that the tracker manages.
-     * 
-     * @return the number of peers that the tracker manages.
-     */
-    public int getNbOfPeersStored();
-
-    /**
-     * Returns a random and valid peer from the stored peers list.
-     * 
-     * @return a random and valid peer.
-     */
-    public Peer getRandomPeer();
-
-    /**
-     * Returns the {@link Peer} stored at the specified index.
-     * 
-     * @param index
-     *            the index to use.
-     * @return a {@link Peer}.
-     */
-    public Peer getStoredPeerAt(int index);
-
-    /**
-     * Returns the stored peers.
-     * 
-     * @return the stored peers.
-     */
-    public List<Peer> getStoredPeers();
+    public boolean join(Tracker landmarkTracker);
 
     /**
      * Adds the given {@code remotePeer} on the network managed by the tracker.
@@ -103,28 +62,153 @@ public interface Tracker {
      */
     public boolean addOnNetwork(Peer remotePeer);
 
+    /**
+     * Stores the specified {@code peerReference} locally and call
+     * {@link #internalStorePeer(Peer)} on each Tracker that belongs to the
+     * group of tracker maintained by this peer.
+     * 
+     * @param peerReference
+     *            the peer reference to store.
+     */
     public void storePeer(Peer peerReference);
 
-    public BooleanWrapper _storePeer(Peer peerReference);
-
+    /**
+     * Removes the specified {@code peerReference} locally and call
+     * {@link #internalRemovePeer(Peer)} on each Tracker that belongs to the
+     * group of tracker maintained by this peer.
+     * 
+     * @param peerReference
+     *            the peer reference to remove.
+     */
     public void removePeer(Peer peerReference);
 
-    public BooleanWrapper _removePeer(Peer peerReference);
+    /**
+     * Adds the specified {@code peerReference} into the list of peer references
+     * that are maintained. This method is exposed at the API level in order to
+     * have the possibility to call it on an untyped ProActive group of internal
+     * type Tracker.
+     * 
+     * @param peerReference
+     *            the remote peer reference to remove.
+     * 
+     * @return {@code true} if the operation has succeed, {@code false}
+     *         otherwise.
+     */
+    public BooleanWrapper internalStorePeer(Peer peerReference);
 
     /**
-     * Join an existing tracker in order to duplicate peers references.
+     * Removes the specified {@code peerReference} from the list of peer
+     * references that are maintained. This method is exposed at the API level
+     * in order to have the possibility to call it on an untyped ProActive group
+     * of internal type Tracker.
      * 
-     * @param remoteTracker
-     *            the tracker to use for the operation.
-     * @return <code>true</code> if the operation has succeeded,
-     *         <code>false</code> otherwise.
+     * @param peerReference
+     *            the remote peer reference to remove.
+     * 
+     * @return {@code true} if the operation has succeed, {@code false}
+     *         otherwise.
      */
-    public boolean join(Tracker remoteTracker);
+    public BooleanWrapper internalRemovePeer(Peer peerReference);
 
-    public BooleanWrapper notifyLeave(Tracker trackerReference);
+    /**
+     * Adds the specified {@code trackerReference} into the tracker group. This
+     * method is exposed at the API level in order to have the possibility to
+     * call it on an untyped ProActive group of internal type Tracker.
+     * 
+     * @param trackerReference
+     *            the remote peer reference to remove.
+     * 
+     * @return {@code true} if the operation has succeed, {@code false}
+     *         otherwise.
+     */
+    public BooleanWrapper internalAddTracker(Tracker trackerReference);
 
-    public String getBindingName();
+    /**
+     * Removes the specified {@code trackerReference} from the tracker group.
+     * This method is exposed at the API level in order to have the possibility
+     * to call it on an untyped ProActive group of internal type Tracker.
+     * 
+     * @param trackerReference
+     *            the remote peer reference to remove.
+     * 
+     * @return {@code true} if the operation has succeed, {@code false}
+     *         otherwise.
+     */
+    public BooleanWrapper internalRemoveTracker(Tracker trackerReference);
 
-    public String register();
+    /**
+     * Register the tracker into the RMI registry.
+     */
+    public void register();
+
+    /**
+     * Returns the unique identifier associated to this tracker.
+     * 
+     * @return the unique identifier associated to this tracker.
+     */
+    public UUID getId();
+
+    /**
+     * Returns the network name the tracker belongs to.
+     * 
+     * @return the network name the tracker belongs to.
+     */
+    public String getNetworkName();
+
+    /**
+     * Returns the probability to store a {@link Peer} reference.
+     * 
+     * @return the probability to store a {@link Peer} reference.
+     */
+    public double getProbabilityToStorePeer();
+
+    /**
+     * Returns the {@link Peer} stored at the specified index.
+     * 
+     * @param index
+     *            the index to use.
+     * @return a {@link Peer}.
+     */
+    public Peer getPeer(int index);
+
+    /**
+     * Returns a list containing all the peer references that are maintained.
+     * 
+     * @return a list containing all the peer references that are maintained.
+     */
+    public List<Peer> getPeers();
+
+    /**
+     * Returns a random and valid peer from the stored peers list.
+     * 
+     * @return a random and valid peer.
+     */
+    public Peer getRandomPeer();
+
+    /**
+     * Returns the typed group view (the group contains the trackers that have
+     * been joined and that belongs to the same network name).
+     * 
+     * @return the typed group view (the group contains the trackers that have
+     *         been joined and that belongs to the same network name).
+     */
+    public Group<Tracker> getTypedGroupView();
+
+    /**
+     * Returns the type of peer references the tracker maintain. The type is
+     * determined by the first call to {@link #addOnNetwork(Peer)}.
+     * 
+     * @return the type of peer references the tracker maintain
+     */
+    public OverlayType getType();
+
+    /**
+     * Sets the probability to keep in mind a peer reference to the specified
+     * {@code value}.
+     * 
+     * @param value
+     *            the new value to set.
+     */
+    public void setProbabilityToStorePeer(double value);
 
 }

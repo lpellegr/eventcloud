@@ -24,8 +24,6 @@ public class IsActivatedOperation implements Operation {
      *         otherwise.
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        return new BooleanResponseOperation(overlay.getLocalPeer()
-                .isActivated());
+        return new BooleanResponseOperation(overlay.isActivated());
     }
-
 }

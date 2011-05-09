@@ -151,7 +151,7 @@
 						<configuration>
 							<includes>
 								<include>fr.inria.eventcloud.overlay.SemanticPeer</include>
-								<include>fr.inria.eventcloud.tracker.SemanticCanTracker</include>
+								<include>fr.inria.eventcloud.tracker.SemanticTracker</include>
 							</includes>
 						</configuration>
 						<goals>

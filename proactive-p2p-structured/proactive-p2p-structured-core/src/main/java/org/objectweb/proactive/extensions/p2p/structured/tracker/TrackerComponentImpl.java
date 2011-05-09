@@ -1,44 +1,20 @@
 package org.objectweb.proactive.extensions.p2p.structured.tracker;
 
-import java.io.Serializable;
-
-import org.objectweb.fractal.api.Component;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
-import org.objectweb.proactive.core.component.body.ComponentRunActive;
-import org.objectweb.proactive.extensions.p2p.structured.api.TrackerFactory;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
-import org.slf4j.LoggerFactory;
 
 /**
- * A tracker assists in the communication between peers. It is used in order to
- * help a peer to join an existing network and to store several peers references
- * in order to retrieve them later as an entry point.
- * <p>
- * A tracker can join an another tracker. When a tracker A join a tracker B
- * which already has references to other trackers C and D for example, a
- * reference on tracker B, C and D will be added.
- * 
- * Warning, this class must not be instantiate directly. It is the
- * implementation of a component tracker. In order to create a new component
- * tracker you must use the {@link TrackerFactory}.
+ * Extends {@link TrackerComponentImpl} to provide a component implementation.
  * 
  * @author bsauvan
  */
 public class TrackerComponentImpl extends TrackerImpl implements Tracker,
-        ComponentInitActive, ComponentRunActive, ComponentEndActive,
-        Serializable {
+        ComponentInitActive, ComponentEndActive {
 
     private static final long serialVersionUID = 1L;
-
-    static {
-        logger = LoggerFactory.getLogger(TrackerComponentImpl.class);
-    }
 
     /**
      * Constructor.
@@ -50,25 +26,12 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker,
      * {@inheritDoc}
      */
     public void initComponentActivity(Body body) {
-        super.initActivity(body);
-
-        this.stub = null;
-        // try {
-        // Component tracker = Fractive.getComponentRepresentativeOnThis();
-        // this.stub = (Tracker)
-        // tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF
-        // .getValue());
-        // } catch (NoSuchInterfaceException nsie) {
-        // logger.error("Cannot get stub of tracker: " + nsie.getMessage(),
-        // nsie);
-        // }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void runComponentActivity(Body body) {
-        super.runActivity(body);
+        // /!\ do not call super.initActivity(body)
+        // in this method or reset the stub variable
+        // to null because the call to initActivity will
+        // initialize the stub variable with the reference
+        // to the ProActive stub whereas the remote reference
+        // must be a component stub!
     }
 
     /**
@@ -82,64 +45,15 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker,
      * {@inheritDoc}
      */
     @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAssociatedNetworkName(String networkName) {
-        if (this.associatedNetworkName == null) {
-            this.associatedNetworkName = networkName;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setStub() {
-        if (this.stub == null) {
-            try {
-                Component tracker = Fractive.getComponentRepresentativeOnThis();
-                this.stub =
-                        (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
-            } catch (NoSuchInterfaceException nsie) {
-                logger.error(
-                        "Cannot get stub of tracker: " + nsie.getMessage(),
-                        nsie);
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setType(OverlayType type) {
-        if (this.type == null) {
-            this.type = type;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String register() {
-        String bindingName = null;
+    public void register() {
         try {
-            bindingName =
+            super.bindingName =
                     Fractive.registerByName(
                             Fractive.getComponentRepresentativeOnThis(),
-                            this.getBindingName());
+                            super.getBindingNameSuffix());
         } catch (ProActiveException pe) {
             pe.printStackTrace();
         }
-
-        return bindingName;
     }
 
 }

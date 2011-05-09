@@ -168,8 +168,7 @@ public class PeerFactory {
                             context);
             Peer stub =
                     (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
-            stub.setStub();
-            stub.setOverlay(overlay);
+            stub.init(stub, overlay);
             GCM.getGCMLifeCycleController(peer).startFc();
 
             return stub;

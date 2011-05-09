@@ -27,11 +27,16 @@ public abstract class RequestResponseManager implements Serializable {
 
     protected StructuredOverlay overlay;
 
-    private Map<UUID, ResponseEntry> repliesReceived =
-            new ConcurrentHashMap<UUID, ResponseEntry>();
+    private Map<UUID, ResponseEntry> repliesReceived;
 
-    public RequestResponseManager() {
-
+    protected RequestResponseManager() {
+        this.repliesReceived = new ConcurrentHashMap<UUID, ResponseEntry>();
+    }
+    
+    public void init(StructuredOverlay overlay) {
+        if (this.overlay == null) {
+            this.overlay = overlay;
+        }
     }
 
     /**
@@ -140,10 +145,6 @@ public abstract class RequestResponseManager implements Serializable {
 
     public Map<UUID, ResponseEntry> getResponsesReceived() {
         return this.repliesReceived;
-    }
-
-    public void setOverlay(StructuredOverlay overlay) {
-        this.overlay = overlay;
     }
 
 }

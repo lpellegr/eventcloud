@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 /**
  * Operation used to know if the peer which handles the operation has a neighbor
@@ -13,7 +13,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
  * 
  * @author lpellegr
  * 
- * @see AbstractCanOverlay#hasNeighbor(UUID)
+ * @see CanOverlay#hasNeighbor(UUID)
  */
 public class HasNeighborOperation implements SynchronousOperation {
 
@@ -30,7 +30,7 @@ public class HasNeighborOperation implements SynchronousOperation {
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         return new BooleanResponseOperation(
-                ((AbstractCanOverlay) overlay).hasNeighbor(this.uuid));
+                ((CanOverlay) overlay).hasNeighbor(this.uuid));
     }
 
 }

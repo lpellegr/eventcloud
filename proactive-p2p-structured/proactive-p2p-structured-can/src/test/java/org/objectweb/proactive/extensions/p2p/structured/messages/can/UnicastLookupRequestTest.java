@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
-import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
+import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetworkInitializer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -17,7 +17,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public class UnicastLookupRequestTest extends CANNetworkInitializer {
+public class UnicastLookupRequestTest extends CanNetworkInitializer {
 
     @Before
     public void setUp() throws Exception {
@@ -27,7 +27,7 @@ public class UnicastLookupRequestTest extends CANNetworkInitializer {
     @Test
     public void testLookupQuery() {
         LookupResponse response = null;
-        Peer targetedPeer = super.getRandomPeer();
+        Peer targetedPeer = super.get(8);
 
         try {
             response =
@@ -40,10 +40,9 @@ public class UnicastLookupRequestTest extends CANNetworkInitializer {
                                                     .getLowerBound())));
 
             Assert.assertTrue(response.getLatency() > 0);
-            // the peer to reach is maybe the initiator of the request
-            Assert.assertTrue(response.getHopCount() >= 0);
-            Assert.assertTrue(response.getInboundHopCount() >= 0);
-            Assert.assertTrue(response.getOutboundHopCount() >= 0);
+            Assert.assertTrue(response.getHopCount() > 0);
+            Assert.assertTrue(response.getInboundHopCount() > 0);
+            Assert.assertTrue(response.getOutboundHopCount() > 0);
 
             Assert.assertEquals(targetedPeer, response.getPeerFound());
         } catch (Exception e) {
@@ -54,7 +53,7 @@ public class UnicastLookupRequestTest extends CANNetworkInitializer {
     @Test
     public void testLookupQueryComponent() {
         LookupResponse response = null;
-        Peer targetedPeer = super.getRandomComponentPeer();
+        Peer targetedPeer = super.getc(8);
 
         try {
             response =
@@ -67,10 +66,9 @@ public class UnicastLookupRequestTest extends CANNetworkInitializer {
                                                     .getLowerBound())));
 
             Assert.assertTrue(response.getLatency() > 0);
-            // the peer to reach is maybe the initiator of the request
-            Assert.assertTrue(response.getHopCount() >= 0);
-            Assert.assertTrue(response.getInboundHopCount() >= 0);
-            Assert.assertTrue(response.getOutboundHopCount() >= 0);
+            Assert.assertTrue(response.getHopCount() > 0);
+            Assert.assertTrue(response.getInboundHopCount() > 0);
+            Assert.assertTrue(response.getOutboundHopCount() > 0);
 
             Assert.assertEquals(targetedPeer, response.getPeerFound());
         } catch (Exception e) {

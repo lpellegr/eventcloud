@@ -5,7 +5,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
@@ -46,16 +46,15 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
     }
 
     protected void doHandle(StructuredOverlay overlay, T response) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("The peer " + overlay + " contains the key to reach "
-                    + response.getKey() + ".");
-        }
+        logger.debug(
+                "The peer {} contains the key to reach {}", overlay,
+                response.getKey());
 
         overlay.getRequestResponseManager().pushFinalResponse(response);
     }
 
     protected void doRoute(StructuredOverlay overlay, T response) {
-        AbstractCanOverlay overlayCAN = ((AbstractCanOverlay) overlay);
+        CanOverlay overlayCAN = ((CanOverlay) overlay);
 
         byte dimension = 0;
         byte direction = NeighborTable.DIRECTION_ANY;
@@ -97,8 +96,9 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
             response.incrementHopCount(1);
             neighborChosen.getStub().route(response);
         } catch (ProActiveRuntimeException e) {
-            logger.error("Error while sending the message to the neighbor managing "
-                    + neighborChosen.getZone());
+            logger.error(
+                    "Error while sending the message to the neighbor managing {}",
+                    neighborChosen.getZone());
             e.printStackTrace();
         }
     }

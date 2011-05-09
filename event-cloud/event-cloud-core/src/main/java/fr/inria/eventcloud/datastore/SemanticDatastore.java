@@ -2,17 +2,19 @@ package fr.inria.eventcloud.datastore;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
 import org.ontoware.aifbcommons.collection.ClosableIterable;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.RDF2Go;
@@ -30,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.config.EventCloudProperties;
+import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
+import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
  * Provides all methods that can be performed on a semantic context data store
@@ -50,7 +54,8 @@ import fr.inria.eventcloud.config.EventCloudProperties;
  * 
  * @author lpellegr
  */
-public abstract class SemanticDatastore implements SemanticDatastoreOperations {
+public abstract class SemanticDatastore extends PersistentDatastore implements
+        SemanticDatastoreOperations {
 
     private static final Logger logger =
             LoggerFactory.getLogger(SemanticDatastore.class);
@@ -67,30 +72,26 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
     private final ScheduledExecutorService consistencyCheckerThread =
             Executors.newSingleThreadScheduledExecutor();
 
-    private final UUID id;
-
-    protected File dataStorePath;
-
     protected ModelSet rootModel = null;
-
-    protected AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
      * Constructs a new SemanticDatastore.
      */
     public SemanticDatastore() {
-        this.id = UUID.randomUUID();
+        super(new File(EventCloudProperties.REPOSITORIES_PATH.getValue()));
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                close();
+                if (initialized.get()) {
+                    // forces datastore close operation if not closed manually
+                    close();
+                }
             }
         });
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("New datastore with id '" + this.id
-                    + "' has been created");
-        }
+        logger.info(
+                "New repository with id {} has been created in {}",
+                super.getId(), super.getPath());
     }
 
     /**
@@ -101,47 +102,6 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
      * @return the new RDF2Go root {@link Model} or {@link ModelSet}.
      */
     public abstract ModelSet createRootModel(File repositoryPath);
-
-    /**
-     * Initialize the datastore.
-     */
-    public void open() {
-        if (this.initialized.getAndSet(true)) {
-            throw new IllegalStateException(
-                    "SemanticDataStore already initialized");
-        }
-
-        this.dataStorePath =
-                new File(
-                        EventCloudProperties.REPOSITORIES_PATH.getValue(),
-                        this.id.toString());
-        this.dataStorePath.mkdirs();
-
-        this.rootModel = this.createRootModel(this.dataStorePath);
-        this.rootModel.open();
-        this.rootModel.setAutocommit(false);
-
-        this.consistencyCheckerThread.scheduleWithFixedDelay(
-                new Runnable() {
-                    public void run() {
-                        tryToFixConsistency();
-                    }
-                }, 0, EventCloudProperties.CONSISTENCY_TIMEOUT.getValue(),
-                TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * Shutdown the repository.
-     */
-    public synchronized void close() {
-        if (this.initialized.get()) {
-            this.consistencyCheckerThread.shutdown();
-            this.fixConsistency();
-            this.dirtyTable.clear();
-            this.rootModel.close();
-            this.initialized.set(false);
-        }
-    }
 
     private void updateDirtyTable(Model model) {
         this.dirtyTable.put(model, true);
@@ -193,7 +153,9 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
         model.commit();
     }
 
-    // Interface implementation -------------------------
+    /*
+     * Implementation of SemanticDatastoreOperations interface
+     */
 
     public void addAll(URI context, Iterator<? extends Statement> other) {
         this.writeLock.lock();
@@ -531,15 +493,170 @@ public abstract class SemanticDatastore implements SemanticDatastoreOperations {
     }
 
     /*
-     * Accessors & Mutators
+     * Implementation of PersistentDatastore abstract methods
      */
 
-    public File getDataStorePath() {
-        return this.dataStorePath;
+    @Override
+    protected void internalOpen() {
+        super.path.mkdirs();
+
+        this.rootModel = this.createRootModel(super.path);
+        this.rootModel.open();
+        this.rootModel.setAutocommit(false);
+
+        this.consistencyCheckerThread.scheduleWithFixedDelay(
+                new Runnable() {
+                    public void run() {
+                        tryToFixConsistency();
+                    }
+                }, 0, EventCloudProperties.CONSISTENCY_TIMEOUT.getValue(),
+                TimeUnit.MILLISECONDS);
     }
 
-    public UUID getId() {
-        return this.id;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected synchronized void internalClose(boolean remove) {
+        this.consistencyCheckerThread.shutdown();
+        this.fixConsistency();
+        this.dirtyTable.clear();
+        this.rootModel.close();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected synchronized void internalClose() {
+        this.internalClose(false);
+    }
+
+    /*
+     * Implementation of PeerDataHandler interface
+     */
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void affectDataReceived(Object dataReceived) {
+        ClosableIterator<Statement> data =
+                ((ClosableIterableWrapper) dataReceived).toRDF2Go().iterator();
+
+        this.addAll(EventCloudProperties.DEFAULT_CONTEXT, data);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object retrieveAllData() {
+        return this.sparqlConstruct(
+                EventCloudProperties.DEFAULT_CONTEXT,
+                "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object retrieveDataIn(Object interval) {
+        Zone zone = (Zone) interval;
+
+        Set<Statement> statementsToTransfert = new HashSet<Statement>();
+        ClosableIterable<Statement> result =
+                this.sparqlConstruct(
+                        EventCloudProperties.DEFAULT_CONTEXT,
+                        "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
+
+        ClosableIterator<Statement> it = result.iterator();
+        Statement stmt;
+        String subject;
+        String predicate;
+        String object;
+
+        while (it.hasNext()) {
+            stmt = it.next();
+
+            subject =
+                    SemanticHelper.parseTripleElement(stmt.getSubject()
+                            .toString());
+            predicate =
+                    SemanticHelper.parseTripleElement(stmt.getPredicate()
+                            .toString());
+            object =
+                    SemanticHelper.parseTripleElement(stmt.getObject()
+                            .toString());
+
+            // Yeah, manual filtering is really ugly!
+            if (subject.compareTo(zone.getLowerBound((byte) 0).toString()) >= 0
+                    && subject.compareTo(zone.getUpperBound((byte) 0)
+                            .toString()) < 0
+                    && predicate.compareTo(zone.getLowerBound((byte) 1)
+                            .toString()) >= 0
+                    && predicate.compareTo(zone.getUpperBound((byte) 1)
+                            .toString()) < 0
+                    && object.compareTo(zone.getLowerBound((byte) 2).toString()) >= 0
+                    && object.compareTo(zone.getUpperBound((byte) 2).toString()) < 0) {
+
+                statementsToTransfert.add(stmt);
+            }
+        }
+
+        return new ClosableIterableWrapper(
+                SemanticHelper.generateClosableIterable(statementsToTransfert));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object removeDataIn(Object interval) {
+        Zone zone = (Zone) interval;
+
+        ClosableIterable<Statement> queryResult =
+                this.sparqlConstruct(
+                        EventCloudProperties.DEFAULT_CONTEXT,
+                        "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }");
+
+        ClosableIterator<Statement> it = queryResult.iterator();
+        Statement stmt;
+        String subject;
+        String predicate;
+        String object;
+
+        Set<Statement> result = new HashSet<Statement>();
+
+        while (it.hasNext()) {
+            stmt = it.next();
+
+            subject =
+                    SemanticHelper.parseTripleElement(stmt.getSubject()
+                            .toString());
+            predicate =
+                    SemanticHelper.parseTripleElement(stmt.getPredicate()
+                            .toString());
+            object =
+                    SemanticHelper.parseTripleElement(stmt.getObject()
+                            .toString());
+
+            if (subject.compareTo(zone.getLowerBound((byte) 0).toString()) >= 0
+                    && subject.compareTo(zone.getUpperBound((byte) 0)
+                            .toString()) < 0
+                    && predicate.compareTo(zone.getLowerBound((byte) 1)
+                            .toString()) >= 0
+                    && predicate.compareTo(zone.getUpperBound((byte) 1)
+                            .toString()) < 0
+                    && object.compareTo(zone.getLowerBound((byte) 2).toString()) >= 0
+                    && object.compareTo(zone.getUpperBound((byte) 2).toString()) < 0) {
+                result.add(stmt);
+                this.removeStatement(EventCloudProperties.DEFAULT_CONTEXT, stmt);
+            }
+
+        }
+
+        return new ClosableIterableWrapper(result);
     }
 
 }

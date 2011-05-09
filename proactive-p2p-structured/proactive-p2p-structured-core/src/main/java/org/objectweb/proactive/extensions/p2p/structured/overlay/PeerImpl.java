@@ -2,7 +2,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.EndActive;
@@ -24,7 +23,9 @@ import org.slf4j.LoggerFactory;
 /**
  * PeerImpl is a concrete implementation of {@link Peer}. It is composed of a
  * {@link StructuredOverlay} which allows to have several implementations of
- * common operations for each peer-to-peer protocol to implement.
+ * common operations for each peer-to-peer protocol to implement. This class
+ * acts as a Facade in order to simplify interface (easier to use, understand
+ * and test).
  * <p>
  * Warning, this class must not be instantiate directly. In order to create a
  * new active peer you have to use the {@link PeerFactory}.
@@ -37,17 +38,12 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
 
     protected static Logger logger = LoggerFactory.getLogger(PeerImpl.class);
 
-    protected Peer stub;
-
     protected StructuredOverlay overlay;
-
-    private AtomicBoolean activated;
 
     /**
      * The no-argument constructor as commanded by ProActive.
      */
     public PeerImpl() {
-        this.activated = new AtomicBoolean();
     }
 
     /**
@@ -60,15 +56,22 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     public PeerImpl(StructuredOverlay overlay) {
         this();
         this.overlay = overlay;
-        this.overlay.setLocalPeer(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void init(Peer stub, StructuredOverlay overlay) {
+        if (this.overlay == null) {
+            this.overlay = overlay;
+            this.overlay.stub = stub;
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     public void initActivity(Body body) {
-        this.stub = (Peer) PAActiveObject.getStubOnThis();
-
         body.setImmediateService("receiveImmediateService", false);
 
         // these methods do not change the state of the peer
@@ -84,7 +87,9 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
         PAActiveObject.setImmediateService("send");
         PAActiveObject.setImmediateService("route");
 
+        // tests if overlay is null for component instantiation use-case
         if (this.overlay != null) {
+            this.overlay.stub = (Peer) PAActiveObject.getStubOnThis();
             this.overlay.initActivity(body);
         }
 
@@ -96,7 +101,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * {@inheritDoc}
      */
     public void endActivity(Body body) {
-        if (this.activated.get()) {
+        if (this.overlay.activated.get()) {
             try {
                 this.leave();
             } catch (NetworkNotJoinedException e) {
@@ -111,35 +116,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * {@inheritDoc}
      */
     public UUID getId() {
-        return this.overlay.getId();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Body getBody() {
-        return PAActiveObject.getBodyOnThis();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Peer getStub() {
-        return this.stub;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setStub() {
-        // Nothing to do. This method is only useful for component peer.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public OverlayType getType() {
-        return this.overlay.getType();
+        return this.overlay.id;
     }
 
     /**
@@ -152,22 +129,23 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
-    public void setOverlay(StructuredOverlay structuredOverlay) {
-        this.overlay = structuredOverlay;
+    public OverlayType getType() {
+        return this.overlay.getType();
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isActivated() {
-        return this.activated.get();
+        return this.overlay.activated.get();
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean create() throws NetworkAlreadyJoinedException {
-        if (this.activated.compareAndSet(false, true)) {
+        if (this.overlay.activated.compareAndSet(false, true)) {
             return this.overlay.create();
         } else {
             throw new NetworkAlreadyJoinedException();
@@ -178,7 +156,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * {@inheritDoc}
      */
     public boolean join(Peer landmarkPeer) throws NetworkAlreadyJoinedException {
-        if (this.activated.compareAndSet(false, true)) {
+        if (this.overlay.activated.compareAndSet(false, true)) {
             return this.overlay.join(landmarkPeer);
         } else {
             throw new NetworkAlreadyJoinedException();
@@ -189,7 +167,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * {@inheritDoc}
      */
     public boolean leave() throws NetworkNotJoinedException {
-        if (this.activated.compareAndSet(true, false)) {
+        if (this.overlay.activated.compareAndSet(true, false)) {
             return this.overlay.leave();
         } else {
             throw new NetworkNotJoinedException();
@@ -228,14 +206,14 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * {@inheritDoc}
      */
     public void route(RequestResponseMessage<?> msg) {
-        this.overlay.route(msg);
+        msg.route(this.overlay);
     }
 
     /**
      * {@inheritDoc}
      */
     public Response<?> send(Request<?> request) throws DispatchException {
-        return this.overlay.getRequestResponseManager().dispatch(request);
+        return this.overlay.messagingManager.dispatch(request);
     }
 
     /**
@@ -259,7 +237,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      */
     @Override
     public int hashCode() {
-        return this.getId().hashCode();
+        return this.overlay.id.hashCode();
     }
 
     /**

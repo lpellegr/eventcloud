@@ -9,7 +9,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.NumericZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
@@ -49,7 +49,7 @@ public class ZoneTest {
                         createDoubleCoordinate(0.0),
                         createDoubleCoordinate(1.0)));
 
-        Pair<Zone> newZones = z.split(AbstractCanOverlay.getRandomDimension());
+        Pair<Zone> newZones = z.split(CanOverlay.getRandomDimension());
         Assert.assertEquals(z, newZones.getFirst().merge(newZones.getSecond()));
     }
 

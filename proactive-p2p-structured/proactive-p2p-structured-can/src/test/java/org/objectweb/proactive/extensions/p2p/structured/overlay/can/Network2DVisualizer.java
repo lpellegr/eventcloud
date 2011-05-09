@@ -31,7 +31,6 @@ import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOpera
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.BasicCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
@@ -150,7 +149,7 @@ public class Network2DVisualizer extends JFrame {
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         if (mode == Mode.JOIN) {
                             Peer newPeer =
-                                    PeerFactory.newActivePeer(new BasicCanOverlay());
+                                    PeerFactory.newActivePeer(new CanOverlay());
                             try {
                                 newPeer.join(entry.getStub());
                             } catch (NetworkAlreadyJoinedException ex) {

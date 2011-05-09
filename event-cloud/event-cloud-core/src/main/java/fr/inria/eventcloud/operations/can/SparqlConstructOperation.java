@@ -5,7 +5,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.ontoware.rdf2go.model.node.URI;
 
-import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
+import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
 
 /**
@@ -33,9 +33,8 @@ public class SparqlConstructOperation implements SynchronousOperation {
     public ResponseOperation handle(StructuredOverlay overlay) {
         return new SparqlConstructResponseOperation(
                 new ClosableIterableWrapper(
-                        ((SemanticCanOverlay) overlay).getDatastore()
-                                .sparqlConstruct(
-                                        context, this.sparqlConstructQuery)));
+                        ((SemanticDatastore) overlay.getDatastore()).sparqlConstruct(
+                                context, this.sparqlConstructQuery)));
     }
 
 }
