@@ -34,7 +34,7 @@ public class Pair<T> implements Serializable {
 
     public T get(int index) {
         if (index < 0 || index > 1) {
-            throw new AssertionError("index value is " + index);
+            throw new IndexOutOfBoundsException("index " + index + " is not in [0,1]");
         }
 
         return index == 0
