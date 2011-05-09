@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.ontoware.rdf2go.model.node.URI;
 
 import fr.inria.eventcloud.api.SemanticFactory;
@@ -127,6 +128,8 @@ public class EventCloudInitializer extends
                 public void run() {
                     try {
                         getRandomTracker().addOnNetwork(peers[index]);
+                    } catch (NetworkAlreadyJoinedException e) {
+                        e.printStackTrace();
                     } finally {
                         doneSignal.countDown();
                     }

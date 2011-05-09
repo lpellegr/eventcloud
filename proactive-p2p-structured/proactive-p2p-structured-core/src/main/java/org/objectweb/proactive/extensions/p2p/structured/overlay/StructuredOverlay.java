@@ -79,10 +79,17 @@ public abstract class StructuredOverlay implements Serializable {
 
     public abstract OverlayType getType();
 
-    public abstract String toString();
-
     public abstract String dump();
 
+    /**
+     * Returns a boolean indicating whether the current overlay is activated
+     * (i.e. the overlay has handled a join operation but not a leave operation
+     * yet).
+     * 
+     * @return {@code true} if the overlay is activated (i.e. the overlay has
+     *         handled a join operation but not a leave operation yet),
+     *         {@code false} otherwise.
+     */
     public boolean isActivated() {
         return this.activated.get();
     }
