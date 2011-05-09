@@ -40,7 +40,7 @@ public class LookupRequest extends ForwardRequest {
         return new UnicastRequestRouter<ForwardRequest>() {
             protected void onDestinationReached(StructuredOverlay overlay,
                                                 ForwardRequest msg) {
-                ((LookupRequest) msg).setRemotePeerReached(overlay.getRemotePeer());
+                ((LookupRequest) msg).setRemotePeerReached(overlay.getStub());
             };
         };
     }

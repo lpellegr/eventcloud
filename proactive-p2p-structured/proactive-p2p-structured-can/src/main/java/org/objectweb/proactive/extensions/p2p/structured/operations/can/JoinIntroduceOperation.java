@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 /**
  * This operation is used to performed the join introduce phase: it consists in
@@ -14,8 +14,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
  * 
  * @author lpellegr
  * 
- * @see AbstractCanOverlay#join(Peer)
- * @see AbstractCanOverlay#handleJoinIntroduceMessage(JoinIntroduceOperation)
+ * @see CanOverlay#join(Peer)
+ * @see CanOverlay#handleJoinIntroduceMessage(JoinIntroduceOperation)
  */
 public class JoinIntroduceOperation implements SynchronousOperation {
 
@@ -43,7 +43,7 @@ public class JoinIntroduceOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     public JoinIntroduceResponseOperation handle(StructuredOverlay overlay) {
-        return ((AbstractCanOverlay) overlay).handleJoinIntroduceMessage(this);
+        return ((CanOverlay) overlay).handleJoinIntroduceMessage(this);
     }
 
 }

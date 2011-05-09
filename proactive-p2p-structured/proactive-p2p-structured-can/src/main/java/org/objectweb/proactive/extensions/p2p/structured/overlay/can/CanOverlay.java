@@ -34,6 +34,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
 import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,25 +42,25 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 /**
- * AbstractCANOverlay is an implementation of Content-Addressable Network (CAN)
+ * CanOverlay is an implementation of Content-Addressable Network (CAN)
  * protocol. Each peer manages neighbors from a {@link NeighborTable} and is
  * composed of a {@link Zone} which indicates the space associated to resources
  * to manage.
  * 
  * @author lpellegr
  */
-public abstract class AbstractCanOverlay extends StructuredOverlay {
+public class CanOverlay extends StructuredOverlay {
 
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger =
-            LoggerFactory.getLogger(AbstractCanOverlay.class);
+            LoggerFactory.getLogger(CanOverlay.class);
 
     private ScheduledExecutorService maintenanceTask;
 
-    private NeighborTable neighborTable = new NeighborTable();
+    private NeighborTable neighborTable;
 
-    private LinkedList<SplitEntry> splitHistory = new LinkedList<SplitEntry>();
+    private LinkedList<SplitEntry> splitHistory;
 
     private AtomicReference<UUID> peerJoiningId;
 
@@ -70,14 +71,37 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     private Zone zone;
 
     /**
+     * Constructs a new overlay with messagingManager set to
+     * {@link CanRequestResponseManager} and no {@link PersistentDatastore}.
+     */
+    public CanOverlay() {
+        this(new CanRequestResponseManager(), null);
+    }
+
+    /**
      * Constructs a new overlay with the specified
      * {@code requestResponseManager}.
      * 
      * @param requestResponseManager
      *            the {@link RequestResponseManager} to use.
      */
-    public AbstractCanOverlay(RequestResponseManager requestResponseManager) {
-        super(requestResponseManager);
+    public CanOverlay(RequestResponseManager requestResponseManager) {
+        this(requestResponseManager, null);
+    }
+
+    /**
+     * Constructs a new overlay with the specified {@code dataHandler} and
+     * {@code requestResponseManager}.
+     * 
+     * @param requestResponseManager
+     *            the {@link RequestResponseManager} to use.
+     * 
+     * @param datastore
+     *            the datastore instance to set.
+     */
+    public CanOverlay(RequestResponseManager requestResponseManager,
+            PersistentDatastore datastore) {
+        super(requestResponseManager, datastore);
 
         this.neighborTable = new NeighborTable();
         this.peerJoiningId = new AtomicReference<UUID>();
@@ -92,21 +116,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     public boolean contains(StringCoordinate coordinate) {
         return this.zone.contains(coordinate);
     }
-
-    /**
-     * Implements a behavior to execute with the specified
-     * <code>dataReceived</code> (e.g. to store the data in the local
-     * datastore).
-     * 
-     * @param dataReceived
-     *            the data which have been received when the peer has join a
-     *            network from a landmark node.
-     * 
-     * @see AbstractCanOverlay#join(Peer)
-     */
-    protected abstract void affectDataReceived(Object dataReceived);
-
-    protected abstract Object retrieveAllData();
 
     /**
      * Iterates on the {@link NeighborTable} in order to check whether each
@@ -149,7 +158,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      *         {@code coordinate} and which contains the specified coordinate on
      *         {@code dimension-1} dimensions.
      * 
-     * @see AbstractCanOverlay#neighborsVerifyingDimensions(Collection,
+     * @see CanOverlay#neighborsVerifyingDimensions(Collection,
      *      StringCoordinate, byte)
      */
     public NeighborEntry nearestNeighbor(StringCoordinate coordinate,
@@ -198,7 +207,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     /**
      * Returns a list of neighbors with the best rank. The rank is related to
      * the number of coordinate elements contained by the neighbor for the
-     * specified <code>coordinate</code>.
+     * specified {@code coordinate}.
      * 
      * @param neighbors
      *            the neighbors to filter.
@@ -240,9 +249,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     /**
-     * Returns the neighbors which validates the specified
-     * <code>coordinate</code> on <code>d-1</code> dimensions where
-     * <code>d</code> is the given <code>dimension</code>.
+     * Returns the neighbors which validates the specified {@code coordinate} on
+     * {@code d-1} dimensions where {@code d} is the given {@code dimension}.
      * 
      * @param neighbors
      *            the neighbors to filter.
@@ -253,9 +261,9 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * @param dimension
      *            the dimension limit.
      * 
-     * @return the neighbors which validates the specified
-     *         <code>coordinate</code> on <code>d-1</code> dimensions where
-     *         <code>d</code> is the given <code>dimension</code>.
+     * @return the neighbors which validates the specified {@code coordinate} on
+     *         {@code d-1} dimensions where {@code d} is the given
+     *         {@code dimension}.
      */
     public List<NeighborEntry> neighborsVerifyingDimensions(Collection<NeighborEntry> neighbors,
                                                             StringCoordinate coordinate,
@@ -289,8 +297,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
     }
 
     /**
-     * Gets a random dimension number. The minimum dimension number is {@code 0}
-     * . The maximum dimension number is defined by
+     * Gets a random dimension number. The lower dimension number is defined as
+     * {@code 0}. The maximum dimension number is defined by
      * {@link P2PStructuredProperties#CAN_NB_DIMENSIONS}.
      * 
      * @return a random dimension number.
@@ -305,10 +313,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * @return a random direction number.
      */
     public static byte getRandomDirection() {
-        if (ProActiveRandom.nextBoolean()) {
-            return 1;
-        }
-        return 0;
+        return (byte) ProActiveRandom.nextInt(2);
     }
 
     /**
@@ -329,33 +334,12 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         return this.zone;
     }
 
-    /**
-     * Returns the data which are contained in the specified <code>zone</code>
-     * from the current peer.
-     * 
-     * @param zone
-     *            the zone delineating the space of data to retrieve.
-     * 
-     * @return the data which are contained in the specified <code>zone</code>
-     *         from the current peer.
-     */
-    protected abstract Object getDataIn(Zone zone);
-
-    /**
-     * Removes the data managed in the specified <code>zone</code> from the
-     * current overlay.
-     * 
-     * @param zone
-     *            the zone delineating the space of data to remove.
-     */
-    protected abstract void removeDataIn(Zone zone);
-
     public String dump() {
         StringBuilder buf = new StringBuilder();
         buf.append("Peer managing ");
         buf.append(this);
-        buf.append(" with ID=");
-        buf.append(this.getId());
+        buf.append(" with id ");
+        buf.append(super.id);
         buf.append(" has neighbor(s):\n");
 
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -364,7 +348,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
                         dim, direction).values()) {
                     buf.append("  - ");
                     buf.append(neighbor.getZone());
-                    buf.append(", ID=");
+                    buf.append(", id is ");
                     buf.append(neighbor.getId());
                     buf.append(", abuts in dim "
                             + neighbor.getZone().neighbors(zone)
@@ -388,7 +372,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      */
     @SuppressWarnings("unchecked")
     public JoinIntroduceResponseOperation handleJoinIntroduceMessage(JoinIntroduceOperation msg) {
-        if (!super.getLocalPeer().isActivated()) {
+        if (!super.activated.get()) {
             throw new PeerNotActivatedRuntimeException();
         } else if (this.peerLeavingId.get() != null
                 || !this.peerJoiningId.compareAndSet(null, msg.getPeerID())) {
@@ -399,12 +383,12 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         // TODO: choose the direction according to the number of triples to
         // transfer
         byte direction = getRandomDirection();
-        byte directionInv = AbstractCanOverlay.getOppositeDirection(direction);
+        byte directionInv = CanOverlay.getOppositeDirection(direction);
 
         // gets the next dimension to split onto
         if (!this.splitHistory.isEmpty()) {
             dimension =
-                    AbstractCanOverlay.getNextDimension(this.splitHistory.removeLast()
+                    CanOverlay.getNextDimension(this.splitHistory.removeLast()
                             .getDimension());
         }
 
@@ -440,9 +424,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         // adds the landmark peer in the neighborhood of the peer which is
         // joining
         pendingNewNeighborhood.add(
-                new NeighborEntry(
-                        this.getId(), this.getRemotePeer(),
-                        newZones.get(direction)), dimension, direction);
+                new NeighborEntry(super.id, super.stub, newZones.get(direction)),
+                dimension, direction);
 
         LinkedList<SplitEntry> historyToTransfert = null;
         try {
@@ -463,9 +446,13 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
                                 newZones.get(directionInv)));
 
         return new JoinIntroduceResponseOperation(
-                this.getId(), newZones.get(directionInv), historyToTransfert,
+                super.id,
+                newZones.get(directionInv),
+                historyToTransfert,
                 pendingNewNeighborhood,
-                this.getDataIn(newZones.get(directionInv)));
+                this.datastore == null
+                        ? null
+                        : this.datastore.removeDataIn(newZones.get(directionInv)));
     }
 
     public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation operation) {
@@ -477,7 +464,11 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         this.splitHistory.add(new SplitEntry(
                 this.tmpJoinInformation.getDimension(),
                 this.tmpJoinInformation.getDirection()));
-        this.removeDataIn(this.tmpJoinInformation.getEntry().getZone());
+
+        if (this.datastore != null) {
+            this.datastore.removeDataIn(this.tmpJoinInformation.getEntry()
+                    .getZone());
+        }
 
         // removes the current peer from the neighbors that are back
         // the new peer which join and updates the zone maintained by
@@ -494,14 +485,14 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
                     if (dim == this.tmpJoinInformation.getDimension()
                             && dir == directionInv) {
                         CanOperations.removeNeighbor(
-                                entry.getStub(), this.getId(), dim,
+                                entry.getStub(), super.id, dim,
                                 getOppositeDirection(dir));
                         it.remove();
                     } else if (entry.getZone().neighbors(this.zone) == -1) {
                         // the old neighbor does not neighbors us with the new
                         // zone affected
                         CanOperations.removeNeighbor(
-                                entry.getStub(), this.getId(), dim,
+                                entry.getStub(), super.id, dim,
                                 getOppositeDirection(dir));
                         it.remove();
                     } else {
@@ -564,23 +555,26 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         try {
             response =
                     (JoinIntroduceResponseOperation) PAFuture.getFutureValue(landmarkPeer.receiveImmediateService(new JoinIntroduceOperation(
-                            this.getId(), this.getRemotePeer())));
+                            super.id, super.stub)));
         } catch (PeerNotActivatedRuntimeException e) {
-            logger.info(
+            logger.warn(
                     "Landmark peer {} to join is not activated",
                     landmarkPeer.getId());
             return false;
         } catch (ConcurrentModificationException e) {
-            logger.info(
+            logger.warn(
                     "Peer {} is already handling a join operation for peer {}",
-                    landmarkPeer.getId(), this.getId());
+                    landmarkPeer.getId(), super.id);
             return false;
         }
 
         this.zone = response.getZone();
         this.splitHistory = response.getSplitHistory();
         this.neighborTable = response.getNeighbors();
-        this.affectDataReceived(response.getData());
+
+        if (this.datastore != null) {
+            this.datastore.affectDataReceived(response.getData());
+        }
 
         PAFuture.waitFor(landmarkPeer.receiveImmediateService(new JoinWelcomeOperation()));
 
@@ -600,9 +594,6 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
             }
         }
 
-        logger.debug(
-                "Peer {} has joined the network from {}", this, landmarkPeer);
-
         return true;
     }
 
@@ -613,14 +604,14 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
         if (this.neighborTable.size() == 0) {
             return true;
         }
-        
+
         synchronized (this) {
             if (this.peerLeavingId.get() != null
                     || this.peerJoiningId.get() != null) {
                 retryLeave();
                 return false;
             } else {
-                this.peerLeavingId.set(this.getId());
+                this.peerLeavingId.set(super.id);
             }
         }
 
@@ -641,8 +632,9 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
 
             PAFuture.waitFor(suitableNeighbor.getStub().receive(
                     new LeaveOperation(
-                            this.getId(), this.zone, neighbors,
-                            this.retrieveAllData())));
+                            super.id, this.zone, neighbors,
+                            this.datastore == null
+                                    ? null : this.datastore.retrieveAllData())));
 
             // updates neighbors NeighborTable
             for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -653,7 +645,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
                                 && dir != neighborDimDir.getSecond()) {
                             PAFuture.waitFor(entry.getStub().receive(
                                     new ReplaceNeighborOperation(
-                                            this.getId(), entry)));
+                                            super.id, entry)));
                         }
                     }
                 }
@@ -673,8 +665,10 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
                         - P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue())
                         + P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue();
 
-        logger.info("Peer {} cannot leave at this time, retry in {} ms", this, timeout);
-        
+        logger.info(
+                "Peer {} cannot leave at this time, retry in {} ms", this,
+                timeout);
+
         try {
             Thread.sleep(timeout);
         } catch (InterruptedException e) {
@@ -696,7 +690,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
             this.zone = this.zone.merge(operation.getPeerLeavingZone());
 
             if (operation.getData() != null) {
-                this.affectDataReceived(operation.getData());
+                this.datastore.affectDataReceived(operation.getData());
             }
 
             this.neighborTable.removeAll(dim, dir);
@@ -737,7 +731,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * @return the {@link NeighborEntry} associated to the current overlay.
      */
     private NeighborEntry getNeighborEntry() {
-        return new NeighborEntry(this.getId(), this.getRemotePeer(), this.zone);
+        return new NeighborEntry(super.id, super.stub, this.zone);
     }
 
     /**
@@ -785,7 +779,7 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      */
     public String toString() {
         if (this.zone == null) {
-            return this.getId().toString();
+            return super.id.toString();
         } else {
             return this.zone.toString();
         }
@@ -839,8 +833,8 @@ public abstract class AbstractCanOverlay extends StructuredOverlay {
      * 
      * @param peerID
      *            the peer identifier to look for.
-     * @return <code>true</code> if the {@link NeighborTable} contains the peer
-     *         identifier as neighbor, <code>false</code> otherwise.
+     * @return {@code true} if the {@link NeighborTable} contains the peer
+     *         identifier as neighbor, {@code false} otherwise.
      */
     public boolean hasNeighbor(UUID peerID) {
         return this.neighborTable.contains(peerID);

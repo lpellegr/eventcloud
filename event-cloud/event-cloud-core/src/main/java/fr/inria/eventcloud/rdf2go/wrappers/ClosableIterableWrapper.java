@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
- * The <code>ClosableIterableWrapper</code> wraps a value of the RDF2Go type
+ * The {@code ClosableIterableWrapper} wraps a RDF2Go type value.
  * {@link ClosableIterable}.
  * 
  * @author lpellegr
@@ -23,13 +23,25 @@ public class ClosableIterableWrapper implements
 
     private static final long serialVersionUID = 1L;
 
-    private static final transient Logger logger =
+    private static final Logger logger =
             LoggerFactory.getLogger(ClosableIterableWrapper.class);
 
     private final Set<Statement> data = new HashSet<Statement>();
 
     public ClosableIterableWrapper() {
 
+    }
+
+    public ClosableIterableWrapper(Set<Statement> statements) {
+        for (Statement stmt : statements) {
+            this.data.add(new StatementImpl(
+                    stmt.getContext(), stmt.getSubject(), stmt.getPredicate(),
+                    stmt.getObject()));
+        }
+
+        logger.debug(
+                "ClosableIterableWrapper initialized with {} data.",
+                this.data.size());
     }
 
     public ClosableIterableWrapper(ClosableIterable<Statement> closableIterable) {
@@ -42,11 +54,9 @@ public class ClosableIterableWrapper implements
                     currentStmt.getPredicate(), currentStmt.getObject()));
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug(
-                    "ClosableIterableWrapper initialized with {} data.",
-                    this.data.size());
-        }
+        logger.debug(
+                "ClosableIterableWrapper initialized with {} data.",
+                this.data.size());
     }
 
     public void addAll(Set<Statement> set) {

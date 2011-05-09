@@ -3,11 +3,12 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
 
 /**
  * The StructuredOverlay class contains the logic associated to methods exposed
@@ -20,77 +21,114 @@ public abstract class StructuredOverlay implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID identifier;
+    protected final UUID id;
 
-    private RequestResponseManager messagingManager;
+    protected transient PersistentDatastore datastore;
 
-    private Peer localPeer;
+    protected RequestResponseManager messagingManager;
+
+    /**
+     * Indicates whether the current peer is activated (i.e. if the peer has
+     * already joined or not).
+     */
+    protected AtomicBoolean activated;
+
+    /**
+     * The ProActive stub reference to the outer peer active object.
+     */
+    protected Peer stub;
 
     protected StructuredOverlay() {
-        this.identifier = UUID.randomUUID();
+        this.activated = new AtomicBoolean();
+        this.id = UUID.randomUUID();
+    }
+
+    protected StructuredOverlay(RequestResponseManager messagingManager,
+            PersistentDatastore datastore) {
+        this();
+        this.datastore = datastore;
+        this.messagingManager = messagingManager;
+        // messagingManager maybe null if the overlay
+        // is not assumed to support request/response
+        if (this.messagingManager != null) {
+            this.messagingManager.init(this);
+        }
     }
 
     protected StructuredOverlay(RequestResponseManager queryManager) {
-        this();
-        this.messagingManager = queryManager;
-        this.messagingManager.setOverlay(this);
+        this(queryManager, null);
+    }
+
+    public void initActivity(Body body) {
+        if (this.datastore != null) {
+            this.datastore.open();
+        }
+    }
+
+    public void endActivity(Body body) {
+        if (this.datastore != null) {
+            this.datastore.close();
+        }
     }
 
     public abstract boolean create();
 
-    /**
-     * Forces the current peer to join an existing network by using the
-     * specified landmark peer.
-     * 
-     * @param landmarkPeer
-     *            the peer (entry point) which is used in order to join the
-     *            network.
-     * @return <code>true</code> if join operation has succeeded,
-     *         <code>false</code> otherwise.
-     * @throws StructuredP2PException
-     */
     public abstract boolean join(Peer landmarkPeer);
 
     public abstract boolean leave();
 
-    public abstract String toString();
-
-    public void initActivity(Body body) {
-        // to be overridden
-    }
-
-    public void endActivity(Body body) {
-        // to be overridden
-    }
-
     public abstract OverlayType getType();
 
+    public abstract String toString();
+
+    public abstract String dump();
+
+    public boolean isActivated() {
+        return this.activated.get();
+    }
+
+    /**
+     * Returns the unique identifier associated to the overlay.
+     * 
+     * @return the unique identifier associated to the overlay.
+     */
     public UUID getId() {
-        return this.identifier;
+        return this.id;
     }
 
     /**
-     * Returns the current peer that use this overlay.
+     * Returns the datastore instance.
      * 
-     * @return the current peer that use this overlay.
+     * @return the datastore instance.
      */
-    public Peer getLocalPeer() {
-        return this.localPeer;
+    public Datastore getDatastore() {
+        return this.datastore;
     }
 
     /**
-     * Returns the stub associated to the local peer.
+     * Returns the stub (i.e the remote reference) to the active peer associated
+     * to this overlay.
      * 
-     * @return the stub associated to the local peer.
+     * @return the stub (i.e the remote reference) to the active peer associated
+     *         to this overlay.
      */
-    public Peer getRemotePeer() {
-        return this.localPeer.getStub();
+    public Peer getStub() {
+        return this.stub;
     }
 
     public RequestResponseManager getRequestResponseManager() {
         return this.messagingManager;
     }
 
+    /**
+     * Returns the {@link ResponseEntry} associated to the given
+     * {@code responseId} from the {@link RequestResponseManager}.
+     * 
+     * @param responseId
+     *            the response identifier to look for.
+     * @return the {@link ResponseEntry} associated to the given
+     *         {@code responseId} or {@code null} if no entry was found.
+     */
     public ResponseEntry getResponseEntry(UUID responseId) {
         return this.messagingManager.getResponsesReceived().get(responseId);
     }
@@ -98,15 +136,5 @@ public abstract class StructuredOverlay implements Serializable {
     public Map<UUID, ResponseEntry> getResponseEntries() {
         return this.messagingManager.getResponsesReceived();
     }
-
-    public void setLocalPeer(Peer localPeer) {
-        this.localPeer = localPeer;
-    }
-
-    public void route(RequestResponseMessage<?> msg) {
-        msg.route(this);
-    }
-
-    public abstract String dump();
 
 }

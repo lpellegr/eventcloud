@@ -6,7 +6,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanRespo
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 
 /**
@@ -100,7 +100,7 @@ public class RemoveNeighborOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        NeighborTable table = ((AbstractCanOverlay) overlay).getNeighborTable();
+        NeighborTable table = ((CanOverlay) overlay).getNeighborTable();
         boolean result;
 
         if (dimension == -1 && direction == -1) {

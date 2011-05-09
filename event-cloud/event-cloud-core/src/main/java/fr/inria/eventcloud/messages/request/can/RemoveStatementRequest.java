@@ -6,7 +6,7 @@ import org.ontoware.rdf2go.model.node.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
+import fr.inria.eventcloud.datastore.SemanticDatastore;
 
 /**
  * Used to remove a statement from the overlay network.
@@ -30,7 +30,7 @@ public class RemoveStatementRequest extends StatementRequest {
     @Override
     public void onDestinationReached(StructuredOverlay overlay, URI context,
                                      Statement stmt) {
-        ((SemanticCanOverlay) overlay).getDatastore().removeStatement(
+        ((SemanticDatastore) overlay.getDatastore()).removeStatement(
                 context, stmt);
 
         if (logger.isDebugEnabled()) {

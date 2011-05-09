@@ -3,7 +3,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 import java.io.Serializable;
 import java.util.UUID;
 
-import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
@@ -22,31 +21,24 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 public interface Peer extends Serializable {
 
     /**
+     * The init method is a convenient method for components which is used to
+     * initialize the {@link StructuredOverlay}. Once this method is called and
+     * the values are set, the next calls perform no action.
+     * 
+     * @param stub
+     *            the remote peer reference to set.
+     * 
+     * @param overlay
+     *            the overlay instance to set to the peer.
+     */
+    public void init(Peer stub, StructuredOverlay overlay);
+
+    /**
      * Returns the unique identifier associated to this peer.
      * 
      * @return the unique identifier associated to this peer.
      */
     public UUID getId();
-
-    /**
-     * Return the ProActive {@link Body} associated to this peer.
-     * 
-     * @return the ProActive {@link Body} associated to this peer.
-     */
-    public Body getBody();
-
-    /**
-     * Returns the stub associated to the current peer.
-     * 
-     * @return the stub associated to the current peer.
-     */
-    public Peer getStub();
-
-    /**
-     * Sets the stub associated to the current peer. Useful only for component
-     * peer to initiate its stub.
-     */
-    public void setStub();
 
     /**
      * Returns the overlay type for the current peer.
@@ -63,17 +55,11 @@ public interface Peer extends Serializable {
     public StructuredOverlay getOverlay();
 
     /**
-     * Sets the overlay associated to the current peer.
+     * Returns a boolean indicating the current peer is activated (i.e. it has
+     * already joined a network and has not yet left).
      * 
-     * @param structuredOverlay
-     *            the overlay associated to the current peer.
-     */
-    public void setOverlay(StructuredOverlay structuredOverlay);
-
-    /**
-     * Indicates whether a join operation has already be performed or not.
-     * 
-     * @return {@code true} if the peer is activated, {@code false} otherwise.
+     * @return {@code true} if the peer has already joined a network and has not
+     *         yet left, {@code false} otherwise.
      */
     public boolean isActivated();
 

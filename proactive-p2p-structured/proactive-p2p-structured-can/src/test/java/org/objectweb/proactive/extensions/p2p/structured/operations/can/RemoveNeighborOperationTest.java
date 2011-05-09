@@ -8,8 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
-import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
+import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetworkInitializer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -17,11 +16,11 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public class RemoveNeighborOperationTest extends CANNetworkInitializer {
+public class RemoveNeighborOperationTest extends CanNetworkInitializer {
 
     @Before
     public void setUp() throws Exception {
-        super.initializeNewNetwork(OverlayType.CAN, 2);
+        super.initializeNewNetwork(2);
     }
 
     @Test
@@ -60,7 +59,7 @@ public class RemoveNeighborOperationTest extends CANNetworkInitializer {
 
     @After
     public void tearDown() {
-        super.clearNetwork();
+//        super.clearNetwork();
     }
 
 }

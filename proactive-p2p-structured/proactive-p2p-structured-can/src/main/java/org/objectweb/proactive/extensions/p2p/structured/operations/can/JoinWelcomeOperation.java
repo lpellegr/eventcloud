@@ -4,7 +4,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyRespons
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 /**
  * This operation is used to performed the join welcome phase: it consists to
@@ -14,8 +14,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCan
  * 
  * @author lpellegr
  * 
- * @see AbstractCanOverlay#join(Peer)
- * @see AbstractCanOverlay#handleJoinWelcomeMessage(JoinWelcomeOperation)
+ * @see CanOverlay#join(Peer)
+ * @see CanOverlay#handleJoinWelcomeMessage(JoinWelcomeOperation)
  */
 public class JoinWelcomeOperation implements SynchronousOperation {
 
@@ -29,7 +29,7 @@ public class JoinWelcomeOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        return ((AbstractCanOverlay) overlay).handleJoinWelcomeMessage(this);
+        return ((CanOverlay) overlay).handleJoinWelcomeMessage(this);
     }
 
 }

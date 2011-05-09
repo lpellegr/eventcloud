@@ -4,7 +4,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Reques
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
@@ -55,7 +55,7 @@ public class ForwardRequest extends Request<StringCoordinate> {
     public void route(StructuredOverlay overlay) {
         if (this.senderCoordinate == null) {
             this.senderCoordinate =
-                    ((AbstractCanOverlay) overlay).getZone().getLowerBound();
+                    ((CanOverlay) overlay).getZone().getLowerBound();
         }
         super.route(overlay);
     }

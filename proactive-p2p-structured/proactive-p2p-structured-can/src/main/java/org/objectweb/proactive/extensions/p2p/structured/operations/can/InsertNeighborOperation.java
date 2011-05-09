@@ -3,7 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 
 /**
@@ -75,7 +75,7 @@ public class InsertNeighborOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        ((AbstractCanOverlay) overlay).getNeighborTable().get(
+        ((CanOverlay) overlay).getNeighborTable().get(
                 this.dimension, this.direction).put(
                 this.entry.getId(), this.entry);
         return new BooleanResponseOperation(true);

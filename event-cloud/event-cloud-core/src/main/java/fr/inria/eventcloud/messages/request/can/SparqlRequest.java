@@ -3,15 +3,15 @@ package fr.inria.eventcloud.messages.request.can;
 import java.util.concurrent.Callable;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
 import fr.inria.eventcloud.config.EventCloudProperties;
+import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
-import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
 import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
 
 /**
@@ -59,9 +59,9 @@ public abstract class SparqlRequest extends AnycastRequest {
         return true;
     }
 
-    public ClosableIterableWrapper queryDatastore(AbstractCanOverlay overlay) {
+    public ClosableIterableWrapper queryDatastore(CanOverlay overlay) {
         return new ClosableIterableWrapper(
-                ((SemanticCanOverlay) overlay).getDatastore().sparqlConstruct(
+                ((SemanticDatastore) overlay.getDatastore()).sparqlConstruct(
                         EventCloudProperties.DEFAULT_CONTEXT,
                         this.sparqlConstructQuery));
     }
@@ -69,7 +69,7 @@ public abstract class SparqlRequest extends AnycastRequest {
     public AnycastRequestRouter<SparqlRequest> getRouter() {
         return new AnycastRequestRouter<SparqlRequest>() {
             @Override
-            public void onPeerValidatingKeyConstraints(final AbstractCanOverlay overlay,
+            public void onPeerValidatingKeyConstraints(final CanOverlay overlay,
                                                        final AnycastRequest request) {
                 final SparqlRequestResponseManager messagingManager =
                         (SparqlRequestResponseManager) overlay.getRequestResponseManager();

@@ -4,7 +4,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.NumericZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
@@ -48,7 +48,7 @@ public class NumericZoneViewTest {
     @Test
     public void testGetArea() {
         Pair<ZoneView<DoubleCoordinate, DoubleElement, Double>> views =
-                this.view.split(AbstractCanOverlay.getRandomDimension());
+                this.view.split(CanOverlay.getRandomDimension());
 
         Assert.assertEquals(
                 ((NumericZoneView) views.getFirst()).getArea(),

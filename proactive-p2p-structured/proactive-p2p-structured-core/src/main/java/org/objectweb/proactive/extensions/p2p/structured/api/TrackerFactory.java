@@ -20,11 +20,12 @@ import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link TrackerFactory} provides some static methods in order to ease the
@@ -33,6 +34,9 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
  * @author lpellegr
  */
 public class TrackerFactory {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(TrackerFactory.class);
 
     private static Factory factory;
 
@@ -46,66 +50,50 @@ public class TrackerFactory {
     }
 
     /**
-     * Creates a new tracker active object on the local JVM and associates it to
-     * the network named {@code default}.
+     * Creates a new active tracker on the local JVM and associates it to the
+     * network named "default".
      * 
-     * @param type
-     *            the type of network the tracker manages.
-     * 
-     * @return the new tracker active object created.
+     * @return the new active tracker created.
      */
-    public static Tracker newActiveTracker(OverlayType type) {
-        return TrackerFactory.newActiveTracker(type, "default");
+    public static Tracker newActiveTracker() {
+        return TrackerFactory.newActiveTracker("default", null);
     }
 
     /**
-     * Creates a new tracker active object on the local JVM and associates it to
-     * the specified {@code networkName}.
+     * Creates a new active tracker on the local JVM and associates it to the
+     * specified {@code networkName}.
      * 
-     * @param type
-     *            the type of network the tracker manages.
      * @param networkName
-     *            the name of the network the tracker manages.
+     *            the network name managed by the tracker.
      * 
-     * @return the new tracker active object created.
+     * @return the new active tracker created.
      */
-    public static Tracker newActiveTracker(OverlayType type, String networkName) {
-        return TrackerFactory.newActiveTracker(type, networkName, null);
-    }
-
-    /**
-     * Creates a new tracker active object on the specified {@code node} and
-     * associates it to the network named {@code default}.
-     * 
-     * @param type
-     *            the type of network the tracker manages.
-     * @param node
-     *            the node to use for deployment.
-     * 
-     * @return the new tracker active object created.
-     */
-    public static Tracker newActiveTracker(OverlayType type, Node node) {
-        return TrackerFactory.newActiveTracker(type, "default", node);
+    public static Tracker newActiveTracker(String networkName) {
+        return TrackerFactory.newActiveTracker(networkName, null);
     }
 
     /**
      * Creates a new tracker active object on the specified {@code node} and
      * associates it to the given {@code networkName}.
      * 
-     * @param type
-     *            the type of network the tracker manages.
      * @param networkName
-     *            the name of the network the tracker manages.
+     *            the network name managed by the tracker.
      * @param node
      *            the node to use for deployment.
      * 
      * @return the new tracker active object created.
      */
-    public static Tracker newActiveTracker(OverlayType type,
-                                           String networkName, Node node) {
+    public static Tracker newActiveTracker(String networkName, Node node) {
         try {
-            return PAActiveObject.newActive(TrackerImpl.class, new Object[] {
-                    type, networkName}, node);
+            Tracker tracker =
+                    PAActiveObject.newActive(
+                            TrackerImpl.class, new Object[] {networkName}, node);
+
+            logger.info(
+                    "Tracker {} associated to network named '{}' has been created",
+                    tracker.getId(), networkName);
+
+            return tracker;
         } catch (ActiveObjectCreationException e) {
             e.printStackTrace();
         } catch (NodeException e) {
@@ -116,79 +104,57 @@ public class TrackerFactory {
     }
 
     /**
-     * Creates the specified number of trackers in parallel.
+     * Creates the specified {@code number} of active trackers in parallel. Each
+     * tracker manages the same network, namely {@code networkName}.
      * 
-     * @param type
-     *            the type of network the tracker manages.
      * @param number
      *            the number of trackers to create.
      * 
+     * @param networkName
+     *            the name of the network each tracker belongs to.
+     * 
      * @return the trackers created.
      */
-    public static Tracker[] newActiveTrackerInParallel(final OverlayType type,
-                                                       int number) {
+    public static Tracker[] newActiveTrackerInParallel(int number,
+                                                       final String networkName) {
         return Executor.execute(Tracker.class, new Callable<Tracker>() {
             public Tracker call() throws Exception {
-                return TrackerFactory.newActiveTracker(type);
+                return TrackerFactory.newActiveTracker(networkName);
             }
         }, number);
     }
 
     /**
      * Creates a new tracker component on the local JVM and associates it to the
-     * network named {@code default}.
-     * 
-     * @param type
-     *            the type of network the tracker manages.
+     * network name "default".
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(OverlayType type) {
+    public static Tracker newComponentTracker() {
         return TrackerFactory.newComponentTracker(
-                type, "default", new HashMap<String, Object>());
+                "default", new HashMap<String, Object>());
     }
 
     /**
      * Creates a new tracker component on the local JVM and associates it to the
      * specified {@code networkName}.
      * 
-     * @param type
-     *            the type of network the tracker manages.
      * @param networkName
      *            the name of the network the tracker manages.
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(OverlayType type,
-                                              String networkName) {
+    public static Tracker newComponentTracker(String networkName) {
         return TrackerFactory.newComponentTracker(
-                type, networkName, new HashMap<String, Object>());
-    }
-
-    /**
-     * Creates a new tracker component on the specified {@code node} and
-     * associates it to the network named {@code default}.
-     * 
-     * @param type
-     *            the type of network the tracker manages.
-     * @param node
-     *            the node to use for deployment.
-     * 
-     * @return the reference on the {@link Tracker} interface of the new tracker
-     *         component created.
-     */
-    public static Tracker newComponentTracker(OverlayType type, Node node) {
-        return TrackerFactory.newComponentTracker(type, "default", node);
+                networkName, new HashMap<String, Object>());
     }
 
     /**
      * Creates a new tracker component on the specified {@code node} and
      * associates it to the given {@code networkName}.
      * 
-     * @param type
-     *            the type of network the tracker manages.
      * @param networkName
      *            the name of the network the tracker manages.
      * @param node
@@ -197,40 +163,20 @@ public class TrackerFactory {
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(OverlayType type,
-                                              String networkName, Node node) {
+    public static Tracker newComponentTracker(String networkName, Node node) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (node != null) {
             List<Node> nodeList = new ArrayList<Node>(1);
             nodeList.add(node);
             context.put(ADLNodeProvider.NODES_ID, nodeList);
         }
-        return TrackerFactory.newComponentTracker(type, networkName, context);
-    }
-
-    /**
-     * Creates a new tracker component on the specified {@code GCM virtual node}
-     * and associates it to the network named {@code default}.
-     * 
-     * @param type
-     *            the type of network the tracker manages.
-     * @param vn
-     *            the GCM virtual node to use for deployment.
-     * 
-     * @return the reference on the {@link Tracker} interface of the new tracker
-     *         component created.
-     */
-    public static Tracker newComponentTracker(OverlayType type,
-                                              GCMVirtualNode vn) {
-        return TrackerFactory.newComponentTracker(type, "default", vn);
+        return TrackerFactory.newComponentTracker(networkName, context);
     }
 
     /**
      * Creates a new tracker component on the specified {@code GCM virtual node}
      * and associates it to the given {@code networkName}.
      * 
-     * @param type
-     *            the type of network the tracker manages.
      * @param networkName
      *            the name of the network the tracker manages.
      * @param vn
@@ -239,32 +185,13 @@ public class TrackerFactory {
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(OverlayType type,
-                                              String networkName,
+    public static Tracker newComponentTracker(String networkName,
                                               GCMVirtualNode vn) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (vn != null) {
             context.put(vn.getName(), vn);
         }
-        return TrackerFactory.newComponentTracker(type, networkName, context);
-    }
-
-    /**
-     * Creates a new tracker component by using the specified
-     * {@code GCM virtual node} and associates it to the network named
-     * {@code default}.
-     * 
-     * @param type
-     *            the type of network the tracker manages.
-     * @param gcma
-     *            the GCM deployment to use for deployment.
-     * 
-     * @return the reference on the {@link Tracker} interface of the new tracker
-     *         component created.
-     */
-    public static Tracker newComponentTracker(OverlayType type,
-                                              GCMApplication gcma) {
-        return TrackerFactory.newComponentTracker(type, "default", gcma);
+        return TrackerFactory.newComponentTracker(networkName, context);
     }
 
     /**
@@ -272,8 +199,6 @@ public class TrackerFactory {
      * {@code GCM virtual node} and associates it to the given
      * {@code networkName}.
      * 
-     * @param type
-     *            the type of network the tracker manages.
      * @param networkName
      *            the name of the network the tracker manages.
      * @param gcma
@@ -282,18 +207,16 @@ public class TrackerFactory {
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(OverlayType type,
-                                              String networkName,
+    public static Tracker newComponentTracker(String networkName,
                                               GCMApplication gcma) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (gcma != null) {
             context.put("deployment-descriptor", gcma);
         }
-        return TrackerFactory.newComponentTracker(type, networkName, context);
+        return TrackerFactory.newComponentTracker(networkName, context);
     }
 
-    private static Tracker newComponentTracker(OverlayType type,
-                                               String networkName,
+    private static Tracker newComponentTracker(String networkName,
                                                Map<String, Object> context) {
         try {
             Component tracker =
@@ -302,10 +225,12 @@ public class TrackerFactory {
                             context);
             Tracker stub =
                     (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
-            stub.setAssociatedNetworkName(networkName);
-            stub.setStub();
-            stub.setType(type);
+            stub.init(stub, networkName);
             GCM.getGCMLifeCycleController(tracker).startFc();
+
+            logger.info(
+                    "ComponentTracker {} associated to network named '{}' has been created",
+                    stub.getId(), networkName);
 
             return stub;
         } catch (ADLException e) {

@@ -12,7 +12,6 @@ import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
@@ -22,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.tracker.SemanticFrequencies.Type;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
@@ -32,30 +30,25 @@ import fr.inria.eventcloud.util.SemanticHelper;
  * 
  * @author lpellegr
  */
-public class SemanticCanTracker extends TrackerImpl {
+public class SemanticTracker extends TrackerImpl {
 
     private static final long serialVersionUID = 1L;
 
-    private static final transient Logger logger =
-            LoggerFactory.getLogger(SemanticCanTracker.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(SemanticTracker.class);
 
     // The frequency of prefix of data inserted in the network
     private Map<Character, SemanticFrequencies> frequencies;
 
     private long occurencesTotalCount = 0;
 
-    public SemanticCanTracker() {
+    public SemanticTracker() {
         super();
         this.initialize();
     }
 
-    public SemanticCanTracker(String associatedNetworkName) {
-        super(OverlayType.CAN, associatedNetworkName);
-        this.initialize();
-    }
-
-    public SemanticCanTracker(String associatedNetworkName, String trackerName) {
-        super(OverlayType.CAN, associatedNetworkName, trackerName);
+    public SemanticTracker(String associatedNetworkName) {
+        super(associatedNetworkName);
         this.initialize();
     }
 
@@ -105,11 +98,14 @@ public class SemanticCanTracker extends TrackerImpl {
         double f = ProActiveRandom.nextDouble();
 
         Character subjectCharacter =
-                this.findCharacterByFrequency(f, Type.SUBJECT);
+                this.findCharacterByFrequency(
+                        f, SemanticFrequencies.Type.SUBJECT);
         Character predicateCharacter =
-                this.findCharacterByFrequency(f, Type.PREDICATE);
+                this.findCharacterByFrequency(
+                        f, SemanticFrequencies.Type.PREDICATE);
         Character objectCharacter =
-                this.findCharacterByFrequency(f, Type.OBJECT);
+                this.findCharacterByFrequency(
+                        f, SemanticFrequencies.Type.OBJECT);
 
         if (subjectCharacter == null || predicateCharacter == null
                 || objectCharacter == null) {
@@ -135,15 +131,8 @@ public class SemanticCanTracker extends TrackerImpl {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Peer getLandmarkPeerToJoin() {
-        return this.findPeerToJoin();
-    }
-
-    private Character findCharacterByFrequency(double f, Type type) {
+    private Character findCharacterByFrequency(double f,
+                                               SemanticFrequencies.Type type) {
         double sum = 0;
         CharacterFrequency cf = null;
 
@@ -216,97 +205,96 @@ public class SemanticCanTracker extends TrackerImpl {
         return result;
     }
 
-    public static void main(String[] args) {
-    }
-}
+    public static class CharactersInterval {
 
-class SemanticFrequencies implements Serializable {
+        private final char lowerBound;
 
-    private static final long serialVersionUID = 1L;
+        private final char upperBound;
 
-    public enum Type {
-        SUBJECT, PREDICATE, OBJECT
-    }
+        public CharactersInterval(char lowerBound, char upperBound) {
+            super();
+            this.lowerBound = lowerBound;
+            this.upperBound = upperBound;
+        }
 
-    private CharacterFrequency subjectCharacterFrequency;
+        public char getLowerBound() {
+            return this.lowerBound;
+        }
 
-    private CharacterFrequency predicateCharacterFrequency;
+        public char getUpperBound() {
+            return this.upperBound;
+        }
 
-    private CharacterFrequency objectCharacterFrequency;
-
-    public SemanticFrequencies() {
-        this.subjectCharacterFrequency = new CharacterFrequency(0);
-        this.predicateCharacterFrequency = new CharacterFrequency(0);
-        this.objectCharacterFrequency = new CharacterFrequency(0);
     }
 
-    public SemanticFrequencies(CharacterFrequency subjectCharacterFrequency,
-            CharacterFrequency predicateCharacterFrequency,
-            CharacterFrequency objectCharacterFrequency) {
-        super();
-        this.subjectCharacterFrequency = subjectCharacterFrequency;
-        this.predicateCharacterFrequency = predicateCharacterFrequency;
-        this.objectCharacterFrequency = objectCharacterFrequency;
+    public static class CharacterFrequency implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        private long occurencesCount;
+
+        public CharacterFrequency(long occurencesCount) {
+            super();
+            this.occurencesCount = occurencesCount;
+        }
+
+        public long getOccurencesCount() {
+            return this.occurencesCount;
+        }
+
+        public void incrementOccurencesCount() {
+            this.occurencesCount++;
+        }
+
+        @Override
+        public String toString() {
+            return Long.toString(this.occurencesCount);
+        }
+
     }
 
-    public CharacterFrequency getSubjectCharacterFrequency() {
-        return this.subjectCharacterFrequency;
-    }
+    public static class SemanticFrequencies implements Serializable {
 
-    public CharacterFrequency getPredicateCharacterFrequency() {
-        return this.predicateCharacterFrequency;
-    }
+        private static final long serialVersionUID = 1L;
 
-    public CharacterFrequency getObjectCharacterFrequency() {
-        return this.objectCharacterFrequency;
-    }
+        public enum Type {
+            SUBJECT, PREDICATE, OBJECT
+        }
 
-}
+        private CharacterFrequency subjectCharacterFrequency;
 
-class CharacterFrequency implements Serializable {
+        private CharacterFrequency predicateCharacterFrequency;
 
-    private static final long serialVersionUID = 1L;
+        private CharacterFrequency objectCharacterFrequency;
 
-    private long occurencesCount;
+        public SemanticFrequencies() {
+            this.subjectCharacterFrequency = new CharacterFrequency(0);
+            this.predicateCharacterFrequency = new CharacterFrequency(0);
+            this.objectCharacterFrequency = new CharacterFrequency(0);
+        }
 
-    public CharacterFrequency(long occurencesCount) {
-        super();
-        this.occurencesCount = occurencesCount;
-    }
+        public SemanticFrequencies(
+                CharacterFrequency subjectCharacterFrequency,
+                CharacterFrequency predicateCharacterFrequency,
+                CharacterFrequency objectCharacterFrequency) {
+            super();
+            this.subjectCharacterFrequency = subjectCharacterFrequency;
+            this.predicateCharacterFrequency = predicateCharacterFrequency;
+            this.objectCharacterFrequency = objectCharacterFrequency;
+        }
 
-    public long getOccurencesCount() {
-        return this.occurencesCount;
-    }
+        public CharacterFrequency getSubjectCharacterFrequency() {
+            return this.subjectCharacterFrequency;
+        }
 
-    public void incrementOccurencesCount() {
-        this.occurencesCount++;
-    }
+        public CharacterFrequency getPredicateCharacterFrequency() {
+            return this.predicateCharacterFrequency;
+        }
 
-    @Override
-    public String toString() {
-        return "" + this.occurencesCount;
-    }
+        public CharacterFrequency getObjectCharacterFrequency() {
+            return this.objectCharacterFrequency;
+        }
 
-}
-
-class CharactersInterval {
-
-    private final char lowerBound;
-
-    private final char upperBound;
-
-    public CharactersInterval(char lowerBound, char upperBound) {
-        super();
-        this.lowerBound = lowerBound;
-        this.upperBound = upperBound;
-    }
-
-    public char getLowerBound() {
-        return this.lowerBound;
-    }
-
-    public char getUpperBound() {
-        return this.upperBound;
     }
 
 }

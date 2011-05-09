@@ -3,7 +3,7 @@ package org.objectweb.proactive.extensions.p2p.structured.validator.can;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
@@ -23,7 +23,7 @@ public class UnicastConstraintsValidator extends
     }
 
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
-        return ((AbstractCanOverlay) overlay).getZone().contains(super.key);
+        return ((CanOverlay) overlay).getZone().contains(super.key);
     }
 
 }

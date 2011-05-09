@@ -4,7 +4,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.URI;
 
-import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
+import fr.inria.eventcloud.datastore.SemanticDatastore;
 
 /**
  * Used to insert a statement over the overlay network.
@@ -25,8 +25,7 @@ public class AddStatementRequest extends StatementRequest {
     @Override
     public void onDestinationReached(StructuredOverlay overlay, URI context,
                                      Statement stmt) {
-        ((SemanticCanOverlay) overlay).getDatastore().addStatement(
-                context, stmt);
+        ((SemanticDatastore) overlay.getDatastore()).addStatement(context, stmt);
     }
 
 }

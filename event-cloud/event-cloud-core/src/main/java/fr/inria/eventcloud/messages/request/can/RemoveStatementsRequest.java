@@ -3,14 +3,14 @@ package fr.inria.eventcloud.messages.request.can;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.URI;
 
+import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.messages.response.can.RemoveStatementsResponse;
-import fr.inria.eventcloud.overlay.can.SemanticCanOverlay;
 import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
@@ -36,9 +36,9 @@ public class RemoveStatementsRequest extends AnycastRequest {
     public AnycastRequestRouter<AnycastRequest> getRouter() {
         return new AnycastRequestRouter<AnycastRequest>() {
             @Override
-            public void onPeerValidatingKeyConstraints(AbstractCanOverlay overlay,
+            public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                        AnycastRequest msg) {
-                ((SemanticCanOverlay) overlay).getDatastore().removeStatement(
+                ((SemanticDatastore) overlay.getDatastore()).removeStatement(
                         context, statement);
             }
         };

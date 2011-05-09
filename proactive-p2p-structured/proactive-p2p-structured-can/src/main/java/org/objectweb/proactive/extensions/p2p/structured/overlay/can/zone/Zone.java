@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
@@ -18,7 +18,7 @@ import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
 
 /**
  * A zone defines a space (rectangle) which is completely logical and managed by
- * an {@link AbstractCanOverlay}. The coordinates of this rectangle are
+ * an {@link CanOverlay}. The coordinates of this rectangle are
  * maintained in a {@link ZoneView}. By default a zone contain two views. The
  * first one is a {@link NumericZoneView} which uses respectively {@code 0.0}
  * and {@code 1.0} as the lower and upper bound. The second is an

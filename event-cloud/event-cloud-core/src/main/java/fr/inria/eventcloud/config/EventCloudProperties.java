@@ -54,10 +54,9 @@ public class EventCloudProperties {
         if (preferencesFile.exists()) {
             ConfigurationParser.parse(preferencesFile.toString());
         } else {
-            if (logger.isInfoEnabled()) {
-                logger.info("No Event-Cloud properties loaded because file "
-                        + preferencesFile + " not found!");
-            }
+            logger.info(
+                    "No Event-Cloud properties loaded because file {} does not exist",
+                    preferencesFile);
         }
     }
 

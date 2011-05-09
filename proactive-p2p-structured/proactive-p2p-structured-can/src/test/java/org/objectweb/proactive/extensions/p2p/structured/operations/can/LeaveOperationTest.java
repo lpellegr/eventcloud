@@ -10,23 +10,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.intializers.CANNetworkInitializer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.AbstractCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetworkInitializer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
 
 /**
- * Test cases for the Join operation in {@link AbstractCanOverlay}.
+ * Test cases for the Join operation in {@link CanOverlay}.
  * 
  * @author lpellegr
  */
 public class LeaveOperationTest {
 
-    private CANNetworkInitializer networkInitializer;
+    private CanNetworkInitializer networkInitializer;
 
     @Before
     public void setUp() {
-        this.networkInitializer = new CANNetworkInitializer();
+        this.networkInitializer = new CanNetworkInitializer();
     }
 
     @Test
@@ -145,7 +145,7 @@ public class LeaveOperationTest {
 
     @After
     public void tearDown() throws Exception {
-        networkInitializer.clearNetwork();
+//        networkInitializer.clearNetwork();
     }
 
 }
