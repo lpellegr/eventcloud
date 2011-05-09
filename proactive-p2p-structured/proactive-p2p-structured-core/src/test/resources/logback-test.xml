@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%-30(%d{HH:mm:ss.SSS} [%-5.5level %22.22logger{0}]) %msg%n
@@ -8,9 +8,8 @@
 	</appender>
 
 	<logger name="org.objectweb.proactive.extensions.p2p" level="DEBUG" />
-	
+
 	<root level="OFF">
 		<appender-ref ref="STDOUT" />
 	</root>
-
 </configuration>
