@@ -47,7 +47,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
     private List<Peer> peers;
 
     // remote reference of the current tracker
-    protected Tracker stub;
+    private Tracker stub;
 
     private transient Group<Tracker> typedGroupView;
 
@@ -60,6 +60,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
      */
     public TrackerImpl() {
         this.id = UUID.randomUUID();
+
         this.probabilityToStorePeer =
                 P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
 
@@ -142,7 +143,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
      * {@inheritDoc}
      */
     @Override
-    public synchronized boolean join(Tracker landmarkTracker) {
+    public boolean join(Tracker landmarkTracker) {
         if (!this.networkName.equals(landmarkTracker.getNetworkName())
                 && this.type == landmarkTracker.getType()) {
             return false;
@@ -160,7 +161,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
      * {@inheritDoc}
      */
     @Override
-    public synchronized boolean addOnNetwork(Peer remotePeer) {
+    public boolean addOnNetwork(Peer remotePeer) {
         OverlayType remotePeerType = remotePeer.getType();
 
         if (this.type == null) {
@@ -272,7 +273,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
      * {@inheritDoc}
      */
     @Override
-    public void register() {
+    public String register() {
         try {
             this.bindingName =
                     PAActiveObject.registerByName(
@@ -280,11 +281,13 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
         } catch (ProActiveException pe) {
             pe.printStackTrace();
         }
+
+        return this.bindingName;
     }
 
-    public synchronized String getBindingNameSuffix() {
+    public String getBindingNameSuffix() {
         if (this.bindingNameSuffix == null) {
-            StringBuffer appender = new StringBuffer();
+            StringBuffer appender = new StringBuffer("tracker/");
             appender.append("/");
             appender.append(this.networkName);
             appender.append("/");
