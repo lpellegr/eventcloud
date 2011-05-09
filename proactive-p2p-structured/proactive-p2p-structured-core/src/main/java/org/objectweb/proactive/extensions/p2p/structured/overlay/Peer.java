@@ -48,13 +48,6 @@ public interface Peer extends Serializable {
     public OverlayType getType();
 
     /**
-     * Returns the overlay associated to the current peer.
-     * 
-     * @return the overlay associated to the current peer.
-     */
-    // public StructuredOverlay getOverlay();
-
-    /**
      * Returns a boolean indicating the current peer is activated (i.e. it has
      * already joined a network and has not yet left).
      * 

@@ -38,7 +38,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
 
     protected static Logger logger = LoggerFactory.getLogger(PeerImpl.class);
 
-    protected StructuredOverlay overlay;
+    protected transient StructuredOverlay overlay;
 
     /**
      * The no-argument constructor as commanded by ProActive.
@@ -117,13 +117,6 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      */
     public UUID getId() {
         return this.overlay.id;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public StructuredOverlay getOverlay() {
-        return this.overlay;
     }
 
     /**

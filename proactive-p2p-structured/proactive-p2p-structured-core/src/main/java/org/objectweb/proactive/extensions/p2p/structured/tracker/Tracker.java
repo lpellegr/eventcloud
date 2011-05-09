@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.api.TrackerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
@@ -59,8 +60,18 @@ public interface Tracker extends Serializable {
      * 
      * @param remotePeer
      *            the peer to add on the network.
+     * 
+     * @throws NetworkAlreadyJoinedException
+     *             if the specified {@code remotePeer} has already joined a
+     *             network.
+     * 
+     * @throws IllegalArgumentException
+     *             if the specified {@code remotePeer} does not manage the same
+     *             overlay type as the peers that are already maintained by the
+     *             tracker.
      */
-    public boolean addOnNetwork(Peer remotePeer);
+    public void addOnNetwork(Peer remotePeer)
+            throws NetworkAlreadyJoinedException;
 
     /**
      * Stores the specified {@code peerReference} locally and call

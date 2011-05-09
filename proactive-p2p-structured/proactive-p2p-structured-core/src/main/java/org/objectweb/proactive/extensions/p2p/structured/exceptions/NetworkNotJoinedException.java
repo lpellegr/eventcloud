@@ -14,8 +14,8 @@ public class NetworkNotJoinedException extends StructuredP2PException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a <code>NetworkNotJoinedException</code> with no specified
-     * detail message.
+     * Constructs a {@code NetworkNotJoinedException} with no specified detail
+     * message.
      */
     public NetworkNotJoinedException() {
         super();

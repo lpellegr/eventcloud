@@ -11,7 +11,7 @@ public class StructuredP2PException extends Exception {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a <code>StructuredP2PException</code> with no specified detail
+     * Constructs a {@code StructuredP2PException} with no specified detail
      * message.
      */
     public StructuredP2PException() {
@@ -19,8 +19,8 @@ public class StructuredP2PException extends Exception {
     }
 
     /**
-     * Constructs a <code>StructuredP2PException</code> with the specified
-     * detail message.
+     * Constructs a {@code StructuredP2PException} with the specified detail
+     * message.
      * 
      * @param message
      *            the detail message.
@@ -30,8 +30,8 @@ public class StructuredP2PException extends Exception {
     }
 
     /**
-     * Constructs a <code>StructuredP2PException</code> with the specified
-     * detail message and nested exception.
+     * Constructs a {@code StructuredP2PException} with the specified detail
+     * message and nested exception.
      * 
      * @param message
      *            the detail message.
@@ -43,8 +43,8 @@ public class StructuredP2PException extends Exception {
     }
 
     /**
-     * Constructs a <code>StructuredP2PException</code> with the specified
-     * detail message and nested exception.
+     * Constructs a {@code StructuredP2PException} with the specified detail
+     * message and nested exception.
      * 
      * @param cause
      *            the nested exception.

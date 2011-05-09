@@ -14,7 +14,7 @@ public class NetworkAlreadyJoinedException extends StructuredP2PException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a <code>NetworkAlreadyJoinedException</code> with no specified
+     * Constructs a {@code NetworkAlreadyJoinedException} with no specified
      * detail message.
      */
     public NetworkAlreadyJoinedException() {

@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.ontoware.rdf2go.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,11 @@ public class DataTransfertTest {
                 "Before join operation on old peer, the old peer contains {} data",
                 dataContainedByOldPeer.size());
 
-        this.initializer.getRandomTracker().addOnNetwork(newPeer);
+        try {
+            this.initializer.getRandomTracker().addOnNetwork(newPeer);
+        } catch (NetworkAlreadyJoinedException e) {
+            e.printStackTrace();
+        }
 
         logger.debug("Initial peer manages "
                 + this.initializer.getRandomTracker().getRandomPeer());

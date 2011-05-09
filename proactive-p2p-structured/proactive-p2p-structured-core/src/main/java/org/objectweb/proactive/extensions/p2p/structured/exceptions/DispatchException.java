@@ -14,16 +14,14 @@ public class DispatchException extends StructuredP2PException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a <code>DispatchException</code> with no specified detail
-     * message.
+     * Constructs a {@code DispatchException} with no specified detail message.
      */
     public DispatchException() {
         super();
     }
 
     /**
-     * Constructs a <code>DispatchException</code> with the specified detail
-     * message.
+     * Constructs a {@code DispatchException} with the specified detail message.
      * 
      * @param message
      *            the detail message.
@@ -33,8 +31,8 @@ public class DispatchException extends StructuredP2PException {
     }
 
     /**
-     * Constructs a <code>DispatchException</code> with the specified detail
-     * message and nested exception.
+     * Constructs a {@code DispatchException} with the specified detail message
+     * and nested exception.
      * 
      * @param message
      *            the detail message.
@@ -46,8 +44,8 @@ public class DispatchException extends StructuredP2PException {
     }
 
     /**
-     * Constructs a <code>DispatchException</code> with the specified detail
-     * message and nested exception.
+     * Constructs a {@code DispatchException} with the specified detail message
+     * and nested exception.
      * 
      * @param cause
      *            the nested exception.

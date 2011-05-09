@@ -161,19 +161,14 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
      * {@inheritDoc}
      */
     @Override
-    public boolean addOnNetwork(Peer remotePeer) {
+    public void addOnNetwork(Peer remotePeer)
+            throws NetworkAlreadyJoinedException {
         OverlayType remotePeerType = remotePeer.getType();
 
         if (this.type == null) {
             this.type = remotePeerType;
-            try {
-                remotePeer.create();
-                this.storePeer(remotePeer);
-                return true;
-            } catch (NetworkAlreadyJoinedException e) {
-                e.printStackTrace();
-                return false;
-            }
+            remotePeer.create();
+            this.storePeer(remotePeer);
         } else {
             if (this.type != remotePeerType) {
                 throw new IllegalArgumentException(
@@ -181,41 +176,34 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
                                 + " network and receives" + remotePeerType);
             }
 
-            try {
-                Peer landmarkPeer = this.getRandomPeer();
-                boolean joinSucceed = false;
+            Peer landmarkPeer = this.getRandomPeer();
+            boolean joinSucceed = false;
 
-                // try to join until the operation succeeds (the operation
-                // can fail if a concurrent join is detected).
-                while (!joinSucceed) {
-                    joinSucceed = remotePeer.join(landmarkPeer);
+            // try to join until the operation succeeds (the operation
+            // can fail if a concurrent join is detected).
+            while (!joinSucceed) {
+                joinSucceed = remotePeer.join(landmarkPeer);
 
-                    if (!joinSucceed) {
-                        logger.debug(
-                                "Retry join operation in {} ms because a concurrent join or leave operation has been detected",
-                                P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
-                        try {
-                            Thread.sleep(P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
-                            landmarkPeer = getRandomPeer();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                if (!joinSucceed) {
+                    logger.debug(
+                            "Retry join operation in {} ms because a concurrent join or leave operation has been detected",
+                            P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
+                    try {
+                        Thread.sleep(P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
+                        landmarkPeer = getRandomPeer();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
-
-                if (ProActiveRandom.nextDouble() <= this.getProbabilityToStorePeer()) {
-                    this.storePeer(remotePeer);
-                }
-
-                logger.info(
-                        "Peer managing {} has joined from {}", remotePeer,
-                        landmarkPeer);
-
-                return true;
-            } catch (NetworkAlreadyJoinedException e) {
-                e.printStackTrace();
-                return false;
             }
+
+            if (ProActiveRandom.nextDouble() <= this.getProbabilityToStorePeer()) {
+                this.storePeer(remotePeer);
+            }
+
+            logger.info(
+                    "Peer managing {} has joined from {}", remotePeer,
+                    landmarkPeer);
         }
     }
 
@@ -288,10 +276,10 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
     public String getBindingNameSuffix() {
         if (this.bindingNameSuffix == null) {
             StringBuffer appender = new StringBuffer("tracker/");
-            appender.append("/");
             appender.append(this.networkName);
             appender.append("/");
             appender.append(this.id.toString());
+            this.bindingNameSuffix = appender.toString();
         }
 
         return this.bindingNameSuffix;

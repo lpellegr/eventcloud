@@ -10,6 +10,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.api.TrackerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
@@ -36,7 +37,11 @@ public abstract class NetworkInitializer {
         Peer peerCreated;
         for (int i = 0; i < nbPeersToCreate; i++) {
             peerCreated = this.createActivePeer();
-            this.tracker.addOnNetwork(peerCreated);
+            try {
+                this.tracker.addOnNetwork(peerCreated);
+            } catch (NetworkAlreadyJoinedException e) {
+                e.printStackTrace();
+            }
         }
 
         this.componentTracker = TrackerFactory.newComponentTracker();
@@ -44,7 +49,11 @@ public abstract class NetworkInitializer {
 
         for (int i = 0; i < nbPeersToCreate; i++) {
             peerCreated = this.createComponentPeer();
-            this.componentTracker.addOnNetwork(peerCreated);
+            try {
+                this.componentTracker.addOnNetwork(peerCreated);
+            } catch (NetworkAlreadyJoinedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -67,8 +76,6 @@ public abstract class NetworkInitializer {
                     e.printStackTrace();
                 } catch (NoSuchInterfaceException e) {
                     e.printStackTrace();
-                } catch (Exception e) {
-                    // ignores it
                 }
             }
             try {
@@ -82,8 +89,6 @@ public abstract class NetworkInitializer {
                 e.printStackTrace();
             } catch (NoSuchInterfaceException e) {
                 e.printStackTrace();
-            } catch (Exception e) {
-                // ignores it
             }
         }
     }
@@ -103,11 +108,11 @@ public abstract class NetworkInitializer {
     public Peer getRandomComponentPeer() {
         return this.componentTracker.getRandomPeer();
     }
-    
+
     public List<Peer> getPeers() {
         return this.tracker.getPeers();
     }
-    
+
     public List<Peer> getComponentPeers() {
         return this.componentTracker.getPeers();
     }

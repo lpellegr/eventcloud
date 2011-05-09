@@ -15,6 +15,10 @@ public enum OverlayType {
      * Chord : a scalable peer-to-peer lookup service for Internet applications
      * where topology is a ring.
      */
-    CHORD
+    CHORD,
+    /**
+     * Unknown type for mock overlays
+     */
+    UNKNOWN
 
 }
