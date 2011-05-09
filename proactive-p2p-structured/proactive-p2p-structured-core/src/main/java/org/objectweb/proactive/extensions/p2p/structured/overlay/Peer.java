@@ -52,7 +52,7 @@ public interface Peer extends Serializable {
      * 
      * @return the overlay associated to the current peer.
      */
-    public StructuredOverlay getOverlay();
+    // public StructuredOverlay getOverlay();
 
     /**
      * Returns a boolean indicating the current peer is activated (i.e. it has
