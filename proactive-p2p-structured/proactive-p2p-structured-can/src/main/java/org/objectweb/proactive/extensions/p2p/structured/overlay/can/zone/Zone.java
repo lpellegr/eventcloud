@@ -1,3 +1,19 @@
+/**
+ * Copyright (c) 2011 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 
 import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createDoubleCoordinate;
@@ -18,12 +34,11 @@ import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
 
 /**
  * A zone defines a space (rectangle) which is completely logical and managed by
- * an {@link CanOverlay}. The coordinates of this rectangle are
- * maintained in a {@link ZoneView}. By default a zone contain two views. The
- * first one is a {@link NumericZoneView} which uses respectively {@code 0.0}
- * and {@code 1.0} as the lower and upper bound. The second is an
- * {@link UnicodeZoneView} which uses respectively
- * {@link P2PStructuredProperties#CAN_LOWER_BOUND} and
+ * an {@link CanOverlay}. The coordinates of this rectangle are maintained in a
+ * {@link ZoneView}. By default a zone contain two views. The first one is a
+ * {@link NumericZoneView} which uses respectively {@code 0.0} and {@code 1.0}
+ * as the lower and upper bound. The second is an {@link UnicodeZoneView} which
+ * uses respectively {@link P2PStructuredProperties#CAN_LOWER_BOUND} and
  * {@link P2PStructuredProperties#CAN_UPPER_BOUND} as the lower and upper bound.
  * <p>
  * The former is used to compute a distance or an area whereas the latter is
