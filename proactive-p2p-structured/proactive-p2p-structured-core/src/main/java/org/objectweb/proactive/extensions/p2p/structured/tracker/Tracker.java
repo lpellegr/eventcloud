@@ -138,8 +138,10 @@ public interface Tracker extends Serializable {
 
     /**
      * Register the tracker into the RMI registry.
+     * 
+     * @return the URL where the object has been bind to.
      */
-    public void register();
+    public String register();
 
     /**
      * Returns the unique identifier associated to this tracker.

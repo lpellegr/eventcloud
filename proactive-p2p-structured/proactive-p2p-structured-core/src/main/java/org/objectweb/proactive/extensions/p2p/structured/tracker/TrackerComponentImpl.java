@@ -45,7 +45,7 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker,
      * {@inheritDoc}
      */
     @Override
-    public void register() {
+    public String register() {
         try {
             super.bindingName =
                     Fractive.registerByName(
@@ -54,6 +54,8 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker,
         } catch (ProActiveException pe) {
             pe.printStackTrace();
         }
+        
+        return super.bindingName;
     }
 
 }
