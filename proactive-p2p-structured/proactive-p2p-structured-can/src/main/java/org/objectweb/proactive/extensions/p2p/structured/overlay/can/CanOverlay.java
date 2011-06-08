@@ -51,7 +51,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
-import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -401,7 +401,7 @@ public class CanOverlay extends StructuredOverlay {
         byte direction = getRandomDirection();
         byte directionInv = CanOverlay.getOppositeDirection(direction);
 
-        // gets the next dimension to split onto
+        // gets the next dimension to split into
         if (!this.splitHistory.isEmpty()) {
             dimension =
                     CanOverlay.getNextDimension(this.splitHistory.removeLast()
@@ -573,12 +573,12 @@ public class CanOverlay extends StructuredOverlay {
                     (JoinIntroduceResponseOperation) PAFuture.getFutureValue(landmarkPeer.receiveImmediateService(new JoinIntroduceOperation(
                             super.id, super.stub)));
         } catch (PeerNotActivatedRuntimeException e) {
-            logger.warn(
+            logger.error(
                     "Landmark peer {} to join is not activated",
                     landmarkPeer.getId());
             return false;
         } catch (ConcurrentModificationException e) {
-            logger.warn(
+            logger.error(
                     "Peer {} is already handling a join operation for peer {}",
                     landmarkPeer.getId(), super.id);
             return false;

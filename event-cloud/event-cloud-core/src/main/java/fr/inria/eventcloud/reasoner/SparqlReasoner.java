@@ -19,7 +19,7 @@ package fr.inria.eventcloud.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.inria.eventcloud.messages.request.can.SparqlConstructRequest;
+import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
 
 /**
  * 
@@ -33,14 +33,13 @@ public class SparqlReasoner {
         this.decomposer = new SparqlDecomposer();
     }
 
-    public List<SparqlConstructRequest> parseSparql(String sparqlQuery) {
-        List<SparqlConstructRequest> subRequests;
-        List<AtomicSparqlQuery> subQueries =
-                this.decomposer.decompose(sparqlQuery);
-        subRequests = new ArrayList<SparqlConstructRequest>(subQueries.size());
+    public List<SparqlAtomicRequest> parseSparql(String sparqlQuery) {
+        List<AtomicQuery> subQueries = this.decomposer.decompose(sparqlQuery);
+        List<SparqlAtomicRequest> subRequests =
+                new ArrayList<SparqlAtomicRequest>(subQueries.size());
 
-        for (AtomicSparqlQuery query : subQueries) {
-            subRequests.add(new SparqlConstructRequest(query));
+        for (AtomicQuery query : subQueries) {
+            subRequests.add(new SparqlAtomicRequest(query));
         }
 
         return subRequests;

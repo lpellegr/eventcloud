@@ -21,9 +21,9 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Reques
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * A <code>Response</code> is the response message associated to a
- * {@link Request}. This class contains several information common to all
- * responses like for example the latency, the hop count, etc.
+ * A Response is the response message associated to a {@link Request}. This
+ * class contains several information common to all responses (e.g. the latency,
+ * the hop count, etc.).
  * 
  * @author lpellegr
  */
@@ -166,4 +166,5 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
                 + super.getHopCount() + ", outboundHopCount="
                 + this.outboundHopCount + ", latency=" + this.latency + "]";
     }
+
 }

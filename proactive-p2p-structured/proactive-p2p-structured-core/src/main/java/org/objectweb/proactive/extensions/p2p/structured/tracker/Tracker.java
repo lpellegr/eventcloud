@@ -33,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * references. These references are stored according to a specified probability
  * rate. Please also note that a tracker can only maintain reference to peers of
  * the same type (e.g. peers of type CAN or Chord but not the both at the same
- * time). Take care of it when you call {@link #addOnNetwork(Peer)}.
+ * time). Take care of it when you call {@link #inject(Peer)}.
  * <p>
  * A tracker can join an another tracker. When a tracker A join a tracker B
  * which already has references to other trackers C and D for example, a
@@ -86,8 +86,7 @@ public interface Tracker extends Serializable {
      *             overlay type as the peers that are already maintained by the
      *             tracker.
      */
-    public void addOnNetwork(Peer remotePeer)
-            throws NetworkAlreadyJoinedException;
+    public void inject(Peer remotePeer) throws NetworkAlreadyJoinedException;
 
     /**
      * Stores the specified {@code peerReference} locally and call
@@ -225,7 +224,7 @@ public interface Tracker extends Serializable {
 
     /**
      * Returns the type of peer references the tracker maintain. The type is
-     * determined by the first call to {@link #addOnNetwork(Peer)}.
+     * determined by the first call to {@link #inject(Peer)}.
      * 
      * @return the type of peer references the tracker maintain
      */

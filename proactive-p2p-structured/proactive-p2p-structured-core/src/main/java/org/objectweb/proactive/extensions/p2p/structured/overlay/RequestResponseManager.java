@@ -73,7 +73,6 @@ public abstract class RequestResponseManager implements Serializable {
                     + this.overlay.toString());
         }
 
-        // sends the request over the overlay
         request.route(this.overlay);
 
         return this.pullResponse(request.getId());

@@ -25,6 +25,8 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The StructuredOverlay class contains the logic associated to methods exposed
@@ -37,6 +39,9 @@ public abstract class StructuredOverlay implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger log =
+            LoggerFactory.getLogger(StructuredOverlay.class);
+
     protected final UUID id;
 
     protected transient PersistentDatastore datastore;
@@ -45,7 +50,7 @@ public abstract class StructuredOverlay implements Serializable {
 
     /**
      * Indicates whether the current peer is activated (i.e. if the peer has
-     * already joined or not).
+     * already joined a network or not).
      */
     protected AtomicBoolean activated;
 
@@ -78,11 +83,12 @@ public abstract class StructuredOverlay implements Serializable {
     public void initActivity(Body body) {
         if (this.datastore != null) {
             this.datastore.open();
+            log.debug("Datastore opened on {}", this);
         }
     }
 
     public void endActivity(Body body) {
-        if (this.datastore != null) {
+        if (this.datastore != null && this.datastore.isInitialized()) {
             this.datastore.close();
         }
     }

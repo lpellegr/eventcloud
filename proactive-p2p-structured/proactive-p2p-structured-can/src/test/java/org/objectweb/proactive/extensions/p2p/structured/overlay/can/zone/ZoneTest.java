@@ -21,15 +21,10 @@ import static org.objectweb.proactive.extensions.p2p.structured.configuration.P2
 import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createDoubleCoordinate;
 import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createStringCoordinate;
 
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.NumericZoneView;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZoneView;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 
 /**
  * Test cases for class {@link Zone}.
@@ -38,21 +33,16 @@ import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
  */
 public class ZoneTest {
 
-    private static Zone zone;
-
-    @BeforeClass
-    public static void setUp() throws Exception {
-        ZoneTest.zone = new Zone();
-    }
-
     @Test
-    public void testZone() {
+    public void testZoneCreation() {
+        Zone zone = new Zone();
+
         Assert.assertEquals(
-                ZoneTest.zone.getLowerBound(),
+                zone.getLowerBound(),
                 createStringCoordinate(CAN_LOWER_BOUND.getValue()));
 
         Assert.assertEquals(
-                ZoneTest.zone.getUpperBound(),
+                zone.getUpperBound(),
                 createStringCoordinate(CAN_UPPER_BOUND.getValue()));
     }
 
@@ -67,11 +57,6 @@ public class ZoneTest {
 
         Pair<Zone> newZones = z.split(CanOverlay.getRandomDimension());
         Assert.assertEquals(z, newZones.getFirst().merge(newZones.getSecond()));
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        ZoneTest.zone = null;
     }
 
 }

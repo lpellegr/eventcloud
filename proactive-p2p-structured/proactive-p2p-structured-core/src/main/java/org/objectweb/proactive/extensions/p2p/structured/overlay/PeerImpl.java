@@ -166,7 +166,16 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      */
     public boolean join(Peer landmarkPeer) throws NetworkAlreadyJoinedException {
         if (this.overlay.activated.compareAndSet(false, true)) {
-            return this.overlay.join(landmarkPeer);
+            if (!this.overlay.join(landmarkPeer)) {
+                // a concurrent join operation has been detected
+                // hence we have to reset the activated variable
+                // to false in order to have the possibility to
+                // try again later
+                this.overlay.activated.set(false);
+                return false;
+            } else {
+                return true;
+            }
         } else {
             throw new NetworkAlreadyJoinedException();
         }

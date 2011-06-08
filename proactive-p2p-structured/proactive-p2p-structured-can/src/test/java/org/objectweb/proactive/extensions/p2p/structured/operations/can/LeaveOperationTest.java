@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJo
 import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetworkInitializer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 
 /**
  * Test cases for the Join operation in {@link CanOverlay}.
@@ -67,7 +67,7 @@ public class LeaveOperationTest {
 
     @Test
     public void testLeaveWithOnePeer() {
-        this.networkInitializer.initializeNewNetwork(1);
+        this.networkInitializer.setUp(1);
         try {
             assertTrue(this.networkInitializer.get(0).leave());
         } catch (NetworkNotJoinedException e) {
@@ -77,7 +77,7 @@ public class LeaveOperationTest {
 
     @Test
     public void testLeaveWithTwoPeers() {
-        this.networkInitializer.initializeNewNetwork(2);
+        this.networkInitializer.setUp(2);
 
         UUID peerLeavingId = this.networkInitializer.get(0).getId();
 

@@ -16,28 +16,26 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
-import static fr.inria.eventcloud.config.EventCloudProperties.DEFAULT_CONTEXT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.proactive.api.PAFuture;
-import org.ontoware.aifbcommons.collection.ClosableIterator;
-import org.ontoware.rdf2go.model.QueryResultTable;
-import org.ontoware.rdf2go.model.QueryRow;
 
-import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
-import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+
+import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.initializers.EventCloudInitializer;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.util.RDF2GoBuilder;
-import fr.inria.eventcloud.util.SemanticHelper;
+import fr.inria.eventcloud.utils.generator.NodeGenerator;
+import fr.inria.eventcloud.utils.generator.QuadrupleGenerator;
 
 /**
  * Tests associated to semantic operations provided by {@link SemanticPeer}.
@@ -46,266 +44,170 @@ import fr.inria.eventcloud.util.SemanticHelper;
  */
 public class SemanticPeerTest {
 
-    private static EventCloudInitializer initializer =
-            new EventCloudInitializer();
+    private EventCloudInitializer initializer;
 
-    private static String[][] statementsToAdd = {
-            {"http://Chair", "http://Made-of", "http://Wood"},
-            {"http://Table", "http://Made-of", "http://Wood"},
-            {"http://Looking-glass", "http://Made-of", "http://Glass"},
-            {"http://Lamp", "http://On", "http://Chest"},
-            {"http://Carpet", "http://Under", "http://CoffeeTable"},
-            {"http://Accordion", "http://IsUsedFor", "http://Music"}};
-
-    @BeforeClass
-    public static void setUp() {
-        initializer.setUpNetworkOnLocalMachine(10);
+    @Before
+    public void setUp() {
+        this.initializer = new EventCloudInitializer(1);
+        this.initializer.setUp();
     }
 
     @Test
-    public void runTests() {
-        this.testSparlqConstructTriplePatternDecomposedWithoutDataAvailable();
-        this.testSparqlConstructTriplePatternWithNoDataAvailable();
-        this.testAddStatements();
-        this.testSparqlAskTriplePattern();
-        this.testSparqlConstructTriplePattern1();
-        this.testSparqlConstructTriplePattern2();
-        this.testSparqlConstructTriplePattern3();
-        this.testSparqlConstructTriplePattern4();
-        this.testSparqlConstructBasicGraphPattern();
+    public void testAddQuadruple() {
+        Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
-        // TODO: fixes describe queries which are not supported
-        // this.testSparqlDescribe();
-
-        this.testSparqlSelectTriplePattern();
-        this.testSparqlSelectBasicGraphPattern();
-        this.testRemoveStatement();
-        this.testRemoveStatements();
-    }
-
-    public void testSparlqConstructTriplePatternDecomposedWithoutDataAvailable() {
-        StringBuffer query = new StringBuffer();
-        query.append("CONSTRUCT { ?s ?p ?o } WHERE { ");
-        query.append("?s ?p <");
-        query.append(statementsToAdd[0][2]);
-        query.append(">. <");
-        query.append(statementsToAdd[2][0]);
-        query.append("> ?p ?o. }");
-
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
-
-        Assert.assertEquals(0, SemanticHelper.size(response.getResult()
-                .toRDF2Go()));
-    }
-
-    public void testSparqlConstructTriplePatternWithNoDataAvailable() {
-        String query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
-
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
-
-        assertEquals(0, SemanticHelper.size(response.getResult().toRDF2Go()));
-    }
-
-    /**
-     * /!\ This test adds statements in datastore(s) and is compulsory for the
-     * next tests. All tests are executed sequentially and use the same context.
-     */
-    public void testAddStatements() {
-        for (String[] stmt : statementsToAdd) {
-            initializer.getRandomPeer().addStatement(
-                    DEFAULT_CONTEXT,
-                    RDF2GoBuilder.createStatementInternal(
-                            stmt[0], stmt[1], stmt[2]));
+        Quadruple quadruple;
+        for (int i = 0; i < 100; i++) {
+            quadruple = QuadrupleGenerator.create();
+            quadruples.add(quadruple);
+            this.initializer.selectPeer().add(quadruple);
         }
 
-        String query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
+        Collection<Quadruple> quadruplesFound =
+                this.initializer.selectPeer().find(QuadruplePattern.ANY);
 
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(query);
-
-        assertEquals(
-                statementsToAdd.length,
-                SemanticHelper.size(response.getResult().toRDF2Go()));
+        for (Quadruple quad : quadruplesFound) {
+            Assert.assertTrue(quadruples.contains(quad));
+        }
     }
 
-    public void testSparqlDescribe() {
-        StringBuffer query = new StringBuffer();
-        query.append("DESCRIBE ?s WHERE { ?s ?p <");
-        query.append(statementsToAdd[0][2]);
-        query.append("> }");
+    // TODO add testAddQuadrupleInParallel
 
-        SparqlDescribeResponse response =
-                initializer.getRandomPeer().executeSparqlDescribe(
-                        query.toString());
+    @Test
+    public void testContainsQuadruple() {
+        Quadruple quadToCheck = QuadrupleGenerator.create();
+        Assert.assertFalse(this.initializer.selectPeer().contains(quadToCheck));
 
-        assertEquals(2, SemanticHelper.size(response.getResult().toRDF2Go()));
+        this.initializer.selectPeer().add(quadToCheck);
+        Assert.assertTrue(this.initializer.selectPeer().contains(quadToCheck));
     }
 
-    public void testSparqlConstructTriplePattern1() {
-        StringBuffer query = new StringBuffer();
-        query.append("CONSTRUCT { ?s <http://Chair> ?o } ");
-        query.append("WHERE { ?s <http://Chair> ?o }");
+    @Test
+    public void testDeleteQuadruple() {
+        Quadruple quad = QuadrupleGenerator.create();
+        this.initializer.selectPeer().add(quad);
+        Assert.assertTrue(this.initializer.selectPeer().contains(quad));
 
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
-
-        assertEquals(0, SemanticHelper.size(response.getResult().toRDF2Go()));
+        this.initializer.selectPeer().delete(quad);
+        Assert.assertFalse(this.initializer.selectPeer().contains(quad));
     }
 
-    public void testSparqlConstructTriplePattern2() {
-        StringBuffer query = new StringBuffer();
-        query.append("CONSTRUCT { ?s ?p <http://Wood> } ");
-        query.append("WHERE { ?s ?p <http://Wood> }");
+    @Test
+    public void testDeleteQuadruples() {
+        Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
+        Quadruple quadruple;
+        Node graphValue = NodeGenerator.createNode();
+        for (int i = 0; i < 100; i++) {
+            if (i < 20) {
+                // some nodes with the same graph value
+                quadruple = QuadrupleGenerator.create(graphValue);
+            } else {
+                quadruple = QuadrupleGenerator.create();
+            }
+            quadruples.add(quadruple);
+            this.initializer.selectPeer().add(quadruple);
+        }
 
-        assertEquals(2, SemanticHelper.size(response.getResult().toRDF2Go()));
+        this.initializer.selectPeer().delete(
+                new QuadruplePattern(graphValue, Node.ANY, Node.ANY, Node.ANY));
+
+        Collection<Quadruple> quadruplesFound =
+                this.initializer.selectPeer().find(QuadruplePattern.ANY);
+
+        Assert.assertEquals(80, quadruplesFound.size());
+
+        for (Quadruple quad : quadruplesFound) {
+            Assert.assertTrue(quadruples.contains(quad));
+        }
     }
 
-    public void testSparqlConstructTriplePattern3() {
-        StringBuffer query = new StringBuffer();
-        query.append("CONSTRUCT { <http://Chair> ?p ?o } ");
-        query.append("WHERE { <http://Chair> ?p ?o }");
+    @Test
+    public void testExecuteSparqlAsk() {
+        Assert.assertFalse(this.initializer.selectPeer().executeSparqlAsk(
+                "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
+        Quadruple quad =
+                QuadrupleGenerator.create(Node.createURI("http://sparql.org"));
+        this.initializer.selectPeer().add(quad);
 
-        assertEquals(1, SemanticHelper.size(response.getResult().toRDF2Go()));
+        Assert.assertTrue(this.initializer.selectPeer().executeSparqlAsk(
+                "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
+
+        Assert.assertTrue(this.initializer.selectPeer().executeSparqlAsk(
+                "ASK { GRAPH ?g { <" + quad.getSubject().toString()
+                        + "> ?p ?o } }").getResult());
+
+        Assert.assertFalse(this.initializer.selectPeer().executeSparqlAsk(
+                "ASK { GRAPH <http://sparql.com> { ?s ?p ?o } }").getResult());
     }
 
-    public void testSparqlConstructTriplePattern4() {
-        StringBuffer query = new StringBuffer();
-        query.append("CONSTRUCT { <");
-        query.append(statementsToAdd[0][0]);
-        query.append("> ?p <");
-        query.append(statementsToAdd[2][2]);
-        query.append("> } WHERE { ");
-        query.append("<");
-        query.append(statementsToAdd[0][0]);
-        query.append("> ?p <");
-        query.append(statementsToAdd[2][2]);
-        query.append("> }");
+    @Test
+    public void testExecuteSparqlConstruct() {
+        Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
+        Quadruple quadruple;
+        for (int i = 0; i < 100; i++) {
+            quadruple = QuadrupleGenerator.create();
+            quadruples.add(quadruple);
+            this.initializer.selectPeer().add(quadruple);
+        }
 
-        assertEquals(0, SemanticHelper.size(response.getResult().toRDF2Go()));
-    }
-
-    public void testSparqlConstructBasicGraphPattern() {
-        StringBuffer query = new StringBuffer();
-        query.append("CONSTRUCT { ?s ?p ?o } ");
-        query.append("WHERE {  ?s ?p <");
-        query.append(statementsToAdd[0][2]);
-        query.append("> . <");
-        query.append(statementsToAdd[2][0]);
-        query.append("> ?p ?o. }");
-
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
-
-        assertEquals(2, SemanticHelper.size(response.getResult().toRDF2Go()));
-    }
-
-    public void testSparqlSelectTriplePattern() {
-        String query = "SELECT ?p WHERE { ?s ?p ?o }";
-
-        QueryResultTable response =
-                initializer.getRandomPeer()
-                        .executeSparqlSelect(query)
+        Assert.assertEquals(
+                100,
+                this.initializer.selectPeer()
+                        .executeSparqlConstruct(
+                                "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }")
                         .getResult()
-                        .toRDF2Go();
-        ClosableIterator<QueryRow> it = response.iterator();
+                        .size());
+    }
 
-        Set<String> predicates = new HashSet<String>();
-        for (int i = 0; i < statementsToAdd.length; i++) {
-            predicates.add(statementsToAdd[i][1]);
+    @Test
+    public void testExecuteSparqlSelect() {
+        Set<Quadruple> quadruples = new HashSet<Quadruple>();
+
+        Quadruple quadruple;
+        for (int i = 0; i < 100; i++) {
+            quadruple = QuadrupleGenerator.create();
+            quadruples.add(quadruple);
+            this.initializer.selectPeer().add(quadruple);
         }
 
-        int i = 0;
-        QueryRow row = null;
-        while (it.hasNext()) {
-            row = it.next();
-            assertTrue(predicates.contains(row.getValue("p").toString()));
-            i++;
+        ResultSet resultSet =
+                this.initializer.selectPeer()
+                        .executeSparqlSelect(
+                                "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }")
+                        .getResult();
+        Binding binding = null;
+        Quadruple quad = null;
+
+        Var vars[] = new Var[resultSet.getResultVars().size()];
+        for (int i = 0; i < resultSet.getResultVars().size(); i++) {
+            vars[i] = Var.alloc(resultSet.getResultVars().get(i));
         }
 
-        assertEquals(statementsToAdd.length, i);
-    }
-
-    public void testSparqlSelectBasicGraphPattern() {
-        StringBuffer query = new StringBuffer();
-        query.append("SELECT ?p WHERE { ");
-        query.append("?s <http://Made-of> ?o . ");
-        query.append("<http://Chair> ?p ?o. }");
-
-        QueryResultTable response =
-                initializer.getRandomPeer().executeSparqlSelect(
-                        query.toString()).getResult().toRDF2Go();
-        ClosableIterator<QueryRow> it = response.iterator();
-
-        int i = 0;
-        QueryRow row = null;
-        while (it.hasNext()) {
-            row = it.next();
-            Assert.assertEquals(statementsToAdd[0][1], row.getValue("p")
-                    .toString());
-            i++;
+        int count = 0;
+        while (resultSet.hasNext()) {
+            binding = resultSet.nextBinding();
+            quad =
+                    new Quadruple(
+                            binding.get(vars[0]), binding.get(vars[1]),
+                            binding.get(vars[2]), binding.get(vars[3]));
+            Assert.assertTrue(quadruples.contains(quad));
+            count++;
         }
 
-        assertEquals(2, i);
+        Assert.assertEquals(100, count);
     }
 
-    public void testSparqlAskTriplePattern() {
-        String query = "ASK { ?s ?p ?o }";
+    // TODO add testExecuteSparqlWithEmptyNetwork
 
-        assertEquals(true, initializer.getRandomPeer()
-                .executeSparqlAsk(query)
-                .getResult());
-    }
+    // TODO add testExecuteSparqlWithConjunctions()
 
-    public void testRemoveStatement() {
-        PAFuture.waitFor(initializer.getRandomPeer().removeStatement(
-                DEFAULT_CONTEXT,
-                RDF2GoBuilder.createStatementInternal(
-                        "http://Table", "http://Made-of", "http://Wood")));
-
-        String query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
-
-        assertEquals(
-                statementsToAdd.length - 1,
-                SemanticHelper.size(response.getResult().toRDF2Go()));
-    }
-
-    public void testRemoveStatements() {
-        PAFuture.waitFor(initializer.getRandomPeer().removeStatements(
-                DEFAULT_CONTEXT,
-                RDF2GoBuilder.createStatementInternal(null, null, null)));
-
-        String query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
-        SparqlConstructResponse response =
-                initializer.getRandomPeer().executeSparqlConstruct(
-                        query.toString());
-
-        assertEquals(0, SemanticHelper.size(response.getResult().toRDF2Go()));
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        initializer.tearDownNetwork();
+    @After
+    public void tearDown() {
+        this.initializer.tearDown();
+        this.initializer = null;
     }
 
 }

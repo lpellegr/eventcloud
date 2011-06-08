@@ -28,7 +28,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
  * SemanticFactory must be used to create new instances of Semantic objects like
- * for example {@link SemanticPeer}s or {@link SemanticTracker}.
+ * for example {@link SemanticTracker}s and {@link SemanticPeer}s.
  * 
  * @author lpellegr
  */
@@ -38,10 +38,10 @@ public class SemanticFactory {
      * Creates a new active semantic tracker on the local JVM and associates it
      * to the network named "default".
      * 
-     * @return the new active semantic tracker created.
+     * @return the SemanticTracker object created.
      */
-    public static SemanticTracker newActiveSemanticTracker() {
-        return SemanticFactory.newActiveSemanticTracker("default", null);
+    public static SemanticTracker newSemanticTracker() {
+        return SemanticFactory.newSemanticTracker("default", null);
     }
 
     /**
@@ -51,25 +51,25 @@ public class SemanticFactory {
      * @param networkName
      *            the network name managed by the tracker.
      * 
-     * @return the new active semantic tracker created.
+     * @return the SemanticTracker object created.
      */
-    public static SemanticTracker newActiveSemanticTracker(String networkName) {
-        return SemanticFactory.newActiveSemanticTracker(networkName, null);
+    public static SemanticTracker newSemanticTracker(String networkName) {
+        return SemanticFactory.newSemanticTracker(networkName, null);
     }
 
     /**
-     * Creates a new semantic tracker active object on the specified
-     * {@code node} and associates it to the given {@code networkName}.
+     * Creates a new semantic tracker on the specified {@code node} and
+     * associates it to the given {@code networkName}.
      * 
      * @param networkName
      *            the network name managed by the tracker.
      * @param node
      *            the node to use for the deployment.
      * 
-     * @return the new semantic tracker active object created.
+     * @return the SemanticTracker object created.
      */
-    public static SemanticTracker newActiveSemanticTracker(String networkName,
-                                                           Node node) {
+    public static SemanticTracker newSemanticTracker(String networkName,
+                                                     Node node) {
         try {
             return PAActiveObject.newActive(
                     SemanticTracker.class, new Object[] {networkName}, node);
@@ -83,27 +83,27 @@ public class SemanticFactory {
     }
 
     /**
-     * Creates a new {@link SemanticPeer} active object on the local machine.
+     * Creates a new {@link SemanticPeer} on the local machine.
      * 
-     * @return the new active SemanticPeer object created.
+     * @return the SemanticPeer object created.
      */
-    public static SemanticPeer newActiveSemanticPeer() {
+    public static SemanticPeer newSemanticPeer() {
         return SemanticFactory.newActiveSemanticPeer(null);
     }
 
     /**
-     * Creates a new semantic peer active object deployed on the specified
-     * {@code node}.
+     * Creates a new {@link SemanticPeer} deployed on the specified {@code node}
+     * .
      * 
      * @param node
      *            the node used to deploy the peer.
      * 
-     * @return the new semantic peer active object created.
+     * @return the SemanticPeer object created.
      */
     public static SemanticPeer newActiveSemanticPeer(Node node) {
         try {
             return PAActiveObject.newActive(
-                    SemanticPeer.class, new Object[0], node);
+                    SemanticPeer.class, new Object[] {null}, node);
         } catch (ActiveObjectCreationException e) {
             e.printStackTrace();
         } catch (NodeException e) {
@@ -114,25 +114,26 @@ public class SemanticFactory {
     }
 
     /**
-     * Creates the specified {@code number} of SemanticPeer active object in
-     * parallel.
+     * Creates the specified {@code number} of SemanticPeer in parallel.
      * 
      * @param number
      *            the number of {@link SemanticPeer} to create.
-     * @return the {@link SemanticPeer} active objects created.
+     * 
+     * @return the SemanticPeer objects created.
      */
     public static SemanticPeer[] newActiveSemanticPeersInParallel(int number) {
         return newActiveSemanticPeersInParallel(new Node[number]);
     }
 
     /**
-     * Creates a number of SemanticPeer active objects which equals to the
-     * number {@code nodes} specified. Each new SemanticPeer being deployed on a
-     * node from the array node specified in parameter.
+     * Creates a number of SemanticPeer object that is equals to the number
+     * {@code nodes} specified. Each new SemanticPeer is deployed on a node from
+     * the nodes array specified in parameter.
      * 
      * @param nodes
-     *            the nodes to use for the deployment of active objects.
-     * @return the {@link SemanticPeer} active objects created.
+     *            the nodes to use for the deployment.
+     * 
+     * @return the SemanticPeer object created.
      */
     public static SemanticPeer[] newActiveSemanticPeersInParallel(Node[] nodes) {
         checkNotNull(nodes);

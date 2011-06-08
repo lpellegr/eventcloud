@@ -20,11 +20,9 @@ import java.util.UUID;
 
 import junit.framework.Assert;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
-import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetworkInitializer;
+import org.objectweb.proactive.extensions.p2p.structured.initializers.AbstractCanNetworkInitializerTest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -32,11 +30,11 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public class RemoveNeighborOperationTest extends CanNetworkInitializer {
+public class RemoveNeighborOperationTest extends
+        AbstractCanNetworkInitializerTest {
 
-    @Before
-    public void setUp() throws Exception {
-        super.initializeNewNetwork(2);
+    public RemoveNeighborOperationTest() {
+        super(2);
     }
 
     @Test
@@ -71,11 +69,6 @@ public class RemoveNeighborOperationTest extends CanNetworkInitializer {
 
         Assert.assertFalse(CanOperations.hasNeighbor(firstPeer, secondPeerID));
         Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));
-    }
-
-    @After
-    public void tearDown() {
-        // super.clearNetwork();
     }
 
 }

@@ -36,8 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This router is used to route messages of type {@link AnycastRequest}. The
- * request is supposed to reach one or more peers depending on the of the key
+ * This router is used to route the messages of type {@link AnycastRequest}. The
+ * request is supposed to reach one or more peers depending of the key
  * associated to the request to route.
  * 
  * @author lpellegr
@@ -80,7 +80,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
         // the current overlay has already received the request
         if (messagingManager.hasReceivedRequest(request.getId())) {
             request.getAnycastRoutingList().removeLast().getPeerStub().route(
-                    request.createResponse());
+                    request.createResponse(overlay));
             if (logger.isDebugEnabled()) {
                 logger.debug("Request " + request.getId() + " has reach peer "
                         + canOverlay + " which has already received it");
@@ -122,7 +122,8 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
             super.onDestinationReached(overlay, request);
             overlay.getResponseEntries().put(
                     request.getId(), new ResponseEntry(1));
-            AnycastResponse response = request.createResponse();
+            AnycastResponse response =
+                    (AnycastResponse) request.createResponse(overlay);
             response.incrementHopCount(1);
             response.route(overlay);
         } else {
@@ -134,7 +135,8 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
             // returned;
             if (neighborsToSendTo.size() == 0) {
                 super.onDestinationReached(overlay, request);
-                AnycastResponse response = request.createResponse();
+                AnycastResponse response =
+                        (AnycastResponse) request.createResponse(overlay);
                 response.incrementHopCount(1);
                 overlay.getResponseEntries().put(
                         response.getId(), new ResponseEntry(1));

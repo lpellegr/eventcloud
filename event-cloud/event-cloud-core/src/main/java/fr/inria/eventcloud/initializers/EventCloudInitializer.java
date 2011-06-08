@@ -16,134 +16,124 @@
  **/
 package fr.inria.eventcloud.initializers;
 
-import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
-import org.ontoware.rdf2go.model.node.URI;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.SemanticFactory;
-import fr.inria.eventcloud.deployment.NodeProvider;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
-import fr.inria.eventcloud.util.SemanticHelper;
 
 /**
  * Initializes a space network on a local machine or by distributing the active
  * objects on several machines. A space network is represented by a CAN network.
  * 
+ * TODO add support for deployment with the Scheduler. I think we just have to
+ * provide a new constructor with some parameters which are needed to use a
+ * scheduler. Then, we have to update the {@link #createPeer()} and
+ * {@link #createTracker()} methods according to the parameters which have been
+ * initialized from the constructor.
+ * 
  * @author lpellegr
  */
-public class EventCloudInitializer extends
-        SemanticNetworkInitializer<SemanticTracker> {
+public class EventCloudInitializer {
 
-    private ExecutorService threadsPool;
+    private static final Logger log =
+            LoggerFactory.getLogger(EventCloudInitializer.class);
 
-    private NodeProvider nodeProvider;
+    private static final int INJECTION_THRESHOLD = 10;
 
-    // very ugly but no other solution at this time!
-    private FinalizeTrackersInitialization finalizeTrackerInitialization;
+    private SemanticTracker[] trackers;
 
-    public void setFinalizeTrackerInitialization(FinalizeTrackersInitialization task) {
-        this.finalizeTrackerInitialization = task;
-    }
+    private final int nbPeers;
 
-    public EventCloudInitializer() {
-        this.threadsPool = Executors.newFixedThreadPool(50);
-    }
+    private final int nbTrackers;
+
+    private boolean running;
 
     /**
-     * Setup a new space network composed of the specified number of peers of
-     * type CAN.
+     * Creates a new EventCloudInitializer that will be initialized with the
+     * specified {@code nbTrackers} and {@code nbPeers} when the method
+     * {@link #setUp()} is called.
      * 
-     * @param nbCanPeers
-     *            the number of peers to add on the network.
+     * @param nbTrackers
+     *            the default number of trackers to create.
+     * @param nbPeers
+     *            the default number of peers to create.
      */
-    public void setUpNetworkOnLocalMachine(int nbCanPeers) {
-        if (super.initialized) {
-            throw new IllegalStateException("Network already initialized");
-        }
-
-        SemanticTracker tracker = SemanticFactory.newActiveSemanticTracker();
-        super.trackers = new SemanticTracker[] {tracker};
-
-        if (this.finalizeTrackerInitialization != null) {
-            this.finalizeTrackerInitialization.run(trackers);
-        }
-
-        SemanticPeer[] peers =
-                SemanticFactory.newActiveSemanticPeersInParallel(nbCanPeers);
-
-        this.addOnNetworkInParallel(peers);
-
-        super.initialized = true;
+    public EventCloudInitializer(int nbTrackers, int nbPeers) {
+        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
+        this.nbTrackers = nbTrackers;
+        this.nbPeers = nbPeers;
+        this.running = false;
+        this.trackers = new SemanticTracker[this.nbTrackers];
     }
 
-    /**
-     * Setup a new space network using the specified GCMA descriptor.
-     * 
-     * @param pathToGCMA
-     *            the path to the descriptor to use.
-     * 
-     * @param maxCANNodesToAcquire
-     *            the maximum number of nodes for peers of type CAN to acquire.
-     */
-    public void setUpNetworkOnMultipleMachine(File pathToGCMA,
-                                              int maxCANNodesToAcquire) {
-        // if (super.initialized) {
-        // throw new IllegalStateException("Network already initialized.");
-        // }
-        //
-        // this.nodeProvider = new NodeProvider(pathToGCMA);
-        // this.nodeProvider.deploy(1, 0, maxCANNodesToAcquire);
-        //
-        // try {
-        // super.trackers = new Tracker[] {
-        // SemanticFactory.newActiveSemanticCanTracker(
-        // UUID.randomUUID().toString(),
-        // UUID.randomUUID().toString(),
-        // this.nodeProvider.getNextNode(
-        // NodeProviderKey.TRACKERS)) };
-        // if (this.finalizeTrackerInitialization != null) {
-        // this.finalizeTrackerInitialization.run(trackers);
-        // }
-        //
-        // // Kernels use the same nodes as peers because
-        // // they must be on the same JVM.
-        // List<Node> nodesCAN = this.nodeProvider.getAllNodes(
-        // NodeProviderKey.PEERS_CAN);;
-        //
-        // Map<Node, SemanticSpaceOverlayKernel> deployedKernels =
-        // SemanticFactory.newActiveSemanticSpaceOverlayKernelsInParallel(
-        // this.trackers, true, nodesCAN);
-        //
-        // SemanticPeer[] peers =
-        // SemanticFactory.newActiveSemanticCanPeersInParallel(
-        // this.spaceURI, Arrays.asList(super.trackers),
-        // deployedKernels);
-        // this.addOnNetworkInParallel(peers);
-        //
-        // super.initialized = true;
-        // } catch (ActiveObjectCreationException e) {
-        // e.printStackTrace();
-        // } catch (NodeException e) {
-        // e.printStackTrace();
-        // }
+    public EventCloudInitializer(int nbPeers) {
+        this(1, nbPeers);
     }
 
-    private void addOnNetworkInParallel(final SemanticPeer[] peers) {
-        final CountDownLatch doneSignal = new CountDownLatch(peers.length);
+    public synchronized void setUp() {
+        if (this.running) {
+            throw new IllegalStateException(
+                    "The network is already initialized and running");
+        }
 
-        for (int i = 0; i < peers.length; i++) {
-            final int index = i;
-            this.threadsPool.execute(new Runnable() {
+        this.running = true;
+
+        // creates and initializes the trackers
+        for (int i = 0; i < this.nbTrackers; i++) {
+            this.trackers[i] = this.createTracker();
+            if (i > 0) {
+                this.trackers[i].join(this.trackers[i - 1]);
+            }
+        }
+
+        this.injectPeers();
+    }
+
+    private void injectPeers() {
+        if (this.nbPeers > INJECTION_THRESHOLD) {
+            log.debug(
+                    "Creates and injects {} peers on the network in parallel",
+                    this.nbPeers);
+            this.injectPeersInParallel();
+        } else {
+            log.debug(
+                    "Creates and use sequential injection for the {} peer(s) to insert on the network",
+                    this.nbPeers);
+            Peer peerCreated;
+            for (int i = 0; i < this.nbPeers; i++) {
+                peerCreated = this.createPeer();
+                try {
+                    this.getRandomTracker().inject(peerCreated);
+                } catch (NetworkAlreadyJoinedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void injectPeersInParallel() {
+        ExecutorService threadsPool =
+                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
+        final CountDownLatch doneSignal = new CountDownLatch(this.nbPeers);
+
+        for (int i = 0; i < this.nbPeers; i++) {
+            threadsPool.execute(new Runnable() {
                 public void run() {
                     try {
-                        getRandomTracker().addOnNetwork(peers[index]);
+                        getRandomTracker().inject(createPeer());
                     } catch (NetworkAlreadyJoinedException e) {
                         e.printStackTrace();
                     } finally {
@@ -160,65 +150,88 @@ public class EventCloudInitializer extends
         }
     }
 
-    public void addRandomStatements(final URI context, int nb) {
-        final CountDownLatch doneSignal = new CountDownLatch(nb);
-
-        for (int i = 0; i < nb; i++) {
-            this.threadsPool.execute(new Runnable() {
-                public void run() {
-                    getRandomPeer().addStatement(
-                            context, SemanticHelper.generateRandomStatement());
-                    doneSignal.countDown();
-                }
-            });
+    public synchronized void tearDown() {
+        if (!this.running) {
+            return;
         }
 
+        this.running = false;
+
         try {
-            doneSignal.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    public SemanticPeer getRandomPeer() {
-        return super.getRandomTracker().getRandomPeer();
-    }
-
-    /**
-     * Returns <code>true</code> if the network has been deployed on the local
-     * machine without using the grid component model, <code>false</code>
-     * otherwise.
-     * 
-     * @return <code>true</code> if the network has been deployed on the local
-     *         machine without using the grid component model,
-     *         <code>false</code> otherwise.
-     */
-    public boolean isLocalSetup() {
-        return this.nodeProvider == null;
-    }
-
-    /**
-     * Returns the {@link NodeProvider} instance used to perform the network
-     * initialization or <code>null</code> if the network has been initialized
-     * on the local JVM without using grid component model.
-     * 
-     * @return the {@link NodeProvider} instance used to perform the network
-     *         initialization or <code>null</code> if the network has been
-     *         initialized on the local JVM without using grid component model.
-     */
-    public NodeProvider getNodeProvider() {
-        return this.nodeProvider;
-    }
-
-    public void tearDownNetwork() {
-        this.threadsPool.shutdown();
-
-        // shutdowns the datastores
-        try {
-            this.getRandomTracker().getRandomPeer().send(new ShutdownRequest());
+            this.selectPeer().send(new ShutdownRequest());
         } catch (DispatchException e) {
             e.printStackTrace();
         }
+
+        // for (Peer peer : this.tracker.getPeers()) {
+        // PAActiveObject.terminateActiveObject(peer, true);
+        // }
+        // PAActiveObject.terminateActiveObject(this.tracker, true);
+        //
+        // // TODO checks if termination of components works!
+        // for (Peer peer : this.componentTracker.getPeers()) {
+        // try {
+        // Component owner = ((Interface) peer).getFcItfOwner();
+        // GCMLifeCycleController lcc =
+        // GCM.getGCMLifeCycleController(owner);
+        // lcc.stopFc();
+        // lcc.terminateGCMComponent();
+        // } catch (IllegalLifeCycleException e) {
+        // e.printStackTrace();
+        // } catch (NoSuchInterfaceException e) {
+        // e.printStackTrace();
+        // }
+        // }
+        // try {
+        // Component owner =
+        // ((Interface) this.componentTracker).getFcItfOwner();
+        // GCMLifeCycleController lcc =
+        // GCM.getGCMLifeCycleController(owner);
+        // lcc.stopFc();
+        // lcc.terminateGCMComponent();
+        // } catch (IllegalLifeCycleException e) {
+        // e.printStackTrace();
+        // } catch (NoSuchInterfaceException e) {
+        // e.printStackTrace();
+        // }
+        // }
+    }
+
+    /**
+     * Creates a new Peer.
+     * 
+     * @return the peer created.
+     */
+    protected SemanticPeer createPeer() {
+        return SemanticFactory.newSemanticPeer();
+    }
+
+    /**
+     * Creates a new Tracker active object.
+     * 
+     * @return the tracker active object created.
+     */
+    protected SemanticTracker createTracker() {
+        return SemanticFactory.newSemanticTracker();
+    }
+
+    /**
+     * Selects a peer according to some metrics (e.g. the network load).
+     * 
+     * TODO: implement the selection according to the metric.
+     * 
+     * @return a peer according to some metrics (e.g. the network load).
+     */
+    public SemanticPeer selectPeer() {
+        return this.getRandomTracker().getRandomPeer();
+    }
+
+    public SemanticPeer getRandomPeer() {
+        return this.getRandomTracker().getRandomPeer();
+    }
+
+    public SemanticTracker getRandomTracker() {
+        return this.trackers[ProActiveRandom.nextInt(this.trackers.length)];
     }
 
 }

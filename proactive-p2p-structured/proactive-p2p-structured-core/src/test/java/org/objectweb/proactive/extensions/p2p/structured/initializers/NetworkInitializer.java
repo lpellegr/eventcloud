@@ -42,38 +42,57 @@ public abstract class NetworkInitializer {
 
     private Tracker componentTracker;
 
-    protected abstract Peer createActivePeer();
+    private boolean running;
 
-    protected abstract Peer createComponentPeer();
+    /**
+     * Creates a new NetworkInitializer that will be initialized when the method
+     * {@link #setUp()} is called.
+     */
+    public NetworkInitializer() {
+        this.running = false;
+    }
 
-    public void initializeNewNetwork(int nbPeersToCreate) {
-        this.tracker = TrackerFactory.newActiveTracker();
+    public synchronized void setUp(int nbPeers) {
+        if (this.running) {
+            throw new IllegalStateException(
+                    "The network is already initialized and running");
+        }
+
+        this.running = true;
+
+        this.tracker = this.createActiveTracker();
         this.tracker.setProbabilityToStorePeer(1);
 
         Peer peerCreated;
-        for (int i = 0; i < nbPeersToCreate; i++) {
+        for (int i = 0; i < nbPeers; i++) {
             peerCreated = this.createActivePeer();
             try {
-                this.tracker.addOnNetwork(peerCreated);
+                this.tracker.inject(peerCreated);
             } catch (NetworkAlreadyJoinedException e) {
                 e.printStackTrace();
             }
         }
 
-        this.componentTracker = TrackerFactory.newComponentTracker();
+        this.componentTracker = this.createComponentTracker();
         this.componentTracker.setProbabilityToStorePeer(1);
 
-        for (int i = 0; i < nbPeersToCreate; i++) {
+        for (int i = 0; i < nbPeers; i++) {
             peerCreated = this.createComponentPeer();
             try {
-                this.componentTracker.addOnNetwork(peerCreated);
+                this.componentTracker.inject(peerCreated);
             } catch (NetworkAlreadyJoinedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void clearNetwork() {
+    public synchronized void tearDown() {
+        if (!this.running) {
+            return;
+        }
+
+        this.running = false;
+
         if (this.tracker != null && this.componentTracker != null) {
             for (Peer peer : this.tracker.getPeers()) {
                 PAActiveObject.terminateActiveObject(peer, true);
@@ -109,6 +128,38 @@ public abstract class NetworkInitializer {
         }
     }
 
+    /**
+     * Creates a new Peer active object.
+     * 
+     * @return the peer active object created.
+     */
+    protected abstract Peer createActivePeer();
+
+    /**
+     * Creates a new Peer using the ProActive GCM components.
+     * 
+     * @return the component that have been created.
+     */
+    protected abstract Peer createComponentPeer();
+
+    /**
+     * Creates a new Tracker active object.
+     * 
+     * @return the tracker active object created.
+     */
+    protected Tracker createActiveTracker() {
+        return TrackerFactory.newActiveTracker();
+    }
+
+    /**
+     * Creates a new Tracker using the ProActive GCM components.
+     * 
+     * @return the component that have been created.
+     */
+    protected Tracker createComponentTracker() {
+        return TrackerFactory.newComponentTracker();
+    }
+
     public Peer get(int index) {
         return this.tracker.getPeer(index);
     }
@@ -117,11 +168,11 @@ public abstract class NetworkInitializer {
         return this.componentTracker.getPeer(index);
     }
 
-    public Peer getRandomPeer() {
+    public Peer selectPeer() {
         return this.tracker.getRandomPeer();
     }
 
-    public Peer getRandomComponentPeer() {
+    public Peer selectComponentPeer() {
         return this.componentTracker.getRandomPeer();
     }
 

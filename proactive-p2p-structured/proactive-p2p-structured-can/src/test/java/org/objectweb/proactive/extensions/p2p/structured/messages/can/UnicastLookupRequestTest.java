@@ -18,12 +18,10 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.can;
 
 import junit.framework.Assert;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.api.operations.CanOperations;
-import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetworkInitializer;
+import org.objectweb.proactive.extensions.p2p.structured.initializers.AbstractCanNetworkInitializerTest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -33,11 +31,10 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public class UnicastLookupRequestTest extends CanNetworkInitializer {
+public class UnicastLookupRequestTest extends AbstractCanNetworkInitializerTest {
 
-    @Before
-    public void setUp() throws Exception {
-        super.initializeNewNetwork(10);
+    public UnicastLookupRequestTest() {
+        super(10);
     }
 
     @Test
@@ -90,12 +87,6 @@ public class UnicastLookupRequestTest extends CanNetworkInitializer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @After
-    public void tearDown() {
-        // TODO uncomment when CAN leave works
-        // super.clearNetwork();
     }
 
 }

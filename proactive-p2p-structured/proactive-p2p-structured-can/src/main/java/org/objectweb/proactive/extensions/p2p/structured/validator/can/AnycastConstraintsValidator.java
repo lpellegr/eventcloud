@@ -48,7 +48,7 @@ public abstract class AnycastConstraintsValidator<K> extends
     }
 
     /**
-     * Indicates if the key is contained by the specified {@code zone}.
+     * Indicates whether the key is contained by the specified {@code zone}.
      * 
      * @param zone
      *            the zone to use in order to perform the check.
@@ -56,6 +56,6 @@ public abstract class AnycastConstraintsValidator<K> extends
      * @return {@code true} if the zone contains the key, {@code false}
      *         otherwise.
      */
-    abstract public boolean validatesKeyConstraints(Zone zone);
+    public abstract boolean validatesKeyConstraints(Zone zone);
 
 }
