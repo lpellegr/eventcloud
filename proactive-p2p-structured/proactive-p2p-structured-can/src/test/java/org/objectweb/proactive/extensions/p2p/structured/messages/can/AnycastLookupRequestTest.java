@@ -22,13 +22,13 @@ import java.util.Set;
 import junit.framework.Assert;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetworkInitializer;
+import org.objectweb.proactive.extensions.p2p.structured.initializers.AbstractCanNetworkInitializerTest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
@@ -44,11 +44,10 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
  * 
  * @author lpellegr
  */
-public class AnycastLookupRequestTest extends CanNetworkInitializer {
+public class AnycastLookupRequestTest extends AbstractCanNetworkInitializerTest {
 
-    @Before
-    public void setUp() throws Exception {
-        super.initializeNewNetwork(10);
+    public AnycastLookupRequestTest() {
+        super(10);
     }
 
     @Test
@@ -122,11 +121,17 @@ public class AnycastLookupRequestTest extends CanNetworkInitializer {
             this.zonesValidatingConstraints = new HashSet<Zone>();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public AnycastResponse createResponse() {
+        public AnycastResponse createResponse(StructuredOverlay overlay) {
             return new AnycastLookupResponse(this);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
             return new AnycastRequestRouter<AnycastLookupRequest>() {
@@ -159,11 +164,17 @@ public class AnycastLookupRequestTest extends CanNetworkInitializer {
                     request.getZonesValidatingConstraints();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public void merge(AnycastResponse subResponse) {
+        public void addSubResult(AnycastResponse subResponse) {
             super.incrementHopCount(subResponse.getHopCount());
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
             return new AnycastResponseRouter<AnycastResponse>();

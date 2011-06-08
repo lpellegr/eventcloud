@@ -71,7 +71,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
             entry.setResponse(response);
         } else {
             synchronized (entry) {
-                ((AnycastResponse) tmpResponse).merge(response);
+                ((AnycastResponse) tmpResponse).addSubResult(response);
                 tmpResponse.incrementHopCount(response.getOutboundHopCount());
             }
         }

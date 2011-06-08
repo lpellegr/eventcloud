@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
@@ -66,8 +67,8 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
     }
 
     /**
-     * Constructs a new query message with the specified <code>uuid</code>,
-     * <code>keyToReach</code> and <code>dispatchTimestamp</code>.
+     * Constructs a new query message with the specified {@code uuid},
+     * {@code validator} and {@code dispatchTimestamp}.
      * 
      * @param uuid
      *            the universally unique identifier associated to the query.
@@ -86,10 +87,13 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
      * Creates an {@link Response} in accordance to the type of the current
      * {@link Request}.
      * 
+     * @param overlay
+     *            the overlay from which the response is created.
+     * 
      * @return an {@link Response} in accordance to the type of the current
      *         {@link Request}.
      */
-    public abstract Response<?> createResponse();
+    public abstract Response<K> createResponse(StructuredOverlay overlay);
 
     /**
      * {@inheritDoc}

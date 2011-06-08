@@ -16,93 +16,234 @@
  **/
 package fr.inria.eventcloud.overlay;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.io.File;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.ontoware.rdf2go.model.Statement;
-import org.ontoware.rdf2go.model.node.URI;
 
+import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.PutGetApi;
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SemanticFactory;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
+import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
-import fr.inria.eventcloud.datastore.OwlimDatastore;
-import fr.inria.eventcloud.messages.request.can.AddStatementRequest;
-import fr.inria.eventcloud.messages.request.can.RemoveStatementRequest;
-import fr.inria.eventcloud.messages.request.can.RemoveStatementsRequest;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
+import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
+import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
+import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
+import fr.inria.eventcloud.messages.request.can.FindQuadruplesRequest;
+import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
+import fr.inria.eventcloud.messages.response.can.FindQuadruplesResponse;
 
 /**
  * A SemanticPeer is a peer constructed by using a {@link CanOverlay}. It
- * provides semantic operations to insert, to remove and to retrieve semantic
- * data by executing a SPARQL query.
+ * exposes the methods contained by the {@link SemanticDatastore} interface in
+ * order to provide semantic operations like add, delete, find, etc. but also to
+ * execute a SPARQL query.
  * <p>
  * Warning, it is strongly recommended to use {@link SemanticFactory} in order
  * to create a new active object of type SemanticPeer.
  * 
  * @author lpellegr
  */
-public class SemanticPeer extends PeerImpl {
+/*
+ * TODO implements the PublishSubscribeApi interfaces
+ */
+public class SemanticPeer extends PeerImpl implements PutGetApi {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * No-arg constructor for ProActive.
+     */
     public SemanticPeer() {
+        // keep it empty because it is called each time we have to reify
+        // a SemanticPeer object (e.g. each time you call getRandomPeer()
+        // from a tracker)
+    }
+
+    /**
+     * Constructs and initializes a SemantiPeer. The parameter {@code obj} is
+     * provided in order to make a distinction between the empty no-arg
+     * constructor that is used by ProActive and the current one. The parameter
+     * value is not used and can always be set to {@code null}.
+     * 
+     * @param obj
+     */
+    public SemanticPeer(Object obj) {
         super(new CanOverlay(
-                new SparqlRequestResponseManager(), new OwlimDatastore()));
+                new SparqlRequestResponseManager(), new JenaDatastore(new File(
+                        EventCloudProperties.REPOSITORIES_PATH.getValue()))));
     }
 
     /*
-     * Operations specific to semantic peer
+     * PutGetApi implementation
+     * 
+     * The boolean value which is returned in the PutGetApi by some methods 
+     * is used to ensure that ProActive calls are synchronous.
      */
 
-    public BooleanWrapper addStatement(URI context, Statement stmt) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean add(Quadruple quad) {
         try {
-            PAFuture.waitFor(super.send(new AddStatementRequest(context, stmt)));
+            PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
         } catch (DispatchException e) {
             e.printStackTrace();
         }
-        return new BooleanWrapper(true);
+
+        return true;
     }
 
-    public BooleanWrapper removeStatement(URI context, Statement stmt) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean add(Collection<Quadruple> quads) {
+        // TODO: use a thread-pool to parallelize it
+        for (Quadruple quad : quads) {
+            this.add(quad);
+        }
+
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean contains(Quadruple quad) {
         try {
-            PAFuture.waitFor(super.send(new RemoveStatementRequest(
-                    context, stmt)));
+            return ((BooleanForwardResponse) PAFuture.getFutureValue(super.send(new ContainsQuadrupleRequest(
+                    quad)))).getResult();
+        } catch (DispatchException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean delete(Quadruple quad) {
+        try {
+            PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
         } catch (DispatchException e) {
             e.printStackTrace();
         }
-        return new BooleanWrapper(true);
+
+        return true;
     }
 
-    public BooleanWrapper removeStatements(URI context, Statement stmt) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean delete(Collection<Quadruple> quads) {
+        // TODO: use a thread-pool to parallelize it
+        for (Quadruple quad : quads) {
+            this.delete(quad);
+        }
+
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
         try {
-            PAFuture.waitFor(super.send(new RemoveStatementsRequest(
-                    context, stmt)));
+            PAFuture.waitFor(super.send(new DeleteQuadruplesRequest(
+                    quadPattern.getGraph(), quadPattern.getSubject(),
+                    quadPattern.getPredicate(), quadPattern.getObject())));
         } catch (DispatchException e) {
             e.printStackTrace();
         }
-        return new BooleanWrapper(true);
+
+        // TODO retrieve the quadruples that have been removed
+        return null;
     }
 
-    public SparqlAskResponse executeSparqlAsk(String sparqlAsk) {
-        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(checkNotNull(sparqlAsk));
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<Quadruple> find(QuadruplePattern quadPattern) {
+        try {
+            return ((FindQuadruplesResponse) PAFuture.getFutureValue((super.send(new FindQuadruplesRequest(
+                    quadPattern.getGraph(), quadPattern.getSubject(),
+                    quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
+        } catch (DispatchException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SparqlResponse<?> executeSparqlQuery(String sparqlQuery) {
+        sparqlQuery = sparqlQuery.trim();
+
+        if (sparqlQuery.startsWith("ASK")) {
+            return this.executeSparqlAsk(sparqlQuery);
+        } else if (sparqlQuery.startsWith("CONSTRUCT")) {
+            return this.executeSparqlConstruct(sparqlQuery);
+        } else if (sparqlQuery.startsWith("DESCRIBE")) {
+            return this.executeSparqlDescribe(sparqlQuery);
+        } else if (sparqlQuery.startsWith("SELECT")) {
+            return this.executeSparqlSelect(sparqlQuery);
+        } else {
+            throw new IllegalArgumentException("Unknow query form for query: "
+                    + sparqlQuery);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
+        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(sparqlAskQuery);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct) {
-        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(checkNotNull(sparqlConstruct));
+        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(sparqlConstruct);
     }
 
-    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribe) {
-        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlDescribe(checkNotNull(sparqlDescribe));
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
-        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(checkNotNull(sparqlSelect));
+        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(sparqlSelect);
     }
 
     /**
@@ -110,9 +251,10 @@ public class SemanticPeer extends PeerImpl {
      */
     @Override
     public void initActivity(Body body) {
-        body.setImmediateService("addStatement", false);
-        body.setImmediateService("removeStatement", false);
-        body.setImmediateService("removeStatements", false);
+        body.setImmediateService("add", false);
+        body.setImmediateService("contains", false);
+        body.setImmediateService("delete", false);
+        body.setImmediateService("find", false);
         body.setImmediateService("executeSparqlAsk", false);
         body.setImmediateService("executeSparqlConstruct", false);
         body.setImmediateService("executeSparqlDescribe", false);

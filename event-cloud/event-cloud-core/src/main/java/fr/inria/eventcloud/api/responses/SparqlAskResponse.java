@@ -16,7 +16,11 @@
  **/
 package fr.inria.eventcloud.api.responses;
 
+import fr.inria.eventcloud.overlay.SemanticPeer;
+
 /**
+ * The response returned by a call to
+ * {@link SemanticPeer#executeSparqlAsk(String)}.
  * 
  * @author lpellegr
  */

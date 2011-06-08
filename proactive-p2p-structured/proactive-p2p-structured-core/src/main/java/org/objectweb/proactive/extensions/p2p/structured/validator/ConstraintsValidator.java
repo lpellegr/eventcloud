@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 /**
  * Used by the {@link Router}s to known whether a {@link StructuredOverlay}
@@ -39,13 +40,13 @@ public abstract class ConstraintsValidator<K> implements Serializable {
     /**
      * The key used in order to route the query over the network.
      */
-    protected final K key;
+    protected final SerializedValue<K> key;
 
     public ConstraintsValidator(K key) {
-        this.key = key;
+        this.key = new SerializedValue<K>(key);
     }
 
-    abstract public boolean validatesKeyConstraints(StructuredOverlay overlay);
+    public abstract boolean validatesKeyConstraints(StructuredOverlay overlay);
 
     /**
      * Returns the key to reach (i.e. the peer containing this key is the
@@ -55,7 +56,7 @@ public abstract class ConstraintsValidator<K> implements Serializable {
      *         receiver of this message).
      */
     public K getKey() {
-        return this.key;
+        return this.key.getValue();
     }
 
 }

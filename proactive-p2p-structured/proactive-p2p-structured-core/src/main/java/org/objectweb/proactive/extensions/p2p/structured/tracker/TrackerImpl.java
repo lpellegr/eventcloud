@@ -177,14 +177,14 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
      * {@inheritDoc}
      */
     @Override
-    public void addOnNetwork(Peer remotePeer)
-            throws NetworkAlreadyJoinedException {
+    public void inject(Peer remotePeer) throws NetworkAlreadyJoinedException {
         OverlayType remotePeerType = remotePeer.getType();
 
         if (this.type == null) {
             this.type = remotePeerType;
             remotePeer.create();
             this.storePeer(remotePeer);
+            logger.debug("New network created from {}", remotePeer.getId());
         } else {
             if (this.type != remotePeerType) {
                 throw new IllegalArgumentException(

@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneVi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
-import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 
 /**
  * Tests cases for {@link NumericZoneView}.

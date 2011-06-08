@@ -16,19 +16,21 @@
  **/
 package fr.inria.eventcloud.api.responses;
 
-import fr.inria.eventcloud.rdf2go.wrappers.QueryResultTableWrapper;
+import fr.inria.eventcloud.datastore.wrapper.ResultSetWrapper;
+import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
+ * The response returned by a call to
+ * {@link SemanticPeer#executeSparqlSelect(String)}.
  * 
  * @author lpellegr
  */
-public class SparqlSelectResponse extends
-        SparqlResponse<QueryResultTableWrapper> {
+public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
 
     private static final long serialVersionUID = 1L;
 
     public SparqlSelectResponse(long inboundHopCount, long outboundHopCount,
-            long latency, QueryResultTableWrapper result) {
+            long latency, ResultSetWrapper result) {
         super(inboundHopCount, outboundHopCount, latency, result);
     }
 

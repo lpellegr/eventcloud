@@ -34,6 +34,14 @@ public abstract class Datastore implements PeerDataHandler {
     public Datastore() {
         this.id = UUID.randomUUID();
         this.initialized = new AtomicBoolean();
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                if (initialized.get()) {
+                    close();
+                }
+            }
+        });
     }
 
     /**

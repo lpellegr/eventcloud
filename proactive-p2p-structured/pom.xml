@@ -6,12 +6,12 @@
 	<parent>
 		<artifactId>event-cloud-parent</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 	<artifactId>proactive-p2p-structured</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>proactive-p2p-structured</name>
 
 	<packaging>pom</packaging>

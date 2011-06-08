@@ -28,18 +28,18 @@ import java.util.concurrent.Future;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
-import org.ontoware.aifbcommons.collection.ClosableIterable;
-import org.ontoware.rdf2go.model.QueryResultTable;
-import org.ontoware.rdf2go.model.Statement;
 
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
+
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
-import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
-import fr.inria.eventcloud.messages.request.can.SparqlRequest;
-import fr.inria.eventcloud.messages.response.can.SparqlResponse;
-import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
-import fr.inria.eventcloud.rdf2go.wrappers.QueryResultTableWrapper;
+import fr.inria.eventcloud.datastore.wrapper.ModelWrapper;
+import fr.inria.eventcloud.datastore.wrapper.ResultSetWrapper;
+import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
+import fr.inria.eventcloud.messages.response.can.SparqlAtomicResponse;
 import fr.inria.eventcloud.reasoner.SparqlColander;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 
@@ -54,17 +54,22 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
 
     private static final long serialVersionUID = 1L;
 
-    private transient SparqlReasoner reasoner;
+    private SparqlReasoner reasoner;
 
-    private transient SparqlColander colander;
+    private SparqlColander colander;
 
-    private final ConcurrentHashMap<UUID, Future<ClosableIterableWrapper>> pendingRequestsResult =
-            new ConcurrentHashMap<UUID, Future<ClosableIterableWrapper>>();
+    private final ConcurrentHashMap<UUID, Future<? extends Object>> pendingResults;
 
-    private transient ExecutorService threadPool;
+    private ExecutorService threadPool;
 
     public SparqlRequestResponseManager() {
         super();
+        this.colander = new SparqlColander();
+        this.pendingResults =
+                new ConcurrentHashMap<UUID, Future<? extends Object>>();
+        this.reasoner = new SparqlReasoner();
+        // TODO choose the optimal size to use for the thread-pool
+        this.threadPool = Executors.newFixedThreadPool(30);
     }
 
     /**
@@ -76,11 +81,12 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
      * @return a response corresponding to the type of the query dispatched.
      */
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
-        List<SparqlResponse> responses =
+        List<SparqlAtomicResponse> responses =
                 this.dispatch(this.getReasoner().parseSparql(sparqlAskQuery));
 
         boolean result =
-                this.getColander().filterSparqlAsk(sparqlAskQuery, responses);
+                this.getColander().filterSparqlAsk(
+                        sparqlAskQuery, extractQuadruples(responses));
 
         long[] measurements = this.aggregateMeasurements(responses);
 
@@ -97,43 +103,19 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
      * @return a response corresponding to the type of the query dispatched.
      */
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery) {
-        List<SparqlResponse> responses =
+        List<SparqlAtomicResponse> responses =
                 this.dispatch(this.getReasoner().parseSparql(
                         sparqlConstructQuery));
 
-        ClosableIterable<Statement> result =
+        Model result =
                 this.getColander().filterSparqlConstruct(
-                        sparqlConstructQuery, responses);
+                        sparqlConstructQuery, extractQuadruples(responses));
 
         long[] measurements = this.aggregateMeasurements(responses);
 
         return new SparqlConstructResponse(
                 measurements[0], measurements[1], measurements[2],
-                new ClosableIterableWrapper(result));
-    }
-
-    /**
-     * Dispatches a SPARQL DESCRIBE query over the overlay network.
-     * 
-     * @param sparqlDescribeQuery
-     *            the SPARQL DESCRIBE query to execute.
-     * 
-     * @return a response corresponding to the type of the query dispatched.
-     */
-    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
-        List<SparqlResponse> responses =
-                this.dispatch(this.getReasoner().parseSparql(
-                        sparqlDescribeQuery));
-
-        ClosableIterable<Statement> result =
-                this.getColander().filterSparqlDescribe(
-                        sparqlDescribeQuery, responses);
-
-        long[] measurements = this.aggregateMeasurements(responses);
-
-        return new SparqlDescribeResponse(
-                measurements[0], measurements[1], measurements[2],
-                new ClosableIterableWrapper(result));
+                new ModelWrapper(result));
     }
 
     /**
@@ -144,18 +126,27 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
      * @return a response corresponding to the type of the query dispatched.
      */
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
-        List<SparqlResponse> responses =
+        List<SparqlAtomicResponse> responses =
                 this.dispatch(this.getReasoner().parseSparql(sparqlSelectQuery));
 
-        QueryResultTable result =
+        ResultSet result =
                 this.getColander().filterSparqlSelect(
-                        sparqlSelectQuery, responses);
+                        sparqlSelectQuery, extractQuadruples(responses));
 
         long[] measurements = this.aggregateMeasurements(responses);
 
         return new SparqlSelectResponse(
                 measurements[0], measurements[1], measurements[2],
-                new QueryResultTableWrapper(result));
+                new ResultSetWrapper(result));
+    }
+
+    private static List<Quadruple> extractQuadruples(List<SparqlAtomicResponse> responses) {
+        List<Quadruple> quadruples = new ArrayList<Quadruple>();
+        for (SparqlAtomicResponse response : responses) {
+            quadruples.addAll(response.getResult());
+        }
+
+        return quadruples;
     }
 
     /**
@@ -169,11 +160,11 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
      *         {@code inboundHopCount}, the {@code outboundHopCount} and the
      *         {@code latency}.
      */
-    private long[] aggregateMeasurements(List<SparqlResponse> responses) {
+    private long[] aggregateMeasurements(List<SparqlAtomicResponse> responses) {
         long outboundHopCount = 0;
         long latency = 0;
 
-        for (SparqlResponse response : responses) {
+        for (SparqlAtomicResponse response : responses) {
             if (response.getLatency() > latency) {
                 latency = response.getLatency();
             }
@@ -181,23 +172,22 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
             outboundHopCount += response.getOutboundHopCount();
         }
 
-        return new long[] {outboundHopCount, // inboundHopCount =
-                                             // outboundHopCount
-                outboundHopCount, latency};
+        // inboundHopCount = outboundHopCount
+        return new long[] {outboundHopCount, outboundHopCount, latency};
     }
 
-    public List<SparqlResponse> dispatch(List<? extends SparqlRequest> requests) {
-        final List<SparqlResponse> replies =
-                Collections.synchronizedList(new ArrayList<SparqlResponse>(
+    public List<SparqlAtomicResponse> dispatch(List<SparqlAtomicRequest> requests) {
+        final List<SparqlAtomicResponse> replies =
+                Collections.synchronizedList(new ArrayList<SparqlAtomicResponse>(
                         requests.size()));
         final CountDownLatch doneSignal = new CountDownLatch(requests.size());
 
-        for (final SparqlRequest request : requests) {
+        for (final SparqlAtomicRequest request : requests) {
             this.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        replies.add((SparqlResponse) SparqlRequestResponseManager.super.dispatch(request));
+                        replies.add((SparqlAtomicResponse) SparqlRequestResponseManager.super.dispatch(request));
                     } catch (DispatchException e) {
                         e.printStackTrace();
                     } finally {
@@ -216,30 +206,19 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
         return replies;
     }
 
-    public ConcurrentHashMap<UUID, Future<ClosableIterableWrapper>> getPendingRequestsResult() {
-        return pendingRequestsResult;
+    public ConcurrentHashMap<UUID, Future<? extends Object>> getPendingResults() {
+        return this.pendingResults;
     }
 
-    public synchronized ExecutorService getThreadPool() {
-        if (this.threadPool == null) {
-            // TODO choose the optimal size to use for the thread pool
-            this.threadPool = Executors.newFixedThreadPool(20);
-        }
-
+    public ExecutorService getThreadPool() {
         return this.threadPool;
     }
 
     private synchronized SparqlReasoner getReasoner() {
-        if (this.reasoner == null) {
-            this.reasoner = new SparqlReasoner();
-        }
         return this.reasoner;
     }
 
-    private synchronized SparqlColander getColander() {
-        if (this.colander == null) {
-            this.colander = new SparqlColander();
-        }
+    private SparqlColander getColander() {
         return this.colander;
     }
 

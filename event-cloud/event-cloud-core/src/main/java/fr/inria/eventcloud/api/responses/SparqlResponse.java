@@ -19,10 +19,13 @@ package fr.inria.eventcloud.api.responses;
 import java.io.Serializable;
 
 /**
+ * A SPARQL response that maintain information which are commons to any SPARQL
+ * response.
  * 
  * @author lpellegr
  * 
  * @param <T>
+ *            the result type.
  */
 public abstract class SparqlResponse<T> implements Serializable {
 

@@ -64,7 +64,8 @@ public class LookupRequest extends ForwardRequest {
     /**
      * {@inheritDoc}
      */
-    public Response<StringCoordinate> createResponse() {
+    @Override
+    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
         return new LookupResponse(this, this.remotePeerReached);
     }
 

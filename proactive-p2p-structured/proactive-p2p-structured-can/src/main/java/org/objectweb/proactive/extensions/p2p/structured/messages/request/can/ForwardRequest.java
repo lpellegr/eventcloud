@@ -61,6 +61,7 @@ public class ForwardRequest extends Request<StringCoordinate> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Router<ForwardRequest, StringCoordinate> getRouter() {
         return new UnicastRequestRouter<ForwardRequest>();
     }
@@ -68,6 +69,7 @@ public class ForwardRequest extends Request<StringCoordinate> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void route(StructuredOverlay overlay) {
         if (this.senderCoordinate == null) {
             this.senderCoordinate =
@@ -79,7 +81,8 @@ public class ForwardRequest extends Request<StringCoordinate> {
     /**
      * {@inheritDoc}
      */
-    public Response<StringCoordinate> createResponse() {
+    @Override
+    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
         return new ForwardResponse(this);
     }
 

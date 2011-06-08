@@ -19,7 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
@@ -46,8 +45,6 @@ public abstract class AnycastRequest extends Request<StringCoordinate> {
             AnycastConstraintsValidator<StringCoordinate> validator) {
         super(validator);
     }
-
-    public abstract AnycastResponse createResponse();
 
     /**
      * Returns the {@link AnycastRoutingList} containing the

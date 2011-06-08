@@ -20,52 +20,50 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import fr.inria.eventcloud.overlay.can.SemanticElement;
+
 /**
  * Tests some methods from the {@link SemanticHelper} class.
  * 
  * @author lpellegr
  */
-public class SemanticHelperTest {
+public final class SemanticHelperTest {
 
     @Test
     public void testParseTripleElement() {
         Assert.assertEquals(
                 "members",
-                SemanticHelper.parseTripleElement("http://www.inria.fr/sophia/members"));
+                SemanticElement.parseElement("http://www.inria.fr/sophia/members"));
 
         Assert.assertEquals(
                 "members",
-                SemanticHelper.parseTripleElement("http://www.inria.fr/sophia#members"));
+                SemanticElement.parseElement("http://www.inria.fr/sophia#members"));
 
         Assert.assertEquals(
                 "members",
-                SemanticHelper.parseTripleElement("http://www.inria.fr/sophia/members/"));
+                SemanticElement.parseElement("http://www.inria.fr/sophia/members/"));
 
         Assert.assertEquals(
                 "members",
-                SemanticHelper.parseTripleElement("http://www.inria.fr/sophia/members#"));
+                SemanticElement.parseElement("http://www.inria.fr/sophia/members#"));
+
+        Assert.assertEquals(
+                "inria.fr", SemanticElement.parseElement("http://www.inria.fr"));
 
         Assert.assertEquals(
                 "inria.fr",
-                SemanticHelper.parseTripleElement("http://www.inria.fr"));
+                SemanticElement.parseElement("http://www.inria.fr/"));
+
+        Assert.assertEquals("bn177", SemanticElement.parseElement("_:bn177"));
 
         Assert.assertEquals(
-                "inria.fr",
-                SemanticHelper.parseTripleElement("http://www.inria.fr/"));
+                "literal", SemanticElement.parseElement("\"literal\""));
 
         Assert.assertEquals(
-                "bn177", SemanticHelper.parseTripleElement("_:bn177"));
+                "test.com", SemanticElement.parseElement("http://test.com"));
 
         Assert.assertEquals(
-                "literal", SemanticHelper.parseTripleElement("\"literal\""));
-
-        Assert.assertEquals(
-                "test.com",
-                SemanticHelper.parseTripleElement("http://test.com"));
-
-        Assert.assertEquals(
-                "4t84t203",
-                SemanticHelper.parseTripleElement("http://4t84t203"));
+                "4t84t203", SemanticElement.parseElement("http://4t84t203"));
 
     }
 

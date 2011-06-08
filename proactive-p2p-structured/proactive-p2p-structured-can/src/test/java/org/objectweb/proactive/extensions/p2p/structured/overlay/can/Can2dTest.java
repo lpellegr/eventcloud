@@ -43,11 +43,7 @@ public class Can2dTest {
 
     @BeforeClass
     public static void setUp() {
-        try {
-            networkInitializer.initializeNewNetwork(10);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        networkInitializer.setUp(10);
     }
 
     @Test
@@ -72,7 +68,7 @@ public class Can2dTest {
     public static void main(String[] args) {
         P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
-        networkInitializer.initializeNewNetwork(20);
+        networkInitializer.setUp(20);
 
         final List<Peer> peers = new ArrayList<Peer>();
         for (Peer peer : networkInitializer.getPeers()) {

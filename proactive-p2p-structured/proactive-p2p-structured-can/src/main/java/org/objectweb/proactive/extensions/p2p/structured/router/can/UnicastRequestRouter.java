@@ -72,7 +72,7 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
                     + request.getId());
         }
         this.onDestinationReached(overlay, request);
-        request.createResponse().route(overlay);
+        request.createResponse(overlay).route(overlay);
     }
 
     @Override

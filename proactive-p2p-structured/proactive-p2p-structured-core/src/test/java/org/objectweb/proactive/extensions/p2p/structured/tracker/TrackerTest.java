@@ -53,8 +53,8 @@ public class TrackerTest implements Serializable {
                 });
 
         try {
-            tracker.addOnNetwork(peerWithMockOverlay);
-            tracker.addOnNetwork(peerWithAnonymousMockOverlay);
+            tracker.inject(peerWithMockOverlay);
+            tracker.inject(peerWithAnonymousMockOverlay);
         } catch (NetworkAlreadyJoinedException e) {
             e.printStackTrace();
         }
@@ -72,7 +72,7 @@ public class TrackerTest implements Serializable {
         tracker1.join(tracker2);
 
         try {
-            tracker1.addOnNetwork(peer);
+            tracker1.inject(peer);
         } catch (NetworkAlreadyJoinedException e) {
             e.printStackTrace();
         }
@@ -102,7 +102,7 @@ public class TrackerTest implements Serializable {
         tracker1.join(tracker2);
 
         try {
-            tracker1.addOnNetwork(peer);
+            tracker1.inject(peer);
         } catch (NetworkAlreadyJoinedException e) {
             e.printStackTrace();
         }

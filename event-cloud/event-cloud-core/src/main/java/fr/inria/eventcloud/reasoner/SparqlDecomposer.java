@@ -20,62 +20,117 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
+import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;
 import com.hp.hpl.jena.sparql.syntax.ElementUnion;
 
+import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
+
 /**
- * The SPARQL decomposer is used to decompose a SPARQL query into subqueries if
- * several conjunctions or disjunctions are detected.
+ * A SPARQL decomposer is in charge of decomposing a SPARQL query into
+ * sub-queries ( {@link AtomicQuery}s).
+ * <p>
+ * TODO: The field of applications of this decomposer is very limited. It would
+ * be nice to create a parser that parses the SPARQL grammar and extracts
+ * informations while the grammar is parsed.
  * 
  * @author lpellegr
  */
-public class SparqlDecomposer {
+public final class SparqlDecomposer {
 
-    public List<AtomicSparqlQuery> decompose(String sparqlQuery) {
+    private static final Logger log =
+            LoggerFactory.getLogger(SparqlDecomposer.class);
+
+    public List<AtomicQuery> decompose(String sparqlQuery) {
         Query query = QueryFactory.create(sparqlQuery);
-        return this.parseQueryTree((ElementGroup) query.getQueryPattern());
-    }
 
-    private ArrayList<AtomicSparqlQuery> parseQueryTree(ElementGroup group) {
-        ArrayList<AtomicSparqlQuery> result =
-                new ArrayList<AtomicSparqlQuery>();
+        ParentQueryForm parentQueryForm;
 
-        List<Element> elementList = group.getElements();
-        for (int i = 0; i < elementList.size(); i++) {
-            Element e = elementList.get(i);
-            result.addAll(this.processElement(e));
+        if (query.isAskType()) {
+            parentQueryForm = ParentQueryForm.ASK;
+        } else if (query.isConstructType()) {
+            parentQueryForm = ParentQueryForm.CONSTRUCT;
+        } else if (query.isDescribeType()) {
+            parentQueryForm = ParentQueryForm.DESCRIBE;
+        } else if (query.isSelectType()) {
+            parentQueryForm = ParentQueryForm.SELECT;
+        } else {
+            throw new IllegalArgumentException("Unknown query type");
         }
 
-        return result;
+        return this.parseQueryTree(
+                parentQueryForm, (ElementGroup) query.getQueryPattern());
     }
 
-    private List<AtomicSparqlQuery> processElement(Element elt) {
-        List<AtomicSparqlQuery> result = new ArrayList<AtomicSparqlQuery>();
+    private List<AtomicQuery> parseQueryTree(ParentQueryForm parentQueryForm,
+                                             ElementGroup group) {
+        log.debug("SparqlDecomposer.parseQueryTree({}, {})", new Object[] {
+                parentQueryForm, group.toString().replaceAll("\n", "")});
 
-        // Parses a Basic Graph Pattern
-        if (elt instanceof ElementPathBlock) {
-            result = parse((ElementPathBlock) elt);
+        List<AtomicQuery> atomicQueries = new ArrayList<AtomicQuery>();
+
+        for (Element elt : group.getElements()) {
+            this.processElement(parentQueryForm, elt, atomicQueries, null);
+        }
+
+        return atomicQueries;
+    }
+
+    private void processElement(ParentQueryForm parentQueryForm, Element elt,
+                                List<AtomicQuery> atomicQueries, Node graph) {
+
+        log.debug(
+                "SparqlDecomposer.processElement({}, {}, {}, {})",
+                new Object[] {
+                        parentQueryForm, elt.toString().replaceAll("\n", ""),
+                        atomicQueries, graph});
+        if (elt instanceof ElementNamedGraph) {
+            log.debug("    ElementNamedGraph");
+            // parses the graph name
+
+            Node graphValue = ((ElementNamedGraph) elt).getGraphNameNode();
+
+            for (Element e : ((ElementGroup) ((ElementNamedGraph) elt).getElement()).getElements()) {
+                this.processElement(
+                        parentQueryForm, e, atomicQueries, graphValue);
+            }
+        } else if (elt instanceof ElementPathBlock) {
+            log.debug("    ElementpathBlock");
+            // parses a Basic Graph Pattern
+            this.parse(
+                    parentQueryForm, (ElementPathBlock) elt, atomicQueries,
+                    graph);
         } else if (elt instanceof ElementUnion) {
-            // Parses an UNION keyword which forms a disjunction
+            log.debug("    ElementUnion");
+            // parses an UNION keyword which forms a disjunction
             // of two graph patterns
             ElementUnion unionBlock = ((ElementUnion) elt);
             for (Element unionElt : unionBlock.getElements()) {
                 for (Element graphPattern : ((ElementGroup) unionElt).getElements()) {
-                    result.addAll(this.parse((ElementPathBlock) graphPattern));
+                    this.parse(
+                            parentQueryForm, (ElementPathBlock) graphPattern,
+                            atomicQueries, graph);
                 }
             }
+        } else {
+            log.debug(" elt type " + elt.getClass());
         }
-
-        return result;
     }
 
-    public List<AtomicSparqlQuery> parse(ElementPathBlock elt) {
-        List<AtomicSparqlQuery> result = new ArrayList<AtomicSparqlQuery>();
+    public void parse(ParentQueryForm parentQueryForm, ElementPathBlock elt,
+                      List<AtomicQuery> atomicQueries, Node graph) {
+        log.debug("SparqlDecomposer.parse({}, {}, {}, {})", new Object[] {
+                parentQueryForm, elt.toString().replaceAll("\n", ""),
+                atomicQueries, graph});
         ElementPathBlock block = elt;
         Iterator<TriplePath> it = block.patternElts();
 
@@ -85,31 +140,10 @@ public class SparqlDecomposer {
             triple = it.next();
 
             // TODO adds support for FilterElement
-            result.add(new AtomicSparqlQuery(
-                    triple.getSubject().toString(), triple.getPredicate()
-                            .toString(), triple.getObject().toString()));
+            atomicQueries.add(new AtomicQuery(
+                    parentQueryForm, graph, triple.getSubject(),
+                    triple.getPredicate(), triple.getObject()));
             i++;
         }
-
-        return result;
     }
-
-    public static void main(String[] args) {
-        // String query1 =
-        // "CONSTRUCT { ?s ?p ?o } WHERE { ?s <http://predicate1.com> ?o . ?o <http://predicate2.com> \"hello\" } ";
-        // String query2 =
-        // "CONSTRUCT { ?s ?p ?o } WHERE { ?s <http://predicate1.com> ?o . } ";
-
-        // disjunction
-        String query3 =
-                "PREFIX go: <http://purl.org/obo/owl/GO#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX obo: <http://www.obofoundry.org/ro/ro.owl#> SELECT DISTINCT ?label ?process WHERE { { ?process obo:part_of go:GO_0007165 }  UNION  { ?process rdfs:subClassOf go:GO_0007165 } }";
-
-        SparqlDecomposer decomposer = new SparqlDecomposer();
-        List<AtomicSparqlQuery> subqueries = decomposer.decompose(query3);
-
-        for (AtomicSparqlQuery query : subqueries) {
-            System.out.println(query.toConstruct());
-        }
-    }
-
 }

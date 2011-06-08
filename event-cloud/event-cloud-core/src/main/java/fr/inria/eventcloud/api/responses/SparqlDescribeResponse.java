@@ -16,19 +16,22 @@
  **/
 package fr.inria.eventcloud.api.responses;
 
-import fr.inria.eventcloud.rdf2go.wrappers.ClosableIterableWrapper;
+import com.hp.hpl.jena.rdf.model.Model;
+
+import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
+ * The response returned by a call to
+ * {@link SemanticPeer#executeSparqlDescribe(String)}.
  * 
  * @author lpellegr
  */
-public class SparqlDescribeResponse extends
-        SparqlResponse<ClosableIterableWrapper> {
+public class SparqlDescribeResponse extends SparqlResponse<Model> {
 
     private static final long serialVersionUID = 1L;
 
     public SparqlDescribeResponse(long inboundHopCount, long outboundHopCount,
-            long latency, ClosableIterableWrapper result) {
+            long latency, Model result) {
         super(inboundHopCount, outboundHopCount, latency, result);
     }
 

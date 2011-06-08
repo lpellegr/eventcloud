@@ -53,14 +53,13 @@ public abstract class AnycastResponse extends Response<StringCoordinate> {
 
     /**
      * Merges the specified {@link AnycastResponse} with the current one. This
-     * methods have to be overridden to merge some results data that are
-     * conveyed. When the merge operation is terminated, the specified response
-     * is discarded.
+     * method has to be overridden to merge the data received as result. When
+     * the merge operation is terminated, the specified response is discarded.
      * 
      * @param subResponse
      *            the subResponse to merge into the current one.
      */
-    public synchronized void merge(AnycastResponse subResponse) {
+    public synchronized void addSubResult(AnycastResponse subResponse) {
         // to be overridden
     }
 

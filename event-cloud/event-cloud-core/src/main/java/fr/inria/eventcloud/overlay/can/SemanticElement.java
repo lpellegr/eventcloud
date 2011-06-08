@@ -16,11 +16,11 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
-import org.ontoware.rdf2go.model.node.Node;
-import org.ontoware.rdf2go.model.node.Resource;
+import java.net.URISyntaxException;
 
-import fr.inria.eventcloud.util.SemanticHelper;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+
+import com.hp.hpl.jena.graph.Node;
 
 /**
  * Represents a semantic coordinate element. This kind of element extends
@@ -40,15 +40,62 @@ public class SemanticElement extends StringElement {
      *            the value that will be parsed.
      */
     public SemanticElement(String value) {
-        super(SemanticHelper.parseTripleElement(value));
-    }
-
-    public SemanticElement(Resource value) {
-        super(SemanticHelper.parseTripleElement(value.toString()));
+        super(parseElement(value));
     }
 
     public SemanticElement(Node value) {
-        super(SemanticHelper.parseTripleElement(value.toString()));
+        super(parseElement(value.toString()));
+    }
+
+    /**
+     * Parses the String value from a {@link Node} in order to remove the
+     * prefixes and some characters specific to the RDF syntax used. This
+     * suppression is done to improve the load balancing (i.e. especially to
+     * avoid to have several values with popular prefixes that are managed in
+     * the same zone).
+     * 
+     * @param value
+     *            the value to parse.
+     * 
+     * @return a String that has been improved for load balancing.
+     */
+    public static String parseElement(String value) {
+        try {
+            java.net.URI uri = new java.net.URI(value);
+
+            int slashIndex = value.lastIndexOf("/");
+            int sharpIndex = value.lastIndexOf("#");
+
+            // # or / is the last character
+            if (slashIndex == value.length() - 1
+                    || sharpIndex == value.length() - 1) {
+                value = value.substring(0, value.length() - 1);
+                slashIndex = value.lastIndexOf("/");
+                sharpIndex = value.lastIndexOf("#");
+            }
+
+            if (slashIndex < 7 && sharpIndex == -1) {
+                if (uri.getScheme().equals("http")
+                        && value.startsWith("http://www.")) {
+                    return value.substring(11);
+                }
+                return value.substring(uri.getScheme().length() + 3);
+            } else if (slashIndex > sharpIndex) {
+                return value.substring(slashIndex + 1, value.length());
+            } else if (slashIndex < sharpIndex) {
+                return value.substring(sharpIndex + 1, value.length());
+            }
+
+            return "";
+        } catch (URISyntaxException e) {
+            if (value.startsWith("_:")) {
+                return value.substring(2);
+            } else if (value.startsWith("\"")) {
+                return value.substring(1, value.length() - 1);
+            } else {
+                return value;
+            }
+        }
     }
 
 }

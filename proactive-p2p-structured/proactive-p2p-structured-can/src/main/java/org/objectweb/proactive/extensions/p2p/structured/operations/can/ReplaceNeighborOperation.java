@@ -24,7 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 
 /**
  * Operation used in order to replace a neighbor by an another from a

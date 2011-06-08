@@ -16,8 +16,10 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 
@@ -32,21 +34,27 @@ public class CanRequestResponseManager extends RequestResponseManager {
     private static final long serialVersionUID = 1L;
 
     /*
-     * Used to maintain the list of requests which have been already 
+     * Used to maintain the list of requests which have already been 
      * received when anycast requests are executed.
      */
-    private ConcurrentSkipListSet<UUID> requestsAlreadyReceived =
-            new ConcurrentSkipListSet<UUID>();
+    private Set<UUID> requestsAlreadyReceived;
+
+    public CanRequestResponseManager() {
+        super();
+        this.requestsAlreadyReceived =
+                Collections.newSetFromMap(new ConcurrentHashMap<UUID, Boolean>());
+    }
 
     public void markRequestAsReceived(UUID requestId) {
         this.requestsAlreadyReceived.add(requestId);
     }
 
     /**
-     * Indicates if the current peer has already received the request identified
-     * by the specified requestId.
+     * Indicates whether the current peer has already received the request
+     * identified by the specified identifier.
      * 
      * @param requestId
+     *            the identifier to check.
      * 
      * @return {@code true} if the current peer has already received the
      *         request, {@code false} otherwise.

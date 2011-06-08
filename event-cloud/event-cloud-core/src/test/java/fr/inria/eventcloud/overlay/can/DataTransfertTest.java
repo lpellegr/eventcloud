@@ -16,30 +16,26 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-
-import java.util.Set;
+import java.util.HashSet;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
-import org.ontoware.rdf2go.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
+import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SemanticFactory;
-import fr.inria.eventcloud.config.EventCloudProperties;
 import fr.inria.eventcloud.initializers.EventCloudInitializer;
-import fr.inria.eventcloud.operations.can.SparqlConstructOperation;
-import fr.inria.eventcloud.operations.can.SparqlConstructResponseOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.util.RDF2GoBuilder;
-import fr.inria.eventcloud.util.SemanticHelper;
+import fr.inria.eventcloud.util.SemanticPeerOperations;
 
 /**
  * Test the data transfert during a join operation for
@@ -54,75 +50,70 @@ public class DataTransfertTest {
 
     private EventCloudInitializer initializer;
 
-    private static String[][] statementsToAdd = {
-            {"http://A", "http://A", "http://A"},
-            {"http://U", "http://U", "http://U"},
-            {"http://Z", "http://Z", "http://Z"}};
+    private static String[][] quadrupleValues = {
+            {"http://A", "http://A", "http://A", "http://A"},
+            {"http://U", "http://U", "http://U", "http://U"},
+            {"http://Z", "http://Z", "http://Z", "http://Z"}};
 
     @Before
     public void setUp() {
-        this.initializer = new EventCloudInitializer();
-        this.initializer.setUpNetworkOnLocalMachine(1);
+        this.initializer = new EventCloudInitializer(1);
+        this.initializer.setUp();
     }
 
     @Test
     public void testDataTransfert() {
-        for (String[] stmt : statementsToAdd) {
-            this.initializer.getRandomPeer().addStatement(
-                    EventCloudProperties.DEFAULT_CONTEXT,
-                    RDF2GoBuilder.createStatementInternal(
-                            stmt[0], stmt[1], stmt[2]));
+        for (String[] stmt : quadrupleValues) {
+            this.initializer.selectPeer().add(
+                    new Quadruple(
+                            Node.createURI(stmt[0]), Node.createURI(stmt[1]),
+                            Node.createURI(stmt[2]), Node.createURI(stmt[3])));
         }
 
-        SemanticPeer newPeer = SemanticFactory.newActiveSemanticPeer();
-        SemanticPeer oldPeer = this.initializer.getRandomPeer();
+        SemanticPeer newPeer = SemanticFactory.newSemanticPeer();
+        SemanticPeer oldPeer = this.initializer.selectPeer();
 
-        String query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
-
-        Set<Statement> dataContainedByOldPeer =
-                SemanticHelper.asSet(((SparqlConstructResponseOperation) PAFuture.getFutureValue(oldPeer.receiveImmediateService(new SparqlConstructOperation(
-                        EventCloudProperties.DEFAULT_CONTEXT, query)))).getResult()
-                        .toRDF2Go());
+        Collection<Quadruple> oldPeerQuads = oldPeer.find(QuadruplePattern.ANY);
+        int nbDataContainedByOldPeer = oldPeerQuads.size();
 
         logger.debug(
                 "Before join operation on old peer, the old peer contains {} data",
-                dataContainedByOldPeer.size());
+                nbDataContainedByOldPeer);
 
         try {
-            this.initializer.getRandomTracker().addOnNetwork(newPeer);
+            this.initializer.getRandomTracker().inject(newPeer);
         } catch (NetworkAlreadyJoinedException e) {
             e.printStackTrace();
         }
 
-        logger.debug("Initial peer manages "
-                + this.initializer.getRandomTracker().getRandomPeer());
+        logger.debug("Initial peer manages " + oldPeer);
         logger.debug("New peer manages " + newPeer);
 
-        dataContainedByOldPeer =
-                SemanticHelper.asSet(((SparqlConstructResponseOperation) PAFuture.getFutureValue(oldPeer.receiveImmediateService(new SparqlConstructOperation(
-                        EventCloudProperties.DEFAULT_CONTEXT, query)))).getResult()
-                        .toRDF2Go());
+        oldPeerQuads =
+                SemanticPeerOperations.findQuadruples(
+                        oldPeer, QuadruplePattern.ANY);
+        nbDataContainedByOldPeer = oldPeerQuads.size();
 
-        Set<Statement> dataContainedByNewPeer =
-                SemanticHelper.asSet(((SparqlConstructResponseOperation) PAFuture.getFutureValue(newPeer.receiveImmediateService(new SparqlConstructOperation(
-                        EventCloudProperties.DEFAULT_CONTEXT, query)))).getResult()
-                        .toRDF2Go());
+        Collection<Quadruple> newPeerQuads =
+                SemanticPeerOperations.findQuadruples(
+                        newPeer, QuadruplePattern.ANY);
+        int nbDataContainedByNewPeer = newPeerQuads.size();
 
         logger.debug(
                 "After join operation on old peer with new peer, the old peer contains {} data whereas the new peer contains {} data",
-                dataContainedByOldPeer.size(), dataContainedByNewPeer.size());
+                nbDataContainedByOldPeer, nbDataContainedByNewPeer);
 
-        assertEquals(0, Sets.intersection(
-                dataContainedByOldPeer, dataContainedByNewPeer).size());
-        assertEquals(statementsToAdd.length, dataContainedByOldPeer.size()
-                + dataContainedByNewPeer.size());
-        assertTrue(dataContainedByOldPeer.size() < statementsToAdd.length);
-        assertTrue(dataContainedByOldPeer.size() > 0);
+        Assert.assertNotSame(0, Sets.intersection(new HashSet<Quadruple>(
+                oldPeerQuads), new HashSet<Quadruple>(newPeerQuads)));
+        Assert.assertEquals(quadrupleValues.length, nbDataContainedByOldPeer
+                + nbDataContainedByNewPeer);
+        Assert.assertTrue(nbDataContainedByOldPeer < quadrupleValues.length);
+        Assert.assertTrue(nbDataContainedByOldPeer > 0);
     }
 
     @After
     public void tearDown() {
-        this.initializer.tearDownNetwork();
+        this.initializer.tearDown();
     }
 
 }

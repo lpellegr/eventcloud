@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.objectweb.proactive.extensions.p2p.structured.util.SystemUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 
 /**
  * Provides static method to execute a specified number of times a given task.

@@ -48,13 +48,6 @@ public abstract class PersistentDatastore extends Datastore {
      * @param remove
      *            indicates whether the repository associated to the datastore
      *            has to be removed.
-     * @return {@code true} if the operation has succeeded, {@code false}
-     *         otherwise.
-     */
-    /**
-     * Closes the repository (e.g. releases the resources). If someone attempt
-     * to call this method whereas the datastore is not initialized, then the an
-     * exception is thrown.
      */
     public void close(boolean remove) {
         if (!super.initialized.compareAndSet(true, false)) {

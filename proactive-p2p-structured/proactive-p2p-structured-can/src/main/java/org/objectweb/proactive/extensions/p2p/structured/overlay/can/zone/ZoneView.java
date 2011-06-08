@@ -24,7 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
-import org.objectweb.proactive.extensions.p2p.structured.util.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 
 /**
  * A ZoneView is a view associated to a {@link Zone}. It is composed of two
