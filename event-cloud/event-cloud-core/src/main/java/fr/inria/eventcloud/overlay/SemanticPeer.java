@@ -73,7 +73,7 @@ public class SemanticPeer extends PeerImpl implements PutGetApi {
     }
 
     /**
-     * Constructs and initializes a SemantiPeer. The parameter {@code obj} is
+     * Constructs and initializes a SemanticPeer. The parameter {@code obj} is
      * provided in order to make a distinction between the empty no-arg
      * constructor that is used by ProActive and the current one. The parameter
      * value is not used and can always be set to {@code null}.
