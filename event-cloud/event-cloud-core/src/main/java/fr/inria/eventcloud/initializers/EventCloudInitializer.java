@@ -37,8 +37,8 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
 /**
  * Initializes a space network on a local machine or by distributing the active
  * objects on several machines. A space network is represented by a CAN network.
- * 
- * TODO add support for deployment with the Scheduler. I think we just have to
+ * <p>
+ * TODO: add support for deployment with the Scheduler. I think we just have to
  * provide a new constructor with some parameters which are needed to use a
  * scheduler. Then, we have to update the {@link #createPeer()} and
  * {@link #createTracker()} methods according to the parameters which have been

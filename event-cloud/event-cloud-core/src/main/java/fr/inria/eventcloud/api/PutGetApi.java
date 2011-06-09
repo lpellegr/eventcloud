@@ -111,7 +111,7 @@ public interface PutGetApi {
     public Collection<Quadruple> find(QuadruplePattern quadPattern);
 
     /**
-     * Executes on the Event-Cloud the specified SPARQl query. This SPARQL query
+     * Executes on the Event-Cloud the specified SPARQL query. This SPARQL query
      * can have any query form.
      * 
      * @param sparqlQuery
@@ -122,7 +122,7 @@ public interface PutGetApi {
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery);
 
     /**
-     * Executes on the Event-Cloud the specified SPARQl query that uses a ASK
+     * Executes on the Event-Cloud the specified SPARQL query that uses a ASK
      * query form.
      * 
      * @param sparqlAskQuery
@@ -133,7 +133,7 @@ public interface PutGetApi {
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery);
 
     /**
-     * Executes on the Event-Cloud the specified SPARQl query that uses a
+     * Executes on the Event-Cloud the specified SPARQL query that uses a
      * CONSTRUCT query form.
      * 
      * @param sparqlConstructQuery
@@ -144,7 +144,7 @@ public interface PutGetApi {
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery);
 
     /**
-     * Executes on the Event-Cloud the specified SPARQl query that uses a
+     * Executes on the Event-Cloud the specified SPARQL query that uses a
      * DESCRIBE query form.
      * 
      * @param sparqlDescribeQuery
