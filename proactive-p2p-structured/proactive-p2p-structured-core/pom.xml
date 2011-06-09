@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.objectweb.proactive</groupId>
 			<artifactId>proactive</artifactId>
-			<version>5.0.1</version>
+			<version>5.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
