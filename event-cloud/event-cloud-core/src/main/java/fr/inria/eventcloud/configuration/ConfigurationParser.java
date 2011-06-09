@@ -52,7 +52,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class ConfigurationParser {
 
-    protected static Logger logger =
+    protected static Logger log =
             LoggerFactory.getLogger(ConfigurationParser.class);
 
     private static final String JAXP_SCHEMA_LANGUAGE =
@@ -136,31 +136,32 @@ public class ConfigurationParser {
                 if (prop != null) {
                     if (prop.isValid(value)) {
                         System.setProperty(key, value);
+                        log.info(
+                                "Property '{}' has been loaded with value {}",
+                                key, value);
                     } else {
-                        logger.warn("Invalid value, " + value + " for key "
-                                + key + ". Must be a "
-                                + prop.getType().toString());
+                        log.warn("Invalid value, " + value + " for key " + key
+                                + ". Must be a " + prop.getType().toString());
                     }
                 } else {
-                    logger.warn("Skipped unknown property: " + key);
+                    log.warn("Skipped unknown property: " + key);
                     unknownProperty = true;
                 }
             }
             if (unknownProperty) {
-                logger.warn("All supported Event-Cloud properties are declared inside "
+                log.warn("All supported Event-Cloud properties are declared inside "
                         + PAProperties.class.getName()
                         + ". Please check your Event-Cloud Configuration file: "
                         + filename);
             }
         } catch (SAXException e) {
-            logger.warn("Invalid Event-Cloud Configuration file: " + source, e);
+            log.warn("Invalid Event-Cloud Configuration file: " + source, e);
         } catch (ParserConfigurationException e) {
-            logger.warn("Invalid Event-Cloud Configuration file: " + source, e);
+            log.warn("Invalid Event-Cloud Configuration file: " + source, e);
         } catch (XPathExpressionException e) {
-            logger.warn("Invalid Event-Cloud Configuration file: " + source, e);
+            log.warn("Invalid Event-Cloud Configuration file: " + source, e);
         } catch (IOException e) {
-            logger.error(
-                    "Error while parsing Event-Cloud Configuration file", e);
+            log.error("Error while parsing Event-Cloud Configuration file", e);
         }
     }
 
@@ -192,21 +193,21 @@ public class ConfigurationParser {
     private static class MyDefaultHandler extends DefaultHandler {
         @Override
         public void warning(SAXParseException e) {
-            logger.warn("Warning Line " + e.getLineNumber() + ": "
+            log.warn("Warning Line " + e.getLineNumber() + ": "
                     + e.getMessage() + "\n");
         }
 
         @Override
         public void error(SAXParseException e) throws SAXParseException {
-            logger.error("Error Line " + e.getLineNumber() + ": "
-                    + e.getMessage() + "\n");
+            log.error("Error Line " + e.getLineNumber() + ": " + e.getMessage()
+                    + "\n");
             throw e;
         }
 
         @Override
         public void fatalError(SAXParseException e) throws SAXParseException {
-            logger.error("Error Line " + e.getLineNumber() + ": "
-                    + e.getMessage() + "\n");
+            log.error("Error Line " + e.getLineNumber() + ": " + e.getMessage()
+                    + "\n");
             throw e;
         }
     }

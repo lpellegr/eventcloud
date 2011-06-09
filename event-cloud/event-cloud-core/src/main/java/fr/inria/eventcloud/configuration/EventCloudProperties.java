@@ -18,13 +18,9 @@ package fr.inria.eventcloud.configuration;
 
 import java.io.File;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyInteger;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.hp.hpl.jena.graph.Node;
 
 /**
  * Contains default values for Event-Cloud properties.
@@ -40,26 +36,14 @@ import com.hp.hpl.jena.graph.Node;
  */
 public class EventCloudProperties {
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(EventCloudProperties.class);
-
-    public static final PropertyInteger CONSISTENCY_TIMEOUT =
-            new PropertyInteger("repository.consistency.timeout", 500);
-
-    // TODO: remove this property as soon as possible (however
-    // we need to define how to manage the context part before)
-    public static final Node DEFAULT_INRIA_NODE =
-            Node.createURI("http://www.inria.fr");
-
-    public static final String PATH_SEPARATOR =
-            System.getProperty("file.separator");
 
     public static final PropertyString REPOSITORIES_PATH = new PropertyString(
             "repositories.path", getDefaultRepositoriesPath());
 
     static {
         File preferencesFile = new File(getPreferencesFilePath());
-
         String eventCloudConfigurationProperty =
                 System.getProperty("eventcloud.configuration");
         if (eventCloudConfigurationProperty != null) {
@@ -67,9 +51,10 @@ public class EventCloudProperties {
         }
 
         if (preferencesFile.exists()) {
+            log.info("Loading properties from {}", preferencesFile);
             ConfigurationParser.parse(preferencesFile.toString());
         } else {
-            logger.info(
+            log.info(
                     "No Event-Cloud properties loaded because file {} does not exist",
                     preferencesFile);
         }
@@ -78,7 +63,7 @@ public class EventCloudProperties {
     public static final String getPreferencesFilePath() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getPreferencesPath());
-        buffer.append(System.getProperty("file.separator"));
+        buffer.append(File.separator);
         buffer.append("preferences");
 
         return buffer.toString();
@@ -92,11 +77,8 @@ public class EventCloudProperties {
     public static final String getPreferencesPath() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(System.getProperty("user.home"));
-        buffer.append(System.getProperty("file.separator"));
-        if (!SystemUtil.isWindows()) {
-            buffer.append(".");
-        }
-        buffer.append("eventcloud");
+        buffer.append(File.separator);
+        buffer.append(".eventcloud");
 
         return buffer.toString();
     }
@@ -109,7 +91,7 @@ public class EventCloudProperties {
     public static final String getDefaultRepositoriesPath() {
         StringBuffer buffer = new StringBuffer();
         buffer.append(getPreferencesPath());
-        buffer.append(System.getProperty("file.separator"));
+        buffer.append(File.separator);
         buffer.append("repositories");
 
         return buffer.toString();

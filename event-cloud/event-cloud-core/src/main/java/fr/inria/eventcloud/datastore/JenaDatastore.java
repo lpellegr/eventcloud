@@ -60,7 +60,7 @@ public class JenaDatastore extends SemanticDatastore {
     private DatasetGraphTDB datastore;
 
     public JenaDatastore() {
-        super(new File(System.getProperty("java.io.tmpdir")));
+        super(new File(System.getProperty("java.io.tmpdir"), "eventcloud"));
     }
 
     public JenaDatastore(File repositoryPath) {
