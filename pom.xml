@@ -33,7 +33,7 @@
 	<distributionManagement>
 		<repository>
 			<id>event-cloud-releases</id>
-			<name>dspace releases repository</name>
+			<name>event-cloud-releases</name>
 			<url>dav:http://maven.event-cloud.googlecode.com/hg/releases</url>
 		</repository>
 		<snapshotRepository>
@@ -44,13 +44,6 @@
 	</distributionManagement>
 
 	<repositories>
-		<!-- TODO: removes the dspace repository as soon as possible! Instead we 
-			must use our own private repository or Maven Central via Sonatype OSS -->
-		<repository>
-			<id>dspace-releases</id>
-			<name>dspace releases repository</name>
-			<url>http://dspace.gforge.inria.fr/maven2/repository/releases</url>
-		</repository>
 		<repository>
 			<id>event-cloud-releases</id>
 			<url>http://maven.event-cloud.googlecode.com/hg/releases</url>
@@ -64,7 +57,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>proactive-maven-plugin</id>
-			<name>ProActive Maven Plugin</name>
+			<name>proactive-maven-plugin</name>
 			<url>http://maven.proactive-maven-plugin.googlecode.com/hg/releases</url>
 		</pluginRepository>
 	</pluginRepositories>
