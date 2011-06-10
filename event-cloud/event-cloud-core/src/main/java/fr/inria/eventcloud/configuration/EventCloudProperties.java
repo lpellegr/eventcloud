@@ -18,6 +18,7 @@ package fr.inria.eventcloud.configuration;
 
 import java.io.File;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +40,18 @@ public class EventCloudProperties {
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudProperties.class);
 
+    /**
+     * Specifies where the repositories that store the RDF data are created.
+     */
     public static final PropertyString REPOSITORIES_PATH = new PropertyString(
-            "repositories.path", getDefaultRepositoriesPath());
+            "eventcloud.repositories.path", getDefaultRepositoriesPath());
+
+    /**
+     * Defines whether the Event-Cloud has to compress the data that are
+     * transfered between the peers and the users when it is possible.
+     */
+    public static final PropertyBoolean COMPRESSION = new PropertyBoolean(
+            "eventcloud.compression", false);
 
     static {
         File preferencesFile = new File(getPreferencesFilePath());

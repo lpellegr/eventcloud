@@ -26,6 +26,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.utils.SparqlResultSerializer;
 
 /**
@@ -54,7 +55,8 @@ public class ResultSetWrapper extends SparqlResultWrapper<ResultSet> implements
     @Override
     protected void internalWriteObject(ObjectOutputStream out)
             throws IOException {
-        SparqlResultSerializer.serialize(out, this);
+        SparqlResultSerializer.serialize(
+                out, this, EventCloudProperties.COMPRESSION.getValue());
     }
 
     /**
@@ -62,7 +64,9 @@ public class ResultSetWrapper extends SparqlResultWrapper<ResultSet> implements
      */
     @Override
     protected void internalReadObject(ObjectInputStream in) throws IOException {
-        this.object = SparqlResultSerializer.deserializeResultSet(in);
+        this.object =
+                SparqlResultSerializer.deserializeResultSet(
+                        in, EventCloudProperties.COMPRESSION.getValue());
     }
 
     // private void writeObject(ObjectOutputStream out) throws IOException {
