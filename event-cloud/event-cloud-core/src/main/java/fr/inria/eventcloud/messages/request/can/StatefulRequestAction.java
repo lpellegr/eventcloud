@@ -14,26 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.api.responses;
-
-import com.hp.hpl.jena.rdf.model.Model;
-
-import fr.inria.eventcloud.overlay.SemanticPeer;
+package fr.inria.eventcloud.messages.request.can;
 
 /**
- * The response returned by a call to
- * {@link SemanticPeer#executeSparqlDescribe(String)}.
+ * A stateful request action is a wrapper that contain the result of the action
+ * which is executed with a {@link StatefulQuadruplePatternRequest}, but also
+ * some other metrics like the time to execute the action, etc.
  * 
  * @author lpellegr
+ * 
+ * @param <T>
+ *            the action type result.
  */
-public class SparqlDescribeResponse extends SparqlResponse<Model> {
+public final class StatefulRequestAction<T> {
 
-    private static final long serialVersionUID = 1L;
+    public final long duration;
 
-    public SparqlDescribeResponse(long inboundHopCount, long outboundHopCount,
-            long latency, long queryDatastoreTime, Model result) {
-        super(inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
-                result);
+    public final T result;
+
+    public StatefulRequestAction(long duration, T result) {
+        super();
+        this.duration = duration;
+        this.result = result;
     }
 
 }

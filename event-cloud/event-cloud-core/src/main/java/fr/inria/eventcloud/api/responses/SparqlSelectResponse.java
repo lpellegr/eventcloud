@@ -30,8 +30,9 @@ public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
     private static final long serialVersionUID = 1L;
 
     public SparqlSelectResponse(long inboundHopCount, long outboundHopCount,
-            long latency, ResultSetWrapper result) {
-        super(inboundHopCount, outboundHopCount, latency, result);
+            long latency, long queryDatastoreTime, ResultSetWrapper result) {
+        super(inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
+                result);
     }
 
 }

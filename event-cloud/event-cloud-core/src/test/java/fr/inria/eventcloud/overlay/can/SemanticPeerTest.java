@@ -23,6 +23,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.ResultSet;
@@ -32,6 +34,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.initializers.EventCloudInitializer;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.utils.generator.NodeGenerator;
@@ -43,6 +46,9 @@ import fr.inria.eventcloud.utils.generator.QuadrupleGenerator;
  * @author lpellegr
  */
 public class SemanticPeerTest {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(SemanticPeerTest.class);
 
     private EventCloudInitializer initializer;
 
@@ -302,6 +308,26 @@ public class SemanticPeerTest {
                                 + commonURI.toString() + "> ?d ?e } }")
                 .getResult()
                 .hasNext());
+    }
+
+    @Test
+    public void testMeasurementsReturnedBySparqlQuery() {
+        SparqlAskResponse response =
+                this.initializer.selectPeer().executeSparqlAsk(
+                        "ASK { GRAPH ?g { ?s ?p ?o } }");
+
+        log.debug(
+                "Measurements returned for a SPARQL ASK query with no data: latency={}, queryDatastoreTime={}, nbInboundHop={}, nbOutboundHop={}",
+                new Object[] {
+                        response.getLatency(),
+                        response.getQueryDatastoreTime(),
+                        response.getInboundHopCount(),
+                        response.getOutboundHopCount()});
+
+        Assert.assertTrue(response.getLatency() > 0);
+        Assert.assertTrue(response.getQueryDatastoreTime() > 0);
+        Assert.assertEquals(
+                response.getInboundHopCount(), response.getOutboundHopCount());
     }
 
     @After
