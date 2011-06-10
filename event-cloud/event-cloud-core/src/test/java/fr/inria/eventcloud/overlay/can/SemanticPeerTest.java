@@ -69,9 +69,30 @@ public class SemanticPeerTest {
         for (Quadruple quad : quadruplesFound) {
             Assert.assertTrue(quadruples.contains(quad));
         }
+
+        Assert.assertEquals(quadruples.size(), quadruplesFound.size());
     }
 
-    // TODO add testAddQuadrupleInParallel
+    @Test
+    public void testAddCollectionQuadruples() {
+        Set<Quadruple> quadruples = new HashSet<Quadruple>();
+
+        for (int i = 0; i < 100; i++) {
+            quadruples.add(QuadrupleGenerator.create());
+        }
+
+        this.initializer.selectPeer()
+                .add(new Collection<Quadruple>(quadruples));
+
+        Collection<Quadruple> quadruplesFound =
+                this.initializer.selectPeer().find(QuadruplePattern.ANY);
+
+        for (Quadruple quad : quadruplesFound) {
+            Assert.assertTrue(quadruples.contains(quad));
+        }
+
+        Assert.assertEquals(quadruples.size(), quadruplesFound.size());
+    }
 
     @Test
     public void testContainsQuadruple() {
@@ -90,6 +111,21 @@ public class SemanticPeerTest {
 
         this.initializer.selectPeer().delete(quad);
         Assert.assertFalse(this.initializer.selectPeer().contains(quad));
+    }
+
+    @Test
+    public void testDeleteCollectionQuadruples() {
+        Set<Quadruple> quadruples = new HashSet<Quadruple>();
+
+        for (int i = 0; i < 100; i++) {
+            quadruples.add(QuadrupleGenerator.create());
+        }
+
+        this.initializer.selectPeer().delete(
+                new Collection<Quadruple>(quadruples));
+
+        Assert.assertEquals(0, this.initializer.selectPeer().find(
+                QuadruplePattern.ANY).size());
     }
 
     @Test
