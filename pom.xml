@@ -34,12 +34,12 @@
 		<repository>
 			<id>event-cloud-releases</id>
 			<name>event-cloud-releases</name>
-			<url>dav:http://maven.event-cloud.googlecode.com/hg/releases</url>
+			<url>file:${event.cloud.maven.directory}/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>event-cloud-snapshots</id>
 			<name>event-cloud-snapshots</name>
-			<url>dav:http://maven.event-cloud.googlecode.com/hg/snapshots</url>
+			<url>file:${event.cloud.maven.directory}/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
