@@ -26,6 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
+import fr.inria.eventcloud.messages.request.can.StatefulRequestAction;
 import fr.inria.eventcloud.messages.request.can.StatefulQuadruplePatternRequest;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 
@@ -39,14 +40,14 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
 
     private static final long serialVersionUID = 1L;
 
-    // TODO compute the value
-    private long stateActionsTime;
+    private long stateActionTime;
 
     protected List<SerializedValue<T>> subResults;
 
     public StatefulQuadruplePatternResponse(
             StatefulQuadruplePatternRequest<T> request) {
         super(request);
+        this.stateActionTime = 0;
         this.subResults = new ArrayList<SerializedValue<T>>();
     }
 
@@ -56,13 +57,20 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
 
     public abstract T mergeSubResults(List<SerializedValue<T>> subResults);
 
+    public long getStateActionTime() {
+        return this.stateActionTime;
+    }
+    
     /**
      * {@inheritDoc}
      */
     @Override
     @SuppressWarnings("unchecked")
     public synchronized void addSubResult(AnycastResponse subResponse) {
-        this.subResults.addAll(((StatefulQuadruplePatternResponse<T>) subResponse).subResults);
+        StatefulQuadruplePatternResponse<T> response =
+                ((StatefulQuadruplePatternResponse<T>) subResponse);
+        this.subResults.addAll(response.subResults);
+        this.stateActionTime += response.stateActionTime;
     }
 
     /**
@@ -75,15 +83,17 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
             @SuppressWarnings("unchecked")
             public void makeDecision(StructuredOverlay overlay,
                                      AnycastResponse response) {
-                Future<T> result =
-                        (Future<T>) ((SparqlRequestResponseManager) overlay.getRequestResponseManager()).getPendingResults()
+                Future<StatefulRequestAction<T>> result =
+                        (Future<StatefulRequestAction<T>>) ((SparqlRequestResponseManager) overlay.getRequestResponseManager()).getPendingResults()
                                 .remove(response.getId());
                 if (result != null) {
                     // ensure that the query operation has terminated
                     // before to send back the request
                     try {
                         ((StatefulQuadruplePatternResponse<T>) response).subResults.add(new SerializedValue<T>(
-                                result.get()));
+                                result.get().result));
+                        ((StatefulQuadruplePatternResponse<T>) response).stateActionTime +=
+                                result.get().duration;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } catch (ExecutionException e) {

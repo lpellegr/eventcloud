@@ -91,7 +91,8 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
         long[] measurements = this.aggregateMeasurements(responses);
 
         return new SparqlAskResponse(
-                measurements[0], measurements[1], measurements[2], result);
+                measurements[0], measurements[1], measurements[2],
+                measurements[3], result);
     }
 
     /**
@@ -115,7 +116,7 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
 
         return new SparqlConstructResponse(
                 measurements[0], measurements[1], measurements[2],
-                new ModelWrapper(result));
+                measurements[3], new ModelWrapper(result));
     }
 
     /**
@@ -137,7 +138,7 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
 
         return new SparqlSelectResponse(
                 measurements[0], measurements[1], measurements[2],
-                new ResultSetWrapper(result));
+                measurements[3], new ResultSetWrapper(result));
     }
 
     private static List<Quadruple> extractQuadruples(List<SparqlAtomicResponse> responses) {
@@ -157,12 +158,13 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
      * 
      * @return the measurements after having merged the intermediate results.
      *         The measurements which are returned are respectively the
-     *         {@code inboundHopCount}, the {@code outboundHopCount} and the
-     *         {@code latency}.
+     *         {@code inboundHopCount}, the {@code outboundHopCount}, the
+     *         {@code latency} and the {@code queryDatastoreTime}.
      */
     private long[] aggregateMeasurements(List<SparqlAtomicResponse> responses) {
         long outboundHopCount = 0;
         long latency = 0;
+        long queryDatastoreTime = 0;
 
         for (SparqlAtomicResponse response : responses) {
             if (response.getLatency() > latency) {
@@ -170,10 +172,12 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
             }
 
             outboundHopCount += response.getOutboundHopCount();
+            queryDatastoreTime += response.getStateActionTime();
         }
 
         // inboundHopCount = outboundHopCount
-        return new long[] {outboundHopCount, outboundHopCount, latency};
+        return new long[] {
+                outboundHopCount, outboundHopCount, latency, queryDatastoreTime};
     }
 
     public List<SparqlAtomicResponse> dispatch(List<SparqlAtomicRequest> requests) {

@@ -89,12 +89,19 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
                     messagingManager.getPendingResults().put(
                             request.getId(),
                             messagingManager.getThreadPool().submit(
-                                    new Callable<T>() {
-                                        public T call() {
-                                            return StatefulQuadruplePatternRequest.this.onPeerValidatingKeyConstraints(
-                                                    overlay,
-                                                    request,
-                                                    StatefulQuadruplePatternRequest.super.quadruplePattern.getValue());
+                                    new Callable<StatefulRequestAction<T>>() {
+                                        public StatefulRequestAction<T> call() {
+                                            long start =
+                                                    System.currentTimeMillis();
+                                            T actionResult =
+                                                    StatefulQuadruplePatternRequest.this.onPeerValidatingKeyConstraints(
+                                                            overlay,
+                                                            request,
+                                                            StatefulQuadruplePatternRequest.super.quadruplePattern.getValue());
+                                            return new StatefulRequestAction<T>(
+                                                    System.currentTimeMillis()
+                                                            - start,
+                                                    actionResult);
                                         }
                                     }));
                 }
