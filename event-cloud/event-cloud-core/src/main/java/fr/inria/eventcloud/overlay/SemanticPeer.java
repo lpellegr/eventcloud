@@ -17,6 +17,9 @@
 package fr.inria.eventcloud.overlay;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAFuture;
@@ -57,11 +60,13 @@ import fr.inria.eventcloud.messages.response.can.FindQuadruplesResponse;
  * @author lpellegr
  */
 /*
- * TODO implements the PublishSubscribeApi interfaces
+ * TODO implement the PublishSubscribeApi interface
  */
 public class SemanticPeer extends PeerImpl implements PutGetApi {
 
     private static final long serialVersionUID = 1L;
+
+    private ExecutorService threadPool;
 
     /**
      * No-arg constructor for ProActive.
@@ -84,6 +89,10 @@ public class SemanticPeer extends PeerImpl implements PutGetApi {
         super(new CanOverlay(
                 new SparqlRequestResponseManager(), new JenaDatastore(new File(
                         EventCloudProperties.REPOSITORIES_PATH.getValue()))));
+
+        // TODO define the thread pool size and/or provide a dynamic thread pool
+        // implementation
+        this.threadPool = Executors.newFixedThreadPool(50);
     }
 
     /*
@@ -112,9 +121,22 @@ public class SemanticPeer extends PeerImpl implements PutGetApi {
      */
     @Override
     public boolean add(Collection<Quadruple> quads) {
-        // TODO: use a thread-pool to parallelize it
-        for (Quadruple quad : quads) {
-            this.add(quad);
+        final CountDownLatch doneSignal = new CountDownLatch(quads.size());
+
+        for (final Quadruple quad : quads) {
+            this.threadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    add(quad);
+                    doneSignal.countDown();
+                }
+            });
+        }
+
+        try {
+            doneSignal.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         return true;
@@ -153,9 +175,22 @@ public class SemanticPeer extends PeerImpl implements PutGetApi {
      */
     @Override
     public boolean delete(Collection<Quadruple> quads) {
-        // TODO: use a thread-pool to parallelize it
-        for (Quadruple quad : quads) {
-            this.delete(quad);
+        final CountDownLatch doneSignal = new CountDownLatch(quads.size());
+
+        for (final Quadruple quad : quads) {
+            this.threadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    delete(quad);
+                    doneSignal.countDown();
+                }
+            });
+        }
+
+        try {
+            doneSignal.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         return true;
@@ -261,6 +296,15 @@ public class SemanticPeer extends PeerImpl implements PutGetApi {
         body.setImmediateService("executeSparqlSelect", false);
 
         super.initActivity(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void endActivity(Body body) {
+        this.threadPool.shutdown();
+        super.endActivity(body);
     }
 
 }
