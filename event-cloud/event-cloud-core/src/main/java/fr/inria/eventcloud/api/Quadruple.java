@@ -27,7 +27,9 @@ import org.openjena.riot.tokens.Tokenizer;
 import org.openjena.riot.tokens.TokenizerFactory;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Node_ANY;
 import com.hp.hpl.jena.graph.Node_Blank;
+import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.Triple;
 
 /**
@@ -108,8 +110,19 @@ public class Quadruple implements Serializable {
                         "Blank nodes are not supported");
             }
 
+            if (graph instanceof Node_ANY || subject instanceof Node_ANY
+                    || predicate instanceof Node_ANY
+                    || object instanceof Node_ANY
+                    || graph instanceof Node_Variable
+                    || subject instanceof Node_Variable
+                    || predicate instanceof Node_Variable
+                    || object instanceof Node_Variable) {
+                throw new IllegalArgumentException(
+                        "Variables are not allowed in a quadruple, use a QuadruplePattern instead");
+            }
+
             if (graph == null) {
-                throw new IllegalArgumentException("subject cannot be null");
+                throw new IllegalArgumentException("graph cannot be null");
             }
 
             if (subject == null) {
