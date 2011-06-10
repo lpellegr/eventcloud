@@ -25,6 +25,8 @@ import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.utils.generator.NodeGenerator;
+
 /**
  * Tests cases associated to the {@link Quadruple} class.
  * 
@@ -32,31 +34,57 @@ import com.hp.hpl.jena.graph.Node;
  */
 public class QuadrupleTest {
 
-    private static final String DEFAULT_URI = "http://www.inria.fr";
-
     @Test(expected = IllegalArgumentException.class)
     public void testQuadrupleInstanciationWithBlankNode() {
         new Quadruple(
-                Node.createAnon(), Node.createURI(DEFAULT_URI),
-                Node.createURI(DEFAULT_URI), Node.createURI(DEFAULT_URI));
+                Node.createAnon(), NodeGenerator.createUri(),
+                NodeGenerator.createUri(), NodeGenerator.createUri());
         new Quadruple(
-                Node.createURI(DEFAULT_URI), Node.createAnon(),
-                Node.createURI(DEFAULT_URI), Node.createURI(DEFAULT_URI));
+                NodeGenerator.createUri(), Node.createAnon(),
+                NodeGenerator.createUri(), NodeGenerator.createUri());
         new Quadruple(
-                Node.createURI(DEFAULT_URI), Node.createURI(DEFAULT_URI),
-                Node.createAnon(), Node.createURI(DEFAULT_URI));
+                NodeGenerator.createUri(), NodeGenerator.createUri(),
+                Node.createAnon(), NodeGenerator.createUri());
         new Quadruple(
-                Node.createURI(DEFAULT_URI), Node.createURI(DEFAULT_URI),
-                Node.createURI(DEFAULT_URI), Node.createAnon());
+                NodeGenerator.createUri(), NodeGenerator.createUri(),
+                NodeGenerator.createUri(), Node.createAnon());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testQuadrupleInstanciationWithVars() {
+        new Quadruple(
+                Node.ANY, NodeGenerator.createUri(), NodeGenerator.createUri(),
+                NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), Node.ANY, NodeGenerator.createUri(),
+                NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), NodeGenerator.createUri(), Node.ANY,
+                NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), NodeGenerator.createUri(),
+                NodeGenerator.createUri(), Node.ANY);
+
+        new Quadruple(
+                Node.createVariable("test"), NodeGenerator.createUri(),
+                NodeGenerator.createUri(), NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), Node.createVariable("test"),
+                NodeGenerator.createUri(), NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), NodeGenerator.createUri(),
+                Node.createVariable("test"), NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), NodeGenerator.createUri(),
+                NodeGenerator.createUri(), Node.createVariable("test"));
     }
 
     @Test
     public void testSerialization() {
         Quadruple quad =
                 new Quadruple(
-                        Node.createURI(DEFAULT_URI),
-                        Node.createURI(DEFAULT_URI),
-                        Node.createURI(DEFAULT_URI),
+                        NodeGenerator.createUri(), NodeGenerator.createUri(),
+                        NodeGenerator.createUri(),
                         Node.createLiteral("Literal Value"));
 
         Quadruple newQuad = null;
