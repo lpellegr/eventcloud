@@ -58,6 +58,10 @@ public class NodeGenerator {
         }
     }
 
+    public static Node createUri() {
+        return createUri(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
+    }
+
     public static Node createUri(int exactLength) {
         return Node.createURI(StringGenerator.create(
                 DEFAULT_URL_PREFIX, exactLength, DEFAULT_BOUNDS));
@@ -66,6 +70,10 @@ public class NodeGenerator {
     public static Node createUri(int minLength, int maxLength) {
         return Node.createURI(StringGenerator.create(
                 DEFAULT_URL_PREFIX, minLength, maxLength, DEFAULT_BOUNDS));
+    }
+
+    public static Node createLiteral() {
+        return createLiteral(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
     }
 
     public static Node createLiteral(int exactLength) {

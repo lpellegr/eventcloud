@@ -218,7 +218,7 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
         return this.reasoner;
     }
 
-    private SparqlColander getColander() {
+    public SparqlColander getColander() {
         return this.colander;
     }
 

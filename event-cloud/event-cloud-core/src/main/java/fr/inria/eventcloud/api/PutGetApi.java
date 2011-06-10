@@ -43,7 +43,8 @@ public interface PutGetApi {
     public boolean add(Quadruple quad);
 
     /**
-     * Inserts the specified collection of quadruples into the Event-Cloud.
+     * Loads the specified collection of quadruples into the Event-Cloud in
+     * parallel.
      * 
      * @param quads
      *            the quadruples to insert into the Event-Cloud.

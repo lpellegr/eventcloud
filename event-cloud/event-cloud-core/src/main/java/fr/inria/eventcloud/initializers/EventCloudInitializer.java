@@ -147,6 +147,8 @@ public class EventCloudInitializer {
             doneSignal.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
+            threadsPool.shutdownNow();
         }
     }
 
