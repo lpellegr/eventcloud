@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.reasoner;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.List;
 
 import com.hp.hpl.jena.graph.Node;
@@ -41,7 +43,7 @@ import fr.inria.eventcloud.datastore.SemanticDatastore;
  * 
  * @author lpellegr
  */
-public class SparqlColander {
+public class SparqlColander implements Closeable {
 
     private SemanticDatastore datastore;
 
@@ -110,6 +112,14 @@ public class SparqlColander {
         for (Quadruple quad : quadruples) {
             this.datastore.add(quad);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() throws IOException {
+        this.datastore.close(true);
     }
 
 }

@@ -48,7 +48,7 @@ public class SemanticPeerTest {
 
     @Before
     public void setUp() {
-        this.initializer = new EventCloudInitializer(1);
+        this.initializer = new EventCloudInitializer(10);
         this.initializer.setUp();
     }
 
@@ -200,9 +200,73 @@ public class SemanticPeerTest {
         Assert.assertEquals(100, count);
     }
 
-    // TODO add testExecuteSparqlWithEmptyNetwork
+    @Test
+    public void testExecuteSparqlWithEmptyNetwork() {
+        Assert.assertFalse(this.initializer.selectPeer().executeSparqlAsk(
+                "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
-    // TODO add testExecuteSparqlWithConjunctions()
+        Assert.assertEquals(
+                0,
+                this.initializer.selectPeer()
+                        .executeSparqlConstruct(
+                                "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }")
+                        .getResult()
+                        .size());
+
+        Assert.assertFalse(this.initializer.selectPeer()
+                .executeSparqlSelect(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }")
+                .getResult()
+                .hasNext());
+    }
+
+    @Test
+    public void testExecuteSparqlWithConjunctionsAndOneJoinVariable() {
+        Node commonURI = NodeGenerator.createUri();
+        Node graphValue = NodeGenerator.createUri();
+
+        // two quadruples share the same value respectively for the object and
+        // subject component and they have the same graphValue
+        Quadruple[] quads =
+                {
+                        new Quadruple(
+                                graphValue, NodeGenerator.createUri(),
+                                NodeGenerator.createUri(), commonURI),
+                        new Quadruple(
+                                graphValue, commonURI,
+                                NodeGenerator.createUri(),
+                                NodeGenerator.createUri()),
+                        QuadrupleGenerator.create(),
+                        QuadrupleGenerator.create(),
+                        QuadrupleGenerator.create()};
+
+        for (Quadruple quad : quads) {
+            this.initializer.selectPeer().add(quad);
+        }
+
+        // test with ask query form
+        Assert.assertTrue(this.initializer.selectPeer().executeSparqlAsk(
+                "ASK { GRAPH ?a { ?b ?c <" + commonURI.toString() + "> . <"
+                        + commonURI.toString() + "> ?e ?f } }").getResult());
+
+        // test with construct query form
+        Assert.assertEquals(2, this.initializer.selectPeer()
+                .executeSparqlConstruct(
+                        "CONSTRUCT { ?a ?b ?c . ?a ?d ?e } WHERE { GRAPH ?a { ?b ?c <"
+                                + commonURI.toString() + "> . <"
+                                + commonURI.toString() + "> ?d ?e } }")
+                .getResult()
+                .size());
+
+        // test with select query form
+        Assert.assertTrue(this.initializer.selectPeer()
+                .executeSparqlSelect(
+                        "SELECT ?a WHERE { GRAPH ?a { ?b ?c <"
+                                + commonURI.toString() + "> . <"
+                                + commonURI.toString() + "> ?d ?e } }")
+                .getResult()
+                .hasNext());
+    }
 
     @After
     public void tearDown() {

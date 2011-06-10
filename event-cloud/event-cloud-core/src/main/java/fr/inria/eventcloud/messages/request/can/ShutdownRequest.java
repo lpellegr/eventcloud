@@ -16,10 +16,13 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.io.IOException;
+
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 
 /**
  * This request is used to send a shutdown message to all the peers that belong
@@ -42,7 +45,15 @@ public class ShutdownRequest extends StatelessQuadruplePatternRequest {
     @Override
     public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                QuadruplePattern quadruplePattern) {
+        // close the datastore associated to the peer
         ((JenaDatastore) overlay.getDatastore()).close(true);
+        // close the datastore that is used to filter the SPARQL responses
+        try {
+            ((SparqlRequestResponseManager) overlay.getRequestResponseManager()).getColander()
+                    .close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
