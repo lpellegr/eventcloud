@@ -60,6 +60,7 @@ import com.hp.hpl.jena.shared.Lock;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.shared.ReificationStyle;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.utils.SparqlResultSerializer;
 
 /**
@@ -89,7 +90,8 @@ public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
     @Override
     protected void internalWriteObject(ObjectOutputStream out)
             throws IOException {
-        SparqlResultSerializer.serialize(out, this);
+        SparqlResultSerializer.serialize(
+                out, this, EventCloudProperties.COMPRESSION.getValue());
     }
 
     /**
@@ -98,7 +100,9 @@ public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
     @Override
     protected void internalReadObject(ObjectInputStream in) throws IOException,
             ClassNotFoundException {
-        this.object = SparqlResultSerializer.deserializeModel(in);
+        this.object =
+                SparqlResultSerializer.deserializeModel(
+                        in, EventCloudProperties.COMPRESSION.getValue());
     }
 
     /**
