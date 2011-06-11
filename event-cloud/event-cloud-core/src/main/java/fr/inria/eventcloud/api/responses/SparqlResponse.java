@@ -87,10 +87,10 @@ public abstract class SparqlResponse<T> implements Serializable {
     }
 
     /**
-     * Returns the take taken (in ms) to send request and to receive the
+     * Returns the take taken (in ms) to send the request and to receive the
      * response.
      * 
-     * @return the take taken (in ms) to send request and to receive the
+     * @return the take taken (in ms) to send the request and to receive the
      *         response.
      */
     public long getLatency() {

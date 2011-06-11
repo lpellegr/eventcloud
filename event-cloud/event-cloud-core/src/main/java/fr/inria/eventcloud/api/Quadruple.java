@@ -33,22 +33,21 @@ import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.Triple;
 
 /**
- * A quadruple is 4-tuple containing respectively a graph, a subject, a
- * predicate and an object value. The object component value can be either an
- * IRI or a Literal whereas all the other components are compulsorily an IRI.
+ * A quadruple is a 4-tuple containing respectively a graph, a subject, a
+ * predicate and an object value. The object value can be either an IRI or a
+ * Literal whereas for all the others components an IRI is required.
  * <p>
- * Jena already provides its own abstraction for quadruples. However, from our
- * point of view an Event-Cloud wants to impose some restrictions on the
- * Quadruple components values. For example, an Event-Cloud does not accept
- * Blank Nodes. By providing our own Quadruple abstraction, we can check for
- * this kind of rule when the object is created. Also, the Quadruple class
- * provides a constructor with Jena Node objects to force a type-checking at
- * compile time but it is important to notice that Jena objects are not
- * serializable. This requires special handling during the serialization by
- * overriding the readObject and writeObject methods.
+ * Jena already provides its own abstraction for quadruples. However, the
+ * event-cloud has to impose some restrictions on the values of a Quadruple
+ * (e.g. the Blank Nodes are not allowed). By providing our own Quadruple
+ * abstraction, we can check for this kind of rule when the object is created.
+ * Also, the Quadruple class provides a constructor that use Jena objects for
+ * type-checking at compile time. However, these objects are not serializable,
+ * that's why the quadruple abstraction overrides the readObject and writeObject
+ * methods.
  * <p>
- * For backwards compatibility with tools from linked data people the graph
- * value is kept separated from the Triple value .
+ * For backwards compatibility with linked data tools, the graph value is kept
+ * separated from the Triple value.
  * 
  * @author lpellegr
  */
@@ -84,7 +83,7 @@ public class Quadruple implements Serializable {
 
     /**
      * Constructs a new Quadruple with the specified {@code graph},
-     * {@code subject}, {@code predicate}, {@code object} node values. This
+     * {@code subject}, {@code predicate} and {@code object} nodes. This
      * constructor will perform a type checking on each node value.
      * 
      * @param graph
@@ -144,18 +143,38 @@ public class Quadruple implements Serializable {
         this.object = object;
     }
 
+    /**
+     * Returns the graph value.
+     * 
+     * @return the graph value.
+     */
     public final Node getGraph() {
         return this.graph;
     }
 
+    /**
+     * Returns the subject value.
+     * 
+     * @return the subject value.
+     */
     public final Node getSubject() {
         return this.subject;
     }
 
+    /**
+     * Returns the predicate value.
+     * 
+     * @return the predicate value.
+     */
     public final Node getPredicate() {
         return this.predicate;
     }
 
+    /**
+     * Returns the object value.
+     * 
+     * @return the object value.
+     */
     public final Node getObject() {
         return this.object;
     }

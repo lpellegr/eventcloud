@@ -49,13 +49,13 @@ import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.FindQuadruplesResponse;
 
 /**
- * A SemanticPeer is a peer constructed by using a {@link CanOverlay}. It
- * exposes the methods contained by the {@link SemanticDatastore} interface in
- * order to provide semantic operations like add, delete, find, etc. but also to
- * execute a SPARQL query.
+ * A SemanticPeer is a peer constructed by using a {@link CanOverlay} and a
+ * {@link JenaDatastore}. It exposes the methods provided by the
+ * {@link SemanticDatastore} interface in order to provide semantic operations
+ * like add, delete, find, etc. but also to execute a SPARQL query.
  * <p>
- * Warning, it is strongly recommended to use {@link SemanticFactory} in order
- * to create a new active object of type SemanticPeer.
+ * Warning, you have to use the {@link SemanticFactory} in order to create a new
+ * SemanticPeer.
  * 
  * @author lpellegr
  */
