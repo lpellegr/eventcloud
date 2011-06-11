@@ -156,7 +156,7 @@ public interface PutGetApi {
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery);
 
     /**
-     * Executes on the Event-Cloud the specified SPARQl query that uses a SELECT
+     * Executes on the Event-Cloud the specified SPARQL query that uses a SELECT
      * query form.
      * 
      * @param sparqlSelectQuery

@@ -66,8 +66,6 @@ import fr.inria.eventcloud.utils.SparqlResultSerializer;
 /**
  * ModelWrapper is used to make a Jena {@link Model} serializable.
  * 
- * TODO to end mapping to super.object.method(...)
- * 
  * @author lpellegr
  */
 public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {

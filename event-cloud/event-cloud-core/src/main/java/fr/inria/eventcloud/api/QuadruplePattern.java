@@ -6,12 +6,13 @@ import com.hp.hpl.jena.graph.Node_Variable;
 /**
  * A QuadruplePattern is {@link Quadruple} where each component value may be
  * either a regular value (the same as a Quadruple) or a variable. A variable is
- * constructed by using the {@link Node#ANY} or the {@code null} value.
+ * constructed by using {@link Node#createVariable(String)}, {@link Node#ANY} or
+ * a {@code null} value.
  * <p>
  * For example, a quadruple {@code Q=(Node.ANY, v1, v2, v3)} means that we want
- * to retrieve all the quadruples that have a graph value set to any value and a
- * subject, predicate and object value respectively set to {@code v1},
- * {@code v2} and {@code v3}.
+ * to retrieve all the quadruples that have a graph value which is set to any
+ * value and a subject, predicate and object value respectively set to
+ * {@code v1}, {@code v2} and {@code v3}.
  * 
  * @author lpellegr
  */
