@@ -17,11 +17,7 @@
 package fr.inria.eventcloud.datastore;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.slf4j.Logger;
@@ -183,7 +179,7 @@ public class JenaDatastore extends SemanticDatastore {
      */
     @Override
     public Collection<Quadruple> find(Node g, Node s, Node p, Node o) {
-        Set<Quadruple> result = new HashSet<Quadruple>();
+        Collection<Quadruple> result = new Collection<Quadruple>();
 
         this.datastore.getLock().enterCriticalSection(Lock.READ);
         Iterator<Quad> quads = this.datastore.find(g, s, p, o);
@@ -197,7 +193,7 @@ public class JenaDatastore extends SemanticDatastore {
                     quad.getObject()));
         }
 
-        return new Collection<Quadruple>(result);
+        return result;
     }
 
     /**
@@ -316,7 +312,7 @@ public class JenaDatastore extends SemanticDatastore {
         Zone zone = (Zone) interval;
         String graph, subject, predicate, object;
 
-        List<Quadruple> quads = new ArrayList<Quadruple>();
+        Collection<Quadruple> quads = new Collection<Quadruple>();
 
         for (Quadruple quad : this.find(QuadruplePattern.ANY)) {
             graph = SemanticElement.parseElement(quad.getGraph().toString());
@@ -346,7 +342,7 @@ public class JenaDatastore extends SemanticDatastore {
             }
         }
 
-        return new Collection<Quadruple>(quads);
+        return quads;
     }
 
     private static abstract class DataInAction {

@@ -230,8 +230,8 @@ public final class Collection<T> implements java.util.Collection<T>,
     private void readObject(ObjectInputStream in) throws IOException,
             ClassNotFoundException {
         in.defaultReadObject();
-        Class<? extends Collection<T>> clazz =
-                (Class<? extends Collection<T>>) in.readObject();
+        Class<? extends java.util.Collection<T>> clazz =
+                (Class<? extends java.util.Collection<T>>) in.readObject();
         try {
             this.collection = (java.util.Collection<T>) clazz.newInstance();
         } catch (InstantiationException e) {
