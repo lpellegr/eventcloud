@@ -31,7 +31,7 @@ public final class QuadruplePattern extends Quadruple {
                 replaceNullWithVarNode(p), replaceNullWithVarNode(o), false);
     }
 
-    private static Node replaceNullWithVarNode(Node node) {
+    private final static Node replaceNullWithVarNode(Node node) {
         if (node == null || node instanceof Node_Variable) {
             return Node.ANY;
         }

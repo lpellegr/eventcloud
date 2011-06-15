@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -34,27 +35,65 @@ import java.util.Iterator;
  *            the type of the elements that are iterated. A element of type T
  *            must be serializable.
  */
-public class Collection<T> implements java.util.Collection<T>, Serializable {
+public final class Collection<T> implements java.util.Collection<T>,
+        Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private transient java.util.Collection<T> collection;
 
     /**
-     * Creates a collection from a {@link java.util.Collection} which has a
-     * concrete type which is serializable.
+     * Creates a new collection that is backed by default with an
+     * {@link ArrayList}.
+     */
+    public Collection() {
+        this.collection = new ArrayList<T>();
+    }
+
+    /**
+     * Creates a collection from a Java {@link java.util.Collection} which has a
+     * concrete type that is serializable. The constructor does not perform a
+     * shallow or a deep copy. Hence, any modifications to the specified
+     * collection is reflected to the created collection. If you want to create
+     * a collection from a Java collection by performing a shallow copy you can
+     * use {@link #withShallowCopy(java.util.Collection)}.
      * 
      * @param collection
      *            the Java collection to use in order to create the serializable
      *            collection.
      */
     public Collection(java.util.Collection<T> collection) {
+        this(collection, true);
+    }
+
+    private Collection(java.util.Collection<T> collection, boolean shallowCopy) {
         if (collection instanceof Collection) {
             throw new IllegalArgumentException(
                     "Recursive construction not allowed: you try to construct a Collection from a Collection");
         }
 
-        this.collection = collection;
+        if (shallowCopy) {
+            this.collection = new ArrayList<T>();
+            this.collection.addAll(collection);
+        } else {
+            this.collection = collection;
+        }
+    }
+
+    /**
+     * Creates a new collection from the specified Java collection by performing
+     * a shallow copy of the collection.
+     * 
+     * @param <E>
+     *            the elements type.
+     * @param collection
+     *            the collection to copy.
+     * 
+     * @return a new collection that is serializable and that is a shallow copy
+     *         from the specified Java collection.
+     */
+    public static <E> Collection<E> withShallowCopy(java.util.Collection<E> collection) {
+        return new Collection<E>(collection, true);
     }
 
     /**
