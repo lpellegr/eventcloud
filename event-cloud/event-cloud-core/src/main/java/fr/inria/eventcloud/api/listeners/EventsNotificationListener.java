@@ -20,7 +20,7 @@ import fr.inria.eventcloud.api.Event;
 
 /**
  * This kind of notification listener will receive the notification in the form
- * of a collection of events.
+ * of a collection of {@link Event}s.
  * 
  * @author lpellegr
  */

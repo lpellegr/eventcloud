@@ -47,6 +47,8 @@ public final class Collection<T> implements java.util.Collection<T>,
      * {@link ArrayList}.
      */
     public Collection() {
+        // TODO: check performance for contains operation vs size overhead for
+        // serialization with a HashSet
         this.collection = new ArrayList<T>();
     }
 
