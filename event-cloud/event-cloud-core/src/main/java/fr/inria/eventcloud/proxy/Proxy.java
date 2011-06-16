@@ -14,29 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.api.listeners;
+package fr.inria.eventcloud.proxy;
 
-import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
- * A NotificationListener offers the possibility to define an action to execute
- * depending of the notification type which is received.
+ * Any user side proxy have to implement this abstract proxy class that stores
+ * an {@link EventCloudProxy} which serves as a cache.
  * 
  * @author lpellegr
  */
-public abstract class NotificationListener<T> {
+public abstract class Proxy {
 
-    /**
-     * Handles a notification that has been received.
-     * 
-     * @param id
-     *            the subscription identifier.
-     * @param handback
-     *            a collection of the opaque object that is received as a
-     *            notification.
-     */
-    public abstract void handleNotification(SubscriptionId id,
-                                            Collection<T> handback);
+    protected EventCloudProxy proxy;
+
+    protected Proxy() {
+    }
+
+    protected Proxy(EventCloudProxy proxy) {
+        this.proxy = proxy;
+    }
+
+    public SemanticPeer selectPeer() {
+        return this.proxy.selectTracker().getRandomPeer();
+    }
 
 }

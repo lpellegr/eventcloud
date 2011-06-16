@@ -28,9 +28,13 @@ public final class SubscriptionId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private UUID id;
+    private final long value;
 
-    private SubscriptionId() {
+    // TODO define if the subscription id is unique for a given sparql query or
+    // unique regarding any sparql queries even if we have two sparql queries
+    // that return the same result?
+    protected SubscriptionId(long value) {
+        this.value = value;
     }
 
     /**
@@ -39,7 +43,7 @@ public final class SubscriptionId implements Serializable {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof SubscriptionId
-                && this.id.equals((SubscriptionId) obj);
+                && this.value == ((SubscriptionId) obj).value;
     }
 
     /**
@@ -47,7 +51,7 @@ public final class SubscriptionId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return this.id.hashCode();
+        return Long.valueOf(value).hashCode();
     }
 
 }

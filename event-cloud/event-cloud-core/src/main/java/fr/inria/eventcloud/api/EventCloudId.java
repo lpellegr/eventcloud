@@ -14,29 +14,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.api.listeners;
+package fr.inria.eventcloud.api;
 
-import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.SubscriptionId;
+import java.io.Serializable;
 
 /**
- * A NotificationListener offers the possibility to define an action to execute
- * depending of the notification type which is received.
+ * Uniquely identify an {@link EventCloud}.
  * 
  * @author lpellegr
  */
-public abstract class NotificationListener<T> {
+public final class EventCloudId implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private final long value;
+
+    protected EventCloudId(long value) {
+        this.value = value;
+    }
 
     /**
-     * Handles a notification that has been received.
-     * 
-     * @param id
-     *            the subscription identifier.
-     * @param handback
-     *            a collection of the opaque object that is received as a
-     *            notification.
+     * {@inheritDoc}
      */
-    public abstract void handleNotification(SubscriptionId id,
-                                            Collection<T> handback);
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof EventCloudId
+                && this.value == ((EventCloudId) obj).value;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Long.valueOf(this.value).hashCode();
+    }
 
 }

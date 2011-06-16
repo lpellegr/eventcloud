@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.overlay;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,10 +29,15 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.PublishSubscribeApi;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SemanticFactory;
+import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
+import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -62,7 +68,8 @@ import fr.inria.eventcloud.messages.response.can.FindQuadruplesResponse;
 /*
  * TODO implement the PublishSubscribeApi interface
  */
-public class SemanticPeer extends PeerImpl implements PutGetApi {
+public class SemanticPeer extends PeerImpl implements PutGetApi,
+        PublishSubscribeApi {
 
     private static final long serialVersionUID = 1L;
 
@@ -305,6 +312,75 @@ public class SemanticPeer extends PeerImpl implements PutGetApi {
     public void endActivity(Body body) {
         this.threadPool.shutdown();
         super.endActivity(body);
+    }
+
+    /*
+     * PublishSubscribeApi implementation 
+     */
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publish(Quadruple quad) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publish(Event event) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publish(Collection<Event> events) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publish(InputStream in) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SubscriptionId subscribe(String sparqlQuery,
+                                    BindingsNotificationListener listener) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SubscriptionId subscribe(String sparqlQuery,
+                                    EventsNotificationListener listener) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unsubscribe(SubscriptionId id) {
+        // TODO Auto-generated method stub
+
     }
 
 }
