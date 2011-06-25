@@ -131,7 +131,7 @@ public final class PutGetProxy extends Proxy implements PutGetApi {
      */
     @Override
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
-        return super.selectPeer().executeSparqlDescribe(sparqlDescribeQuery);
+        throw new UnsupportedOperationException();
     }
 
     /**
