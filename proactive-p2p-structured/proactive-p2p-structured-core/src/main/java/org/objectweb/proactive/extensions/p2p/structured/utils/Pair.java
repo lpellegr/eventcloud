@@ -58,4 +58,30 @@ public class Pair<T> implements Serializable {
                 ? this.first : this.second;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return 31 * (31 + this.first.hashCode()) + this.second.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean equals(Object obj) {
+        return obj instanceof Pair && this.first.equals(((Pair<T>) obj).first)
+                && this.second.equals(((Pair<T>) obj).second);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "Pair [first=" + this.first + ", second=" + this.second + "]";
+    }
+
 }
