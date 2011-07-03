@@ -60,7 +60,7 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
     public long getStateActionTime() {
         return this.stateActionTime;
     }
-    
+
     /**
      * {@inheritDoc}
      */

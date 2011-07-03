@@ -19,7 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coord
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
- * 
+ * A coordinate composed of {@link StringElement}s.
  * 
  * @author lpellegr
  */

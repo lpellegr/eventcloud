@@ -168,7 +168,7 @@
 							project.name "${project.name}"
 							-d
 							${project.build.directory}/apidocs
-           				</additionalparam>
+						</additionalparam>
 						<useStandardDocletOptions>false</useStandardDocletOptions>
 						<!-- | Apple's JVM sometimes requires more memory -->
 						<additionalJOption>-J-Xmx1024m</additionalJOption>

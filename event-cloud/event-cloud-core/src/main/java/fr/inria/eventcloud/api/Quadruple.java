@@ -234,8 +234,11 @@ public class Quadruple implements Serializable {
         out.defaultWriteObject();
         OutputStreamWriter outWriter = new OutputStreamWriter(out);
         OutputLangUtils.output(outWriter, this.graph, null);
+        outWriter.write(' ');
         OutputLangUtils.output(outWriter, this.subject, null);
+        outWriter.write(' ');
         OutputLangUtils.output(outWriter, this.predicate, null);
+        outWriter.write(' ');
         OutputLangUtils.output(outWriter, this.object, null);
         outWriter.flush();
     }
