@@ -116,6 +116,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
      */
     private void register() {
         // TODO implement the registration into the EventCloudRegistry
+        // and check if the registration has already be done
     }
 
     /**

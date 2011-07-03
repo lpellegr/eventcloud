@@ -61,13 +61,13 @@ public class QuadruplePatternTest {
         }
 
         ObjectInputStream ois = null;
-        Quadruple newQuad = null;
+        QuadruplePattern newQuad = null;
 
         try {
             ois =
                     new ObjectInputStream(new ByteArrayInputStream(
                             buffer.toByteArray()));
-            newQuad = (Quadruple) ois.readObject();
+            newQuad = (QuadruplePattern) ois.readObject();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
