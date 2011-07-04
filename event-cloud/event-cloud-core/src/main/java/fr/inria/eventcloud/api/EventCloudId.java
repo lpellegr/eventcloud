@@ -50,4 +50,6 @@ public final class EventCloudId implements Serializable {
         return Long.valueOf(this.value).hashCode();
     }
 
+    // TODO provide an asURL() method in order 
+    
 }

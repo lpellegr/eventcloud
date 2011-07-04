@@ -63,6 +63,14 @@ public class Quadruple implements Serializable {
 
     private transient Node object;
 
+    /**
+     * Defines the different formats that are allowed to read quadruples from an
+     * input stream.
+     */
+    public enum SerializationFormat {
+        TriG, NQuads
+    }
+
     public Quadruple() {
     }
 

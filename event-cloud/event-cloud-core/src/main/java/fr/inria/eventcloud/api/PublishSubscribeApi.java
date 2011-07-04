@@ -18,6 +18,7 @@ package fr.inria.eventcloud.api;
 
 import java.io.InputStream;
 
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
 
@@ -28,10 +29,6 @@ import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
  * @author lpellegr
  */
 public interface PublishSubscribeApi {
-
-    public enum SerializationFormat {
-        TriG, NQuads
-    }
 
     /**
      * Publishes the specified quadruple.

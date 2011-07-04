@@ -235,5 +235,9 @@ public class EventCloudInitializer {
     public SemanticTracker getRandomTracker() {
         return this.trackers[ProActiveRandom.nextInt(this.trackers.length)];
     }
+    
+    public SemanticTracker[] getTrackers() {
+        return this.trackers;
+    }
 
 }

@@ -33,6 +33,7 @@ import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.PublishSubscribeApi;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SemanticFactory;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -147,6 +148,15 @@ public class SemanticPeer extends PeerImpl implements PutGetApi,
         }
 
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean add(InputStream in, SerializationFormat format) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     /**

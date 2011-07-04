@@ -16,15 +16,20 @@
  **/
 package fr.inria.eventcloud.proxy;
 
+import java.io.InputStream;
+
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.utils.InputStreamReaderHelper;
+import fr.inria.eventcloud.utils.InputStreamReaderHelper.QuadrupleAction;
 
 /**
  * A PutGetProxy is a proxy that implements the {@link PutGetApi}. It has to be
@@ -60,6 +65,21 @@ public final class PutGetProxy extends Proxy implements PutGetApi {
     @Override
     public boolean add(Collection<Quadruple> quads) {
         return super.selectPeer().add(quads);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean add(InputStream in, SerializationFormat format) {
+        InputStreamReaderHelper.read(in, format, new QuadrupleAction() {
+            @Override
+            public void execute(Quadruple quad) {
+                add(quad);
+            }
+        });
+
+        return true;
     }
 
     /**

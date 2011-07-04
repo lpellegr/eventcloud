@@ -17,13 +17,16 @@
 package fr.inria.eventcloud.api;
 
 import java.io.Serializable;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
+import fr.inria.eventcloud.initializers.EventCloudInitializer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 import fr.inria.eventcloud.utils.MurmurHash;
 
@@ -36,6 +39,8 @@ import fr.inria.eventcloud.utils.MurmurHash;
  */
 public final class EventCloud implements EventCloudApi, Serializable {
 
+    private static final Logger log = LoggerFactory.getLogger(EventCloud.class);
+
     private static final long serialVersionUID = 1L;
 
     private final EventCloudId id;
@@ -44,15 +49,15 @@ public final class EventCloud implements EventCloudApi, Serializable {
 
     private final Collection<UnalterableElaProperty> elaProperties;
 
-    private final URL nodeProviderUrl;
+    private final String nodeProviderUrl;
 
-    private final URL registryUrl;
+    private final String registryUrl;
 
-    private final List<URL> trackerUrls;
+    private final List<String> trackerUrls;
 
     private final List<SemanticTracker> trackers;
 
-    private EventCloud(URL registryUrl, URL nodeProviderUrl,
+    private EventCloud(String registryUrl, String nodeProviderUrl,
             Collection<UnalterableElaProperty> elaProperties, int nbTrackers,
             int nbPeers) {
         this.id =
@@ -65,7 +70,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
         this.elaProperties = elaProperties;
         this.nodeProviderUrl = nodeProviderUrl;
         this.registryUrl = registryUrl;
-        this.trackerUrls = new ArrayList<URL>();
+        this.trackerUrls = new ArrayList<String>();
         this.trackers = new ArrayList<SemanticTracker>();
 
         this.initializeNetwork(nbTrackers, nbPeers);
@@ -74,6 +79,16 @@ public final class EventCloud implements EventCloudApi, Serializable {
     private void initializeNetwork(int nbTrackers, int nbPeers) {
         // TODO retrieve the nodes, create and deploy the peers and the trackers
         // and populate the fields
+
+        // temporary implementation that deploy the trackers and the peers on
+        // the local machine
+        EventCloudInitializer initializer =
+                new EventCloudInitializer(nbTrackers, nbPeers);
+        initializer.setUp();
+        for (SemanticTracker tracker : initializer.getTrackers()) {
+            this.trackers.add(tracker);
+            this.trackerUrls.add(PAActiveObject.getUrl(tracker));
+        }
     }
 
     /**
@@ -97,8 +112,8 @@ public final class EventCloud implements EventCloudApi, Serializable {
      *         properties associated to the Event-Cloud have been registered
      *         into the EventCloudsRegistry.
      */
-    public static EventCloud create(URL registryUrl,
-                                    URL nodeProviderUrl,
+    public static EventCloud create(String registryUrl,
+                                    String nodeProviderUrl,
                                     Collection<UnalterableElaProperty> elaProperties,
                                     int nbTrackers, int nbPeers) {
         EventCloud eventCloud =
@@ -115,6 +130,8 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * Registers the properties to the {@link EventCloudsRegistry}.
      */
     private void register() {
+        log.info("Registering Event-Cloud {}", this.id);
+
         // TODO implement the registration into the EventCloudRegistry
         // and check if the registration has already be done
     }
@@ -147,7 +164,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public URL getNodeProviderUrl() {
+    public String getNodeProviderUrl() {
         return this.nodeProviderUrl;
     }
 
@@ -155,7 +172,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public URL getRegistryUrl() {
+    public String getRegistryUrl() {
         return this.registryUrl;
     }
 
@@ -163,8 +180,8 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public Collection<URL> getTrackerUrls() {
-        return new Collection<URL>(this.trackerUrls);
+    public Collection<String> getTrackerUrls() {
+        return new Collection<String>(this.trackerUrls);
     }
 
     /**
