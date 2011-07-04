@@ -349,7 +349,7 @@ public class SemanticPeer extends PeerImpl implements PutGetApi,
      * {@inheritDoc}
      */
     @Override
-    public void publish(InputStream in) {
+    public void publish(InputStream in, SerializationFormat format) {
         // TODO Auto-generated method stub
 
     }
