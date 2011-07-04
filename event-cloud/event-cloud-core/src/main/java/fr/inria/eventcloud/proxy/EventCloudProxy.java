@@ -16,7 +16,13 @@
  **/
 package fr.inria.eventcloud.proxy;
 
-import java.net.URL;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.objectweb.proactive.ActiveObjectCreationException;
+import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.core.util.ProActiveRandom;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudApi;
@@ -37,15 +43,32 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class EventCloudProxy implements EventCloudApi {
 
-    public EventCloudProxy(URL registryUrl, EventCloudId id) {
+    private EventCloudId id;
+
+    private List<SemanticTracker> trackers;
+
+    public EventCloudProxy(String registryUrl, EventCloudId id) {
         // TODO throw an exception if the registry identified by registryUrl
         // does not contain the specified EventCloudId
+        this.id = id;
+
+        try {
+            this.trackers = new ArrayList<SemanticTracker>();
+            this.trackers.addAll(PAActiveObject.lookupActive(
+                    EventCloudsRegistry.class, registryUrl).getTrackers());
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public EventCloudId getId() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.id;
     }
 
     @Override
@@ -61,33 +84,31 @@ public class EventCloudProxy implements EventCloudApi {
     }
 
     @Override
-    public URL getNodeProviderUrl() {
+    public String getNodeProviderUrl() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public URL getRegistryUrl() {
+    public String getRegistryUrl() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection<URL> getTrackerUrls() {
+    public Collection<String> getTrackerUrls() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Collection<SemanticTracker> getTrackers() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Collection<SemanticTracker>(this.trackers);
     }
 
     @Override
     public SemanticTracker selectTracker() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.trackers.get(ProActiveRandom.nextInt(this.trackers.size()));
     }
-
+    
 }

@@ -18,24 +18,18 @@ package fr.inria.eventcloud.proxy;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
-import org.openjena.atlas.lib.Sink;
-import org.openjena.riot.RiotReader;
-import org.openjena.riot.lang.LangRIOT;
-
-import com.hp.hpl.jena.sparql.core.Quad;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.ProxyFactory;
 import fr.inria.eventcloud.api.PublishSubscribeApi;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
+import fr.inria.eventcloud.utils.InputStreamReaderHelper;
+import fr.inria.eventcloud.utils.InputStreamReaderHelper.QuadrupleAction;
 
 /**
  * A PublishSubscribeProxy is a proxy that implements the
@@ -69,7 +63,6 @@ public final class PublishSubscribeProxy extends Proxy implements
     @Override
     public void publish(Quadruple quad) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -86,51 +79,12 @@ public final class PublishSubscribeProxy extends Proxy implements
 
     @Override
     public void publish(InputStream in, SerializationFormat format) {
-        // TODO define the number of threads to use and if the thread pool has
-        // to be shared between all the methods?
-        final ExecutorService threadPool =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
-
-        Sink<Quad> sink = new Sink<Quad>() {
+        InputStreamReaderHelper.read(in, format, new QuadrupleAction() {
             @Override
-            public void send(final Quad quad) {
-                threadPool.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        publish(new Quadruple(
-                                quad.getGraph(), quad.getSubject(),
-                                quad.getPredicate(), quad.getObject()));
-                    }
-                });
+            public void execute(Quadruple quad) {
+                publish(quad);
             }
-
-            @Override
-            public void close() {
-                threadPool.shutdown();
-            }
-
-            @Override
-            public void flush() {
-            }
-
-        };
-
-        LangRIOT parser;
-
-        switch (format) {
-            case TriG:
-                // TODO define baseURI
-                parser = RiotReader.createParserTriG(in, "", sink);
-                break;
-            case NQuads:
-                parser = RiotReader.createParserNQuads(in, sink);
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Unknow SerializationFormat: " + format);
-        }
-
-        parser.parse();
+        });
     }
 
     @Override

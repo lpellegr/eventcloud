@@ -61,7 +61,7 @@ public final class ProxyFactory {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      */
-    private ProxyFactory(URL registryUrl, EventCloudId id) {
+    private ProxyFactory(String registryUrl, EventCloudId id) {
         this.eventCloudProxy = new EventCloudProxy(registryUrl, id);
     }
 
@@ -105,8 +105,16 @@ public final class ProxyFactory {
      * @return an instance of a ProxyFactory that is specialized to create
      *         proxies for the given {@link EventCloudId}.
      */
-    public static ProxyFactory getInstance(URL registryUrl, EventCloudId id) {
-        return proxies.putIfAbsent(id, new ProxyFactory(registryUrl, id));
+    public static ProxyFactory getInstance(String registryUrl, EventCloudId id) {
+        ProxyFactory newFactory = new ProxyFactory(registryUrl, id);
+        
+        ProxyFactory oldFactory = proxies.putIfAbsent(id, newFactory);
+        
+        if (oldFactory == null) {
+            return newFactory;
+        } else {
+            return oldFactory;
+        }
     }
 
 }

@@ -16,11 +16,18 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.io.InputStream;
+import java.io.Serializable;
+
+import org.objectweb.proactive.api.PAActiveObject;
+
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
  * The EventCloudRegistry is in charge of storing all the information related to
@@ -31,7 +38,38 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
  * 
  * @author lpellegr
  */
-public class EventCloudsRegistry implements PutGetApi {
+public class EventCloudsRegistry implements PutGetApi, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    // TODO: temporary fields that have to be replaced by an RDF repository.
+    private EventCloudId id;
+
+    private Collection<SemanticTracker> trackers;
+
+    public EventCloudId getId() {
+        return this.id;
+    }
+
+    public Collection<SemanticTracker> getTrackers() {
+        return this.trackers;
+    }
+
+    public EventCloudsRegistry() {
+    }
+
+    public void register(EventCloud eventCloud) {
+        this.id = eventCloud.getId();
+        this.trackers = eventCloud.getTrackers();
+    }
+
+    public String getUrl() {
+        return PAActiveObject.getUrl(PAActiveObject.getStubOnThis());
+    }
+
+    /*
+     * Implementation of the PutGetApi
+     */
 
     /**
      * {@inheritDoc}
@@ -47,6 +85,15 @@ public class EventCloudsRegistry implements PutGetApi {
      */
     @Override
     public boolean add(Collection<Quadruple> quads) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean add(InputStream in, SerializationFormat format) {
         // TODO Auto-generated method stub
         return false;
     }
