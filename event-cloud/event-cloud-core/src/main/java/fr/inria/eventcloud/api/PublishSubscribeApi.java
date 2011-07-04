@@ -29,6 +29,10 @@ import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
  */
 public interface PublishSubscribeApi {
 
+    public enum SerializationFormat {
+        TriG, NQuads
+    }
+
     /**
      * Publishes the specified quadruple.
      * 
@@ -61,8 +65,12 @@ public interface PublishSubscribeApi {
      * 
      * @param in
      *            the input stream from where the quadruples are read.
+     * 
+     * @param format
+     *            the format that is used to read the data from the input
+     *            stream.
      */
-    public void publish(InputStream in);
+    public void publish(InputStream in, SerializationFormat format);
 
     /**
      * Subscribes for notifications of type {@link BindingsNotificationListener}
