@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -19,8 +19,8 @@ package org.objectweb.proactive.extensions.p2p.structured.utils;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.objectweb.proactive.core.util.converter.ByteToObjectConverter;
-import org.objectweb.proactive.core.util.converter.ObjectToByteConverter;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converter.ByteToObjectConverter;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converter.ObjectToByteConverter;
 
 /**
  * SerializedValue is a class that is used to maintain a value as an array of
@@ -48,7 +48,7 @@ public final class SerializedValue<T> implements Serializable {
 
     public SerializedValue(T value) {
         try {
-            this.bytes = ObjectToByteConverter.ObjectStream.convert(value);
+            this.bytes = ObjectToByteConverter.convert(value);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,8 +58,7 @@ public final class SerializedValue<T> implements Serializable {
     public synchronized T getValue() {
         if (this.value == null) {
             try {
-                this.value =
-                        (T) ByteToObjectConverter.ObjectStream.convert(this.bytes);
+                this.value = (T) ByteToObjectConverter.convert(this.bytes);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {

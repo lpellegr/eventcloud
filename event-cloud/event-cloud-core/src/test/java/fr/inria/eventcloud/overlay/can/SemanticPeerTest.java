@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -34,11 +34,11 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.generators.NodeGenerator;
+import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.initializers.EventCloudInitializer;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.utils.generator.NodeGenerator;
-import fr.inria.eventcloud.utils.generator.QuadrupleGenerator;
 
 /**
  * Tests associated to semantic operations provided by {@link SemanticPeer}.

@@ -19,6 +19,8 @@
 	<modules>
 		<module>proactive-p2p-structured-core</module>
 		<module>proactive-p2p-structured-can</module>
+		<module>proactive-p2p-structured-configuration</module>
+		<module>proactive-p2p-structured-utils</module>
 	</modules>
 
 </project>

@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -21,7 +21,7 @@ import java.io.Serializable;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
-import org.objectweb.proactive.extensions.p2p.structured.api.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.slf4j.LoggerFactory;
 
 /**

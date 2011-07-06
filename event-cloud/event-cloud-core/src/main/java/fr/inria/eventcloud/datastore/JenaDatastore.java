@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -183,7 +183,6 @@ public class JenaDatastore extends SemanticDatastore {
 
         this.datastore.getLock().enterCriticalSection(Lock.READ);
         Iterator<Quad> quads = this.datastore.find(g, s, p, o);
-        this.datastore.getLock().leaveCriticalSection();
 
         Quad quad;
         while (quads.hasNext()) {
@@ -192,6 +191,7 @@ public class JenaDatastore extends SemanticDatastore {
                     quad.getGraph(), quad.getSubject(), quad.getPredicate(),
                     quad.getObject()));
         }
+        this.datastore.getLock().leaveCriticalSection();
 
         return result;
     }
@@ -299,7 +299,7 @@ public class JenaDatastore extends SemanticDatastore {
      */
     @Override
     public Collection<Quadruple> removeDataIn(Object interval) {
-        return this.retrieveDataIn(interval, new DataInAction() {
+        return this.retrieveDataIn(interval, new QuadrupleAction() {
             @Override
             public void performAction(Quadruple quad) {
                 delete(quad);
@@ -308,7 +308,7 @@ public class JenaDatastore extends SemanticDatastore {
     }
 
     private Collection<Quadruple> retrieveDataIn(Object interval,
-                                                 DataInAction action) {
+                                                 QuadrupleAction action) {
         Zone zone = (Zone) interval;
         String graph, subject, predicate, object;
 
@@ -345,9 +345,9 @@ public class JenaDatastore extends SemanticDatastore {
         return quads;
     }
 
-    private static abstract class DataInAction {
+    public static interface QuadrupleAction {
 
-        public abstract void performAction(Quadruple quad);
+        public void performAction(Quadruple quad);
 
     }
 

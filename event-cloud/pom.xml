@@ -17,6 +17,10 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>event-cloud-api</module>
+		<module>event-cloud-configuration</module>
 		<module>event-cloud-core</module>
+		<module>event-cloud-utils</module>
 	</modules>
+
 </project>
