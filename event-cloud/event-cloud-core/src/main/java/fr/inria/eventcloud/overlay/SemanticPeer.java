@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -35,7 +35,6 @@ import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.SemanticFactory;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
@@ -47,6 +46,7 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.JenaDatastore;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;

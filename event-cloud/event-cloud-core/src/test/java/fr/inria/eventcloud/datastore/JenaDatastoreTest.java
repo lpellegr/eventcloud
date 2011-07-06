@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -31,7 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.ResultSet;
 
-import fr.inria.eventcloud.utils.generator.QuadrupleGenerator;
+import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 
 /**
  * Provides tests for some methods exposed by a {@link JenaDatastore}.

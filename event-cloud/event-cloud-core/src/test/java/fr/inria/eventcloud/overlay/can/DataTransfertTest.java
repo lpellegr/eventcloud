@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,11 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.SemanticFactory;
+import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.initializers.EventCloudInitializer;
+import fr.inria.eventcloud.operations.can.FindQuadruplesOperation;
+import fr.inria.eventcloud.operations.can.FindQuadruplesResponseOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.util.SemanticPeerOperations;
 
 /**
  * Test the data transfert during a join operation for
@@ -89,14 +91,11 @@ public class DataTransfertTest {
         logger.debug("Initial peer manages " + oldPeer);
         logger.debug("New peer manages " + newPeer);
 
-        oldPeerQuads =
-                SemanticPeerOperations.findQuadruples(
-                        oldPeer, QuadruplePattern.ANY);
+        oldPeerQuads = findQuadruplesOperation(oldPeer, QuadruplePattern.ANY);
         nbDataContainedByOldPeer = oldPeerQuads.size();
 
         Collection<Quadruple> newPeerQuads =
-                SemanticPeerOperations.findQuadruples(
-                        newPeer, QuadruplePattern.ANY);
+                findQuadruplesOperation(newPeer, QuadruplePattern.ANY);
         int nbDataContainedByNewPeer = newPeerQuads.size();
 
         logger.debug(
@@ -114,6 +113,12 @@ public class DataTransfertTest {
     @After
     public void tearDown() {
         this.initializer.tearDown();
+    }
+
+    private static Collection<Quadruple> findQuadruplesOperation(SemanticPeer peer,
+                                                                 QuadruplePattern quadruplePattern) {
+        return ((FindQuadruplesResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new FindQuadruplesOperation(
+                quadruplePattern)))).getQuadruples();
     }
 
 }

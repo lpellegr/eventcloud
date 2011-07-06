@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -135,7 +135,7 @@ public final class SparqlDecomposer {
         Iterator<TriplePath> it = block.patternElts();
 
         TriplePath triple;
-        int i = 0;
+
         while (it.hasNext()) {
             triple = it.next();
 
@@ -143,7 +143,7 @@ public final class SparqlDecomposer {
             atomicQueries.add(new AtomicQuery(
                     parentQueryForm, graph, triple.getSubject(),
                     triple.getPredicate(), triple.getObject()));
-            i++;
         }
     }
+
 }

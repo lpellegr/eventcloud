@@ -85,9 +85,39 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>1.6.1</version>
+				<groupId>com.hp.hpl.jena</groupId>
+				<artifactId>arq</artifactId>
+				<version>2.8.9-SNAPSHOT</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<artifactId>log4j</artifactId>
+						<groupId>log4j</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.hp.hpl.jena</groupId>
+				<artifactId>jena</artifactId>
+				<version>2.6.4</version>
+				<exclusions>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.hp.hpl.jena</groupId>
+				<artifactId>tdb</artifactId>
+				<version>0.8.11-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
@@ -99,6 +129,11 @@
 				<artifactId>junit</artifactId>
 				<version>4.8.2</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>1.6.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -213,10 +248,11 @@
 	</build>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- To force goal "eclipse:eclipse" to download javadoc and sources -->
 		<downloadJavadoc>true</downloadJavadoc>
 		<downloadSources>true</downloadSources>
+		<!-- force usage of UTF-8 encoding -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 </project>
