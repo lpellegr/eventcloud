@@ -49,11 +49,11 @@ import fr.inria.eventcloud.proxies.Proxy;
  * 
  * @author lpellegr
  */
-public abstract class Rdf2goProxyAdapter<T> {
+public abstract class Rdf2goAdapter<T> {
 
     protected T delegate;
 
-    protected Rdf2goProxyAdapter(T delegate) {
+    protected Rdf2goAdapter(T delegate) {
         this.delegate = delegate;
     }
 
@@ -101,9 +101,10 @@ public abstract class Rdf2goProxyAdapter<T> {
             com.hp.hpl.jena.rdf.model.Statement stmt = stmts.next();
             list.add(new StatementImpl(
                     null, // TODO check if null is allowed
-                    (Resource) TypeConversion.toRDF2Go((com.hp.hpl.jena.graph.Node) stmt.getSubject()),
-                    (URI) TypeConversion.toRDF2Go((com.hp.hpl.jena.graph.Node) stmt.getPredicate()),
-                    TypeConversion.toRDF2Go((com.hp.hpl.jena.graph.Node) stmt.getObject())));
+                    (Resource) TypeConversion.toRDF2Go(stmt.getSubject()
+                            .asNode()),
+                    (URI) TypeConversion.toRDF2Go(stmt.getPredicate().asNode()),
+                    TypeConversion.toRDF2Go(stmt.getObject().asNode())));
         }
 
         return generateClosableIterable(list);

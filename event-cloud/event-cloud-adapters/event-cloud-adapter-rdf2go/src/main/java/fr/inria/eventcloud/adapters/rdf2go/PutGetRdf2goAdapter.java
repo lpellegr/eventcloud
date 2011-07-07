@@ -20,7 +20,6 @@ import java.io.InputStream;
 
 import org.ontoware.aifbcommons.collection.ClosableIterable;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
-import org.ontoware.rdf2go.impl.jena26.TypeConversion;
 import org.ontoware.rdf2go.model.QuadPattern;
 import org.ontoware.rdf2go.model.QueryResultTable;
 import org.ontoware.rdf2go.model.Statement;
@@ -29,36 +28,33 @@ import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 
 import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.proxies.PutGetProxy;
 
 /**
- * This class is used as an adapter for a {@link PutGetProxy}. It provides
- * methods with types which are compatible with RDF2Go. These methods then
- * delegate the calls to the underlying proxy.
+ * This class is used as an adapter for any object that implements the
+ * {@link PutGetApi} interface. It provides methods with types which are
+ * compatible with RDF2Go. These methods then delegate the calls to the
+ * underlying object by using the {@link PutGetApi}.
  * 
  * @author lpellegr
  */
-public final class PutGetRdf2goProxyAdapter extends
-        Rdf2goProxyAdapter<PutGetProxy> {
+public final class PutGetRdf2goAdapter extends Rdf2goAdapter<PutGetApi> {
 
     /**
-     * Constructs a new RDF2Go adapter for the given {@link PutGetProxy}.
+     * Constructs a new RDF2Go adapter for the given object.
      * 
-     * @param proxy
-     *            the proxy to adapt.
+     * @param obj
+     *            the object to adapt.
      */
-    public PutGetRdf2goProxyAdapter(PutGetProxy proxy) {
-        super(proxy);
+    public PutGetRdf2goAdapter(PutGetApi obj) {
+        super(obj);
     }
 
     public boolean add(URI context, Resource subject, URI predicate, Node object) {
-        return super.delegate.add(new Quadruple(
-                TypeConversion.toJenaNode(context),
-                TypeConversion.toJenaNode(subject),
-                TypeConversion.toJenaNode(predicate),
-                TypeConversion.toJenaNode(object)));
+        return super.delegate.add(toQuadruple(
+                context, subject, predicate, object));
     }
 
     public boolean add(Statement stmt) {

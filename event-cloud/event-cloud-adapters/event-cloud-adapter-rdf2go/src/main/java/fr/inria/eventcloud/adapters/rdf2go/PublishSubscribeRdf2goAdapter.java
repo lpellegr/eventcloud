@@ -23,39 +23,39 @@ import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 
+import fr.inria.eventcloud.api.PublishSubscribeApi;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
-import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
 
 /**
- * This class is used as an adapter for a {@link PublishSubscribeProxy}. It
- * provides methods with types which are compatible with RDF2Go. These methods
- * then delegate the calls to the underlying proxy.
+ * This class is used as an adapter for any object that implements the
+ * {@link PublishSubscribeApi} interface. It provides methods with types which
+ * are compatible with RDF2Go. These methods then delegate the calls to the
+ * underlying object by using the {@link PublishSubscribeApi}.
  * 
  * @author lpellegr
  */
-public final class PublishSubscribeRdf2goProxyAdapter extends
-        Rdf2goProxyAdapter<PublishSubscribeProxy> {
+public final class PublishSubscribeRdf2goAdapter extends
+        Rdf2goAdapter<PublishSubscribeApi> {
 
     /**
-     * Constructs a new RDF2Go adapter for the given
-     * {@link PublishSubscribeProxy}.
+     * Constructs a new RDF2Go adapter for the given object.
      * 
-     * @param proxy
-     *            the proxy to adapt.
+     * @param obj
+     *            the object to adapt.
      */
-    public PublishSubscribeRdf2goProxyAdapter(PublishSubscribeProxy proxy) {
-        super(proxy);
+    public PublishSubscribeRdf2goAdapter(PublishSubscribeApi obj) {
+        super(obj);
     }
 
-    public final void publish(URI context, Resource subject, URI predicate,
-                              Node object) {
+    public void publish(URI context, Resource subject, URI predicate,
+                        Node object) {
         super.delegate.publish(toQuadruple(context, subject, predicate, object));
     }
 
-    public final void publish(Statement stmt) {
+    public void publish(Statement stmt) {
         this.publish(
                 stmt.getContext(), stmt.getSubject(), stmt.getPredicate(),
                 stmt.getObject());
