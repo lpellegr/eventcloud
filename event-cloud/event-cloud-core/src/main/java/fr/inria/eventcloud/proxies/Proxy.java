@@ -47,7 +47,7 @@ public abstract class Proxy {
         this.proxy = proxy;
     }
 
-    public SemanticPeer selectPeer() {
+    protected SemanticPeer selectPeer() {
         return this.proxy.selectTracker().getRandomPeer();
     }
 

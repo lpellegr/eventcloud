@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.api.responses;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 
 /**
  * The response returned by a call to
@@ -24,12 +24,12 @@ import com.hp.hpl.jena.rdf.model.Model;
  * 
  * @author lpellegr
  */
-public class SparqlDescribeResponse extends SparqlResponse<Model> {
+public class SparqlDescribeResponse extends SparqlResponse<ModelWrapper> {
 
     private static final long serialVersionUID = 1L;
 
     public SparqlDescribeResponse(long inboundHopCount, long outboundHopCount,
-            long latency, long queryDatastoreTime, Model result) {
+            long latency, long queryDatastoreTime, ModelWrapper result) {
         super(inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
                 result);
     }

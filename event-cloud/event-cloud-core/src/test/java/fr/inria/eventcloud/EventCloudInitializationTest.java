@@ -29,6 +29,8 @@ import fr.inria.eventcloud.proxies.PutGetProxy;
 
 /**
  * Shows how to instantiate and to use an EventCloud.
+ * <p>
+ * TODO: put the example into the wiki.
  * 
  * @author lpellegr
  */
@@ -79,12 +81,26 @@ public class EventCloudInitializationTest {
         // e.printStackTrace();
         // }
 
+        // Finds all the quadruples that are contained by the Event-Cloud
         Collection<Quadruple> result = putGetProxy.find(QuadruplePattern.ANY);
         System.out.println("Quadruples contained by the Event-Cloud "
                 + eventCloud.getId() + ":");
         for (Quadruple quad : result) {
             System.out.println(quad);
         }
+
+        // You can also use the find method with a quadruple pattern.
+        // The Node.ANY plays as a variable
+        putGetProxy.find(new QuadruplePattern(
+                Node.createURI("http://uri"), Node.ANY,
+                Node.createURI("http://uri2"), Node.createLiteral("a")));
+        
+        // Creates and retrieved a publish subscribe proxy
+        // However the interface is not yet implemented
+        factory.createPublishSubscribeProxy();
+        
+        
+
     }
 
 }
