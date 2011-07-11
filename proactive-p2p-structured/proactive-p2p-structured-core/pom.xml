@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>proactive-p2p-structured</artifactId>
+		<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+	<artifactId>proactive-p2p-structured-core</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>proactive-p2p-structured-core</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+			<artifactId>proactive-p2p-structured-configuration</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+			<artifactId>proactive-p2p-structured-utils</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>r09</version>
+		</dependency>
+		<dependency>
+			<groupId>org.objectweb.proactive</groupId>
+			<artifactId>proactive</artifactId>
+			<version>5.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.elaunira.pmp</groupId>
+				<artifactId>proactive-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<configuration>
+							<includes>
+								<include>org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl</include>
+							</includes>
+						</configuration>
+						<goals>
+							<goal>stubs</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<forkMode>once</forkMode>
+					<systemPropertyVariables>
+						<java.security.policy>${basedir}/src/test/resources/proactive.security.policy</java.security.policy>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
