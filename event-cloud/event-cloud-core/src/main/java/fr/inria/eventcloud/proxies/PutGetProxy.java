@@ -36,7 +36,7 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
  * 
  * @author lpellegr
  */
-public final class PutGetProxy extends Proxy implements PutGetApi {
+public class PutGetProxy extends Proxy implements PutGetApi {
 
     /**
      * Constructs a PutGetProxy by using the specified EventCloudProxy.

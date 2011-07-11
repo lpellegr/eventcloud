@@ -39,7 +39,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
  * 
  * @see ProxyFactory
  */
-public final class PublishSubscribeProxy extends Proxy implements
+public class PublishSubscribeProxy extends Proxy implements
         PublishSubscribeApi, Serializable {
 
     private static final long serialVersionUID = 1L;
