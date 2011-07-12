@@ -18,21 +18,51 @@ package fr.inria.eventcloud.factories;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.etsi.uri.gcm.util.GCM;
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.Factory;
+import org.objectweb.fractal.api.Component;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.core.component.adl.FactoryFactory;
+import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
+import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.node.NodeException;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.gcmdeployment.GCMApplication;
+import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
+import fr.inria.eventcloud.configuration.ComponentProperties;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
- * SemanticFactory must be used to create new instances of Semantic objects like
- * for example {@link SemanticTracker}s and {@link SemanticPeer}s.
+ * SemanticFactory must be used to create new instances of Semantic components
+ * like for example {@link SemanticTracker}s and {@link SemanticPeer}s.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public class SemanticFactory {
+
+    private static Factory factory;
+
+    static {
+        CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
+        try {
+            factory = FactoryFactory.getFactory();
+        } catch (ADLException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Creates a new active semantic tracker on the local JVM and associates it
@@ -83,30 +113,87 @@ public class SemanticFactory {
     }
 
     /**
-     * Creates a new {@link SemanticPeer} on the local machine.
+     * Creates a new {@link SemanticPeer} component on the local machine.
      * 
-     * @return the SemanticPeer object created.
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         component created.
      */
     public static SemanticPeer newSemanticPeer() {
-        return SemanticFactory.newActiveSemanticPeer(null);
+        return createSemanticPeer(new HashMap<String, Object>());
     }
 
     /**
-     * Creates a new {@link SemanticPeer} deployed on the specified {@code node}
-     * .
+     * Creates a new {@link SemanticPeer} component deployed on the specified
+     * {@code node}.
      * 
      * @param node
      *            the node used to deploy the peer.
      * 
-     * @return the SemanticPeer object created.
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         component created.
      */
-    public static SemanticPeer newActiveSemanticPeer(Node node) {
+    public static SemanticPeer newSemanticPeer(Node node) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (node != null) {
+            List<Node> nodeList = new ArrayList<Node>(1);
+            nodeList.add(node);
+            context.put(ADLNodeProvider.NODES_ID, nodeList);
+        }
+        return createSemanticPeer(context);
+    }
+
+    /**
+     * Creates a new {@link SemanticPeer} component deployed on the specified
+     * {@code GCM virtual node}.
+     * 
+     * @param vn
+     *            the GCM virtual node used to deploy the peer.
+     * 
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         component created.
+     */
+    public static SemanticPeer newSemanticPeer(GCMVirtualNode vn) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (vn != null) {
+            context.put(vn.getName(), vn);
+        }
+        return createSemanticPeer(context);
+    }
+
+    /**
+     * Creates a new {@link SemanticPeer} component deployed on {@code node}
+     * provided by the specified GCM application.
+     * 
+     * @param gcma
+     *            the GCM application used to deploy the peer.
+     * 
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         component created.
+     */
+    public static SemanticPeer newSemanticPeer(GCMApplication gcma) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (gcma != null) {
+            context.put("deployment-descriptor", gcma);
+        }
+        return createSemanticPeer(context);
+    }
+
+    private static SemanticPeer createSemanticPeer(Map<String, Object> context) {
         try {
-            return PAActiveObject.newActive(
-                    SemanticPeer.class, new Object[] {null}, node);
-        } catch (ActiveObjectCreationException e) {
+            Component peer =
+                    (Component) factory.newComponent(
+                            ComponentProperties.SEMANTIC_PEER_ADL.getValue(),
+                            context);
+            SemanticPeer stub =
+                    (SemanticPeer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+            stub.init(stub, null);
+            GCM.getGCMLifeCycleController(peer).startFc();
+            return stub;
+        } catch (ADLException e) {
             e.printStackTrace();
-        } catch (NodeException e) {
+        } catch (NoSuchInterfaceException e) {
+            e.printStackTrace();
+        } catch (IllegalLifeCycleException e) {
             e.printStackTrace();
         }
 
@@ -114,38 +201,39 @@ public class SemanticFactory {
     }
 
     /**
-     * Creates the specified {@code number} of SemanticPeer in parallel.
+     * Creates the specified {@code number} of SemanticPeer components in
+     * parallel.
      * 
      * @param number
-     *            the number of {@link SemanticPeer} to create.
+     *            the number of {@link SemanticPeer} components to create.
      * 
-     * @return the SemanticPeer objects created.
+     * @return the SemanticPeer components created.
      */
-    public static SemanticPeer[] newActiveSemanticPeersInParallel(int number) {
-        return newActiveSemanticPeersInParallel(new Node[number]);
+    public static SemanticPeer[] newSemanticPeersInParallel(int number) {
+        return newSemanticPeersInParallel(new Node[number]);
     }
 
     /**
-     * Creates a number of SemanticPeer object that is equals to the number
+     * Creates a number of SemanticPeer components that is equals to the number
      * {@code nodes} specified. Each new SemanticPeer is deployed on a node from
      * the nodes array specified in parameter.
      * 
      * @param nodes
      *            the nodes to use for the deployment.
      * 
-     * @return the SemanticPeer object created.
+     * @return the SemanticPeer components created.
      */
-    public static SemanticPeer[] newActiveSemanticPeersInParallel(Node[] nodes) {
+    /*
+     * TODO better implementation of newComponentInParallel
+     */
+    public static SemanticPeer[] newSemanticPeersInParallel(Node[] nodes) {
         checkNotNull(nodes);
 
-        try {
-            return (SemanticPeer[]) PAActiveObject.newActiveInParallel(
-                    SemanticPeer.class.getCanonicalName(),
-                    new Object[nodes.length][0], nodes);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
+        SemanticPeer[] peers = new SemanticPeer[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            peers[i] = newSemanticPeer(nodes[i]);
         }
+        return peers;
     }
 
 }
