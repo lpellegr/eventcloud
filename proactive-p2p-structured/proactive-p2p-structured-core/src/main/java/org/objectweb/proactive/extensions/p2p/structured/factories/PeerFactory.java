@@ -130,7 +130,7 @@ public class PeerFactory {
             nodeList.add(node);
             context.put(ADLNodeProvider.NODES_ID, nodeList);
         }
-        return createComponentPeer(overlay, context);
+        return PeerFactory.createComponentPeer(overlay, context);
     }
 
     /**
@@ -151,7 +151,7 @@ public class PeerFactory {
         if (vn != null) {
             context.put(vn.getName(), vn);
         }
-        return createComponentPeer(overlay, context);
+        return PeerFactory.createComponentPeer(overlay, context);
     }
 
     /**
@@ -172,7 +172,7 @@ public class PeerFactory {
         if (gcma != null) {
             context.put("deployment-descriptor", gcma);
         }
-        return createComponentPeer(overlay, context);
+        return PeerFactory.createComponentPeer(overlay, context);
     }
 
     private static Peer createComponentPeer(StructuredOverlay overlay,
