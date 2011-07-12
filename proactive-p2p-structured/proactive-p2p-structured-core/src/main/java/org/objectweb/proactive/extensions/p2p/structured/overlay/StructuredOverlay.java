@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
@@ -68,6 +67,10 @@ public abstract class StructuredOverlay implements Serializable {
             PersistentDatastore datastore) {
         this();
         this.datastore = datastore;
+        if (this.datastore != null) {
+            this.datastore.open();
+            log.debug("Datastore opened on {}", this);
+        }
         this.messagingManager = messagingManager;
         // messagingManager maybe null if the overlay
         // is not assumed to support request/response
@@ -78,19 +81,6 @@ public abstract class StructuredOverlay implements Serializable {
 
     protected StructuredOverlay(RequestResponseManager queryManager) {
         this(queryManager, null);
-    }
-
-    public void initActivity(Body body) {
-        if (this.datastore != null) {
-            this.datastore.open();
-            log.debug("Datastore opened on {}", this);
-        }
-    }
-
-    public void endActivity(Body body) {
-        if (this.datastore != null && this.datastore.isInitialized()) {
-            this.datastore.close();
-        }
     }
 
     public abstract boolean create();

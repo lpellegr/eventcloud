@@ -14,20 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.overlay;
+package fr.inria.eventcloud.configuration;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-
-import fr.inria.eventcloud.api.PublishSubscribeApi;
-import fr.inria.eventcloud.api.PutGetApi;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
 
 /**
- * The SemanticPeer interface is used to merge the {@link Peer} interface, the
- * {@link PutGetApi} interface and the {@link PublishSubscribeApi} interface
- * into a single one.
+ * Contains default values for component properties.
  * 
  * @author bsauvan
  */
-public interface SemanticPeer extends Peer, PutGetApi, PublishSubscribeApi {
+public class ComponentProperties {
+
+    public static final PropertyString SEMANTIC_PEER_ADL = new PropertyString(
+            "semantic.peer.adl",
+            "fr.inria.eventcloud.overlay.SemanticPeer");
 
 }
