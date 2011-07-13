@@ -225,11 +225,11 @@ public class EventCloudInitializer {
      * @return a peer according to some metrics (e.g. the network load).
      */
     public SemanticPeer selectPeer() {
-        return this.getRandomTracker().getRandomPeer();
+        return this.getRandomTracker().getRandomSemanticPeer();
     }
 
     public SemanticPeer getRandomPeer() {
-        return this.getRandomTracker().getRandomPeer();
+        return this.getRandomTracker().getRandomSemanticPeer();
     }
 
     public SemanticTracker getRandomTracker() {

@@ -29,18 +29,15 @@ import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
-import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
-import fr.inria.eventcloud.configuration.ComponentProperties;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -65,47 +62,116 @@ public class SemanticFactory {
     }
 
     /**
-     * Creates a new active semantic tracker on the local JVM and associates it
-     * to the network named "default".
+     * Creates a new semantic tracker component on the local JVM and associates
+     * it to the network named "default".
      * 
-     * @return the SemanticTracker object created.
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         tracker component created.
      */
     public static SemanticTracker newSemanticTracker() {
-        return SemanticFactory.newSemanticTracker("default", null);
+        return SemanticFactory.createSemanticTracker(
+                "default", new HashMap<String, Object>());
     }
 
     /**
-     * Creates a new active semantic tracker on the local JVM and associates it
-     * to the specified {@code networkName}.
+     * Creates a new semantic tracker component on the local JVM and associates
+     * it to the specified {@code networkName}.
      * 
      * @param networkName
      *            the network name managed by the tracker.
      * 
-     * @return the SemanticTracker object created.
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         tracker component created.
      */
     public static SemanticTracker newSemanticTracker(String networkName) {
-        return SemanticFactory.newSemanticTracker(networkName, null);
+        return SemanticFactory.createSemanticTracker(
+                networkName, new HashMap<String, Object>());
     }
 
     /**
-     * Creates a new semantic tracker on the specified {@code node} and
-     * associates it to the given {@code networkName}.
+     * Creates a new semantic tracker component on the specified {@code node}
+     * and associates it to the given {@code networkName}.
      * 
      * @param networkName
      *            the network name managed by the tracker.
      * @param node
      *            the node to use for the deployment.
      * 
-     * @return the SemanticTracker object created.
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         tracker component created.
      */
     public static SemanticTracker newSemanticTracker(String networkName,
                                                      Node node) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (node != null) {
+            List<Node> nodeList = new ArrayList<Node>(1);
+            nodeList.add(node);
+            context.put(ADLNodeProvider.NODES_ID, nodeList);
+        }
+        return SemanticFactory.createSemanticTracker(networkName, context);
+    }
+
+    /**
+     * Creates a new semantic tracker component on the specified
+     * {@code GCM virtual node} and associates it to the given
+     * {@code networkName}.
+     * 
+     * @param networkName
+     *            the network name managed by the tracker.
+     * @param vn
+     *            the GCM virtual node to use for the deployment.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(String networkName,
+                                                     GCMVirtualNode vn) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (vn != null) {
+            context.put(vn.getName(), vn);
+        }
+        return SemanticFactory.createSemanticTracker(networkName, context);
+    }
+
+    /**
+     * Creates a new semantic tracker component on {@code node} provided by the
+     * specified GCM application and associates it to the given
+     * {@code networkName}.
+     * 
+     * @param networkName
+     *            the network name managed by the tracker.
+     * @param gcma
+     *            the GCM application to use for the deployment.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(String networkName,
+                                                     GCMApplication gcma) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (gcma != null) {
+            context.put("deployment-descriptor", gcma);
+        }
+        return SemanticFactory.createSemanticTracker(networkName, context);
+    }
+
+    private static SemanticTracker createSemanticTracker(String networkName,
+                                                         Map<String, Object> context) {
         try {
-            return PAActiveObject.newActive(
-                    SemanticTracker.class, new Object[] {networkName}, node);
-        } catch (ActiveObjectCreationException e) {
+            Component tracker =
+                    (Component) factory.newComponent(
+                            EventCloudProperties.SEMANTIC_TRACKER_ADL.getValue(),
+                            context);
+            SemanticTracker stub =
+                    (SemanticTracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
+            stub.init(stub, networkName);
+            GCM.getGCMLifeCycleController(tracker).startFc();
+            return stub;
+        } catch (ADLException e) {
             e.printStackTrace();
-        } catch (NodeException e) {
+        } catch (NoSuchInterfaceException e) {
+            e.printStackTrace();
+        } catch (IllegalLifeCycleException e) {
             e.printStackTrace();
         }
 
@@ -119,7 +185,7 @@ public class SemanticFactory {
      *         component created.
      */
     public static SemanticPeer newSemanticPeer() {
-        return createSemanticPeer(new HashMap<String, Object>());
+        return SemanticFactory.createSemanticPeer(new HashMap<String, Object>());
     }
 
     /**
@@ -139,7 +205,7 @@ public class SemanticFactory {
             nodeList.add(node);
             context.put(ADLNodeProvider.NODES_ID, nodeList);
         }
-        return createSemanticPeer(context);
+        return SemanticFactory.createSemanticPeer(context);
     }
 
     /**
@@ -157,7 +223,7 @@ public class SemanticFactory {
         if (vn != null) {
             context.put(vn.getName(), vn);
         }
-        return createSemanticPeer(context);
+        return SemanticFactory.createSemanticPeer(context);
     }
 
     /**
@@ -175,14 +241,14 @@ public class SemanticFactory {
         if (gcma != null) {
             context.put("deployment-descriptor", gcma);
         }
-        return createSemanticPeer(context);
+        return SemanticFactory.createSemanticPeer(context);
     }
 
     private static SemanticPeer createSemanticPeer(Map<String, Object> context) {
         try {
             Component peer =
                     (Component) factory.newComponent(
-                            ComponentProperties.SEMANTIC_PEER_ADL.getValue(),
+                            EventCloudProperties.SEMANTIC_PEER_ADL.getValue(),
                             context);
             SemanticPeer stub =
                     (SemanticPeer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
@@ -210,7 +276,7 @@ public class SemanticFactory {
      * @return the SemanticPeer components created.
      */
     public static SemanticPeer[] newSemanticPeersInParallel(int number) {
-        return newSemanticPeersInParallel(new Node[number]);
+        return SemanticFactory.newSemanticPeersInParallel(new Node[number]);
     }
 
     /**
@@ -231,7 +297,7 @@ public class SemanticFactory {
 
         SemanticPeer[] peers = new SemanticPeer[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            peers[i] = newSemanticPeer(nodes[i]);
+            peers[i] = SemanticFactory.newSemanticPeer(nodes[i]);
         }
         return peers;
     }
