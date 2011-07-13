@@ -23,6 +23,8 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyS
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.api.EventCloudId;
+
 /**
  * Contains default values for Event-Cloud properties.
  * <p>
@@ -39,6 +41,14 @@ public class EventCloudProperties {
 
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudProperties.class);
+
+    public static final PropertyString SEMANTIC_PEER_ADL = new PropertyString(
+            "semantic.peer.adl", "fr.inria.eventcloud.overlay.SemanticPeer");
+
+    public static final PropertyString SEMANTIC_TRACKER_ADL =
+            new PropertyString(
+                    "semantic.tracker.adl",
+                    "fr.inria.eventcloud.tracker.SemanticTracker");
 
     /**
      * Specifies where the repositories that store the RDF data are created.
