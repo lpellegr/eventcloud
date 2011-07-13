@@ -50,6 +50,14 @@ public class EventCloudProperties {
                     "semantic.tracker.adl",
                     "fr.inria.eventcloud.tracker.SemanticTracker");
 
+    public static final PropertyString PUBSUB_PROXY_ADL = new PropertyString(
+            "pubsub.proxy.adl",
+            "fr.inria.eventcloud.proxies.PublishSubscribeProxy");
+
+    public static final PropertyString PUBSUB_PROXY_SERVICES_ITF =
+            new PropertyString(
+                    "pubsub-proxy.services.itf", "pubsub-proxy-services");
+
     /**
      * Specifies where the repositories that store the RDF data are created.
      */

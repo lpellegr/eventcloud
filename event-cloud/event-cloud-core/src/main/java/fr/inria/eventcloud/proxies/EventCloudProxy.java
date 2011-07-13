@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.proxies;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * 
  * @see ProxyFactory
  */
-public class EventCloudProxy implements EventCloudApi {
+public class EventCloudProxy implements EventCloudApi, Serializable {
 
     private EventCloudId id;
 
