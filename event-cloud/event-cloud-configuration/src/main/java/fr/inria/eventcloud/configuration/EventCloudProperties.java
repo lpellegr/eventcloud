@@ -23,8 +23,6 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyS
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.api.EventCloudId;
-
 /**
  * Contains default values for Event-Cloud properties.
  * <p>
@@ -72,8 +70,8 @@ public class EventCloudProperties {
             "eventcloud.compression", false);
 
     /**
-     * Defines the prefix that is used for any EventCloudId when an
-     * {@link EventCloudId} is returned as an URL.
+     * Defines the prefix that is used for any EventCloudId when an EventCloudId
+     * is returned as an URL.
      */
     public static final PropertyString EVENT_CLOUD_ID_PREFIX =
             new PropertyString(
