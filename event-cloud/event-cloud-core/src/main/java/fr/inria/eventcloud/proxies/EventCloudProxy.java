@@ -44,74 +44,74 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class EventCloudProxy implements EventCloudApi, Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private EventCloudId id;
+    private EventCloudId id;
 
-	private List<SemanticTracker> trackers;
+    private List<SemanticTracker> trackers;
 
-	public EventCloudProxy(String registryUrl, EventCloudId id) {
-		// TODO throw an exception if the registry identified by registryUrl
-		// does not contain the specified EventCloudId
-		this.id = id;
+    public EventCloudProxy(String registryUrl, EventCloudId id) {
+        // TODO throw an exception if the registry identified by registryUrl
+        // does not contain the specified EventCloudId
+        this.id = id;
 
-		try {
-			this.trackers = new ArrayList<SemanticTracker>();
-			this.trackers.addAll(PAActiveObject.lookupActive(
-					EventCloudsRegistry.class, registryUrl).getTrackers());
-		} catch (ActiveObjectCreationException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            this.trackers = new ArrayList<SemanticTracker>();
+            this.trackers.addAll(PAActiveObject.lookupActive(
+                    EventCloudsRegistry.class, registryUrl).getTrackers());
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public EventCloudId getId() {
-		return this.id;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public EventCloudId getId() {
+        return this.id;
+    }
 
-	@Override
-	public long getCreationTime() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public long getCreationTime() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-	@Override
-	public Collection<UnalterableElaProperty> getElaProperties() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Collection<UnalterableElaProperty> getElaProperties() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public String getNodeProviderUrl() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getNodeProviderUrl() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public String getRegistryUrl() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getRegistryUrl() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Collection<String> getTrackerUrls() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Collection<String> getTrackerUrls() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Collection<SemanticTracker> getTrackers() {
-		return new Collection<SemanticTracker>(this.trackers);
-	}
+    @Override
+    public Collection<SemanticTracker> getTrackers() {
+        return new Collection<SemanticTracker>(this.trackers);
+    }
 
-	@Override
-	public SemanticTracker selectTracker() {
-		return this.trackers.get(ProActiveRandom.nextInt(this.trackers.size()));
-	}
+    @Override
+    public SemanticTracker selectTracker() {
+        return this.trackers.get(ProActiveRandom.nextInt(this.trackers.size()));
+    }
 
 }

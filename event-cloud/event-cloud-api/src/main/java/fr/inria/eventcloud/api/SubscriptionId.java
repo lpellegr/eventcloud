@@ -29,11 +29,21 @@ public final class SubscriptionId implements Serializable {
 
     private final long value;
 
-    // TODO define if the subscription id is unique for a given sparql query or
-    // unique regarding any sparql queries even if we have two sparql queries
-    // that return the same result?
-    protected SubscriptionId(long value) {
+    public SubscriptionId(long value) {
         this.value = value;
+    }
+
+    /**
+     * Parses the string argument as a SubscriptionId.
+     * 
+     * @param s
+     *            a <code>String</code> containing the
+     *            <code>SubscriptionId</code> representation to be parsed.
+     * 
+     * @return the <code>SubscriptionId</code> represented by the argument.
+     */
+    public static final SubscriptionId parseSubscriptionId(String s) {
+        return new SubscriptionId(Long.parseLong(s));
     }
 
     /**
@@ -51,6 +61,14 @@ public final class SubscriptionId implements Serializable {
     @Override
     public int hashCode() {
         return Long.valueOf(value).hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return Long.toString(this.value);
     }
 
 }

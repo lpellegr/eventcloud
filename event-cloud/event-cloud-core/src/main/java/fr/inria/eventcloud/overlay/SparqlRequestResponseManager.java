@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,17 +30,21 @@ import java.util.concurrent.Future;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 
+import com.google.common.collect.MapMaker;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
+import fr.inria.eventcloud.datastore.JenaDatastore;
 import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
 import fr.inria.eventcloud.messages.response.can.SparqlAtomicResponse;
+import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.reasoner.SparqlColander;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 
@@ -60,6 +65,8 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
 
     private final ConcurrentHashMap<UUID, Future<? extends Object>> pendingResults;
 
+    private final ConcurrentMap<SubscriptionId, Subscription> subscriptionsCache;
+
     private ExecutorService threadPool;
 
     public SparqlRequestResponseManager() {
@@ -67,9 +74,22 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
         this.colander = new SparqlColander();
         this.pendingResults =
                 new ConcurrentHashMap<UUID, Future<? extends Object>>();
+        this.subscriptionsCache =
+                new MapMaker().concurrencyLevel(4).softValues().makeMap();
         this.reasoner = new SparqlReasoner();
         // TODO choose the optimal size to use for the thread-pool
         this.threadPool = Executors.newFixedThreadPool(30);
+    }
+
+    public Subscription find(SubscriptionId id) {
+        Subscription subscription = this.subscriptionsCache.get(id);
+
+        if (subscription == null) {
+            return Subscription.parseSubscription(
+                    (JenaDatastore) this.overlay.getDatastore(), id);
+        }
+
+        return subscription;
     }
 
     /**
@@ -212,6 +232,10 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
 
     public ConcurrentHashMap<UUID, Future<? extends Object>> getPendingResults() {
         return this.pendingResults;
+    }
+
+    public ConcurrentMap<SubscriptionId, Subscription> getSubscriptionsCache() {
+        return this.subscriptionsCache;
     }
 
     public ExecutorService getThreadPool() {

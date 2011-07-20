@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.api;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Node_Variable;
 
 /**
  * A QuadruplePattern is {@link Quadruple} where each component value may be
@@ -43,16 +42,17 @@ public final class QuadruplePattern extends Quadruple {
             Node.ANY, Node.ANY, Node.ANY, Node.ANY);
 
     public QuadruplePattern(Node g, Node s, Node p, Node o) {
-        super(replaceNullWithVarNode(g), replaceNullWithVarNode(s),
-                replaceNullWithVarNode(p), replaceNullWithVarNode(o), false);
+        // super(replaceNullWithVarNode(g), replaceNullWithVarNode(s),
+        // replaceNullWithVarNode(p), replaceNullWithVarNode(o), false);
+        super(g, s, p, o, false);
     }
 
-    private final static Node replaceNullWithVarNode(Node node) {
-        if (node == null || node instanceof Node_Variable) {
-            return Node.ANY;
-        }
-
-        return node;
-    }
+    // private final static Node replaceNullWithVarNode(Node node) {
+    // if (node == null || node instanceof Node_Variable) {
+    // return Node.ANY;
+    // }
+    //
+    // return node;
+    // }
 
 }

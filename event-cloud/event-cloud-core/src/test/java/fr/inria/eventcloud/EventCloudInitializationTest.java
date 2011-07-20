@@ -16,25 +16,32 @@
  **/
 package fr.inria.eventcloud;
 
+import java.io.Serializable;
+
 import org.junit.Test;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 
 /**
  * Shows how to instantiate and to use an EventCloud.
  * <p>
- * TODO: put the example into the wiki.
+ * TODO: put the example into the wiki and try to remove the Serializable
+ * interface that is implemented.
  * 
  * @author lpellegr
  */
-public class EventCloudInitializationTest {
+public class EventCloudInitializationTest implements Serializable {
 
     @Test
     public void testEventCloudInstantiationAndUsage() {
@@ -75,7 +82,7 @@ public class EventCloudInitializationTest {
         // putGetProxy.add(
         // new FileInputStream(
         // new File(
-        // "/Users/lpellegr/rdf-data/infobox_property_definitions_en.nq")),
+        // "/user/lpellegr/home/Desktop/infobox_property_definitions_en.nq")),
         // SerializationFormat.NQuads);
         // } catch (FileNotFoundException e) {
         // e.printStackTrace();
@@ -94,12 +101,33 @@ public class EventCloudInitializationTest {
         putGetProxy.find(new QuadruplePattern(
                 Node.createURI("http://uri"), Node.ANY,
                 Node.createURI("http://uri2"), Node.createLiteral("a")));
-        
+
         // Creates and retrieved a publish subscribe proxy
         // However the interface is not yet implemented
-        factory.createPublishSubscribeProxy();
-        
-        
+        PublishSubscribeProxy pubsubProxy =
+                factory.createPublishSubscribeProxy();
+
+        SubscriptionId id =
+                pubsubProxy.subscribe(
+                        "SELECT ?s ?g WHERE { GRAPH ?g { ?s <http://v1> <http://v2> . ?s <http://v3> <http://v4> } }",
+                        new BindingsNotificationListener() {
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void handleNotification(SubscriptionId id,
+                                                           Collection<Binding> handback) {
+                                System.out.println("EventCloudInitializationTest.handleNotification() "
+                                        + id);
+                            }
+                        });
+
+        pubsubProxy.publish(new Quadruple(
+                Node.createURI("http://uri"), Node.createURI("http://uri"),
+                Node.createURI("http://uri"), Node.createURI("http://uri")));
+
+        System.out.println("Subscription id is " + id);
+
+        System.out.println(pubsubProxy.find(id));
 
     }
 

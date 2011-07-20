@@ -47,6 +47,14 @@ public abstract class SemanticDatastore extends PersistentDatastore {
     public abstract void add(Quadruple quad);
 
     /**
+     * Adds the specified collection of {@code quad}s into the datastore.
+     * 
+     * @param quads
+     *            the collection of quadruples to add into the datastore.
+     */
+    public abstract void add(Collection<Quadruple> quads);
+
+    /**
      * Returns a boolean indicating if the specified {@code quad} is contained
      * by the datastore.
      * 

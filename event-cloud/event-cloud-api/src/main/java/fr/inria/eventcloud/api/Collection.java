@@ -68,6 +68,19 @@ public final class Collection<T> implements java.util.Collection<T>,
         this(collection, true);
     }
 
+    /**
+     * Creates a collection from the specified elements.
+     * 
+     * @param elts
+     *            the elements to insert into the collection.
+     */
+    public Collection(T... elts) {
+        this();
+        for (T elt : elts) {
+            this.collection.add(elt);
+        }
+    }
+
     private Collection(java.util.Collection<T> collection, boolean shallowCopy) {
         if (collection instanceof Collection) {
             throw new IllegalArgumentException(
