@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.api.listeners;
 
+import java.io.Serializable;
+
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.SubscriptionId;
 
@@ -25,7 +27,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  * 
  * @author lpellegr
  */
-public interface NotificationListener<T> {
+public interface NotificationListener<T> extends Serializable {
 
     /**
      * Handles a notification that has been received.

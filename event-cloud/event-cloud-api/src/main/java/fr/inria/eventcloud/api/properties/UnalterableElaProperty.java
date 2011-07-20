@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.api.properties;
 
-import com.hp.hpl.jena.graph.Node;
-
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 
@@ -64,7 +62,7 @@ public final class UnalterableElaProperty extends ElaProperty {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> toQuadruples(Node graph) {
+    public Collection<Quadruple> toQuadruples() {
         Collection<Quadruple> quads = new Collection<Quadruple>();
         // TODO: implement the translation to quadruples
         // quads.add(new Quadruple("eventCloud", "hasUnalterableElaProperty",

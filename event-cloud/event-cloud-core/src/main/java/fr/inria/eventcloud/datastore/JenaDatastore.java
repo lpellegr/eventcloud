@@ -23,6 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -57,10 +58,17 @@ public class JenaDatastore extends SemanticDatastore {
 
     public JenaDatastore() {
         super(new File(System.getProperty("java.io.tmpdir")));
+        this.registerPlugins();
     }
 
     public JenaDatastore(File repositoryPath) {
         super(repositoryPath);
+        this.registerPlugins();
+    }
+
+    private void registerPlugins() {
+        TypeMapper.getInstance().registerDatatype(
+                VariableDatatype.getInstance());
     }
 
     /*
@@ -123,6 +131,22 @@ public class JenaDatastore extends SemanticDatastore {
         this.datastore.add(
                 quad.getGraph(), quad.getSubject(), quad.getPredicate(),
                 quad.getObject());
+
+        this.datastore.getLock().leaveCriticalSection();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void add(Collection<Quadruple> quads) {
+        this.datastore.getLock().enterCriticalSection(Lock.WRITE);
+
+        for (Quadruple quad : quads) {
+            this.datastore.add(
+                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                    quad.getObject());
+        }
 
         this.datastore.getLock().leaveCriticalSection();
     }

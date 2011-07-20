@@ -107,6 +107,29 @@ public class Quadruple implements Serializable {
         this(graph, subject, predicate, object, true);
     }
 
+    /**
+     * Creates a new Quadruple with the specified {@code graph}, {@code subject}
+     * , {@code predicate} and {@code object} nodes without checking the type of
+     * the nodes. This method has to be used with care!
+     * 
+     * @param graph
+     *            the graph value.
+     * @param subject
+     *            the subject value.
+     * @param predicate
+     *            the predicate value.
+     * @param object
+     *            the object value.
+     * 
+     * @return the quadruple which has been created.
+     */
+    public static final Quadruple createWithoutTypeChecking(Node graph,
+                                                            Node subject,
+                                                            Node predicate,
+                                                            Node object) {
+        return new Quadruple(graph, subject, predicate, object, false);
+    }
+
     protected Quadruple(Node graph, Node subject, Node predicate, Node object,
             boolean typeChecking) {
         if (typeChecking) {

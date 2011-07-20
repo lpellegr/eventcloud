@@ -61,6 +61,14 @@ public class EventCloudProperties {
             new PropertyString(
                     "eventcloud.id.prefix", "http://streams.play-project.eu/");
 
+    /**
+     * Defines the namespace which is used to prefix some of the URI declared
+     * into the project.
+     */
+    public static final PropertyString EVENT_CLOUD_NS = new PropertyString(
+            "eventcloud.namespace", "http://www.play-project.eu/event-cloud/");
+
+
     static {
         File preferencesFile = new File(getPreferencesFilePath());
         String eventCloudConfigurationProperty =

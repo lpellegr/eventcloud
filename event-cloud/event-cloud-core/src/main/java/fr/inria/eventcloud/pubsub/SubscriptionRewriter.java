@@ -80,8 +80,8 @@ public class SubscriptionRewriter {
      *         removed or {@code null} if the original SPARQL query contains
      *         only one triple pattern.
      */
-    public static final String removeFirstTriplePatternAndReplaceVars(String sparqlQuery,
-                                                                      final Quadruple quad) {
+    protected static final String removeFirstTriplePatternAndReplaceVars(String sparqlQuery,
+                                                                         final Quadruple quad) {
         Op op = Algebra.compile(QueryFactory.create(sparqlQuery));
 
         // vars that are contained by the first triple pattern
@@ -98,7 +98,8 @@ public class SubscriptionRewriter {
 
                 // skips the first triple pattern if possible
                 if (!it.hasNext()) {
-                    return null;
+                    throw new IllegalArgumentException(
+                            "The SPARQL query to rewrite must have at least 2 triple patterns");
                 } else {
                     triple = it.next();
 
@@ -116,7 +117,8 @@ public class SubscriptionRewriter {
 
                 // the query is assumed to have at least two triple patterns
                 if (!it.hasNext()) {
-                    return null;
+                    throw new IllegalArgumentException(
+                            "The SPARQL query to rewrite must have at least 2 triple patterns");
                 }
 
                 while (it.hasNext()) {
@@ -165,5 +167,5 @@ public class SubscriptionRewriter {
 
         return tripleNode;
     }
-
+    
 }

@@ -16,10 +16,7 @@
  **/
 package fr.inria.eventcloud.api.properties;
 
-import com.hp.hpl.jena.graph.Node;
-
-import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Rdfable;
 
 /**
  * ElaProperty stands for Event Level Agreement Property. It is used to store a
@@ -27,7 +24,7 @@ import fr.inria.eventcloud.api.Quadruple;
  * 
  * @author lpellegr
  */
-public abstract class ElaProperty {
+public abstract class ElaProperty implements Rdfable {
 
     protected String name;
 
@@ -58,16 +55,5 @@ public abstract class ElaProperty {
     public String getValue() {
         return this.value;
     }
-
-    /**
-     * Translates an ELA property to a collection of quadruples.
-     * 
-     * @param graph
-     *            the context/graph value to use.
-     * 
-     * @return a collection of quadruples that contain the information about the
-     *         ELA property that has been translated.
-     */
-    public abstract Collection<Quadruple> toQuadruples(Node graph);
 
 }
