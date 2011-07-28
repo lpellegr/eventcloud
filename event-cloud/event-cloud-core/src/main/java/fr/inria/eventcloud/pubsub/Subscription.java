@@ -16,21 +16,9 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_CREATION_DATETIME_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_CREATION_DATETIME_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ID_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_PARENT_ID_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_PARENT_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SERIALIZED_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SPARQL_QUERY_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.*;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
+
+import org.objectweb.proactive.ActiveObjectCreationException;
+import org.objectweb.proactive.api.PAActiveObject;
 
 import com.google.common.base.Objects;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -49,6 +40,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Rdfable;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
 import fr.inria.eventcloud.utils.MurmurHash;
@@ -64,8 +56,14 @@ public class Subscription implements Rdfable, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    // the id of the subscription before someone rewrites it
+    private final SubscriptionId originalId;
+
+    // the id of the subscription identifying the subscription such that when it
+    // is rewritten with the right quadruples, it gives the current subscription
     private final SubscriptionId parentId;
 
+    // the id of the current subscription
     private final SubscriptionId id;
 
     private final long creationTime;
@@ -73,6 +71,8 @@ public class Subscription implements Rdfable, Serializable {
     private final String source;
 
     private final String sparqlQuery;
+
+    private List<Stub> stubs;
 
     // this field is transient because the subSubscriptions can be created from
     // the sparqlQuery on the fly
@@ -84,6 +84,11 @@ public class Subscription implements Rdfable, Serializable {
 
     public Subscription(SubscriptionId parentId, String source,
             String sparqlQuery) {
+        this(null, parentId, source, sparqlQuery);
+    }
+
+    public Subscription(SubscriptionId originalId, SubscriptionId parentId,
+            String source, String sparqlQuery) {
         if (!sparqlQuery.contains("GRAPH")) {
             throw new IllegalArgumentException(
                     "The SPARQL query used for a subscription must always contain a GRAPH pattern.");
@@ -94,26 +99,36 @@ public class Subscription implements Rdfable, Serializable {
                     "The SPARQL query used for a subscription must always use the SELECT query form.");
         }
 
-        this.creationTime = System.currentTimeMillis();
+        this.creationTime = System.nanoTime();
         this.parentId = parentId;
         this.id =
                 new SubscriptionId(MurmurHash.hash64(
                         source, sparqlQuery, Long.toString(this.creationTime)));
+        this.originalId = originalId == null
+                ? this.id : originalId;
         this.source = source;
         this.sparqlQuery = sparqlQuery;
+        this.stubs = new ArrayList<Stub>();
     }
 
-    private Subscription(SubscriptionId parentId, SubscriptionId id,
-            long creationTime, String source, String sparqlQuery) {
+    private Subscription(SubscriptionId originalId, SubscriptionId parentId,
+            SubscriptionId id, long creationTime, String source,
+            String sparqlQuery) {
+        this.originalId = originalId;
         this.parentId = parentId;
         this.id = id;
         this.creationTime = creationTime;
         this.source = source;
         this.sparqlQuery = sparqlQuery;
+        this.stubs = new ArrayList<Stub>();
     }
 
-    public static final Subscription parseSubscription(SemanticDatastore datastore,
-                                                       SubscriptionId id) {
+    public final void addStub(Stub stub) {
+        this.stubs.add(stub);
+    }
+
+    public static final Subscription parseFrom(SemanticDatastore datastore,
+                                               SubscriptionId id) {
         Collection<Quadruple> quads =
                 datastore.find(Node.ANY, Node.createURI(SUBSCRIPTION_NS
                         + id.toString()), Node.ANY, Node.ANY);
@@ -122,13 +137,15 @@ public class Subscription implements Rdfable, Serializable {
         Map<String, Node> basicInfo = new HashMap<String, Node>();
         // contains the identifier of the sub-subscriptions
         List<String> subSubscriptionsId = new ArrayList<String>();
+        // contains the stub urls associated to the subscription
+        List<String> stubs = new ArrayList<String>();
 
         for (Quadruple quad : quads) {
             if (quad.getPredicate().equals(
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
-                subSubscriptionsId.add(quad.getObject()
-                        .getLiteralValue()
-                        .toString());
+                subSubscriptionsId.add(quad.getObject().getLiteralLexicalForm());
+            } else if (quad.getPredicate().equals(SUBSCRIPTION_STUB_NODE)) {
+                stubs.add(quad.getObject().getLiteralLexicalForm());
             } else {
                 basicInfo.put(quad.getPredicate().toString(), quad.getObject());
             }
@@ -138,19 +155,30 @@ public class Subscription implements Rdfable, Serializable {
         if (basicInfo.get(SUBSCRIPTION_PARENT_ID_PROPERTY) != null) {
             parentId =
             // we cannot use getLiteralValue in order to directly retrieve a
-            // Long because it will return an Integer due to the fact that Jena
-            // encodes internally all number with 56 bits :(
-                    SubscriptionId.parseSubscriptionId(basicInfo.get(
-                            SUBSCRIPTION_PARENT_ID_PROPERTY)
-                            .getLiteralLexicalForm());
+            // Long because it will return an Integer if the initial value fit
+            // into a Java Integer
+                    new SubscriptionId(
+                            ((Number) basicInfo.get(
+                                    SUBSCRIPTION_PARENT_ID_PROPERTY)
+                                    .getLiteralValue()).longValue());
+        }
+
+        SubscriptionId originalId = null;
+        if (basicInfo.get(SUBSCRIPTION_ORIGINAL_ID_PROPERTY) != null) {
+            originalId =
+                    new SubscriptionId(((Number) basicInfo.get(
+                            SUBSCRIPTION_ORIGINAL_ID_PROPERTY)
+                            .getLiteralValue()).longValue());
         }
 
         Subscription subscription =
                 new Subscription(
+                        originalId,
                         parentId,
-                        SubscriptionId.parseSubscriptionId(basicInfo.get(
-                                SUBSCRIPTION_ID_PROPERTY)
-                                .getLiteralLexicalForm()),
+                        new SubscriptionId(
+                                ((Number) basicInfo.get(
+                                        SUBSCRIPTION_ID_PROPERTY)
+                                        .getLiteralValue()).longValue()),
                         DatatypeConverter.parseDateTime(
                                 basicInfo.get(
                                         SUBSCRIPTION_CREATION_DATETIME_PROPERTY)
@@ -161,13 +189,20 @@ public class Subscription implements Rdfable, Serializable {
                                 SUBSCRIPTION_SPARQL_QUERY_PROPERTY)
                                 .getLiteralLexicalForm());
 
+        // retrieves the stub urls
+        for (String stub : stubs) {
+            String[] parsedStub = stub.split(" ");
+            subscription.addStub(new Stub(
+                    parsedStub[1], Long.parseLong(parsedStub[0])));
+        }
+
         // recreates the sub-subscriptions
         subscription.subSubscriptions =
                 new Subsubscription[subSubscriptionsId.size()];
 
         for (int i = 0; i < subSubscriptionsId.size(); i++) {
             Subsubscription s =
-                    Subsubscription.parseSubsubscription(
+                    Subsubscription.parseFrom(
                             datastore, basicInfo.get(SUBSCRIPTION_ID_PROPERTY)
                                     .getLiteralLexicalForm(),
                             subSubscriptionsId.get(i));
@@ -178,15 +213,31 @@ public class Subscription implements Rdfable, Serializable {
     }
 
     /**
-     * Returns the parent identifier. If the value is {@code null}, it means
-     * that this subscription has no parent.
+     * Returns the id of the parent subscription before someone rewrites it.
+     * This means that if the subscription has not been rewritten, a call to
+     * {@link #getId()} will return the same value as this method.
      * 
-     * @return the parent identifier.
+     * @return the id of the parent subscription before someone rewrites it.
+     */
+    public SubscriptionId getOriginalId() {
+        return this.originalId;
+    }
+
+    /**
+     * Returns the previous parent identifier. If the value is {@code null}, it
+     * means that this subscription has no parent.
+     * 
+     * @return the previous parent identifier.
      */
     public SubscriptionId getParentId() {
         return this.parentId;
     }
 
+    /**
+     * Returns an identifier that uniquely identify the subscription.
+     * 
+     * @return an identifier that uniquely identify the subscription.
+     */
     public SubscriptionId getId() {
         return this.id;
     }
@@ -199,8 +250,25 @@ public class Subscription implements Rdfable, Serializable {
         return this.source;
     }
 
+    public PublishSubscribeProxy getSourceStub() {
+        try {
+            return PAActiveObject.lookupActive(
+                    PublishSubscribeProxy.class, this.source);
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public String getSparqlQuery() {
         return this.sparqlQuery;
+    }
+
+    public List<Stub> getStubs() {
+        return this.stubs;
     }
 
     public Subsubscription[] getSubSubscriptions() {
@@ -242,6 +310,14 @@ public class Subscription implements Rdfable, Serializable {
                             this.parentId.toString(), null, XSDDatatype.XSDlong)));
         }
 
+        if (this.originalId != null) {
+            quads.add(new Quadruple(
+                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    SUBSCRIPTION_ORIGINAL_ID_NODE, Node.createLiteral(
+                            this.originalId.toString(), null,
+                            XSDDatatype.XSDlong)));
+        }
+
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_SERIALIZED_VALUE_NODE,
@@ -265,6 +341,14 @@ public class Subscription implements Rdfable, Serializable {
                         this.getSubSubscriptions()[0].getId().toString(), null,
                         XSDDatatype.XSDlong)));
 
+        for (Stub stub : this.stubs) {
+            quads.add(new Quadruple(
+                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    SUBSCRIPTION_STUB_NODE,
+                    Node.createLiteral(Long.toString(stub.quadrupleHash) + " "
+                            + stub.peerUrl)));
+        }
+
         for (Subsubscription ssubscription : this.getSubSubscriptions()) {
             quads.add(new Quadruple(
                     SUBSCRIPTION_NS_NODE, subscriptionURI,
@@ -283,8 +367,8 @@ public class Subscription implements Rdfable, Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(
-                this.parentId, this.id, this.creationTime, this.source,
-                this.sparqlQuery);
+                this.originalId, this.parentId, this.id, this.creationTime,
+                this.source, this.sparqlQuery);
     }
 
     /**
@@ -295,6 +379,7 @@ public class Subscription implements Rdfable, Serializable {
         if (obj instanceof Subscription) {
             Subscription s = (Subscription) obj;
             return this.id.equals(s.id) && this.parentId.equals(s.parentId)
+                    && this.originalId.equals(s.originalId)
                     && this.creationTime == s.creationTime
                     && this.source.equals(s.source)
                     && this.sparqlQuery.equals(s.sparqlQuery);
@@ -311,6 +396,23 @@ public class Subscription implements Rdfable, Serializable {
         return "Subscription [id=" + this.id + ", creationTime="
                 + this.creationTime + ", source=" + this.source
                 + ", sparqlQuery=" + this.sparqlQuery + "]";
+    }
+
+    public static final class Stub implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        // the url that identify the peer to visit
+        public final String peerUrl;
+
+        // hash value that identifies the quadruple to retrieve
+        public final long quadrupleHash;
+
+        public Stub(String peerUrl, long timestamp) {
+            this.peerUrl = peerUrl;
+            this.quadrupleHash = timestamp;
+        }
+
     }
 
 }
