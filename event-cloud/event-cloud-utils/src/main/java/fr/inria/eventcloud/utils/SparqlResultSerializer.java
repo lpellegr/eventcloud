@@ -19,14 +19,29 @@ package fr.inria.eventcloud.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import org.openjena.riot.tokens.TokenizerFactory;
 
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.resultset.TSVOutput;
+import com.hp.hpl.jena.sparql.util.FmtUtils;
+
+import fr.inria.eventcloud.protobuf.SparqlResultsProtos;
+import fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding.Builder;
+import fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding.SequenceBinding;
 
 /**
  * A SparqlResultSerializer provides several methods to serialize and to
@@ -36,6 +51,103 @@ import com.hp.hpl.jena.sparql.resultset.TSVOutput;
  * @author lpellegr
  */
 public class SparqlResultSerializer {
+
+    /**
+     * Serializes the specified {@code binding} into the given output stream. By
+     * default the output is not compressed.
+     * 
+     * @param out
+     *            the output stream to write in.
+     * @param resultSet
+     *            the {@link Binding} to serialize.
+     */
+    public static void serialize(OutputStream out, Binding binding) {
+        serialize(out, binding, false);
+    }
+
+    /**
+     * Serializes the specified {@code binding} into the given output stream.
+     * The compression is enabled or not according to the {@code gzipped}
+     * parameter.
+     * 
+     * @param out
+     *            the output stream to write in.
+     * @param binding
+     *            the {@link Binding} to serialize.
+     * @param gzipped
+     *            if set to {@code true} the output is gzipped.
+     */
+    public static void serialize(OutputStream out, Binding binding,
+                                 boolean gzipped) {
+
+        Builder bindingBuilder = SparqlResultsProtos.Binding.newBuilder();
+
+        if (gzipped) {
+            try {
+                out = new GZIPOutputStream(out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (binding.getParent() != null) {
+            injectSequenceBindings(bindingBuilder, binding.getParent(), true);
+        }
+        injectSequenceBindings(bindingBuilder, binding, false);
+
+        try {
+            bindingBuilder.build().writeTo(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (gzipped) {
+            try {
+                ((GZIPOutputStream) out).finish();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void injectSequenceBindings(Builder builder,
+                                               Binding binding, boolean parent) {
+        List<Var> vars = extractConcreteVars(binding);
+
+        for (Var var : vars) {
+            SequenceBinding.Builder sequenceBinding =
+                    SparqlResultsProtos.Binding.SequenceBinding.newBuilder();
+            sequenceBinding.setVarName(var.getName());
+            sequenceBinding.setValue(FmtUtils.stringForNode(binding.get(var)));
+            if (parent) {
+                builder.addParentBinding(sequenceBinding);
+            } else {
+                builder.addBinding(sequenceBinding);
+            }
+        }
+    }
+
+    private static List<Var> extractConcreteVars(Binding binding) {
+        Iterator<Var> varsIterator = binding.vars();
+        Set<Var> parentVars = new HashSet<Var>();
+        List<Var> result = new ArrayList<Var>();
+
+        if (binding.getParent() != null) {
+            Iterator<Var> it = binding.getParent().vars();
+            while (it.hasNext()) {
+                parentVars.add(it.next());
+            }
+        }
+
+        while (varsIterator.hasNext()) {
+            Var var = varsIterator.next();
+            if (!parentVars.contains(var)) {
+                result.add(var);
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Serializes the specified {@code resultSet} into the given output stream
@@ -125,6 +237,69 @@ public class SparqlResultSerializer {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Deserializes a {@link Binding} by reading bytes from the specified input
+     * stream. It assumes the output is not compressed.
+     * 
+     * @param in
+     *            the input stream to read from.
+     * 
+     * @return the {@link Binding} read from the input stream.
+     */
+    public static Binding deserializeBinding(InputStream in) {
+        return deserializeBinding(in, false);
+    }
+
+    /**
+     * Deserializes a {@link Binding} by reading bytes from the specified input
+     * stream. It will try to ungzip the byte buffer according to the
+     * {@code gzipped} parameter.
+     * 
+     * @param in
+     *            the input stream to read from.
+     * 
+     * @return the {@link Binding} read from the input stream.
+     */
+    public static Binding deserializeBinding(InputStream in, boolean gzipped) {
+        if (gzipped) {
+            try {
+                in = new GZIPInputStream(in);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        SparqlResultsProtos.Binding bindingProto = null;
+        try {
+            bindingProto = SparqlResultsProtos.Binding.parseFrom(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Binding parentBinding = null;
+        if (bindingProto.getParentBindingCount() > 0) {
+            parentBinding =
+                    createBinding(bindingProto.getParentBindingList(), null);
+        }
+
+        return createBinding(bindingProto.getBindingList(), parentBinding);
+    }
+
+    private static final Binding createBinding(List<SequenceBinding> sbl,
+                                               Binding parent) {
+        Binding binding = BindingFactory.create(parent);
+
+        for (SequenceBinding sb : sbl) {
+            binding.add(
+                    Var.alloc(sb.getVarName()),
+                    TokenizerFactory.makeTokenizerString(sb.getValue())
+                            .next()
+                            .asNode());
+        }
+
+        return binding;
     }
 
     /**
