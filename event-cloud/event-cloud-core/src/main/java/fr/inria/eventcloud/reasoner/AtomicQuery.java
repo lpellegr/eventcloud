@@ -117,6 +117,14 @@ public final class AtomicQuery {
         return this.quadruplePattern.getObject();
     }
 
+    public Node[] toArray() {
+        return new Node[] {
+                this.quadruplePattern.getGraph(),
+                this.quadruplePattern.getSubject(),
+                this.quadruplePattern.getPredicate(),
+                this.quadruplePattern.getObject()};
+    }
+
     public Set<String> getVariables() {
         return this.vars.keySet();
     }
