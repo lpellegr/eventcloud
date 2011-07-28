@@ -19,6 +19,9 @@ package fr.inria.eventcloud.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -34,8 +37,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.sparql.core.DatasetImpl;
-
-import fr.inria.eventcloud.utils.SparqlResultSerializer;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 
 /**
  * Tests associated to {@link SparqlResultSerializerTest}.
@@ -57,26 +61,79 @@ public class SparqlResultSerializerTest {
     }
 
     @Test
-    public void testSerializeModelWithCompressionDisabled() {
-        testSerializeModel(false);
+    public void testBindingSerializationWithCompressionDisabled() {
+        testBindingSerialization(false);
     }
 
     @Test
-    public void testSerializeModelWithCompressionEnabled() {
-        testSerializeModel(true);
+    public void testBindingSerializationWithCompressionEnabled() {
+        testBindingSerialization(true);
     }
 
     @Test
-    public void testSerializeResultSetWithCompressionDisabled() {
-        testSerializeResultSet(false);
+    public void testModelSerializationWithCompressionDisabled() {
+        testModelSerialization(false);
     }
 
     @Test
-    public void testSerializeResultSetWithCompressionEnabled() {
-        testSerializeResultSet(true);
+    public void testModelSerializationWithCompressionEnabled() {
+        testModelSerialization(true);
     }
 
-    private void testSerializeModel(boolean gzipped) {
+    @Test
+    public void testResultSetSerializationWithCompressionDisabled() {
+        testResultSetSerialization(false);
+    }
+
+    @Test
+    public void testResultSetserializationWithCompressionEnabled() {
+        testResultSetSerialization(true);
+    }
+
+    private void testBindingSerialization(boolean gzipped) {
+        Node defaultNode = Node.createURI("http://www.inria.fr");
+
+        Binding parentBinding = BindingFactory.create();
+        parentBinding.add(Var.alloc("parent"), defaultNode);
+        Binding binding = BindingFactory.create(parentBinding);
+        binding.add(Var.alloc("var1"), defaultNode);
+        binding.add(Var.alloc("var2"), defaultNode);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        SparqlResultSerializer.serialize(baos, binding, gzipped);
+
+        try {
+            baos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ByteArrayInputStream bais =
+                new ByteArrayInputStream(baos.toByteArray());
+        Binding unserializedBinding =
+                SparqlResultSerializer.deserializeBinding(bais, gzipped);
+
+        try {
+            bais.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Binding unserializedParentBinding = unserializedBinding.getParent();
+        Assert.assertEquals(
+                unserializedParentBinding.vars().next().getName(), "parent");
+
+        Set<String> vars = new HashSet<String>();
+        Iterator<Var> varsIt = unserializedBinding.vars();
+        while (varsIt.hasNext()) {
+            vars.add(varsIt.next().getName());
+        }
+
+        Assert.assertTrue(vars.contains("var1"));
+        Assert.assertTrue(vars.contains("var2"));
+    }
+
+    private void testModelSerialization(boolean gzipped) {
         QueryExecution queryExec =
                 QueryExecutionFactory.create(
                         QueryFactory.create("CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }"),
@@ -108,7 +165,7 @@ public class SparqlResultSerializerTest {
         queryExec.close();
     }
 
-    private void testSerializeResultSet(boolean gzipped) {
+    private void testResultSetSerialization(boolean gzipped) {
         QueryExecution queryExec =
                 QueryExecutionFactory.create(
                         QueryFactory.create("SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }"),
