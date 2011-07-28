@@ -29,7 +29,10 @@ import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
 import com.hp.hpl.jena.sparql.algebra.TransformCopy;
 import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Quadruple;
 
@@ -58,36 +61,64 @@ public class SubscriptionRewriter {
      */
     public static final Subscription rewrite(Subscription subscription,
                                              Quadruple quad) {
-        return new Subscription(
-                subscription.getId(), subscription.getSource(),
-                removeFirstTriplePatternAndReplaceVars(
-                        subscription.getSparqlQuery(), quad));
+        return removeFirstTriplePatternAndReplaceVars(
+                subscription, createBGPTransformCopy(quad));
     }
 
     /**
-     * Rewrites the first triple pattern from the SPARQL query. This method
-     * assumes that the SPARQL query has only <strong>one</strong> Basic Graph
-     * Pattern.
+     * Rewrites the first triple pattern from the SPARQL query. The rewrite
+     * operation consists in removing the first triple pattern from the SPARQL
+     * query and to replace all the variables (identified with the first triple
+     * pattern) by the value associated with the specified {@code binding}.
      * 
-     * @param sparqlQuery
-     *            the sparqlQuery to transform.
+     * @param subscription
+     *            the subscription to rewrite.
+     * @param binding
+     *            the binding that is used to replace the variables.
      * 
-     * @param quad
-     *            the quadruple that is matched by the first triple pattern and
-     *            that may be used to rewrite the SPARQL query.
+     * @return a new subscription which has been rewritten and which has the
+     *         original subscription as parent.
+     */
+    public static final Subscription rewrite(Subscription subscription,
+                                             Binding binding) {
+        return removeFirstTriplePatternAndReplaceVars(
+                subscription, createBGPTransformCopy(binding));
+    }
+
+    /**
+     * Removes the first triple pattern from the SPARQL query and rewrites the
+     * next triple patterns. This method assumes that the SPARQL query has only
+     * <strong>one</strong> Basic Graph Pattern.
+     * 
+     * @param subscription
+     *            the subscription to transform.
+     * 
+     * @param tc
+     *            the transform copy that is used to remove the first triple
+     *            pattern and to rewrite the next.
      * 
      * @return a new SPARQL query with the first triple pattern which has been
      *         removed or {@code null} if the original SPARQL query contains
      *         only one triple pattern.
      */
-    protected static final String removeFirstTriplePatternAndReplaceVars(String sparqlQuery,
-                                                                         final Quadruple quad) {
-        Op op = Algebra.compile(QueryFactory.create(sparqlQuery));
+    private static final Subscription removeFirstTriplePatternAndReplaceVars(Subscription subscription,
+                                                                             TransformCopy tc) {
+        return new Subscription(
+                subscription.getOriginalId(),
+                subscription.getId(),
+                subscription.getSource(),
+                OpAsQuery.asQuery(
+                        Transformer.transform(
+                                tc,
+                                Algebra.compile(QueryFactory.create(subscription.getSparqlQuery()))))
+                        .toString());
+    }
 
+    private static final TransformCopy createBGPTransformCopy(final Quadruple quad) {
         // vars that are contained by the first triple pattern
         final Map<Node, Node> vars = new HashMap<Node, Node>(3);
 
-        TransformCopy tc = new TransformCopy() {
+        return new TransformCopy() {
             @Override
             public Op transform(OpBGP opBGP) {
                 BasicPattern oldBasicPattern = opBGP.getPattern();
@@ -139,9 +170,58 @@ public class SubscriptionRewriter {
 
                 return new OpBGP(newBasicPattern);
             }
-        };
 
-        return OpAsQuery.asQuery(Transformer.transform(tc, op)).toString();
+            @Override
+            public Op transform(OpGraph opGraph, Op subOp) {
+                if (opGraph.getNode().isVariable()) {
+                    return new OpGraph(quad.getGraph(), subOp);
+                }
+
+                return opGraph;
+            }
+        };
+    }
+
+    private static final TransformCopy createBGPTransformCopy(final Binding binding) {
+        return new TransformCopy() {
+            @Override
+            public Op transform(OpBGP opBGP) {
+                BasicPattern oldBasicPattern = opBGP.getPattern();
+                BasicPattern newBasicPattern = new BasicPattern();
+
+                Iterator<Triple> it = oldBasicPattern.iterator();
+                Triple triple;
+
+                // skips the first triple pattern if possible
+                if (!it.hasNext()) {
+                    throw new IllegalArgumentException(
+                            "The SPARQL query to rewrite must have at least 2 triple patterns");
+                } else {
+                    triple = it.next();
+                }
+
+                if (!it.hasNext()) {
+                    throw new IllegalArgumentException(
+                            "The SPARQL query to rewrite must have at least 2 triple patterns");
+                }
+
+                while (it.hasNext()) {
+                    triple = it.next();
+                    // replaces the variables which have the same name as the
+                    // variables from the first triple pattern by the value from
+                    // the quadruple that match the first triple pattern
+                    newBasicPattern.add(Triple.create(
+                            replaceVarByBindingValue(
+                                    triple.getSubject(), binding),
+                            replaceVarByBindingValue(
+                                    triple.getPredicate(), binding),
+                            replaceVarByBindingValue(
+                                    triple.getObject(), binding)));
+                }
+
+                return new OpBGP(newBasicPattern);
+            }
+        };
     }
 
     /**
@@ -167,5 +247,18 @@ public class SubscriptionRewriter {
 
         return tripleNode;
     }
-    
+
+    private static final Node replaceVarByBindingValue(Node tripleNode,
+                                                       Binding binding) {
+
+        if (tripleNode.isVariable()) {
+            Node value = binding.get(Var.alloc(tripleNode.getName()));
+            if (value != null) {
+                return value;
+            }
+        }
+
+        return tripleNode;
+    }
+
 }
