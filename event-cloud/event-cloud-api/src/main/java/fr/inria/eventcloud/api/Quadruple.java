@@ -233,6 +233,18 @@ public class Quadruple implements Serializable {
     }
 
     /**
+     * Returns the quadruple as an array of {@link Node}s.
+     * 
+     * @return the quadruple as an array of {@link Node}s. The array contains
+     *         the nodes in the following order: graph, subject, predicate,
+     *         object.
+     */
+    public Node[] toArray() {
+        return new Node[] {
+                this.graph, this.subject, this.predicate, this.object};
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
