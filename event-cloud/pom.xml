@@ -21,6 +21,7 @@
 		<module>event-cloud-adapters</module>
 		<module>event-cloud-configuration</module>
 		<module>event-cloud-core</module>
+		<module>event-cloud-protobuf</module>
 		<module>event-cloud-utils</module>
 	</modules>
 
