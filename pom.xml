@@ -27,7 +27,7 @@
 	</issueManagement>
 
 	<prerequisites>
-		<maven>2.2.1</maven>
+		<maven>3.0.3</maven>
 	</prerequisites>
 
 	<distributionManagement>
@@ -53,14 +53,6 @@
 			<url>http://maven.event-cloud.googlecode.com/hg/snapshots</url>
 		</repository>
 	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>proactive-maven-plugin</id>
-			<name>proactive-maven-plugin</name>
-			<url>http://maven.proactive-maven-plugin.googlecode.com/hg/releases</url>
-		</pluginRepository>
-	</pluginRepositories>
 
 	<inceptionYear>2011</inceptionYear>
 
@@ -211,19 +203,19 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>2.7</version>
+					<version>2.8</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.1</version>
+					<version>2.2</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>2.4.3</version>
+					<version>2.5</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>2.2</version>
+					<version>2.3</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-source-plugin</artifactId>
@@ -231,12 +223,12 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.8.1</version>
+					<version>2.9</version>
 				</plugin>
 				<plugin>
-					<groupId>com.elaunira.pmp</groupId>
+					<groupId>org.objectweb.proactive</groupId>
 					<artifactId>proactive-maven-plugin</artifactId>
-					<version>1.0</version>
+					<version>1.0.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
