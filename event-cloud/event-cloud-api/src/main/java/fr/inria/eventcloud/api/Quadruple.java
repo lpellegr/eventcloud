@@ -55,13 +55,9 @@ public class Quadruple implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private transient Node graph;
-
-    private transient Node subject;
-
-    private transient Node predicate;
-
-    private transient Node object;
+    // contains respectively the graph, the subject, the predicate and the
+    // object value
+    private transient Node[] nodes;
 
     /**
      * Defines the different formats that are allowed to read quadruples or to
@@ -72,6 +68,7 @@ public class Quadruple implements Serializable {
     }
 
     public Quadruple() {
+        this.nodes = new Node[4];
     }
 
     /**
@@ -132,6 +129,7 @@ public class Quadruple implements Serializable {
 
     protected Quadruple(Node graph, Node subject, Node predicate, Node object,
             boolean typeChecking) {
+        this();
         if (typeChecking) {
             if (graph instanceof Node_Blank || subject instanceof Node_Blank
                     || predicate instanceof Node_Blank
@@ -168,10 +166,10 @@ public class Quadruple implements Serializable {
             }
         }
 
-        this.graph = graph;
-        this.subject = subject;
-        this.predicate = predicate;
-        this.object = object;
+        this.nodes[0] = graph;
+        this.nodes[1] = subject;
+        this.nodes[2] = predicate;
+        this.nodes[3] = object;
     }
 
     /**
@@ -180,7 +178,7 @@ public class Quadruple implements Serializable {
      * @return the graph value.
      */
     public final Node getGraph() {
-        return this.graph;
+        return this.nodes[0];
     }
 
     /**
@@ -189,7 +187,7 @@ public class Quadruple implements Serializable {
      * @return the subject value.
      */
     public final Node getSubject() {
-        return this.subject;
+        return this.nodes[1];
     }
 
     /**
@@ -198,7 +196,7 @@ public class Quadruple implements Serializable {
      * @return the predicate value.
      */
     public final Node getPredicate() {
-        return this.predicate;
+        return this.nodes[2];
     }
 
     /**
@@ -207,7 +205,7 @@ public class Quadruple implements Serializable {
      * @return the object value.
      */
     public final Node getObject() {
-        return this.object;
+        return this.nodes[3];
     }
 
     /**
@@ -216,8 +214,8 @@ public class Quadruple implements Serializable {
     @Override
     public int hashCode() {
         return 31
-                * (31 * (31 * (31 + this.graph.hashCode()) + this.subject.hashCode()) + this.predicate.hashCode())
-                + this.object.hashCode();
+                * (31 * (31 * (31 + this.nodes[0].hashCode()) + this.nodes[1].hashCode()) + this.nodes[2].hashCode())
+                + this.nodes[3].hashCode();
     }
 
     /**
@@ -226,22 +224,21 @@ public class Quadruple implements Serializable {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Quadruple
-                && this.graph.equals(((Quadruple) obj).getGraph())
-                && this.subject.equals(((Quadruple) obj).getSubject())
-                && this.predicate.equals(((Quadruple) obj).getPredicate())
-                && this.object.equals(((Quadruple) obj).getObject());
+                && this.nodes[0].equals(((Quadruple) obj).getGraph())
+                && this.nodes[1].equals(((Quadruple) obj).getSubject())
+                && this.nodes[2].equals(((Quadruple) obj).getPredicate())
+                && this.nodes[3].equals(((Quadruple) obj).getObject());
     }
 
     /**
      * Returns the quadruple as an array of {@link Node}s.
      * 
      * @return the quadruple as an array of {@link Node}s. The array contains
-     *         the nodes in the following order: graph, subject, predicate,
-     *         object.
+     *         respectively the graph, the subject, the predicate, and the
+     *         object value.
      */
     public Node[] toArray() {
-        return new Node[] {
-                this.graph, this.subject, this.predicate, this.object};
+        return this.nodes;
     }
 
     /**
@@ -251,13 +248,13 @@ public class Quadruple implements Serializable {
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("(");
-        result.append(this.graph.toString());
+        result.append(this.nodes[0].toString());
         result.append(", ");
-        result.append(this.subject.toString());
+        result.append(this.nodes[1].toString());
         result.append(", ");
-        result.append(this.predicate.toString());
+        result.append(this.nodes[2].toString());
         result.append(", ");
-        result.append(this.object.toString());
+        result.append(this.nodes[3].toString());
         result.append(")");
         return result.toString();
     }
@@ -267,22 +264,23 @@ public class Quadruple implements Serializable {
         in.defaultReadObject();
 
         Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
-        this.graph = tokenizer.next().asNode();
-        this.subject = tokenizer.next().asNode();
-        this.predicate = tokenizer.next().asNode();
-        this.object = tokenizer.next().asNode();
+        this.nodes = new Node[4];
+        this.nodes[0] = tokenizer.next().asNode();
+        this.nodes[1] = tokenizer.next().asNode();
+        this.nodes[2] = tokenizer.next().asNode();
+        this.nodes[3] = tokenizer.next().asNode();
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         OutputStreamWriter outWriter = new OutputStreamWriter(out);
-        OutputLangUtils.output(outWriter, this.graph, null);
+        OutputLangUtils.output(outWriter, this.nodes[0], null);
         outWriter.write(' ');
-        OutputLangUtils.output(outWriter, this.subject, null);
+        OutputLangUtils.output(outWriter, this.nodes[1], null);
         outWriter.write(' ');
-        OutputLangUtils.output(outWriter, this.predicate, null);
+        OutputLangUtils.output(outWriter, this.nodes[2], null);
         outWriter.write(' ');
-        OutputLangUtils.output(outWriter, this.object, null);
+        OutputLangUtils.output(outWriter, this.nodes[3], null);
         outWriter.flush();
     }
 
