@@ -17,12 +17,13 @@
 package fr.inria.eventcloud.reasoner;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 
@@ -36,7 +37,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
  */
 public final class AtomicQuery {
 
-    private final UUID id;
+    // private final UUID id;
 
     public enum ParentQueryForm {
         ASK, CONSTRUCT, DESCRIBE, SELECT
@@ -51,7 +52,7 @@ public final class AtomicQuery {
 
     public AtomicQuery(ParentQueryForm form, Node graph, Node subject,
             Node predicate, Node object) {
-        this.id = UUID.randomUUID();
+        // this.id = UUID.randomUUID();
         this.parentQueryForm = form;
         this.quadruplePattern =
                 new QuadruplePattern(graph, subject, predicate, object);
@@ -70,7 +71,7 @@ public final class AtomicQuery {
                 && this.quadruplePattern.getObject().isLiteral();
     }
 
-    public String getVariable(int index) {
+    public String getVarName(int index) {
         for (Entry<String, Integer> entry : this.vars.entrySet()) {
             if (entry.getValue().equals(index)) {
                 return entry.getKey();
@@ -80,18 +81,22 @@ public final class AtomicQuery {
         return null;
     }
 
-    public int hasVariable(String elt) {
-        Integer result = this.vars.get(elt);
+    public int getVarIndex(String varName) {
+        Integer result = vars.get(varName);
         if (result == null) {
             return -1;
-        } else {
-            return result;
         }
+
+        return result;
     }
 
-    public UUID getId() {
-        return this.id;
+    public boolean hasVariable(String varName) {
+        return getVarIndex(varName) != -1;
     }
+
+    // public UUID getId() {
+    // return this.id;
+    // }
 
     public ParentQueryForm getParentQueryForm() {
         return this.parentQueryForm;
@@ -118,15 +123,15 @@ public final class AtomicQuery {
     }
 
     public Node[] toArray() {
-        return new Node[] {
-                this.quadruplePattern.getGraph(),
-                this.quadruplePattern.getSubject(),
-                this.quadruplePattern.getPredicate(),
-                this.quadruplePattern.getObject()};
+        return this.quadruplePattern.toArray();
     }
 
-    public Set<String> getVariables() {
-        return this.vars.keySet();
+    public Set<Var> getVariables() {
+        Set<Var> vars = new HashSet<Var>();
+        for (String varName : this.vars.keySet()) {
+            vars.add(Var.alloc(varName));
+        }
+        return vars;
     }
 
     // /**

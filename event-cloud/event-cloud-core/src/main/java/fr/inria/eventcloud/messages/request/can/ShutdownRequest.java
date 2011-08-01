@@ -46,7 +46,8 @@ public class ShutdownRequest extends StatelessQuadruplePatternRequest {
     public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                QuadruplePattern quadruplePattern) {
         // close the datastore associated to the peer
-        ((JenaDatastore) overlay.getDatastore()).close(true);
+        ((JenaDatastore) overlay.getDatastore()).close();
+
         // close the datastore that is used to filter the SPARQL responses
         try {
             ((SparqlRequestResponseManager) overlay.getRequestResponseManager()).getColander()

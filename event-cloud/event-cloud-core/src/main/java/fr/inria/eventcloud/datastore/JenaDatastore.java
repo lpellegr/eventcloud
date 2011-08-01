@@ -192,16 +192,9 @@ public class JenaDatastore extends SemanticDatastore {
     }
 
     public Collection<Quadruple> find(QuadruplePattern quadruplePattern) {
-        this.datastore.getLock().enterCriticalSection(Lock.READ);
-
-        try {
-            return this.find(
-                    quadruplePattern.getGraph(), quadruplePattern.getSubject(),
-                    quadruplePattern.getPredicate(),
-                    quadruplePattern.getObject());
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
+        return this.find(
+                quadruplePattern.getGraph(), quadruplePattern.getSubject(),
+                quadruplePattern.getPredicate(), quadruplePattern.getObject());
     }
 
     /**
@@ -293,6 +286,7 @@ public class JenaDatastore extends SemanticDatastore {
         Query query = QueryFactory.create(sparqlSelectQuery);
 
         this.datastore.getLock().enterCriticalSection(Lock.READ);
+
         try {
             QueryExecution qe =
                     QueryExecutionFactory.create(

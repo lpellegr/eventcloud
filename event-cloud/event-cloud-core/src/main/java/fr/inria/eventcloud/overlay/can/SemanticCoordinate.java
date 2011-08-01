@@ -105,7 +105,7 @@ public class SemanticCoordinate extends StringCoordinate {
     }
 
     private static boolean isVariable(Node n) {
-        return n == null || n instanceof Node_ANY;
+        return n.isVariable() || n == null || n instanceof Node_ANY;
     }
 
     public static String toNTripleSyntax(String tripleElt) {

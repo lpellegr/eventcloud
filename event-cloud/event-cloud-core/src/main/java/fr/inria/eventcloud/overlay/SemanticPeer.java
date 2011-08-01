@@ -94,9 +94,13 @@ public class SemanticPeer extends PeerImpl implements PutGetApi,
      * @param obj
      */
     public SemanticPeer(Object obj) {
-        super(new CanOverlay(
-                new SparqlRequestResponseManager(), new JenaDatastore(new File(
-                        EventCloudProperties.REPOSITORIES_PATH.getValue()))));
+        super(
+                new CanOverlay(
+                        new SparqlRequestResponseManager(),
+                        new JenaDatastore(
+                                new File(
+                                        EventCloudProperties.REPOSITORIES_PATH.getValue()),
+                                EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue())));
 
         // TODO define the thread pool size and/or provide a dynamic thread pool
         // implementation

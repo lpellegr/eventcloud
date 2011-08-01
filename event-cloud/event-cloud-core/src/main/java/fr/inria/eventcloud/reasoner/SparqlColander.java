@@ -119,7 +119,7 @@ public class SparqlColander implements Closeable {
      */
     @Override
     public void close() throws IOException {
-        this.datastore.close(true);
+        this.datastore.close();
     }
 
 }

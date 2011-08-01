@@ -18,8 +18,8 @@ package fr.inria.eventcloud.proxies;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
@@ -61,14 +61,14 @@ public class PublishSubscribeProxy extends Proxy implements
     private static final Logger log =
             LoggerFactory.getLogger(PublishSubscribeProxy.class);
 
-    // Contains the subscriptions that have been registered from this proxy
-    private ConcurrentMap<SubscriptionId, Subscription> subscriptions;
+    // contains the subscriptions that have been registered from this proxy
+    private Map<SubscriptionId, Subscription> subscriptions;
 
-    // Contains the listeners to use in order to deliver the solutions
-    private ConcurrentMap<SubscriptionId, NotificationListener<?>> listeners;
+    // contains the listeners to use in order to deliver the solutions
+    private Map<SubscriptionId, NotificationListener<?>> listeners;
 
-    // Contains the solutions that are being received
-    private ConcurrentMap<NotificationId, Solution> solutions;
+    // contains the solutions that are being received
+    private Map<NotificationId, Solution> solutions;
 
     /**
      * Empty constructor required by ProActive.
@@ -82,11 +82,9 @@ public class PublishSubscribeProxy extends Proxy implements
     public PublishSubscribeProxy(EventCloudProxy proxy) {
         super(proxy);
 
-        this.subscriptions =
-                new ConcurrentHashMap<SubscriptionId, Subscription>();
-        this.listeners =
-                new ConcurrentHashMap<SubscriptionId, NotificationListener<?>>();
-        this.solutions = new ConcurrentHashMap<NotificationId, Solution>();
+        this.subscriptions = new HashMap<SubscriptionId, Subscription>();
+        this.listeners = new HashMap<SubscriptionId, NotificationListener<?>>();
+        this.solutions = new HashMap<NotificationId, Solution>();
     }
 
     /**
@@ -164,8 +162,12 @@ public class PublishSubscribeProxy extends Proxy implements
                         PAActiveObject.getUrl(PAActiveObject.getStubOnThis()),
                         sparqlQuery);
 
+        log.debug(
+                "New subscription has been registered from {} with id {}",
+                PAActiveObject.getBodyOnThis().getUrl(), subscription.getId());
+
         NotificationListener<?> result =
-                this.listeners.putIfAbsent(subscription.getId(), listener);
+                this.listeners.put(subscription.getId(), listener);
 
         if (result != null) {
             log.warn("The subscription is canceled because a listener associated to the same subscription id has been detected: "
@@ -195,7 +197,8 @@ public class PublishSubscribeProxy extends Proxy implements
 
     private void deliver(NotificationId id) {
         // TODO delivers the solution according the type of the listener
-        NotificationListener<?> listener = this.listeners.get(id);
+        NotificationListener<?> listener =
+                this.listeners.get(id.getSubscriptionId());
 
         if (listener instanceof BindingsNotificationListener) {
             this.deliver(id, (BindingsNotificationListener) listener);
@@ -221,13 +224,21 @@ public class PublishSubscribeProxy extends Proxy implements
     }
 
     public void receive(Notification notification) {
+        log.debug(
+                "New notification received on {} from {} for subscription id {}",
+                new Object[] {
+                        PAActiveObject.getBodyOnThis().getUrl(),
+                        notification.getSource(),
+                        notification.getId().getSubscriptionId()});
+
         Solution solution =
                 new Solution(
-                        this.subscriptions.get(notification.getId())
+                        this.subscriptions.get(
+                                notification.getId().getSubscriptionId())
                                 .getSubSubscriptions().length,
                         notification.getBinding());
         Solution existingSolution =
-                this.solutions.putIfAbsent(notification.getId(), solution);
+                this.solutions.put(notification.getId(), solution);
 
         if (existingSolution != null) {
             existingSolution.addSubSolution(notification.getBinding());
@@ -243,6 +254,18 @@ public class PublishSubscribeProxy extends Proxy implements
         }
     }
 
+    /**
+     * Searches the {@link Subscription} associated to the specified
+     * {@link SubscriptionId}.
+     * 
+     * @param id
+     *            the identifier associated to the {@link Subscription} to
+     *            lookup.
+     * 
+     * @return the subscription associated to the {@code id} if the {@code id}
+     *         is contained into the list of the subscription identifiers that
+     *         have been register from this proxy, {@code false} otherwise.
+     */
     public Subscription find(SubscriptionId id) {
         return this.subscriptions.get(id);
     }
