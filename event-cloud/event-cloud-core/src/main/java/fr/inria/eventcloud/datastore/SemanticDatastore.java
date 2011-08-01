@@ -34,8 +34,8 @@ import fr.inria.eventcloud.api.Quadruple;
  */
 public abstract class SemanticDatastore extends PersistentDatastore {
 
-    protected SemanticDatastore(File parentPath) {
-        super(parentPath);
+    protected SemanticDatastore(File parentPath, boolean autoRemove) {
+        super(parentPath, autoRemove);
     }
 
     /**

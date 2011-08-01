@@ -150,7 +150,7 @@ public final class JenaDatastoreTest {
 
     @After
     public void tearDown() {
-        this.datastore.close(true);
+        this.datastore.close();
     }
 
 }

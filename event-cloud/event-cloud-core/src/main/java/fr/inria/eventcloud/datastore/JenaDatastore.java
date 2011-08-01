@@ -20,8 +20,6 @@ import java.io.File;
 import java.util.Iterator;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
@@ -40,7 +38,6 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
-import fr.inria.eventcloud.utils.Files;
 
 /**
  * This class defines a concrete implementation of a persistent datastore which
@@ -51,18 +48,29 @@ import fr.inria.eventcloud.utils.Files;
  */
 public class JenaDatastore extends SemanticDatastore {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(JenaDatastore.class);
-
     private DatasetGraphTDB datastore;
 
+    /**
+     * Creates a new datastore that stores data into a folder from the OS
+     * temporary directory.
+     */
     public JenaDatastore() {
-        super(new File(System.getProperty("java.io.tmpdir")));
-        this.registerPlugins();
+        this(new File(System.getProperty("java.io.tmpdir")), true);
     }
 
-    public JenaDatastore(File repositoryPath) {
-        super(repositoryPath);
+    /**
+     * Creates a new datastore that stores data into the specified
+     * {@code repositoryPath}.
+     * 
+     * @param repositoryPath
+     *            the path where to store the data.
+     * 
+     * @param autoRemove
+     *            indicates whether the repository has to be removed or not when
+     *            it is closed.
+     */
+    public JenaDatastore(File repositoryPath, boolean autoRemove) {
+        super(repositoryPath, autoRemove);
         this.registerPlugins();
     }
 
@@ -91,30 +99,7 @@ public class JenaDatastore extends SemanticDatastore {
      */
     @Override
     protected void internalClose() {
-        if (super.path.toString().startsWith(
-                System.getProperty("java.io.tmpdir"))) {
-            this.internalClose(true);
-        } else {
-            this.datastore.close();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void internalClose(boolean remove) {
         this.datastore.close();
-
-        if (remove) {
-            if (Files.deleteDirectory(super.path)) {
-                log.info("Repository {} has been deleted", super.path);
-            } else {
-                log.error(
-                        "The deletion of the repository {} has failed",
-                        super.path);
-            }
-        }
     }
 
     /*
@@ -128,11 +113,13 @@ public class JenaDatastore extends SemanticDatastore {
     public void add(Quadruple quad) {
         this.datastore.getLock().enterCriticalSection(Lock.WRITE);
 
-        this.datastore.add(
-                quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                quad.getObject());
-
-        this.datastore.getLock().leaveCriticalSection();
+        try {
+            this.datastore.add(
+                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                    quad.getObject());
+        } finally {
+            this.datastore.getLock().leaveCriticalSection();
+        }
     }
 
     /**
@@ -142,13 +129,15 @@ public class JenaDatastore extends SemanticDatastore {
     public void add(Collection<Quadruple> quads) {
         this.datastore.getLock().enterCriticalSection(Lock.WRITE);
 
-        for (Quadruple quad : quads) {
-            this.datastore.add(
-                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                    quad.getObject());
+        try {
+            for (Quadruple quad : quads) {
+                this.datastore.add(
+                        quad.getGraph(), quad.getSubject(),
+                        quad.getPredicate(), quad.getObject());
+            }
+        } finally {
+            this.datastore.getLock().leaveCriticalSection();
         }
-
-        this.datastore.getLock().leaveCriticalSection();
     }
 
     /**
@@ -158,11 +147,13 @@ public class JenaDatastore extends SemanticDatastore {
     public void delete(Quadruple quad) {
         this.datastore.getLock().enterCriticalSection(Lock.WRITE);
 
-        this.datastore.delete(
-                quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                quad.getObject());
-
-        this.datastore.getLock().leaveCriticalSection();
+        try {
+            this.datastore.delete(
+                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                    quad.getObject());
+        } finally {
+            this.datastore.getLock().leaveCriticalSection();
+        }
     }
 
     /**
@@ -173,11 +164,15 @@ public class JenaDatastore extends SemanticDatastore {
         boolean result;
 
         this.datastore.getLock().enterCriticalSection(Lock.READ);
-        result =
-                this.datastore.contains(
-                        quad.getGraph(), quad.getSubject(),
-                        quad.getPredicate(), quad.getObject());
-        this.datastore.getLock().leaveCriticalSection();
+
+        try {
+            result =
+                    this.datastore.contains(
+                            quad.getGraph(), quad.getSubject(),
+                            quad.getPredicate(), quad.getObject());
+        } finally {
+            this.datastore.getLock().leaveCriticalSection();
+        }
 
         return result;
     }
@@ -188,14 +183,25 @@ public class JenaDatastore extends SemanticDatastore {
     @Override
     public void deleteAny(Node g, Node s, Node p, Node o) {
         this.datastore.getLock().enterCriticalSection(Lock.WRITE);
-        this.datastore.deleteAny(g, s, p, o);
-        this.datastore.getLock().leaveCriticalSection();
+
+        try {
+            this.datastore.deleteAny(g, s, p, o);
+        } finally {
+            this.datastore.getLock().leaveCriticalSection();
+        }
     }
 
     public Collection<Quadruple> find(QuadruplePattern quadruplePattern) {
-        return this.find(
-                quadruplePattern.getGraph(), quadruplePattern.getSubject(),
-                quadruplePattern.getPredicate(), quadruplePattern.getObject());
+        this.datastore.getLock().enterCriticalSection(Lock.READ);
+
+        try {
+            return this.find(
+                    quadruplePattern.getGraph(), quadruplePattern.getSubject(),
+                    quadruplePattern.getPredicate(),
+                    quadruplePattern.getObject());
+        } finally {
+            this.datastore.getLock().leaveCriticalSection();
+        }
     }
 
     /**
@@ -206,16 +212,20 @@ public class JenaDatastore extends SemanticDatastore {
         Collection<Quadruple> result = new Collection<Quadruple>();
 
         this.datastore.getLock().enterCriticalSection(Lock.READ);
-        Iterator<Quad> quads = this.datastore.find(g, s, p, o);
 
-        Quad quad;
-        while (quads.hasNext()) {
-            quad = quads.next();
-            result.add(new Quadruple(
-                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                    quad.getObject()));
+        try {
+            Iterator<Quad> quads = this.datastore.find(g, s, p, o);
+
+            Quad quad;
+            while (quads.hasNext()) {
+                quad = quads.next();
+                result.add(new Quadruple(
+                        quad.getGraph(), quad.getSubject(),
+                        quad.getPredicate(), quad.getObject()));
+            }
+        } finally {
+            this.datastore.getLock().leaveCriticalSection();
         }
-        this.datastore.getLock().leaveCriticalSection();
 
         return result;
     }
@@ -228,8 +238,12 @@ public class JenaDatastore extends SemanticDatastore {
         boolean result;
 
         this.datastore.getLock().enterCriticalSection(Lock.READ);
-        result = this.datastore.isEmpty();
-        this.datastore.getLock().leaveCriticalSection();
+
+        try {
+            result = this.datastore.isEmpty();
+        } finally {
+            this.datastore.getLock().leaveCriticalSection();
+        }
 
         return result;
     }
@@ -239,9 +253,10 @@ public class JenaDatastore extends SemanticDatastore {
      */
     @Override
     public boolean executeSparqAsk(String sparqlAskQuery) {
+        Query query = QueryFactory.create(sparqlAskQuery);
+
+        this.datastore.getLock().enterCriticalSection(Lock.READ);
         try {
-            Query query = QueryFactory.create(sparqlAskQuery);
-            this.datastore.getLock().enterCriticalSection(Lock.READ);
             QueryExecution qe =
                     QueryExecutionFactory.create(
                             query, this.datastore.toDataset());
@@ -256,9 +271,11 @@ public class JenaDatastore extends SemanticDatastore {
      */
     @Override
     public Model executeSparqlConstruct(String sparqlConstructQuery) {
+        Query query = QueryFactory.create(sparqlConstructQuery);
+
+        this.datastore.getLock().enterCriticalSection(Lock.READ);
+
         try {
-            Query query = QueryFactory.create(sparqlConstructQuery);
-            this.datastore.getLock().enterCriticalSection(Lock.READ);
             QueryExecution qe =
                     QueryExecutionFactory.create(
                             query, this.datastore.toDataset());
@@ -273,9 +290,10 @@ public class JenaDatastore extends SemanticDatastore {
      */
     @Override
     public ResultSet executeSparqlSelect(String sparqlSelectQuery) {
+        Query query = QueryFactory.create(sparqlSelectQuery);
+
+        this.datastore.getLock().enterCriticalSection(Lock.READ);
         try {
-            Query query = QueryFactory.create(sparqlSelectQuery);
-            this.datastore.getLock().enterCriticalSection(Lock.READ);
             QueryExecution qe =
                     QueryExecutionFactory.create(
                             query, this.datastore.toDataset());
@@ -295,11 +313,7 @@ public class JenaDatastore extends SemanticDatastore {
     @Override
     @SuppressWarnings("unchecked")
     public void affectDataReceived(Object dataReceived) {
-        for (Quadruple quad : (Collection<Quadruple>) dataReceived) {
-            this.datastore.add(
-                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                    quad.getObject());
-        }
+        this.add((Collection<Quadruple>) dataReceived);
     }
 
     /**
