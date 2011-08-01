@@ -77,6 +77,22 @@ public class EventCloudProperties {
     public static final PropertyString EVENT_CLOUD_NS = new PropertyString(
             "eventcloud.namespace", "http://www.play-project.eu/event-cloud/");
 
+    public static final PropertyString SEMANTIC_PEER_ADL = new PropertyString(
+            "semantic.peer.adl", "fr.inria.eventcloud.overlay.SemanticPeer");
+
+    public static final PropertyString SEMANTIC_TRACKER_ADL =
+            new PropertyString(
+                    "semantic.tracker.adl",
+                    "fr.inria.eventcloud.tracker.SemanticTracker");
+
+    public static final PropertyString PUBSUB_PROXY_ADL = new PropertyString(
+            "pubsub.proxy.adl",
+            "fr.inria.eventcloud.proxies.PublishSubscribeProxy");
+
+    public static final PropertyString PUBSUB_PROXY_SERVICES_ITF =
+            new PropertyString(
+                    "pubsub-proxy.services.itf", "pubsub-proxy-services");
+
     static {
         File preferencesFile = new File(getPreferencesFilePath());
         String eventCloudConfigurationProperty =

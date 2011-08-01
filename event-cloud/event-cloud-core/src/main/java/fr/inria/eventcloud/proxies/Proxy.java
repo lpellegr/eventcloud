@@ -48,7 +48,7 @@ public abstract class Proxy {
     }
 
     protected SemanticPeer selectPeer() {
-        return this.proxy.selectTracker().getRandomPeer();
+        return this.proxy.selectTracker().getRandomSemanticPeer();
     }
 
     public static final void read(InputStream in, SerializationFormat format,
