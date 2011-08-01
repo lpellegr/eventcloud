@@ -52,7 +52,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.elaunira.pmp</groupId>
+				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-maven-plugin</artifactId>
 				<executions>
 					<execution>
