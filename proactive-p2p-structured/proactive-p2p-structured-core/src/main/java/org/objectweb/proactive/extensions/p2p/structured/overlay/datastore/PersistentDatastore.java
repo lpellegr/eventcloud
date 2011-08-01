@@ -17,6 +17,11 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.datastore;
 
 import java.io.File;
+import java.io.IOException;
+
+import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A persistent datastore is a datastore that writes data on a disk.
@@ -25,11 +30,27 @@ import java.io.File;
  */
 public abstract class PersistentDatastore extends Datastore {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(PersistentDatastore.class);
+
     protected final File path;
 
-    protected PersistentDatastore(File parentPath) {
+    protected final boolean autoRemove;
+
+    protected PersistentDatastore(File parentPath, boolean autoRemove) {
         super();
         this.path = new File(parentPath, super.id.toString());
+        this.autoRemove = autoRemove;
+
+        if (autoRemove) {
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    if (initialized.get()) {
+                        close();
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -44,19 +65,24 @@ public abstract class PersistentDatastore extends Datastore {
     /**
      * Closes the datastore and removes the repository from the disk if the
      * {@code remove} parameter is set to {@code true}.
-     * 
-     * @param remove
-     *            indicates whether the repository associated to the datastore
-     *            has to be removed.
      */
-    public void close(boolean remove) {
+    @Override
+    public void close() {
         if (!super.initialized.compareAndSet(true, false)) {
             throw new IllegalStateException("datastore not initialized");
         } else {
-            this.internalClose(remove);
+            if (this.autoRemove) {
+                try {
+                    Files.deleteDirectory(this.path);
+                    log.info("Repository {} has been deleted", this.path);
+                } catch (IOException e) {
+                    log.error("The deletion of the repository " + this.path
+                            + " has failed", e);
+                }
+            }
+
+            this.internalClose();
         }
     }
-
-    protected abstract void internalClose(boolean remove);
 
 }

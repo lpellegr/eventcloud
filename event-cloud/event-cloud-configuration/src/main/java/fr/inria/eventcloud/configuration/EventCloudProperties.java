@@ -47,6 +47,15 @@ public class EventCloudProperties {
             "eventcloud.repositories.path", getDefaultRepositoriesPath());
 
     /**
+     * Defines whether the repositories that are instantiated must be removed
+     * automatically when they are closed. This value is set by default to
+     * {@code false} but setting it to {@code true} is really useful for testing
+     * purposes.
+     */
+    public static final PropertyBoolean REPOSITORIES_AUTO_REMOVE =
+            new PropertyBoolean("eventcloud.repositories.autoremove", false);
+
+    /**
      * Defines whether the Event-Cloud has to compress the data that are
      * transfered between the peers and the users when it is possible.
      */
@@ -67,7 +76,6 @@ public class EventCloudProperties {
      */
     public static final PropertyString EVENT_CLOUD_NS = new PropertyString(
             "eventcloud.namespace", "http://www.play-project.eu/event-cloud/");
-
 
     static {
         File preferencesFile = new File(getPreferencesFilePath());
