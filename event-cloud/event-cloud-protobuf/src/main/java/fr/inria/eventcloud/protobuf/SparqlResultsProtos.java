@@ -811,7 +811,7 @@ public final class SparqlResultsProtos {
       
       public fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding buildPartial() {
         fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding result = new fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding(this);
-        // int from_bitField0_ = bitField0_;
+        int from_bitField0_ = bitField0_;
         if (parentBindingBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001)) {
             parentBinding_ = java.util.Collections.unmodifiableList(parentBinding_);
