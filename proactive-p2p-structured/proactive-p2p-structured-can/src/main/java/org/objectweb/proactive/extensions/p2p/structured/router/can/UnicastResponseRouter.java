@@ -100,9 +100,9 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
             logger.debug("The message is routed to a neigbour because the current peer "
                     + "managing "
                     + overlay
-                    + " does not contains the key to reach ("
+                    + " does not contains the key to reach "
                     + response.getKey()
-                    + "). Neighbor is selected from dimension "
+                    + ". Neighbor is selected from dimension "
                     + dimension
                     + " and direction " + direction + ": " + neighborChosen);
         }

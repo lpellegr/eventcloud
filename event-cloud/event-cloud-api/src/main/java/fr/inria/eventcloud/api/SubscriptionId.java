@@ -42,7 +42,7 @@ public final class SubscriptionId implements Serializable {
      * 
      * @return the <code>SubscriptionId</code> represented by the argument.
      */
-    public static final SubscriptionId parseSubscriptionId(String s) {
+    public static final SubscriptionId parseFrom(String s) {
         return new SubscriptionId(Long.parseLong(s));
     }
 

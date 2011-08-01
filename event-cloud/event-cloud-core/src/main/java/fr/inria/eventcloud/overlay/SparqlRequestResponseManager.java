@@ -29,6 +29,8 @@ import java.util.concurrent.Future;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.MapMaker;
 import com.hp.hpl.jena.query.ResultSet;
@@ -56,6 +58,9 @@ import fr.inria.eventcloud.reasoner.SparqlReasoner;
  * @author lpellegr
  */
 public class SparqlRequestResponseManager extends CanRequestResponseManager {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(SparqlRequestResponseManager.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -85,8 +90,14 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
         Subscription subscription = this.subscriptionsCache.get(id);
 
         if (subscription == null) {
-            return Subscription.parseSubscription(
-                    (JenaDatastore) this.overlay.getDatastore(), id);
+            log.debug(
+                    "SparqlRequestResponseManager.find({}) subscription not in cache, retrieving it from the datastore",
+                    id);
+            subscription =
+                    Subscription.parseFrom(
+                            (JenaDatastore) this.overlay.getDatastore(), id);
+            this.subscriptionsCache.putIfAbsent(
+                    subscription.getId(), subscription);
         }
 
         return subscription;

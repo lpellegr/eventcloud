@@ -45,7 +45,7 @@ public class SubscriptionTest {
         datastore.add(quads);
 
         Subscription deserializedSubscription =
-                Subscription.parseSubscription(datastore, subscription.getId());
+                Subscription.parseFrom(datastore, subscription.getId());
 
         Collection<Quadruple> newQuads =
                 deserializedSubscription.toQuadruples();

@@ -22,8 +22,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import fr.inria.eventcloud.api.QuadruplePattern;
-
 /**
  * Tests associated to the {@link SparqlDecomposer} class.
  * 
@@ -43,8 +41,7 @@ public class SparqlDecomposerTest {
                 this.decomposer.decompose("ASK { GRAPH ?g { ?s ?p ?o } }");
 
         Assert.assertEquals(1, atomicQueries.size());
-        Assert.assertEquals(QuadruplePattern.ANY, atomicQueries.get(0)
-                .getQuadruplePattern());
+        Assert.assertEquals(4, atomicQueries.get(0).getVariables().size());
 
         atomicQueries =
                 this.decomposer.decompose("SELECT ?g WHERE { GRAPH ?g { ?s <http://www.inria.fr/eventcloud/predicate1> ?o . ?s <http://www.inria.fr/eventcloud/predicate2> ?o } }");

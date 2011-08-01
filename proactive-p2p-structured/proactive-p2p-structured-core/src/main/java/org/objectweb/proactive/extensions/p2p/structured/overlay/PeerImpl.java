@@ -97,11 +97,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
         body.setImmediateService("toString", false);
         body.setImmediateService("getType", false);
 
-        // puts the following methods as immediate service in
-        // order to have the possibility to handle concurrent
-        // queries
-        PAActiveObject.setImmediateService("send");
-        PAActiveObject.setImmediateService("route");
+        body.setImmediateService("route", false);
 
         // tests if overlay is null for component instantiation use-case
         if (this.overlay != null) {

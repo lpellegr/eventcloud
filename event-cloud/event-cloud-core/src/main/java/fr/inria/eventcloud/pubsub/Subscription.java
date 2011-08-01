@@ -16,15 +16,33 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.*;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_CREATION_DATETIME_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_CREATION_DATETIME_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ID_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_INDEXED_WITH_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ORIGINAL_ID_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ORIGINAL_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_PARENT_ID_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_PARENT_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SERIALIZED_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SPARQL_QUERY_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_STUB_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SUBSCRIBER_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SUBSCRIBER_PROPERTY;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -34,6 +52,8 @@ import org.objectweb.proactive.api.PAActiveObject;
 import com.google.common.base.Objects;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
@@ -74,8 +94,10 @@ public class Subscription implements Rdfable, Serializable {
 
     private List<Stub> stubs;
 
-    // this field is transient because the subSubscriptions can be created from
-    // the sparqlQuery on the fly
+    // the following fields are transient because they can be
+    // created from the sparqlQuery on the fly
+    private transient Set<Var> resultVars;
+
     private transient Subsubscription[] subSubscriptions;
 
     public Subscription(String source, String sparqlQuery) {
@@ -271,7 +293,7 @@ public class Subscription implements Rdfable, Serializable {
         return this.stubs;
     }
 
-    public Subsubscription[] getSubSubscriptions() {
+    public synchronized Subsubscription[] getSubSubscriptions() {
         if (this.subSubscriptions == null) {
             List<AtomicQuery> subQueries =
                     new SparqlDecomposer().decompose(this.sparqlQuery);
@@ -283,6 +305,18 @@ public class Subscription implements Rdfable, Serializable {
         }
 
         return this.subSubscriptions;
+    }
+
+    public synchronized Set<Var> getResultVars() {
+        if (this.resultVars == null) {
+            this.resultVars = new HashSet<Var>();
+            for (String varName : QueryFactory.create(this.sparqlQuery)
+                    .getResultVars()) {
+                this.resultVars.add(Var.alloc(varName));
+            }
+        }
+
+        return this.resultVars;
     }
 
     /**
@@ -408,9 +442,9 @@ public class Subscription implements Rdfable, Serializable {
         // hash value that identifies the quadruple to retrieve
         public final long quadrupleHash;
 
-        public Stub(String peerUrl, long timestamp) {
+        public Stub(String peerUrl, long quadrupleHashValue) {
             this.peerUrl = peerUrl;
-            this.quadrupleHash = timestamp;
+            this.quadrupleHash = quadrupleHashValue;
         }
 
     }

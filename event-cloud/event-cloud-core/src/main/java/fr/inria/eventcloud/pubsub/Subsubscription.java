@@ -16,7 +16,19 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.*;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_GRAPH_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_ID_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_INDEX_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_INDEX_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_OBJECT_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_PREDICATE_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -25,7 +37,6 @@ import java.util.Map;
 import com.google.common.base.Objects;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Node_ANY;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
@@ -38,6 +49,8 @@ import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
 import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
+ * A Subsubscription is an {@link AtomicQuery} that knows who is its parent and
+ * what is its position in the parent query.
  * 
  * @author lpellegr
  */
@@ -57,10 +70,12 @@ public class Subsubscription implements Rdfable, Serializable {
             int index) {
         this.parentId = parentId;
         this.atomicQuery = atomicQuery;
+        this.index = index;
         this.id =
                 new SubscriptionId(MurmurHash.hash64(
-                        parentId.toString(), atomicQuery.getId().toString()));
-        this.index = index;
+                        parentId.toString(),
+                        Integer.toString(atomicQuery.hashCode()),
+                        Integer.toString(index)));
     }
 
     private Subsubscription(SubscriptionId parentId, SubscriptionId id,
@@ -75,11 +90,11 @@ public class Subsubscription implements Rdfable, Serializable {
     }
 
     public SubscriptionId getParentId() {
-        return parentId;
+        return this.parentId;
     }
 
     public SubscriptionId getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -92,7 +107,7 @@ public class Subsubscription implements Rdfable, Serializable {
     }
 
     public AtomicQuery getAtomicQuery() {
-        return atomicQuery;
+        return this.atomicQuery;
     }
 
     /**
@@ -105,37 +120,35 @@ public class Subsubscription implements Rdfable, Serializable {
                 Node.createURI(SUBSUBSCRIPTION_NS + this.id.toString());
 
         quads.add(new Quadruple(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_NS_NODE,
-                subSubscriptionURI, SUBSUBSCRIPTION_ID_NODE,
-                Node.createLiteral(
+                SUBSCRIPTION_NS_NODE, subSubscriptionURI,
+                SUBSUBSCRIPTION_ID_NODE, Node.createLiteral(
                         this.id.toString(), null, XSDDatatype.XSDlong)));
 
         quads.add(new Quadruple(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_NS_NODE,
-                subSubscriptionURI, SUBSUBSCRIPTION_INDEX_NODE,
-                Node.createLiteral(
+                SUBSCRIPTION_NS_NODE, subSubscriptionURI,
+                SUBSUBSCRIPTION_INDEX_NODE, Node.createLiteral(
                         Integer.toString(this.index), null, XSDDatatype.XSDint)));
 
         quads.add(new Quadruple(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_NS_NODE,
+                SUBSCRIPTION_NS_NODE,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_GRAPH_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getGraph())));
 
         quads.add(new Quadruple(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_NS_NODE,
+                SUBSCRIPTION_NS_NODE,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_SUBJECT_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getSubject())));
 
         quads.add(new Quadruple(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_NS_NODE,
+                SUBSCRIPTION_NS_NODE,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_PREDICATE_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getPredicate())));
 
         quads.add(new Quadruple(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_NS_NODE,
+                SUBSCRIPTION_NS_NODE,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_OBJECT_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getObject())));
@@ -168,9 +181,25 @@ public class Subsubscription implements Rdfable, Serializable {
         return false;
     }
 
-    public static final Subsubscription parseSubsubscription(SemanticDatastore datastore,
-                                                             String subscriptionId,
-                                                             String subSubscriptionId) {
+    /**
+     * Parses a {@link Subsubscription} from the specified
+     * {@link SemanticDatastore} by using the specified {@code subscriptionId}
+     * and {@code subSubscriptionId}.
+     * 
+     * @param datastore
+     *            the datastore where the information about the sub subscription
+     *            are stored.
+     * @param subscriptionId
+     *            the subscriptionId which is the parent id for the
+     *            {@code subSubscriptionId}
+     * @param subSubscriptionId
+     *            the identifier of the sub subscription.
+     * 
+     * @return the sub subscription which has been parsed.
+     */
+    public static final Subsubscription parseFrom(SemanticDatastore datastore,
+                                                  String subscriptionId,
+                                                  String subSubscriptionId) {
         Collection<Quadruple> quads =
                 datastore.find(Node.ANY, Node.createURI(SUBSUBSCRIPTION_NS
                         + subSubscriptionId), Node.ANY, Node.ANY);
@@ -184,32 +213,25 @@ public class Subsubscription implements Rdfable, Serializable {
         }
 
         return new Subsubscription(
-                SubscriptionId.parseSubscriptionId(subscriptionId),
-                SubscriptionId.parseSubscriptionId(subSubscriptionId),
+                SubscriptionId.parseFrom(subscriptionId),
+                SubscriptionId.parseFrom(subSubscriptionId),
                 (Integer) properties.get(SUBSUBSCRIPTION_INDEX_PROPERTY)
                         .getLiteralValue(),
-                replaceVarNodeByVariableTypedLiteral(properties.get(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY)),
-                replaceVarNodeByVariableTypedLiteral(properties.get(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY)),
-                replaceVarNodeByVariableTypedLiteral(properties.get(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY)),
-                replaceVarNodeByVariableTypedLiteral(properties.get(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY)));
+
+                // when they are serialized, variables are serialized as
+                // typed-literal with VariableDatatype datatype. To get a
+                // Node_Variable we have to get the parsed literal value but
+                // only if the serialized value was a variable
+                replaceVariableTypedLiteralByVarNode(properties.get(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY)),
+                replaceVariableTypedLiteralByVarNode(properties.get(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY)),
+                replaceVariableTypedLiteralByVarNode(properties.get(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY)),
+                replaceVariableTypedLiteralByVarNode(properties.get(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY)));
     }
 
-    // uses the "-" prefix because a SPARQL variable cannot start with it
     private static final Node replaceVarNodeByVariableTypedLiteral(Node node) {
-        if (node == null) {
-            return Node.createLiteral(
-                    "-null", null, VariableDatatype.getInstance());
-
-        }
-
         if (node.isVariable()) {
             return Node.createLiteral(
                     node.getName(), null, VariableDatatype.getInstance());
-        }
-
-        if (node instanceof Node_ANY) {
-            return Node.createLiteral(
-                    "-any", null, VariableDatatype.getInstance());
         }
 
         return node;
@@ -224,4 +246,5 @@ public class Subsubscription implements Rdfable, Serializable {
 
         return node;
     }
+
 }
