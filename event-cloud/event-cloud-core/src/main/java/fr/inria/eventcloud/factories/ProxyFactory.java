@@ -17,14 +17,22 @@
 package fr.inria.eventcloud.factories;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.core.node.NodeException;
+import org.etsi.uri.gcm.util.GCM;
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.Factory;
+import org.objectweb.fractal.api.Component;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalLifeCycleException;
+import org.objectweb.proactive.core.component.adl.FactoryFactory;
+import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.proxies.EventCloudProxy;
 import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
@@ -45,10 +53,18 @@ import fr.inria.eventcloud.proxies.PutGetProxy;
  */
 public final class ProxyFactory {
 
+    private static Factory factory;
+
     private static final ConcurrentMap<EventCloudId, ProxyFactory> proxies;
 
     static {
         proxies = new ConcurrentHashMap<EventCloudId, ProxyFactory>();
+        CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
+        try {
+            factory = FactoryFactory.getFactory();
+        } catch (ADLException e) {
+            e.printStackTrace();
+        }
     }
 
     private EventCloudProxy eventCloudProxy;
@@ -73,12 +89,20 @@ public final class ProxyFactory {
      */
     public PublishSubscribeProxy createPublishSubscribeProxy() {
         try {
-            return PAActiveObject.newActive(
-                    PublishSubscribeProxy.class,
-                    new Object[] {this.eventCloudProxy});
-        } catch (ActiveObjectCreationException e) {
+            Component pubSubProxy =
+                    (Component) factory.newComponent(
+                            EventCloudProperties.PUBSUB_PROXY_ADL.getValue(),
+                            new HashMap<String, Object>());
+            PublishSubscribeProxy stub =
+                    (PublishSubscribeProxy) pubSubProxy.getFcInterface(EventCloudProperties.PUBSUB_PROXY_SERVICES_ITF.getValue());
+            stub.init(this.eventCloudProxy);
+            GCM.getGCMLifeCycleController(pubSubProxy).startFc();
+            return stub;
+        } catch (ADLException e) {
             e.printStackTrace();
-        } catch (NodeException e) {
+        } catch (NoSuchInterfaceException e) {
+            e.printStackTrace();
+        } catch (IllegalLifeCycleException e) {
             e.printStackTrace();
         }
 

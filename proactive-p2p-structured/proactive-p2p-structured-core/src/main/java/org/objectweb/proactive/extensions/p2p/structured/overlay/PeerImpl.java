@@ -102,7 +102,6 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
         // tests if overlay is null for component instantiation use-case
         if (this.overlay != null) {
             this.overlay.stub = (Peer) PAActiveObject.getStubOnThis();
-            this.overlay.initActivity(body);
         }
 
         // receive cannot be handled as immediate service
@@ -121,7 +120,10 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
             }
         }
 
-        this.overlay.endActivity(body);
+        if (this.overlay.datastore != null
+                && this.overlay.datastore.isInitialized()) {
+            this.overlay.datastore.close();
+        }
     }
 
     /**
