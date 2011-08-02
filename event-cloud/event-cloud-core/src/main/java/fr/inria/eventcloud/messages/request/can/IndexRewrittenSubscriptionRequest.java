@@ -98,8 +98,8 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
         List<Binding> bindings = new ArrayList<Binding>();
         List<Node> quadHashValues = new ArrayList<Node>();
 
-        // cannot iterate on the binding and perform operation on the datastore
-        // at the same time
+        // cannot iterate on the binding and perform write
+        // operation on the datastore at the same time
         while (result.hasNext()) {
             Binding binding = result.nextBinding();
             bindings.add(filter(
@@ -192,8 +192,8 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
      * @return a binding which contains only the variables (and their associated
      *         value) from the specified list of variables.
      */
-    private Binding filter(Binding binding, Set<Var> resultVars,
-                           AtomicQuery atomicQuery) {
+    private static final Binding filter(Binding binding, Set<Var> resultVars,
+                                        AtomicQuery atomicQuery) {
         Set<Var> vars =
                 Sets.intersection(resultVars, atomicQuery.getVariables());
 
@@ -209,19 +209,19 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
     }
 
     private static final String createQueryRetrievingQuadruplesMatchingRewrittenSubscription(Subsubscription s) {
-        String[] triplePatternValues = new String[3];
+        String[] quadruplePatternValues = new String[4];
         String[] defaultVariables = {"?g", "?s", "?p", "?o"};
         List<String> resultVariables = new ArrayList<String>();
         resultVariables.add(defaultVariables[0]);
 
         Node[] nodes = s.getAtomicQuery().toArray();
 
-        for (int i = 1; i < nodes.length; i++) {
+        for (int i = 0; i < nodes.length; i++) {
             if (nodes[i].isVariable()) {
                 resultVariables.add(defaultVariables[i]);
-                triplePatternValues[i - 1] = defaultVariables[i];
+                quadruplePatternValues[i] = defaultVariables[i];
             } else {
-                triplePatternValues[i - 1] = FmtUtils.stringForNode(nodes[i]);
+                quadruplePatternValues[i] = FmtUtils.stringForNode(nodes[i]);
             }
         }
 
@@ -232,11 +232,13 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
             result.append(" ");
         }
         result.append(" WHERE {\n     GRAPH ?h {\n        ");
-        for (String triplePatternValue : triplePatternValues) {
-            result.append(triplePatternValue);
+        for (int i = 1; i < quadruplePatternValues.length; i++) {
+            result.append(quadruplePatternValues[i]);
             result.append(" ");
         }
-        result.append(" .\n        ?g <");
+        result.append(" .\n        ");
+        result.append(quadruplePatternValues[0]);
+        result.append(" <");
         result.append(PUBLICATION_INSERTION_DATETIME_NODE);
         result.append("> ?insertionTime .\n    }\n}");
 
