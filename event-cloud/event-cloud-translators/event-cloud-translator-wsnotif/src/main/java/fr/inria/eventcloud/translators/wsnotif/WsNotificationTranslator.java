@@ -37,7 +37,23 @@ public interface WsNotificationTranslator {
 
     /**
      * Translates a {@code xmlPayload} standing for a WS-Notification
-     * notification to an {@link Event} where the literal values assocaited to
+     * notification to an {@link Event}. Because there is no XSD information
+     * that is given to the method, the literals are not annotated with a
+     * datatype.
+     * 
+     * @param data
+     *            the XML payload.
+     * @param eventId
+     *            the identifier associated to the event.
+     * 
+     * @return an {@link Event}.
+     */
+    public Event translateWsNotifNotificationToEvent(InputStream xmlPayload,
+                                                     URI eventId);
+
+    /**
+     * Translates a {@code xmlPayload} standing for a WS-Notification
+     * notification to an {@link Event} where the literal values associated to
      * the quadruple contained by the event are annotated by using the
      * {@code xsdPayload}.
      * 

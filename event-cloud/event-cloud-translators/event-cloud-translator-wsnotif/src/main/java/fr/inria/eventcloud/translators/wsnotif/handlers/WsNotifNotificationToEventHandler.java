@@ -1,13 +1,31 @@
+/**
+ * Copyright (c) 2011 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
 package fr.inria.eventcloud.translators.wsnotif.handlers;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Collection;
@@ -35,10 +53,14 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
 
     private Node topicFullQName;
 
-    public WsNotifNotificationToEventHandler(String graphValue) {
+    private Map<String, XSDDatatype> elementDatatypes;
+
+    public WsNotifNotificationToEventHandler(String graphValue,
+            Map<String, XSDDatatype> elementDatatypes) {
         this.elements = new LinkedList<Element>();
         this.quadruples = new ArrayList<Quadruple>();
         this.graphNode = Node.createURI(graphValue);
+        this.elementDatatypes = elementDatatypes;
     }
 
     /**
@@ -64,9 +86,7 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
         if (!this.lastTextNodeRead.trim().isEmpty()) {
-            this.parseQuadruple(
-                    this.elements.getLast().getFullQName(),
-                    this.lastTextNodeRead);
+            this.parseQuadruple(this.lastTextNodeRead);
         }
         this.elements.removeLast();
     }
@@ -96,7 +116,7 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
         }
     }
 
-    private void parseQuadruple(String fullQName, String textNode) {
+    private void parseQuadruple(String textNode) {
         StringBuilder predicate = new StringBuilder();
         for (int i = 0; i < this.elements.size(); i++) {
             predicate.append(this.elements.get(i).getFullQName());
@@ -105,12 +125,24 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
             }
         }
 
-        // TODO: annotate object with datatype from XSD
+        Node object = null;
+        // try to annotate the object value by leveraging the information from
+        // the XSD file
+        if (this.elementDatatypes != null) {
+            XSDDatatype datatype =
+                    this.elementDatatypes.get(this.elements.getLast().localName);
+            if (datatype != null) {
+                object = Node.createLiteral(textNode, null, datatype);
+            }
+        }
+
+        if (object == null) {
+            object = Node.createLiteral(textNode);
+        }
 
         this.quadruples.add(Quadruple.createWithoutTypeChecking(
                 this.graphNode, this.topicFullQName,
-                Node.createURI(predicate.toString()),
-                Node.createLiteral(textNode)));
+                Node.createURI(predicate.toString()), object));
     }
 
     public List<Quadruple> getQuadruples() {

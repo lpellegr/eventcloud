@@ -23,6 +23,7 @@
 		<module>event-cloud-core</module>
 		<module>event-cloud-protobuf</module>
 		<module>event-cloud-utils</module>
+		<module>event-cloud-translators</module>
 	</modules>
 
 </project>
