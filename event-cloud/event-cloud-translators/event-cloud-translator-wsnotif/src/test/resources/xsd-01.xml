@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xsd:element name="cardiacRythm">
+	<xsd:complexType>
+		<xsd:sequence>
+			<xsd:element name="fireman" type="Q1:FiremanType" />
+			<xsd:element name="value" type="xsd:int" />
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:element>
+<xsd:complexType name="FiremanType">
+	<xsd:sequence>
+		<xsd:element name="name" type="string" />
+		<xsd:element ref="wsa:EndpointReference" />
+	</xsd:sequence>
+</xsd:complexType>
