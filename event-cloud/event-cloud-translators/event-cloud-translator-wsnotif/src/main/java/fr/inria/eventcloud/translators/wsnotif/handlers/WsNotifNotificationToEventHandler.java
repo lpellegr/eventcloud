@@ -76,7 +76,9 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
             this.topicFullQName = Node.createURI(uri + "/" + localName);
         }
 
-        this.elements.add(new Element(uri, localName, qName, attributes));
+        this.elements.add(new Element(uri, localName
+        // , qName, attributes
+        ));
     }
 
     /**
@@ -159,17 +161,19 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
 
         private final String localName;
 
-        private final String qName;
+        // private final String qName;
 
-        private final Attributes attributes;
+        // private final Attributes attributes;
 
-        public Element(String uri, String localName, String qName,
-                Attributes attributes) {
+        public Element(String uri, String localName
+        // , String qName,
+        // Attributes attributes
+        ) {
             super();
             this.uri = uri;
             this.localName = localName;
-            this.qName = qName;
-            this.attributes = attributes;
+            // this.qName = qName;
+            // this.attributes = attributes;
         }
 
         public String getFullQName() {

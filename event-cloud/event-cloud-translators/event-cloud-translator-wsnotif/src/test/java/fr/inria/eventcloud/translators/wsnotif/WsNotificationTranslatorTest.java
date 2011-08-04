@@ -16,11 +16,15 @@
  **/
 package fr.inria.eventcloud.translators.wsnotif;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.SecureRandom;
 
 import org.junit.Test;
+
+import fr.inria.eventcloud.api.Event;
 
 /**
  * A simple test that output to the standard output the translation result of
@@ -32,91 +36,65 @@ public class WsNotificationTranslatorTest {
 
     @Test
     public void test() {
+        WsNotificationTranslator translator =
+                new WsNotificationTranslatorImpl();
+
+        Event event;
+
+        System.out.println("[ Output for the translation of /notification-01.xml from WS-Notification notification to an Event without using XSD information ]");
         // a first translation by using only a WS-Notification notification
         // payload
-        testWsNotifNotificationToEventTranslationWith("/notification-01.xml");
+        event =
+                translator.translateWsNotifNotificationToEvent(
+                        inputStreamFrom("/notification-01.xml"),
+                        generateRandomUri());
+        System.out.println(event);
+
+        System.out.println("[ Output for the translation of /notification-01.xml from WS-Notification notification to an Event by using XSD information ]");
         // a second translation by using the WS-Notification notification
         // payload and an associated XSD file (in that case we can see that the
         // value "90" is annotated with http://www.w3.org/2001/XMLSchema#int,
         // whereas in the previous case it was not done)
-        testWsNotifNotificationToEventTranslationWith(
-                "/notification-01.xml", "/xsd-01.xml");
+        event =
+                translator.translateWsNotifNotificationToEvent(
+                        inputStreamFrom("/notification-01.xml"),
+                        inputStreamFrom("/xsd-01.xml"), generateRandomUri());
+        System.out.println(event);
+
+        System.out.println("[ Output for the translation of an Event to a WS-Notification notification for the Event which has been previously created ]");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        translator.translateEventToWsNotifNotification(baos, event);
+        System.out.println(new String(baos.toByteArray()));
+
     }
 
-    private void testWsNotifNotificationToEventTranslationWith(String dataFile) {
-        testWith(
-                dataFile,
-                null,
-                "from WS-Notification notification to an Event without using XSD information",
-                new WsNotificationTranslatorLambda() {
+    private InputStream inputStreamFrom(String file) {
+        InputStream is = null;
 
-                    @Override
-                    public void executeMethodCall(WsNotificationTranslator translator,
-                                                  InputStream dataIS,
-                                                  InputStream xsdIS) {
-                        try {
-                            System.out.println(translator.translateWsNotifNotificationToEvent(
-                                    dataIS,
-                                    xsdIS,
-                                    new URI(
-                                            "http://www.inria.fr/85asd7qw7f5cbj6tr23ja1ad7")));
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-    }
-
-    private void testWsNotifNotificationToEventTranslationWith(String dataFile,
-                                                               String xsdFile) {
-        testWith(
-                dataFile,
-                xsdFile,
-                "from WS-Notification notification to an Event by using XSD information",
-                new WsNotificationTranslatorLambda() {
-
-                    @Override
-                    public void executeMethodCall(WsNotificationTranslator translator,
-                                                  InputStream dataIS,
-                                                  InputStream xsdIS) {
-                        try {
-                            System.out.println(translator.translateWsNotifNotificationToEvent(
-                                    dataIS,
-                                    xsdIS,
-                                    new URI(
-                                            "http://www.inria.fr/85asd7qw7f5cbj6tr23ja1ad7")));
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-    }
-
-    private void testWith(String dataFile, String xsdFile, String comment,
-                          WsNotificationTranslatorLambda lambda) {
-        InputStream dataIS =
-                WsNotificationTranslatorTest.class.getResourceAsStream(dataFile);
-
-        InputStream xsdIS = null;
-        if (xsdFile != null) {
-            xsdIS =
-                    WsNotificationTranslatorTest.class.getResourceAsStream(xsdFile);
+        if (file != null) {
+            is = WsNotificationTranslatorTest.class.getResourceAsStream(file);
         }
 
-        System.out.println("[ Output for the translation of " + dataFile + " "
-                + comment + " ]");
-
-        WsNotificationTranslator translator =
-                new WsNotificationTranslatorImpl();
-
-        lambda.executeMethodCall(translator, dataIS, xsdIS);
+        return is;
     }
 
-    private static interface WsNotificationTranslatorLambda {
+    private URI generateRandomUri() {
+        String legalChars =
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        public void executeMethodCall(WsNotificationTranslator translator,
-                                      InputStream dataIS, InputStream xsdIS);
+        StringBuilder result = new StringBuilder("http://www.inria.fr/");
+        SecureRandom random = new SecureRandom();
 
+        for (int i = 0; i < 20; i++) {
+            result.append(random.nextInt(legalChars.length()));
+        }
+
+        try {
+            return new URI(result.toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

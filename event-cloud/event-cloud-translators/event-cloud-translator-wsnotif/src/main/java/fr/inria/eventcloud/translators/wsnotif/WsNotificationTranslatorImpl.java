@@ -29,6 +29,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 
 import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.translators.wsnotif.handlers.EventToWsNotifNotificationHandler;
 import fr.inria.eventcloud.translators.wsnotif.handlers.WsNotifNotificationToEventHandler;
 import fr.inria.eventcloud.translators.wsnotif.handlers.XsdHandler;
 
@@ -86,7 +87,7 @@ public class WsNotificationTranslatorImpl implements WsNotificationTranslator {
     @Override
     public void translateEventToWsNotifNotification(OutputStream output,
                                                     Event event) {
-
+        new EventToWsNotifNotificationHandler().translate(output, event);
     }
 
     private void executeSaxParser(InputStream in, InputStream xsd,
