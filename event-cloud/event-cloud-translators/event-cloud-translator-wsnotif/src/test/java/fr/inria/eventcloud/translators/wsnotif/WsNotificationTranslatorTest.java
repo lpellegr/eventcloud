@@ -66,6 +66,11 @@ public class WsNotificationTranslatorTest {
         translator.translateEventToWsNotifNotification(baos, event);
         System.out.println(new String(baos.toByteArray()));
 
+        System.out.println("[ Output for the translation of a WS-Notification subscription to a SPARQL query ]");
+        System.out.println(translator.translateWsNotifSubscriptionToSparqlQuery(
+                inputStreamFrom("/subscription-01.xml"),
+                inputStreamFrom("/topic-namespace-01.xml"),
+                inputStreamFrom("/topic-definitions-01.xml")));
     }
 
     private InputStream inputStreamFrom(String file) {

@@ -74,15 +74,22 @@ public interface WsNotificationTranslator {
      * Translates a {@code xmlPayload} standing for a WS-Notification
      * subscription to a SPARQL query as String.
      * 
-     * @param xmlPayload
-     *            the XML payload.
-     * @param xsdPaylaod
-     *            the XSD payload
+     * @param wsNotifSubscriptionPayload
+     *            the WS-Notification subscription payload to translate to a
+     *            SPARQL query.
+     * @param topicNameSpacePayload
+     *            the topicNameSpace payload that defines an event.
+     * @param topicNameSpacePayloads
+     *            the definition of the topics. Several inputStream can be
+     *            specified because each topic may corresponds to a message
+     *            defined in a WSDL.
      * 
-     * @return a SPARQL query as String.
+     * @return a SPARQL query associated to the information that have been given
+     *         into parameters or {@code null} if some information are missing.
      */
-    public String translateWsNotifSubscriptionToSparqlQuery(InputStream xmlPayload,
-                                                            InputStream xsdPaylaod);
+    public String translateWsNotifSubscriptionToSparqlQuery(InputStream wsNotifSubscriptionPayload,
+                                                            InputStream topicNameSpacePayload,
+                                                            InputStream... topicsDefinitionPayloads);
 
     /**
      * Translates an {@link Event} to a WS-Notification notification XML

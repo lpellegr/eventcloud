@@ -99,7 +99,7 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
     @Override
     public void characters(char[] ch, int start, int length)
             throws SAXException {
-        this.lastTextNodeRead = new String(ch, start, length);;
+        this.lastTextNodeRead = new String(ch, start, length);
     }
 
     /**
