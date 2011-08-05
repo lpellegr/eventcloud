@@ -93,7 +93,7 @@ public class EventToWsNotifNotificationHandler {
             for (String element : elements) {
                 // pln[0] -> namespace
                 // pln[1] -> localName
-                String[] pln = splitPrefixFromLocalName(element);
+                String[] pln = XmlUtils.splitUri(element);
 
                 Element elt =
                         this.xmlElements.get(subTree(element, predicateValue));
@@ -108,8 +108,9 @@ public class EventToWsNotifNotificationHandler {
                         // element with a namespace whose a prefix already exist
                         newElt =
                                 xmlDoc.createElementNS(
-                                        pln[0], this.namespaces.get(pln[0])
-                                                + ":" + pln[1]);
+                                        pln[0], XmlUtils.createQName(
+                                                this.namespaces.get(pln[0]),
+                                                pln[1]));
                     } else {
                         // element with a namespace with no existing prefix
                         String prefix =
@@ -117,8 +118,9 @@ public class EventToWsNotifNotificationHandler {
                         this.namespaces.put(pln[0], prefix);
                         this.prefixes.put(prefix, pln[0]);
                         newElt =
-                                xmlDoc.createElementNS(pln[0], prefix + ":"
-                                        + pln[1]);
+                                xmlDoc.createElementNS(
+                                        pln[0], XmlUtils.createQName(
+                                                prefix, pln[1]));
                     }
 
                     this.xmlElements.put(
@@ -177,14 +179,6 @@ public class EventToWsNotifNotificationHandler {
 
     private static String subTree(String elt, String tree) {
         return tree.substring(0, tree.lastIndexOf(elt) + elt.length());
-    }
-
-    private static String[] splitPrefixFromLocalName(String element) {
-        int slashIndex = element.lastIndexOf('/');
-
-        return new String[] {
-                element.substring(0, slashIndex),
-                element.substring(slashIndex + 1)};
     }
 
 }

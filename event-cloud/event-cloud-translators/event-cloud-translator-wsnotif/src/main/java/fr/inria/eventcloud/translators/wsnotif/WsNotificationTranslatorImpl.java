@@ -31,6 +31,8 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.translators.wsnotif.handlers.EventToWsNotifNotificationHandler;
 import fr.inria.eventcloud.translators.wsnotif.handlers.WsNotifNotificationToEventHandler;
+import fr.inria.eventcloud.translators.wsnotif.handlers.WsNotifSubscriptionToSparqlHandler;
+import fr.inria.eventcloud.translators.wsnotif.handlers.XmlUtils;
 import fr.inria.eventcloud.translators.wsnotif.handlers.XsdHandler;
 
 /**
@@ -76,8 +78,47 @@ public class WsNotificationTranslatorImpl implements WsNotificationTranslator {
      * {@inheritDoc}
      */
     @Override
-    public String translateWsNotifSubscriptionToSparqlQuery(InputStream xmlPayload,
-                                                            InputStream xsdPaylaod) {
+    public String translateWsNotifSubscriptionToSparqlQuery(InputStream wsNotifSubscriptionPayload,
+                                                            InputStream topicNameSpacePayload,
+                                                            InputStream... topicsDefinitionPayloads) {
+
+        WsNotifSubscriptionToSparqlHandler.Subscription subscriptionHandler =
+                new WsNotifSubscriptionToSparqlHandler.Subscription();
+        WsNotifSubscriptionToSparqlHandler.TopicNamespace topicNamespaceHandler =
+                new WsNotifSubscriptionToSparqlHandler.TopicNamespace();
+
+        // parses the WS-Notification subscription to extract the topic
+        // expression
+        this.executeSaxParser(
+                wsNotifSubscriptionPayload, null, subscriptionHandler);
+
+        // parses the topic namespace to extract each topic name with its
+        // associated message types
+        this.executeSaxParser(
+                topicNameSpacePayload, null, topicNamespaceHandler);
+
+        // keeps only the local name from the topic expression
+        String topicExpression = subscriptionHandler.getTopicExpression();
+        String topicExpressionLocalName =
+                XmlUtils.getLocalNameFromUri(topicExpression);
+
+        WsNotifSubscriptionToSparqlHandler.TopicDefinition topicDefinitionHandler =
+                new WsNotifSubscriptionToSparqlHandler.TopicDefinition(
+                        topicNamespaceHandler.getTopicNames().get(
+                                topicExpressionLocalName));
+
+        for (InputStream is : topicsDefinitionPayloads) {
+            this.executeSaxParser(is, null, topicDefinitionHandler);
+
+            if (topicDefinitionHandler.getTopicMessageElement() != null) {
+                return WsNotifSubscriptionToSparqlHandler.createSparqlSubscription(topicDefinitionHandler.getTopicMessageElement());
+            } else {
+                // reset the state -> by using the clear we avoid to create a
+                // new object for each input stream
+                topicDefinitionHandler.clear();
+            }
+        }
+
         return null;
     }
 
