@@ -30,7 +30,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>r09</version>
 		</dependency>
 		<dependency>
 			<groupId>org.objectweb.proactive</groupId>
