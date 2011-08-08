@@ -16,11 +16,14 @@
  **/
 package fr.inria.eventcloud.translators.wsnotif;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 
@@ -44,10 +47,11 @@ public class WsNotificationTranslatorTest {
         System.out.println("[ Output for the translation of /notification-01.xml from WS-Notification notification to an Event without using XSD information ]");
         // a first translation by using only a WS-Notification notification
         // payload
+        URI eventId = generateRandomUri();
+
         event =
                 translator.translateWsNotifNotificationToEvent(
-                        inputStreamFrom("/notification-01.xml"),
-                        generateRandomUri());
+                        inputStreamFrom("/notification-01.xml"), eventId);
         System.out.println(event);
 
         System.out.println("[ Output for the translation of /notification-01.xml from WS-Notification notification to an Event by using XSD information ]");
@@ -58,7 +62,7 @@ public class WsNotificationTranslatorTest {
         event =
                 translator.translateWsNotifNotificationToEvent(
                         inputStreamFrom("/notification-01.xml"),
-                        inputStreamFrom("/xsd-01.xml"), generateRandomUri());
+                        inputStreamFrom("/xsd-01.xml"), eventId);
         System.out.println(event);
 
         System.out.println("[ Output for the translation of an Event to a WS-Notification notification for the Event which has been previously created ]");
@@ -67,10 +71,22 @@ public class WsNotificationTranslatorTest {
         System.out.println(new String(baos.toByteArray()));
 
         System.out.println("[ Output for the translation of a WS-Notification subscription to a SPARQL query ]");
-        System.out.println(translator.translateWsNotifSubscriptionToSparqlQuery(
-                inputStreamFrom("/subscription-01.xml"),
-                inputStreamFrom("/topic-namespace-01.xml"),
-                inputStreamFrom("/topic-definitions-01.xml")));
+
+        String sparqlQuery =
+                translator.translateWsNotifSubscriptionToSparqlQuery(
+                        inputStreamFrom("/subscription-01.xml"),
+                        inputStreamFrom("/topic-namespace-01.xml"),
+                        inputStreamFrom("/topic-definitions-01.xml"));
+        System.out.println(sparqlQuery);
+
+        // assertions
+        Event event2 =
+                translator.translateWsNotifNotificationToEvent(
+                        new ByteArrayInputStream(baos.toByteArray()),
+                        inputStreamFrom("/xsd-01.xml"), eventId);
+
+        Assert.assertEquals(event, event2);
+        Assert.assertTrue(sparqlQuery.contains("http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm"));
     }
 
     private InputStream inputStreamFrom(String file) {

@@ -24,7 +24,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.inria.eventcloud.api.Event;
+
 /**
+ * Translates a WS-Notification subscription payload to an {@link Event}. For
+ * this translation, three information are needed: the WS-Notification
+ * subscription, the TopicNamespace definition, the definition of the topics.
  * 
  * @author lpellegr
  */
