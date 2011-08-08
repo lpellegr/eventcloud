@@ -18,16 +18,17 @@ package fr.inria.eventcloud.overlay;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
-import fr.inria.eventcloud.api.PublishSubscribeApi;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.PutGetApi;
 
 /**
  * The SemanticPeer interface is used to merge the {@link Peer} interface, the
- * {@link PutGetApi} interface and the {@link PublishSubscribeApi} interface
- * into a single one.
+ * {@link PutGetApi} interface and the {@link SubscribeApi} interface into a
+ * single one.
  * 
  * @author bsauvan
  */
-public interface SemanticPeer extends Peer, PutGetApi, PublishSubscribeApi {
+public interface SemanticPeer extends Peer, PutGetApi {
+    //, SubscribeApi {
 
 }

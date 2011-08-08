@@ -21,20 +21,18 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * Provides test cases for the {@link PublishSubscribeRdf2goAdapter}. This class
- * provides tests in order to test whether the translation between RDF2Go
- * objects and event-cloud-api/Jena objects works.
+ * Provides test cases for the {@link PublishRdf2goAdapter}. This class provides
+ * tests in order to test whether the translation between RDF2Go objects and
+ * event-cloud-api/Jena objects works.
  * 
  * @author lpellegr
  */
-public class PublishSubscribeRdf2goAdapterTest extends
-        Rdf2goAdapterTest<PublishSubscribeRdf2goAdapter> {
+public class PublishRdf2goAdapterTest extends
+        Rdf2goAdapterTest<PublishRdf2goAdapter> {
 
     @Before
     public void setUp() {
-        this.adapter =
-                new PublishSubscribeRdf2goAdapter(
-                        new MockPublishSubscribeProxy());
+        this.adapter = new PublishRdf2goAdapter(new MockPublishProxy());
     }
 
     @Test

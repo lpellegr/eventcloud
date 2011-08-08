@@ -24,12 +24,12 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * A solution is a value that is delivered to a user who has subscribed with a
  * query which is matched by the solution. It contains a collection of
- * sub-solutions that are received by a {@link PublishSubscribeProxy}
+ * sub-solutions that are received by a {@link SubscribeProxy}
  * asynchronously. A solution also knows what is the number of sub solutions
  * expected and what is the current number of sub solution that are received. A
  * sub solution is represented by using a {@link Binding}.

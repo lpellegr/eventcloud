@@ -21,10 +21,10 @@ import java.io.Serializable;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.wrappers.BindingWrapper;
-import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
- * Defines a notification that is received by a {@link PublishSubscribeProxy}. A
+ * Defines a notification that is received by a {@link SubscribeProxy}. A
  * notification contains the smallest entity which can be received (i.e. a
  * {@link Binding}) as a sub-solution for a given subscription.
  * 

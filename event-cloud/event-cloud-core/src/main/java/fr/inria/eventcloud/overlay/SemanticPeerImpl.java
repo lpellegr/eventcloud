@@ -31,13 +31,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -67,9 +63,6 @@ import fr.inria.eventcloud.messages.response.can.FindQuadruplesResponse;
  * 
  * @author lpellegr
  * @author bsauvan
- */
-/*
- * TODO implement the PublishSubscribeApi interface
  */
 public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer {
 
@@ -322,75 +315,6 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
         this.threadPool.shutdown();
 
         super.endComponentActivity(body);
-    }
-
-    /*
-     * PublishSubscribeApi implementation 
-     */
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Quadruple quad) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Event event) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Collection<Event> events) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(InputStream in, SerializationFormat format) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingNotificationListener listener) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    EventNotificationListener listener) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void unsubscribe(SubscriptionId id) {
-        // TODO Auto-generated method stub
-
     }
 
 }

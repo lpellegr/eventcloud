@@ -16,53 +16,29 @@
  **/
 package fr.inria.eventcloud.adapters.rdf2go;
 
-import java.io.InputStream;
-
-import org.ontoware.rdf2go.model.Statement;
-import org.ontoware.rdf2go.model.node.Node;
-import org.ontoware.rdf2go.model.node.Resource;
-import org.ontoware.rdf2go.model.node.URI;
-
-import fr.inria.eventcloud.api.PublishSubscribeApi;
-import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 
 /**
  * This class is used as an adapter for any object that implements the
- * {@link PublishSubscribeApi} interface. It provides methods with types which
- * are compatible with RDF2Go. These methods then delegate the calls to the
- * underlying object by using the {@link PublishSubscribeApi}.
+ * {@link SubscribeApi} interface. It provides methods with types which are
+ * compatible with RDF2Go. These methods then delegate the calls to the
+ * underlying object by using the {@link SubscribeApi}.
  * 
  * @author lpellegr
  */
-public final class PublishSubscribeRdf2goAdapter extends
-        Rdf2goAdapter<PublishSubscribeApi> {
+public final class SubscribeRdf2goAdapter extends Rdf2goAdapter<SubscribeApi> {
 
     /**
-     * Constructs a new RDF2Go adapter for the given object.
+     * Constructs a new RDF2Go adapter for the given delegate.
      * 
-     * @param obj
+     * @param delegate
      *            the object to adapt.
      */
-    public PublishSubscribeRdf2goAdapter(PublishSubscribeApi obj) {
-        super(obj);
-    }
-
-    public void publish(URI context, Resource subject, URI predicate,
-                        Node object) {
-        super.delegate.publish(toQuadruple(context, subject, predicate, object));
-    }
-
-    public void publish(Statement stmt) {
-        this.publish(
-                stmt.getContext(), stmt.getSubject(), stmt.getPredicate(),
-                stmt.getObject());
-    }
-
-    public void publish(InputStream in, SerializationFormat format) {
-        super.delegate.publish(in, format);
+    public SubscribeRdf2goAdapter(SubscribeApi delegate) {
+        super(delegate);
     }
 
     public SubscriptionId subscribe(String sparqlQuery,

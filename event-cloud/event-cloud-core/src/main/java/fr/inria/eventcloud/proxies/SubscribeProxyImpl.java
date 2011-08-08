@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.proxies;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,26 +26,20 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.Solution;
 import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
- * PublishSubscribeProxyImpl is a concrete implementation of
- * {@link PublishSubscribeProxy}. This class has to be instantiated as a
- * ProActive/GCM component.
+ * SubscribeProxyImpl is a concrete implementation of {@link SubscribeProxy}.
+ * This class has to be instantiated as a ProActive/GCM component.
  * <p>
  * Currently the receive operation is handled sequentially because it is not set
  * as IS. This means we don't have to synchronize the datastructure that are
@@ -58,13 +51,13 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * 
  * @see ProxyFactory
  */
-public class PublishSubscribeProxyImpl extends Proxy implements
-        ComponentInitActive, PublishSubscribeProxy {
+public class SubscribeProxyImpl extends Proxy implements ComponentInitActive,
+        SubscribeProxy {
 
     private static final long serialVersionUID = 1L;
 
     private static final Logger log =
-            LoggerFactory.getLogger(PublishSubscribeProxy.class);
+            LoggerFactory.getLogger(SubscribeProxy.class);
 
     // contains the subscriptions that have been registered from this proxy
     private Map<SubscriptionId, Subscription> subscriptions;
@@ -78,7 +71,7 @@ public class PublishSubscribeProxyImpl extends Proxy implements
     /**
      * Empty constructor required by ProActive.
      */
-    public PublishSubscribeProxyImpl() {
+    public SubscribeProxyImpl() {
         super();
     }
 
@@ -102,56 +95,6 @@ public class PublishSubscribeProxyImpl extends Proxy implements
                     new HashMap<SubscriptionId, NotificationListener<?>>();
             this.solutions = new HashMap<NotificationId, Solution>();
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Quadruple quad) {
-        // TODO: use an asynchronous call with no response (see issue 16)
-        try {
-            super.proxy.selectTracker().getRandomPeer().send(
-                    new PublishQuadrupleRequest(quad));
-        } catch (DispatchException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Event event) {
-        // TODO try to improve the publication of several quadruples
-        // first insight: use a thread-pool
-        for (Quadruple quad : event.getQuadruples()) {
-            this.publish(quad);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Collection<Event> events) {
-        // TODO use a thread-pool
-        for (Event event : events) {
-            this.publish(event);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(InputStream in, SerializationFormat format) {
-        read(in, format, new QuadrupleAction() {
-            @Override
-            public void performAction(Quadruple quad) {
-                publish(quad);
-            }
-        });
     }
 
     /**
