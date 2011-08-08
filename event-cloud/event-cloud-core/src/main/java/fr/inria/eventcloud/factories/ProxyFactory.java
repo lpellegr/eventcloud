@@ -32,6 +32,7 @@ import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.proxies.EventCloudProxy;
 import fr.inria.eventcloud.proxies.PublishProxy;
@@ -97,7 +98,7 @@ public final class ProxyFactory {
      * 
      * @return a new {@link SubscribeProxy}.
      */
-    public SubscribeProxy createSubscribeProxy() {
+    public SubscribeProxy createSubscribeProxy(AlterableElaProperty... properties) {
         try {
             Component pubSubProxy =
                     (Component) factory.newComponent(
@@ -105,7 +106,7 @@ public final class ProxyFactory {
                             new HashMap<String, Object>());
             SubscribeProxy stub =
                     (SubscribeProxy) pubSubProxy.getFcInterface(EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
-            stub.init(this.eventCloudProxy);
+            stub.init(this.eventCloudProxy, properties);
             GCM.getGCMLifeCycleController(pubSubProxy).startFc();
             return stub;
         } catch (ADLException e) {

@@ -30,6 +30,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
+import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.pubsub.Notification;
@@ -87,13 +88,14 @@ public class SubscribeProxyImpl extends Proxy implements ComponentInitActive,
      */
     // TODO: add support for ELA properties. At least for the maximum number of
     // requests per seconds (by using a queue and a scheduled Timer).
-    public void init(EventCloudProxy proxy) {
+    public void init(EventCloudProxy proxy, AlterableElaProperty[] properties) {
         if (this.proxy == null) {
             this.proxy = proxy;
             this.subscriptions = new HashMap<SubscriptionId, Subscription>();
             this.listeners =
                     new HashMap<SubscriptionId, NotificationListener<?>>();
             this.solutions = new HashMap<NotificationId, Solution>();
+            // TODO: use the properties field to initialize ELA properties
         }
     }
 
