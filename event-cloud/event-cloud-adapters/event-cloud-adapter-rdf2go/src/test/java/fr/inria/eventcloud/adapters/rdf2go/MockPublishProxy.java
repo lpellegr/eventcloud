@@ -8,7 +8,7 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
@@ -20,23 +20,17 @@ import java.io.InputStream;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
-import fr.inria.eventcloud.api.PublishSubscribeApi;
+import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 
 /**
- * This class is assumed to play the role of a mock PublishSubscribeProxy in
- * order to test if the translation between RDF2Go and Jena objects work.
+ * This class is assumed to play the role of a mock PublishProxy in order to
+ * test if the translation between RDF2Go and Jena objects work.
  * 
  * @author lpellegr
  */
-public class MockPublishSubscribeProxy implements PublishSubscribeApi {
-
-    public MockPublishSubscribeProxy() {
-    }
+public class MockPublishProxy implements PublishApi {
 
     /**
      * {@inheritDoc}
@@ -64,31 +58,6 @@ public class MockPublishSubscribeProxy implements PublishSubscribeApi {
      */
     @Override
     public void publish(InputStream in, SerializationFormat format) {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingNotificationListener listener) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    EventNotificationListener listener) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void unsubscribe(SubscriptionId id) {
     }
 
 }

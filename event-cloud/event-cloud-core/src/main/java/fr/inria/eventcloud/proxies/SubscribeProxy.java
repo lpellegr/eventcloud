@@ -18,21 +18,20 @@ package fr.inria.eventcloud.proxies;
 
 import java.io.Serializable;
 
-import fr.inria.eventcloud.api.PublishSubscribeApi;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
- * A PublishSubscribeProxy is a proxy that implements the
- * {@link PublishSubscribeApi}. It has to be used by a user who wants to execute
- * publish/subscribe asynchronous operations on an Event-Cloud.
+ * A SubscribeProxy is a proxy that implements the {@link SubscribeApi}. It has
+ * to be used by a user who wants to execute subscribe asynchronous operations
+ * on an Event Cloud.
  * 
  * @author lpellegr
  * @author bsauvan
  */
-public interface PublishSubscribeProxy extends PublishSubscribeApi,
-        Serializable {
+public interface SubscribeProxy extends SubscribeApi, Serializable {
 
     /**
      * The init method is a convenient method for components which is used to

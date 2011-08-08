@@ -32,7 +32,7 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 /**
  * A PutGetProxy is a proxy that implements the {@link PutGetApi}. It has to be
  * used by a user who wants to execute put/get synchronous operations on an
- * Event-Cloud.
+ * Event Cloud.
  * 
  * @author lpellegr
  */

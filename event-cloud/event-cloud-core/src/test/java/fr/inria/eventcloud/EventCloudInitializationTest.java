@@ -30,7 +30,8 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
+import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * Shows how to instantiate and to use an EventCloud.
@@ -108,11 +109,10 @@ public class EventCloudInitializationTest implements Serializable {
 
         // Creates and retrieved a publish subscribe proxy
         // However the interface is not yet implemented
-        final PublishSubscribeProxy pubsubProxy =
-                factory.createPublishSubscribeProxy();
+        final SubscribeProxy subscribeProxy = factory.createSubscribeProxy();
 
         SubscriptionId id =
-                pubsubProxy.subscribe(
+                subscribeProxy.subscribe(
                         "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
                         new BindingNotificationListener() {
                             private static final long serialVersionUID = 1L;
@@ -125,16 +125,18 @@ public class EventCloudInitializationTest implements Serializable {
                             }
                         });
 
+        PublishProxy publishProxy = factory.createPublishProxy();
+
         System.out.println("Subscription with id " + id
                 + " has been registered");
 
-        pubsubProxy.publish(new Quadruple(
+        publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/107234124364605485774/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/name"),
                 Node.createLiteral("Laurent Pellegrino")));
 
-        pubsubProxy.publish(new Quadruple(
+        publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/107234124364605485774/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
@@ -142,36 +144,35 @@ public class EventCloudInitializationTest implements Serializable {
 
         // pubsubProxy.find(id);
 
-        pubsubProxy.publish(new Quadruple(
+        publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/107234124364605485774/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
                 Node.createLiteral("laurent.pellegrino@gmail.com[chronicle context]")));
 
-        pubsubProxy.publish(new Quadruple(
+        publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/48798548797974/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
                 Node.createLiteral("firstname.lastname@gmail.com")));
 
-        pubsubProxy.publish(new Quadruple(
+        publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/746668964541235679/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
                 Node.createLiteral("frederic.dupont@gmail.com")));
 
-        pubsubProxy.publish(new Quadruple(
+        publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/746668964541235679/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/name"),
                 Node.createLiteral("Frederic Dupont")));
-        
-        pubsubProxy.publish(new Quadruple(
+
+        publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/48798548797974/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("firstname Lastname")));
-
+                Node.createLiteral("Firstname Lastname")));
 
         // pubsubProxy.publish(new Quadruple(
         // Node.createURI("https://plus.google.com/ee"),

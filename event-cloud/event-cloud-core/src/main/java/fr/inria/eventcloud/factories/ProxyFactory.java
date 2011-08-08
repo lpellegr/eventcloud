@@ -34,18 +34,19 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.proxies.EventCloudProxy;
-import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
+import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 
 /**
  * ProxyFactory is used to create a new instance of a proxy (e.g.
- * {@link PublishSubscribeProxy} or {@link PutGetProxy}). This means that there
- * is at least one instance of a proxy by user. To retrieve a ProxyFactory
- * instance you have to use the {@link #getInstance(URL, EventCloudId)} method.
- * It will return an instance of a ProxyFactory that is specialized to create
- * proxies for the given {@link EventCloudId}. Then, internally, when you create
- * a new proxy, the factory will share the same {@link EventCloudProxy} for all
- * the proxies that are created from the retrieved ProxyFactory. Indeed, a proxy
+ * {@link SubscribeProxy} or {@link PutGetProxy}). This means that there is at
+ * least one instance of a proxy by user. To retrieve a ProxyFactory instance
+ * you have to use the {@link #getInstance(URL, EventCloudId)} method. It will
+ * return an instance of a ProxyFactory that is specialized to create proxies
+ * for the given {@link EventCloudId}. Then, internally, when you create a new
+ * proxy, the factory will share the same {@link EventCloudProxy} for all the
+ * proxies that are created from the retrieved ProxyFactory. Indeed, a proxy
  * only needs trackers (which serves as entry points into the network) to work
  * and these trackers are supposed to stay the same over the time.
  * 
@@ -83,18 +84,27 @@ public final class ProxyFactory {
     }
 
     /**
-     * Creates a new {@link PublishSubscribeProxy}.
+     * Creates a new {@link PublishProxy}.
      * 
-     * @return a new {@link PublishSubscribeProxy}.
+     * @return a new {@link PublishProxy}.
      */
-    public PublishSubscribeProxy createPublishSubscribeProxy() {
+    public PublishProxy createPublishProxy() {
+        return new PublishProxy(this.eventCloudProxy);
+    }
+
+    /**
+     * Creates a new {@link SubscribeProxy}.
+     * 
+     * @return a new {@link SubscribeProxy}.
+     */
+    public SubscribeProxy createSubscribeProxy() {
         try {
             Component pubSubProxy =
                     (Component) factory.newComponent(
-                            EventCloudProperties.PUBSUB_PROXY_ADL.getValue(),
+                            EventCloudProperties.SUBSCRIBE_PROXY_ADL.getValue(),
                             new HashMap<String, Object>());
-            PublishSubscribeProxy stub =
-                    (PublishSubscribeProxy) pubSubProxy.getFcInterface(EventCloudProperties.PUBSUB_PROXY_SERVICES_ITF.getValue());
+            SubscribeProxy stub =
+                    (SubscribeProxy) pubSubProxy.getFcInterface(EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
             stub.init(this.eventCloudProxy);
             GCM.getGCMLifeCycleController(pubSubProxy).startFc();
             return stub;

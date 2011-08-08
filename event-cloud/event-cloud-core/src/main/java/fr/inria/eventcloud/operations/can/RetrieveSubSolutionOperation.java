@@ -39,7 +39,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.JenaDatastore;
-import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.Subsubscription;
@@ -152,9 +152,9 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
                             .getLiteralLexicalForm();
 
             try {
-                PublishSubscribeProxy proxy =
-                        (PublishSubscribeProxy) PAActiveObject.lookupActive(
-                                PublishSubscribeProxy.class, subscriberUrl);
+                SubscribeProxy proxy =
+                        (SubscribeProxy) PAActiveObject.lookupActive(
+                                SubscribeProxy.class, subscriberUrl);
 
                 proxy.receive(new Notification(
                         this.id, PAActiveObject.getUrl(overlay.getStub()),

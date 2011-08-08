@@ -28,46 +28,7 @@ import fr.inria.eventcloud.api.listeners.EventNotificationListener;
  * 
  * @author lpellegr
  */
-public interface PublishSubscribeApi {
-
-    /**
-     * Publishes the specified quadruple.
-     * 
-     * @param quad
-     *            the quadruple to publish.
-     */
-    public void publish(Quadruple quad);
-
-    /**
-     * Publishes the specified event.
-     * 
-     * @param event
-     *            the event to publish.
-     */
-    public void publish(Event event);
-
-    /**
-     * Publishes the specified collection of {@link Event}s.
-     * 
-     * @param events
-     *            the events to publish.
-     */
-    public void publish(Collection<Event> events);
-
-    /**
-     * Publishes the quadruples that are read from the specified input stream.
-     * The input stream is assumed to comply with the <a
-     * href="http://www4.wiwiss.fu-berlin.de/bizer/TriG/">TriG</a> or <a
-     * href="http://sw.deri.org/2008/07/n-quads/">N-Quads</a> syntax.
-     * 
-     * @param in
-     *            the input stream from where the quadruples are read.
-     * 
-     * @param format
-     *            the format that is used to read the data from the input
-     *            stream.
-     */
-    public void publish(InputStream in, SerializationFormat format);
+public interface SubscribeApi {
 
     /**
      * Subscribes for notifications of type {@link BindingNotificationListener}

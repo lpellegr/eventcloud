@@ -60,7 +60,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Rdfable;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
-import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
 import fr.inria.eventcloud.utils.MurmurHash;
@@ -272,10 +272,10 @@ public class Subscription implements Rdfable, Serializable {
         return this.source;
     }
 
-    public PublishSubscribeProxy getSourceStub() {
+    public SubscribeProxy getSourceStub() {
         try {
             return PAActiveObject.lookupActive(
-                    PublishSubscribeProxy.class, this.source);
+                    SubscribeProxy.class, this.source);
         } catch (ActiveObjectCreationException e) {
             e.printStackTrace();
         } catch (IOException e) {
