@@ -19,7 +19,9 @@ package fr.inria.eventcloud.proxies;
 import java.io.Serializable;
 
 import fr.inria.eventcloud.api.PublishSubscribeApi;
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.pubsub.Notification;
+import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
  * A PublishSubscribeProxy is a proxy that implements the
@@ -42,6 +44,20 @@ public interface PublishSubscribeProxy extends PublishSubscribeApi,
      *            proxy.
      */
     public void init(EventCloudProxy proxy);
+
+    /**
+     * Searches the {@link Subscription} associated to the specified
+     * {@link SubscriptionId}.
+     * 
+     * @param id
+     *            the identifier associated to the {@link Subscription} to
+     *            lookup.
+     * 
+     * @return the subscription associated to the {@code id} if the {@code id}
+     *         is contained into the list of the subscription identifiers that
+     *         have been register from this proxy, {@code false} otherwise.
+     */
+    public Subscription find(SubscriptionId id);
 
     /**
      * Used internally to send back a notification.

@@ -16,23 +16,24 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.PUBLICATION_INSERTION_DATETIME_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.QUADRUPLE_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_INDEXED_WITH_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.PUBLICATION_INSERTION_DATETIME_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.QUADRUPLE_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -44,12 +45,17 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.util.FmtUtils;
 
+import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.JenaDatastore;
@@ -58,9 +64,10 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
-import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
+import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.SubscriptionRewriter;
+import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
@@ -84,9 +91,6 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        System.err.println("PublishQuadrupleRequest.onDestinationReached() "
-                + PAActiveObject.getUrl(overlay.getStub()));
-
         long quadId = MurmurHash.hash64(quad.toString());
         Node quadIdNode = Node.createURI(QUADRUPLE_NS + quadId);
         JenaDatastore datastore = ((JenaDatastore) overlay.getDatastore());
@@ -95,16 +99,17 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         // this quadruple is decomposed into 2 quadruples to indicate when it
         // has been inserted but also to know the quadruple has been inserted
         // from the publish/subscribe api.
-        datastore.add(new Quadruple(
-                quadIdNode, quad.getSubject(), quad.getPredicate(),
-                quad.getObject()));
-        datastore.add(new Quadruple(
-                quadIdNode,
-                quad.getGraph(),
-                PUBLICATION_INSERTION_DATETIME_NODE,
-                Node.createLiteral(
-                        DatatypeConverter.printDateTime(Calendar.getInstance()),
-                        null, XSDDatatype.XSDdateTime)));
+        datastore.add(new Collection<Quadruple>(
+                new Quadruple(
+                        quadIdNode, quad.getSubject(), quad.getPredicate(),
+                        quad.getObject()),
+                new Quadruple(
+                        quadIdNode,
+                        quad.getGraph(),
+                        PUBLICATION_INSERTION_DATETIME_NODE,
+                        Node.createLiteral(
+                                DatatypeConverter.printDateTime(Calendar.getInstance()),
+                                null, XSDDatatype.XSDdateTime))));
 
         log.debug(
                 "SPARQL query used to retrieve the sub subscriptions matching {}:\n{}",
@@ -129,8 +134,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         }
 
         log.debug(
-                "{} subscription(s) matches the quadruple which has been inserted",
-                matchingIds.size());
+                "{} subscription(s) matches the quadruple which has been inserted on {}",
+                matchingIds.size(), overlay);
 
         for (Pair<Node> pair : matchingIds) {
             log.debug(
@@ -191,9 +196,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 new Notification(
                                         notificationId,
                                         PAActiveObject.getUrl(overlay.getStub()),
-                                        PublishSubscribeUtils.extractBinding(
-                                                subscription.getSubSubscriptions()[0].getAtomicQuery(),
-                                                quad)));
+                                        filter(
+                                                quad,
+                                                subscription.getResultVars(),
+                                                subscription.getSubSubscriptions()[0].getAtomicQuery())));
             } else {
                 // then we find the subscription object associated to the
                 // subscriptionId that is matched and we rewrite the
@@ -215,6 +221,24 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 }
             }
         }
+    }
+
+    public static final Binding filter(Quadruple quad, Set<Var> resultVars,
+                                       AtomicQuery atomicQuery) {
+        Set<Var> vars =
+                Sets.intersection(resultVars, atomicQuery.getVariables());
+        Binding binding = BindingFactory.create();
+        Node[] nodes = quad.toArray();
+
+        int i = 0;
+        for (Node node : atomicQuery.toArray()) {
+            if (node.isVariable() && vars.contains(Var.alloc(node.getName()))) {
+                binding.add(Var.alloc(node.getName()), nodes[i]);
+            }
+            i++;
+        }
+
+        return binding;
     }
 
     private static final String createQueryRetrievingSubscriptionsMatching(Quadruple quad) {
@@ -248,22 +272,22 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         query.append("            (sameTerm(?subSubscriptionGraph, ");
         query.append(FmtUtils.stringForNode(quad.getGraph()));
         query.append(") || datatype(?subSubscriptionGraph) = <");
-        query.append(PublishSubscribeUtils.SUBSCRIPTION_VARIABLE_VALUE);
+        query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionSubject, ");
         query.append(FmtUtils.stringForNode(quad.getSubject()));
         query.append(") || datatype(?subSubscriptionSubject) = <");
-        query.append(PublishSubscribeUtils.SUBSCRIPTION_VARIABLE_VALUE);
+        query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionPredicate, ");
         query.append(FmtUtils.stringForNode(quad.getPredicate()));
         query.append(") || datatype(?subSubscriptionPredicate) = <");
-        query.append(PublishSubscribeUtils.SUBSCRIPTION_VARIABLE_VALUE);
+        query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionObject, ");
         query.append(FmtUtils.stringForNode(quad.getObject()));
         query.append(") || datatype(?subSubscriptionObject) = <");
-        query.append(PublishSubscribeUtils.SUBSCRIPTION_VARIABLE_VALUE);
+        query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("        )\n");
         query.append("     }\n");

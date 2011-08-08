@@ -242,6 +242,17 @@ public class Quadruple implements Serializable {
     }
 
     /**
+     * Returns the {@link Triple} value associated to the quadruple by cutting
+     * the graph value.
+     * 
+     * @return the {@link Triple} value associated to the quadruple by cutting
+     *         the graph value.
+     */
+    public Triple toTriple() {
+        return Triple.create(this.nodes[1], this.nodes[2], this.nodes[3]);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

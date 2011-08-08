@@ -7,7 +7,7 @@
 		</encoder>
 	</appender>
 
-	<logger name="com.hp" level="INFO" />
+	<logger name="com.hp" level="OFF" />
 	<logger name="org.objectweb.proactive.extensions.p2p" level="DEBUG" />
 	<logger name="fr.inria.eventcloud" level="DEBUG" />
 

@@ -32,8 +32,8 @@ import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
@@ -47,6 +47,11 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * PublishSubscribeProxyImpl is a concrete implementation of
  * {@link PublishSubscribeProxy}. This class has to be instantiated as a
  * ProActive/GCM component.
+ * <p>
+ * Currently the receive operation is handled sequentially because it is not set
+ * as IS. This means we don't have to synchronize the datastructure that are
+ * used inside this method. However it would be nice to evaluate/decide if it is
+ * interesting to put the receive operation as IS (TODO).
  * 
  * @author lpellegr
  * @author bsauvan
@@ -154,7 +159,7 @@ public class PublishSubscribeProxyImpl extends Proxy implements
      */
     @Override
     public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingsNotificationListener listener) {
+                                    BindingNotificationListener listener) {
         return this.indexSubscription(sparqlQuery, listener);
     }
 
@@ -163,7 +168,7 @@ public class PublishSubscribeProxyImpl extends Proxy implements
      */
     @Override
     public SubscriptionId subscribe(String sparqlQuery,
-                                    EventsNotificationListener listener) {
+                                    EventNotificationListener listener) {
         return this.indexSubscription(sparqlQuery, listener);
     }
 
@@ -212,10 +217,10 @@ public class PublishSubscribeProxyImpl extends Proxy implements
         NotificationListener<?> listener =
                 this.listeners.get(id.getSubscriptionId());
 
-        if (listener instanceof BindingsNotificationListener) {
-            this.deliver(id, (BindingsNotificationListener) listener);
-        } else if (listener instanceof EventsNotificationListener) {
-            this.deliver(id, (EventsNotificationListener) listener);
+        if (listener instanceof BindingNotificationListener) {
+            this.deliver(id, (BindingNotificationListener) listener);
+        } else if (listener instanceof EventNotificationListener) {
+            this.deliver(id, (EventNotificationListener) listener);
         } else {
             log.error("Unknown notification listener: " + listener.getClass());
         }
@@ -223,16 +228,16 @@ public class PublishSubscribeProxyImpl extends Proxy implements
         log.debug("Notification {} has been delivered", id);
     }
 
-    private void deliver(NotificationId id,
-                         BindingsNotificationListener listener) {
-        listener.handleNotification(id.getSubscriptionId(), this.solutions.get(
-                id).getBindings());
+    private void deliver(NotificationId id, BindingNotificationListener listener) {
+        listener.onNotification(id.getSubscriptionId(), this.solutions.get(id)
+                .getSolution());
     }
 
-    private void deliver(NotificationId id, EventsNotificationListener listener) {
+    private void deliver(NotificationId id, EventNotificationListener listener) {
         // TODO retrieve all the quadruples associated to each context value and
         // create events according to the context value, then deliver the events
         // by using the listener
+        System.out.println("PublishSubscribeProxyImpl.enclosing_method()");
     }
 
     public void receive(Notification notification) {
@@ -243,18 +248,22 @@ public class PublishSubscribeProxyImpl extends Proxy implements
                         notification.getSource(),
                         notification.getId().getSubscriptionId()});
 
-        Solution solution =
-                new Solution(
-                        this.subscriptions.get(
-                                notification.getId().getSubscriptionId())
-                                .getSubSubscriptions().length,
-                        notification.getBinding());
-        Solution existingSolution =
-                this.solutions.put(notification.getId(), solution);
+        System.out.println("PublishSubscribeProxyImpl.receive() notification contains binding which is "
+                + notification.getBinding()
+                + " and notification id is "
+                + notification.getId());
 
-        if (existingSolution != null) {
-            existingSolution.addSubSolution(notification.getBinding());
-            solution = existingSolution;
+        Solution solution = this.solutions.get(notification.getId());
+        if (solution == null) {
+            solution =
+                    new Solution(
+                            this.subscriptions.get(
+                                    notification.getId().getSubscriptionId())
+                                    .getSubSubscriptions().length,
+                            notification.getBinding());
+            this.solutions.put(notification.getId(), solution);
+        } else {
+            solution.addSubSolution(notification.getBinding());
         }
 
         // checks whether all the sub-solutions have been received or not
@@ -267,17 +276,9 @@ public class PublishSubscribeProxyImpl extends Proxy implements
     }
 
     /**
-     * Searches the {@link Subscription} associated to the specified
-     * {@link SubscriptionId}.
-     * 
-     * @param id
-     *            the identifier associated to the {@link Subscription} to
-     *            lookup.
-     * 
-     * @return the subscription associated to the {@code id} if the {@code id}
-     *         is contained into the list of the subscription identifiers that
-     *         have been register from this proxy, {@code false} otherwise.
+     * {@inheritDoc}
      */
+    @Override
     public Subscription find(SubscriptionId id) {
         return this.subscriptions.get(id);
     }

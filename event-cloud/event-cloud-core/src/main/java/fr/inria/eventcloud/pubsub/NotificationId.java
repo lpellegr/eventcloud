@@ -95,7 +95,7 @@ public class NotificationId implements Serializable {
      */
     @Override
     public String toString() {
-        return "[subscriptionId=" + this.subscriptionId + ", hash="
+        return "[subscriptionId=" + this.subscriptionId + ", timestamp="
                 + this.timestamp + "]";
     }
 

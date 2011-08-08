@@ -19,8 +19,8 @@ package fr.inria.eventcloud.api;
 import java.io.InputStream;
 
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 
 /**
  * Defines the publish/subscribe operations that can be executed on an
@@ -70,7 +70,7 @@ public interface PublishSubscribeApi {
     public void publish(InputStream in, SerializationFormat format);
 
     /**
-     * Subscribes for notifications of type {@link BindingsNotificationListener}
+     * Subscribes for notifications of type {@link BindingNotificationListener}
      * with the specified SPARQL query.
      * 
      * @param sparqlQuery
@@ -82,10 +82,10 @@ public interface PublishSubscribeApi {
      * @return the subscription identifier.
      */
     public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingsNotificationListener listener);
+                                    BindingNotificationListener listener);
 
     /**
-     * Subscribes for notifications of type {@link EventsNotificationListener}
+     * Subscribes for notifications of type {@link EventNotificationListener}
      * with the specified SPARQL query.
      * 
      * @param sparqlQuery
@@ -97,7 +97,7 @@ public interface PublishSubscribeApi {
      * @return the subscription identifier.
      */
     public SubscriptionId subscribe(String sparqlQuery,
-                                    EventsNotificationListener listener);
+                                    EventNotificationListener listener);
 
     /**
      * Unsubscribes by using the specified subscription identifier.

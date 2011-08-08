@@ -74,4 +74,14 @@ public class EventCloudsRegistry {
         return PAActiveObject.getUrl(PAActiveObject.getStubOnThis());
     }
 
+    /**
+     * Returns the list of the Event Clouds that are managed by the registry.
+     * 
+     * @return the list of the Event Clouds that are managed by the registry.
+     */
+    public Collection<EventCloudId> listEventClouds() {
+        // TODO: implement
+        return null;
+    }
+
 }

@@ -19,16 +19,18 @@ package fr.inria.eventcloud;
 import java.io.Serializable;
 
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
-import fr.inria.eventcloud.proxies.PutGetProxy;
 
 /**
  * Shows how to instantiate and to use an EventCloud.
@@ -52,6 +54,11 @@ public class EventCloudInitializationTest implements Serializable {
                         "http://node.provider.not.yet.available",
                         new Collection<UnalterableElaProperty>(), 1, 3);
 
+        System.out.println("Peers contained by the Event Cloud:");
+        for (Peer p : eventCloud.getTrackers().iterator().next().getPeers()) {
+            System.out.println(p.dump());
+        }
+
         // Registers the Event-Cloud which has been previously created into the
         // registry. This is done in order to offer the possibility to any user
         // to interact with this Event-Cloud
@@ -64,13 +71,13 @@ public class EventCloudInitializationTest implements Serializable {
 
         // From the factory we can get a PutGet proxy that is used to perform
         // some synchronous operations
-        PutGetProxy putGetProxy = factory.createPutGetProxy();
-
-        putGetProxy.add(new Quadruple(
-                Node.createURI("http://www.inria.fr"),
-                Node.createURI("http://www.inria.fr"),
-                Node.createURI("http://www.inria.fr"),
-                Node.createURI("http://www.inria.fr")));
+        // PutGetProxy putGetProxy = factory.createPutGetProxy();
+        //
+        // putGetProxy.add(new Quadruple(
+        // Node.createURI("http://www.inria.fr"),
+        // Node.createURI("http://www.inria.fr"),
+        // Node.createURI("http://www.inria.fr"),
+        // Node.createURI("http://www.inria.fr")));
 
         // TODO make it work
         // try {
@@ -85,70 +92,104 @@ public class EventCloudInitializationTest implements Serializable {
         // }
 
         // Finds all the quadruples that are contained by the Event-Cloud
-        Collection<Quadruple> result = putGetProxy.find(QuadruplePattern.ANY);
-        System.out.println("Quadruples contained by the Event-Cloud "
-                + eventCloud.getId() + ":");
-        for (Quadruple quad : result) {
-            System.out.println(quad);
-        }
-
-        // You can also use the find method with a quadruple pattern.
-        // The Node.ANY plays as a variable
-        putGetProxy.find(new QuadruplePattern(
-                Node.createURI("http://uri"), Node.ANY,
-                Node.createURI("http://uri2"), Node.createLiteral("a")));
+        // Collection<Quadruple> result =
+        // putGetProxy.find(QuadruplePattern.ANY);
+        // System.out.println("Quadruples contained by the Event-Cloud "
+        // + eventCloud.getId() + ":");
+        // for (Quadruple quad : result) {
+        // System.out.println(quad);
+        // }
+        //
+        // // You can also use the find method with a quadruple pattern.
+        // // The Node.ANY plays as a variable
+        // putGetProxy.find(new QuadruplePattern(
+        // Node.createURI("http://uri"), Node.ANY,
+        // Node.createURI("http://uri2"), Node.createLiteral("a")));
 
         // Creates and retrieved a publish subscribe proxy
         // However the interface is not yet implemented
-        PublishSubscribeProxy pubsubProxy =
+        final PublishSubscribeProxy pubsubProxy =
                 factory.createPublishSubscribeProxy();
 
-        // SubscriptionId id =
-        // pubsubProxy.subscribe(
-        // "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
-        // new BindingsNotificationListener() {
-        // private static final long serialVersionUID = 1L;
-        //
-        // @Override
-        // public void handleNotification(SubscriptionId id,
-        // Collection<Binding> handback) {
-        // System.out.println("EventCloudInitializationTest.handleNotification()");
-        // for (Binding binding : handback) {
-        // System.out.println(binding);
-        // }
-        // }
-        // });
-        //
-        // pubsubProxy.publish(new Quadruple(
-        // Node.createURI("https://plus.google.com/"),
-        // Node.createURI("https://plus.google.com/107234124364605485774/"),
-        // Node.createURI("http://xmlns.com/foaf/0.1/name"),
-        // Node.createLiteral("Laurent Pellegrino")));
-        //
-        // pubsubProxy.publish(new Quadruple(
-        // Node.createURI("https://plus.google.com/"),
-        // Node.createURI("https://plus.google.com/107234124364605485774/"),
-        // Node.createURI("http://xmlns.com/foaf/0.1/email"),
-        // Node.createLiteral("laurent.pellegrino@gmail.com")));
+        SubscriptionId id =
+                pubsubProxy.subscribe(
+                        "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
+                        new BindingNotificationListener() {
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void onNotification(SubscriptionId id,
+                                                       Binding solution) {
+                                System.out.println("EventCloudInitializationTest.handleNotification() "
+                                        + solution);
+                            }
+                        });
+
+        System.out.println("Subscription with id " + id
+                + " has been registered");
+
+        pubsubProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/107234124364605485774/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                Node.createLiteral("Laurent Pellegrino")));
+
+        pubsubProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/107234124364605485774/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                Node.createLiteral("laurent.pellegrino@gmail.com")));
+
         // pubsubProxy.find(id);
 
-        // try {
-        // Thread.sleep(3000);
-        // } catch (InterruptedException e) {
-        // e.printStackTrace();
-        // }
+        pubsubProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/107234124364605485774/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                Node.createLiteral("laurent.pellegrino@gmail.com[chronicle context]")));
 
-        // pubsubProxy.publish(new Quadruple(
-        // Node.createURI("https://plus.google.com/ee"),
-        // Node.createURI("https://plus.google.com/107234124364605485774/"),
-        // Node.createURI("http://xmlns.com/foaf/0.1/email"),
-        // Node.createLiteral("laurent.pellegrino@gmail.com222")));
-        //
+        pubsubProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/48798548797974/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                Node.createLiteral("firstname.lastname@gmail.com")));
+
+        pubsubProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/746668964541235679/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                Node.createLiteral("frederic.dupont@gmail.com")));
+
+        pubsubProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/746668964541235679/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                Node.createLiteral("Frederic Dupont")));
+        
+        pubsubProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/48798548797974/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                Node.createLiteral("firstname Lastname")));
+
+
         // pubsubProxy.publish(new Quadruple(
         // Node.createURI("https://plus.google.com/ee"),
         // Node.createURI("https://plus.google.com/107234124364605485774/"),
         // Node.createURI("http://xmlns.com/foaf/0.1/name"),
         // Node.createLiteral("Laurent Pellegrino")));
+        //
+        // pubsubProxy.publish(new Quadruple(
+        // Node.createURI("https://plus.google.com/ee2"),
+        // Node.createURI("https://plus.google.com/107234124364605485774/"),
+        // Node.createURI("http://xmlns.com/foaf/0.1/name"),
+        // Node.createLiteral("Laurent Pellegrino")));
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.err.println("END");
     }
-
 }

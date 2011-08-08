@@ -16,19 +16,19 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_GRAPH_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_ID_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_INDEX_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_INDEX_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_OBJECT_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_PREDICATE_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_ID_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_INDEX_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_INDEX_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -180,6 +180,16 @@ public class Subsubscription implements Rdfable, Serializable {
 
         return false;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "Subsubscription [parentId=" + this.parentId + ", id=" + this.id
+                + ", index=" + this.index + ", atomicQuery=" + this.atomicQuery
+                + "]";
+    };
 
     /**
      * Parses a {@link Subsubscription} from the specified

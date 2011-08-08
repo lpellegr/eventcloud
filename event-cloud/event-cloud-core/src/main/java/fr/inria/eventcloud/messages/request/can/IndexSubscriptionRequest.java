@@ -68,7 +68,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
         log.debug(
                 "Subscription {} has been indexed on peer {}",
-                subscription.getId(), overlay.getId());
+                subscription.getId(), overlay);
     }
 
 }

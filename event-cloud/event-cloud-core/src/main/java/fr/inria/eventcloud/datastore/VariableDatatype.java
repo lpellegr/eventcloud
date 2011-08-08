@@ -23,7 +23,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
 
-import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
+import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 
 /**
  * A VariableDatatype is a Jena {@link RDFDatatype} that is used to store a
@@ -40,7 +40,7 @@ public class VariableDatatype extends BaseDatatype {
     private static final RDFDatatype instance = new VariableDatatype();
 
     private VariableDatatype() {
-        super(PublishSubscribeUtils.SUBSCRIPTION_VARIABLE_VALUE);
+        super(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
     }
 
     /**
