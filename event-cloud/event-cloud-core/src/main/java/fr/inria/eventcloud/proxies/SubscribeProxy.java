@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.Subscription;
 
@@ -41,8 +42,12 @@ public interface SubscribeProxy extends SubscribeApi, Serializable {
      * @param proxy
      *            the event cloud proxy instance to set to the publish subscribe
      *            proxy.
+     * 
+     * @param properties
+     *            a set of {@link AlterableElaProperty} properties to use for
+     *            initializing the {@link SubscribeProxy}.
      */
-    public void init(EventCloudProxy proxy);
+    public void init(EventCloudProxy proxy, AlterableElaProperty[] properties);
 
     /**
      * Searches the {@link Subscription} associated to the specified
