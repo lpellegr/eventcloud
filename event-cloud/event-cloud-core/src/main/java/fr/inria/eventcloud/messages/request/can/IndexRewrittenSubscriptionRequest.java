@@ -16,9 +16,9 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.PUBLICATION_INSERTION_DATETIME_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.PUBLICATION_INSERTION_DATETIME_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
 
 import java.io.IOException;
 import java.util.ArrayList;

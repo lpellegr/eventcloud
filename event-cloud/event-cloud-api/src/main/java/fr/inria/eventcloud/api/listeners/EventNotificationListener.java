@@ -16,15 +16,14 @@
  **/
 package fr.inria.eventcloud.api.listeners;
 
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import fr.inria.eventcloud.api.Event;
 
 /**
- * This kind of notification listener will only receive the bindings (i.e. the
- * variables and their associated values) that match the subscription.
+ * This kind of notification listener will receive the notification in the form
+ * of an {@link Event}.
  * 
  * @author lpellegr
  */
-public interface BindingsNotificationListener extends
-        NotificationListener<Binding> {
+public interface EventNotificationListener extends NotificationListener<Event> {
 
 }

@@ -36,8 +36,8 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -369,7 +369,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      */
     @Override
     public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingsNotificationListener listener) {
+                                    BindingNotificationListener listener) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -379,7 +379,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      */
     @Override
     public SubscriptionId subscribe(String sparqlQuery,
-                                    EventsNotificationListener listener) {
+                                    EventNotificationListener listener) {
         // TODO Auto-generated method stub
         return null;
     }

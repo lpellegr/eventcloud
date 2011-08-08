@@ -17,8 +17,11 @@
 package fr.inria.eventcloud.pubsub;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
+import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
@@ -27,8 +30,8 @@ import fr.inria.eventcloud.proxies.PublishSubscribeProxy;
  * A solution is a value that is delivered to a user who has subscribed with a
  * query which is matched by the solution. It contains a collection of
  * sub-solutions that are received by a {@link PublishSubscribeProxy}
- * asynchronously. A solution also knows what is the number of sub-solutions
- * expected and what is the current number of sub-solution that are received. A
+ * asynchronously. A solution also knows what is the number of sub solutions
+ * expected and what is the current number of sub solution that are received. A
  * sub solution is represented by using a {@link Binding}.
  * 
  * @author lpellegr
@@ -59,13 +62,34 @@ public final class Solution implements Serializable {
     }
 
     /**
+     * Merges the sub solutions and returns the solution. The result of this
+     * operation is not put into a cache. Hence, you have to take care when
+     * calling this method because the merge will be computed each time you call
+     * it.
+     * 
+     * @return the solution that have been computed from the sub solutions.
+     */
+    public Binding getSolution() {
+        Binding solution = BindingFactory.create();
+        for (Binding b : this.bindings) {
+            Iterator<Var> varsIt = b.vars();
+            while (varsIt.hasNext()) {
+                Var var = varsIt.next();
+                solution.add(var, b.get(var));
+            }
+        }
+
+        return solution;
+    }
+
+    /**
      * Adds the specified sub-solution and increments the number of
      * sub-solutions that have been received.
      * 
      * @param binding
      *            the sub-solution to add.
      */
-    public synchronized void addSubSolution(Binding binding) {
+    public void addSubSolution(Binding binding) {
         this.bindings.add(binding);
         this.receivedSubSolutions++;
     }
@@ -93,7 +117,7 @@ public final class Solution implements Serializable {
      * 
      * @return the sub-solutions that have been received.
      */
-    public Collection<Binding> getBindings() {
+    public Collection<Binding> getSubSolutions() {
         return this.bindings;
     }
 

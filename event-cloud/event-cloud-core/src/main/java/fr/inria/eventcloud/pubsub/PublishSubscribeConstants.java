@@ -16,21 +16,9 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import java.util.Calendar;
-
-import javax.xml.bind.DatatypeConverter;
-
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 
-import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
-import fr.inria.eventcloud.reasoner.AtomicQuery;
-import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
  * Defines constants that are regularly used by the publish/subscribe
@@ -38,7 +26,7 @@ import fr.inria.eventcloud.utils.MurmurHash;
  * 
  * @author lpellegr
  */
-public class PublishSubscribeUtils {
+public class PublishSubscribeConstants {
 
     /*
      * Namespaces
@@ -194,38 +182,5 @@ public class PublishSubscribeUtils {
 
     public static final Node QUADRUPLE_MATCHES_SUBSCRIPTION_NODE =
             Node.createURI(QUADRUPLE_MATCHES_SUBSCRIPTION_VALUE);
-
-    public static final void storePublication(SemanticDatastore datastore,
-                                              Quadruple quad) {
-        Node quadId =
-                Node.createURI(EventCloudProperties.EVENT_CLOUD_NS.getValue()
-                        + MurmurHash.hash64(quad.toString()));
-
-        datastore.add(new Quadruple(
-                quadId, quad.getSubject(), quad.getPredicate(),
-                quad.getObject()));
-        datastore.add(new Quadruple(
-                quadId,
-                quad.getGraph(),
-                PUBLICATION_INSERTION_DATETIME_NODE,
-                Node.createLiteral(
-                        DatatypeConverter.printDateTime(Calendar.getInstance()),
-                        null, XSDDatatype.XSDdateTime)));
-    }
-
-    public static final Binding extractBinding(AtomicQuery aq, Quadruple quad) {
-        Binding b = BindingFactory.create();
-        Node[] nodes = quad.toArray();
-
-        int i = 0;
-        for (Node node : aq.toArray()) {
-            if (node.isVariable()) {
-                b.add(Var.alloc(node.getName()), nodes[i]);
-            }
-            i++;
-        }
-
-        return b;
-    }
 
 }

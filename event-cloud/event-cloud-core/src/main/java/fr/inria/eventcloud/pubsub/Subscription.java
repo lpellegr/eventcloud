@@ -16,23 +16,23 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_CREATION_DATETIME_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_CREATION_DATETIME_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ID_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_INDEXED_WITH_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ORIGINAL_ID_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_ORIGINAL_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_PARENT_ID_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_PARENT_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SERIALIZED_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SPARQL_QUERY_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_STUB_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SUBSCRIBER_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SUBSCRIBER_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_CREATION_DATETIME_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_CREATION_DATETIME_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ID_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_PARENT_ID_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_PARENT_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SERIALIZED_VALUE_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SPARQL_QUERY_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_STUB_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_PROPERTY;
 
 import java.io.IOException;
 import java.io.Serializable;

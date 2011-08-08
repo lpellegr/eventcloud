@@ -18,7 +18,6 @@ package fr.inria.eventcloud.api.listeners;
 
 import java.io.Serializable;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
@@ -33,11 +32,11 @@ public interface NotificationListener<T> extends Serializable {
      * Handles a notification that has been received.
      * 
      * @param id
-     *            the subscription identifier.
-     * @param handback
-     *            a collection of the opaque object that is received as a
-     *            notification.
+     *            the subscription identifier that identified which subscription
+     *            is matched by the solution which is received.
+     * @param solution
+     *            a solution that matches the subscription.
      */
-    public void handleNotification(SubscriptionId id, Collection<T> handback);
+    public void onNotification(SubscriptionId id, T solution);
 
 }

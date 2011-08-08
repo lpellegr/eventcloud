@@ -33,7 +33,8 @@ import com.hp.hpl.jena.graph.Triple;
  * {@link #getGraph()} and {@link #getTriples()} may return a wrong value. This
  * is also true if you construct an Event with a collection of quadruples that
  * do not share the same graph value. Indeed, no type checking is performed for
- * performance reasons.
+ * performance reasons. If necessary, you can use {@link #isValid(Event)} to
+ * check whether an Event is valid or not.
  * 
  * @author lpellegr
  */
@@ -41,6 +42,10 @@ public final class Event implements Iterable<Quadruple>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    // TODO store the quadruples as a collection of triples + a graph value
+    // because all the quadruples are assumed to share the same graph value.
+    // this will reduce the size of an Event that is serialized.
+    // warning: a Jena triple is not serializable by default
     private final Collection<Quadruple> quadruples;
 
     private transient Collection<Triple> triples;
@@ -151,6 +156,43 @@ public final class Event implements Iterable<Quadruple>, Serializable {
     @Override
     public Iterator<Quadruple> iterator() {
         return this.quadruples.iterator();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        for (Quadruple quad : this.quadruples) {
+            buf.append(quad.toString());
+            buf.append("\n");
+        }
+        return buf.toString();
+    }
+
+    /**
+     * Checks whether the specified {@link Event} is valid or not (i.e. if all
+     * the quadruples that are contained by the event share the same graph
+     * value).
+     * 
+     * @param e
+     *            the event to check.
+     * 
+     * @return {@code true} if the event is valid, {@code false} otherwise.
+     */
+    public static final boolean isValid(Event e) {
+        Collection<Quadruple> quads = e.getQuadruples();
+        Iterator<Quadruple> it = quads.iterator();
+
+        Node ref = it.next().getGraph();
+        while (it.hasNext()) {
+            if (!it.next().getGraph().equals(ref)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

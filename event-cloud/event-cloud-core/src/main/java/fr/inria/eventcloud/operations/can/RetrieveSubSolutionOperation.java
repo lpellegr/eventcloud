@@ -16,12 +16,12 @@
  **/
 package fr.inria.eventcloud.operations.can;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.PUBLICATION_INSERTION_DATETIME_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.QUADRUPLE_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_NS_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeUtils.SUBSCRIPTION_SUBSCRIBER_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.PUBLICATION_INSERTION_DATETIME_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.QUADRUPLE_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE;
 
 import java.io.IOException;
 

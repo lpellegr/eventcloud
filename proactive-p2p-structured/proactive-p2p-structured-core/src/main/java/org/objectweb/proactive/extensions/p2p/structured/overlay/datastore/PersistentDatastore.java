@@ -71,6 +71,8 @@ public abstract class PersistentDatastore extends Datastore {
         if (!super.initialized.compareAndSet(true, false)) {
             throw new IllegalStateException("datastore not initialized");
         } else {
+            this.internalClose();
+
             if (this.autoRemove) {
                 try {
                     Files.deleteDirectory(this.path);
@@ -80,8 +82,6 @@ public abstract class PersistentDatastore extends Datastore {
                             + " has failed", e);
                 }
             }
-
-            this.internalClose();
         }
     }
 

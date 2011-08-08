@@ -97,6 +97,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
         body.setImmediateService("toString", false);
         body.setImmediateService("getType", false);
 
+        body.setImmediateService("send", false);
         body.setImmediateService("route", false);
 
         // tests if overlay is null for component instantiation use-case

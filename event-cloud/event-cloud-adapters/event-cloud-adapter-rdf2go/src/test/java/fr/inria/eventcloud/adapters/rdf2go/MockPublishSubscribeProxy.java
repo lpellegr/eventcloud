@@ -24,8 +24,8 @@ import fr.inria.eventcloud.api.PublishSubscribeApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 
 /**
  * This class is assumed to play the role of a mock PublishSubscribeProxy in
@@ -71,7 +71,7 @@ public class MockPublishSubscribeProxy implements PublishSubscribeApi {
      */
     @Override
     public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingsNotificationListener listener) {
+                                    BindingNotificationListener listener) {
         return null;
     }
 
@@ -80,7 +80,7 @@ public class MockPublishSubscribeProxy implements PublishSubscribeApi {
      */
     @Override
     public SubscriptionId subscribe(String sparqlQuery,
-                                    EventsNotificationListener listener) {
+                                    EventNotificationListener listener) {
         return null;
     }
 

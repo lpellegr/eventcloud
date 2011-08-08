@@ -26,8 +26,8 @@ import org.ontoware.rdf2go.model.node.URI;
 import fr.inria.eventcloud.api.PublishSubscribeApi;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingsNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventsNotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 
 /**
  * This class is used as an adapter for any object that implements the
@@ -66,12 +66,12 @@ public final class PublishSubscribeRdf2goAdapter extends
     }
 
     public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingsNotificationListener listener) {
+                                    BindingNotificationListener listener) {
         return super.delegate.subscribe(sparqlQuery, listener);
     }
 
     public SubscriptionId subscribe(String sparqlQuery,
-                                    EventsNotificationListener listener) {
+                                    EventNotificationListener listener) {
         return super.delegate.subscribe(sparqlQuery, listener);
     }
 
