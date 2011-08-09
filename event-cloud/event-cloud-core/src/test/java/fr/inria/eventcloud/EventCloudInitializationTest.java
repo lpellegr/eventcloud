@@ -19,6 +19,7 @@ package fr.inria.eventcloud;
 import java.io.Serializable;
 
 import org.junit.Test;
+import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 import com.hp.hpl.jena.graph.Node;
@@ -48,10 +49,12 @@ public class EventCloudInitializationTest implements Serializable {
         EventCloudsRegistry registry =
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
 
+        String registryUrl = PAActiveObject.getUrl(registry);
+        
         // Creates a new Event-Cloud
         EventCloud eventCloud =
                 EventCloud.create(
-                        registry.getUrl(),
+                        registryUrl,
                         "http://node.provider.not.yet.available",
                         new Collection<UnalterableElaProperty>(), 1, 3);
 
@@ -68,7 +71,7 @@ public class EventCloudInitializationTest implements Serializable {
         // Retrieves a factory that is specialized to the previous Event-Cloud
         // for creating a proxy
         ProxyFactory factory =
-                ProxyFactory.getInstance(registry.getUrl(), eventCloud.getId());
+                ProxyFactory.getInstance(registryUrl, eventCloud.getId());
 
         // From the factory we can get a PutGet proxy that is used to perform
         // some synchronous operations

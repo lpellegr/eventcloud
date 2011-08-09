@@ -52,7 +52,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends Proxy implements ComponentInitActive,
+public class SubscribeProxyImpl extends ProxyCache implements ComponentInitActive,
         SubscribeProxy {
 
     private static final long serialVersionUID = 1L;
@@ -88,7 +88,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentInitActive,
      */
     // TODO: add support for ELA properties. At least for the maximum number of
     // requests per seconds (by using a queue and a scheduled Timer).
-    public void init(EventCloudProxy proxy, AlterableElaProperty[] properties) {
+    public void init(EventCloudCache proxy, AlterableElaProperty[] properties) {
         if (this.proxy == null) {
             this.proxy = proxy;
             this.subscriptions = new HashMap<SubscriptionId, Subscription>();

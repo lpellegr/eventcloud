@@ -32,11 +32,11 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * @author lpellegr
  * @author bsauvan
  */
-public interface SubscribeProxy extends SubscribeApi, Serializable {
+public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
 
     /**
      * The init method is a convenient method for components which is used to
-     * initialize the {@link EventCloudProxy}. Once this method is called and
+     * initialize the {@link EventCloudCache}. Once this method is called and
      * the value is set, the next calls perform no action.
      * 
      * @param proxy
@@ -47,7 +47,7 @@ public interface SubscribeProxy extends SubscribeApi, Serializable {
      *            a set of {@link AlterableElaProperty} properties to use for
      *            initializing the {@link SubscribeProxy}.
      */
-    public void init(EventCloudProxy proxy, AlterableElaProperty[] properties);
+    public void init(EventCloudCache proxy, AlterableElaProperty[] properties);
 
     /**
      * Searches the {@link Subscription} associated to the specified
