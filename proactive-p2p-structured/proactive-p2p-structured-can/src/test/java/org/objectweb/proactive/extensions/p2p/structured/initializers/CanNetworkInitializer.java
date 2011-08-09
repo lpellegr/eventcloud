@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.initializers;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -24,8 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 /**
  * Network initializer that provides a concrete implementation of
  * {@link #createActivePeer()} and {@link #createComponentPeer()} for a
- * Content-Adressable Network. The CAN network that is created by this
- * initializer is a 3-dimensional CAN network.
+ * Content-Adressable Network.
  * 
  * @author lpellegr
  */
@@ -33,7 +31,6 @@ public class CanNetworkInitializer extends NetworkInitializer {
 
     public CanNetworkInitializer() {
         super();
-        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 3);
     }
 
     /**
