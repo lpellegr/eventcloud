@@ -34,7 +34,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
- * An EventCloudProxy is used to keep in cache the information that are exposed
+ * An EventCloudCache is used to keep in cache the information that are exposed
  * by the {@link EventCloudApi}. This is done to reduce the number of calls to
  * the {@link EventCloudsRegistry}.
  * 
@@ -42,7 +42,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * 
  * @see ProxyFactory
  */
-public class EventCloudProxy implements EventCloudApi, Serializable {
+public class EventCloudCache implements EventCloudApi, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -50,7 +50,7 @@ public class EventCloudProxy implements EventCloudApi, Serializable {
 
     private List<SemanticTracker> trackers;
 
-    public EventCloudProxy(String registryUrl, EventCloudId id) {
+    public EventCloudCache(String registryUrl, EventCloudId id) {
         // TODO throw an exception if the registry identified by registryUrl
         // does not contain the specified EventCloudId
         this.id = id;
@@ -58,7 +58,7 @@ public class EventCloudProxy implements EventCloudApi, Serializable {
         try {
             this.trackers = new ArrayList<SemanticTracker>();
             this.trackers.addAll(PAActiveObject.lookupActive(
-                    EventCloudsRegistry.class, registryUrl).getTrackers());
+                    EventCloudsRegistry.class, registryUrl).findTrackers(id));
         } catch (ActiveObjectCreationException e) {
             e.printStackTrace();
         } catch (IOException e) {

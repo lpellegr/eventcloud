@@ -34,7 +34,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.proxies.EventCloudProxy;
+import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
@@ -46,7 +46,7 @@ import fr.inria.eventcloud.proxies.PutGetProxy;
  * you have to use the {@link #getInstance(URL, EventCloudId)} method. It will
  * return an instance of a ProxyFactory that is specialized to create proxies
  * for the given {@link EventCloudId}. Then, internally, when you create a new
- * proxy, the factory will share the same {@link EventCloudProxy} for all the
+ * proxy, the factory will share the same {@link EventCloudCache} for all the
  * proxies that are created from the retrieved ProxyFactory. Indeed, a proxy
  * only needs trackers (which serves as entry points into the network) to work
  * and these trackers are supposed to stay the same over the time.
@@ -69,7 +69,7 @@ public final class ProxyFactory {
         }
     }
 
-    private EventCloudProxy eventCloudProxy;
+    private EventCloudCache eventCloudProxy;
 
     /**
      * Constructs a new ProxyFactory from the specified registryUrl and the
@@ -81,7 +81,7 @@ public final class ProxyFactory {
      *            the identifier that identify the Event-Cloud to work on.
      */
     private ProxyFactory(String registryUrl, EventCloudId id) {
-        this.eventCloudProxy = new EventCloudProxy(registryUrl, id);
+        this.eventCloudProxy = new EventCloudCache(registryUrl, id);
     }
 
     /**

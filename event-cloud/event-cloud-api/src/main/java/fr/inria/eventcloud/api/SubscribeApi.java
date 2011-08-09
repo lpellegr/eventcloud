@@ -16,9 +16,6 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.io.InputStream;
-
-import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 

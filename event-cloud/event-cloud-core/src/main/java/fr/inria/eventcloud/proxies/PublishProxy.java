@@ -33,7 +33,7 @@ import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
  * 
  * @author lpellegr
  */
-public class PublishProxy extends Proxy implements PublishApi {
+public class PublishProxy extends ProxyCache implements Proxy, PublishApi {
 
     /**
      * Constructs a PublishProxy by using the specified EventCloudProxy.
@@ -42,7 +42,7 @@ public class PublishProxy extends Proxy implements PublishApi {
      *            the EventCloudProxy that is used to retrieve an entry-point
      *            into the Event-Cloud.
      */
-    public PublishProxy(EventCloudProxy proxy) {
+    public PublishProxy(EventCloudCache proxy) {
         super(proxy);
     }
 

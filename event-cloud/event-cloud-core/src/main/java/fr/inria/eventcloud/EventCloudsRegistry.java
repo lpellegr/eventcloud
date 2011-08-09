@@ -16,42 +16,36 @@
  **/
 package fr.inria.eventcloud;
 
-import org.objectweb.proactive.api.PAActiveObject;
+import java.util.HashMap;
+import java.util.Map;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
  * The EventCloudRegistry is in charge of storing all the information related to
  * the Event-Clouds which are runnings for an organization or a group.
  * <p>
- * As a first prototype the registry is centralized and stores the information
- * as {@link Quadruple}s.
+ * <strong>As a first prototype the registry is centralized and stores the
+ * information in memory.</strong>
+ * <p>
+ * TODO: the registry has to be distributed and the data that are saved have to
+ * be persisted.
  * 
  * @author lpellegr
  */
 public class EventCloudsRegistry {
 
-    // TODO: temporary fields that have to be replaced by an RDF repository.
-    private EventCloudId id;
-
-    private Collection<SemanticTracker> trackers;
-
-    public EventCloudId getId() {
-        return this.id;
-    }
-
-    public Collection<SemanticTracker> getTrackers() {
-        return this.trackers;
-    }
+    private Map<EventCloudId, Collection<SemanticTracker>> eventClouds;
 
     /**
      * Empty constructor commanded by ProActive to expose this object as an
      * active object.
      */
     public EventCloudsRegistry() {
+        this.eventClouds =
+                new HashMap<EventCloudId, Collection<SemanticTracker>>();
     }
 
     /**
@@ -61,17 +55,7 @@ public class EventCloudsRegistry {
      *            the EventCloud to register into the registry.
      */
     public void register(EventCloud eventCloud) {
-        this.id = eventCloud.getId();
-        this.trackers = eventCloud.getTrackers();
-    }
-
-    /**
-     * Returns the URL to which the active object is bind.
-     * 
-     * @return the URL to which the active object is bind.
-     */
-    public String getUrl() {
-        return PAActiveObject.getUrl(PAActiveObject.getStubOnThis());
+        this.eventClouds.put(eventCloud.getId(), eventCloud.getTrackers());
     }
 
     /**
@@ -80,8 +64,21 @@ public class EventCloudsRegistry {
      * @return the list of the Event Clouds that are managed by the registry.
      */
     public Collection<EventCloudId> listEventClouds() {
-        // TODO: implement
-        return null;
+        return new Collection<EventCloudId>(this.eventClouds.keySet());
+    }
+
+    /**
+     * Returns the trackers associated to the specified {@link EventCloudId} if
+     * it is registered in the registry or {@code null}.
+     * 
+     * @param id
+     *            the Event Cloud identifier to look for.
+     * 
+     * @return the trackers associated to the specified {@link EventCloudId} if
+     *         it is registered in the registry or {@code null}.
+     */
+    public Collection<SemanticTracker> findTrackers(EventCloudId id) {
+        return this.eventClouds.get(id);
     }
 
 }

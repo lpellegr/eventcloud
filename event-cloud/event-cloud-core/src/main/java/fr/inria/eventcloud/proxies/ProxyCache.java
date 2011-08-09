@@ -32,18 +32,18 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
  * Any user side proxy have to implement this abstract proxy class that stores
- * an {@link EventCloudProxy} which serves as a cache.
+ * an {@link EventCloudCache} which serves as a cache.
  * 
  * @author lpellegr
  */
-public abstract class Proxy {
+public abstract class ProxyCache {
 
-    protected EventCloudProxy proxy;
+    protected EventCloudCache proxy;
 
-    protected Proxy() {
+    protected ProxyCache() {
     }
 
-    protected Proxy(EventCloudProxy proxy) {
+    protected ProxyCache(EventCloudCache proxy) {
         this.proxy = proxy;
     }
 
