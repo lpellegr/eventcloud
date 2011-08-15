@@ -58,7 +58,7 @@ public class SparqlResultSerializer {
      * 
      * @param out
      *            the output stream to write in.
-     * @param resultSet
+     * @param binding
      *            the {@link Binding} to serialize.
      */
     public static void serialize(OutputStream out, Binding binding) {

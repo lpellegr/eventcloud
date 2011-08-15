@@ -17,8 +17,7 @@
 package fr.inria.eventcloud.api.responses;
 
 /**
- * The response returned by a call to
- * {@link SemanticPeer#executeSparqlAsk(String)}.
+ * The response returned for an Ask SPARQL query form that has been executed.
  * 
  * @author lpellegr
  */

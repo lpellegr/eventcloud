@@ -23,8 +23,6 @@ import fr.inria.eventcloud.api.Quadruple;
  * An AlterableElaProperty is an {@link ElaProperty} which is modifiable.
  * 
  * @author lpellegr
- * 
- * @see EventCloud
  */
 public final class AlterableElaProperty extends ElaProperty {
 

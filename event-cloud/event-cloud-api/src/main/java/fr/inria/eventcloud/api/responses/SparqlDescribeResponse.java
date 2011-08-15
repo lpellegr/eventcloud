@@ -19,8 +19,8 @@ package fr.inria.eventcloud.api.responses;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 
 /**
- * The response returned by a call to
- * {@link SemanticPeer#executeSparqlDescribe(String)}.
+ * The response returned for a Describe SPARQL query form that has been
+ * executed.
  * 
  * @author lpellegr
  */

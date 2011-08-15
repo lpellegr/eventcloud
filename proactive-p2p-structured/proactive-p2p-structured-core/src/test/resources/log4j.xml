@@ -8,12 +8,14 @@
 		</layout>
 	</appender>
 
-	<logger name="com.ontotext">
-		<level value="off" />
-	</logger>
 	<logger name="proactive">
 		<level value="off" />
 	</logger>
+
+	<!-- used to detect what are the stubs to pre-generate -->
+	<!-- <logger name="proactive.mop.stubgeneration"> -->
+	<!-- <level value="debug" /> -->
+	<!-- </logger> -->
 
 	<root>
 		<priority value="off" />

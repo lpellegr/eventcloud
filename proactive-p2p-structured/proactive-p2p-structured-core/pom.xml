@@ -34,7 +34,6 @@
 		<dependency>
 			<groupId>org.objectweb.proactive</groupId>
 			<artifactId>proactive</artifactId>
-			<version>5.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -55,12 +54,16 @@
 				<artifactId>proactive-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>compile</phase>
 						<configuration>
 							<includes>
-								<include>org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation</include>
-								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker</include>
 								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerComponentImpl</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.Peer</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.PeerComponentImpl</include>
+								<include>org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation</include>
+								<include>org.objectweb.proactive.core.group.Group</include>
 							</includes>
 						</configuration>
 						<goals>
@@ -91,5 +94,41 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.objectweb.proactive
+										</groupId>
+										<artifactId>
+											proactive-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.1.0,)
+										</versionRange>
+										<goals>
+											<goal>stubs</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>

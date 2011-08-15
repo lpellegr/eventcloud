@@ -7,11 +7,12 @@
 		</encoder>
 	</appender>
 
-	<logger name="com.hp" level="OFF" />
+	<logger name="com.hp" level="off" />
 	<logger name="org.objectweb.proactive.extensions.p2p" level="DEBUG" />
 	<logger name="fr.inria.eventcloud" level="DEBUG" />
+	<logger name="proactive" level="debug" />
 
-	<root level="OFF">
+	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>
-</configuration>
+</configuration> 

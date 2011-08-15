@@ -21,7 +21,7 @@ import java.io.Serializable;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
- * Uniquely identify an {@link EventCloud}.
+ * Uniquely identify an Event Cloud.
  * 
  * @author lpellegr
  */

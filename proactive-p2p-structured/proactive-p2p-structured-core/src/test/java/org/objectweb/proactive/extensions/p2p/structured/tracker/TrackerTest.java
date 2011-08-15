@@ -78,15 +78,15 @@ public class TrackerTest implements Serializable {
         }
 
         Assert.assertEquals(
-                "After join, the trackers does not share the same peer references",
+                "After join, the trackers do not share the same peer references",
                 peer.toString(), tracker1.getRandomPeer().toString());
 
         Assert.assertEquals(
-                "After join, the trackers does not share the same peer references",
+                "After join, the trackers do not share the same peer references",
                 peer.toString(), tracker2.getRandomPeer().toString());
 
         Assert.assertEquals(
-                "After join, the trackers does not share the same peer references",
+                "After join, the trackers do not share the same peer references",
                 peer.toString(), tracker3.getRandomPeer().toString());
     }
 

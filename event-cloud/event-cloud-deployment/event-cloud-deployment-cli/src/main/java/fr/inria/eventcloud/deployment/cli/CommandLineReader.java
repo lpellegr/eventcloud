@@ -164,7 +164,7 @@ public class CommandLineReader<T> {
     private static final class QuitCommand<T> extends Command<T> {
 
         public QuitCommand() {
-            super("quit", "Quit", "exit", "q");
+            super("quit", "Quit the application", "exit", "q");
         }
 
         /**
@@ -191,34 +191,18 @@ public class CommandLineReader<T> {
         public void execute(CommandLineReader<T> reader, T context) {
             StringBuilder out = new StringBuilder("usage:\n");
             for (Command<T> command : reader.commands) {
-                out.append("    * ");
-                out.append(command.getName());
-                out.append(" (");
-                for (String shortcut : command.getShortcuts()) {
-                    out.append(shortcut);
-                    out.append(",");
-                }
-                out = out.deleteCharAt(out.length() - 1);
-                out.append(")\t");
-                out.append(command.getDescription());
-                out.append("\n");
+                out.append(String.format(
+                        "    * %-25.25s    %s\n", command.getName(),
+                        command.getDescription()));
+
                 for (ParameterDescription param : command.getParameters()) {
-                    out.append("        ");
                     Parameter ap =
                             ((Parameter) param.getField().getAnnotations()[0]);
-                    for (String name : ap.names()) {
-                        out.append(name);
-                        out.append(", ");
-                    }
-                    out.append("\t");
-                    if (ap.required()) {
-                        out.append("[required]");
-                    }
-
-                    out.append(ap.description());
-                    out.append("\n");
+                    out.append(String.format(
+                            "        %-23s    %s %s\n", ap.names()[0],
+                            ap.description(), ap.required()
+                                    ? "(required)" : "(optional)"));
                 }
-                out.append("\n");
             }
             System.out.println(out.toString());
         }
