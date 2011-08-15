@@ -17,15 +17,13 @@
 package fr.inria.eventcloud.api.properties;
 
 import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
  * An UnalterableElaProperty is an {@link ElaProperty} which is not modifiable.
  * 
  * @author lpellegr
- * 
- * @see PutGetProxy
- * @see PublishSubscribeProxy
  */
 public final class UnalterableElaProperty extends ElaProperty {
 

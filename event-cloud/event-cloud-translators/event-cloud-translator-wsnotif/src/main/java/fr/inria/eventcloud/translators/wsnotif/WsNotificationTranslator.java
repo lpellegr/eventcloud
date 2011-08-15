@@ -41,7 +41,7 @@ public interface WsNotificationTranslator {
      * that is given to the method, the literals are not annotated with a
      * datatype.
      * 
-     * @param data
+     * @param xmlPayload
      *            the XML payload.
      * @param eventId
      *            the identifier associated to the event.
@@ -57,9 +57,9 @@ public interface WsNotificationTranslator {
      * the quadruple contained by the event are annotated by using the
      * {@code xsdPayload}.
      * 
-     * @param data
+     * @param xmlPayload
      *            the XML payload.
-     * @param xsd
+     * @param xsdPayload
      *            the XSD payload.
      * @param eventId
      *            the identifier associated to the event.
@@ -79,7 +79,7 @@ public interface WsNotificationTranslator {
      *            SPARQL query.
      * @param topicNameSpacePayload
      *            the topicNameSpace payload that defines an event.
-     * @param topicNameSpacePayloads
+     * @param topicsDefinitionPayloads
      *            the definition of the topics. Several inputStream can be
      *            specified because each topic may corresponds to a message
      *            defined in a WSDL.

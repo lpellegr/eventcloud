@@ -31,8 +31,6 @@ public class Files {
      * 
      * @param path
      *            the path to the directory to remove.
-     * @return <code>true</code> is the delete has succeeded, <code>false</code>
-     *         otherwise.
      * 
      * @throws IOException
      */

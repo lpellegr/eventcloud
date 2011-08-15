@@ -40,7 +40,6 @@ public class ListEventCloudsCommand extends Command<EventCloudsRegistry> {
     @Override
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
-        System.out.println("registry=" + registry);
         for (EventCloudId id : registry.listEventClouds()) {
             System.out.println("- [" + id + "]");
         }

@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.factories;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,20 +35,21 @@ import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * ProxyFactory is used to create a new instance of a proxy (e.g.
- * {@link SubscribeProxy} or {@link PutGetProxy}). This means that there is at
- * least one instance of a proxy by user. To retrieve a ProxyFactory instance
- * you have to use the {@link #getInstance(URL, EventCloudId)} method. It will
- * return an instance of a ProxyFactory that is specialized to create proxies
- * for the given {@link EventCloudId}. Then, internally, when you create a new
- * proxy, the factory will share the same {@link EventCloudCache} for all the
- * proxies that are created from the retrieved ProxyFactory. Indeed, a proxy
- * only needs trackers (which serves as entry points into the network) to work
- * and these trackers are supposed to stay the same over the time.
+ * {@link SubscribeProxy}, {@link PublishProxy} or {@link PutGetProxy}). This
+ * means that there is at least one instance of a proxy by user. To retrieve a
+ * ProxyFactory instance you have to use the
+ * {@link ProxyFactory#getInstance(String, EventCloudId)} method. It will return
+ * an instance of a ProxyFactory that is specialized to create proxies for the
+ * given {@link EventCloudId}. Then, internally, when you create a new proxy,
+ * the factory will share the same {@link EventCloudCache} for all the proxies
+ * that are created from the retrieved ProxyFactory. Indeed, a proxy only needs
+ * trackers (which serves as entry points into the network) to work and these
+ * trackers are supposed to stay the same over the time.
  * 
  * @author lpellegr
  */

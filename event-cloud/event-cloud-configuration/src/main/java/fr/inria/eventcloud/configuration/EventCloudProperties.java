@@ -63,8 +63,8 @@ public class EventCloudProperties {
             "eventcloud.compression", false);
 
     /**
-     * Defines the prefix that is used for any EventCloudId when an
-     * {@link EventCloudId} is returned as an URL.
+     * Defines the prefix that is used for transforming an event cloud
+     * identifier to an URL.
      */
     public static final PropertyString EVENT_CLOUD_ID_PREFIX =
             new PropertyString(

@@ -19,8 +19,7 @@ package fr.inria.eventcloud.api.responses;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 
 /**
- * The response returned by a call to
- * {@link SemanticPeer#executeSparqlSelect(String)}.
+ * The response returned for a Select SPARQL query form that has been executed.
  * 
  * @author lpellegr
  */

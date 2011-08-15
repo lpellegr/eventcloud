@@ -39,7 +39,8 @@ import fr.inria.eventcloud.deployment.cli.CommandLineReader;
  * 
  * @param <T>
  *            the type associated to the context object that is given to the
- *            command it is executed by using {@link #execute(Object)}.
+ *            command it is executed by using
+ *            {@link Command#execute(CommandLineReader, Object)}.
  */
 public abstract class Command<T> {
 

@@ -2,46 +2,42 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
 	<groupId>fr.inria.eventcloud</groupId>
 	<artifactId>event-cloud-parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>event-cloud-parent</name>
 
+	<name>event-cloud-parent</name>
 	<description>Parent module for event-cloud maven related modules.</description>
+	<url>https://code.google.com/p/proactive-maven-plugin/</url>
+	<inceptionYear>2010</inceptionYear>
+
+	<prerequisites>
+		<maven>3.0.3</maven>
+	</prerequisites>
 
 	<scm>
 		<connection>scm:hg:https://event-cloud.googlecode.com/hg/</connection>
 		<developerConnection>scm:hg:https://event-cloud.googlecode.com/hg/</developerConnection>
-		<url>http://code.google.com/p/event-cloud/source/browse/</url>
+		<url>http://event-cloud.googlecode.com/hg/</url>
 	</scm>
 
 	<ciManagement>
 		<system>Jenkins</system>
-		<url>http://oops.inria.fr/jenkins</url>
+		<url>http://eventcloud.inria.fr/jenkins</url>
 	</ciManagement>
 
 	<issueManagement>
 		<system>google-code</system>
 		<url>http://code.google.com/p/event-cloud/issues/</url>
 	</issueManagement>
-
-	<prerequisites>
-		<maven>3.0.3</maven>
-	</prerequisites>
-
-	<distributionManagement>
-		<repository>
-			<id>event-cloud-releases</id>
-			<name>event-cloud-releases</name>
-			<url>file:${event.cloud.maven.directory}/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>event-cloud-snapshots</id>
-			<name>event-cloud-snapshots</name>
-			<url>file:${event.cloud.maven.directory}/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<repositories>
 		<repository>
@@ -54,7 +50,39 @@
 		</repository>
 	</repositories>
 
-	<inceptionYear>2011</inceptionYear>
+	<developers>
+		<developer>
+			<id>bsauvan</id>
+			<name>Bastien Sauvan</name>
+			<email>bastien.sauvan@inria.fr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>lpellegr</id>
+			<name>Laurent Pellegrino</name>
+			<email>laurent.pellegrino@inria.fr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
+
+	<distributionManagement>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>sonatype-nexus-staging</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+		</repository>
+		<snapshotRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>sonatype-nexus-snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<licenses>
 		<license>
@@ -66,7 +94,7 @@
 
 	<organization>
 		<name>INRIA Sophia Antipolis</name>
-		<url>http://www-sop.inria.fr/</url>
+		<url>http://www.inria.fr/en/</url>
 	</organization>
 
 	<modules>
@@ -77,9 +105,19 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId>
+				<version>1.6.1</version>
+			</dependency>
+			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>r09</version>
+			</dependency>
+			<dependency>
+				<groupId>org.objectweb.proactive</groupId>
+				<artifactId>proactive</artifactId>
+				<version>5.0.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.hp.hpl.jena</groupId>
@@ -90,10 +128,6 @@
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-api</artifactId>
 					</exclusion>
-					<exclusion>
-						<artifactId>log4j</artifactId>
-						<groupId>log4j</groupId>
-					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -102,8 +136,8 @@
 				<version>2.6.4</version>
 				<exclusions>
 					<exclusion>
-						<groupId>log4j</groupId>
-						<artifactId>log4j</artifactId>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
 					</exclusion>
 					<exclusion>
 						<groupId>org.slf4j</groupId>
@@ -115,6 +149,16 @@
 				<groupId>com.hp.hpl.jena</groupId>
 				<artifactId>tdb</artifactId>
 				<version>0.8.11-SNAPSHOT</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
@@ -131,7 +175,7 @@
 	</dependencyManagement>
 
 	<build>
-		<!-- This is the parent, so only define pluginManagement, not plugins. -->
+		<!-- this is the parent, so only define pluginManagement, not plugins. -->
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -177,28 +221,6 @@
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>2.8</version>
 					<configuration>
-						<docletArtifact>
-							<groupId>com.google.doclava</groupId>
-							<artifactId>doclava</artifactId>
-							<version>1.0.4-SNAPSHOT</version>
-						</docletArtifact>
-						<doclet>com.google.doclava.Doclava</doclet>
-						<!-- | bootclasspath required by Sun's JVM -->
-						<bootclasspath>${sun.boot.class.path}:${settings.localRepository}/junit/junit/4.8.2/junit-4.8.2.jar</bootclasspath>
-						<additionalparam>
-							-quiet
-							-federate JDK
-							http://download.oracle.com/javase/6/docs/api/index.html?
-							-federationxml JDK
-							http://doclava.googlecode.com/svn/static/api/openjdk-6.xml
-							-hdf
-							project.name "${project.name}"
-							-d
-							${project.build.directory}/apidocs
-						</additionalparam>
-						<useStandardDocletOptions>false</useStandardDocletOptions>
-						<!-- | Apple's JVM sometimes requires more memory -->
-						<additionalJOption>-J-Xmx1024m</additionalJOption>
 						<links>
 							<link>http://jena.sourceforge.net/javadoc/</link>
 							<link>http://openjena.org/ARQ/javadoc/</link>
@@ -233,7 +255,7 @@
 				<plugin>
 					<groupId>org.objectweb.proactive</groupId>
 					<artifactId>proactive-maven-plugin</artifactId>
-					<version>1.0.2</version>
+					<version>1.1.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

@@ -41,21 +41,21 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  */
 public class EventCloudInitializationTest implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     @Test
     public void testEventCloudInstantiationAndUsage() {
-
         // Creates an EnvetCloud registry in order to store and to retrieve
         // later the information about the EventCloud which have been created
         EventCloudsRegistry registry =
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
 
         String registryUrl = PAActiveObject.getUrl(registry);
-        
+
         // Creates a new Event-Cloud
         EventCloud eventCloud =
                 EventCloud.create(
-                        registryUrl,
-                        "http://node.provider.not.yet.available",
+                        registryUrl, "http://node.provider.not.yet.available",
                         new Collection<UnalterableElaProperty>(), 1, 3);
 
         System.out.println("Peers contained by the Event Cloud:");
@@ -111,7 +111,6 @@ public class EventCloudInitializationTest implements Serializable {
         // Node.createURI("http://uri2"), Node.createLiteral("a")));
 
         // Creates and retrieved a publish subscribe proxy
-        // However the interface is not yet implemented
         final SubscribeProxy subscribeProxy = factory.createSubscribeProxy();
 
         SubscriptionId id =
@@ -189,11 +188,10 @@ public class EventCloudInitializationTest implements Serializable {
         // Node.createURI("http://xmlns.com/foaf/0.1/name"),
         // Node.createLiteral("Laurent Pellegrino")));
         try {
-            Thread.sleep(10000);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        System.err.println("END");
     }
+
 }
