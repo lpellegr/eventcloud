@@ -23,6 +23,10 @@ package fr.inria.eventcloud.api.generators;
  */
 public class StringGenerator extends Generator {
 
+    private StringGenerator() {
+
+    }
+    
     public static String create(int minLength, int maxLength,
                                 char inferiorBound, char superiorBound) {
         StringBuffer buf = new StringBuffer();

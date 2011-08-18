@@ -34,6 +34,10 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
  */
 public class Executor {
 
+    private Executor() {
+        
+    }
+    
     /**
      * Creates the specified number of active objects by using the specified
      * task which knows how to create an active object.

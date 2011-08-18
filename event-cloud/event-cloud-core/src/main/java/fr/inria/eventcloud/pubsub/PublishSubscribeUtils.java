@@ -47,6 +47,10 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  */
 public class PublishSubscribeUtils {
 
+    private PublishSubscribeUtils() {
+        
+    }
+    
     /**
      * Creates the matching quadruple meta information. This is a quadruple that
      * indicates that a subscription identified by {@code subscriptionIdUrl} is

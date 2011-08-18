@@ -39,6 +39,10 @@ import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
  */
 public class EventCloudsRegistryLauncher {
 
+    private EventCloudsRegistryLauncher() {
+        
+    }
+    
     public static void main(String[] args) {
 
         EventCloudsRegistry registry = null;
