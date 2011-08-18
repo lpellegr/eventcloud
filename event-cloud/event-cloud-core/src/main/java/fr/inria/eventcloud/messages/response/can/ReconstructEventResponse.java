@@ -14,18 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.overlay;
+package fr.inria.eventcloud.messages.response.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-
-import fr.inria.eventcloud.api.PutGetApi;
+import fr.inria.eventcloud.messages.request.can.ReconstructEventRequest;
 
 /**
- * The SemanticPeer interface is used to merge the {@link Peer} interface and
- * the {@link PutGetApi} interface into a single one.
+ * Response associated to {@link ReconstructEventRequest}.
  * 
- * @author bsauvan
+ * @author lpellegr
  */
-public interface SemanticPeer extends Peer, PutGetApi {
+public class ReconstructEventResponse extends QuadruplePatternResponse {
+
+    private static final long serialVersionUID = 1L;
+
+    public ReconstructEventResponse(ReconstructEventRequest request) {
+        super(request);
+    }
 
 }

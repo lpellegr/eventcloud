@@ -24,7 +24,7 @@ import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * Test cases for class {@link Zone}.
@@ -55,7 +55,7 @@ public class ZoneTest {
                         createDoubleCoordinate(0.0),
                         createDoubleCoordinate(1.0)));
 
-        Pair<Zone> newZones = z.split(CanOverlay.getRandomDimension());
+        HomogenousPair<Zone> newZones = z.split(CanOverlay.getRandomDimension());
         Assert.assertEquals(z, newZones.getFirst().merge(newZones.getSecond()));
     }
 

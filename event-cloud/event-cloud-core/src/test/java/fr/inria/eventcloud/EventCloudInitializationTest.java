@@ -188,10 +188,12 @@ public class EventCloudInitializationTest implements Serializable {
         // Node.createURI("http://xmlns.com/foaf/0.1/name"),
         // Node.createLiteral("Laurent Pellegrino")));
         try {
-            Thread.sleep(10);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        // TODO test has to be rewritten to detect termination cleanly
     }
 
 }

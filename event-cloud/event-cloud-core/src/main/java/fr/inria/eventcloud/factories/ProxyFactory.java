@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.factories;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -53,7 +54,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * 
  * @author lpellegr
  */
-public final class ProxyFactory {
+public final class ProxyFactory implements Serializable {
 
     private static Factory factory;
 

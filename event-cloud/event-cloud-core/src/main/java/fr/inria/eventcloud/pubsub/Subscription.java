@@ -92,13 +92,15 @@ public class Subscription implements Rdfable, Serializable {
 
     private final String sparqlQuery;
 
-    private List<Stub> stubs;
+    private final List<Stub> stubs;
 
     // the following fields are transient because they can be
     // created from the sparqlQuery on the fly
     private transient Set<Var> resultVars;
 
     private transient Subsubscription[] subSubscriptions;
+
+    private transient Node graphNode;
 
     public Subscription(String source, String sparqlQuery) {
         this(null, source, sparqlQuery);
@@ -225,9 +227,10 @@ public class Subscription implements Rdfable, Serializable {
         for (int i = 0; i < subSubscriptionsId.size(); i++) {
             Subsubscription s =
                     Subsubscription.parseFrom(
-                            datastore, basicInfo.get(SUBSCRIPTION_ID_PROPERTY)
-                                    .getLiteralLexicalForm(),
-                            subSubscriptionsId.get(i));
+                            datastore, SubscriptionId.parseFrom(basicInfo.get(
+                                    SUBSCRIPTION_ID_PROPERTY)
+                                    .getLiteralLexicalForm()),
+                            SubscriptionId.parseFrom(subSubscriptionsId.get(i)));
             subscription.subSubscriptions[s.getIndex()] = s;
         }
 
@@ -317,6 +320,15 @@ public class Subscription implements Rdfable, Serializable {
         }
 
         return this.resultVars;
+    }
+
+    public synchronized Node getGraphNode() {
+        if (this.graphNode == null) {
+            this.graphNode =
+                    this.getSubSubscriptions()[0].getAtomicQuery().getGraph();
+        }
+
+        return this.graphNode;
     }
 
     /**

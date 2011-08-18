@@ -46,10 +46,10 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * 
  * @author lpellegr
  */
-public class EventCloudInitializer {
+public class EventCloudDeployer {
 
     private static final Logger log =
-            LoggerFactory.getLogger(EventCloudInitializer.class);
+            LoggerFactory.getLogger(EventCloudDeployer.class);
 
     private static final int INJECTION_THRESHOLD = 10;
 
@@ -71,7 +71,7 @@ public class EventCloudInitializer {
      * @param nbPeers
      *            the default number of peers to create.
      */
-    public EventCloudInitializer(int nbTrackers, int nbPeers) {
+    public EventCloudDeployer(int nbTrackers, int nbPeers) {
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
         this.nbTrackers = nbTrackers;
         this.nbPeers = nbPeers;
@@ -79,7 +79,7 @@ public class EventCloudInitializer {
         this.trackers = new SemanticTracker[this.nbTrackers];
     }
 
-    public EventCloudInitializer(int nbPeers) {
+    public EventCloudDeployer(int nbPeers) {
         this(1, nbPeers);
     }
 

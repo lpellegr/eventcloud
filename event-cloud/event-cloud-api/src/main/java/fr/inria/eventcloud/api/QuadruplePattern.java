@@ -17,12 +17,12 @@
 package fr.inria.eventcloud.api;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Node_Variable;
 
 /**
  * A QuadruplePattern is {@link Quadruple} where each component value may be
  * either a regular value (the same as a Quadruple) or a variable. A variable is
- * constructed by using {@link Node#createVariable(String)}, {@link Node#ANY} or
- * a {@code null} value.
+ * represented by using {@link Node#ANY} or {@code null} as value.
  * <p>
  * For example, a quadruple {@code Q=(Node.ANY, v1, v2, v3)} means that we want
  * to retrieve all the quadruples that have a graph value which is set to any
@@ -43,6 +43,12 @@ public final class QuadruplePattern extends Quadruple {
 
     public QuadruplePattern(Node g, Node s, Node p, Node o) {
         super(g, s, p, o, false);
+
+        if (g instanceof Node_Variable || s instanceof Node_Variable
+                || p instanceof Node_Variable || o instanceof Node_Variable) {
+            throw new IllegalArgumentException(
+                    "Node_Var is not allowed inside a quadruple pattern, only Node.ANY and null can be used");
+        }
     }
 
 }

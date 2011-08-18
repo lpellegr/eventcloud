@@ -37,7 +37,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
-import fr.inria.eventcloud.initializers.EventCloudInitializer;
+import fr.inria.eventcloud.initializers.EventCloudDeployer;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -50,11 +50,11 @@ public class SemanticPeerTest {
     private static final Logger log =
             LoggerFactory.getLogger(SemanticPeerTest.class);
 
-    private EventCloudInitializer initializer;
+    private EventCloudDeployer initializer;
 
     @Before
     public void setUp() {
-        this.initializer = new EventCloudInitializer(10);
+        this.initializer = new EventCloudDeployer(10);
         this.initializer.setUp();
     }
 

@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneVi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * Tests cases for {@link NumericZoneView}.
@@ -63,7 +63,7 @@ public class NumericZoneViewTest {
 
     @Test
     public void testGetArea() {
-        Pair<ZoneView<DoubleCoordinate, DoubleElement, Double>> views =
+        HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement, Double>> views =
                 this.view.split(CanOverlay.getRandomDimension());
 
         Assert.assertEquals(

@@ -17,24 +17,39 @@
 package fr.inria.eventcloud.proxies;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+
+import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.can.ReconstructEventRequest;
+import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
+import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 import fr.inria.eventcloud.pubsub.Solution;
 import fr.inria.eventcloud.pubsub.Subscription;
 
@@ -43,22 +58,31 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * This class has to be instantiated as a ProActive/GCM component.
  * <p>
  * Currently the receive operation is handled sequentially because it is not set
- * as IS. This means we don't have to synchronize the datastructure that are
- * used inside this method. However it would be nice to evaluate/decide if it is
- * interesting to put the receive operation as IS (TODO).
+ * as Immediate Service (IS). This means we don't have to synchronize the
+ * datastructure that are used inside this method. However it would be nice to
+ * evaluate/decide if it is interesting to put the receive operation as IS
+ * (TODO).
  * 
  * @author lpellegr
  * @author bsauvan
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends ProxyCache implements ComponentInitActive,
-        SubscribeProxy {
+public class SubscribeProxyImpl extends ProxyCache implements
+        ComponentInitActive, SubscribeProxy {
 
     private static final long serialVersionUID = 1L;
 
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxy.class);
+
+    /**
+     * The retry threshold defines the time to wait in milliseconds before to
+     * re-execute the query for retrieving the quadruples that belongs to the
+     * specified event id.
+     */
+    // TODO: evaluate which value to use for this threshold
+    private static final int RECONSTRUCTION_RETRY_THRESHOLD = 200;
 
     // contains the subscriptions that have been registered from this proxy
     private Map<SubscriptionId, Subscription> subscriptions;
@@ -68,6 +92,16 @@ public class SubscribeProxyImpl extends ProxyCache implements ComponentInitActiv
 
     // contains the solutions that are being received
     private Map<NotificationId, Solution> solutions;
+
+    // TODO: this set has to be replace by a DataBag. The number of events ids
+    // received will grow quickly and after some time it is possible to get an
+    // OutOfMemory exception. That's why it would be nice to have the
+    // possibility to define a threshold that defines what is the maximum number
+    // of eventIds to store in memory. Then by using a DataBag and when the
+    // threshold is reached, the data write are spilled to the disk
+    // example from pig:
+    // http://pig.apache.org/docs/r0.7.0/api/org/apache/pig/data/DataBag.html
+    private Set<Node> eventIdsReceived;
 
     /**
      * Empty constructor required by ProActive.
@@ -95,6 +129,7 @@ public class SubscribeProxyImpl extends ProxyCache implements ComponentInitActiv
             this.listeners =
                     new HashMap<SubscriptionId, NotificationListener<?>>();
             this.solutions = new HashMap<NotificationId, Solution>();
+            this.eventIdsReceived = new HashSet<Node>();
             // TODO: use the properties field to initialize ELA properties
         }
     }
@@ -114,6 +149,9 @@ public class SubscribeProxyImpl extends ProxyCache implements ComponentInitActiv
     @Override
     public SubscriptionId subscribe(String sparqlQuery,
                                     EventNotificationListener listener) {
+        // TODO rewrite the sparqlQuery to keep only the graph variable in the
+        // solution variables. Indeed we need only the graph variable (which
+        // identify the event which is matched) to reconstruct the event
         return this.indexSubscription(sparqlQuery, listener);
     }
 
@@ -151,6 +189,92 @@ public class SubscribeProxyImpl extends ProxyCache implements ComponentInitActiv
     /**
      * {@inheritDoc}
      */
+    public final Event reconstructEvent(Subscription subscription,
+                                        Binding binding) {
+
+        if (!subscription.getGraphNode().isVariable()) {
+            throw new IllegalArgumentException(
+                    "The subscription graph node is not a variable");
+        }
+
+        Node eventId;
+        if ((eventId =
+                binding.get(Var.alloc(subscription.getGraphNode().getName()))) == null) {
+            throw new IllegalArgumentException(
+                    "the specified binding does not contain the specified graph value: "
+                            + subscription.getGraphNode());
+        }
+
+        return this.reconstructEvent(eventId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public final Event reconstructEvent(Node eventId) {
+        if (!eventId.isURI()
+                || !eventId.getURI().startsWith(
+                        EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())) {
+            throw new IllegalArgumentException(
+                    "The event id must be an URI starting by "
+                            + EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                            + ": " + eventId);
+        }
+
+        // the events that are already received are evicted
+        if (this.eventIdsReceived.contains(eventId)) {
+            return null;
+        }
+
+        int expectedNumberOfQuadruples = -1;
+
+        Collection<Quadruple> quadsReceived = new Collection<Quadruple>();
+        Collection<Long> quadHashesReceived =
+                new Collection<Long>(new HashSet<Long>());
+
+        // perform polling while all the quadruples have not been retrieved
+        while (expectedNumberOfQuadruples == -1
+                || quadsReceived.size() != expectedNumberOfQuadruples) {
+            Collection<Quadruple> quads = null;
+            try {
+                quads =
+                        ((ReconstructEventResponse) PAFuture.getFutureValue(super.proxy.selectTracker()
+                                .getRandomPeer()
+                                .send(
+                                        new ReconstructEventRequest(
+                                                new QuadruplePattern(
+                                                        eventId, Node.ANY,
+                                                        Node.ANY, Node.ANY),
+                                                quadHashesReceived)))).getResult();
+            } catch (DispatchException e) {
+                e.printStackTrace();
+            }
+
+            for (Quadruple quad : quads) {
+                if (quad.getPredicate().equals(
+                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
+                    expectedNumberOfQuadruples =
+                            (Integer) quad.getObject().getLiteralValue();
+                }
+                quadsReceived.add(quad);
+                quadHashesReceived.add(quad.hashValue());
+            }
+
+            try {
+                Thread.sleep(RECONSTRUCTION_RETRY_THRESHOLD);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        this.eventIdsReceived.add(eventId);
+
+        return new Event(quadsReceived);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void unsubscribe(SubscriptionId id) {
         // TODO Auto-generated method stub
@@ -179,10 +303,14 @@ public class SubscribeProxyImpl extends ProxyCache implements ComponentInitActiv
     }
 
     private void deliver(NotificationId id, EventNotificationListener listener) {
-        // TODO retrieve all the quadruples associated to each context value and
-        // create events according to the context value, then deliver the events
-        // by using the listener
-        System.out.println("PublishSubscribeProxyImpl.enclosing_method()");
+        Event event =
+                this.reconstructEvent(
+                        this.subscriptions.get(id.getSubscriptionId()),
+                        this.solutions.get(id).getSolution());
+
+        if (event != null) {
+            listener.onNotification(id.getSubscriptionId(), event);
+        }
     }
 
     public void receive(Notification notification) {

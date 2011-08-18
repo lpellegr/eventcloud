@@ -208,8 +208,8 @@ public class Subsubscription implements Rdfable, Serializable {
      * @return the sub subscription which has been parsed.
      */
     public static final Subsubscription parseFrom(SemanticDatastore datastore,
-                                                  String subscriptionId,
-                                                  String subSubscriptionId) {
+                                                  SubscriptionId subscriptionId,
+                                                  SubscriptionId subSubscriptionId) {
         Collection<Quadruple> quads =
                 datastore.find(Node.ANY, Node.createURI(SUBSUBSCRIPTION_NS
                         + subSubscriptionId), Node.ANY, Node.ANY);
@@ -223,8 +223,8 @@ public class Subsubscription implements Rdfable, Serializable {
         }
 
         return new Subsubscription(
-                SubscriptionId.parseFrom(subscriptionId),
-                SubscriptionId.parseFrom(subSubscriptionId),
+                subscriptionId,
+                subSubscriptionId,
                 (Integer) properties.get(SUBSUBSCRIPTION_INDEX_PROPERTY)
                         .getLiteralValue(),
 

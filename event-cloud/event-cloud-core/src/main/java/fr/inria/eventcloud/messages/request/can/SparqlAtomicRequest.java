@@ -31,7 +31,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
 /**
  * Retrieves all the {@link Quadruple}s that match the {@link AtomicQuery} that
  * is specified when the object is constructed. A {@link SparqlAtomicRequest}
- * differs from a {@link FindQuadruplesRequest}. Indeed, with a
+ * differs from a {@link QuadruplePatternRequest}. Indeed, with a
  * {@link SparqlAtomicRequest} the request routing can be improved by using some
  * filter constraints and the result will be filtered according to these
  * constraints.

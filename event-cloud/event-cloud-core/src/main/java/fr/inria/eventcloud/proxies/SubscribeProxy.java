@@ -18,6 +18,11 @@ package fr.inria.eventcloud.proxies;
 
 import java.io.Serializable;
 
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+
+import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
@@ -26,8 +31,33 @@ import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
  * A SubscribeProxy is a proxy that implements the {@link SubscribeApi}. It has
- * to be used by a user who wants to execute subscribe asynchronous operations
+ * to be used by a user who wants to execute asynchronous subscribe operations
  * on an Event Cloud.
+ * <p>
+ * The proxy offers the possibility to reconstruct an Event from the binding
+ * which has matched the subscription by a call to
+ * {@link SubscribeProxy#reconstructEvent(Subscription, Binding)} or
+ * {@link SubscribeProxy#reconstructEvent(Node)} and also by calling
+ * {@link SubscribeProxy#subscribe(String, fr.inria.eventcloud.api.listeners.EventNotificationListener)}
+ * . The reconstruction is an heavy operation that may be used carefully.
+ * Indeed, to reconstruct an {@link Event} from its identifier, a
+ * {@link QuadruplePattern} query must be sent to all the peers matching the
+ * graph value corresponding to the event identifier. Because three dimensions
+ * among four are not fixed, a lot of peers are contacted. Moreover, due to the
+ * fact that the proxies and the event cloud infrastructure are decoupled (and
+ * because each quadruple that belongs to an Event is published asynchronously),
+ * it is not possible to guarantee that all the quadruples that belong to the
+ * event identifier have been retrieved after the execution of the first
+ * {@link QuadruplePattern}. That's why the reconstruction consists in polling
+ * periodically the network with a {@link QuadruplePattern} while all the
+ * quadruples that belong to the event identifier are not retrieved.
+ * <p>
+ * To avoid the reception of replica during the polling, a list of hashes (where
+ * each hash correspond to the hash of the subject, predicate and object values
+ * that belong to a quadruple previously received) is sent along the
+ * {@link QuadruplePattern}. Thus, on the peer which receives the
+ * {@link QuadruplePattern} to execute, it is possible to evict the quadruples
+ * which have already been received by computing a diff.
  * 
  * @author lpellegr
  * @author bsauvan
@@ -62,6 +92,40 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      *         have been register from this proxy, {@code false} otherwise.
      */
     public Subscription find(SubscriptionId id);
+
+    /**
+     * Reconstructs an {@link Event} from the specified {@code subscription} and
+     * {@code binding}. A call to this method block until the whole event has
+     * been retrieved. <strong>This operation must be used carefully</strong>.
+     * It is the invoker responsability to parallelize several calls to this
+     * method.
+     * 
+     * @param subscription
+     *            the subscription that is used to retrieve the name of the
+     *            graph variable.
+     * 
+     * @param binding
+     *            the binding containing the value associated to the graph
+     *            variable extracted from the subscription. The value which is
+     *            read from the binding is the event identifier.
+     * 
+     * @return the event which has been reconstructed.
+     */
+    public Event reconstructEvent(Subscription subscription, Binding binding);
+
+    /**
+     * Reconstructs an {@link Event} from the specified {@code eventId}. A call
+     * to this method block until the whole event has been retrieved.
+     * <strong>This operation must be used carefully</strong>. It is the invoker
+     * responsability to parallelize several calls to this method.
+     * 
+     * @param eventId
+     *            the event identifier to use for retrieving the quadruples that
+     *            belong to the event.
+     * 
+     * @return the event which has been reconstructed.
+     */
+    public Event reconstructEvent(Node eventId);
 
     /**
      * Used internally to send back a notification.

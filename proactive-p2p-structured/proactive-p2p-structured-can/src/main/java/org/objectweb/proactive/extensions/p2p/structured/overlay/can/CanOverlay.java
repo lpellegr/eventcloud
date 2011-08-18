@@ -51,7 +51,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -409,7 +409,7 @@ public class CanOverlay extends StructuredOverlay {
         }
 
         // splits the current peer zone to share it
-        Pair<Zone> newZones = this.zone.split(dimension);
+        HomogenousPair<Zone> newZones = this.zone.split(dimension);
 
         // neighbors affected for the new peer which joins the network
         NeighborTable pendingNewNeighborhood = new NeighborTable();
@@ -638,7 +638,7 @@ public class CanOverlay extends StructuredOverlay {
             retryLeave();
             return false;
         } else {
-            Pair<Byte> neighborDimDir =
+            HomogenousPair<Byte> neighborDimDir =
                     this.neighborTable.findDimensionAndDirection(suitableNeighbor.getId());
 
             Set<NeighborEntry> neighbors =

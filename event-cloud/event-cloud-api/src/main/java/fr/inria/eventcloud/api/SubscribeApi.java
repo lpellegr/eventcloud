@@ -44,7 +44,10 @@ public interface SubscribeApi {
 
     /**
      * Subscribes for notifications of type {@link EventNotificationListener}
-     * with the specified SPARQL query.
+     * with the specified SPARQL query. To have the possibility to retrieve an
+     * {@link Event}, the method reconstructs internally the Event from the
+     * event identifier which matches the subscription. <strong>This operation
+     * must be used carefully</strong>.
      * 
      * @param sparqlQuery
      *            the SPARQL query that is used to subscribe.

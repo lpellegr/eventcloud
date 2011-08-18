@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * Data structure used in order to store the neighbors of a {@link Peer} of type
@@ -202,11 +202,11 @@ public class NeighborTable implements Serializable {
         return this.entries[dimension][direction].containsKey(peerIdentifier);
     }
 
-    public Pair<Byte> findDimensionAndDirection(UUID peerIdentifier) {
+    public HomogenousPair<Byte> findDimensionAndDirection(UUID peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
-                    return new Pair<Byte>(dim, direction);
+                    return new HomogenousPair<Byte>(dim, direction);
                 }
             }
         }
@@ -249,11 +249,11 @@ public class NeighborTable implements Serializable {
      *         table or {@code null} if the peer identified with
      *         {@code peerIdentifier} has not been found in the table.
      */
-    public Pair<Byte> remove(UUID peerIdentifier) {
+    public HomogenousPair<Byte> remove(UUID peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].remove(peerIdentifier) != null) {
-                    return new Pair<Byte>(dim, direction);
+                    return new HomogenousPair<Byte>(dim, direction);
                 }
             }
         }
