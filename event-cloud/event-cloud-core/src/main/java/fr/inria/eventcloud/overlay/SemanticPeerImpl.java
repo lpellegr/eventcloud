@@ -47,9 +47,9 @@ import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
-import fr.inria.eventcloud.messages.request.can.FindQuadruplesRequest;
+import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
-import fr.inria.eventcloud.messages.response.can.FindQuadruplesResponse;
+import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 
 /**
  * SemanticPeerImpl is a concrete implementation of {@link SemanticPeer}. It is
@@ -228,7 +228,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
     @Override
     public Collection<Quadruple> find(QuadruplePattern quadPattern) {
         try {
-            return ((FindQuadruplesResponse) PAFuture.getFutureValue((super.send(new FindQuadruplesRequest(
+            return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
                     quadPattern.getGraph(), quadPattern.getSubject(),
                     quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
         } catch (DispatchException e) {

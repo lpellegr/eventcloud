@@ -30,7 +30,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * A zone defines a space (rectangle) which is completely logical and managed by
@@ -86,7 +86,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     * Returns a new {@link Pair} containing two zone resulting from the split
+     * Returns a new {@link HomogenousPair} containing two zone resulting from the split
      * of the current one on the specified {@code dimension}.
      * 
      * @param dimension
@@ -95,13 +95,13 @@ public class Zone implements Serializable {
      * @return two zone resulting from the split of the current one on the
      *         specified {@code dimension}.
      */
-    public Pair<Zone> split(byte dimension) {
-        Pair<ZoneView<StringCoordinate, StringElement, String>> newUnicodeViews =
+    public HomogenousPair<Zone> split(byte dimension) {
+        HomogenousPair<ZoneView<StringCoordinate, StringElement, String>> newUnicodeViews =
                 this.unicodeView.split(dimension);
-        Pair<ZoneView<DoubleCoordinate, DoubleElement, Double>> newNumViews =
+        HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement, Double>> newNumViews =
                 this.numView.split(dimension);
 
-        return new Pair<Zone>(new Zone(
+        return new HomogenousPair<Zone>(new Zone(
                 (UnicodeZoneView) newUnicodeViews.getFirst(),
                 (NumericZoneView) newNumViews.getFirst()), new Zone(
                 (UnicodeZoneView) newUnicodeViews.getSecond(),

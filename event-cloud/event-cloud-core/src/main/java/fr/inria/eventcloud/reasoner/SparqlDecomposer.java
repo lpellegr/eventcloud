@@ -95,8 +95,8 @@ public final class SparqlDecomposer {
                         atomicQueries, graph});
         if (elt instanceof ElementNamedGraph) {
             log.debug("    ElementNamedGraph");
-            // parses the graph name
-
+            
+            // parses the graph variable
             Node graphValue = ((ElementNamedGraph) elt).getGraphNameNode();
 
             for (Element e : ((ElementGroup) ((ElementNamedGraph) elt).getElement()).getElements()) {

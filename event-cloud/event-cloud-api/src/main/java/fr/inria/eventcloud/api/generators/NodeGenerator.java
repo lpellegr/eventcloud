@@ -60,6 +60,11 @@ public class NodeGenerator extends Generator {
         return createUri(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
     }
 
+    public static Node createUri(String prefix) {
+        return Node.createURI(StringGenerator.create(
+                prefix, DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH, DEFAULT_BOUNDS));
+    }
+
     public static Node createUri(int exactLength) {
         return Node.createURI(StringGenerator.create(
                 DEFAULT_URL_PREFIX, exactLength, DEFAULT_BOUNDS));

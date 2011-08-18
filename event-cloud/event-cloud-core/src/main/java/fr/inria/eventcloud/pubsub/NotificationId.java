@@ -37,6 +37,7 @@ public class NotificationId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    // original subscription identifier
     private final SubscriptionId subscriptionId;
 
     private final long timestamp;
@@ -45,7 +46,12 @@ public class NotificationId implements Serializable {
      * Constructs a NotificationId from the specified parameters.
      * 
      * @param id
+     *            the subscription identifier that identifies the subscription
+     *            which is matched by the notification.
+     * 
      * @param timestamp
+     *            a timestamp that identify when the notification has been
+     *            created.
      */
     public NotificationId(SubscriptionId id, long timestamp) {
         this.subscriptionId = id;

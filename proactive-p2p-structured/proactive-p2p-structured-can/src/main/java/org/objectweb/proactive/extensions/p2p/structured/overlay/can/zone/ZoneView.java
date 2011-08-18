@@ -24,7 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * A ZoneView is a view associated to a {@link Zone}. It is composed of two
@@ -229,7 +229,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      *         following the specified {@code dimension}.
      */
     @SuppressWarnings("unchecked")
-    public Pair<ZoneView<C, E, T>> split(byte dimension) {
+    public HomogenousPair<ZoneView<C, E, T>> split(byte dimension) {
         Element<T> middle =
                 Element.middle(
                         this.lowerBound.getElement(dimension),
@@ -242,7 +242,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
             lowerBoundCopy.setElement(dimension, (E) middle);
             upperBoundCopy.setElement(dimension, (E) middle);
 
-            return new Pair<ZoneView<C, E, T>>(this.createZoneView(
+            return new HomogenousPair<ZoneView<C, E, T>>(this.createZoneView(
                     this.lowerBound, (C) upperBoundCopy), this.createZoneView(
                     (C) lowerBoundCopy, this.upperBound));
         } catch (CloneNotSupportedException e) {

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
-import fr.inria.eventcloud.initializers.EventCloudInitializer;
+import fr.inria.eventcloud.initializers.EventCloudDeployer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 import fr.inria.eventcloud.utils.MurmurHash;
 
@@ -84,8 +84,8 @@ public final class EventCloud implements EventCloudApi, Serializable {
 
         // temporary implementation that deploy the trackers and the peers on
         // the local machine
-        EventCloudInitializer initializer =
-                new EventCloudInitializer(nbTrackers, nbPeers);
+        EventCloudDeployer initializer =
+                new EventCloudDeployer(nbTrackers, nbPeers);
         initializer.setUp();
         for (SemanticTracker tracker : initializer.getTrackers()) {
             this.trackers.add(tracker);

@@ -32,6 +32,9 @@ public class PublishSubscribeConstants {
      * Namespaces
      */
 
+    public static final String EVENT_NS =
+            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "event/";
+
     public static final String SUBSCRIPTION_NS =
             EventCloudProperties.EVENT_CLOUD_NS.getValue() + "subscription/";
 
@@ -48,6 +51,8 @@ public class PublishSubscribeConstants {
      * Nodes associated to namespaces
      */
 
+    public static final Node EVENT_NS_NODE = Node.createURI(EVENT_NS);
+
     public static final Node SUBSCRIPTION_NS_NODE =
             Node.createURI(SUBSCRIPTION_NS);
 
@@ -62,6 +67,8 @@ public class PublishSubscribeConstants {
     /*
      * Properties
      */
+
+    public static final String EVENT_NB_QUADRUPLES = EVENT_NS + "nbquads";
 
     public static final String SUBSCRIPTION_ID_PROPERTY = SUBSCRIPTION_NS
             + "id";
@@ -114,6 +121,9 @@ public class PublishSubscribeConstants {
     /*
      *  Nodes associated to the properties
      */
+
+    public static final Node EVENT_NB_QUADRUPLES_NODE =
+            Node.createURI(EVENT_NB_QUADRUPLES);
 
     public static final Node SUBSCRIPTION_ID_NODE =
             Node.createURI(SUBSCRIPTION_ID_PROPERTY);

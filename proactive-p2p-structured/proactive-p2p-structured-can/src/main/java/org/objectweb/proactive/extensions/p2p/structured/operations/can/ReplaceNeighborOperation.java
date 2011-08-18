@@ -24,7 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * Operation used in order to replace a neighbor by an another from a
@@ -49,7 +49,7 @@ public class ReplaceNeighborOperation implements SynchronousOperation {
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         NeighborTable table = ((CanOverlay) overlay).getNeighborTable();
 
-        Pair<Byte> dimAndDir = table.remove(this.peerIdToReplace);
+        HomogenousPair<Byte> dimAndDir = table.remove(this.peerIdToReplace);
         table.add(this.entry, dimAndDir.getFirst(), dimAndDir.getSecond());
 
         return new EmptyResponseOperation();

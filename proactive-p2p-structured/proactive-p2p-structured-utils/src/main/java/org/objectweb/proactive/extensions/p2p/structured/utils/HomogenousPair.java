@@ -16,36 +16,20 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils;
 
-import java.io.Serializable;
-
 /**
- * Simple pair class.
+ * A pair class that contains homogenous values.
  * 
  * @author lpellegr
  * 
  * @param <T>
- *            the values type which is contained by the pair.
+ *            the values type contained by the pair.
  */
-public class Pair<T> implements Serializable {
+public class HomogenousPair<T> extends Pair<T, T> {
 
     private static final long serialVersionUID = 1L;
 
-    private final T first;
-
-    private final T second;
-
-    public Pair(T first, T second) {
-        super();
-        this.first = first;
-        this.second = second;
-    }
-
-    public T getFirst() {
-        return this.first;
-    }
-
-    public T getSecond() {
-        return this.second;
+    public HomogenousPair(T first, T second) {
+        super(first, second);
     }
 
     public T get(int index) {
@@ -55,7 +39,7 @@ public class Pair<T> implements Serializable {
         }
 
         return index == 0
-                ? this.first : this.second;
+                ? super.first : super.second;
     }
 
 }

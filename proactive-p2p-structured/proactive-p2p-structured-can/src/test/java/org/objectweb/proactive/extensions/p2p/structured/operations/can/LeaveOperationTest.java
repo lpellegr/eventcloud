@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetwork
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * Test cases for the Join operation in {@link CanOverlay}.
@@ -48,14 +48,14 @@ public class LeaveOperationTest {
     @Test
     public void testCanMerge() {
         Zone z1 = new Zone();
-        Pair<Zone> z1Split = z1.split((byte) 0);
+        HomogenousPair<Zone> z1Split = z1.split((byte) 0);
         Zone z2 = z1Split.getFirst();
         Zone z3 = z1Split.getSecond();
 
         // two zones: z1, z2
         assertTrue(z2.canMerge(z3, (byte) 0));
 
-        Pair<Zone> z3Split = z3.split((byte) 1);
+        HomogenousPair<Zone> z3Split = z3.split((byte) 1);
         Zone z4 = z3Split.getFirst();
         Zone z5 = z3Split.getSecond();
 

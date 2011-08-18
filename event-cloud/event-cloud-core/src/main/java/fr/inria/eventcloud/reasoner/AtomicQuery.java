@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.reasoner;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,27 +38,24 @@ import fr.inria.eventcloud.api.QuadruplePattern;
  */
 public final class AtomicQuery {
 
-    // private final UUID id;
-
     public enum ParentQueryForm {
         ASK, CONSTRUCT, DESCRIBE, SELECT
     };
 
     private final ParentQueryForm parentQueryForm;
 
-    private final QuadruplePattern quadruplePattern;
+    private final Node nodes[];
 
     // contains the variables and its associated positions
+    // TODO: this field could be transient?
     private Map<String, Integer> vars;
 
     public AtomicQuery(ParentQueryForm form, Node graph, Node subject,
             Node predicate, Node object) {
-        // this.id = UUID.randomUUID();
         this.parentQueryForm = form;
-        this.quadruplePattern =
-                new QuadruplePattern(graph, subject, predicate, object);
-        this.vars = new HashMap<String, Integer>(4);
+        this.nodes = new Node[] {graph, subject, predicate, object};
 
+        this.vars = new HashMap<String, Integer>(4);
         Node[] nodes = {graph, subject, predicate, object};
         for (int i = 0; i < nodes.length; i++) {
             if (nodes[i].isVariable()) {
@@ -67,8 +65,7 @@ public final class AtomicQuery {
     }
 
     public boolean hasLiteralObject() {
-        return this.quadruplePattern.getObject() != null
-                && this.quadruplePattern.getObject().isLiteral();
+        return this.nodes[2] != null && this.nodes[2].isLiteral();
     }
 
     public String getVarName(int index) {
@@ -94,36 +91,36 @@ public final class AtomicQuery {
         return getVarIndex(varName) != -1;
     }
 
-    // public UUID getId() {
-    // return this.id;
-    // }
-
     public ParentQueryForm getParentQueryForm() {
         return this.parentQueryForm;
     }
 
     public QuadruplePattern getQuadruplePattern() {
-        return this.quadruplePattern;
+        return new QuadruplePattern(
+                replaceVarNodeByNodeAny(this.nodes[0]),
+                replaceVarNodeByNodeAny(this.nodes[1]),
+                replaceVarNodeByNodeAny(this.nodes[2]),
+                replaceVarNodeByNodeAny(this.nodes[3]));
     }
 
     public Node getGraph() {
-        return this.quadruplePattern.getGraph();
+        return this.nodes[0];
     }
 
     public Node getSubject() {
-        return this.quadruplePattern.getSubject();
+        return this.nodes[1];
     }
 
     public Node getPredicate() {
-        return this.quadruplePattern.getPredicate();
+        return this.nodes[2];
     }
 
     public Node getObject() {
-        return this.quadruplePattern.getObject();
+        return this.nodes[3];
     }
 
     public Node[] toArray() {
-        return this.quadruplePattern.toArray();
+        return this.nodes;
     }
 
     public Set<Var> getVariables() {
@@ -134,133 +131,16 @@ public final class AtomicQuery {
         return vars;
     }
 
-    // /**
-    // * Returns the triple pattern as an array of String where each component
-    // is
-    // * either a String if the triple pattern component depicts a value or
-    // * {@code null} if the triple pattern component depicts a variable.
-    // *
-    // * @return an array of String where each component is either a String if
-    // the
-    // * triple pattern component depicts a value or {@code null} if the
-    // * triple pattern component depicts a variable.
-    // */
-    // public String[] toArray() {
-    // return new String[] {isVariable(this.elements[0])
-    // ? null : this.elements[0], isVariable(this.elements[1])
-    // ? null : this.elements[1], isVariable(this.elements[2])
-    // ? null : this.elements[2], isVariable(this.elements[3])
-    // ? null : this.elements[3]};
-    // }
-
-    // public String asSparql() {
-    // if (this.sparql == null) {
-    // switch (this.parentQueryForm) {
-    // case ASK:
-    // this.sparql = this.asAskSparql();
-    // break;
-    // case CONSTRUCT:
-    // this.sparql = this.asConstruct();
-    // break;
-    // case DESCRIBE:
-    // this.sparql = this.asDescribeSparql();
-    // break;
-    // case SELECT:
-    // this.sparql = this.asSelectSparql();
-    // break;
-    // }
-    // }
-    //
-    // return this.sparql;
-    // }
-
-    // private String asAskSparql() {
-    // StringBuilder query = new StringBuilder();
-    // query.append("ASK { GRAPH ");
-    // query.append(SemanticHelper.toNTripleSyntax(this.elements[0]));
-    // query.append(" { ");
-    //
-    // for (int i = 1; i < 4; i++) {
-    // query.append(SemanticHelper.toNTripleSyntax(this.elements[i]));
-    // query.append(" ");
-    // }
-    //
-    // query.append("} }");
-    // return query.toString();
-    // }
-
-    // public String asConstruct() {
-    // String subjectAsString = RdfFormatter.format(this.quad.getSubject());
-    // String predicateAsString =
-    // RdfFormatter.format(this.quad.getPredicate());
-    // String objectAsString = RdfFormatter.format(this.quad.getObject());
-    //
-    // StringBuilder query = new StringBuilder();
-    // query.append("CONSTRUCT { ");
-    // query.append(subjectAsString);
-    // query.append(" ");
-    // query.append(predicateAsString);
-    // query.append(" ");
-    // query.append(objectAsString);
-    // query.append("} WHERE { GRAPH ");
-    // query.append(RdfFormatter.format(this.quad.getGraph()));
-    // query.append(" { ");
-    // query.append(subjectAsString);
-    // query.append(" ");
-    // query.append(predicateAsString);
-    // query.append(" ");
-    // query.append(objectAsString);
-    // query.append("} }");
-    //
-    // return query.toString();
-    // }
-
-    // private String asDescribeSparql() {
-    // StringBuilder query = new StringBuilder();
-    // query.append("DESCRIBE { ");
-    //
-    // for (int i = 1; i < 4; i++) {
-    // query.append(SemanticHelper.toNTripleSyntax(this.elements[i]));
-    // query.append(" ");
-    // }
-    //
-    // query.append("} WHERE { GRAPH ");
-    // query.append(SemanticHelper.toNTripleSyntax(this.elements[0]));
-    // query.append(" { ");
-    //
-    // for (int i = 1; i < 4; i++) {
-    // query.append(SemanticHelper.toNTripleSyntax(this.elements[i]));
-    // query.append(" ");
-    // }
-    //
-    // query.append("} }");
-    // return query.toString();
-    // }
-    //
-    // private String asSelectSparql() {
-    // StringBuilder query = new StringBuilder();
-    // query.append("SELECT ");
-    //
-    // for (int i = 1; i < 4; i++) {
-    // query.append(SemanticHelper.toNTripleSyntax(this.elements[i]));
-    // query.append(" ");
-    // }
-    //
-    // query.append("WHERE { GRAPH ");
-    // query.append(SemanticHelper.toNTripleSyntax(this.elements[0]));
-    // query.append(" { ");
-    //
-    // for (int i = 1; i < 4; i++) {
-    // query.append(SemanticHelper.toNTripleSyntax(this.elements[i]));
-    // query.append(" ");
-    // }
-    //
-    // query.append("} }");
-    // return query.toString();
-    // }
-
     public int getNumberOfVariables() {
         return this.vars.size();
+    }
+
+    private static final Node replaceVarNodeByNodeAny(Node node) {
+        if (node.isVariable()) {
+            return Node.ANY;
+        }
+
+        return node;
     }
 
     /**
@@ -268,7 +148,7 @@ public final class AtomicQuery {
      */
     @Override
     public int hashCode() {
-        return this.quadruplePattern.hashCode();
+        return Arrays.hashCode(this.nodes);
     }
 
     /**
@@ -277,7 +157,7 @@ public final class AtomicQuery {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof AtomicQuery
-                && this.quadruplePattern.equals(((QuadruplePattern) obj));
+                && Arrays.equals(this.nodes, ((AtomicQuery) obj).toArray());
     }
 
     /**
@@ -296,29 +176,5 @@ public final class AtomicQuery {
         result.append(")");
         return result.toString();
     }
-
-    // private static final String[] varNames = {"g", "s", "p", "o"};
-
-    // public static QuadruplePattern create(ParentQueryForm parentQueryForm) {
-    // Node[] nodes = new Node[4];
-    // for (int i = 0; i < 4; i++) {
-    // nodes[i] = createNode(i);
-    // }
-    //
-    // return new QuadruplePattern(
-    // parentQueryForm, nodes[0], nodes[1], nodes[2], nodes[3]);
-    // }
-
-    // public static Node createNode(int index) {
-    // if (ProActiveRandom.nextInt(10) > 7) {
-    // return Node.createVariable(varNames[index]);
-    // } else {
-    // if (index > 2) {
-    // return NodeGenerator.createNode(5, 10);
-    // } else {
-    // return NodeGenerator.createUri(5, 10);
-    // }
-    // }
-    // }
 
 }

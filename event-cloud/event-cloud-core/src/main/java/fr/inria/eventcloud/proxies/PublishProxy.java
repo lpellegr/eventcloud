@@ -20,12 +20,15 @@ import java.io.InputStream;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 
+import com.hp.hpl.jena.graph.Node;
+
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
+import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 
 /**
  * A PublishProxy is a proxy that implements the {@link PublishApi}. It has to
@@ -65,6 +68,14 @@ public class PublishProxy extends ProxyCache implements Proxy, PublishApi {
      */
     @Override
     public void publish(Event event) {
+        // publish a quadruples that indicates what is the number of quadruples
+        // contained by the event
+        this.publish(new Quadruple(
+                event.getGraph(), event.getGraph(),
+                PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
+                Node.createLiteral(Integer.toString(event.getQuadruples()
+                        .size() + 1))));
+
         // TODO try to improve the publication of several quadruples
         // first insight: use a thread-pool
         for (Quadruple quad : event.getQuadruples()) {

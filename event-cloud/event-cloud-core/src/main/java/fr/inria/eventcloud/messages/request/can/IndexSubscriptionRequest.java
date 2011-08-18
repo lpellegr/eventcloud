@@ -28,10 +28,9 @@ import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
  * Indexes a {@link Subscription} into the network. The indexing operation
- * consist in reaching all the peer that matches the first sub subscription
- * contained by the subscription. Then, when we are on one of these peer we have
- * to put the subscription into the local cache and to store the subscription
- * into the local datastore.
+ * consists in reaching all the peers that match the first sub-subscription
+ * contained by the subscription. Then, when one of these peers are reached, the
+ * subscription is put into the local cache and into the local datastore.
  * 
  * @author lpellegr
  */

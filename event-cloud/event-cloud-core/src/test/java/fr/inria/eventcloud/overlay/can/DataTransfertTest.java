@@ -34,7 +34,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.factories.SemanticFactory;
-import fr.inria.eventcloud.initializers.EventCloudInitializer;
+import fr.inria.eventcloud.initializers.EventCloudDeployer;
 import fr.inria.eventcloud.operations.can.FindQuadruplesOperation;
 import fr.inria.eventcloud.operations.can.FindQuadruplesResponseOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
@@ -50,7 +50,7 @@ public class DataTransfertTest {
     private final static Logger logger =
             LoggerFactory.getLogger(DataTransfertTest.class);
 
-    private EventCloudInitializer initializer;
+    private EventCloudDeployer initializer;
 
     private static String[][] quadrupleValues = {
             {"http://A", "http://A", "http://A", "http://A"},
@@ -59,7 +59,7 @@ public class DataTransfertTest {
 
     @Before
     public void setUp() {
-        this.initializer = new EventCloudInitializer(1);
+        this.initializer = new EventCloudDeployer(1);
         this.initializer.setUp();
     }
 

@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.messages.request.can.FindQuadruplesRequest;
+import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.StatelessQuadruplePatternRequest;
 
 /**
@@ -31,12 +31,12 @@ import fr.inria.eventcloud.messages.request.can.StatelessQuadruplePatternRequest
  * 
  * @author lpellegr
  */
-public class FindQuadruplesResponse extends
+public class QuadruplePatternResponse extends
         StatefulQuadruplePatternResponse<Collection<Quadruple>> {
 
     private static final long serialVersionUID = 1L;
 
-    public FindQuadruplesResponse(FindQuadruplesRequest request) {
+    public QuadruplePatternResponse(QuadruplePatternRequest request) {
         super(request);
     }
 

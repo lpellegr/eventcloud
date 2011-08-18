@@ -16,31 +16,18 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.PUBLICATION_INSERTION_DATETIME_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Iterator;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
-import com.google.common.collect.Sets;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
-import com.hp.hpl.jena.sparql.util.FmtUtils;
 
+import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.JenaDatastore;
@@ -48,14 +35,20 @@ import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
+import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.SubscriptionRewriter;
 import fr.inria.eventcloud.pubsub.Subsubscription;
-import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
- * Request that is used to index a subscription that have been rewritten after
- * the publication of a quadruple.
+ * Request used to index a subscription that have been rewritten after the
+ * publication of a quadruple. While the rewritten subscription is indexed, it
+ * is possible to have received some quadruples that match the rewritten
+ * subscription. That's why an algorithm similar to the one from
+ * {@link PublishQuadrupleRequest} is used to rewrite the rewritten subscription
+ * for the quadruples that match the rewritten subscription.
+ * 
+ * @see PublishQuadrupleRequest
  * 
  * @author lpellegr
  */
@@ -63,16 +56,13 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
 
     private static final long serialVersionUID = 1L;
 
-    private static final Map<Integer, Var> varIndexes;
-
-    static {
-        varIndexes = new HashMap<Integer, Var>(4, 1);
-        varIndexes.put(0, Var.alloc("g"));
-        varIndexes.put(1, Var.alloc("s"));
-        varIndexes.put(2, Var.alloc("p"));
-        varIndexes.put(3, Var.alloc("o"));
-    }
-
+    /**
+     * Constructs an IndexRewrittenSubscriptionRequest from the specified
+     * rewritten {@code subscription}.
+     * 
+     * @param subscription
+     *            the rewritten subscription to index.
+     */
     public IndexRewrittenSubscriptionRequest(Subscription subscription) {
         super(subscription);
     }
@@ -92,42 +82,35 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
         Subsubscription firstSubsubscription =
                 super.subscription.getValue().getSubSubscriptions()[0];
 
-        ResultSet result =
-                datastore.executeSparqlSelect(createQueryRetrievingQuadruplesMatchingRewrittenSubscription(firstSubsubscription));
+        // finds the quadruples that match the rewritten subscription which has
+        // been indexed
+        Collection<Quadruple> quadsMatchingFirstSubsubscription =
+                datastore.find(firstSubsubscription.getAtomicQuery()
+                        .getQuadruplePattern());
 
-        List<Binding> bindings = new ArrayList<Binding>();
-        List<Node> quadHashValues = new ArrayList<Node>();
-
-        // cannot iterate on the binding and perform write
-        // operation on the datastore at the same time
-        while (result.hasNext()) {
-            Binding binding = result.nextBinding();
-            bindings.add(filter(
-                    binding, subscription.getResultVars(),
-                    firstSubsubscription.getAtomicQuery()));
-            quadHashValues.add(binding.get(Var.alloc("h")));
-        }
-
-        for (int i = 0; i < bindings.size(); i++) {
-            Quadruple matchingQuad =
-                    new Quadruple(
-                            quadHashValues.get(i),
-                            Node.createURI(SUBSCRIPTION_NS
-                                    + subscription.getParentId()),
-                            QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
-                            Node.createLiteral(
-                                    subscription.getId().toString(), null,
-                                    XSDDatatype.XSDlong));
+        Iterator<Quadruple> it = quadsMatchingFirstSubsubscription.iterator();
+        while (it.hasNext()) {
+            Quadruple quadMatching = it.next();
 
             if (subscription.getSubSubscriptions().length == 1) {
                 NotificationId notificationId =
                         new NotificationId(
                                 subscription.getOriginalId(), System.nanoTime());
 
-                // TODO check if it is ok?
-                datastore.delete(matchingQuad);
+                // sends part of the solution to the subscriber
+                // TODO: this operation can be done in parallel with the send
+                // RetrieveSubSolutionOperation
+                subscription.getSourceStub()
+                        .receive(
+                                new Notification(
+                                        notificationId,
+                                        PAActiveObject.getUrl(overlay.getStub()),
+                                        PublishSubscribeUtils.filter(
+                                                quadMatching,
+                                                subscription.getResultVars(),
+                                                firstSubsubscription.getAtomicQuery())));
 
-                // broadcast a message to all the stubs contained by the
+                // broadcasts a message to all the stubs contained by the
                 // subscription to say to these peers to send their
                 // sub-solutions to the subscriber
                 // TODO: send message in parallel
@@ -143,29 +126,24 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
                         e.printStackTrace();
                     }
                 }
-
-                // sends part of the solution to the subscriber
-                // TODO; this operation can be done in parallel with the send
-                // RetrieveSubSolutionOperation
-                subscription.getSourceStub().receive(
-                        new Notification(
-                                notificationId,
-                                PAActiveObject.getUrl(overlay.getStub()),
-                                bindings.get(i)));
             } else {
-                // writes a quadruple that indicates that the given quadruple
-                // match the given subscription
-                datastore.add(matchingQuad);
+                Quadruple metaQuad =
+                        PublishSubscribeUtils.createMetaQuadruple(
+                                quadMatching,
+                                PublishSubscribeUtils.createSubscriptionIdUrl(subscription.getParentId()),
+                                Node.createLiteral(subscription.getId()
+                                        .toString(), null, XSDDatatype.XSDlong));
+
+                datastore.add(metaQuad);
 
                 Subscription rewrittenSubscription =
-                        SubscriptionRewriter.rewrite(
-                                subscription, bindings.get(i));
+                        SubscriptionRewriter.rewrite(subscription, quadMatching);
 
                 // stores the url of the stub of the current peer in order to
                 // have the possibility to retrieve the quadruple later
                 rewrittenSubscription.addStub(new Subscription.Stub(
                         PAActiveObject.getUrl(overlay.getStub()),
-                        (Long) quadHashValues.get(i).getLiteralValue()));
+                        quadMatching.hashValue()));
 
                 try {
                     overlay.getStub().send(
@@ -176,73 +154,6 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
                 }
             }
         }
-    }
-
-    /**
-     * Filters the specified {@code binding} to keep only the variables that are
-     * contained by the given{@code resultVars} list.
-     * 
-     * @param binding
-     *            the binding to filter.
-     * @param resultVars
-     *            the variable to keep.
-     * @param atomicQuery
-     *            the atomicQuery that is used to filter the variables.
-     * 
-     * @return a binding which contains only the variables (and their associated
-     *         value) from the specified list of variables.
-     */
-    private static final Binding filter(Binding binding, Set<Var> resultVars,
-                                        AtomicQuery atomicQuery) {
-        Set<Var> vars =
-                Sets.intersection(resultVars, atomicQuery.getVariables());
-
-        Binding newBinding = BindingFactory.create();
-
-        for (Var var : vars) {
-            newBinding.add(
-                    var,
-                    binding.get(varIndexes.get(atomicQuery.getVarIndex(var.getName()))));
-        }
-
-        return newBinding;
-    }
-
-    private static final String createQueryRetrievingQuadruplesMatchingRewrittenSubscription(Subsubscription s) {
-        String[] quadruplePatternValues = new String[4];
-        String[] defaultVariables = {"?g", "?s", "?p", "?o"};
-        List<String> resultVariables = new ArrayList<String>();
-        resultVariables.add(defaultVariables[0]);
-
-        Node[] nodes = s.getAtomicQuery().toArray();
-
-        for (int i = 0; i < nodes.length; i++) {
-            if (nodes[i].isVariable()) {
-                resultVariables.add(defaultVariables[i]);
-                quadruplePatternValues[i] = defaultVariables[i];
-            } else {
-                quadruplePatternValues[i] = FmtUtils.stringForNode(nodes[i]);
-            }
-        }
-
-        StringBuilder result = new StringBuilder();
-        result.append("SELECT ?h ");
-        for (String resultVariable : resultVariables) {
-            result.append(resultVariable);
-            result.append(" ");
-        }
-        result.append(" WHERE {\n     GRAPH ?h {\n        ");
-        for (int i = 1; i < quadruplePatternValues.length; i++) {
-            result.append(quadruplePatternValues[i]);
-            result.append(" ");
-        }
-        result.append(" .\n        ");
-        result.append(quadruplePatternValues[0]);
-        result.append(" <");
-        result.append(PUBLICATION_INSERTION_DATETIME_NODE);
-        result.append("> ?insertionTime .\n    }\n}");
-
-        return result.toString();
     }
 
 }

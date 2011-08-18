@@ -32,6 +32,8 @@ import com.hp.hpl.jena.graph.Node_Blank;
 import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.Triple;
 
+import fr.inria.eventcloud.utils.MurmurHash;
+
 /**
  * A quadruple is a 4-tuple containing respectively a graph, a subject, a
  * predicate and an object value. The object value can be either an IRI or a
@@ -206,6 +208,19 @@ public class Quadruple implements Serializable {
      */
     public final Node getObject() {
         return this.nodes[3];
+    }
+
+    /**
+     * Returns a 64 bits hash value for the current quadruple by using
+     * {@link MurmurHash} function.
+     * 
+     * @return a 64 bits hash value for the current quadruple by using
+     *         {@link MurmurHash} function.
+     */
+    public long hashValue() {
+        return MurmurHash.hash64(
+                this.nodes[0].toString(), this.nodes[1].toString(),
+                this.nodes[2].toString(), this.nodes[3].toString());
     }
 
     /**

@@ -28,7 +28,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.JenaDatastore;
-import fr.inria.eventcloud.messages.response.can.FindQuadruplesResponse;
+import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 
 /**
  * Retrieves all the {@link Quadruple}s that match the {@link QuadruplePattern}
@@ -36,16 +36,16 @@ import fr.inria.eventcloud.messages.response.can.FindQuadruplesResponse;
  * 
  * @author lpellegr
  */
-public class FindQuadruplesRequest extends
+public class QuadruplePatternRequest extends
         StatefulQuadruplePatternRequest<Collection<Quadruple>> {
 
     private static final long serialVersionUID = 1L;
 
-    public FindQuadruplesRequest(QuadruplePattern quadruplePattern) {
+    public QuadruplePatternRequest(QuadruplePattern quadruplePattern) {
         super(quadruplePattern);
     }
 
-    public FindQuadruplesRequest(Node g, Node s, Node p, Node o) {
+    public QuadruplePatternRequest(Node g, Node s, Node p, Node o) {
         super(new QuadruplePattern(g, s, p, o));
     }
 
@@ -54,7 +54,7 @@ public class FindQuadruplesRequest extends
      */
     @Override
     public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        return new FindQuadruplesResponse(this);
+        return new QuadruplePatternResponse(this);
     }
 
     /**
