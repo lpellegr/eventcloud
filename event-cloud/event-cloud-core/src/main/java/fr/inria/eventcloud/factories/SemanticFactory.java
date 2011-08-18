@@ -61,6 +61,10 @@ public class SemanticFactory {
         }
     }
 
+    private SemanticFactory() {
+
+    }
+
     /**
      * Creates a new semantic tracker component on the local JVM and associates
      * it to the network named "default".

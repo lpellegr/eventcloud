@@ -65,6 +65,10 @@ public class TrackerFactory {
         }
     }
 
+    private TrackerFactory() {
+
+    }
+
     /**
      * Creates a new active tracker on the local JVM and associates it to the
      * network named "default".

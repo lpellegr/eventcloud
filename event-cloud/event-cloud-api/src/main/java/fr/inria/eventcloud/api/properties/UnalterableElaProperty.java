@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.api.properties;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**

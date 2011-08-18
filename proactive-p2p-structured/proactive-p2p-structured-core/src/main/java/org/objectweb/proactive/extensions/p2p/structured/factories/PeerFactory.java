@@ -59,6 +59,10 @@ public class PeerFactory {
         }
     }
 
+    private PeerFactory() {
+
+    }
+
     /**
      * Creates a new peer active object on the local JVM by using the specified
      * overlay abstraction.
