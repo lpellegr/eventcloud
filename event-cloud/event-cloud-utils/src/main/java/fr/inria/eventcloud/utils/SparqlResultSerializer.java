@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.openjena.riot.out.NodeFmtLib;
 import org.openjena.riot.tokens.TokenizerFactory;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -37,7 +38,6 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.resultset.TSVOutput;
-import com.hp.hpl.jena.sparql.util.FmtUtils;
 
 import fr.inria.eventcloud.protobuf.SparqlResultsProtos;
 import fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding.Builder;
@@ -118,7 +118,7 @@ public class SparqlResultSerializer {
             SequenceBinding.Builder sequenceBinding =
                     SparqlResultsProtos.Binding.SequenceBinding.newBuilder();
             sequenceBinding.setVarName(var.getName());
-            sequenceBinding.setValue(FmtUtils.stringForNode(binding.get(var)));
+            sequenceBinding.setValue(NodeFmtLib.serialize(binding.get(var)));
             if (parent) {
                 builder.addParentBinding(sequenceBinding);
             } else {
