@@ -47,7 +47,7 @@ public class WsNotifSubscriptionToSparqlHandler {
     private static final String WSDL_NAMESPACE =
             "http://schemas.xmlsoap.org/wsdl/";
 
-    public WsNotifSubscriptionToSparqlHandler() {
+    private WsNotifSubscriptionToSparqlHandler() {
 
     }
 

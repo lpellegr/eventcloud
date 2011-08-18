@@ -36,6 +36,10 @@ public class NodeGenerator extends Generator {
 
     private static final int DEFAULT_MAX_LENGTH = 20;
 
+    private NodeGenerator() {
+        
+    }
+    
     public static Node createNode() {
         return createNode(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
     }

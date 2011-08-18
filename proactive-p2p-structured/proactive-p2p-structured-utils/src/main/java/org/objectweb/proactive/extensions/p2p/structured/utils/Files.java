@@ -26,6 +26,10 @@ import java.io.IOException;
  */
 public class Files {
 
+    private Files() {
+        
+    }
+    
     /**
      * Recursively delete a given directory.
      * 

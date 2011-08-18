@@ -104,4 +104,8 @@ public class P2PStructuredProperties {
     public static final PropertyInteger TRACKER_JOIN_RETRY_INTERVAL =
             new PropertyInteger("tracker.join.retry.interval", 500);
 
+    private P2PStructuredProperties() {
+        
+    }
+    
 }

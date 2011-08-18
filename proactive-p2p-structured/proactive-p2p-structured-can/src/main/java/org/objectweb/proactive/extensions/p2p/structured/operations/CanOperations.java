@@ -45,6 +45,10 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTab
  */
 public class CanOperations {
 
+    private CanOperations() {
+        
+    }
+    
     public static GetIdAndZoneResponseOperation getIdAndZoneResponseOperation(Peer peer) {
         return (GetIdAndZoneResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new GetIdAndZoneOperation()));
     }

@@ -28,6 +28,10 @@ import java.io.ObjectOutputStream;
  */
 public class ObjectToByteConverter {
 
+    private ObjectToByteConverter() {
+        
+    }
+    
     /**
      * Convert an object to a byte array using a regular object stream.
      * 

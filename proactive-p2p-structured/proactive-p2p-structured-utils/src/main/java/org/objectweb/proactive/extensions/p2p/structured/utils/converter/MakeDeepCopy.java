@@ -26,6 +26,10 @@ import java.io.IOException;
  */
 public class MakeDeepCopy {
 
+    private MakeDeepCopy() {
+
+    }
+
     /**
      * Performs a deep copy of an object by using a regular object stream.
      * 

@@ -22,7 +22,7 @@ import java.security.SecureRandom;
  * 
  * @author lpellegr
  */
-public class Generator {
+public abstract class Generator {
 
     protected static final SecureRandom random = new SecureRandom();
 

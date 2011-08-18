@@ -28,6 +28,10 @@ import java.io.ObjectInputStream;
  */
 public class ByteToObjectConverter {
 
+    private ByteToObjectConverter() {
+        
+    }
+    
     /**
      * Converts to an object using a regular object stream.
      * 
