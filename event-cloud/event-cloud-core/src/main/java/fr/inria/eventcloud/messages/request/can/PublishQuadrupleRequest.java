@@ -26,7 +26,6 @@ import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTI
 import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,14 +34,13 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
-import org.openjena.riot.out.OutputLangUtils;
+import org.openjena.riot.out.NodeFmtLib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.sparql.util.FmtUtils;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -235,22 +233,22 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         query.append("> ?subscriptionId .\n");
         query.append("        FILTER (\n");
         query.append("            (sameTerm(?subSubscriptionGraph, ");
-        query.append(FmtUtils.stringForNode(quad.getGraph()));
+        query.append(NodeFmtLib.serialize(quad.getGraph()));
         query.append(") || datatype(?subSubscriptionGraph) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionSubject, ");
-        query.append(FmtUtils.stringForNode(quad.getSubject()));
+        query.append(NodeFmtLib.serialize(quad.getSubject()));
         query.append(") || datatype(?subSubscriptionSubject) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionPredicate, ");
-        query.append(FmtUtils.stringForNode(quad.getPredicate()));
+        query.append(NodeFmtLib.serialize(quad.getPredicate()));
         query.append(") || datatype(?subSubscriptionPredicate) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionObject, ");
-        query.append(formatLiteralValue(quad.getObject()));
+        query.append(NodeFmtLib.serialize(quad.getObject()));
         query.append(") || datatype(?subSubscriptionObject) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
@@ -259,15 +257,6 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         query.append("}");
 
         return query.toString();
-    }
-
-    /*
-     * Temporary fix for issue JENA-103 (https://issues.apache.org/jira/browse/JENA-103).
-     */
-    private static String formatLiteralValue(Node object) {
-        StringWriter sw = new StringWriter();
-        OutputLangUtils.output(sw, object, null);
-        return new String(sw.getBuffer());
     }
 
 }
