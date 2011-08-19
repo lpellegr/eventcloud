@@ -40,13 +40,23 @@
 	</issueManagement>
 
 	<repositories>
-		<repository>
-			<id>event-cloud-releases</id>
-			<url>http://maven.event-cloud.googlecode.com/hg/releases</url>
-		</repository>
+		<!-- These repositories must also be removed before to release the event 
+			cloud artifacts into maven central -->
+		<!-- <repository> -->
+		<!-- <id>event-cloud-releases</id> -->
+		<!-- <url>http://maven.event-cloud.googlecode.com/hg/releases</url> -->
+		<!-- </repository> -->
 		<repository>
 			<id>event-cloud-snapshots</id>
 			<url>http://maven.event-cloud.googlecode.com/hg/snapshots</url>
+		</repository>
+		<!-- Staging repository that is temporarily used to test the proactive 
+			artifact. As soon as the artifact is declared as usable in production, it 
+			has to be released in Maven Central (it takes around 2 hours to be synchronized) 
+			and this staging repository has to be removed -->
+		<repository>
+			<id>staging-orgobjectwebproactive-247</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-250</url>
 		</repository>
 	</repositories>
 
@@ -107,7 +117,7 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>log4j-over-slf4j</artifactId>
-				<version>1.6.1</version>
+				<version>1.6.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -116,8 +126,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
-				<artifactId>proactive</artifactId>
-				<version>5.0.3</version>
+				<artifactId>proactive-programming</artifactId>
+				<version>5.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.hp.hpl.jena</groupId>
