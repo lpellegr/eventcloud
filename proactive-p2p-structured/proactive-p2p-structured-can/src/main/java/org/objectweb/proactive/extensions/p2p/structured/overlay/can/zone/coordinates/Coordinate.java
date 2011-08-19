@@ -184,7 +184,7 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>>
     @Override
     @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof Coordinate
+        return obj instanceof Coordinate
                 && this.compareTo((Coordinate<E, T>) obj) == 0;
     }
 

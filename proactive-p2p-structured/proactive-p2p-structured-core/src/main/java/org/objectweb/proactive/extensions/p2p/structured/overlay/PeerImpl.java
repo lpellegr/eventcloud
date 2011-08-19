@@ -254,7 +254,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      */
     @Override
     public int hashCode() {
-        return this.overlay.id.hashCode();
+        return this.getId().hashCode();
     }
 
     /**

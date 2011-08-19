@@ -1581,6 +1581,14 @@ public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
      * {@inheritDoc}
      */
     @Override
+    public int hashCode() {
+        return super.object.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean equals(Object m) {
         return super.object.equals(m);
     }
