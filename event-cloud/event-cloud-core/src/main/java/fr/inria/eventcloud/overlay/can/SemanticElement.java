@@ -63,15 +63,15 @@ public class SemanticElement extends StringElement {
         try {
             java.net.URI uri = new java.net.URI(value);
 
-            int slashIndex = value.lastIndexOf("/");
-            int sharpIndex = value.lastIndexOf("#");
+            int slashIndex = value.lastIndexOf('/');
+            int sharpIndex = value.lastIndexOf('#');
 
             // # or / is the last character
             if (slashIndex == value.length() - 1
                     || sharpIndex == value.length() - 1) {
                 value = value.substring(0, value.length() - 1);
-                slashIndex = value.lastIndexOf("/");
-                sharpIndex = value.lastIndexOf("#");
+                slashIndex = value.lastIndexOf('/');
+                sharpIndex = value.lastIndexOf('#');
             }
 
             if (slashIndex < 7 && sharpIndex == -1) {
