@@ -33,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.objectweb.proactive</groupId>
-			<artifactId>proactive</artifactId>
+			<artifactId>proactive-programming</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
