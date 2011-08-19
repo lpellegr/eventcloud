@@ -97,4 +97,12 @@ public class PeerComponentImpl extends PeerImpl implements Peer,
                 && this.getId().equals(((PeerComponentImpl) obj).getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+
 }
