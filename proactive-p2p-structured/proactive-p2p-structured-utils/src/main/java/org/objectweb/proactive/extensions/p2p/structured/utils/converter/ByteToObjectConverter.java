@@ -26,7 +26,7 @@ import java.io.ObjectInputStream;
  * 
  * @author lpellegr
  */
-public class ByteToObjectConverter {
+public final class ByteToObjectConverter {
 
     private ByteToObjectConverter() {
         

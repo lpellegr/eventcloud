@@ -32,7 +32,7 @@ import fr.inria.eventcloud.api.Quadruple;
  * 
  * @author lpellegr
  */
-public class QuadrupleGenerator extends Generator {
+public final class QuadrupleGenerator extends Generator {
 
     private static final int DEFAULT_MIN_LENGTH = 10;
 

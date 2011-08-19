@@ -21,7 +21,7 @@ package fr.inria.eventcloud.api.generators;
  * 
  * @author lpellegr
  */
-public class StringGenerator extends Generator {
+public final class StringGenerator extends Generator {
 
     private StringGenerator() {
 

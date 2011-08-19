@@ -50,7 +50,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author ProActive Team
  * @author lpellegr
  */
-public class ConfigurationParser {
+public final class ConfigurationParser {
 
     protected static Logger log =
             LoggerFactory.getLogger(ConfigurationParser.class);

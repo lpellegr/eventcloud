@@ -26,7 +26,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
  * 
  * @author lpellegr
  */
-public class PublishSubscribeConstants {
+public final class PublishSubscribeConstants {
 
     /*
      * Namespaces

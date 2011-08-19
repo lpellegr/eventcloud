@@ -35,7 +35,7 @@ import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
  * 
  * @author lpellegr
  */
-public class VariableDatatype extends BaseDatatype {
+public final class VariableDatatype extends BaseDatatype {
 
     private static final RDFDatatype instance = new VariableDatatype();
 

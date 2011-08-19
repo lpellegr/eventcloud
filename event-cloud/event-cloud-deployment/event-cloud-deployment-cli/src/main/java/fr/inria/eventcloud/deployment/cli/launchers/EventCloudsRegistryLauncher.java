@@ -37,7 +37,7 @@ import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
  * 
  * @author lpellegr
  */
-public class EventCloudsRegistryLauncher {
+public final class EventCloudsRegistryLauncher {
 
     private EventCloudsRegistryLauncher() {
         

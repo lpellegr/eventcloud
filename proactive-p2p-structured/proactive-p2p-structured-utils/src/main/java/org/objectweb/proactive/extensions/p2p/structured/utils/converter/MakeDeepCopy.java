@@ -24,7 +24,7 @@ import java.io.IOException;
  * 
  * @author lpellegr
  */
-public class MakeDeepCopy {
+public final class MakeDeepCopy {
 
     private MakeDeepCopy() {
 

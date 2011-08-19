@@ -43,7 +43,7 @@ import fr.inria.eventcloud.api.Quadruple;
  * 
  * @author lpellegr
  */
-public class SubscriptionRewriter {
+public final class SubscriptionRewriter {
 
     private SubscriptionRewriter() {
         
