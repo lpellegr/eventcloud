@@ -21,12 +21,12 @@ package fr.inria.eventcloud.translators.wsnotif.handlers;
  * 
  * @author lpellegr
  */
-public class XmlUtils {
+public final class XmlUtils {
 
     private XmlUtils() {
-        
+
     }
-    
+
     public static String[] splitUri(String uri) {
         int slashIndex = uri.lastIndexOf('/');
 

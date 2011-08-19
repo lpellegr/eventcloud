@@ -50,12 +50,12 @@ import fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding.SequenceBinding;
  * 
  * @author lpellegr
  */
-public class SparqlResultSerializer {
+public final class SparqlResultSerializer {
 
     private SparqlResultSerializer() {
-        
+
     }
-    
+
     /**
      * Serializes the specified {@code binding} into the given output stream. By
      * default the output is not compressed.

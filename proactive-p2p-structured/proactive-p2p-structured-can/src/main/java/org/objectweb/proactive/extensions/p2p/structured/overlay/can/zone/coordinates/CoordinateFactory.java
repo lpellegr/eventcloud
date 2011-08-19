@@ -25,12 +25,12 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class CoordinateFactory {
+public final class CoordinateFactory {
 
     private CoordinateFactory() {
-        
+
     }
-    
+
     /**
      * Creates a new coordinate containing {@link DoubleElement}s initialized
      * with the specified {@code value}.

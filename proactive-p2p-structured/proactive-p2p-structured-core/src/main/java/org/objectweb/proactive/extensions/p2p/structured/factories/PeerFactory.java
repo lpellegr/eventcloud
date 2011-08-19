@@ -46,7 +46,7 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
  * 
  * @author lpellegr
  */
-public class PeerFactory {
+public final class PeerFactory {
 
     private static Factory factory;
 

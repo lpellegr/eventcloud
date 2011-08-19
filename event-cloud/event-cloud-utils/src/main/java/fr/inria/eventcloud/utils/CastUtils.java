@@ -21,7 +21,7 @@ package fr.inria.eventcloud.utils;
  * 
  * @author lpellegr
  */
-public class CastUtils {
+public final class CastUtils {
 
     private CastUtils() {
         

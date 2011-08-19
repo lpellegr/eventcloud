@@ -24,7 +24,7 @@ import java.io.IOException;
  * 
  * @author lpellegr
  */
-public class Files {
+public final class Files {
 
     private Files() {
         

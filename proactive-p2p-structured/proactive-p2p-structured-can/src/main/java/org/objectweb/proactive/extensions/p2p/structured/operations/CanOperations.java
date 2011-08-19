@@ -43,7 +43,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTab
  * 
  * @author lpellegr
  */
-public class CanOperations {
+public final class CanOperations {
 
     private CanOperations() {
         

@@ -33,7 +33,7 @@ import fr.inria.eventcloud.api.Event;
  * 
  * @author lpellegr
  */
-public class WsNotifSubscriptionToSparqlHandler {
+public final class WsNotifSubscriptionToSparqlHandler {
 
     private static final String ADDRESSING_NAMESPACE =
             "http://www.w3.org/2005/08/addressing";

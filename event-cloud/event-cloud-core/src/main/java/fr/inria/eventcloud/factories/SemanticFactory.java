@@ -48,7 +48,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * @author lpellegr
  * @author bsauvan
  */
-public class SemanticFactory {
+public final class SemanticFactory {
 
     private static Factory factory;
 
