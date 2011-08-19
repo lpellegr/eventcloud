@@ -43,13 +43,11 @@ public class SparqlAtomicRequest extends
 
     private static final long serialVersionUID = 1L;
 
-    public SparqlAtomicRequest(AtomicQuery quadruplePattern) {
+    public SparqlAtomicRequest(AtomicQuery atomicQuery) {
         // TODO offer the possibility to use a constraints validator that will
         // use the filter constraints contained by the quadruple pattern to
         // route the request
-        super(new fr.inria.eventcloud.api.QuadruplePattern(
-                quadruplePattern.getGraph(), quadruplePattern.getSubject(),
-                quadruplePattern.getPredicate(), quadruplePattern.getObject()));
+        super(atomicQuery.getQuadruplePattern());
     }
 
     /**
