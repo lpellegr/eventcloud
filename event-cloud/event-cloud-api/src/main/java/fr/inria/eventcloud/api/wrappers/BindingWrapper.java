@@ -82,8 +82,7 @@ public class BindingWrapper extends SparqlResultWrapper<Binding> implements
      */
     @Override
     public void add(Var var, Node node) {
-        // TODO Auto-generated method stub
-
+        super.object.add(var, node);
     }
 
     /**
