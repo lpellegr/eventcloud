@@ -16,7 +16,7 @@
 
 	<name>event-cloud-parent</name>
 	<description>Parent module for event-cloud maven related modules.</description>
-	<url>https://code.google.com/p/proactive-maven-plugin/</url>
+	<url>https://event-cloud.googlecode.com</url>
 	<inceptionYear>2010</inceptionYear>
 
 	<prerequisites>
