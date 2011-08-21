@@ -21,7 +21,8 @@ import java.util.UUID;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.initializers.AbstractCanNetworkInitializerTest;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassParameterizedCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
@@ -31,33 +32,16 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * @author lpellegr
  */
 public class RemoveNeighborOperationTest extends
-        AbstractCanNetworkInitializerTest {
+        JunitByClassParameterizedCanNetworkDeployer {
 
-    public RemoveNeighborOperationTest() {
-        super(2);
+    public RemoveNeighborOperationTest(NetworkDeployer deployer) {
+        super(deployer, 2);
     }
 
     @Test
     public void testMessage() {
-        Peer firstPeer = super.get(0);
-        Peer secondPeer = super.get(1);
-
-        UUID firstPeerID = firstPeer.getId();
-        UUID secondPeerID = secondPeer.getId();
-
-        Assert.assertTrue(CanOperations.hasNeighbor(firstPeer, secondPeerID));
-        Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));
-
-        CanOperations.removeNeighbor(firstPeer, secondPeerID);
-
-        Assert.assertFalse(CanOperations.hasNeighbor(firstPeer, secondPeerID));
-        Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));
-    }
-
-    @Test
-    public void testMessageComponent() {
-        Peer firstPeer = super.getc(0);
-        Peer secondPeer = super.getc(1);
+        Peer firstPeer = super.getPeer(0);
+        Peer secondPeer = super.getPeer(1);
 
         UUID firstPeerID = firstPeer.getId();
         UUID secondPeerID = secondPeer.getId();

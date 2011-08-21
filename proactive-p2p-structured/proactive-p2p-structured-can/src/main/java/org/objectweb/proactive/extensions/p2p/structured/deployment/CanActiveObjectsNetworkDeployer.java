@@ -14,30 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.initializers;
+package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 /**
- * Network initializer that provides a concrete implementation of
- * {@link #createActivePeer()} and {@link #createComponentPeer()} for a
- * Content-Adressable Network.
+ * Class used to deploy a Content-Addressable Network where each {@link Peer}
+ * and {@link Tracker} is initialized as an Active Object.
  * 
  * @author lpellegr
  */
-public class CanNetworkInitializer extends NetworkInitializer {
+public final class CanActiveObjectsNetworkDeployer extends NetworkDeployer {
 
-    public CanNetworkInitializer() {
-        super();
+    public CanActiveObjectsNetworkDeployer() {
+        super(DeploymentMode.PRODUCTION);
+    }
+
+    public CanActiveObjectsNetworkDeployer(DeploymentMode mode) {
+        super(mode);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Peer createActivePeer() {
+    protected Peer createPeer(NodeProvider nodeProvider) {
+        // TODO use the node provider parameter
         return PeerFactory.newActivePeer(new CanOverlay());
     }
 
@@ -45,8 +51,10 @@ public class CanNetworkInitializer extends NetworkInitializer {
      * {@inheritDoc}
      */
     @Override
-    public Peer createComponentPeer() {
-        return PeerFactory.newComponentPeer(new CanOverlay());
+    protected Tracker createTracker(String networkName,
+                                    NodeProvider nodeProvider) {
+        // TODO use the node provider parameter
+        return TrackerFactory.newActiveTracker(networkName);
     }
 
 }

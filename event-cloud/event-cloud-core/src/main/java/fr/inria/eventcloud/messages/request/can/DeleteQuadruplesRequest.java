@@ -21,7 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 
 /**
  * Removes all the quadruples that match the given quadpattern.
@@ -42,7 +42,7 @@ public class DeleteQuadruplesRequest extends StatelessQuadruplePatternRequest {
     @Override
     public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                QuadruplePattern quadruplePattern) {
-        ((JenaDatastore) overlay.getDatastore()).deleteAny(
+        ((PersistentJenaTdbDatastore) overlay.getDatastore()).deleteAny(
                 quadruplePattern.getGraph(), quadruplePattern.getSubject(),
                 quadruplePattern.getPredicate(), quadruplePattern.getObject());
     }

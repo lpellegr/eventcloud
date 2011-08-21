@@ -55,7 +55,8 @@ public class ZoneTest {
                         createDoubleCoordinate(0.0),
                         createDoubleCoordinate(1.0)));
 
-        HomogenousPair<Zone> newZones = z.split(CanOverlay.getRandomDimension());
+        HomogenousPair<Zone> newZones =
+                z.split(CanOverlay.getRandomDimension());
         Assert.assertEquals(z, newZones.getFirst().merge(newZones.getSecond()));
     }
 

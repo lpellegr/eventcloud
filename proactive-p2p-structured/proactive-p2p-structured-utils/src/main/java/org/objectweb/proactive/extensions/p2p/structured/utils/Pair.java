@@ -37,16 +37,35 @@ public class Pair<A, B> implements Serializable {
 
     protected final B second;
 
+    /**
+     * Constructs a new pair from the specified {@code first} and {@code second}
+     * values.
+     * 
+     * @param first
+     *            the first value contained by the pair.
+     * @param second
+     *            the second value contained by the pair.
+     */
     public Pair(A first, B second) {
         super();
         this.first = first;
         this.second = second;
     }
 
+    /**
+     * Returns the first value contained by the pair.
+     * 
+     * @return the first value contained by the pair.
+     */
     public A getFirst() {
         return this.first;
     }
 
+    /**
+     * Returns the second value contained by the pair.
+     * 
+     * @return the second value contained by the pair.
+     */
     public B getSecond() {
         return this.second;
     }

@@ -39,10 +39,12 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.CanActiveObjectsNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
@@ -53,10 +55,12 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
 
 /**
+ * This class is used to draw a canvas that shows a Content-Addressable Network
+ * where it is possible to check the neighbors of a peer by clicking on it.
  * 
  * @author lpellegr
  */
-public class Network2DVisualizer extends JFrame {
+public class Can2dVisualizer extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
@@ -80,7 +84,7 @@ public class Network2DVisualizer extends JFrame {
 
     private Mode mode;
 
-    public Network2DVisualizer(List<Peer> peers) {
+    public Can2dVisualizer(List<Peer> peers) {
         this.cache = new PeersCache();
         for (Peer peer : peers) {
             this.cache.addEntry(peer);
@@ -440,6 +444,29 @@ public class Network2DVisualizer extends JFrame {
                     neighbors));
         }
 
+    }
+
+    public static void main(String[] args) {
+        P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
+        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
+
+        CanActiveObjectsNetworkDeployer deployer =
+                new CanActiveObjectsNetworkDeployer();
+
+        deployer.deploy(20);
+
+        final List<Peer> peers = new ArrayList<Peer>();
+        for (Peer peer : deployer.getRandomTracker().getPeers()) {
+            peers.add(peer);
+        }
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new Can2dVisualizer(peers).setVisible(true);
+            }
+        });
+
+        deployer.undeploy();
     }
 
 }

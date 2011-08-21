@@ -66,7 +66,7 @@ import fr.inria.eventcloud.reasoner.SparqlDecomposer;
 import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
- * A subscription is a continuous query that is registered into the Event-Cloud.
+ * A subscription is a continuous query that is registered into an Event Cloud.
  * Each time a new event that matches the query is published, a notification is
  * sent to the subscriber.
  * 

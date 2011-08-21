@@ -40,7 +40,7 @@ import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
@@ -53,10 +53,10 @@ import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 
 /**
  * SemanticPeerImpl is a concrete implementation of {@link SemanticPeer}. It is
- * a peer constructed by using a {@link CanOverlay} and a {@link JenaDatastore}.
- * It exposes the methods provided by the {@link SemanticDatastore} interface in
- * order to provide semantic operations like add, delete, find, etc. but also to
- * execute a SPARQL query.
+ * a peer constructed by using a {@link CanOverlay} and a
+ * {@link PersistentTdbDatastore}. It exposes the methods provided by the
+ * {@link SemanticDatastore} interface in order to provide semantic operations
+ * like add, delete, find, etc. but also to execute a SPARQL query.
  * <p>
  * Warning, you have to use the {@link SemanticFactory} in order to create a new
  * SemanticPeer component.
@@ -88,7 +88,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
                 stub,
                 new CanOverlay(
                         new SparqlRequestResponseManager(),
-                        new JenaDatastore(
+                        new PersistentJenaTdbDatastore(
                                 new File(
                                         EventCloudProperties.REPOSITORIES_PATH.getValue()),
                                 EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue())));

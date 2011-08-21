@@ -21,28 +21,25 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodParameterizedCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.initializers.CanNetworkInitializer;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
- * Test cases for the Join operation in {@link CanOverlay}.
+ * Test cases for the leave operation in {@link CanOverlay}.
  * 
  * @author lpellegr
  */
-public class LeaveOperationTest {
+public class LeaveOperationTest extends
+        JunitByMethodParameterizedCanNetworkDeployer {
 
-    private CanNetworkInitializer networkInitializer;
-
-    @Before
-    public void setUp() {
-        this.networkInitializer = new CanNetworkInitializer();
+    public LeaveOperationTest(NetworkDeployer deployer) {
+        super(deployer);
     }
 
     @Test
@@ -67,9 +64,10 @@ public class LeaveOperationTest {
 
     @Test
     public void testLeaveWithOnePeer() {
-        this.networkInitializer.setUp(1);
+        super.deploy(1);
+
         try {
-            assertTrue(this.networkInitializer.get(0).leave());
+            assertTrue(super.getPeer(0).leave());
         } catch (NetworkNotJoinedException e) {
             e.printStackTrace();
         }
@@ -77,18 +75,17 @@ public class LeaveOperationTest {
 
     @Test
     public void testLeaveWithTwoPeers() {
-        this.networkInitializer.setUp(2);
+        super.deploy(2);
 
-        UUID peerLeavingId = this.networkInitializer.get(0).getId();
+        UUID peerLeavingId = super.getPeer(0).getId();
 
         try {
-            assertTrue(this.networkInitializer.get(0).leave());
+            assertTrue(super.getPeer(0).leave());
         } catch (NetworkNotJoinedException e) {
             e.printStackTrace();
         }
 
-        assertFalse(CanOperations.hasNeighbor(
-                this.networkInitializer.get(1), peerLeavingId));
+        assertFalse(CanOperations.hasNeighbor(super.getPeer(1), peerLeavingId));
     }
 
     // @Test
@@ -158,10 +155,5 @@ public class LeaveOperationTest {
     // Assert.assertFalse(CanOperations.hasNeighbor(super.getc(2), super.getc(
     // 2).getId()));
     // }
-
-    @After
-    public void tearDown() throws Exception {
-        // networkInitializer.clearNetwork();
-    }
 
 }

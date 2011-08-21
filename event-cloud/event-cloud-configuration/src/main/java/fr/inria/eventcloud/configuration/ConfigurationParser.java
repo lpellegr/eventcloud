@@ -71,9 +71,9 @@ public final class ConfigurationParser {
     private static final String ATTR_VALUE = "value";
 
     private ConfigurationParser() {
-        
+
     }
-    
+
     private static Map<String, Property> getProperties() {
         Field[] fields = EventCloudProperties.class.getDeclaredFields();
         Map<String, Property> properties =

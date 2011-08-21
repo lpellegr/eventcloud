@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
+import java.io.Closeable;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lpellegr
  */
-public abstract class RequestResponseManager implements Serializable {
+public abstract class RequestResponseManager implements Closeable, Serializable {
 
     private static final long serialVersionUID = 1L;
 

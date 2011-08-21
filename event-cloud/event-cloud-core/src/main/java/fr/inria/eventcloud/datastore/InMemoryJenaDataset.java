@@ -14,18 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.initializers;
+package fr.inria.eventcloud.datastore;
 
-import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import java.io.File;
+
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 
 /**
- * Interface used to have the possibility to run a specific task just after the
- * trackers have been initialized and not the network yet.
+ * A simple non-persistent, in-memory Jena store. Useful for unit testing.
  * 
- * @author lpelleg
+ * @author lpellegr
  */
-public interface FinalizeTrackersInitialization {
+public class InMemoryJenaDataset extends SynchronizedJenaDatasetGraph {
 
-    public void run(Tracker[] trackers);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected DatasetGraph createDatasetGraph(File path) {
+        return DatasetGraphFactory.createMem();
+    }
 
 }

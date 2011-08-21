@@ -27,7 +27,7 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 
 /**
@@ -64,7 +64,7 @@ public class QuadruplePatternRequest extends
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 QuadruplePattern quadruplePattern) {
-        return ((JenaDatastore) overlay.getDatastore()).find(quadruplePattern);
+        return ((PersistentJenaTdbDatastore) overlay.getDatastore()).find(quadruplePattern);
     }
 
 }

@@ -194,7 +194,7 @@ public final class PublishSubscribeConstants {
             Node.createURI(QUADRUPLE_MATCHES_SUBSCRIPTION_VALUE);
 
     private PublishSubscribeConstants() {
-        
+
     }
-    
+
 }

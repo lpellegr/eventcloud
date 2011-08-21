@@ -44,7 +44,7 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
@@ -79,7 +79,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        JenaDatastore datastore = ((JenaDatastore) overlay.getDatastore());
+        PersistentJenaTdbDatastore datastore =
+                ((PersistentJenaTdbDatastore) overlay.getDatastore());
         datastore.add(quad);
 
         log.debug(
@@ -117,17 +118,6 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                     PublishSubscribeUtils.createSubscriptionIdUrl(pair.getFirst()
                             .getLiteralLexicalForm());
 
-            // stores a quadruple that contains the information about the
-            // subscription that is matched and the quadruple that matches the
-            // subscription. This is useful to create the notification later.
-            // The matching quadruple is not sent directly to the next peers
-            // because the quadruple value will be stored in memory on several
-            // peer. Moreover, there is no limit about the size of a quadruple.
-            Quadruple metaQuad =
-                    PublishSubscribeUtils.createMetaQuadruple(
-                            quad, subscriptionIdURL, pair.getSecond());
-            datastore.add(metaQuad);
-
             // the identifier of the sub subscription that is matched is
             // available from the result of the query which has been executed
             SubscriptionId subscriptionId =
@@ -147,7 +137,6 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 // sends part of the solution to the subscriber
                 // TODO: this operation can be done in parallel with the
                 // RetrieveSubSolutionOperation
-                datastore.delete(metaQuad);
                 subscription.getSourceStub()
                         .receive(
                                 new Notification(
@@ -175,6 +164,21 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                     }
                 }
             } else {
+                // stores a quadruple that contains the information about the
+                // subscription that is matched and the quadruple that matches
+                // the
+                // subscription. This is useful to create the notification
+                // later.
+                // The matching quadruple is not sent directly to the next peers
+                // because the quadruple value will be stored in memory on
+                // several
+                // peer. Moreover, there is no limit about the size of a
+                // quadruple.
+                Quadruple metaQuad =
+                        PublishSubscribeUtils.createMetaQuadruple(
+                                quad, subscriptionIdURL, pair.getSecond());
+                datastore.add(metaQuad);
+
                 // a subscription with more that one sub subscription (that
                 // matches the quadruple which has been inserted) has been
                 // detected. Then we find the subscription object associated to

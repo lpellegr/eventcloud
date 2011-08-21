@@ -24,9 +24,9 @@ package fr.inria.eventcloud.utils;
 public final class CastUtils {
 
     private CastUtils() {
-        
+
     }
-    
+
     /**
      * Converts an array of primitive bytes to objects.
      * 

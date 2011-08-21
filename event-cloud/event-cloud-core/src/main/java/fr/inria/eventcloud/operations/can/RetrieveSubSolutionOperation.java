@@ -31,7 +31,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.pubsub.Notification;
@@ -65,7 +65,8 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
      */
     @Override
     public void handle(StructuredOverlay overlay) {
-        JenaDatastore datastore = (JenaDatastore) overlay.getDatastore();
+        PersistentJenaTdbDatastore datastore =
+                (PersistentJenaTdbDatastore) overlay.getDatastore();
 
         // finds the matching quadruple meta information
         Collection<Quadruple> result =
@@ -81,15 +82,18 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
                             + this.hash);
         }
 
-        Quadruple metaInfoQuad = result.iterator().next();
+        Quadruple metaQuad = result.iterator().next();
+        // TODO: find why we got an exception when the meta quad is removed at
+        // this step
+        // datastore.delete(metaQuad);
 
         Pair<Quadruple, SubscriptionId> extractedMetaInfo =
-                PublishSubscribeUtils.extractMetaInformation(metaInfoQuad);
+                PublishSubscribeUtils.extractMetaInformation(metaQuad);
 
         Subsubscription subSubscription =
                 Subsubscription.parseFrom(
                         datastore,
-                        PublishSubscribeUtils.extractSubscriptionId(metaInfoQuad.getSubject()),
+                        PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()),
                         extractedMetaInfo.getSecond());
 
         // extracts only the variabless that are declared as result variables in

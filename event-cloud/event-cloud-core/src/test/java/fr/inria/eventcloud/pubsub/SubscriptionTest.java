@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.InMemoryJenaDataset;
 
 /**
  * Test cases associated to {@link Subscription}.
@@ -40,7 +40,7 @@ public class SubscriptionTest {
 
         Collection<Quadruple> quads = subscription.toQuadruples();
 
-        JenaDatastore datastore = new JenaDatastore();
+        InMemoryJenaDataset datastore = new InMemoryJenaDataset();
         datastore.open();
         datastore.add(quads);
 
@@ -57,6 +57,4 @@ public class SubscriptionTest {
         datastore.close();
     }
 
-    
-    
 }
