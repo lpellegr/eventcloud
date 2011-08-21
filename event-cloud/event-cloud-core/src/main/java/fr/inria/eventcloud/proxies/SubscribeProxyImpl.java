@@ -19,7 +19,6 @@ package fr.inria.eventcloud.proxies;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -101,7 +100,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
     // threshold is reached, the data write are spilled to the disk
     // example from pig:
     // http://pig.apache.org/docs/r0.7.0/api/org/apache/pig/data/DataBag.html
-    private Set<Node> eventIdsReceived;
+    private Map<Node, SubscriptionId> eventIdsReceived;
 
     /**
      * Empty constructor required by ProActive.
@@ -129,7 +128,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
             this.listeners =
                     new HashMap<SubscriptionId, NotificationListener<?>>();
             this.solutions = new HashMap<NotificationId, Solution>();
-            this.eventIdsReceived = new HashSet<Node>();
+            this.eventIdsReceived = new HashMap<Node, SubscriptionId>();
             // TODO: use the properties field to initialize ELA properties
         }
     }
@@ -189,6 +188,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public final Event reconstructEvent(Subscription subscription,
                                         Binding binding) {
 
@@ -205,13 +205,14 @@ public class SubscribeProxyImpl extends ProxyCache implements
                             + subscription.getGraphNode());
         }
 
-        return this.reconstructEvent(eventId);
+        return this.reconstructEvent(subscription.getId(), eventId);
     }
 
     /**
      * {@inheritDoc}
      */
-    public final Event reconstructEvent(Node eventId) {
+    @Override
+    public final Event reconstructEvent(SubscriptionId id, Node eventId) {
         if (!eventId.isURI()
                 || !eventId.getURI().startsWith(
                         EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())) {
@@ -221,8 +222,9 @@ public class SubscribeProxyImpl extends ProxyCache implements
                             + ": " + eventId);
         }
 
-        // the events that are already received are evicted
-        if (this.eventIdsReceived.contains(eventId)) {
+        // the reconstruction operation for an event which has been already
+        // received is cancelled
+        if (this.eventIdsReceived.containsKey(eventId)) {
             return null;
         }
 
@@ -267,7 +269,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
             }
         }
 
-        this.eventIdsReceived.add(eventId);
+        this.eventIdsReceived.put(eventId, id);
 
         return new Event(quadsReceived);
     }
@@ -277,8 +279,12 @@ public class SubscribeProxyImpl extends ProxyCache implements
      */
     @Override
     public void unsubscribe(SubscriptionId id) {
-        // TODO Auto-generated method stub
+        this.subscriptions.remove(id);
+        this.listeners.remove(id);
+        this.eventIdsReceived.values().remove(id);
 
+        // TODO send messages on the network to remove the subscriptions which
+        // are indexed
     }
 
     private void deliver(NotificationId id) {
@@ -298,33 +304,39 @@ public class SubscribeProxyImpl extends ProxyCache implements
     }
 
     private void deliver(NotificationId id, BindingNotificationListener listener) {
-        listener.onNotification(id.getSubscriptionId(), this.solutions.get(id)
-                .getSolution());
+        listener.onNotification(id.getSubscriptionId(), this.solutions.remove(
+                id).getSolution());
     }
 
     private void deliver(NotificationId id, EventNotificationListener listener) {
         Event event =
                 this.reconstructEvent(
                         this.subscriptions.get(id.getSubscriptionId()),
-                        this.solutions.get(id).getSolution());
+                        this.solutions.remove(id).getSolution());
 
         if (event != null) {
             listener.onNotification(id.getSubscriptionId(), event);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void receive(Notification notification) {
+        // this condition is used to ignore the notifications which may be
+        // received after an unsubscribe operation
+        if (!this.subscriptions.containsKey(notification.getId()
+                .getSubscriptionId())) {
+            return;
+        }
+
         log.debug(
                 "New notification received on {} from {} for subscription id {}",
                 new Object[] {
                         PAActiveObject.getBodyOnThis().getUrl(),
                         notification.getSource(),
                         notification.getId().getSubscriptionId()});
-
-        System.out.println("PublishSubscribeProxyImpl.receive() notification contains binding which is "
-                + notification.getBinding()
-                + " and notification id is "
-                + notification.getId());
 
         Solution solution = this.solutions.get(notification.getId());
         if (solution == null) {
