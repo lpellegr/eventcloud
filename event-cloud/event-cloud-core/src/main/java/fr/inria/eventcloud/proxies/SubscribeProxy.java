@@ -119,13 +119,17 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * <strong>This operation must be used carefully</strong>. It is the invoker
      * responsability to parallelize several calls to this method.
      * 
+     * @param id
+     *            the subscription identifier that identifies which subscription
+     *            is matched.
+     * 
      * @param eventId
      *            the event identifier to use for retrieving the quadruples that
      *            belong to the event.
      * 
      * @return the event which has been reconstructed.
      */
-    public Event reconstructEvent(Node eventId);
+    public Event reconstructEvent(SubscriptionId id, Node eventId);
 
     /**
      * Used internally to send back a notification.
