@@ -19,7 +19,8 @@ package fr.inria.eventcloud.api.responses;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 
 /**
- * The response returned for a Construct SPARQL query form that has been executed.
+ * The response returned for a Construct SPARQL query form that has been
+ * executed.
  * 
  * @author lpellegr
  */

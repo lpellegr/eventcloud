@@ -56,6 +56,8 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  */
 public final class ProxyFactory implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private static Factory factory;
 
     private static final ConcurrentMap<EventCloudId, ProxyFactory> proxies;

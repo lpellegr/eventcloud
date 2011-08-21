@@ -20,7 +20,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.initializers.AbstractCanNetworkInitializerTest;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassParameterizedCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
@@ -31,46 +32,21 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public class UnicastLookupRequestTest extends AbstractCanNetworkInitializerTest {
+public class UnicastLookupRequestTest extends
+        JunitByClassParameterizedCanNetworkDeployer {
 
-    public UnicastLookupRequestTest() {
-        super(10);
+    public UnicastLookupRequestTest(NetworkDeployer deployer) {
+        super(deployer, 10);
     }
 
     @Test
     public void testLookupQuery() {
         LookupResponse response = null;
-        Peer targetedPeer = super.get(8);
+        Peer targetedPeer = super.getPeer(8);
 
         try {
             response =
-                    (LookupResponse) PAFuture.getFutureValue(super.get(0)
-                            .send(
-                                    new LookupRequest(
-                                            CanOperations.getIdAndZoneResponseOperation(
-                                                    targetedPeer)
-                                                    .getPeerZone()
-                                                    .getLowerBound())));
-
-            Assert.assertTrue(response.getLatency() > 0);
-            Assert.assertTrue(response.getHopCount() > 0);
-            Assert.assertTrue(response.getInboundHopCount() > 0);
-            Assert.assertTrue(response.getOutboundHopCount() > 0);
-
-            Assert.assertEquals(targetedPeer, response.getPeerFound());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testLookupQueryComponent() {
-        LookupResponse response = null;
-        Peer targetedPeer = super.getc(8);
-
-        try {
-            response =
-                    (LookupResponse) PAFuture.getFutureValue(super.getc(0)
+                    (LookupResponse) PAFuture.getFutureValue(super.getPeer(0)
                             .send(
                                     new LookupRequest(
                                             CanOperations.getIdAndZoneResponseOperation(

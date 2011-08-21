@@ -176,6 +176,19 @@ public class EventCloudInitializationTest implements Serializable {
                 Node.createURI("http://xmlns.com/foaf/0.1/name"),
                 Node.createLiteral("Firstname Lastname")));
 
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+
+        subscribeProxy.unsubscribe(id);
+
+        publishProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/48798548797974/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                Node.createLiteral("Firstname Lastname2")));
         // pubsubProxy.publish(new Quadruple(
         // Node.createURI("https://plus.google.com/ee"),
         // Node.createURI("https://plus.google.com/107234124364605485774/"),

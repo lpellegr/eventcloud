@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.overlay;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +44,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
 import fr.inria.eventcloud.messages.response.can.SparqlAtomicResponse;
 import fr.inria.eventcloud.pubsub.Subscription;
@@ -95,7 +96,8 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
                     id);
             subscription =
                     Subscription.parseFrom(
-                            (JenaDatastore) this.overlay.getDatastore(), id);
+                            (PersistentJenaTdbDatastore) this.overlay.getDatastore(),
+                            id);
             this.subscriptionsCache.putIfAbsent(
                     subscription.getId(), subscription);
         }
@@ -259,6 +261,11 @@ public class SparqlRequestResponseManager extends CanRequestResponseManager {
 
     public SparqlColander getColander() {
         return this.colander;
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.colander.close();
     }
 
 }

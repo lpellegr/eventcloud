@@ -21,10 +21,10 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.junit.After;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.initializers.AbstractCanNetworkInitializerTest;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassParameterizedCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
@@ -44,20 +44,22 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
  * 
  * @author lpellegr
  */
-public class AnycastLookupRequestTest extends AbstractCanNetworkInitializerTest {
+public class AnycastLookupRequestTest extends
+        JunitByClassParameterizedCanNetworkDeployer {
 
-    public AnycastLookupRequestTest() {
-        super(10);
+    public AnycastLookupRequestTest(NetworkDeployer deployer) {
+        super(deployer, 1, 10);
     }
 
     @Test
-    public void testLookupQuery() {
+    public void lookupQueryTest() {
         AnycastLookupResponse response = null;
         StringElement elt = new StringElement("Z");
 
         try {
             response =
-                    (AnycastLookupResponse) PAFuture.getFutureValue(super.get(0)
+                    (AnycastLookupResponse) PAFuture.getFutureValue(super.getPeer(
+                            0)
                             .send(
                                     new AnycastLookupRequest(
                                             new StringCoordinate(
@@ -76,38 +78,6 @@ public class AnycastLookupRequestTest extends AbstractCanNetworkInitializerTest 
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Test
-    public void testLookupQueryComponent() {
-        AnycastLookupResponse response = null;
-        StringElement elt = new StringElement("Z");
-
-        try {
-            response =
-                    (AnycastLookupResponse) PAFuture.getFutureValue(super.getc(
-                            0).send(
-                            new AnycastLookupRequest(new StringCoordinate(
-                                    null, elt, null))));
-
-            Assert.assertTrue(response.getLatency() > 0);
-            Assert.assertTrue(response.getHopCount() > 0);
-            Assert.assertTrue(response.getInboundHopCount() > 0);
-            Assert.assertTrue(response.getOutboundHopCount() > 0);
-
-            // check that all zones retrieved validate the constraints
-            for (Zone zone : response.getZonesValidatingConstraints()) {
-                Assert.assertEquals(0, zone.contains((byte) 1, elt));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @After
-    public void tearDown() {
-        // TODO uncomment when CAN leave works
-        // super.clearNetwork();
     }
 
     public static class AnycastLookupRequest extends AnycastRequest {

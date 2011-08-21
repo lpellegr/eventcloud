@@ -86,8 +86,8 @@ public class Zone implements Serializable {
     }
 
     /**
-     * Returns a new {@link HomogenousPair} containing two zone resulting from the split
-     * of the current one on the specified {@code dimension}.
+     * Returns a new {@link HomogenousPair} containing two zone resulting from
+     * the split of the current one on the specified {@code dimension}.
      * 
      * @param dimension
      *            the dimension to split on.

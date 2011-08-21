@@ -21,8 +21,8 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
- * A specific extension of the {@link Tracker} interface for a semantic content addressable
- * network. 
+ * A specific extension of the {@link Tracker} interface for a semantic content
+ * addressable network.
  * 
  * @author lpellegr
  * @author bsauvan

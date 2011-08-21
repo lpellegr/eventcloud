@@ -189,7 +189,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
             if (this.type != remotePeerType) {
                 throw new IllegalArgumentException(
                         "Illegal Peer type. The tracker manages a " + this.type
-                                + " network and receives" + remotePeerType);
+                                + " network and receives " + remotePeerType);
             }
 
             Peer landmarkPeer = this.getRandomPeer();

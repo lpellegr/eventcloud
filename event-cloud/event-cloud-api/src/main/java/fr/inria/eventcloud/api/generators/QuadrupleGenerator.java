@@ -39,9 +39,9 @@ public final class QuadrupleGenerator extends Generator {
     private static final int DEFAULT_MAX_LENGTH = 20;
 
     private QuadrupleGenerator() {
-        
+
     }
-    
+
     public static Quadruple create() {
         return create(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
     }

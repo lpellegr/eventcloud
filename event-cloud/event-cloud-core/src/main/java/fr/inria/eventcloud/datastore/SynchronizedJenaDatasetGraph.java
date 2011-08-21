@@ -23,6 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -30,9 +31,8 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.shared.Lock;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.tdb.store.DatasetGraphTDB;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
@@ -40,21 +40,24 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
- * This class defines a concrete implementation of a persistent datastore which
- * implements the {@link SemanticDatastore} interface by using Jena TDB as
- * internal datastore.
+ * This class defines a wrapper around a {@link DatasetGraph} to synchronize the
+ * calls to all the methods by using a lock (c.f.
+ * http://openjena.org/how-to/concurrency.html).
  * 
  * @author lpellegr
  */
-public class JenaDatastore extends SemanticDatastore {
+public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
 
-    private DatasetGraphTDB datastore;
+    // TODO: to see whether it is possible to improve concurrency by using the
+    // new transaction features introduced with TDB? (transaction !=
+    // synchronization != thread-safe)
+    private DatasetGraph datastore;
 
     /**
      * Creates a new datastore that stores data into a folder from the OS
      * temporary directory.
      */
-    public JenaDatastore() {
+    public SynchronizedJenaDatasetGraph() {
         this(new File(System.getProperty("java.io.tmpdir")), true);
     }
 
@@ -69,7 +72,7 @@ public class JenaDatastore extends SemanticDatastore {
      *            indicates whether the repository has to be removed or not when
      *            it is closed.
      */
-    public JenaDatastore(File repositoryPath, boolean autoRemove) {
+    public SynchronizedJenaDatasetGraph(File repositoryPath, boolean autoRemove) {
         super(repositoryPath, autoRemove);
         this.registerPlugins();
     }
@@ -78,6 +81,17 @@ public class JenaDatastore extends SemanticDatastore {
         TypeMapper.getInstance().registerDatatype(
                 VariableDatatype.getInstance());
     }
+
+    /**
+     * Creates a new {@link DatasetGraph}.
+     * 
+     * @param path
+     *            the path to use for storing the files associated to a
+     *            persistent datastore.
+     * 
+     * @return a new {@link DatasetGraph}.
+     */
+    protected abstract DatasetGraph createDatasetGraph(File path);
 
     /*
      * Implementation of PersistentDatastore abstract methods
@@ -91,7 +105,8 @@ public class JenaDatastore extends SemanticDatastore {
         if (!this.path.exists()) {
             this.path.mkdirs();
         }
-        this.datastore = TDBFactory.createDatasetGraph(super.path.getPath());
+
+        this.datastore = this.createDatasetGraph(super.path);
     }
 
     /**
@@ -252,7 +267,7 @@ public class JenaDatastore extends SemanticDatastore {
         try {
             QueryExecution qe =
                     QueryExecutionFactory.create(
-                            query, this.datastore.toDataset());
+                            query, DatasetFactory.create(this.datastore));
             return qe.execAsk();
         } finally {
             this.datastore.getLock().leaveCriticalSection();
@@ -271,7 +286,7 @@ public class JenaDatastore extends SemanticDatastore {
         try {
             QueryExecution qe =
                     QueryExecutionFactory.create(
-                            query, this.datastore.toDataset());
+                            query, DatasetFactory.create(this.datastore));
             return qe.execConstruct();
         } finally {
             this.datastore.getLock().leaveCriticalSection();
@@ -290,7 +305,7 @@ public class JenaDatastore extends SemanticDatastore {
         try {
             QueryExecution qe =
                     QueryExecutionFactory.create(
-                            query, this.datastore.toDataset());
+                            query, DatasetFactory.create(this.datastore));
             return qe.execSelect();
         } finally {
             this.datastore.getLock().leaveCriticalSection();

@@ -24,7 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 
@@ -68,7 +68,7 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
                                                                 AnycastRequest request,
                                                                 QuadruplePattern quadruplePattern) {
         Collection<Quadruple> quads =
-                ((JenaDatastore) overlay.getDatastore()).find(quadruplePattern);
+                ((PersistentJenaTdbDatastore) overlay.getDatastore()).find(quadruplePattern);
         Collection<Quadruple> result = new Collection<Quadruple>();
         Collection<Long> quadHashesReceived =
                 this.quadHashesReceived.getValue();

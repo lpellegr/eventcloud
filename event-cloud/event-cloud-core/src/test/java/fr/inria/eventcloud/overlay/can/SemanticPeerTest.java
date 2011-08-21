@@ -19,9 +19,7 @@ package fr.inria.eventcloud.overlay.can;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +35,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
-import fr.inria.eventcloud.initializers.EventCloudDeployer;
+import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -45,17 +43,13 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  * 
  * @author lpellegr
  */
-public class SemanticPeerTest {
+public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
     private static final Logger log =
             LoggerFactory.getLogger(SemanticPeerTest.class);
 
-    private EventCloudDeployer initializer;
-
-    @Before
-    public void setUp() {
-        this.initializer = new EventCloudDeployer(10);
-        this.initializer.setUp();
+    public SemanticPeerTest() {
+        super(10);
     }
 
     @Test
@@ -66,11 +60,11 @@ public class SemanticPeerTest {
         for (int i = 0; i < 100; i++) {
             quadruple = QuadrupleGenerator.create();
             quadruples.add(quadruple);
-            this.initializer.selectPeer().add(quadruple);
+            super.getRandomSemanticPeer().add(quadruple);
         }
 
         Collection<Quadruple> quadruplesFound =
-                this.initializer.selectPeer().find(QuadruplePattern.ANY);
+                super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
 
         for (Quadruple quad : quadruplesFound) {
             Assert.assertTrue(quadruples.contains(quad));
@@ -87,11 +81,11 @@ public class SemanticPeerTest {
             quadruples.add(QuadrupleGenerator.create());
         }
 
-        this.initializer.selectPeer()
+        super.getRandomSemanticPeer()
                 .add(new Collection<Quadruple>(quadruples));
 
         Collection<Quadruple> quadruplesFound =
-                this.initializer.selectPeer().find(QuadruplePattern.ANY);
+                super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
 
         for (Quadruple quad : quadruplesFound) {
             Assert.assertTrue(quadruples.contains(quad));
@@ -103,20 +97,20 @@ public class SemanticPeerTest {
     @Test
     public void testContainsQuadruple() {
         Quadruple quadToCheck = QuadrupleGenerator.create();
-        Assert.assertFalse(this.initializer.selectPeer().contains(quadToCheck));
+        Assert.assertFalse(super.getRandomSemanticPeer().contains(quadToCheck));
 
-        this.initializer.selectPeer().add(quadToCheck);
-        Assert.assertTrue(this.initializer.selectPeer().contains(quadToCheck));
+        super.getRandomSemanticPeer().add(quadToCheck);
+        Assert.assertTrue(super.getRandomSemanticPeer().contains(quadToCheck));
     }
 
     @Test
     public void testDeleteQuadruple() {
         Quadruple quad = QuadrupleGenerator.create();
-        this.initializer.selectPeer().add(quad);
-        Assert.assertTrue(this.initializer.selectPeer().contains(quad));
+        super.getRandomSemanticPeer().add(quad);
+        Assert.assertTrue(super.getRandomSemanticPeer().contains(quad));
 
-        this.initializer.selectPeer().delete(quad);
-        Assert.assertFalse(this.initializer.selectPeer().contains(quad));
+        super.getRandomSemanticPeer().delete(quad);
+        Assert.assertFalse(super.getRandomSemanticPeer().contains(quad));
     }
 
     @Test
@@ -127,10 +121,10 @@ public class SemanticPeerTest {
             quadruples.add(QuadrupleGenerator.create());
         }
 
-        this.initializer.selectPeer().delete(
+        super.getRandomSemanticPeer().delete(
                 new Collection<Quadruple>(quadruples));
 
-        Assert.assertEquals(0, this.initializer.selectPeer().find(
+        Assert.assertEquals(0, super.getRandomSemanticPeer().find(
                 QuadruplePattern.ANY).size());
     }
 
@@ -148,14 +142,14 @@ public class SemanticPeerTest {
                 quadruple = QuadrupleGenerator.create();
             }
             quadruples.add(quadruple);
-            this.initializer.selectPeer().add(quadruple);
+            super.getRandomSemanticPeer().add(quadruple);
         }
 
-        this.initializer.selectPeer().delete(
+        super.getRandomSemanticPeer().delete(
                 new QuadruplePattern(graphValue, Node.ANY, Node.ANY, Node.ANY));
 
         Collection<Quadruple> quadruplesFound =
-                this.initializer.selectPeer().find(QuadruplePattern.ANY);
+                super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
 
         Assert.assertEquals(80, quadruplesFound.size());
 
@@ -166,21 +160,21 @@ public class SemanticPeerTest {
 
     @Test
     public void testExecuteSparqlAsk() {
-        Assert.assertFalse(this.initializer.selectPeer().executeSparqlAsk(
+        Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
         Quadruple quad =
                 QuadrupleGenerator.create(Node.createURI("http://sparql.org"));
-        this.initializer.selectPeer().add(quad);
+        super.getRandomSemanticPeer().add(quad);
 
-        Assert.assertTrue(this.initializer.selectPeer().executeSparqlAsk(
+        Assert.assertTrue(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
-        Assert.assertTrue(this.initializer.selectPeer().executeSparqlAsk(
+        Assert.assertTrue(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?g { <" + quad.getSubject().toString()
                         + "> ?p ?o } }").getResult());
 
-        Assert.assertFalse(this.initializer.selectPeer().executeSparqlAsk(
+        Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH <http://sparql.com> { ?s ?p ?o } }").getResult());
     }
 
@@ -192,12 +186,12 @@ public class SemanticPeerTest {
         for (int i = 0; i < 100; i++) {
             quadruple = QuadrupleGenerator.create();
             quadruples.add(quadruple);
-            this.initializer.selectPeer().add(quadruple);
+            super.getRandomSemanticPeer().add(quadruple);
         }
 
         Assert.assertEquals(
                 100,
-                this.initializer.selectPeer()
+                super.getRandomSemanticPeer()
                         .executeSparqlConstruct(
                                 "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }")
                         .getResult()
@@ -212,11 +206,11 @@ public class SemanticPeerTest {
         for (int i = 0; i < 100; i++) {
             quadruple = QuadrupleGenerator.create();
             quadruples.add(quadruple);
-            this.initializer.selectPeer().add(quadruple);
+            super.getRandomSemanticPeer().add(quadruple);
         }
 
         ResultSet resultSet =
-                this.initializer.selectPeer()
+                super.getRandomSemanticPeer()
                         .executeSparqlSelect(
                                 "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }")
                         .getResult();
@@ -244,18 +238,18 @@ public class SemanticPeerTest {
 
     @Test
     public void testExecuteSparqlWithEmptyNetwork() {
-        Assert.assertFalse(this.initializer.selectPeer().executeSparqlAsk(
+        Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
         Assert.assertEquals(
                 0,
-                this.initializer.selectPeer()
+                super.getRandomSemanticPeer()
                         .executeSparqlConstruct(
                                 "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }")
                         .getResult()
                         .size());
 
-        Assert.assertFalse(this.initializer.selectPeer()
+        Assert.assertFalse(super.getRandomSemanticPeer()
                 .executeSparqlSelect(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }")
                 .getResult()
@@ -283,16 +277,16 @@ public class SemanticPeerTest {
                         QuadrupleGenerator.create()};
 
         for (Quadruple quad : quads) {
-            this.initializer.selectPeer().add(quad);
+            super.getRandomSemanticPeer().add(quad);
         }
 
         // test with ask query form
-        Assert.assertTrue(this.initializer.selectPeer().executeSparqlAsk(
+        Assert.assertTrue(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?a { ?b ?c <" + commonURI.toString() + "> . <"
                         + commonURI.toString() + "> ?e ?f } }").getResult());
 
         // test with construct query form
-        Assert.assertEquals(2, this.initializer.selectPeer()
+        Assert.assertEquals(2, super.getRandomSemanticPeer()
                 .executeSparqlConstruct(
                         "CONSTRUCT { ?a ?b ?c . ?a ?d ?e } WHERE { GRAPH ?a { ?b ?c <"
                                 + commonURI.toString() + "> . <"
@@ -301,7 +295,7 @@ public class SemanticPeerTest {
                 .size());
 
         // test with select query form
-        Assert.assertTrue(this.initializer.selectPeer()
+        Assert.assertTrue(super.getRandomSemanticPeer()
                 .executeSparqlSelect(
                         "SELECT ?a WHERE { GRAPH ?a { ?b ?c <"
                                 + commonURI.toString() + "> . <"
@@ -313,7 +307,7 @@ public class SemanticPeerTest {
     @Test
     public void testMeasurementsReturnedBySparqlQuery() {
         SparqlAskResponse response =
-                this.initializer.selectPeer().executeSparqlAsk(
+                super.getRandomSemanticPeer().executeSparqlAsk(
                         "ASK { GRAPH ?g { ?s ?p ?o } }");
 
         log.debug(
@@ -328,12 +322,6 @@ public class SemanticPeerTest {
         Assert.assertTrue(response.getQueryDatastoreTime() > 0);
         Assert.assertEquals(
                 response.getInboundHopCount(), response.getOutboundHopCount());
-    }
-
-    @After
-    public void tearDown() {
-        this.initializer.tearDown();
-        this.initializer = null;
     }
 
 }

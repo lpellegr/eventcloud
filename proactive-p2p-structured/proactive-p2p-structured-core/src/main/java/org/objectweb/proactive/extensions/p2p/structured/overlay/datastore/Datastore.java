@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.datastore;
 
+import java.io.Closeable;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 
  * @author lpellegr
  */
-public abstract class Datastore implements PeerDataHandler {
+public abstract class Datastore implements Closeable, PeerDataHandler {
 
     protected final UUID id;
 

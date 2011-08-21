@@ -16,58 +16,60 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
-import junit.framework.Assert;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.initializers.AbstractCanNetworkInitializerTest;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassParameterizedCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 
 /**
  * Test cases for {@link NeighborTable}.
  * 
  * @author lpellegr
  */
-public class NeighborTableTest extends AbstractCanNetworkInitializerTest {
+public class NeighborTableTest extends
+        JunitByClassParameterizedCanNetworkDeployer {
 
-    public NeighborTableTest() {
-        super(2);
+    public NeighborTableTest(NetworkDeployer deployer) {
+        super(deployer, 2);
     }
 
     @Test
     public void testContains() {
         NeighborTable neighborTable = new NeighborTable();
-        neighborTable.add(new NeighborEntry(super.get(0)), (byte) 0, (byte) 1);
-        neighborTable.add(new NeighborEntry(super.get(1)), (byte) 0, (byte) 0);
+        neighborTable.add(
+                new NeighborEntry(super.getPeer(0)), (byte) 0, (byte) 1);
+        neighborTable.add(
+                new NeighborEntry(super.getPeer(1)), (byte) 0, (byte) 0);
 
         assertTrue(neighborTable.contains(
-                super.get(0).getId(), (byte) 0, (byte) 1));
+                super.getPeer(0).getId(), (byte) 0, (byte) 1));
         assertTrue(neighborTable.contains(
-                super.get(1).getId(), (byte) 0, (byte) 0));
+                super.getPeer(1).getId(), (byte) 0, (byte) 0));
     }
 
     @Test
     public void testAddAll() {
         NeighborTable neighborTable = new NeighborTable();
-        neighborTable.add(new NeighborEntry(super.get(0)), (byte) 0, (byte) 1);
-        neighborTable.add(new NeighborEntry(super.get(1)), (byte) 0, (byte) 0);
+        neighborTable.add(
+                new NeighborEntry(super.getPeer(0)), (byte) 0, (byte) 1);
+        neighborTable.add(
+                new NeighborEntry(super.getPeer(1)), (byte) 0, (byte) 0);
 
         assertTrue(neighborTable.contains(
-                super.get(0).getId(), (byte) 0, (byte) 1));
+                super.getPeer(0).getId(), (byte) 0, (byte) 1));
         assertTrue(neighborTable.contains(
-                super.get(1).getId(), (byte) 0, (byte) 0));
+                super.getPeer(1).getId(), (byte) 0, (byte) 0));
 
         NeighborTable neighborTable2 = new NeighborTable();
         neighborTable2.addAll(neighborTable);
 
-        Assert.assertEquals(neighborTable.size(), neighborTable2.size());
-        Assert.assertEquals(0, neighborTable2.findDimension(super.get(0)
-                .getId()));
-        Assert.assertEquals(0, neighborTable2.findDimension(super.get(1)
-                .getId()));
-        Assert.assertEquals(1, neighborTable2.findDirection(super.get(0)
-                .getId()));
-        Assert.assertEquals(0, neighborTable2.findDirection(super.get(1)
-                .getId()));
+        assertEquals(neighborTable.size(), neighborTable2.size());
+        assertEquals(0, neighborTable2.findDimension(super.getPeer(0).getId()));
+        assertEquals(0, neighborTable2.findDimension(super.getPeer(1).getId()));
+        assertEquals(1, neighborTable2.findDirection(super.getPeer(0).getId()));
+        assertEquals(0, neighborTable2.findDirection(super.getPeer(1).getId()));
 
     }
 

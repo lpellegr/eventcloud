@@ -26,7 +26,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
 
 /**
@@ -48,7 +48,7 @@ public class SparqlColander implements Closeable {
     private SemanticDatastore datastore;
 
     public SparqlColander() {
-        this.datastore = new JenaDatastore();
+        this.datastore = new PersistentJenaTdbDatastore();
         this.datastore.open();
     }
 

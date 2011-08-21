@@ -29,9 +29,9 @@ import java.io.ObjectInputStream;
 public final class ByteToObjectConverter {
 
     private ByteToObjectConverter() {
-        
+
     }
-    
+
     /**
      * Converts to an object using a regular object stream.
      * 

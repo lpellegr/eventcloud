@@ -21,11 +21,11 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.JenaDatastore;
+import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 
 /**
  * Operation used to query the datastore managed by a peer with a call to
- * {@link JenaDatastore#find(QuadruplePattern)}.
+ * {@link PersistentTdbDatastore#find(QuadruplePattern)}.
  * 
  * @author lpellegr
  */
@@ -45,7 +45,7 @@ public final class FindQuadruplesOperation implements SynchronousOperation {
     @Override
     public ResponseOperation handle(StructuredOverlay overlay) {
         return new FindQuadruplesResponseOperation(
-                ((JenaDatastore) overlay.getDatastore()).find(this.quadruplePattern));
+                ((PersistentJenaTdbDatastore) overlay.getDatastore()).find(this.quadruplePattern));
     }
 
 }

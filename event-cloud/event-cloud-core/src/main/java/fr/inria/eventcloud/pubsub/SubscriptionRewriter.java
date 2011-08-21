@@ -46,9 +46,9 @@ import fr.inria.eventcloud.api.Quadruple;
 public final class SubscriptionRewriter {
 
     private SubscriptionRewriter() {
-        
+
     }
-    
+
     /**
      * Rewrites the first triple pattern from the SPARQL query. The rewrite
      * operation consists in removing the first triple pattern from the SPARQL

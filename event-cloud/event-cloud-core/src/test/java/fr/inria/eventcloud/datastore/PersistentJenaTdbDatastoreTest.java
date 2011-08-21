@@ -34,21 +34,21 @@ import com.hp.hpl.jena.query.ResultSet;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 
 /**
- * Provides tests for some methods exposed by a {@link JenaDatastore}.
+ * Provides tests for some methods exposed by a {@link PersistentTdbDatastore}.
  * 
  * @author lpellegr
  */
-public final class JenaDatastoreTest {
+public final class PersistentJenaTdbDatastoreTest {
 
     private static final int CONCURRENT_ADD_OPERATIONS = 100;
 
     private static final int CONCURRENT_RANDOM_OPERATIONS = 100;
 
-    private JenaDatastore datastore;
+    private PersistentJenaTdbDatastore datastore;
 
     @Before
     public void setUp() {
-        this.datastore = new JenaDatastore();
+        this.datastore = new PersistentJenaTdbDatastore();
         this.datastore.open();
     }
 

@@ -27,9 +27,9 @@ import org.objectweb.proactive.core.node.NodeException;
 public class EventCloudsRegistryFactory {
 
     private EventCloudsRegistryFactory() {
-        
+
     }
-    
+
     public static EventCloudsRegistry newEventCloudsRegistry() {
         try {
             return PAActiveObject.newActive(

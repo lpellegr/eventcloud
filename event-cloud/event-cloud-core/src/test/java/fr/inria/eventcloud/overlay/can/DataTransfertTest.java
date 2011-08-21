@@ -18,9 +18,7 @@ package fr.inria.eventcloud.overlay.can;
 
 import java.util.HashSet;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
@@ -33,8 +31,8 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
 import fr.inria.eventcloud.factories.SemanticFactory;
-import fr.inria.eventcloud.initializers.EventCloudDeployer;
 import fr.inria.eventcloud.operations.can.FindQuadruplesOperation;
 import fr.inria.eventcloud.operations.can.FindQuadruplesResponseOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
@@ -45,35 +43,31 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  * 
  * @author lpellegr
  */
-public class DataTransfertTest {
+public class DataTransfertTest extends JunitByClassEventCloudDeployer {
 
     private final static Logger logger =
             LoggerFactory.getLogger(DataTransfertTest.class);
 
-    private EventCloudDeployer initializer;
+    public DataTransfertTest() {
+        super(1);
+    }
 
     private static String[][] quadrupleValues = {
             {"http://A", "http://A", "http://A", "http://A"},
             {"http://U", "http://U", "http://U", "http://U"},
             {"http://Z", "http://Z", "http://Z", "http://Z"}};
 
-    @Before
-    public void setUp() {
-        this.initializer = new EventCloudDeployer(1);
-        this.initializer.setUp();
-    }
-
     @Test
     public void testDataTransfert() {
         for (String[] stmt : quadrupleValues) {
-            this.initializer.selectPeer().add(
+            super.getRandomSemanticPeer().add(
                     new Quadruple(
                             Node.createURI(stmt[0]), Node.createURI(stmt[1]),
                             Node.createURI(stmt[2]), Node.createURI(stmt[3])));
         }
 
         SemanticPeer newPeer = SemanticFactory.newSemanticPeer();
-        SemanticPeer oldPeer = this.initializer.selectPeer();
+        SemanticPeer oldPeer = super.getRandomSemanticPeer();
 
         Collection<Quadruple> oldPeerQuads = oldPeer.find(QuadruplePattern.ANY);
         int nbDataContainedByOldPeer = oldPeerQuads.size();
@@ -83,7 +77,7 @@ public class DataTransfertTest {
                 nbDataContainedByOldPeer);
 
         try {
-            this.initializer.getRandomTracker().inject(newPeer);
+            super.getRandomTracker().inject(newPeer);
         } catch (NetworkAlreadyJoinedException e) {
             e.printStackTrace();
         }
@@ -108,11 +102,6 @@ public class DataTransfertTest {
                 + nbDataContainedByNewPeer);
         Assert.assertTrue(nbDataContainedByOldPeer < quadrupleValues.length);
         Assert.assertTrue(nbDataContainedByOldPeer > 0);
-    }
-
-    @After
-    public void tearDown() {
-        this.initializer.tearDown();
     }
 
     private static Collection<Quadruple> findQuadruplesOperation(SemanticPeer peer,

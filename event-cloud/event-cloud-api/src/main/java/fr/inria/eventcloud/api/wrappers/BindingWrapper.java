@@ -155,7 +155,7 @@ public class BindingWrapper extends SparqlResultWrapper<Binding> implements
             buf = buf.delete(buf.length() - 2, buf.length());
         }
         buf.append(")");
-        
+
         return buf.toString();
     }
 

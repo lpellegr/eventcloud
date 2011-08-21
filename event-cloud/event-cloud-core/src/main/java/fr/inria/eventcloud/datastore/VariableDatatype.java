@@ -29,7 +29,7 @@ import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
  * A VariableDatatype is a Jena {@link RDFDatatype} that is used to store a
  * {@link Node_Variable} as a RDF literal. Once the variable is inserted into
  * the datastore with the tag {@link VariableDatatype}, when you retrieve a
- * result that contain this type of typed literal, you can execute
+ * result that contains this type of typed literal, you can execute
  * {@link Node#getLiteralValue()} to get directly the {@link Node_Variable}
  * object without parsing it.
  * 

@@ -112,9 +112,9 @@ public class EventCloudProperties {
     }
 
     private EventCloudProperties() {
-        
+
     }
-    
+
     public static final String getPreferencesFilePath() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getPreferencesPath());
