@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,11 +63,13 @@ public final class EventCloud implements EventCloudApi, Serializable {
     private final List<SemanticTracker> trackers;
 
     private EventCloud(String registryUrl, String nodeProviderUrl,
+            DeploymentConfiguration configuration,
             Collection<UnalterableElaProperty> elaProperties, int nbTrackers,
             int nbPeers) {
         this.id =
                 new EventCloudId(MurmurHash.hash64(
-                        registryUrl.toString(), nodeProviderUrl.toString(),
+                        registryUrl.toString(), (nodeProviderUrl == null)
+                                ? "" : nodeProviderUrl.toString(),
                         elaProperties.toString(), Integer.toString(nbTrackers),
                         Integer.toString(nbPeers)));
 
@@ -76,23 +80,33 @@ public final class EventCloud implements EventCloudApi, Serializable {
         this.trackerUrls = new ArrayList<String>();
         this.trackers = new ArrayList<SemanticTracker>();
 
-        this.initializeNetwork(nbTrackers, nbPeers);
+        this.initializeNetwork(configuration, nbTrackers, nbPeers);
     }
 
-    private void initializeNetwork(int nbTrackers, int nbPeers) {
+    private void initializeNetwork(DeploymentConfiguration configuration,
+                                   int nbTrackers, int nbPeers) {
         // TODO retrieve the nodes, create and deploy the peers and the trackers
         // and populate the fields
 
         // temporary implementation that deploy the trackers and the peers on
         // the local machine
-        EventCloudDeployer deployer =
-                new EventCloudDeployer();
+        EventCloudDeployer deployer = new EventCloudDeployer(configuration);
         deployer.deploy(nbTrackers, nbPeers);
-        
+
         for (Tracker tracker : deployer.getTrackers()) {
             this.trackers.add((SemanticTracker) tracker);
             this.trackerUrls.add(PAActiveObject.getUrl(tracker));
         }
+    }
+
+    public static EventCloud create(String registryUrl,
+                                    String nodeProviderUrl,
+                                    Collection<UnalterableElaProperty> elaProperties,
+                                    int nbTrackers, int nbPeers) {
+        return create(
+                registryUrl, nodeProviderUrl,
+                new EmptyDeploymentConfiguration(), elaProperties, nbTrackers,
+                nbPeers);
     }
 
     /**
@@ -102,6 +116,8 @@ public final class EventCloud implements EventCloudApi, Serializable {
      *            the URL to the EventCloudsRegistry that stores the properties.
      * @param nodeProviderUrl
      *            the URL to the node provider.
+     * @param configuration
+     *            the configuration to use for the deployment.
      * @param elaProperties
      *            a collection of non-alterable ELA properties.
      * @param nbTrackers
@@ -118,12 +134,13 @@ public final class EventCloud implements EventCloudApi, Serializable {
      */
     public static EventCloud create(String registryUrl,
                                     String nodeProviderUrl,
+                                    DeploymentConfiguration configuration,
                                     Collection<UnalterableElaProperty> elaProperties,
                                     int nbTrackers, int nbPeers) {
         EventCloud eventCloud =
                 new EventCloud(
-                        registryUrl, nodeProviderUrl, elaProperties,
-                        nbTrackers, nbPeers);
+                        registryUrl, nodeProviderUrl, configuration,
+                        elaProperties, nbTrackers, nbPeers);
 
         eventCloud.register();
 

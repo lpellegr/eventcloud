@@ -50,7 +50,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +67,7 @@ import com.google.common.collect.Sets;
  */
 public class CanOverlay extends StructuredOverlay {
 
-    private static final long serialVersionUID = 1L;
-
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(CanOverlay.class);
 
     private ScheduledExecutorService maintenanceTask;
@@ -88,7 +86,7 @@ public class CanOverlay extends StructuredOverlay {
 
     /**
      * Constructs a new overlay with messagingManager set to
-     * {@link CanRequestResponseManager} and no {@link PersistentDatastore}.
+     * {@link CanRequestResponseManager} and no {@link Datastore}.
      */
     public CanOverlay() {
         this(new CanRequestResponseManager(), null);
@@ -116,7 +114,7 @@ public class CanOverlay extends StructuredOverlay {
      *            the datastore instance to set.
      */
     public CanOverlay(RequestResponseManager requestResponseManager,
-            PersistentDatastore datastore) {
+            Datastore datastore) {
         super(requestResponseManager, datastore);
 
         this.neighborTable = new NeighborTable();
@@ -185,8 +183,8 @@ public class CanOverlay extends StructuredOverlay {
 
         // no neighbors satisfying the coordinate on the specified dimension AND
         // direction
-        if (neighbors.isEmpty() && logger.isDebugEnabled()) {
-            logger.debug("No neighbors satisfying the coordinate on the specified dimension "
+        if (neighbors.isEmpty() && log.isDebugEnabled()) {
+            log.debug("No neighbors satisfying the coordinate on the specified dimension "
                     + dimension
                     + " AND direction "
                     + direction
@@ -201,19 +199,19 @@ public class CanOverlay extends StructuredOverlay {
         }
 
         if (neighbors.size() == 0) {
-            logger.error("No neighbor to route to, dump is " + this.dump());
+            log.error("No neighbor to route to, dump is " + this.dump());
         }
 
         // TODO: choose a metric to evaluate the nearest peer
         NeighborEntry entry =
                 neighbors.get(ProActiveRandom.nextInt(neighbors.size()));
-        if (logger.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             if (this.zone.neighbors(entry.getZone()) == -1) {
-                logger.error("Neighbor chosen to route the message is "
+                log.error("Neighbor chosen to route the message is "
                         + entry.getZone()
                         + ". However it does not neighbor the current peer.");
             } else {
-                logger.debug("Neighbor chosen to route the message is "
+                log.debug("Neighbor chosen to route the message is "
                         + entry.getZone());
             }
         }
@@ -573,12 +571,12 @@ public class CanOverlay extends StructuredOverlay {
                     (JoinIntroduceResponseOperation) PAFuture.getFutureValue(landmarkPeer.receiveImmediateService(new JoinIntroduceOperation(
                             super.id, super.stub)));
         } catch (PeerNotActivatedRuntimeException e) {
-            logger.error(
+            log.error(
                     "Landmark peer {} to join is not activated",
                     landmarkPeer.getId());
             return false;
         } catch (ConcurrentModificationException e) {
-            logger.error(
+            log.error(
                     "Peer {} is already handling a join operation for peer {}",
                     landmarkPeer.getId(), super.id);
             return false;
@@ -667,7 +665,7 @@ public class CanOverlay extends StructuredOverlay {
                 }
             }
 
-            logger.info(
+            log.info(
                     "Peer {} has left the network and the zone has been taken over by {}",
                     this, suitableNeighbor.getZone());
             this.peerLeavingId.set(null);
@@ -681,7 +679,7 @@ public class CanOverlay extends StructuredOverlay {
                         - P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue())
                         + P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue();
 
-        logger.info(
+        log.info(
                 "Peer {} cannot leave at this time, retry in {} ms", this,
                 timeout);
 
@@ -775,14 +773,14 @@ public class CanOverlay extends StructuredOverlay {
     }
 
     public void dumpNeighbors() {
-        logger.debug("Peer managing {}", this.zone);
+        log.debug("Peer managing {}", this.zone);
         NeighborTable neighborTable = this.getNeighborTable();
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry entry : neighborTable.get(
                         dimension, direction).values()) {
-                    logger.debug(
+                    log.debug(
                             "  * {}, dimension={}, direction={}", new Object[] {
                                     entry.getZone(), dimension, direction});
                 }

@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
+import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 
 /**
  * A DeleteQuadrupleRequest is used to remove a quadruple from the network. The
@@ -47,7 +47,7 @@ public class DeleteQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        ((PersistentJenaTdbDatastore) overlay.getDatastore()).delete(quad);
+        ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).delete(quad);
         logger.info("Quadruple {} has been removed from {}", quad, overlay);
     }
 

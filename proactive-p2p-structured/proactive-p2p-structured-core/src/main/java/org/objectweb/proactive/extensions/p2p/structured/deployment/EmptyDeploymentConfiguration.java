@@ -14,19 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.deployment;
-
-import fr.inria.eventcloud.EventCloudsRegistry;
+package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 /**
+ * A {@link DeploymentConfiguration} that does nothing.
  * 
  * @author lpellegr
- * 
  */
-public class EventCloudInfrastructureDeployer {
+public final class EmptyDeploymentConfiguration implements
+        DeploymentConfiguration {
 
-    private EventCloudsRegistry eventCloudsRegistry;
-    
-    
-    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void configure() {
+
+    }
+
 }

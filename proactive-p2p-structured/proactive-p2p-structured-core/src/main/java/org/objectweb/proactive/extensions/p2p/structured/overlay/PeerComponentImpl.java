@@ -81,11 +81,7 @@ public class PeerComponentImpl extends PeerImpl implements Peer,
      */
     @Override
     public OverlayType getType() {
-        if (this.overlay != null) {
-            return this.overlay.getType();
-        }
-
-        return null;
+        return this.overlay.getType();
     }
 
     /**

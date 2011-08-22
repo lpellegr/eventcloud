@@ -31,7 +31,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
+import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.pubsub.Notification;
@@ -65,8 +65,8 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
      */
     @Override
     public void handle(StructuredOverlay overlay) {
-        PersistentJenaTdbDatastore datastore =
-                (PersistentJenaTdbDatastore) overlay.getDatastore();
+        SynchronizedJenaDatasetGraph datastore =
+                (SynchronizedJenaDatasetGraph) overlay.getDatastore();
 
         // finds the matching quadruple meta information
         Collection<Quadruple> result =

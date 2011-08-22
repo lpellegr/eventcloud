@@ -14,40 +14,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.messages.request.can;
+package fr.inria.eventcloud.builders;
 
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.InMemoryJenaDatastore;
+import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 
 /**
- * An AddQuadrupleRequest is used to insert a quadruple into the network. The
- * request will be routed on the network until to reach the peer which manage
- * the quad components. Then, the quad is stored on that peer.
+ * This class is used to build a {@link CanOverlay} with a
+ * {@link SparqlRequestResponseManager} and an {@link InMemoryJenaDatastore} .
  * 
  * @author lpellegr
  */
-public class AddQuadrupleRequest extends QuadrupleRequest {
+public class SemanticNonPersistentOverlayBuilder extends
+        StructuredOverlayBuilder {
 
     private static final long serialVersionUID = 1L;
-
-    private final static Logger logger =
-            LoggerFactory.getLogger(AddQuadrupleRequest.class);
-
-    public AddQuadrupleRequest(final Quadruple quad) {
-        super(quad);
-    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).add(quad);
-        logger.info("Quadruple {} has been added on {}", quad, overlay);
+    public StructuredOverlay build() {
+        return new CanOverlay(
+                new SparqlRequestResponseManager(), new InMemoryJenaDatastore());
     }
 
 }

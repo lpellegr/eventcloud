@@ -16,85 +16,97 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
 
-import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
+ * Class used to test a {@link SubscribeProxy}.
  * 
  * @author lpellegr
  */
 public class SubscribeProxyTest {
 
-    private ProxyFactory proxyFactory;
+    private static final Logger log =
+            LoggerFactory.getLogger(SubscribeProxyTest.class);
 
-    public SubscribeProxyTest() {
-        // this.proxyFactory =
-        // ProxyFactory.getInstance(
-        // super.getEventCloudRegistryUrl(), super.getEventCloud()
-        // .getId());
-    }
-
-    // @Test
-    // public void testSubscribeStringBindingNotificationListener() {
-    // fail("Not yet implemented");
-    // }
+    private static final File EVENTS_RECEIVED_FILE = new File(
+            System.getProperty("java.io.tmpdir"),
+            "subscribe-proxy-test-event-received.tmp");
 
     /**
      * Test the subscription with an {@link EventNotificationListener} by
      * simulating a network congestion between the publication of two sets of
      * quadruples that belong to the same event.
      */
-    @Ignore
+    @Test
     public void testSubscribeStringEventNotificationListenerSimulatingNetworkCongestion() {
-        SubscribeProxy subscribeProxy =
-                this.proxyFactory.createSubscribeProxy();
+        JunitEventCloudInfrastructureDeployer deployer =
+                new JunitEventCloudInfrastructureDeployer();
 
-        final List<Event> eventsReceived = new ArrayList<Event>();
+        EventCloudId ecId = deployer.createEventCloud(10);
 
-        // subscribes for any quadruples
-        subscribeProxy.subscribe(
-                "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
-                new EventNotificationListener() {
-                    private static final long serialVersionUID = 1L;
+        final ProxyFactory proxyFactory =
+                ProxyFactory.getInstance(
+                        deployer.getEventCloudsRegistryUrl(), ecId);
 
-                    @Override
-                    public void onNotification(SubscriptionId id, Event solution) {
-                        eventsReceived.add(solution);
-                        System.out.println("SOLUTION RECEIVED");
-                    }
-                });
+        Thread subscribeThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SubscribeProxy subscribeProxy =
+                        proxyFactory.createSubscribeProxy();
+                // subscribes for any quadruples
+                subscribeProxy.subscribe(
+                        "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
+                        new CustomEventNotificationListener());
+            }
+        });
+
+        subscribeThread.start();
+
+        // waits a little to be sure that the subscription has been indexed
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         final Node eventId =
                 Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                         + "587d8wq8gf7we4gsd4g4qw9");
 
-        final PublishProxy publishProxy =
-                this.proxyFactory.createPublishProxy();
-
-        final Quadruple quadToPublish =
-                new Quadruple(
-                        eventId, eventId,
-                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                        Node.createLiteral("9", null, XSDDatatype.XSDint));
-
-        new Thread(new Runnable() {
+        Thread publishThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                final PublishProxy publishProxy =
+                        proxyFactory.createPublishProxy();
+
+                final Quadruple quadToPublish =
+                        new Quadruple(
+                                eventId,
+                                eventId,
+                                PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
+                                Node.createLiteral(
+                                        "9", null, XSDDatatype.XSDint));
+
                 publishProxy.publish(quadToPublish);
 
                 // inserts 4 quadruples that belongs to the same event
@@ -114,34 +126,36 @@ public class SubscribeProxyTest {
                     publishProxy.publish(QuadrupleGenerator.create(eventId));
                 }
             }
-        }).start();
+        });
+        publishThread.start();
 
-        try {
-            Thread.sleep(50000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        while (!EVENTS_RECEIVED_FILE.exists()) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
-        // TODO: add assertions
+        EVENTS_RECEIVED_FILE.delete();
 
-        // TODO test has to be rewritten to detect termination cleanly
-
-        System.out.println("END");
+        deployer.destroyEventCloud(ecId);
     }
 
-    // @Test
-    // public void testReconstructEventSubscriptionBinding() {
-    // fail("Not yet implemented");
-    // }
+    private static class CustomEventNotificationListener implements
+            EventNotificationListener {
 
-    // @Test
-    // public void testReconstructEventNode() {
-    // fail("Not yet implemented");
-    // }
+        private static final long serialVersionUID = 1L;
 
-    // @Test
-    // public void testUnsubscribe() {
-    // fail("Not yet implemented");
-    // }
+        @Override
+        public void onNotification(SubscriptionId id, Event solution) {
+            try {
+                EVENTS_RECEIVED_FILE.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            log.info("New event received: {}", solution);
+        }
+    }
 
 }

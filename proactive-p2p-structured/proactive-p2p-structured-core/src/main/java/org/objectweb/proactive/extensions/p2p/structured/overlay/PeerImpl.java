@@ -23,6 +23,7 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.EndActive;
 import org.objectweb.proactive.InitActive;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
@@ -66,22 +67,24 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * Constructs a new peer using the specified overlay. Warning, you must use
      * {@link PeerFactory} to instantiate a new active peer.
      * 
-     * @param overlay
-     *            the overlay to set to the new peer.
+     * @param builder
+     *            the builder to use for creating the {@link StructuredOverlay}
+     *            embedded by the peer.
      */
-    public PeerImpl(StructuredOverlay overlay) {
-        this();
-        this.overlay = overlay;
+    public PeerImpl(StructuredOverlayBuilder builder) {
+        this.overlay = builder.build();
     }
 
     /**
      * {@inheritDoc}
      */
-    public void init(Peer stub, StructuredOverlay overlay) {
+    public boolean init(Peer stub, StructuredOverlayBuilder overlay) {
         if (this.overlay == null) {
-            this.overlay = overlay;
+            this.overlay = overlay.build();
             this.overlay.stub = stub;
         }
+
+        return true;
     }
 
     /**

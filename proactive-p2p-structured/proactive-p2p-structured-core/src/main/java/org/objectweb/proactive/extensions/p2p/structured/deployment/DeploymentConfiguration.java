@@ -14,26 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.datastore;
-
-import java.io.File;
-
-import com.hp.hpl.jena.sparql.core.DatasetGraph;
-import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
+package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 /**
- * A simple non-persistent, in-memory Jena store. Useful for unit testing.
+ * This class is used to configure a {@link NetworkDeployer} by setting some
+ * properties before to deploy the network.
  * 
  * @author lpellegr
  */
-public class InMemoryJenaDataset extends SynchronizedJenaDatasetGraph {
+public interface DeploymentConfiguration {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DatasetGraph createDatasetGraph(File path) {
-        return DatasetGraphFactory.createMem();
-    }
+    public void configure();
 
 }

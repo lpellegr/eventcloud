@@ -34,10 +34,10 @@ import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.node.NodeException;
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
@@ -72,7 +72,7 @@ public final class PeerFactory {
      * 
      * @return the new active object created.
      */
-    public static Peer newActivePeer(StructuredOverlay overlay) {
+    public static Peer newActivePeer(StructuredOverlayBuilder overlay) {
         return PeerFactory.newActivePeer(overlay, null);
     }
 
@@ -87,7 +87,7 @@ public final class PeerFactory {
      * 
      * @return the new active object created.
      */
-    public static Peer newActivePeer(StructuredOverlay overlay, Node node) {
+    public static Peer newActivePeer(StructuredOverlayBuilder overlay, Node node) {
         try {
             return PAActiveObject.newActive(
                     PeerImpl.class, new Object[] {overlay}, node);
@@ -110,7 +110,7 @@ public final class PeerFactory {
      * @return the reference on the {@link Peer} interface of the new component
      *         created.
      */
-    public static Peer newComponentPeer(StructuredOverlay overlay) {
+    public static Peer newComponentPeer(StructuredOverlayBuilder overlay) {
         return PeerFactory.createComponentPeer(
                 overlay, new HashMap<String, Object>());
     }
@@ -127,7 +127,8 @@ public final class PeerFactory {
      * @return the reference on the {@link Peer} interface of the new component
      *         created.
      */
-    public static Peer newComponentPeer(StructuredOverlay overlay, Node node) {
+    public static Peer newComponentPeer(StructuredOverlayBuilder overlay,
+                                        Node node) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (node != null) {
             List<Node> nodeList = new ArrayList<Node>(1);
@@ -149,7 +150,7 @@ public final class PeerFactory {
      * @return the reference on the {@link Peer} interface of the new component
      *         created.
      */
-    public static Peer newComponentPeer(StructuredOverlay overlay,
+    public static Peer newComponentPeer(StructuredOverlayBuilder overlay,
                                         GCMVirtualNode vn) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (vn != null) {
@@ -170,7 +171,7 @@ public final class PeerFactory {
      * @return the reference on the {@link Peer} interface of the new component
      *         created.
      */
-    public static Peer newComponentPeer(StructuredOverlay overlay,
+    public static Peer newComponentPeer(StructuredOverlayBuilder overlay,
                                         GCMApplication gcma) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (gcma != null) {
@@ -179,16 +180,18 @@ public final class PeerFactory {
         return PeerFactory.createComponentPeer(overlay, context);
     }
 
-    private static Peer createComponentPeer(StructuredOverlay overlay,
+    private static Peer createComponentPeer(StructuredOverlayBuilder overlay,
                                             Map<String, Object> context) {
         try {
             Component peer =
                     (Component) factory.newComponent(
                             P2PStructuredProperties.PEER_ADL.getValue(),
                             context);
+
             Peer stub =
                     (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
             stub.init(stub, overlay);
+
             GCM.getGCMLifeCycleController(peer).startFc();
 
             return stub;

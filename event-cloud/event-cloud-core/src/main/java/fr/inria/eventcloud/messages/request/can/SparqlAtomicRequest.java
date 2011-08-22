@@ -24,7 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
+import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.messages.response.can.SparqlAtomicResponse;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
@@ -65,7 +65,7 @@ public class SparqlAtomicRequest extends
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 fr.inria.eventcloud.api.QuadruplePattern quadruplePattern) {
-        return ((PersistentJenaTdbDatastore) overlay.getDatastore()).find(quadruplePattern);
+        return ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(quadruplePattern);
     }
 
 }

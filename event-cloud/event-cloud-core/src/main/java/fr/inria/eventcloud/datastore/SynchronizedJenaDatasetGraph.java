@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.datastore;
 
-import java.io.File;
 import java.util.Iterator;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
@@ -51,29 +50,10 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
     // TODO: to see whether it is possible to improve concurrency by using the
     // new transaction features introduced with TDB? (transaction !=
     // synchronization != thread-safe)
-    private DatasetGraph datastore;
+    protected DatasetGraph datastore;
 
-    /**
-     * Creates a new datastore that stores data into a folder from the OS
-     * temporary directory.
-     */
     public SynchronizedJenaDatasetGraph() {
-        this(new File(System.getProperty("java.io.tmpdir")), true);
-    }
-
-    /**
-     * Creates a new datastore that stores data into the specified
-     * {@code repositoryPath}.
-     * 
-     * @param repositoryPath
-     *            the path where to store the data.
-     * 
-     * @param autoRemove
-     *            indicates whether the repository has to be removed or not when
-     *            it is closed.
-     */
-    public SynchronizedJenaDatasetGraph(File repositoryPath, boolean autoRemove) {
-        super(repositoryPath, autoRemove);
+        super();
         this.registerPlugins();
     }
 
@@ -85,37 +65,9 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
     /**
      * Creates a new {@link DatasetGraph}.
      * 
-     * @param path
-     *            the path to use for storing the files associated to a
-     *            persistent datastore.
-     * 
      * @return a new {@link DatasetGraph}.
      */
-    protected abstract DatasetGraph createDatasetGraph(File path);
-
-    /*
-     * Implementation of PersistentDatastore abstract methods
-     */
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void internalOpen() {
-        if (!this.path.exists()) {
-            this.path.mkdirs();
-        }
-
-        this.datastore = this.createDatasetGraph(super.path);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void internalClose() {
-        this.datastore.close();
-    }
+    protected abstract DatasetGraph createDatasetGraph();
 
     /*
      * Implementation of SemanticDatastore interface

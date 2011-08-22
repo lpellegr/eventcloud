@@ -44,7 +44,7 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
+import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
@@ -79,8 +79,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        PersistentJenaTdbDatastore datastore =
-                ((PersistentJenaTdbDatastore) overlay.getDatastore());
+        SynchronizedJenaDatasetGraph datastore =
+                ((SynchronizedJenaDatasetGraph) overlay.getDatastore());
         datastore.add(quad);
 
         log.debug(
