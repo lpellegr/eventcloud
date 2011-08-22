@@ -196,10 +196,16 @@ public abstract class NetworkDeployer extends
         }
 
         this.notifyUndeploymentStarted();
+        
+        this.internalUndeploy();
         this.reset();
 
         this.state.set(NetworkDeployerState.STANDBY);
         this.notifyUndeploymentEnded();
+    }
+    
+    protected void internalUndeploy() {
+        // to be overridden if necessary
     }
 
     private void reset() {

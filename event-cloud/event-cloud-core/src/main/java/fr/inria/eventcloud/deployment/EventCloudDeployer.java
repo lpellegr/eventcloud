@@ -22,10 +22,12 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentCo
 import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 import fr.inria.eventcloud.factories.SemanticFactory;
+import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -78,6 +80,18 @@ public class EventCloudDeployer extends NetworkDeployer {
 
     public SemanticTracker getRandomSemanticTracker() {
         return (SemanticTracker) PAFuture.getFutureValue(super.getRandomTracker());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void internalUndeploy() {
+        try {
+            PAFuture.waitFor(this.getRandomPeer().send(new ShutdownRequest()));
+        } catch (DispatchException e) {
+            e.printStackTrace();
+        }
     }
 
     // TODO implement undeploy by sending a shutdown request
