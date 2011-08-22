@@ -18,7 +18,8 @@ package fr.inria.eventcloud.deployment;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentMode;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -32,36 +33,22 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * Initializes an Event Cloud (i.e. a Content-Addressable-Network composed of
  * four dimensions) on a local machine or by distributing the active objects on
  * several machines.
- * <p>
- * TODO: add support for deployment with the Scheduler. I think we just have to
- * provide a new constructor with some parameters which are needed to use a
- * scheduler. Then, we have to update the {@link #createPeer()} and
- * {@link #createTracker()} methods according to the parameters which have been
- * initialized from the constructor.
  * 
  * @author lpellegr
  */
 public class EventCloudDeployer extends NetworkDeployer {
 
     public EventCloudDeployer() {
-        super();
+        this(new EmptyDeploymentConfiguration());
     }
 
-    public EventCloudDeployer(DeploymentMode mode) {
+    public EventCloudDeployer(DeploymentConfiguration mode) {
         this(mode, null);
     }
 
-    public EventCloudDeployer(DeploymentMode mode, NodeProvider nodeProvider) {
+    public EventCloudDeployer(DeploymentConfiguration mode,
+            NodeProvider nodeProvider) {
         super(mode, nodeProvider);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void configureProductionMode() {
-        super.configureProductionMode();
-
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
     }
 

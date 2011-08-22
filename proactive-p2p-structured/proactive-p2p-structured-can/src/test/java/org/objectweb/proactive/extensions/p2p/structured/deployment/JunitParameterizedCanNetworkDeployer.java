@@ -41,8 +41,10 @@ public final class JunitParameterizedCanNetworkDeployer {
      */
     public static List<NetworkDeployer[]> getDeployersToParameterize() {
         return Arrays.asList(new NetworkDeployer[][] {
-                {new CanActiveObjectsNetworkDeployer(DeploymentMode.TESTING)},
-                {new CanComponentsNetworkDeployer(DeploymentMode.TESTING)}});
+                {new CanActiveObjectsNetworkDeployer(
+                        new TestingDeploymentConfiguration())},
+                {new CanComponentsNetworkDeployer(
+                        new TestingDeploymentConfiguration())}});
     }
 
 }

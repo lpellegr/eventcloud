@@ -43,6 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanActiveObjectsNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
@@ -169,7 +170,7 @@ public class Can2dVisualizer extends JFrame {
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         if (mode == Mode.JOIN) {
                             Peer newPeer =
-                                    PeerFactory.newActivePeer(new CanOverlay());
+                                    PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanOverlay.class));
                             try {
                                 newPeer.join(entry.getStub());
                             } catch (NetworkAlreadyJoinedException ex) {

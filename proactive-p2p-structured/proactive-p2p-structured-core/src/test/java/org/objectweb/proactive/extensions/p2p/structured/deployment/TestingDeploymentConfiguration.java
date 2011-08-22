@@ -19,19 +19,22 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 /**
- * Defines in which mode the deployer must be used.
+ * Configure a {@link NetworkDeployer} for testing purpose. In that case some
+ * properties like for example
+ * {@link P2PStructuredProperties#TRACKER_STORAGE_PROBABILITY} is set to
+ * {@code 1}.
  * 
  * @author lpellegr
  */
-public enum DeploymentMode {
+public final class TestingDeploymentConfiguration implements
+        DeploymentConfiguration {
+
     /**
-     * For testing purpose. In that case some properties like for example
-     * {@link P2PStructuredProperties#TRACKER_STORAGE_PROBABILITY} is set to
-     * {@code 1}.
+     * {@inheritDoc}
      */
-    TESTING,
-    /**
-     * For production.
-     */
-    PRODUCTION
+    @Override
+    public void configure() {
+        P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.setValue(1);
+    }
+
 }

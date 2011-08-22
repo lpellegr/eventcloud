@@ -17,6 +17,11 @@
 package fr.inria.eventcloud.datastore;
 
 import java.io.File;
+import java.io.IOException;
+
+import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.tdb.TDBFactory;
@@ -28,20 +33,74 @@ import com.hp.hpl.jena.tdb.TDBFactory;
  */
 public class PersistentJenaTdbDatastore extends SynchronizedJenaDatasetGraph {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(PersistentJenaTdbDatastore.class);
+
+    private final File repositoryPath;
+
+    private final boolean autoRemove;
+
+    /**
+     * Creates a new persistent datastore that stores data into a folder from
+     * the Operating System temporary directory.
+     */
     public PersistentJenaTdbDatastore() {
-        super();
+        this(new File(System.getProperty("java.io.tmpdir")), true);
     }
-    
+
+    /**
+     * Creates a new datastore that stores data into the specified
+     * {@code repositoryPath}.
+     * 
+     * @param repositoryPath
+     *            the path where to store the data.
+     * 
+     * @param autoRemove
+     *            indicates whether the repository has to be removed or not when
+     *            it is closed.
+     */
     public PersistentJenaTdbDatastore(File repositoryPath, boolean autoRemove) {
-        super(repositoryPath, autoRemove);
+        super();
+        this.autoRemove = autoRemove;
+        this.repositoryPath = new File(repositoryPath, super.id.toString());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected DatasetGraph createDatasetGraph(File path) {
-        return TDBFactory.createDatasetGraph(path.getPath());
+    protected DatasetGraph createDatasetGraph() {
+        return TDBFactory.createDatasetGraph(this.repositoryPath.getPath());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void internalOpen() {
+        if (!this.repositoryPath.exists()) {
+            this.repositoryPath.mkdirs();
+        }
+
+        super.datastore = this.createDatasetGraph();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void internalClose() {
+        this.datastore.close();
+
+        if (this.autoRemove) {
+            try {
+                Files.deleteDirectory(this.repositoryPath);
+                log.info("Repository {} has been deleted", this.repositoryPath);
+            } catch (IOException e) {
+                log.error("The deletion of the repository "
+                        + this.repositoryPath + " has failed", e);
+            }
+        }
     }
 
 }

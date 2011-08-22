@@ -23,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
@@ -57,32 +56,21 @@ public abstract class NetworkDeployer extends
     private AtomicReference<NetworkDeployerState> state;
 
     public NetworkDeployer() {
-        this(DeploymentMode.PRODUCTION, null);
+        this(new EmptyDeploymentConfiguration(), null);
     }
 
-    public NetworkDeployer(DeploymentMode mode) {
-        this(mode, null);
+    public NetworkDeployer(DeploymentConfiguration configuration) {
+        this(configuration, null);
     }
 
-    public NetworkDeployer(DeploymentMode mode, NodeProvider nodeProvider) {
-        if (mode == DeploymentMode.TESTING) {
-            this.configureTestingMode();
-        } else if (mode == DeploymentMode.PRODUCTION) {
-            this.configureProductionMode();
-        }
-
+    public NetworkDeployer(DeploymentConfiguration configuration,
+            NodeProvider nodeProvider) {
         this.state =
                 new AtomicReference<NetworkDeployerState>(
                         NetworkDeployerState.STANDBY);
         this.nodeProvider = null;
-    }
 
-    protected void configureTestingMode() {
-        P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.setValue(1);
-    }
-    
-    protected void configureProductionMode() {
-        // to be overridden if necessary
+        configuration.configure();
     }
 
     public void deploy(int nbPeers) {

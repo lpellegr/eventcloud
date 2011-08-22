@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.overlay;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -24,10 +23,10 @@ import java.util.concurrent.Executors;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerComponentImpl;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 import fr.inria.eventcloud.api.Collection;
@@ -39,7 +38,6 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.factories.SemanticFactory;
@@ -54,7 +52,7 @@ import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 /**
  * SemanticPeerImpl is a concrete implementation of {@link SemanticPeer}. It is
  * a peer constructed by using a {@link CanOverlay} and a
- * {@link PersistentTdbDatastore}. It exposes the methods provided by the
+ * {@link PersistentJenaTdbDatastore}. It exposes the methods provided by the
  * {@link SemanticDatastore} interface in order to provide semantic operations
  * like add, delete, find, etc. but also to execute a SPARQL query.
  * <p>
@@ -83,16 +81,10 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      * {@inheritDoc}
      */
     @Override
-    public void init(Peer stub, StructuredOverlay overlay) {
-        super.init(
-                stub,
-                new CanOverlay(
-                        new SparqlRequestResponseManager(),
-                        new PersistentJenaTdbDatastore(
-                                new File(
-                                        EventCloudProperties.REPOSITORIES_PATH.getValue()),
-                                EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue())));
+    public boolean init(Peer stub, StructuredOverlayBuilder builder) {
+        super.init(stub, builder);
         this.threadPool = Executors.newFixedThreadPool(50);
+        return true;
     }
 
     /*

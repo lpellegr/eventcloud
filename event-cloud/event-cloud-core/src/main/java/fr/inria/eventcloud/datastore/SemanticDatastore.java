@@ -16,9 +16,7 @@
  **/
 package fr.inria.eventcloud.datastore;
 
-import java.io.File;
-
-import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.ResultSet;
@@ -32,11 +30,7 @@ import fr.inria.eventcloud.api.Quadruple;
  * 
  * @author lpellegr
  */
-public abstract class SemanticDatastore extends PersistentDatastore {
-
-    protected SemanticDatastore(File parentPath, boolean autoRemove) {
-        super(parentPath, autoRemove);
-    }
+public abstract class SemanticDatastore extends Datastore {
 
     /**
      * Adds the specified {@code quad} into the datastore.

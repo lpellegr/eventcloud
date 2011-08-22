@@ -16,14 +16,12 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.PersistentDatastore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,16 +32,14 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lpellegr
  */
-public abstract class StructuredOverlay implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public abstract class StructuredOverlay {
 
     private static final Logger log =
             LoggerFactory.getLogger(StructuredOverlay.class);
 
     protected final UUID id;
 
-    protected transient PersistentDatastore datastore;
+    protected Datastore datastore;
 
     protected RequestResponseManager messagingManager;
 
@@ -64,7 +60,7 @@ public abstract class StructuredOverlay implements Serializable {
     }
 
     protected StructuredOverlay(RequestResponseManager messagingManager,
-            PersistentDatastore datastore) {
+            Datastore datastore) {
         this();
         this.datastore = datastore;
         if (this.datastore != null) {

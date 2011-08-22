@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.deployment;
 
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentMode;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodNetworkDeployer;
 
 import fr.inria.eventcloud.overlay.SemanticPeer;
@@ -33,7 +32,7 @@ public class JunitByMethodEventCloudDeployer extends
         JunitByMethodNetworkDeployer {
 
     public JunitByMethodEventCloudDeployer() {
-        super(new EventCloudDeployer(DeploymentMode.TESTING));
+        super(new JunitEventCloudDeployer());
     }
 
     public SemanticPeer getRandomSemanticPeer() {

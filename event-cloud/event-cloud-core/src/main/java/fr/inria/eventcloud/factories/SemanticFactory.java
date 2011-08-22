@@ -33,10 +33,12 @@ import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
+import fr.inria.eventcloud.builders.SemanticPersistentOverlayBuilder;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
@@ -189,7 +191,14 @@ public final class SemanticFactory {
      *         component created.
      */
     public static SemanticPeer newSemanticPeer() {
-        return SemanticFactory.createSemanticPeer(new HashMap<String, Object>());
+        return SemanticFactory.createSemanticPeer(
+                new HashMap<String, Object>(),
+                new SemanticPersistentOverlayBuilder());
+    }
+
+    public static SemanticPeer newSemanticPeer(StructuredOverlayBuilder builder) {
+        return SemanticFactory.createSemanticPeer(
+                new HashMap<String, Object>(), builder);
     }
 
     /**
@@ -209,7 +218,9 @@ public final class SemanticFactory {
             nodeList.add(node);
             context.put(ADLNodeProvider.NODES_ID, nodeList);
         }
-        return SemanticFactory.createSemanticPeer(context);
+
+        return SemanticFactory.createSemanticPeer(
+                context, new SemanticPersistentOverlayBuilder());
     }
 
     /**
@@ -227,7 +238,9 @@ public final class SemanticFactory {
         if (vn != null) {
             context.put(vn.getName(), vn);
         }
-        return SemanticFactory.createSemanticPeer(context);
+
+        return SemanticFactory.createSemanticPeer(
+                context, new SemanticPersistentOverlayBuilder());
     }
 
     /**
@@ -245,10 +258,12 @@ public final class SemanticFactory {
         if (gcma != null) {
             context.put("deployment-descriptor", gcma);
         }
-        return SemanticFactory.createSemanticPeer(context);
+        return SemanticFactory.createSemanticPeer(
+                context, new SemanticPersistentOverlayBuilder());
     }
 
-    private static SemanticPeer createSemanticPeer(Map<String, Object> context) {
+    private static SemanticPeer createSemanticPeer(Map<String, Object> context,
+                                                   StructuredOverlayBuilder builder) {
         try {
             Component peer =
                     (Component) factory.newComponent(
@@ -256,7 +271,7 @@ public final class SemanticFactory {
                             context);
             SemanticPeer stub =
                     (SemanticPeer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
-            stub.init(stub, null);
+            stub.init(stub, builder);
             GCM.getGCMLifeCycleController(peer).startFc();
             return stub;
         } catch (ADLException e) {

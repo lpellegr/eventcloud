@@ -19,6 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
@@ -44,10 +45,11 @@ public interface Peer extends Serializable {
      * @param stub
      *            the remote peer reference to set.
      * 
-     * @param overlay
-     *            the overlay instance to set to the peer.
+     * @param builder
+     *            the builder to use for creating the {@link StructuredOverlay}
+     *            embedded by the peer.
      */
-    public void init(Peer stub, StructuredOverlay overlay);
+    public boolean init(Peer stub, StructuredOverlayBuilder builder);
 
     /**
      * Returns the unique identifier associated to this peer.

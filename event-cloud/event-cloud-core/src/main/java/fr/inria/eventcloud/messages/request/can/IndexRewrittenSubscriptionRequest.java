@@ -30,7 +30,7 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
+import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.pubsub.Notification;
@@ -76,8 +76,8 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
         // writes the subscription into the cache and the local datastore
         super.onPeerValidatingKeyConstraints(overlay, quadruplePattern);
 
-        PersistentJenaTdbDatastore datastore =
-                (PersistentJenaTdbDatastore) overlay.getDatastore();
+        SynchronizedJenaDatasetGraph datastore =
+                (SynchronizedJenaDatasetGraph) overlay.getDatastore();
 
         Subscription subscription = super.subscription.getValue();
         Subsubscription firstSubsubscription =

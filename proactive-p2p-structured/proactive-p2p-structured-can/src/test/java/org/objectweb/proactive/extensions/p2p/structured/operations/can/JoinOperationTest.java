@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
@@ -128,7 +129,8 @@ public class JoinOperationTest {
 
     @Test
     public void testConcurrentJoin() {
-        final Peer landmarkPeer = PeerFactory.newActivePeer(new CanOverlay());
+        final Peer landmarkPeer =
+                PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanOverlay.class));
         try {
             landmarkPeer.create();
         } catch (StructuredP2PException e) {
@@ -139,7 +141,7 @@ public class JoinOperationTest {
 
         List<Peer> peers = new ArrayList<Peer>(nbPeersToJoin);
         for (int i = 0; i < nbPeersToJoin; i++) {
-            peers.add(PeerFactory.newActivePeer(new CanOverlay()));
+            peers.add(PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanOverlay.class)));
         }
 
         ExecutorService threadPool =

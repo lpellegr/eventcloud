@@ -37,7 +37,8 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * The proxy offers the possibility to reconstruct an Event from the binding
  * which has matched the subscription by a call to
  * {@link SubscribeProxy#reconstructEvent(Subscription, Binding)} or
- * {@link SubscribeProxy#reconstructEvent(Node)} and also by calling
+ * {@link SubscribeProxy#reconstructEvent(SubscriptionId, Node)} and also by
+ * calling
  * {@link SubscribeProxy#subscribe(String, fr.inria.eventcloud.api.listeners.EventNotificationListener)}
  * . The reconstruction is an heavy operation that may be used carefully.
  * Indeed, to reconstruct an {@link Event} from its identifier, a

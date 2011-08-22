@@ -21,6 +21,7 @@ import java.io.Serializable;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
@@ -41,16 +42,10 @@ public class TrackerTest implements Serializable {
     public void testAddOnNetworkWithWrongOverlayType() {
         Tracker tracker = TrackerFactory.newActiveTracker();
 
-        Peer peerWithMockOverlay = PeerFactory.newActivePeer(new MockOverlay());
+        Peer peerWithMockOverlay =
+                PeerFactory.newActivePeer(StructuredOverlayBuilder.build(MockOverlay.class));
         Peer peerWithAnonymousMockOverlay =
-                PeerFactory.newActivePeer(new MockOverlay() {
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public OverlayType getType() {
-                        return OverlayType.CAN;
-                    }
-                });
+                PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanMockOverlay.class));
 
         try {
             tracker.inject(peerWithMockOverlay);
@@ -62,7 +57,8 @@ public class TrackerTest implements Serializable {
 
     @Test
     public void testJoin() {
-        Peer peer = PeerFactory.newActivePeer(new MockOverlay());
+        Peer peer =
+                PeerFactory.newActivePeer(StructuredOverlayBuilder.build(MockOverlay.class));
 
         Tracker tracker1 = TrackerFactory.newActiveTracker();
         Tracker tracker2 = TrackerFactory.newActiveTracker();
@@ -78,21 +74,22 @@ public class TrackerTest implements Serializable {
         }
 
         Assert.assertEquals(
-                "After join, the trackers do not share the same peer references",
-                peer.toString(), tracker1.getRandomPeer().toString());
+                "After join, the trackers does not share the same peer references",
+                peer.getId(), tracker1.getRandomPeer().getId());
 
         Assert.assertEquals(
-                "After join, the trackers do not share the same peer references",
-                peer.toString(), tracker2.getRandomPeer().toString());
+                "After join, the trackers does not share the same peer references",
+                peer.getId(), tracker2.getRandomPeer().getId());
 
         Assert.assertEquals(
-                "After join, the trackers do not share the same peer references",
-                peer.toString(), tracker3.getRandomPeer().toString());
+                "After join, the trackers does not share the same peer references",
+                peer.getId(), tracker3.getRandomPeer().getId());
     }
 
     @Test
     public void testJoinWithComponents() {
-        Peer peer = PeerFactory.newComponentPeer(new MockOverlay());
+        Peer peer =
+                PeerFactory.newComponentPeer(StructuredOverlayBuilder.build(MockOverlay.class));
 
         Tracker tracker1 = TrackerFactory.newComponentTracker();
         Tracker tracker2 = TrackerFactory.newComponentTracker();
@@ -109,15 +106,15 @@ public class TrackerTest implements Serializable {
 
         Assert.assertEquals(
                 "After join, the trackers does not share the same peer references",
-                peer.toString(), tracker1.getRandomPeer().toString());
+                peer.getId(), tracker1.getRandomPeer().getId());
 
         Assert.assertEquals(
                 "After join, the trackers does not share the same peer references",
-                peer.toString(), tracker2.getRandomPeer().toString());
+                peer.getId(), tracker2.getRandomPeer().getId());
 
         Assert.assertEquals(
                 "After join, the trackers does not share the same peer references",
-                peer.toString(), tracker3.getRandomPeer().toString());
+                peer.getId(), tracker3.getRandomPeer().getId());
     }
 
     @Test
@@ -133,9 +130,7 @@ public class TrackerTest implements Serializable {
 
     }
 
-    private static class MockOverlay extends StructuredOverlay {
-
-        private static final long serialVersionUID = 1L;
+    public static class MockOverlay extends StructuredOverlay {
 
         /**
          * {@inheritDoc}
@@ -183,6 +178,18 @@ public class TrackerTest implements Serializable {
         @Override
         public String dump() {
             return this.toString();
+        }
+
+    }
+
+    public static final class CanMockOverlay extends MockOverlay {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public OverlayType getType() {
+            return OverlayType.CAN;
         }
 
     }

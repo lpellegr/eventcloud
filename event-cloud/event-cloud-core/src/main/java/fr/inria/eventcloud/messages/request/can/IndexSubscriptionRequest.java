@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
+import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 import fr.inria.eventcloud.pubsub.Subscription;
 
@@ -62,8 +62,8 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 .put(subscription.getId(), subscription);
 
         // writes the subscription into the datastore
-        PersistentJenaTdbDatastore datastore =
-                (PersistentJenaTdbDatastore) overlay.getDatastore();
+        SynchronizedJenaDatasetGraph datastore =
+                (SynchronizedJenaDatasetGraph) overlay.getDatastore();
         datastore.add(subscription.toQuadruples());
 
         log.debug(

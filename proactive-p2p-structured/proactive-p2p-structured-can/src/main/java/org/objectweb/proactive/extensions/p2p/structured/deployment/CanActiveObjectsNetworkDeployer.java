@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
+import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -31,11 +32,11 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 public final class CanActiveObjectsNetworkDeployer extends NetworkDeployer {
 
     public CanActiveObjectsNetworkDeployer() {
-        super(DeploymentMode.PRODUCTION);
+        super();
     }
 
-    public CanActiveObjectsNetworkDeployer(DeploymentMode mode) {
-        super(mode);
+    public CanActiveObjectsNetworkDeployer(DeploymentConfiguration configuration) {
+        super(configuration);
     }
 
     /**
@@ -44,7 +45,7 @@ public final class CanActiveObjectsNetworkDeployer extends NetworkDeployer {
     @Override
     protected Peer createPeer(NodeProvider nodeProvider) {
         // TODO use the node provider parameter
-        return PeerFactory.newActivePeer(new CanOverlay());
+        return PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanOverlay.class));
     }
 
     /**
