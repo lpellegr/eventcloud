@@ -36,7 +36,7 @@ public class UnicastLookupRequestTest extends
         JunitByClassParameterizedCanNetworkDeployer {
 
     public UnicastLookupRequestTest(NetworkDeployer deployer) {
-        super(deployer, 10);
+        super(deployer, 15);
     }
 
     @Test
