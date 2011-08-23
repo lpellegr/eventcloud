@@ -83,8 +83,9 @@ public class JunitEventCloudInfrastructureDeployer {
             return null;
         }
 
-        return ec.getTrackers().toArray(
-                new SemanticTracker[ec.getTrackers().size()])[ProActiveRandom.nextInt(0)];
+        int nbTrackers = ec.getTrackers().size();
+
+        return ec.getTrackers().toArray(new SemanticTracker[nbTrackers])[ProActiveRandom.nextInt(nbTrackers)];
     }
 
     public SemanticPeer getRandomSemanticPeer(EventCloudId id) {
