@@ -190,9 +190,9 @@ public final class PeerFactory {
 
             Peer stub =
                     (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
-            stub.init(stub, overlay);
 
             GCM.getGCMLifeCycleController(peer).startFc();
+            stub.init(stub, overlay);
 
             return stub;
         } catch (ADLException e) {

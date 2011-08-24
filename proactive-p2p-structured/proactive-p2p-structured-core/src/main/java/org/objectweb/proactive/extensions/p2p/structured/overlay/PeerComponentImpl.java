@@ -56,17 +56,6 @@ public class PeerComponentImpl extends PeerImpl implements Peer,
      */
     public void initComponentActivity(Body body) {
         super.initActivity(body);
-
-        // sets the peer stub to null because it has already
-        // been set by the call to super.init.Activity(body)
-        // and in that case any call to init(...) from a
-        // component peer will do nothing.
-        // super.overlay.stub = null;
-
-        // sets setOverlay as immediate service to be sure
-        // that the overlay field is set even if we execute
-        // an another method in immediate service on a component peer
-        body.setImmediateService("init", false);
     }
 
     /**
