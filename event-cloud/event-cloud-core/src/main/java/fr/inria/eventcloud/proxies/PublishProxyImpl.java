@@ -35,12 +35,6 @@ import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 /**
  * PublishProxyImpl is a concrete implementation of {@link PublishProxy}. This
  * class has to be instantiated as a ProActive/GCM component.
- * <p>
- * Currently the receive operation is handled sequentially because it is not set
- * as Immediate Service (IS). This means we don't have to synchronize the
- * datastructure that are used inside this method. However it would be nice to
- * evaluate/decide if it is interesting to put the receive operation as IS
- * (TODO).
  * 
  * @author lpellegr
  * @author bsauvan

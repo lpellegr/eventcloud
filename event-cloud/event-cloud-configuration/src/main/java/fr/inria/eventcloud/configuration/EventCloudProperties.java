@@ -85,6 +85,13 @@ public class EventCloudProperties {
                     "semantic.tracker.adl",
                     "fr.inria.eventcloud.tracker.SemanticTracker");
 
+    public static final PropertyString PUTGET_PROXY_ADL = new PropertyString(
+            "putget.proxy.adl", "fr.inria.eventcloud.proxies.PutGetProxy");
+
+    public static final PropertyString PUTGET_PROXY_SERVICES_ITF =
+            new PropertyString(
+                    "putget-proxy.services.itf", "putget-proxy-services");
+
     public static final PropertyString PUBLISH_PROXY_ADL = new PropertyString(
             "pub.proxy.adl", "fr.inria.eventcloud.proxies.PublishProxy");
 
