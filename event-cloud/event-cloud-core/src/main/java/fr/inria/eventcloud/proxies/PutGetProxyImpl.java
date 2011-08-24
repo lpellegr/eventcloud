@@ -18,9 +18,6 @@ package fr.inria.eventcloud.proxies;
 
 import java.io.InputStream;
 
-import org.objectweb.proactive.Body;
-import org.objectweb.proactive.core.component.body.ComponentInitActive;
-
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -41,21 +38,13 @@ import fr.inria.eventcloud.factories.ProxyFactory;
  * 
  * @see ProxyFactory
  */
-public class PutGetProxyImpl extends ProxyCache implements ComponentInitActive,
-        PutGetProxy {
+public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
 
     /**
      * Empty constructor required by ProActive.
      */
     public PutGetProxyImpl() {
         super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void initComponentActivity(Body body) {
-        body.setImmediateService("init", false);
     }
 
     /**
