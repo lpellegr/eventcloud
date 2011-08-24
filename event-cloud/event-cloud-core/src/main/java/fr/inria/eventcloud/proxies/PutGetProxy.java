@@ -16,18 +16,7 @@
  **/
 package fr.inria.eventcloud.proxies;
 
-import java.io.InputStream;
-
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PutGetApi;
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.responses.SparqlAskResponse;
-import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
-import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
-import fr.inria.eventcloud.api.responses.SparqlResponse;
-import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 
 /**
  * A PutGetProxy is a proxy that implements the {@link PutGetApi}. It has to be
@@ -35,131 +24,18 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
  * Event Cloud.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
-public class PutGetProxy extends ProxyCache implements Proxy, PutGetApi {
+public interface PutGetProxy extends Proxy, PutGetApi {
 
     /**
-     * Constructs a PutGetProxy by using the specified EventCloudProxy.
+     * The init method is a convenient method for components which is used to
+     * initialize the {@link EventCloudCache}. Once this method is called and
+     * the value is set, the next calls perform no action.
      * 
      * @param proxy
-     *            the EventCloudProxy that is used to retrieve an entry-point
-     *            into the Event-Cloud.
+     *            the event cloud proxy instance to set to the put/get proxy.
      */
-    public PutGetProxy(EventCloudCache proxy) {
-        super(proxy);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean add(Quadruple quad) {
-        return super.selectPeer().add(quad);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean add(Collection<Quadruple> quads) {
-        return super.selectPeer().add(quads);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean add(InputStream in, SerializationFormat format) {
-        read(in, format, new QuadrupleAction() {
-            @Override
-            public void performAction(Quadruple quad) {
-                add(new Quadruple(
-                        quad.getGraph(), quad.getSubject(),
-                        quad.getPredicate(), quad.getObject()));
-            }
-        });
-
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean contains(Quadruple quad) {
-        return super.selectPeer().contains(quad);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean delete(Quadruple quad) {
-        return super.selectPeer().delete(quad);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean delete(Collection<Quadruple> quads) {
-        return super.selectPeer().delete(quads);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
-        return super.selectPeer().find(quadPattern);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<Quadruple> find(QuadruplePattern quadPattern) {
-        return super.selectPeer().find(quadPattern);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SparqlResponse<?> executeSparqlQuery(String sparqlQuery) {
-        return super.selectPeer().executeSparqlQuery(sparqlQuery);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
-        return super.selectPeer().executeSparqlAsk(sparqlAskQuery);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery) {
-        return super.selectPeer().executeSparqlConstruct(sparqlConstructQuery);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
-        return super.selectPeer().executeSparqlSelect(sparqlSelectQuery);
-    }
+    public void init(EventCloudCache proxy);
 
 }

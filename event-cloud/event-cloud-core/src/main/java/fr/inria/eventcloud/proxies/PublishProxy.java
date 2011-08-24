@@ -26,6 +26,7 @@ import fr.inria.eventcloud.api.PublishApi;
  * @author bsauvan
  */
 public interface PublishProxy extends Proxy, PublishApi {
+
     /**
      * The init method is a convenient method for components which is used to
      * initialize the {@link EventCloudCache}. Once this method is called and
@@ -35,4 +36,5 @@ public interface PublishProxy extends Proxy, PublishApi {
      *            the event cloud proxy instance to set to the publish proxy.
      */
     public void init(EventCloudCache proxy);
+
 }

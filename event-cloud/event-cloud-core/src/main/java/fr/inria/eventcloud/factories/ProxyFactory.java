@@ -53,6 +53,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * trackers are supposed to stay the same over the time.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public final class ProxyFactory implements Serializable {
 
@@ -147,7 +148,25 @@ public final class ProxyFactory implements Serializable {
      * @return a new {@link PutGetProxy}.
      */
     public PutGetProxy createPutGetProxy() {
-        return new PutGetProxy(this.eventCloudProxy);
+        try {
+            Component putgetProxy =
+                    (Component) factory.newComponent(
+                            EventCloudProperties.PUTGET_PROXY_ADL.getValue(),
+                            new HashMap<String, Object>());
+            PutGetProxy stub =
+                    (PutGetProxy) putgetProxy.getFcInterface(EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
+            stub.init(this.eventCloudProxy);
+            GCM.getGCMLifeCycleController(putgetProxy).startFc();
+            return stub;
+        } catch (ADLException e) {
+            e.printStackTrace();
+        } catch (NoSuchInterfaceException e) {
+            e.printStackTrace();
+        } catch (IllegalLifeCycleException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**
