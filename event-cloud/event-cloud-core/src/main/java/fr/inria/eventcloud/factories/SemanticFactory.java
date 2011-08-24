@@ -271,8 +271,8 @@ public final class SemanticFactory {
                             context);
             SemanticPeer stub =
                     (SemanticPeer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
-            stub.init(stub, builder);
             GCM.getGCMLifeCycleController(peer).startFc();
+            stub.init(stub, builder);
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();
