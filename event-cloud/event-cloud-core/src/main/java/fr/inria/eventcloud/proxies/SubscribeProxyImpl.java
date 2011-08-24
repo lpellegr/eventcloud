@@ -20,10 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +65,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends ProxyCache implements
-        ComponentInitActive, SubscribeProxy {
+public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
 
     private static final long serialVersionUID = 1L;
 
@@ -107,13 +104,6 @@ public class SubscribeProxyImpl extends ProxyCache implements
      */
     public SubscribeProxyImpl() {
         super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void initComponentActivity(Body body) {
-        body.setImmediateService("init", false);
     }
 
     /**

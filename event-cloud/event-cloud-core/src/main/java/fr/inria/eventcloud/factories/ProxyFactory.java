@@ -101,8 +101,8 @@ public final class ProxyFactory implements Serializable {
                             new HashMap<String, Object>());
             PublishProxy stub =
                     (PublishProxy) pubProxy.getFcInterface(EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
-            stub.init(this.eventCloudProxy);
             GCM.getGCMLifeCycleController(pubProxy).startFc();
+            stub.init(this.eventCloudProxy);
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();
@@ -128,8 +128,8 @@ public final class ProxyFactory implements Serializable {
                             new HashMap<String, Object>());
             SubscribeProxy stub =
                     (SubscribeProxy) subProxy.getFcInterface(EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
-            stub.init(this.eventCloudProxy, properties);
             GCM.getGCMLifeCycleController(subProxy).startFc();
+            stub.init(this.eventCloudProxy, properties);
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();
@@ -155,8 +155,8 @@ public final class ProxyFactory implements Serializable {
                             new HashMap<String, Object>());
             PutGetProxy stub =
                     (PutGetProxy) putgetProxy.getFcInterface(EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
-            stub.init(this.eventCloudProxy);
             GCM.getGCMLifeCycleController(putgetProxy).startFc();
+            stub.init(this.eventCloudProxy);
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();

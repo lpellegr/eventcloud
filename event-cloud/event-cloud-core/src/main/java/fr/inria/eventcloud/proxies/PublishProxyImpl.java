@@ -18,8 +18,6 @@ package fr.inria.eventcloud.proxies;
 
 import java.io.InputStream;
 
-import org.objectweb.proactive.Body;
-import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 
 import com.hp.hpl.jena.graph.Node;
@@ -41,20 +39,12 @@ import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
  * 
  * @see ProxyFactory
  */
-public class PublishProxyImpl extends ProxyCache implements
-        ComponentInitActive, PublishProxy {
+public class PublishProxyImpl extends ProxyCache implements PublishProxy {
 
     /**
      * Empty constructor required by ProActive.
      */
     public PublishProxyImpl() {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void initComponentActivity(Body body) {
-        body.setImmediateService("init", false);
     }
 
     /**
