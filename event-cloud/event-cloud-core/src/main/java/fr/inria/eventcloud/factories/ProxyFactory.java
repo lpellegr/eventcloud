@@ -93,7 +93,25 @@ public final class ProxyFactory implements Serializable {
      * @return a new {@link PublishProxy}.
      */
     public PublishProxy createPublishProxy() {
-        return new PublishProxy(this.eventCloudProxy);
+        try {
+            Component pubProxy =
+                    (Component) factory.newComponent(
+                            EventCloudProperties.PUBLISH_PROXY_ADL.getValue(),
+                            new HashMap<String, Object>());
+            PublishProxy stub =
+                    (PublishProxy) pubProxy.getFcInterface(EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
+            stub.init(this.eventCloudProxy);
+            GCM.getGCMLifeCycleController(pubProxy).startFc();
+            return stub;
+        } catch (ADLException e) {
+            e.printStackTrace();
+        } catch (NoSuchInterfaceException e) {
+            e.printStackTrace();
+        } catch (IllegalLifeCycleException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**
@@ -103,14 +121,14 @@ public final class ProxyFactory implements Serializable {
      */
     public SubscribeProxy createSubscribeProxy(AlterableElaProperty... properties) {
         try {
-            Component pubSubProxy =
+            Component subProxy =
                     (Component) factory.newComponent(
                             EventCloudProperties.SUBSCRIBE_PROXY_ADL.getValue(),
                             new HashMap<String, Object>());
             SubscribeProxy stub =
-                    (SubscribeProxy) pubSubProxy.getFcInterface(EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
+                    (SubscribeProxy) subProxy.getFcInterface(EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
             stub.init(this.eventCloudProxy, properties);
-            GCM.getGCMLifeCycleController(pubSubProxy).startFc();
+            GCM.getGCMLifeCycleController(subProxy).startFc();
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();

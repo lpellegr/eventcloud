@@ -71,8 +71,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * the value is set, the next calls perform no action.
      * 
      * @param proxy
-     *            the event cloud proxy instance to set to the publish subscribe
-     *            proxy.
+     *            the event cloud proxy instance to set to the subscribe proxy.
      * 
      * @param properties
      *            a set of {@link AlterableElaProperty} properties to use for

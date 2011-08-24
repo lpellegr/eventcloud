@@ -16,95 +16,23 @@
  **/
 package fr.inria.eventcloud.proxies;
 
-import java.io.InputStream;
-
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
-
-import com.hp.hpl.jena.graph.Node;
-
-import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.PublishApi;
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
-import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 
 /**
  * A PublishProxy is a proxy that implements the {@link PublishApi}. It has to
  * be used by a user who wants to execute publish operations on an Event Cloud.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
-public class PublishProxy extends ProxyCache implements Proxy, PublishApi {
-
+public interface PublishProxy extends Proxy, PublishApi {
     /**
-     * Constructs a PublishProxy by using the specified EventCloudProxy.
+     * The init method is a convenient method for components which is used to
+     * initialize the {@link EventCloudCache}. Once this method is called and
+     * the value is set, the next calls perform no action.
      * 
      * @param proxy
-     *            the EventCloudProxy that is used to retrieve an entry-point
-     *            into the Event-Cloud.
+     *            the event cloud proxy instance to set to the publish proxy.
      */
-    public PublishProxy(EventCloudCache proxy) {
-        super(proxy);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Quadruple quad) {
-        // TODO: use an asynchronous call with no response (see issue 16)
-        try {
-            super.proxy.selectTracker().getRandomPeer().send(
-                    new PublishQuadrupleRequest(quad));
-        } catch (DispatchException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Event event) {
-        // publish a quadruples that indicates what is the number of quadruples
-        // contained by the event
-        this.publish(new Quadruple(
-                event.getGraph(), event.getGraph(),
-                PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                Node.createLiteral(Integer.toString(event.getQuadruples()
-                        .size() + 1))));
-
-        // TODO try to improve the publication of several quadruples
-        // first insight: use a thread-pool
-        for (Quadruple quad : event.getQuadruples()) {
-            this.publish(quad);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Collection<Event> events) {
-        // TODO use a thread-pool
-        for (Event event : events) {
-            this.publish(event);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(InputStream in, SerializationFormat format) {
-        read(in, format, new QuadrupleAction() {
-            @Override
-            public void performAction(Quadruple quad) {
-                publish(quad);
-            }
-        });
-    }
-
+    public void init(EventCloudCache proxy);
 }
