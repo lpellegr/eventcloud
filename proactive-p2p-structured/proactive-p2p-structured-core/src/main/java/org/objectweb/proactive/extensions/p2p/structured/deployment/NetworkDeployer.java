@@ -155,8 +155,8 @@ public abstract class NetworkDeployer extends
         ExecutorService threadsPool =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
         final CountDownLatch doneSignal = new CountDownLatch(nbPeers);
-
-        for (int i = 0; i < nbPeers; i++) {
+        
+        for (int i = 1; i < nbPeers; i++) {
             threadsPool.execute(new Runnable() {
                 public void run() {
                     try {

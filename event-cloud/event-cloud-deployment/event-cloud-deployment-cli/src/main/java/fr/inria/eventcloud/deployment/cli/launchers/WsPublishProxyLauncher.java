@@ -16,34 +16,30 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import fr.inria.eventcloud.deployment.cli.commands.SubscribeCommand;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.proxies.PublishProxy;
 
 /**
- * This launcher is used to have the possibility to execute subscribe operations
- * from the interactive command-line by delegating the commands to a
- * {@link SubscribeProxy}.
+ * This launcher is used to deploy a {@link PublishProxy} as a WebService.
  * 
  * @author lpellegr
  */
-public class SubscribeProxyLauncher extends ProxyLauncher<SubscribeProxy> {
+public final class WsPublishProxyLauncher extends WsProxyLauncher<PublishProxy> {
 
-    @SuppressWarnings("unchecked")
-    public SubscribeProxyLauncher(String[] args) {
-        super(args, new SubscribeCommand());
+    public WsPublishProxyLauncher(String[] args) {
+        super(args);
+    }
+
+    public static void main(String[] args) {
+        new WsPublishProxyLauncher(args).run();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SubscribeProxy createProxy(ProxyFactory factory) {
-        return factory.createSubscribeProxy();
-    }
-
-    public static void main(String[] args) {
-        new SubscribeProxyLauncher(args).run();
+    public PublishProxy createProxy(ProxyFactory factory) {
+        return factory.createPublishProxy();
     }
 
 }
