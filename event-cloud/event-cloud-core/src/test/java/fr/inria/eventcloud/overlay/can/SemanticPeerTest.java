@@ -318,9 +318,13 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                         response.getInboundHopCount(),
                         response.getOutboundHopCount()});
 
-        Assert.assertTrue(response.getLatency() > 0);
-        Assert.assertTrue(response.getQueryDatastoreTime() > 0);
+        Assert.assertTrue(
+                "Latency is not greater than 0", response.getLatency() > 0);
+        Assert.assertTrue(
+                "The time to query the datastore is not greater than 0",
+                response.getQueryDatastoreTime() > 0);
         Assert.assertEquals(
+                "The number of inbound hop count is not equals to the number of outbound hop count",
                 response.getInboundHopCount(), response.getOutboundHopCount());
     }
 
