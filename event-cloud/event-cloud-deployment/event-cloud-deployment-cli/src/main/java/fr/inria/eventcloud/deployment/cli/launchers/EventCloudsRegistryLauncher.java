@@ -16,64 +16,39 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.core.ProActiveException;
 
-import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.deployment.cli.CommandLineReader;
-import fr.inria.eventcloud.deployment.cli.commands.CreateEventCloudCommand;
-import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
 
 /**
- * This launcher is used to create a new {@link EventCloudsRegistry}. Then, from
- * this instance it is possible, thanks to an interactive command-line reader,
- * to execute some operation (e.g. to create an {@link EventCloud}, to list the
- * {@link EventCloud}s managed by the registry, etc).
+ * This launcher is used to deploy a new {@link EventCloudsRegistry}. Before to
+ * return, the Java application print on the standard output the URL indicating
+ * where the registry is binded.
  * 
  * @author lpellegr
  */
 public final class EventCloudsRegistryLauncher {
 
     private EventCloudsRegistryLauncher() {
-
+        super();
     }
 
     public static void main(String[] args) {
+        new EventCloudsRegistryLauncher().run();
+    }
 
-        EventCloudsRegistry registry = null;
+    private void run() {
+        EventCloudsRegistry registry =
+                EventCloudsRegistryFactory.newEventCloudsRegistry();
 
-        if (args.length == 1) {
-            // retrieves the event clouds registry from the URL specified
-            try {
-                registry =
-                        PAActiveObject.lookupActive(
-                                EventCloudsRegistry.class, args[0]);
-            } catch (ActiveObjectCreationException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            registry = EventCloudsRegistryFactory.newEventCloudsRegistry();
+        try {
+            System.out.println(PAActiveObject.registerByName(
+                    registry, "eventclouds-registry"));
+        } catch (ProActiveException e) {
+            e.printStackTrace();
         }
-
-        System.out.println("EventCloudsRegistry running at:");
-        System.out.println(PAActiveObject.getUrl(registry));
-        System.out.println();
-
-        System.out.println("Type 'help' to know what are the possible actions");
-
-        @SuppressWarnings("unchecked")
-        CommandLineReader<EventCloudsRegistry> reader =
-                new CommandLineReader<EventCloudsRegistry>(Arrays.asList(
-                        new CreateEventCloudCommand(),
-                        new ListEventCloudsCommand()), registry);
-        reader.run();
     }
 
 }

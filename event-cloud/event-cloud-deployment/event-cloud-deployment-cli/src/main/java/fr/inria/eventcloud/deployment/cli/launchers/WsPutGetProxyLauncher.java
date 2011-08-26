@@ -17,32 +17,29 @@
 package fr.inria.eventcloud.deployment.cli.launchers;
 
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.PutGetProxy;
 
 /**
- * This launcher is used to have the possibility to execute publish operations
- * from the interactive command-line by delegating the commands to a
- * {@link PublishProxy}.
+ * This launcher is used to deploy a {@link PutGetProxy} as a WebService.
  * 
  * @author lpellegr
  */
-public class PublishProxyLauncher extends ProxyLauncher<PublishProxy> {
+public final class WsPutGetProxyLauncher extends WsProxyLauncher<PutGetProxy> {
 
-    @SuppressWarnings("unchecked")
-    public PublishProxyLauncher(String[] args) {
+    public WsPutGetProxyLauncher(String[] args) {
         super(args);
+    }
+
+    public static void main(String[] args) {
+        new WsPutGetProxyLauncher(args).run();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public PublishProxy createProxy(ProxyFactory factory) {
-        return factory.createPublishProxy();
-    }
-
-    public static void main(String[] args) {
-        new PublishProxyLauncher(args).run();
+    public PutGetProxy createProxy(ProxyFactory factory) {
+        return factory.createPutGetProxy();
     }
 
 }

@@ -130,6 +130,7 @@ public class SubscribeProxyTest {
         publishThread.start();
 
         while (!EVENTS_RECEIVED_FILE.exists()) {
+            log.info("Waiting for the reception of event");
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {

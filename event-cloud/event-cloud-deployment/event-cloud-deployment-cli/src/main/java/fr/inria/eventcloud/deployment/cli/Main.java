@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -28,8 +29,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 /**
- * Main class that is executed to list the launchers that available when
- * executing the JAR associated to this module.
+ * Main class that is executed to list the launchers and readers that available
+ * when the JAR associated to this module is executed.
  * 
  * @author lpellegr
  */
@@ -39,6 +40,17 @@ public class Main {
         System.out.println("Available launchers are:");
         try {
             for (Class<?> clazz : getClasses("fr.inria.eventcloud.deployment.cli.launchers")) {
+                System.out.println("  - " + clazz.getCanonicalName());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println();
+
+        System.out.println("Available readers are:");
+        try {
+            for (Class<?> clazz : getClasses("fr.inria.eventcloud.deployment.cli.readers")) {
                 System.out.println("  - " + clazz.getCanonicalName());
             }
         } catch (Exception e) {
@@ -99,7 +111,10 @@ public class Main {
                     String name =
                             packageName + '.' + stripFilenameExtension(file);
                     Class<?> clazz = Class.forName(name);
-                    classes.add(clazz);
+                    if (!Modifier.isAbstract(clazz.getModifiers())
+                            && !Modifier.isInterface(clazz.getModifiers())) {
+                        classes.add(clazz);
+                    }
                 }
             }
         }
@@ -118,8 +133,14 @@ public class Main {
                 String className = jarEntry.getName();
                 if (className.endsWith(".class")) {
                     className = stripFilenameExtension(className);
-                    if (className.startsWith(packageName))
-                        classes.add(Class.forName(className.replace('/', '.')));
+                    if (className.startsWith(packageName)) {
+                        Class<?> clazz =
+                                Class.forName(className.replace('/', '.'));
+                        if (!Modifier.isAbstract(clazz.getModifiers())
+                                && !Modifier.isInterface(clazz.getModifiers())) {
+                            classes.add(clazz);
+                        }
+                    }
                 }
             }
         } while (jarEntry != null);

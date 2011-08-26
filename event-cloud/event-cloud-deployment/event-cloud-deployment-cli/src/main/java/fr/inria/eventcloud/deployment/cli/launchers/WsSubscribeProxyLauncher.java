@@ -17,32 +17,30 @@
 package fr.inria.eventcloud.deployment.cli.launchers;
 
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.PutGetProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
- * This launcher is used to have the possibility to execute put/get operations
- * from the interactive command-line by delegating the commands to a
- * {@link PutGetProxy}.
+ * This launcher is used to deploy a {@link SubscribeProxy} as a WebService.
  * 
  * @author lpellegr
  */
-public class PutGetProxyLauncher extends ProxyLauncher<PutGetProxy> {
+public final class WsSubscribeProxyLauncher extends
+        WsProxyLauncher<SubscribeProxy> {
 
-    @SuppressWarnings("unchecked")
-    public PutGetProxyLauncher(String[] args) {
+    public WsSubscribeProxyLauncher(String[] args) {
         super(args);
+    }
+
+    public static void main(String[] args) {
+        new WsSubscribeProxyLauncher(args).run();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public PutGetProxy createProxy(ProxyFactory factory) {
-        return factory.createPutGetProxy();
-    }
-
-    public static void main(String[] args) {
-        new PutGetProxyLauncher(args).run();
+    public SubscribeProxy createProxy(ProxyFactory factory) {
+        return factory.createSubscribeProxy();
     }
 
 }
