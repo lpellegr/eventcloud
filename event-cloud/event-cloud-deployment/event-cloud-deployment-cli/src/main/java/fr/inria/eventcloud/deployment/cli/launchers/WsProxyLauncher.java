@@ -16,35 +16,29 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import java.util.Arrays;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.deployment.cli.CommandLineReader;
-import fr.inria.eventcloud.deployment.cli.commands.Command;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.Proxy;
 
 /**
+ * This class is used to provide the operations which are common to all the
+ * proxies that have to be deployed as a WebService.
  * 
  * @author lpellegr
  */
-public abstract class ProxyLauncher<T extends Proxy> {
+public abstract class WsProxyLauncher<T extends Proxy> {
 
-    @Parameter(names = {"-registry"}, description = "The EventCloudsRegistry URL to use", required = true)
+    @Parameter(names = {"-registry"}, description = "An eventclouds registry URL to use", required = true)
     private String registryUrl;
 
-    @Parameter(names = {"-id"}, description = "The Event Cloud Id that identify the event cloud to work on", required = true)
+    @Parameter(names = {"-id"}, description = "An eventcloud identifier to link the proxy with", required = true)
     private long eventCloudId;
 
-    private Command<T>[] commands;
-
-    public ProxyLauncher(String[] args, Command<T>... commands) {
-        this.commands = commands;
-
+    protected WsProxyLauncher(String[] args) {
         JCommander jCommander = new JCommander(this);
         jCommander.setProgramName(this.getClass().getCanonicalName());
 
@@ -63,10 +57,13 @@ public abstract class ProxyLauncher<T extends Proxy> {
                 ProxyFactory.getInstance(this.registryUrl, new EventCloudId(
                         this.eventCloudId));
 
-        CommandLineReader<T> reader =
-                new CommandLineReader<T>(
-                        Arrays.asList(this.commands), createProxy(factory));
-        reader.run();
+        Proxy proxy = this.createProxy(factory);
+
+        // TODO expose proxy as webservice
+
+        System.out.println(proxy.getClass().getName()
+                + " deployed and running at:");
+        System.out.println("ws address");
     }
 
 }

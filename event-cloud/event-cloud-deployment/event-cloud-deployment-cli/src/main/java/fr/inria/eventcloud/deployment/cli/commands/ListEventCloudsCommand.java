@@ -29,8 +29,9 @@ import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 public class ListEventCloudsCommand extends Command<EventCloudsRegistry> {
 
     public ListEventCloudsCommand() {
-        super("list-event-clouds",
-                "List the Event Clouds maintained by the EventCloudsRegistry",
+        super(
+                "list-event-clouds",
+                "Lists the event clouds maintained by the eventclouds registry",
                 new String[] {"list"});
     }
 
@@ -41,7 +42,7 @@ public class ListEventCloudsCommand extends Command<EventCloudsRegistry> {
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
         for (EventCloudId id : registry.listEventClouds()) {
-            System.out.println("- [" + id + "]");
+            System.out.println("  * " + id);
         }
     }
 

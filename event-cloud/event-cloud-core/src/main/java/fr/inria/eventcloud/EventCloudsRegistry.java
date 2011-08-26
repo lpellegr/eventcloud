@@ -55,7 +55,12 @@ public class EventCloudsRegistry {
      *            the EventCloud to register into the registry.
      */
     public void register(EventCloud eventCloud) {
-        this.eventClouds.put(eventCloud.getId(), eventCloud.getTrackers());
+        if (this.eventClouds.containsKey(eventCloud.getId())) {
+            throw new IllegalArgumentException("Event with id '"
+                    + eventCloud.getId() + "' already registered");
+        } else {
+            this.eventClouds.put(eventCloud.getId(), eventCloud.getTrackers());
+        }
     }
 
     /**

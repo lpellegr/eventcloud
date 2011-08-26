@@ -42,7 +42,7 @@ public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
 
     public CreateEventCloudCommand() {
         super("create-event-cloud",
-                "Creates a new Event Cloud and returns the binding URL",
+                "Creates a new event cloud and returns the binding URL",
                 new String[] {"create"});
     }
 

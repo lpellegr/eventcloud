@@ -16,10 +16,12 @@
  **/
 package fr.inria.eventcloud;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
@@ -151,10 +153,23 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * Registers the properties to the {@link EventCloudsRegistry}.
      */
     private void register() {
-        log.info("Registering Event-Cloud {}", this.id);
 
-        // TODO implement the registration into the EventCloudRegistry
-        // and check if the registration has already be done
+        EventCloudsRegistry registry = null;
+        try {
+            registry =
+                    PAActiveObject.lookupActive(
+                            EventCloudsRegistry.class, this.registryUrl);
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        registry.register(this);
+
+        log.info(
+                "Eventcloud '{}' registered into registry '{}'", this.id,
+                this.registryUrl);
     }
 
     /**

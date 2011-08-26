@@ -63,7 +63,6 @@ public class JunitEventCloudInfrastructureDeployer {
                         new TestingDeploymentConfiguration(),
                         new Collection<UnalterableElaProperty>(), nbTrackers,
                         nbPeers);
-        this.eventCloudsRegistry.register(ec);
         this.eventClouds.put(ec.getId(), ec);
         return ec.getId();
     }
