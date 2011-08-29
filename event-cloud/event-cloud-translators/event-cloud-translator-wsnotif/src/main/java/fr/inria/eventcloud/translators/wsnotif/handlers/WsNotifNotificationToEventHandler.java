@@ -134,7 +134,7 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
             XSDDatatype datatype =
                     this.elementDatatypes.get(this.elements.getLast().localName);
             if (datatype != null) {
-                object = Node.createLiteral(textNode, null, datatype);
+                object = Node.createLiteral(textNode, datatype);
             }
         }
 
