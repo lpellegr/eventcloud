@@ -55,8 +55,8 @@
 			has to be released in Maven Central (it takes around 2 hours to be synchronized) 
 			and this staging repository has to be removed -->
 		<repository>
-			<id>staging-orgobjectwebproactive-247</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-250</url>
+			<id>staging-orgobjectwebproactive-208</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-208</url>
 		</repository>
 	</repositories>
 
