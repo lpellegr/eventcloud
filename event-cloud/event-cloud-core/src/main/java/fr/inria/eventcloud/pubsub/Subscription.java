@@ -344,24 +344,20 @@ public class Subscription implements Rdfable, Serializable {
         // http://code.google.com/p/event-cloud/wiki/PublishSubscribeRdfFormat
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI, SUBSCRIPTION_ID_NODE,
-                Node.createLiteral(
-                        this.id.toString(), null, XSDDatatype.XSDlong)));
+                Node.createLiteral(this.id.toString(), XSDDatatype.XSDlong)));
 
         if (this.parentId != null) {
             quads.add(new Quadruple(
-                    SUBSCRIPTION_NS_NODE,
-                    subscriptionURI,
-                    SUBSCRIPTION_PARENT_ID_NODE,
-                    Node.createLiteral(
-                            this.parentId.toString(), null, XSDDatatype.XSDlong)));
+                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    SUBSCRIPTION_PARENT_ID_NODE, Node.createLiteral(
+                            this.parentId.toString(), XSDDatatype.XSDlong)));
         }
 
         if (this.originalId != null) {
             quads.add(new Quadruple(
                     SUBSCRIPTION_NS_NODE, subscriptionURI,
                     SUBSCRIPTION_ORIGINAL_ID_NODE, Node.createLiteral(
-                            this.originalId.toString(), null,
-                            XSDDatatype.XSDlong)));
+                            this.originalId.toString(), XSDDatatype.XSDlong)));
         }
 
         quads.add(new Quadruple(
@@ -374,7 +370,7 @@ public class Subscription implements Rdfable, Serializable {
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_CREATION_DATETIME_NODE, Node.createLiteral(
-                        DatatypeConverter.printDateTime(calendar), null,
+                        DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime)));
 
         quads.add(new Quadruple(
@@ -399,7 +395,7 @@ public class Subscription implements Rdfable, Serializable {
             quads.add(new Quadruple(
                     SUBSCRIPTION_NS_NODE, subscriptionURI,
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE, Node.createLiteral(
-                            ssubscription.getId().toString(), null,
+                            ssubscription.getId().toString(),
                             XSDDatatype.XSDlong)));
             quads.addAll(ssubscription.toQuadruples());
         }

@@ -104,8 +104,7 @@ public class SubscribeProxyTest {
                                 eventId,
                                 eventId,
                                 PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                                Node.createLiteral(
-                                        "9", null, XSDDatatype.XSDint));
+                                Node.createLiteral("9", XSDDatatype.XSDint));
 
                 publishProxy.publish(quadToPublish);
 

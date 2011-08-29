@@ -122,12 +122,12 @@ public class Subsubscription implements Rdfable, Serializable {
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subSubscriptionURI,
                 SUBSUBSCRIPTION_ID_NODE, Node.createLiteral(
-                        this.id.toString(), null, XSDDatatype.XSDlong)));
+                        this.id.toString(), XSDDatatype.XSDlong)));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subSubscriptionURI,
                 SUBSUBSCRIPTION_INDEX_NODE, Node.createLiteral(
-                        Integer.toString(this.index), null, XSDDatatype.XSDint)));
+                        Integer.toString(this.index), XSDDatatype.XSDint)));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE,
@@ -241,7 +241,7 @@ public class Subsubscription implements Rdfable, Serializable {
     private static final Node replaceVarNodeByVariableTypedLiteral(Node node) {
         if (node.isVariable()) {
             return Node.createLiteral(
-                    node.getName(), null, VariableDatatype.getInstance());
+                    node.getName(), VariableDatatype.getInstance());
         }
 
         return node;

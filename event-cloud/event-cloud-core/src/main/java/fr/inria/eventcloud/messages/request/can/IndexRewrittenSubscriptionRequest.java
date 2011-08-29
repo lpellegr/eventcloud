@@ -133,7 +133,7 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
                                 quadMatching,
                                 PublishSubscribeUtils.createSubscriptionIdUrl(subscription.getParentId()),
                                 Node.createLiteral(subscription.getId()
-                                        .toString(), null, XSDDatatype.XSDlong));
+                                        .toString(), XSDDatatype.XSDlong));
 
                 datastore.add(metaQuad);
 
