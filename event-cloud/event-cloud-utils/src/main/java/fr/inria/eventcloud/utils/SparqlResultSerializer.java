@@ -30,14 +30,14 @@ import java.util.zip.GZIPOutputStream;
 import org.openjena.riot.out.NodeFmtLib;
 import org.openjena.riot.tokens.TokenizerFactory;
 
+import com.hp.hpl.jena.query.BIOInput;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
-import com.hp.hpl.jena.sparql.resultset.TSVOutput;
 
 import fr.inria.eventcloud.protobuf.SparqlResultsProtos;
 import fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding.Builder;
@@ -188,7 +188,7 @@ public final class SparqlResultSerializer {
             }
         }
 
-        new TSVOutput().format(out, resultSet);
+        ResultSetFormatter.outputAsBIO(out, resultSet);
 
         if (gzipped) {
             try {
@@ -377,7 +377,7 @@ public final class SparqlResultSerializer {
             }
         }
 
-        ResultSet resultSet = ResultSetFactory.fromTSV(in);
+        ResultSet resultSet = BIOInput.fromBIO(in);
 
         return resultSet;
     }
