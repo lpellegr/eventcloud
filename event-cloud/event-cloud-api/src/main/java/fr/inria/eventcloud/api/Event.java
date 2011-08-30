@@ -38,7 +38,7 @@ import com.hp.hpl.jena.graph.Triple;
  * 
  * @author lpellegr
  */
-public final class Event implements Iterable<Quadruple>, Serializable {
+public class Event implements Iterable<Quadruple>, Serializable {
 
     private static final long serialVersionUID = 1L;
 

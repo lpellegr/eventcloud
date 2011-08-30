@@ -18,12 +18,19 @@ package fr.inria.eventcloud.api;
 
 import java.io.Serializable;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Node_Literal;
+
 /**
- * Uniquely identify a subscription that has been submitted on an Event-Cloud.
+ * Uniquely identify a subscription or a subsubscription that has been submitted
+ * on an eventcloud.
+ * 
+ * // the id of the current subscription
  * 
  * @author lpellegr
  */
-public final class SubscriptionId implements Serializable {
+public class SubscriptionId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,6 +38,16 @@ public final class SubscriptionId implements Serializable {
 
     public SubscriptionId(long value) {
         this.value = value;
+    }
+
+    /**
+     * Returns the current subscription id as a Jena {@link Node_Literal}.
+     * 
+     * @return the current subscription id as a Jena {@link Node_Literal}.
+     */
+    public Node asJenaNode() {
+        return Node.createLiteral(
+                Long.toString(this.value), XSDDatatype.XSDlong);
     }
 
     /**
