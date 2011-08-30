@@ -16,9 +16,6 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
@@ -48,9 +46,7 @@ public class SubscribeProxyTest {
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxyTest.class);
 
-    private static final File EVENTS_RECEIVED_FILE = new File(
-            System.getProperty("java.io.tmpdir"),
-            "subscribe-proxy-test-event-received.tmp");
+    private static Collection<Event> events = new Collection<Event>();
 
     /**
      * Test the subscription with an {@link EventNotificationListener} by
@@ -128,16 +124,15 @@ public class SubscribeProxyTest {
         });
         publishThread.start();
 
-        while (!EVENTS_RECEIVED_FILE.exists()) {
-            log.info("Waiting for the reception of event");
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        synchronized (events) {
+            while (events.size() == 0) {
+                try {
+                    events.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
-
-        EVENTS_RECEIVED_FILE.delete();
 
         deployer.destroyEventCloud(ecId);
     }
@@ -149,10 +144,9 @@ public class SubscribeProxyTest {
 
         @Override
         public void onNotification(SubscriptionId id, Event solution) {
-            try {
-                EVENTS_RECEIVED_FILE.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+            synchronized (events) {
+                events.add(solution);
+                events.notify();
             }
             log.info("New event received: {}", solution);
         }
