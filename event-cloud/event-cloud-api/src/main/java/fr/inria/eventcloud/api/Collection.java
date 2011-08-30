@@ -35,8 +35,7 @@ import java.util.Iterator;
  *            the type of the elements that are iterated. A element of type T
  *            must be serializable.
  */
-public final class Collection<T> implements java.util.Collection<T>,
-        Serializable {
+public class Collection<T> implements java.util.Collection<T>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
