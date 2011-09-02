@@ -366,18 +366,20 @@ public class Quadruple implements Serializable {
             this.nodes[i] = tokenizer.next().asNode();
         }
 
-        String uri = this.nodes[0].getURI();
-        int timestampSeparatorIndex = uri.lastIndexOf(TIMESTAMP_SEPARATOR);
+        if (this.nodes[0].isURI()) {
+            String uri = this.nodes[0].getURI();
+            int timestampSeparatorIndex = uri.lastIndexOf(TIMESTAMP_SEPARATOR);
 
-        // extracts the timestamp associated to the quadruple
-        if (timestampSeparatorIndex != -1) {
-            this.timestamp =
-                    Long.parseLong(uri.substring(timestampSeparatorIndex
-                            + TIMESTAMP_SEPARATOR.length(), uri.length()));
+            // extracts the timestamp associated to the quadruple
+            if (timestampSeparatorIndex != -1) {
+                this.timestamp =
+                        Long.parseLong(uri.substring(timestampSeparatorIndex
+                                + TIMESTAMP_SEPARATOR.length(), uri.length()));
 
-            this.timestampedGraphNode = this.nodes[0];
-            this.nodes[0] =
-                    Node.createURI(uri.substring(0, timestampSeparatorIndex));
+                this.timestampedGraphNode = this.nodes[0];
+                this.nodes[0] =
+                        Node.createURI(uri.substring(0, timestampSeparatorIndex));
+            }
         }
     }
 
