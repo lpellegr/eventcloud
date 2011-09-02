@@ -43,7 +43,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.core.util.ProActiveRandom;
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanActiveObjectsNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
@@ -54,6 +53,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
  * This class is used to draw a canvas that shows a Content-Addressable Network
@@ -170,7 +170,7 @@ public class Can2dVisualizer extends JFrame {
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         if (mode == Mode.JOIN) {
                             Peer newPeer =
-                                    PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanOverlay.class));
+                                    PeerFactory.newActivePeer(SerializableProvider.create(CanOverlay.class));
                             try {
                                 newPeer.join(entry.getStub());
                             } catch (NetworkAlreadyJoinedException ex) {

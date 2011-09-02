@@ -23,7 +23,6 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.EndActive;
 import org.objectweb.proactive.InitActive;
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
@@ -34,6 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,20 +67,22 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * Constructs a new peer using the specified overlay. Warning, you must use
      * {@link PeerFactory} to instantiate a new active peer.
      * 
-     * @param builder
-     *            the builder to use for creating the {@link StructuredOverlay}
+     * @param overlayProvider
+     *            the provider to use for creating the {@link StructuredOverlay}
      *            embedded by the peer.
      */
-    public PeerImpl(StructuredOverlayBuilder builder) {
-        this.overlay = builder.build();
+    public PeerImpl(
+            SerializableProvider<? extends StructuredOverlay> overlayProvider) {
+        this.overlay = overlayProvider.get();
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean init(Peer stub, StructuredOverlayBuilder overlay) {
+    public boolean init(Peer stub,
+                        SerializableProvider<? extends StructuredOverlay> overlay) {
         if (this.overlay == null) {
-            this.overlay = overlay.build();
+            this.overlay = overlay.get();
             this.overlay.stub = stub;
         }
 

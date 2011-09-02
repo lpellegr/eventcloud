@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.util.ProActiveRandom;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -33,6 +32,8 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
+ * This class is used to instantiate an Event Cloud infrastructure (i.e. an
+ * {@link EventCloudsRegistry} and one or several {@link EventCloud}s).
  * 
  * @author lpellegr
  */
@@ -59,8 +60,8 @@ public class JunitEventCloudInfrastructureDeployer {
     public EventCloudId createEventCloud(int nbTrackers, int nbPeers) {
         EventCloud ec =
                 EventCloud.create(
-                        PAActiveObject.getUrl(this.eventCloudsRegistry), null,
-                        new TestingDeploymentConfiguration(),
+                        PAActiveObject.getUrl(this.eventCloudsRegistry),
+                        new JunitEventCloudDeployer(),
                         new Collection<UnalterableElaProperty>(), nbTrackers,
                         nbPeers);
         this.eventClouds.put(ec.getId(), ec);

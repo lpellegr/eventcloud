@@ -35,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.providers.StructuredOverlayProvider;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
  * Test cases associated to {@link CanOverlay#join(Peer)}.
@@ -103,7 +103,7 @@ public class JoinOperationTest extends
     @Test
     public void testConcurrentJoin() {
         final Peer landmarkPeer =
-                PeerFactory.newActivePeer(StructuredOverlayProvider.get(CanOverlay.class));
+                PeerFactory.newActivePeer(SerializableProvider.create(CanOverlay.class));
         try {
             landmarkPeer.create();
         } catch (StructuredP2PException e) {
@@ -114,7 +114,7 @@ public class JoinOperationTest extends
 
         List<Peer> peers = new ArrayList<Peer>(nbPeersToJoin);
         for (int i = 0; i < nbPeersToJoin; i++) {
-            peers.add(PeerFactory.newActivePeer(StructuredOverlayProvider.get(CanOverlay.class)));
+            peers.add(PeerFactory.newActivePeer(SerializableProvider.create(CanOverlay.class)));
         }
 
         ExecutorService threadPool =

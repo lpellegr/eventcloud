@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.datastore;
 
 import java.io.Closeable;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This Datastore interface makes no assumption on the datastore type: whether
@@ -30,11 +29,20 @@ public abstract class Datastore implements Closeable, PeerDataHandler {
 
     protected final UUID id;
 
-    protected AtomicBoolean initialized;
+    protected boolean initialized;
 
     public Datastore() {
         this.id = UUID.randomUUID();
-        this.initialized = new AtomicBoolean();
+        this.initialized = false;
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (initialized) {
+                    close();
+                }
+            }
+        }));
     }
 
     /**
@@ -42,11 +50,12 @@ public abstract class Datastore implements Closeable, PeerDataHandler {
      * operation is performed, a new call will fail by throwing an
      * {@link IllegalStateException}.
      */
-    public void open() {
-        if (!this.initialized.compareAndSet(false, true)) {
+    public synchronized void open() {
+        if (this.initialized) {
             throw new IllegalStateException("Datastore already opened");
         } else {
             this.internalOpen();
+            this.initialized = true;
         }
     }
 
@@ -55,12 +64,13 @@ public abstract class Datastore implements Closeable, PeerDataHandler {
      * to call this method whereas the datastore is not initialized, then an
      * {@link IllegalStateException} exception is thrown.
      */
-    public void close() {
-        if (!this.initialized.compareAndSet(true, false)) {
+    public synchronized void close() {
+        if (!this.initialized) {
             throw new IllegalStateException(
                     "The datastore has not been initialized via open");
         } else {
             this.internalClose();
+            this.initialized = false;
         }
     }
 
@@ -73,7 +83,7 @@ public abstract class Datastore implements Closeable, PeerDataHandler {
     }
 
     public boolean isInitialized() {
-        return this.initialized.get();
+        return this.initialized;
     }
 
 }

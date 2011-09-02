@@ -16,11 +16,11 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 /**
@@ -41,7 +41,7 @@ public final class CanComponentsNetworkDeployer extends NetworkDeployer {
     @Override
     protected synchronized Peer createPeer(NodeProvider nodeProvider) {
         // TODO use the node provider parameter
-        return PeerFactory.newComponentPeer(StructuredOverlayBuilder.build(CanOverlay.class));
+        return PeerFactory.newComponentPeer(SerializableProvider.create(CanOverlay.class));
     }
 
     /**

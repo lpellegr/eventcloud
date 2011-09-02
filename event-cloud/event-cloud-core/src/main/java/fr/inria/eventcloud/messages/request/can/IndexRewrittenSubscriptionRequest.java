@@ -156,5 +156,4 @@ public class IndexRewrittenSubscriptionRequest extends IndexSubscriptionRequest 
             }
         }
     }
-
 }

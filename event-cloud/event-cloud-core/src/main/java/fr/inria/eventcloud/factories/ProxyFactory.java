@@ -18,7 +18,6 @@ package fr.inria.eventcloud.factories;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.etsi.uri.gcm.util.GCM;
@@ -30,6 +29,8 @@ import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+
+import com.google.common.collect.MapMaker;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
@@ -64,7 +65,9 @@ public final class ProxyFactory implements Serializable {
     private static final ConcurrentMap<EventCloudId, ProxyFactory> proxies;
 
     static {
-        proxies = new ConcurrentHashMap<EventCloudId, ProxyFactory>();
+        // proxies may be garbage collected in response to memory demand
+        proxies = new MapMaker().softValues().makeMap();
+
         CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
         try {
             factory = FactoryFactory.getFactory();

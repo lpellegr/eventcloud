@@ -19,6 +19,7 @@ package fr.inria.eventcloud;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
@@ -54,13 +55,13 @@ public interface EventCloudApi {
     public Collection<UnalterableElaProperty> getElaProperties();
 
     /**
-     * Returns the URL to the node provider that is used to retrieve the nodes
-     * for the deployment of the trackers and the peers.
+     * Returns the deployer that is used for the deployment of the trackers and
+     * the peers.
      * 
-     * @return the URL to the node provider that is used to retrieve the nodes
-     *         for the deployment of the trackers and the peers.
+     * @return the deployer that is used for the deployment of the trackers and
+     *         the peers.
      */
-    public String getNodeProviderUrl();
+    public EventCloudDeployer getEventCloudDeployer();
 
     /**
      * Returns the URL to the EventCloudsRegistry.

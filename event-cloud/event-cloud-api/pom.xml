@@ -47,29 +47,4 @@
 		</dependency>
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.objectweb.proactive</groupId>
-				<artifactId>proactive-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>stubs</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>fr.inria.eventcloud.api.Collection</include>
-								<include>fr.inria.eventcloud.api.Event</include>
-								<include>fr.inria.eventcloud.api.Quadruple</include>
-								<include>fr.inria.eventcloud.api.QuadruplePattern</include>
-								<include>fr.inria.eventcloud.api.SubscriptionId</include>
-							</includes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
 </project>

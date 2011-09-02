@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.messages.request.can.StatefulRequestAction;
 import fr.inria.eventcloud.messages.request.can.StatefulQuadruplePatternRequest;
-import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
+import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
 
 /**
  * Response associated to {@link StatefulQuadruplePatternRequest}.
@@ -84,7 +84,7 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
             public void makeDecision(StructuredOverlay overlay,
                                      AnycastResponse response) {
                 Future<StatefulRequestAction<T>> result =
-                        (Future<StatefulRequestAction<T>>) ((SparqlRequestResponseManager) overlay.getRequestResponseManager()).getPendingResults()
+                        (Future<StatefulRequestAction<T>>) ((SemanticRequestResponseManager) overlay.getRequestResponseManager()).getPendingResults()
                                 .remove(response.getId());
                 if (result != null) {
                     // ensure that the query operation has terminated

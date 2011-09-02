@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.tdb.TDBFactory;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
+
 /**
  * A persistent Jena datastore that relies on Jena TDB.
  * 
@@ -41,11 +43,14 @@ public class PersistentJenaTdbDatastore extends SynchronizedJenaDatasetGraph {
     private final boolean autoRemove;
 
     /**
-     * Creates a new persistent datastore that stores data into a folder from
-     * the Operating System temporary directory.
+     * Creates a new persistent datastore that stores semantic data into the
+     * default repository path defined by
+     * {@link EventCloudProperties#REPOSITORIES_PATH} and set the auto remove
+     * property according to the value defined by
+     * {@link EventCloudProperties#REPOSITORIES_AUTO_REMOVE}.
      */
     public PersistentJenaTdbDatastore() {
-        this(new File(System.getProperty("java.io.tmpdir")), true);
+        this(new File(EventCloudProperties.REPOSITORIES_PATH.getValue()), true);
     }
 
     /**
@@ -90,7 +95,7 @@ public class PersistentJenaTdbDatastore extends SynchronizedJenaDatasetGraph {
      */
     @Override
     protected void internalClose() {
-        this.datastore.close();
+        super.datastore.close();
 
         if (this.autoRemove) {
             try {

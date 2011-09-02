@@ -25,7 +25,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
  * 
  * @author lpellegr
  */
-public final class EventCloudId implements Serializable {
+public class EventCloudId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

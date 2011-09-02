@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
+import java.io.Serializable;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -40,7 +41,9 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  */
 public abstract class NetworkDeployer extends
-        Observable<NetworkDeployerListener> {
+        Observable<NetworkDeployerListener> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger log =
             LoggerFactory.getLogger(NetworkDeployer.class);
@@ -155,7 +158,7 @@ public abstract class NetworkDeployer extends
         ExecutorService threadsPool =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
         final CountDownLatch doneSignal = new CountDownLatch(nbPeers);
-        
+
         for (int i = 0; i < nbPeers; i++) {
             threadsPool.execute(new Runnable() {
                 public void run() {
@@ -196,14 +199,14 @@ public abstract class NetworkDeployer extends
         }
 
         this.notifyUndeploymentStarted();
-        
+
         this.internalUndeploy();
         this.reset();
 
         this.state.set(NetworkDeployerState.STANDBY);
         this.notifyUndeploymentEnded();
     }
-    
+
     protected void internalUndeploy() {
         // to be overridden if necessary
     }
@@ -288,6 +291,18 @@ public abstract class NetworkDeployer extends
      */
     public NetworkDeployerState getState() {
         return this.state.get();
+    }
+
+    /**
+     * Returns the instance of the {@link NodeProvider} that is used to deploy
+     * the active objects. Or {@code null} if no {@link NodeProvider} is used.
+     * 
+     * @return returns the instance of the {@link NodeProvider} that is used to
+     *         deploy the active objects. Or {@code null} if no
+     *         {@link NodeProvider} is used.
+     */
+    public NodeProvider getNodeProvider() {
+        return this.nodeProvider;
     }
 
     /*

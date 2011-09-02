@@ -59,9 +59,9 @@ public abstract class WsProxyLauncher<T extends Proxy> {
 
         Proxy proxy = this.createProxy(factory);
 
-        // TODO expose proxy as webservice
+        // TODO: expose proxy as webservice
 
-        System.out.println(proxy.getClass().getName()
+        System.out.println(this.getClass().getName()
                 + " deployed and running at:");
         System.out.println("ws address");
     }

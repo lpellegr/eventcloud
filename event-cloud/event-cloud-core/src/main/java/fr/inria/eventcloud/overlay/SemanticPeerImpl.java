@@ -23,11 +23,12 @@ import java.util.concurrent.Executors;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerComponentImpl;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
@@ -81,8 +82,9 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      * {@inheritDoc}
      */
     @Override
-    public boolean init(Peer stub, StructuredOverlayBuilder builder) {
-        super.init(stub, builder);
+    public boolean init(Peer stub,
+                        SerializableProvider<? extends StructuredOverlay> overlayProvider) {
+        super.init(stub, overlayProvider);
         this.threadPool = Executors.newFixedThreadPool(50);
         return true;
     }
@@ -255,7 +257,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      */
     @Override
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
-        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(sparqlAskQuery);
+        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(sparqlAskQuery);
     }
 
     /**
@@ -263,7 +265,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      */
     @Override
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct) {
-        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(sparqlConstruct);
+        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(sparqlConstruct);
     }
 
     /**
@@ -279,7 +281,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      */
     @Override
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
-        return ((SparqlRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(sparqlSelect);
+        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(sparqlSelect);
     }
 
     /**

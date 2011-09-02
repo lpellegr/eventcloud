@@ -24,8 +24,6 @@ import java.util.List;
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.util.ProActiveRandom;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +54,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
 
     private final Collection<UnalterableElaProperty> elaProperties;
 
-    private final String nodeProviderUrl;
+    private final EventCloudDeployer deployer;
 
     private final String registryUrl;
 
@@ -64,36 +62,28 @@ public final class EventCloud implements EventCloudApi, Serializable {
 
     private final List<SemanticTracker> trackers;
 
-    private EventCloud(String registryUrl, String nodeProviderUrl,
-            DeploymentConfiguration configuration,
+    private EventCloud(String registryUrl, EventCloudDeployer deployer,
             Collection<UnalterableElaProperty> elaProperties, int nbTrackers,
             int nbPeers) {
         this.id =
                 new EventCloudId(MurmurHash.hash64(
-                        registryUrl.toString(), (nodeProviderUrl == null)
-                                ? "" : nodeProviderUrl.toString(),
+                        registryUrl.toString(),
+                        deployer.toString(),
                         elaProperties.toString(), Integer.toString(nbTrackers),
                         Integer.toString(nbPeers)));
 
         this.creationTime = System.currentTimeMillis();
         this.elaProperties = elaProperties;
-        this.nodeProviderUrl = nodeProviderUrl;
+        this.deployer = deployer;
         this.registryUrl = registryUrl;
         this.trackerUrls = new ArrayList<String>();
         this.trackers = new ArrayList<SemanticTracker>();
 
-        this.initializeNetwork(configuration, nbTrackers, nbPeers);
+        this.initializeNetwork(nbTrackers, nbPeers);
     }
 
-    private void initializeNetwork(DeploymentConfiguration configuration,
-                                   int nbTrackers, int nbPeers) {
-        // TODO retrieve the nodes, create and deploy the peers and the trackers
-        // and populate the fields
-
-        // temporary implementation that deploy the trackers and the peers on
-        // the local machine
-        EventCloudDeployer deployer = new EventCloudDeployer(configuration);
-        deployer.deploy(nbTrackers, nbPeers);
+    private void initializeNetwork(int nbTrackers, int nbPeers) {
+        this.deployer.deploy(nbTrackers, nbPeers);
 
         for (Tracker tracker : deployer.getTrackers()) {
             this.trackers.add((SemanticTracker) tracker);
@@ -102,47 +92,13 @@ public final class EventCloud implements EventCloudApi, Serializable {
     }
 
     public static EventCloud create(String registryUrl,
-                                    String nodeProviderUrl,
-                                    Collection<UnalterableElaProperty> elaProperties,
-                                    int nbTrackers, int nbPeers) {
-        return create(
-                registryUrl, nodeProviderUrl,
-                new EmptyDeploymentConfiguration(), elaProperties, nbTrackers,
-                nbPeers);
-    }
-
-    /**
-     * Creates a new Event-Cloud with the specified arguments.
-     * 
-     * @param registryUrl
-     *            the URL to the EventCloudsRegistry that stores the properties.
-     * @param nodeProviderUrl
-     *            the URL to the node provider.
-     * @param configuration
-     *            the configuration to use for the deployment.
-     * @param elaProperties
-     *            a collection of non-alterable ELA properties.
-     * @param nbTrackers
-     *            the number of trackers to create for the Event-Cloud.
-     * @param nbPeers
-     *            the initial number of peers that is contained by the
-     *            Event-Cloud.
-     * 
-     * @return the Event-Cloud that has been created. When the object is
-     *         returned, the Event-Cloud has been created (i.e. the peers and
-     *         the trackers are running and have joined the network) and the
-     *         properties associated to the Event-Cloud have been registered
-     *         into the EventCloudsRegistry.
-     */
-    public static EventCloud create(String registryUrl,
-                                    String nodeProviderUrl,
-                                    DeploymentConfiguration configuration,
+                                    EventCloudDeployer deployer,
                                     Collection<UnalterableElaProperty> elaProperties,
                                     int nbTrackers, int nbPeers) {
         EventCloud eventCloud =
                 new EventCloud(
-                        registryUrl, nodeProviderUrl, configuration,
-                        elaProperties, nbTrackers, nbPeers);
+                        registryUrl, deployer, elaProperties, nbTrackers,
+                        nbPeers);
 
         eventCloud.register();
 
@@ -153,7 +109,6 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * Registers the properties to the {@link EventCloudsRegistry}.
      */
     private void register() {
-
         EventCloudsRegistry registry = null;
         try {
             registry =
@@ -200,8 +155,8 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public String getNodeProviderUrl() {
-        return this.nodeProviderUrl;
+    public EventCloudDeployer getEventCloudDeployer() {
+        return this.deployer;
     }
 
     /**

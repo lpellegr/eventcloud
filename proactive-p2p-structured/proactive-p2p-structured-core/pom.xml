@@ -32,6 +32,11 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.objectweb.proactive</groupId>
 			<artifactId>proactive-programming</artifactId>
 		</dependency>

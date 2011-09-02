@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.utils.converter.MakeDeepCopy;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
 import com.hp.hpl.jena.graph.Node;
 

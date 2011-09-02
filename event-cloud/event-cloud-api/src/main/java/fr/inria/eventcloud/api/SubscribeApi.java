@@ -21,7 +21,7 @@ import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 
 /**
  * Defines the publish/subscribe operations that can be executed on an
- * Event-Cloud.
+ * Event Cloud.
  * 
  * @author lpellegr
  */
