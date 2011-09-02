@@ -134,7 +134,7 @@ public class SubscribeProxyTest {
             }
         }
 
-        deployer.destroyEventCloud(ecId);
+        deployer.undeploy();
     }
 
     private static class CustomEventNotificationListener implements

@@ -69,8 +69,12 @@ public class JunitEventCloudInfrastructureDeployer {
     }
 
     public void destroyEventCloud(EventCloudId id) {
-        this.eventClouds.remove(id);
-        // TODO: undeploy network
+        if (!this.eventClouds.containsKey(id)) {
+            throw new IllegalArgumentException("Event cloud id not managed: "
+                    + id);
+        }
+
+        this.eventClouds.remove(id).getEventCloudDeployer().undeploy();
     }
 
     public EventCloud find(EventCloudId id) {
@@ -99,6 +103,12 @@ public class JunitEventCloudInfrastructureDeployer {
 
     public String getEventCloudsRegistryUrl() {
         return this.eventCloudsRegistryUrl;
+    }
+
+    public void undeploy() {
+        for (EventCloud eventCloud : this.eventClouds.values()) {
+            eventCloud.getEventCloudDeployer().undeploy();
+        }
     }
 
 }
