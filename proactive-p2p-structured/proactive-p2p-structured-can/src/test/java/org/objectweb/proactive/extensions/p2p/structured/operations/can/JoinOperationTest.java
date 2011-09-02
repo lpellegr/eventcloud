@@ -16,8 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import static org.junit.Assert.assertFalse;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -27,110 +25,85 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.junit.Assert;
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodParameterizedCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.StructuredOverlayProvider;
 
 /**
  * Test cases associated to {@link CanOverlay#join(Peer)}.
  * 
  * @author lpellegr
  */
-public class JoinOperationTest {
+public class JoinOperationTest extends
+        JunitByMethodParameterizedCanNetworkDeployer {
 
-    // @Test
-    // public void testNeighborsAfterJoinOperationWithTwoPeers() {
-    // CanNetworkInitializer networkInitializer = new CanNetworkInitializer();
-    // networkInitializer.setUp(2);
-    //
-    // Peer firstPeer = networkInitializer.get(0);
-    // Peer secondPeer = networkInitializer.get(1);
-    //
-    // // checks that the peers are neighbors
-    // Assert.assertTrue(CanOperations.hasNeighbor(
-    // firstPeer, secondPeer.getId()));
-    // Assert.assertTrue(CanOperations.hasNeighbor(
-    // secondPeer, firstPeer.getId()));
-    //
-    // // checks whether a peer has itself in its neighbors list
-    // Assert.assertFalse(CanOperations.hasNeighbor(
-    // firstPeer, firstPeer.getId()));
-    // Assert.assertFalse(CanOperations.hasNeighbor(
-    // secondPeer, secondPeer.getId()));
-    //
-    // // checks whether the peers are abuts
-    // Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
-    // firstPeer).getPeerZone().neighbors(
-    // CanOperations.getIdAndZoneResponseOperation(secondPeer)
-    // .getPeerZone()), -1);
-    //
-    // // TODO: uncomment when tearDown works
-    // // networkInitializer.tearDown();
-    // }
-    //
-    // @Test
-    // public void testNeighborsAfterJoinOperationWithTwoPeerComponents() {
-    // CanNetworkInitializer networkInitializer = new CanNetworkInitializer();
-    // networkInitializer.setUp(2);
-    //
-    // Peer firstPeer = networkInitializer.getc(0);
-    // Peer secondPeer = networkInitializer.getc(1);
-    //
-    // // checks that the peers are neighbors
-    // Assert.assertTrue(CanOperations.hasNeighbor(
-    // firstPeer, secondPeer.getId()));
-    // Assert.assertTrue(CanOperations.hasNeighbor(
-    // secondPeer, firstPeer.getId()));
-    //
-    // // checks whether a peer has itself in its neighbors list
-    // Assert.assertFalse(CanOperations.hasNeighbor(
-    // firstPeer, firstPeer.getId()));
-    // Assert.assertFalse(CanOperations.hasNeighbor(
-    // secondPeer, secondPeer.getId()));
-    //
-    // // checks whether the peers are abuts
-    // Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
-    // firstPeer).getPeerZone().neighbors(
-    // CanOperations.getIdAndZoneResponseOperation(secondPeer)
-    // .getPeerZone()), -1);
-    //
-    // // TODO: uncomment when tearDown works
-    // // networkInitializer.tearDown();
-    // }
-    //
-    // @Test(expected = NetworkAlreadyJoinedException.class)
-    // public void testJoinWithPeerWhichHasAlreadyJoined()
-    // throws NetworkAlreadyJoinedException {
-    // Peer landmarkPeer = PeerFactory.newActivePeer(new CanOverlay());
-    // try {
-    // landmarkPeer.create();
-    // } catch (NetworkAlreadyJoinedException e) {
-    // e.printStackTrace();
-    // }
-    // Peer joiner = PeerFactory.newActivePeer(new CanOverlay());
-    // joiner.join(landmarkPeer);
-    // joiner.join(landmarkPeer);
-    // }
-    //
-    // @Test
-    // public void testJoinOnPeerNotActivated() {
-    // Peer landmarkPeer = PeerFactory.newActivePeer(new CanOverlay());
-    // Peer joiner = PeerFactory.newActivePeer(new CanOverlay());
-    // try {
-    // assertFalse(joiner.join(landmarkPeer));
-    // } catch (NetworkAlreadyJoinedException e) {
-    // e.printStackTrace();
-    // }
-    // }
+    public JoinOperationTest(NetworkDeployer deployer) {
+        super(deployer);
+    }
+
+    @Test
+    public void testNeighborsAfterJoinOperationWithTwoPeers() {
+        super.deploy(2);
+
+        Peer firstPeer = super.getPeer(0);
+        Peer secondPeer = super.getPeer(1);
+
+        // checks that the peers are neighbors
+        Assert.assertTrue(CanOperations.hasNeighbor(
+                firstPeer, secondPeer.getId()));
+        Assert.assertTrue(CanOperations.hasNeighbor(
+                secondPeer, firstPeer.getId()));
+
+        // checks whether a peer has itself in its neighbors list
+        Assert.assertFalse(CanOperations.hasNeighbor(
+                firstPeer, firstPeer.getId()));
+        Assert.assertFalse(CanOperations.hasNeighbor(
+                secondPeer, secondPeer.getId()));
+
+        // checks whether the peers are abuts
+        Assert.assertNotSame(CanOperations.getIdAndZoneResponseOperation(
+                firstPeer).getPeerZone().neighbors(
+                CanOperations.getIdAndZoneResponseOperation(secondPeer)
+                        .getPeerZone()), -1);
+    }
+
+    @Test(expected = NetworkAlreadyJoinedException.class)
+    public void testJoinWithPeerWhichHasAlreadyJoined()
+            throws NetworkAlreadyJoinedException {
+        Peer landmarkPeer = super.createPeer();
+        try {
+            landmarkPeer.create();
+        } catch (NetworkAlreadyJoinedException e) {
+            e.printStackTrace();
+        }
+        Peer joiner = super.createPeer();
+        joiner.join(landmarkPeer);
+        joiner.join(landmarkPeer);
+    }
+
+    @Test
+    public void testJoinOnPeerNotActivated() {
+        Peer landmarkPeer = super.createPeer();
+        Peer joiner = super.createPeer();
+        try {
+            Assert.assertFalse(joiner.join(landmarkPeer));
+        } catch (NetworkAlreadyJoinedException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void testConcurrentJoin() {
         final Peer landmarkPeer =
-                PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanOverlay.class));
+                PeerFactory.newActivePeer(StructuredOverlayProvider.get(CanOverlay.class));
         try {
             landmarkPeer.create();
         } catch (StructuredP2PException e) {
@@ -141,7 +114,7 @@ public class JoinOperationTest {
 
         List<Peer> peers = new ArrayList<Peer>(nbPeersToJoin);
         for (int i = 0; i < nbPeersToJoin; i++) {
-            peers.add(PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanOverlay.class)));
+            peers.add(PeerFactory.newActivePeer(StructuredOverlayProvider.get(CanOverlay.class)));
         }
 
         ExecutorService threadPool =
@@ -181,8 +154,10 @@ public class JoinOperationTest {
         }
 
         // a concurrent join may have occurred.
-        // hence, joinResult must be set to false
-        assertFalse("A concurrent join may have occurred", joinResult);
+        // hence, joinResult must has a false value
+        Assert.assertFalse(
+                "No concurrent join has been detected whereas one is expected",
+                joinResult);
 
         try {
             doneSignal.await();
