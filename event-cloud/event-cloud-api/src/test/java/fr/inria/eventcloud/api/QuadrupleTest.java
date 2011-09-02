@@ -25,6 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDe
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.generators.NodeGenerator;
+import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 
 /**
  * Tests cases associated to the {@link Quadruple} class.
@@ -79,12 +80,48 @@ public class QuadrupleTest {
     }
 
     @Test
+    public void testTimestampedQuadruple() {
+        Quadruple quad = QuadrupleGenerator.createWithLiteral();
+        Node graph = quad.getGraph();
+
+        quad.timestamp();
+        Assert.assertEquals(
+                "The graph value is not the same after timestamping the quadruple",
+                graph, quad.getGraph());
+
+        long timestamp = quad.getPublicationTimestamp();
+
+        quad.timestamp();
+
+        Assert.assertEquals(
+                "A second call to timestamp the quadruple update the timestamp value",
+                timestamp, quad.getPublicationTimestamp());
+    }
+
+    @Test
     public void testSerialization() {
         Quadruple quad =
                 new Quadruple(
                         NodeGenerator.createUri(), NodeGenerator.createUri(),
                         NodeGenerator.createUri(),
                         Node.createLiteral("Literal Value"));
+
+        Quadruple newQuad = null;
+        try {
+            newQuad = (Quadruple) MakeDeepCopy.makeDeepCopy(quad);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertEquals(quad, newQuad);
+    }
+
+    @Test
+    public void testSerializationWithTimestampedQuadruple() {
+        Quadruple quad = QuadrupleGenerator.createWithLiteral();
+        quad.timestamp();
 
         Quadruple newQuad = null;
         try {
