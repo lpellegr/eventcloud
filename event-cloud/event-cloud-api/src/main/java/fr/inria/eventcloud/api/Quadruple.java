@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.openjena.riot.out.OutputLangUtils;
 import org.openjena.riot.tokens.Tokenizer;
@@ -57,9 +58,15 @@ public class Quadruple implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String TIMESTAMP_SEPARATOR = "#t$";
+
     // contains respectively the graph, the subject, the predicate and the
     // object value
     private transient Node[] nodes;
+
+    private transient Node timestampedGraphNode;
+
+    private transient long timestamp;
 
     /**
      * Defines the different formats that are allowed to read quadruples or to
@@ -175,6 +182,52 @@ public class Quadruple implements Serializable {
     }
 
     /**
+     * Indicates whether the quadruple is timestamped or not.
+     * 
+     * @return {@code true} if the quadruple is timestamped, {@code false}
+     *         otherwise.
+     */
+    public boolean isTimestamped() {
+        return this.timestampedGraphNode != null;
+    }
+
+    /**
+     * Timestamps the quadruple (i.e. adds a timestamp value which is assumed to
+     * indicate when the quadruple has been published). If the quadruple is
+     * already timestamped, a call to this method has no effect.
+     */
+    public synchronized void timestamp() {
+        if (this.timestampedGraphNode == null) {
+            this.timestamp = System.nanoTime();
+            this.timestampedGraphNode =
+                    Node.createURI(this.nodes[0].getURI()
+                            .concat(
+                                    TIMESTAMP_SEPARATOR
+                                            + Long.toString(this.timestamp)));
+        }
+    }
+
+    /**
+     * Returns a timestamp indicating when the quadruple has been published.
+     * 
+     * @return a timestamp indicating when the quadruple has been published.
+     */
+    public long getPublicationTimestamp() {
+        return this.timestamp;
+    }
+
+    // /**
+    // * Returns the timestamped graph node or {@code null} if the quadruple has
+    // * not been yet timestamped with the publication time.
+    // *
+    // * @return the timestamped graph node or {@code null} if the quadruple has
+    // * not been yet timestamped with the publication time.
+    // */
+    // public Node getTimestampedGraph() {
+    // return this.timestampedGraphNode;
+    // }
+
+    /**
      * Returns the graph value.
      * 
      * @return the graph value.
@@ -228,9 +281,15 @@ public class Quadruple implements Serializable {
      */
     @Override
     public int hashCode() {
-        return 31
-                * (31 * (31 * (31 + this.nodes[0].hashCode()) + this.nodes[1].hashCode()) + this.nodes[2].hashCode())
-                + this.nodes[3].hashCode();
+        int v =
+                31
+                        * (31 * (31 * (31 + this.nodes[0].hashCode()) + this.nodes[1].hashCode()) + this.nodes[2].hashCode())
+                        + this.nodes[3].hashCode();
+        if (this.timestampedGraphNode != null) {
+            v = 31 * v + this.timestampedGraphNode.hashCode();
+        }
+
+        return v;
     }
 
     /**
@@ -238,11 +297,17 @@ public class Quadruple implements Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Quadruple
-                && this.nodes[0].equals(((Quadruple) obj).getGraph())
-                && this.nodes[1].equals(((Quadruple) obj).getSubject())
-                && this.nodes[2].equals(((Quadruple) obj).getPredicate())
-                && this.nodes[3].equals(((Quadruple) obj).getObject());
+        if (obj instanceof Quadruple) {
+            Quadruple quad = (Quadruple) obj;
+
+            return this.nodes[0].equals(quad.nodes[0])
+                    && this.nodes[1].equals(quad.nodes[1])
+                    && this.nodes[2].equals(quad.nodes[2])
+                    && this.nodes[3].equals(quad.nodes[3])
+                    && this.timestamp == quad.timestamp;
+        }
+
+        return false;
     }
 
     /**
@@ -253,7 +318,7 @@ public class Quadruple implements Serializable {
      *         object value.
      */
     public Node[] toArray() {
-        return this.nodes;
+        return Arrays.copyOf(this.nodes, this.nodes.length);
     }
 
     /**
@@ -280,6 +345,12 @@ public class Quadruple implements Serializable {
                 result.append(", ");
             }
         }
+
+        if (this.isTimestamped()) {
+            result.append(", ");
+            result.append(this.timestamp);
+        }
+
         result.append(")");
 
         return result.toString();
@@ -294,13 +365,35 @@ public class Quadruple implements Serializable {
         for (int i = 0; i < nodes.length; i++) {
             this.nodes[i] = tokenizer.next().asNode();
         }
+
+        String uri = this.nodes[0].getURI();
+        int timestampSeparatorIndex = uri.lastIndexOf(TIMESTAMP_SEPARATOR);
+
+        // extracts the timestamp associated to the quadruple
+        if (timestampSeparatorIndex != -1) {
+            this.timestamp =
+                    Long.parseLong(uri.substring(timestampSeparatorIndex
+                            + TIMESTAMP_SEPARATOR.length(), uri.length()));
+
+            this.timestampedGraphNode = this.nodes[0];
+            this.nodes[0] =
+                    Node.createURI(uri.substring(0, timestampSeparatorIndex));
+        }
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
 
+        Node graphValue = this.nodes[0];
+        if (this.timestampedGraphNode != null) {
+            graphValue = this.timestampedGraphNode;
+        }
+
         OutputStreamWriter outWriter = new OutputStreamWriter(out);
-        for (int i = 0; i < this.nodes.length; i++) {
+        OutputLangUtils.output(outWriter, graphValue, null);
+        outWriter.write(' ');
+
+        for (int i = 1; i < this.nodes.length; i++) {
             OutputLangUtils.output(outWriter, this.nodes[i], null);
             if (i < this.nodes.length - 1) {
                 outWriter.write(' ');
