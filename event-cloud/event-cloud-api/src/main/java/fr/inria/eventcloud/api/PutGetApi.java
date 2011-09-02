@@ -77,7 +77,7 @@ public interface PutGetApi {
      * Event-Cloud.
      * 
      * @param quad
-     *            the quadruple whose presence in Envet-Cloud is to be tested.
+     *            the quadruple whose presence in Event-Cloud is to be tested.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
@@ -119,7 +119,7 @@ public interface PutGetApi {
     public Collection<Quadruple> delete(QuadruplePattern quadPattern);
 
     /**
-     * Finds all the quadruples that matche the specified quadruple pattern.
+     * Finds all the quadruples that match the specified quadruple pattern.
      * 
      * @param quadPattern
      *            the quadruple pattern to be tested.

@@ -20,8 +20,7 @@ import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 
 /**
- * Defines the publish/subscribe operations that can be executed on an
- * Event Cloud.
+ * Defines the subscribe operations that can be executed on an Event Cloud.
  * 
  * @author lpellegr
  */

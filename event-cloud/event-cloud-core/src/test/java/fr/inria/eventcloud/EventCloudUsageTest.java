@@ -38,7 +38,7 @@ import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
- * The purpose of this test is juste to show how to instantiate and to use an
+ * The purpose of this test is just to show how to instantiate and to use an
  * Event Cloud.
  * 
  * @author lpellegr
