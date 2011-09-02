@@ -17,14 +17,18 @@
 package fr.inria.eventcloud.pubsub;
 
 import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_NS;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.openjena.riot.out.NodeFmtLib;
 import org.openjena.riot.out.OutputLangUtils;
 import org.openjena.riot.tokens.Tokenizer;
 import org.openjena.riot.tokens.TokenizerFactory;
@@ -32,12 +36,15 @@ import org.openjena.riot.tokens.TokenizerFactory;
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 
+import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -52,9 +59,9 @@ public final class PublishSubscribeUtils {
     }
 
     /**
-     * Creates the matching quadruple meta information. This is a quadruple that
-     * indicates that a subscription identified by {@code subscriptionIdUrl} is
-     * matched for its {@code subSubscriptionId} with the
+     * Creates a matching quadruple meta information. This is a quadruple that
+     * indicates that a subscription identified by its {@code subscriptionIdUrl}
+     * is matched for its {@code subSubscriptionId} with the
      * {@code quadrupleMatching} value.
      * 
      * @param quadrupleMatching
@@ -70,7 +77,6 @@ public final class PublishSubscribeUtils {
     public static final Quadruple createMetaQuadruple(Quadruple quadrupleMatching,
                                                       Node subscriptionIdUrl,
                                                       Node subSubscriptionId) {
-
         // generates the object value which is the concatenation of
         // subSubscriptionId and quadrupleMatching
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -97,6 +103,53 @@ public final class PublishSubscribeUtils {
                 PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
                 Node.createLiteral(new String(baos.toByteArray())));
 
+    }
+
+    /**
+     * Finds the subscription identifiers that are issue from the specified
+     * original subscription identifier (several rewritten subscriptions may be
+     * issued from the same original subscription).
+     * 
+     * @return the subscription identifiers that are issue from the specified
+     *         original subscription identifier (several rewritten subscriptions
+     *         may be issued from the same original subscription).
+     */
+    public static final List<SubscriptionId> findSubscriptionIds(SemanticDatastore datastore,
+                                                                 SubscriptionId originalSubscriptionId) {
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ?subscriptionId WHERE {\n    GRAPH ");
+        query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
+        query.append(" {\n        ");
+        query.append("?subscriptionIdUrl ");
+        query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
+        query.append(" ");
+        query.append(NodeFmtLib.serialize(originalSubscriptionId.asJenaNode()));
+        query.append(" .\n        ?subscriptionIdUrl ");
+        // query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE));
+        // query.append(" ?subSubscriptionId .\n        ?subscriptionIdUrl ");
+        query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
+        query.append(" ?subscriptionId .\n    }\n}");
+
+        ResultSet result = datastore.executeSparqlSelect(query.toString());
+
+        List<SubscriptionId> ids = new ArrayList<SubscriptionId>();
+
+        while (result.hasNext()) {
+            Binding binding = result.nextBinding();
+
+            SubscriptionId subscriptionId =
+                    new SubscriptionId(
+                            ((Number) binding.get(Var.alloc("subscriptionId"))
+                                    .getLiteralValue()).longValue());
+            // SubscriptionId subSubscriptionId =
+            // new SubscriptionId(
+            // ((Number) binding.get(
+            // Var.alloc("subSubscriptionId"))
+            // .getLiteralValue()).longValue());
+            ids.add(subscriptionId);
+        }
+
+        return ids;
     }
 
     /**
@@ -170,6 +223,31 @@ public final class PublishSubscribeUtils {
     }
 
     /**
+     * Creates a sub subscription id URL from the specified
+     * {@code subscriptionId} which is assumed to be a {@link SubscriptionId}.
+     * 
+     * @param subSubscriptionId
+     *            the subscription identifier to use.
+     * 
+     * @return the sub subscription id URL as a Jena {@link Node_URI}.
+     */
+    public static final Node createSubSubscriptionIdUrl(String subSubscriptionId) {
+        return Node.createURI(SUBSUBSCRIPTION_NS + subSubscriptionId);
+    }
+
+    /**
+     * Creates a sub subscription id URL from the specified {@code id}.
+     * 
+     * @param subSubscriptionId
+     *            the sub subscription identifier to use.
+     * 
+     * @return the sub subscription id URL as a Jena {@link Node_URI}.
+     */
+    public static final Node createSubSubscriptionIdUrl(SubscriptionId subSubscriptionId) {
+        return createSubSubscriptionIdUrl(subSubscriptionId.toString());
+    }
+
+    /**
      * Creates a subscription id URL from the specified {@code subscriptionId}
      * which is assumed to be a {@link SubscriptionId}.
      * 
@@ -180,6 +258,39 @@ public final class PublishSubscribeUtils {
      */
     public static final Node createSubscriptionIdUrl(String subscriptionId) {
         return Node.createURI(SUBSCRIPTION_NS + subscriptionId);
+    }
+
+    /**
+     * Removes the specified {@code subscriptionId} from the given
+     * {@code datastore}.
+     * 
+     * @param datastore
+     *            the datastore from where the subscriptions are removed.
+     * @param subscriptionId
+     *            the subscriptions to remove.
+     */
+    public static final void deleteSubscription(SemanticDatastore datastore,
+                                                SubscriptionId subscriptionId) {
+        Node subscriptionIdUrl =
+                PublishSubscribeUtils.createSubscriptionIdUrl(subscriptionId);
+
+        Collection<Quadruple> subscriptionQuadruples =
+                datastore.find(
+                        PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
+                        subscriptionIdUrl,
+                        PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
+                        Node.ANY);
+
+        // removes the quadruples about the sub subscriptions associated to the
+        // subscription
+        for (Quadruple quad : subscriptionQuadruples) {
+            datastore.deleteAny(
+                    Node.ANY, createSubSubscriptionIdUrl(quad.getObject()
+                            .getLiteralLexicalForm()), Node.ANY, Node.ANY);
+        }
+
+        // removes the quadruples about the subscription
+        datastore.deleteAny(Node.ANY, subscriptionIdUrl, Node.ANY, Node.ANY);
     }
 
     /**

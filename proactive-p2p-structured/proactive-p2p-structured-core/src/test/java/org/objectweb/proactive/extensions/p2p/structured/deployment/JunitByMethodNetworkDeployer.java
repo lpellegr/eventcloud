@@ -65,6 +65,10 @@ public class JunitByMethodNetworkDeployer {
         }
     }
 
+    public Peer createPeer() {
+        return this.deployer.createPeer(this.deployer.getNodeProvider());
+    }
+
     public void deploy(int nbPeers) {
         this.deployer.deploy(nbPeers);
     }

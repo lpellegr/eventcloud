@@ -64,6 +64,11 @@
 						</goals>
 						<configuration>
 							<includes>
+								<include>fr.inria.eventcloud.api.Collection</include>
+								<include>fr.inria.eventcloud.api.Event</include>
+								<include>fr.inria.eventcloud.api.Quadruple</include>
+								<include>fr.inria.eventcloud.api.QuadruplePattern</include>
+								<include>fr.inria.eventcloud.api.SubscriptionId</include>
 								<include>fr.inria.eventcloud.EventCloudsRegistry</include>
 								<include>fr.inria.eventcloud.tracker.SemanticTrackerImpl</include>
 								<include>fr.inria.eventcloud.overlay.SemanticPeerImpl</include>
@@ -79,7 +84,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>-Xmx1024m</argLine>
+					<argLine>-Xmx2048m</argLine>
 				</configuration>
 			</plugin>
 		</plugins>

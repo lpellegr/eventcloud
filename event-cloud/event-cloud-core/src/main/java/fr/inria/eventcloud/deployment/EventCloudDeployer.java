@@ -40,6 +40,8 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class EventCloudDeployer extends NetworkDeployer {
 
+    private static final long serialVersionUID = 1L;
+
     public EventCloudDeployer() {
         this(new EmptyDeploymentConfiguration());
     }
@@ -58,7 +60,7 @@ public class EventCloudDeployer extends NetworkDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected Peer createPeer(NodeProvider nodeProvider) {
+    protected synchronized Peer createPeer(NodeProvider nodeProvider) {
         // TODO: use the nodeProvider parameter
         return SemanticFactory.newSemanticPeer();
     }
@@ -67,7 +69,7 @@ public class EventCloudDeployer extends NetworkDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected Tracker createTracker(String networkName,
+    protected synchronized Tracker createTracker(String networkName,
                                     NodeProvider nodeProvider) {
         // TODO: use the nodeProvider parameter
         return SemanticFactory.newSemanticTracker(networkName);

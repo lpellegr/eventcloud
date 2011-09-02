@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Provider;
+
 import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Factory;
@@ -33,14 +35,15 @@ import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
-import fr.inria.eventcloud.builders.SemanticPersistentOverlayBuilder;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
+import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
@@ -193,12 +196,22 @@ public final class SemanticFactory {
     public static SemanticPeer newSemanticPeer() {
         return SemanticFactory.createSemanticPeer(
                 new HashMap<String, Object>(),
-                new SemanticPersistentOverlayBuilder());
+                new SemanticPersistentOverlayProvider());
     }
 
-    public static SemanticPeer newSemanticPeer(StructuredOverlayBuilder builder) {
+    /**
+     * Creates a new {@link SemanticPeer} component on the local machine with
+     * the specified overlay {@link Provider}.
+     * 
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         component created.
+     */
+    public static <T extends SemanticCanOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider) {
         return SemanticFactory.createSemanticPeer(
-                new HashMap<String, Object>(), builder);
+                new HashMap<String, Object>(), overlayProvider);
     }
 
     /**
@@ -220,7 +233,7 @@ public final class SemanticFactory {
         }
 
         return SemanticFactory.createSemanticPeer(
-                context, new SemanticPersistentOverlayBuilder());
+                context, new SemanticPersistentOverlayProvider());
     }
 
     /**
@@ -240,7 +253,7 @@ public final class SemanticFactory {
         }
 
         return SemanticFactory.createSemanticPeer(
-                context, new SemanticPersistentOverlayBuilder());
+                context, new SemanticPersistentOverlayProvider());
     }
 
     /**
@@ -259,11 +272,11 @@ public final class SemanticFactory {
             context.put("deployment-descriptor", gcma);
         }
         return SemanticFactory.createSemanticPeer(
-                context, new SemanticPersistentOverlayBuilder());
+                context, new SemanticPersistentOverlayProvider());
     }
 
-    private static SemanticPeer createSemanticPeer(Map<String, Object> context,
-                                                   StructuredOverlayBuilder builder) {
+    private static <T extends SemanticCanOverlay> SemanticPeer createSemanticPeer(Map<String, Object> context,
+                                                                                  SerializableProvider<T> overlayProvider) {
         try {
             Component peer =
                     (Component) factory.newComponent(
@@ -272,7 +285,7 @@ public final class SemanticFactory {
             SemanticPeer stub =
                     (SemanticPeer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
             GCM.getGCMLifeCycleController(peer).startFc();
-            stub.init(stub, builder);
+            stub.init(stub, overlayProvider);
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();

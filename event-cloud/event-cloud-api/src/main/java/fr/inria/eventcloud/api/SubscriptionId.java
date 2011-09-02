@@ -24,9 +24,7 @@ import com.hp.hpl.jena.graph.Node_Literal;
 
 /**
  * Uniquely identify a subscription or a subsubscription that has been submitted
- * on an eventcloud.
- * 
- * // the id of the current subscription
+ * on an Event Cloud.
  * 
  * @author lpellegr
  */

@@ -18,34 +18,28 @@ package fr.inria.eventcloud.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
- * Indexes a {@link Subscription} into the network. The indexing operation
- * consists in reaching all the peers that match the first sub-subscription
- * contained by the subscription. Then, when one of these peers are reached, the
- * subscription is put into the local cache and into the local datastore.
+ * This class is used to route and to handle an unsubscribe request.
  * 
  * @author lpellegr
  */
-public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
+public class UnsubscribeRequest extends StatelessQuadruplePatternRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger log =
-            LoggerFactory.getLogger(IndexSubscriptionRequest.class);
+    private final SerializedValue<SubscriptionId> originalSubscriptionId;
 
-    protected SerializedValue<Subscription> subscription;
-
-    public IndexSubscriptionRequest(Subscription subscription) {
+    public UnsubscribeRequest(Subscription subscription) {
         super(subscription.getSubSubscriptions()[0].getAtomicQuery()
                 .getQuadruplePattern());
-        this.subscription = new SerializedValue<Subscription>(subscription);
+        this.originalSubscriptionId =
+                new SerializedValue<SubscriptionId>(subscription.getId());
     }
 
     /**
@@ -54,13 +48,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
     @Override
     public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                QuadruplePattern quadruplePattern) {
-        Subscription subscription = this.subscription.getValue();
-
-        ((SemanticCanOverlay) overlay).storeSubscription(subscription);
-
-        log.debug(
-                "Subscription {} has been indexed on peer {}",
-                subscription.getId(), overlay);
+        ((SemanticCanOverlay) overlay).deleteSubscription(this.originalSubscriptionId.getValue());
     }
 
 }

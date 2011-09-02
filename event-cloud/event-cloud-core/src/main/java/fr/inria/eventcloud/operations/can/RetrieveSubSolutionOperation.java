@@ -32,7 +32,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
-import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
@@ -101,9 +101,8 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
         Binding binding =
                 PublishSubscribeUtils.filter(
                         extractedMetaInfo.getFirst(),
-                        ((SparqlRequestResponseManager) overlay.getRequestResponseManager()).find(
-                                subSubscription.getParentId())
-                                .getResultVars(),
+                        ((SemanticCanOverlay) overlay).findSubscription(
+                                subSubscription.getParentId()).getResultVars(),
                         subSubscription.getAtomicQuery());
 
         // retrieves the subscriber url by using the subscription id from

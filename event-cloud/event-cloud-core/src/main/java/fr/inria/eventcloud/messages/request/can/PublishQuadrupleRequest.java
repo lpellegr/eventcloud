@@ -46,8 +46,8 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
@@ -125,7 +125,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                             .getLiteralValue()).longValue());
 
             Subscription subscription =
-                    ((SparqlRequestResponseManager) overlay.getRequestResponseManager()).find(subscriptionId);
+                    ((SemanticCanOverlay) overlay).findSubscription(subscriptionId);
 
             // a subscription with only one sub subscription (that matches the
             // quadruple which has been inserted) has been detected

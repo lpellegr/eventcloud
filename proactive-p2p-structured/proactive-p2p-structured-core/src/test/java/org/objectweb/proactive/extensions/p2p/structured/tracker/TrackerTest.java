@@ -21,13 +21,13 @@ import java.io.Serializable;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
  * Tests associated to {@link TrackerImpl} and {@link TrackerComponentImpl}.
@@ -43,9 +43,9 @@ public class TrackerTest implements Serializable {
         Tracker tracker = TrackerFactory.newActiveTracker();
 
         Peer peerWithMockOverlay =
-                PeerFactory.newActivePeer(StructuredOverlayBuilder.build(MockOverlay.class));
+                PeerFactory.newActivePeer(SerializableProvider.create(MockOverlay.class));
         Peer peerWithAnonymousMockOverlay =
-                PeerFactory.newActivePeer(StructuredOverlayBuilder.build(CanMockOverlay.class));
+                PeerFactory.newActivePeer(SerializableProvider.create(CanMockOverlay.class));
 
         try {
             tracker.inject(peerWithMockOverlay);
@@ -58,7 +58,7 @@ public class TrackerTest implements Serializable {
     @Test
     public void testJoin() {
         Peer peer =
-                PeerFactory.newActivePeer(StructuredOverlayBuilder.build(MockOverlay.class));
+                PeerFactory.newActivePeer(SerializableProvider.create(MockOverlay.class));
 
         Tracker tracker1 = TrackerFactory.newActiveTracker();
         Tracker tracker2 = TrackerFactory.newActiveTracker();
@@ -89,7 +89,7 @@ public class TrackerTest implements Serializable {
     @Test
     public void testJoinWithComponents() {
         Peer peer =
-                PeerFactory.newComponentPeer(StructuredOverlayBuilder.build(MockOverlay.class));
+                PeerFactory.newComponentPeer(SerializableProvider.create(MockOverlay.class));
 
         Tracker tracker1 = TrackerFactory.newComponentTracker();
         Tracker tracker2 = TrackerFactory.newComponentTracker();

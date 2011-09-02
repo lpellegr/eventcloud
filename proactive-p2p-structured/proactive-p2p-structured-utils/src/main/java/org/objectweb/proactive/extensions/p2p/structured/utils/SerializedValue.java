@@ -19,8 +19,8 @@ package org.objectweb.proactive.extensions.p2p.structured.utils;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.objectweb.proactive.extensions.p2p.structured.utils.converter.ByteToObjectConverter;
-import org.objectweb.proactive.extensions.p2p.structured.utils.converter.ObjectToByteConverter;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ByteToObjectConverter;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
 
 /**
  * SerializedValue is a class that is used to maintain a value as an array of

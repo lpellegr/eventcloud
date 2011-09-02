@@ -20,9 +20,9 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider
 import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
-import fr.inria.eventcloud.builders.SemanticNonPersistentOverlayBuilder;
 import fr.inria.eventcloud.datastore.InMemoryJenaDatastore;
 import fr.inria.eventcloud.factories.SemanticFactory;
+import fr.inria.eventcloud.providers.SemanticNonPersistentOverlayProvider;
 
 /**
  * This class is used to specialize an {@link EventCloudDeployer} for unit
@@ -32,6 +32,8 @@ import fr.inria.eventcloud.factories.SemanticFactory;
  */
 public class JunitEventCloudDeployer extends EventCloudDeployer {
 
+    private static final long serialVersionUID = 1L;
+
     public JunitEventCloudDeployer() {
         super(new TestingDeploymentConfiguration());
     }
@@ -40,8 +42,8 @@ public class JunitEventCloudDeployer extends EventCloudDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected Peer createPeer(NodeProvider nodeProvider) {
-        return SemanticFactory.newSemanticPeer(new SemanticNonPersistentOverlayBuilder());
+    protected synchronized Peer createPeer(NodeProvider nodeProvider) {
+        return SemanticFactory.newSemanticPeer(new SemanticNonPersistentOverlayProvider());
     }
 
 }

@@ -24,7 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastReque
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
+import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
 
 /**
  * StatelessQuadruplePatternRequest is a {@link QuadruplePattern} query that is
@@ -78,8 +78,8 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
             @Override
             public void onPeerValidatingKeyConstraints(final CanOverlay overlay,
                                                        final AnycastRequest request) {
-                final SparqlRequestResponseManager messagingManager =
-                        (SparqlRequestResponseManager) overlay.getRequestResponseManager();
+                final SemanticRequestResponseManager messagingManager =
+                        (SemanticRequestResponseManager) overlay.getRequestResponseManager();
 
                 // TODO is it necessary to check if the request has already been
                 // received. I mean does this condition is not already checked

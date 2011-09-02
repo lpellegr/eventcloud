@@ -43,6 +43,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.ReconstructEventRequest;
+import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
 import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
@@ -269,12 +270,22 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
      */
     @Override
     public void unsubscribe(SubscriptionId id) {
-        this.subscriptions.remove(id);
+        if (!this.subscriptions.containsKey(id)) {
+            throw new IllegalArgumentException(
+                    "No subscription registered with the specified subscription id: "
+                            + id);
+        }
+
+        Subscription subscription = this.subscriptions.remove(id);
         this.listeners.remove(id);
         this.eventIdsReceived.values().remove(id);
 
-        // TODO send messages on the network to remove the subscriptions which
-        // are indexed
+        try {
+            super.proxy.selectTracker().getRandomPeer().send(
+                    new UnsubscribeRequest(subscription));
+        } catch (DispatchException e) {
+            e.printStackTrace();
+        }
     }
 
     private void deliver(NotificationId id) {
@@ -315,7 +326,8 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     @Override
     public void receive(Notification notification) {
         // this condition is used to ignore the notifications which may be
-        // received after an unsubscribe operation
+        // received after an unsubscribe operation because the unsubscribe
+        // operation is not atomic
         if (!this.subscriptions.containsKey(notification.getId()
                 .getSubscriptionId())) {
             return;

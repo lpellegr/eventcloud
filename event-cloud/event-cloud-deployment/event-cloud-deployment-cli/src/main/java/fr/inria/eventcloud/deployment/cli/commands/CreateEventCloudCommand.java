@@ -24,6 +24,7 @@ import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 
 /**
@@ -55,7 +56,7 @@ public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
         EventCloud eventCloud =
                 EventCloud.create(
                         PAActiveObject.getUrl(registry),
-                        "http://node.provider.not.yet.available",
+                        new EventCloudDeployer(),
                         new Collection<UnalterableElaProperty>(),
                         this.nbTrackers, this.nbPeers);
 

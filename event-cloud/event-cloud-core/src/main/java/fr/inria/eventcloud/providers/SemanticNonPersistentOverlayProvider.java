@@ -14,23 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.builders;
+package fr.inria.eventcloud.providers;
 
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 import fr.inria.eventcloud.datastore.InMemoryJenaDatastore;
-import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * This class is used to build a {@link CanOverlay} with a
- * {@link SparqlRequestResponseManager} and an {@link InMemoryJenaDatastore} .
+ * This class is used to build a {@link SemanticCanOverlay} with an
+ * {@link InMemoryJenaDatastore} .
  * 
  * @author lpellegr
  */
-public class SemanticNonPersistentOverlayBuilder extends
-        StructuredOverlayBuilder {
+public final class SemanticNonPersistentOverlayProvider extends
+        SerializableProvider<SemanticCanOverlay> {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,9 +36,9 @@ public class SemanticNonPersistentOverlayBuilder extends
      * {@inheritDoc}
      */
     @Override
-    public StructuredOverlay build() {
-        return new CanOverlay(
-                new SparqlRequestResponseManager(), new InMemoryJenaDatastore());
+    public SemanticCanOverlay get() {
+        return new SemanticCanOverlay(
+                new InMemoryJenaDatastore(), new InMemoryJenaDatastore());
     }
 
 }

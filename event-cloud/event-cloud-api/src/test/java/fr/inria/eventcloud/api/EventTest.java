@@ -21,7 +21,7 @@ import java.io.IOException;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.utils.converter.MakeDeepCopy;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 

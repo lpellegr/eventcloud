@@ -19,7 +19,6 @@ package fr.inria.eventcloud;
 import java.io.Serializable;
 
 import org.junit.Test;
-import org.objectweb.proactive.api.PAActiveObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +26,12 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
+import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
@@ -52,28 +52,15 @@ public class EventCloudUsageTest implements Serializable {
 
     @Test
     public void testEventCloudInstantiationAndUsage() {
-        // Creates an EnvetCloud registry in order to store and to retrieve
-        // later the information about the EventCloud which have been created
-        EventCloudsRegistry registry =
-                EventCloudsRegistryFactory.newEventCloudsRegistry();
-
-        String registryUrl = PAActiveObject.getUrl(registry);
-
-        // Creates a new Event-Cloud
-        EventCloud eventCloud =
-                EventCloud.create(
-                        registryUrl, "http://node.provider.not.yet.available",
-                        new Collection<UnalterableElaProperty>(), 1, 3);
-
-        // Registers the Event-Cloud which has been previously created into the
-        // registry. This is done in order to offer the possibility to any user
-        // to interact with this Event-Cloud
-        registry.register(eventCloud);
+        JunitEventCloudInfrastructureDeployer deployer =
+                new JunitEventCloudInfrastructureDeployer();
+        EventCloudId eventCloudId = deployer.createEventCloud(15);
 
         // Retrieves a factory that is specialized to the previous Event-Cloud
         // for creating a proxy
         ProxyFactory factory =
-                ProxyFactory.getInstance(registryUrl, eventCloud.getId());
+                ProxyFactory.getInstance(
+                        deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
         // From the factory we can get a PutGet proxy that is used to perform
         // some synchronous operations
@@ -90,7 +77,6 @@ public class EventCloudUsageTest implements Serializable {
         // putGetProxy.add(
         // new FileInputStream(
         // new File(
-        //
         // "/user/lpellegr/home/Desktop/infobox_property_definitions_en.nq")),
         // SerializationFormat.NQuads);
         // } catch (FileNotFoundException e) {
@@ -99,9 +85,7 @@ public class EventCloudUsageTest implements Serializable {
 
         // Finds all the quadruples that are contained by the Event-Cloud
         Collection<Quadruple> result = putGetProxy.find(QuadruplePattern.ANY);
-        log.info(
-                "Quadruples contained by the Event-Cloud {}",
-                eventCloud.getId());
+        log.info("Quadruples contained by the Event-Cloud {}", eventCloudId);
         for (Quadruple quad : result) {
             log.info(quad.toString());
         }
@@ -185,7 +169,30 @@ public class EventCloudUsageTest implements Serializable {
             e1.printStackTrace();
         }
 
+        // try {
+        // deployer.getRandomSemanticPeer(eventCloudId).send(
+        // new StatelessQuadruplePatternRequest(QuadruplePattern.ANY) {
+        //
+        // private static final long serialVersionUID = 1L;
+        //
+        // @Override
+        // public void onPeerValidatingKeyConstraints(CanOverlay overlay,
+        // QuadruplePattern quadruplePattern) {
+        // System.err.println("$A$A$ Peer " + overlay
+        // + " contains:");
+        // for (Quadruple quad : ((SynchronizedJenaDatasetGraph)
+        // overlay.getDatastore()).find(QuadruplePattern.ANY)) {
+        // log.debug(quad.toString());
+        // }
+        // }
+        // });
+        // } catch (DispatchException e) {
+        // e.printStackTrace();
+        // }
+
         subscribeProxy.unsubscribe(id);
+
+        // System.err.println(">>> UNSUBSCRIBE REQUEST SENT!");
 
         publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
@@ -196,13 +203,41 @@ public class EventCloudUsageTest implements Serializable {
         // just to test that no notification is delivered
 
         try {
-            Thread.sleep(5000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        // TODO test has to be rewritten to detect termination cleanly (the only
-        // solution is to write into a file in the local filesystem)
+        // System.err.println(">>> UNSUBSCRIBE REQUEST ASSUMED TO BE EXECUTED!");
+        //
+        // try {
+        // deployer.getRandomSemanticPeer(eventCloudId).send(
+        // new StatelessQuadruplePatternRequest(QuadruplePattern.ANY) {
+        //
+        // private static final long serialVersionUID = 1L;
+        //
+        // @Override
+        // public void onPeerValidatingKeyConstraints(CanOverlay overlay,
+        // QuadruplePattern quadruplePattern) {
+        // System.err.println("$B$B$ Peer " + overlay
+        // + " contains:");
+        // for (Quadruple quad : ((SynchronizedJenaDatasetGraph)
+        // overlay.getDatastore()).find(QuadruplePattern.ANY)) {
+        // log.debug(quad.toString());
+        // }
+        // }
+        // });
+        // } catch (DispatchException e) {
+        // e.printStackTrace();
+        // }
+        //
+        // try {
+        // Thread.sleep(15000);
+        // } catch (InterruptedException e) {
+        // e.printStackTrace();
+        // }
+
+        // TODO test has to be rewritten to detect termination cleanly
     }
 
 }

@@ -37,13 +37,13 @@ import fr.inria.eventcloud.utils.MurmurHash;
 /**
  * A quadruple is a 4-tuple containing respectively a graph, a subject, a
  * predicate and an object value. The object value can be either an IRI or a
- * Literal whereas for all the others components an IRI is required.
+ * Literal whereas for all the others elements an IRI is required.
  * <p>
- * Jena already provides its own abstraction for quadruples. However, the
- * event-cloud has to impose some restrictions on the values of a Quadruple
- * (e.g. the Blank Nodes are not allowed). By providing our own Quadruple
- * abstraction, we can check for this kind of rule when the object is created.
- * Also, the Quadruple class provides a constructor that use Jena objects for
+ * Jena already provides its own abstraction for quadruples. However, the event
+ * cloud has to impose some restrictions on the values of a Quadruple (e.g.
+ * Blank Nodes are not allowed). By providing our own Quadruple abstraction, we
+ * can check for this kind of rule when the object is created. Also, the
+ * Quadruple class provides a constructor that use Jena objects for
  * type-checking at compile time. However, these objects are not serializable,
  * that's why the quadruple abstraction overrides the readObject and writeObject
  * methods.
@@ -274,14 +274,14 @@ public class Quadruple implements Serializable {
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("(");
-        result.append(this.nodes[0].toString());
-        result.append(", ");
-        result.append(this.nodes[1].toString());
-        result.append(", ");
-        result.append(this.nodes[2].toString());
-        result.append(", ");
-        result.append(this.nodes[3].toString());
+        for (int i = 0; i < this.nodes.length; i++) {
+            result.append(this.nodes[i].toString());
+            if (i < this.nodes.length - 1) {
+                result.append(", ");
+            }
+        }
         result.append(")");
+
         return result.toString();
     }
 
@@ -291,22 +291,21 @@ public class Quadruple implements Serializable {
 
         Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
         this.nodes = new Node[4];
-        this.nodes[0] = tokenizer.next().asNode();
-        this.nodes[1] = tokenizer.next().asNode();
-        this.nodes[2] = tokenizer.next().asNode();
-        this.nodes[3] = tokenizer.next().asNode();
+        for (int i = 0; i < nodes.length; i++) {
+            this.nodes[i] = tokenizer.next().asNode();
+        }
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
+
         OutputStreamWriter outWriter = new OutputStreamWriter(out);
-        OutputLangUtils.output(outWriter, this.nodes[0], null);
-        outWriter.write(' ');
-        OutputLangUtils.output(outWriter, this.nodes[1], null);
-        outWriter.write(' ');
-        OutputLangUtils.output(outWriter, this.nodes[2], null);
-        outWriter.write(' ');
-        OutputLangUtils.output(outWriter, this.nodes[3], null);
+        for (int i = 0; i < this.nodes.length; i++) {
+            OutputLangUtils.output(outWriter, this.nodes[i], null);
+            if (i < this.nodes.length - 1) {
+                outWriter.write(' ');
+            }
+        }
         outWriter.flush();
     }
 

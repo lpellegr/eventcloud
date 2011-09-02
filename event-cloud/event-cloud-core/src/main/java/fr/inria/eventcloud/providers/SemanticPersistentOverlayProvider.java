@@ -14,40 +14,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.builders;
+package fr.inria.eventcloud.providers;
 
 import java.io.File;
 
-import org.objectweb.proactive.extensions.p2p.structured.builders.StructuredOverlayBuilder;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
-import fr.inria.eventcloud.overlay.SparqlRequestResponseManager;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * This class is used to build a {@link CanOverlay} with a
- * {@link SparqlRequestResponseManager} and a {@link PersistentJenaTdbDatastore}
- * .
+ * This class is used to build a {@link SemanticCanOverlay} with a
+ * {@link PersistentJenaTdbDatastore} .
  * 
  * @author lpellegr
  */
-public class SemanticPersistentOverlayBuilder extends StructuredOverlayBuilder {
+public final class SemanticPersistentOverlayProvider extends
+        SerializableProvider<SemanticCanOverlay> {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public StructuredOverlay build() {
-        return new CanOverlay(
-                new SparqlRequestResponseManager(),
+    public SemanticCanOverlay get() {
+        return new SemanticCanOverlay(
                 new PersistentJenaTdbDatastore(
                         new File(
                                 EventCloudProperties.REPOSITORIES_PATH.getValue()),
-                        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()));
+                        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
+                new PersistentJenaTdbDatastore(new File(
+                        System.getProperty("java.io.tmpdir"),
+                        "eventcloud-colanders"), true));
     }
 
 }

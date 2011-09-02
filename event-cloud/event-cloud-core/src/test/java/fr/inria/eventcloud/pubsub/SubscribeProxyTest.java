@@ -146,9 +146,9 @@ public class SubscribeProxyTest {
         public void onNotification(SubscriptionId id, Event solution) {
             synchronized (events) {
                 events.add(solution);
-                events.notify();
+                events.notifyAll();
             }
-            log.info("New event received: {}", solution);
+            log.info("New event received:\n {}", solution);
         }
     }
 
