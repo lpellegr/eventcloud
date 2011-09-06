@@ -38,8 +38,11 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.hp.hpl.jena.graph.Node;
+
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 
 /**
@@ -83,6 +86,13 @@ public class EventToWsNotifNotificationHandler {
         Document xmlDoc = domImpl.createDocument(null, null, null);
 
         for (Quadruple quad : event.getQuadruples()) {
+            if (quad.getPredicate()
+                    .equals(
+                            Node.createURI(EventCloudProperties.EVENT_CLOUD_NS.getValue()
+                                    + "event/" + "nbquads"))) {
+                continue;
+            }
+
             String predicateValue = quad.getPredicate().getURI();
 
             String[] elements =

@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.proxies;
 
 import java.io.InputStream;
+import java.net.URI;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 
@@ -26,9 +27,12 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.api.webservices.PublishWsApi;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
+import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslatorImpl;
 
 /**
  * PublishProxyImpl is a concrete implementation of {@link PublishProxy}. This
@@ -39,7 +43,10 @@ import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
  * 
  * @see ProxyFactory
  */
-public class PublishProxyImpl extends ProxyCache implements PublishProxy {
+public class PublishProxyImpl extends ProxyCache implements PublishProxy,
+        PublishWsApi {
+
+    private ProxyWsNotificationTranslator translator;
 
     /**
      * Empty constructor required by ProActive.
@@ -53,6 +60,7 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
     public void init(EventCloudCache proxy) {
         if (this.proxy == null) {
             this.proxy = proxy;
+            this.translator = new ProxyWsNotificationTranslatorImpl();
         }
     }
 
@@ -88,6 +96,31 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
         for (Quadruple quad : event.getQuadruples()) {
             this.publish(quad);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishEvent(String xmlPayload, URI eventId) {
+        Event event =
+                this.translator.translateWsNotifNotificationToEvent(
+                        xmlPayload, eventId);
+
+        this.publish(event);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishEventWithXsd(String xmlPayload, String xsdPayload,
+                                    URI eventId) {
+        Event event =
+                this.translator.translateWsNotifNotificationToEvent(
+                        xmlPayload, xsdPayload, eventId);
+
+        this.publish(event);
     }
 
     /**

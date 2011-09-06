@@ -17,12 +17,15 @@
 package fr.inria.eventcloud.deployment.cli.launchers;
 
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
+import fr.inria.eventcloud.webservices.WsProxiesManager;
 
 /**
  * This launcher is used to deploy a {@link PutGetProxy} as a WebService.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public final class WsPutGetProxyLauncher extends WsProxyLauncher<PutGetProxy> {
 
@@ -40,6 +43,14 @@ public final class WsPutGetProxyLauncher extends WsProxyLauncher<PutGetProxy> {
     @Override
     public PutGetProxy createProxy(ProxyFactory factory) {
         return factory.createPutGetProxy();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String exposeWsProxy(Proxy proxy) {
+        return WsProxiesManager.exposePutGetWebService((PutGetProxy) proxy);
     }
 
 }

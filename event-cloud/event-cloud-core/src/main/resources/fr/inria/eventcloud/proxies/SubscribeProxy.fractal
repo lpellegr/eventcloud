@@ -2,9 +2,12 @@
 <!DOCTYPE definition PUBLIC "-//objectweb.org//DTD Fractal ADL 2.0//EN" "classpath://org/objectweb/proactive/core/component/adl/xml/proactive.dtd">
 
 <definition name="fr.inria.eventcloud.proxies.SubscribeProxy">
-	<interface role="server" name="sub-proxy-services" signature="fr.inria.eventcloud.proxies.SubscribeProxy"/>
+	<interface role="server" name="subscribe-services" signature="fr.inria.eventcloud.proxies.SubscribeProxy"/>
+	<interface role="server" name="subscribe-webservices" signature="fr.inria.eventcloud.api.webservices.SubscribeWsApi"/>
 
 	<content class="fr.inria.eventcloud.proxies.SubscribeProxyImpl"/>
+
+	<controller desc="/org/objectweb/proactive/extensions/webservices/cxf/component/controller/cxf-component-config.xml"/>
 
 	<virtual-node name="SubProxyVN"/>
 </definition>

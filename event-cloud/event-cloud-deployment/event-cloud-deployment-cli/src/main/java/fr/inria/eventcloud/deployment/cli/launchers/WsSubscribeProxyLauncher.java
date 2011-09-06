@@ -17,12 +17,15 @@
 package fr.inria.eventcloud.deployment.cli.launchers;
 
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.webservices.WsProxiesManager;
 
 /**
  * This launcher is used to deploy a {@link SubscribeProxy} as a WebService.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public final class WsSubscribeProxyLauncher extends
         WsProxyLauncher<SubscribeProxy> {
@@ -41,6 +44,14 @@ public final class WsSubscribeProxyLauncher extends
     @Override
     public SubscribeProxy createProxy(ProxyFactory factory) {
         return factory.createSubscribeProxy();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String exposeWsProxy(Proxy proxy) {
+        return WsProxiesManager.exposeSubscribeWebService((SubscribeProxy) proxy);
     }
 
 }

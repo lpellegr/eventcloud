@@ -85,18 +85,14 @@ public class EventCloudProperties {
                     "semantic.tracker.adl",
                     "fr.inria.eventcloud.tracker.SemanticTracker");
 
-    public static final PropertyString PUTGET_PROXY_ADL = new PropertyString(
-            "putget.proxy.adl", "fr.inria.eventcloud.proxies.PutGetProxy");
-
-    public static final PropertyString PUTGET_PROXY_SERVICES_ITF =
-            new PropertyString(
-                    "putget-proxy.services.itf", "putget-proxy-services");
-
     public static final PropertyString PUBLISH_PROXY_ADL = new PropertyString(
             "pub.proxy.adl", "fr.inria.eventcloud.proxies.PublishProxy");
 
     public static final PropertyString PUBLISH_PROXY_SERVICES_ITF =
-            new PropertyString("pub-proxy.services.itf", "pub-proxy-services");
+            new PropertyString("publish.services.itf", "publish-services");
+
+    public static final PropertyString PUBLISH_PROXY_WEBSERVICES_ITF =
+            new PropertyString("publish.webservices.itf", "publish-webservices");
 
     public static final PropertyString SUBSCRIBE_PROXY_ADL =
             new PropertyString(
@@ -104,7 +100,20 @@ public class EventCloudProperties {
                     "fr.inria.eventcloud.proxies.SubscribeProxy");
 
     public static final PropertyString SUBSCRIBE_PROXY_SERVICES_ITF =
-            new PropertyString("sub-proxy.services.itf", "sub-proxy-services");
+            new PropertyString("subscribe.services.itf", "subscribe-services");
+
+    public static final PropertyString SUBSCRIBE_PROXY_WEBSERVICES_ITF =
+            new PropertyString(
+                    "subscribe.webservices.itf", "subscribe-webservices");
+
+    public static final PropertyString PUTGET_PROXY_ADL = new PropertyString(
+            "putget.proxy.adl", "fr.inria.eventcloud.proxies.PutGetProxy");
+
+    public static final PropertyString PUTGET_PROXY_SERVICES_ITF =
+            new PropertyString("putget.services.itf", "putget-services");
+
+    public static final PropertyString PUTGET_PROXY_WEBSERVICES_ITF =
+            new PropertyString("putget.webservices.itf", "putget-webservices");
 
     static {
         File preferencesFile = new File(getPreferencesFilePath());
