@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientFactoryBean;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
@@ -39,6 +41,8 @@ import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
+import fr.inria.eventcloud.api.webservices.SubscribeWsApi;
+import fr.inria.eventcloud.api.webservices.SubscriberWsApi;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
@@ -50,6 +54,8 @@ import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 import fr.inria.eventcloud.pubsub.Solution;
 import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslatorImpl;
 
 /**
  * SubscribeProxyImpl is a concrete implementation of {@link SubscribeProxy}.
@@ -66,7 +72,8 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
+public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
+        SubscribeWsApi {
 
     private static final long serialVersionUID = 1L;
 
@@ -90,6 +97,10 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     // contains the solutions that are being received
     private Map<NotificationId, Solution> solutions;
 
+    // contains the subscriber web service clients to use in order to deliver
+    // the solutions
+    private Map<SubscriptionId, Client> subscriberWsClients;
+
     // TODO: this set has to be replace by a DataBag. The number of events ids
     // received will grow quickly and after some time it is possible to get an
     // OutOfMemory exception. That's why it would be nice to have the
@@ -99,6 +110,8 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     // example from pig:
     // http://pig.apache.org/docs/r0.7.0/api/org/apache/pig/data/DataBag.html
     private Map<Node, SubscriptionId> eventIdsReceived;
+
+    private ProxyWsNotificationTranslator translator;
 
     /**
      * Empty constructor required by ProActive.
@@ -119,7 +132,9 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
             this.listeners =
                     new HashMap<SubscriptionId, NotificationListener<?>>();
             this.solutions = new HashMap<NotificationId, Solution>();
+            this.subscriberWsClients = new HashMap<SubscriptionId, Client>();
             this.eventIdsReceived = new HashMap<Node, SubscriptionId>();
+            this.translator = new ProxyWsNotificationTranslatorImpl();
             // TODO: use the properties field to initialize ELA properties
         }
     }
@@ -145,6 +160,19 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         return this.indexSubscription(sparqlQuery, listener);
     }
 
+    @Override
+    public SubscriptionId subscribe(String wsNotifSubscriptionPayload,
+                                    String topicNameSpacePayload,
+                                    String[] topicsDefinitionPayloads,
+                                    String subscriberWsUrl) {
+        String sparqlQuery =
+                this.translator.translateWsNotifSubscriptionToSparqlQuery(
+                        wsNotifSubscriptionPayload, topicNameSpacePayload,
+                        topicsDefinitionPayloads);
+
+        return this.indexSubscription(sparqlQuery, subscriberWsUrl);
+    }
+
     private SubscriptionId indexSubscription(String sparqlQuery,
                                              NotificationListener<?> listener) {
         Subscription subscription =
@@ -164,6 +192,35 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
                     + subscription.getId());
             return subscription.getId();
         }
+
+        try {
+            super.proxy.selectTracker().getRandomPeer().send(
+                    new IndexSubscriptionRequest(subscription));
+            this.subscriptions.put(subscription.getId(), subscription);
+        } catch (DispatchException e) {
+            e.printStackTrace();
+        }
+
+        return subscription.getId();
+    }
+
+    private SubscriptionId indexSubscription(String sparqlQuery,
+                                             String subscriberWsUrl) {
+        Subscription subscription =
+                new Subscription(
+                        PAActiveObject.getUrl(PAActiveObject.getStubOnThis()),
+                        sparqlQuery);
+
+        log.debug(
+                "New subscription has been registered from {} with id {}",
+                PAActiveObject.getBodyOnThis().getUrl(), subscription.getId());
+
+        ClientFactoryBean clientFactory = new ClientFactoryBean();
+        clientFactory.setServiceClass(SubscriberWsApi.class);
+        clientFactory.setAddress(subscriberWsUrl);
+        Client client = clientFactory.create();
+
+        this.subscriberWsClients.put(subscription.getId(), client);
 
         try {
             super.proxy.selectTracker().getRandomPeer().send(
@@ -247,7 +304,8 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
                 if (quad.getPredicate().equals(
                         PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
                     expectedNumberOfQuadruples =
-                            (Integer) quad.getObject().getLiteralValue();
+                            Integer.parseInt((String) quad.getObject()
+                                    .getLiteralValue());
                 }
                 quadsReceived.add(quad);
                 quadHashesReceived.add(quad.hashValue());
@@ -277,7 +335,12 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         }
 
         Subscription subscription = this.subscriptions.remove(id);
-        this.listeners.remove(id);
+        if (this.subscriberWsClients.containsKey(id)) {
+            Client client = this.subscriberWsClients.remove(id);
+            client.destroy();
+        } else {
+            this.listeners.remove(id);
+        }
         this.eventIdsReceived.values().remove(id);
 
         try {
@@ -320,16 +383,40 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         }
     }
 
+    private void deliverWs(NotificationId id) {
+        try {
+            Event event =
+                    this.reconstructEvent(
+                            this.subscriptions.get(id.getSubscriptionId()),
+                            this.solutions.remove(id).getSolution());
+
+            if (event != null) {
+                Client client =
+                        this.subscriberWsClients.get(id.getSubscriptionId());
+                String methodName = "notifyEvent";
+                String wsNotification =
+                        this.translator.translateEventToWsNotifNotification(event);
+
+                client.invoke(methodName, new Object[] {
+                        id.getSubscriptionId(), wsNotification});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void receive(Notification notification) {
+        SubscriptionId subscriptionId =
+                notification.getId().getSubscriptionId();
+
         // this condition is used to ignore the notifications which may be
         // received after an unsubscribe operation because the unsubscribe
         // operation is not atomic
-        if (!this.subscriptions.containsKey(notification.getId()
-                .getSubscriptionId())) {
+        if (!this.subscriptions.containsKey(subscriptionId)) {
             return;
         }
 
@@ -337,15 +424,13 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
                 "New notification received on {} from {} for subscription id {}",
                 new Object[] {
                         PAActiveObject.getBodyOnThis().getUrl(),
-                        notification.getSource(),
-                        notification.getId().getSubscriptionId()});
+                        notification.getSource(), subscriptionId});
 
         Solution solution = this.solutions.get(notification.getId());
         if (solution == null) {
             solution =
                     new Solution(
-                            this.subscriptions.get(
-                                    notification.getId().getSubscriptionId())
+                            this.subscriptions.get(subscriptionId)
                                     .getSubSubscriptions().length,
                             notification.getBinding());
             this.solutions.put(notification.getId(), solution);
@@ -358,7 +443,11 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
             // TODO checks whether the ELA properties are verified
             // if yes, deliver the solution
             // else do nothing and wait for an ELA property that is verified
-            this.deliver(notification.getId());
+            if (this.subscriberWsClients.containsKey(subscriptionId)) {
+                this.deliverWs(notification.getId());
+            } else {
+                this.deliver(notification.getId());
+            }
         }
     }
 

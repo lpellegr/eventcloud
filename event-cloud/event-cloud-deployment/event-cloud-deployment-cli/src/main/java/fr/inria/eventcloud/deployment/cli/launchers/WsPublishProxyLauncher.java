@@ -17,12 +17,15 @@
 package fr.inria.eventcloud.deployment.cli.launchers;
 
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.webservices.WsProxiesManager;
 
 /**
  * This launcher is used to deploy a {@link PublishProxy} as a WebService.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public final class WsPublishProxyLauncher extends WsProxyLauncher<PublishProxy> {
 
@@ -40,6 +43,14 @@ public final class WsPublishProxyLauncher extends WsProxyLauncher<PublishProxy> 
     @Override
     public PublishProxy createProxy(ProxyFactory factory) {
         return factory.createPublishProxy();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String exposeWsProxy(Proxy proxy) {
+        return WsProxiesManager.exposePublishWebService((PublishProxy) proxy);
     }
 
 }

@@ -32,10 +32,21 @@ public class SubscriptionId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final long value;
+    private long value;
+
+    public SubscriptionId() {
+    }
 
     public SubscriptionId(long value) {
         this.value = value;
+    }
+
+    public void setValue(long value) {
+        this.value = value;
+    }
+
+    public long getValue() {
+        return this.value;
     }
 
     /**

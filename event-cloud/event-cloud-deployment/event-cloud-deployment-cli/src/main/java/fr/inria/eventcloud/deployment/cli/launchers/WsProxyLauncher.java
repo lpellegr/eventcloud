@@ -29,6 +29,7 @@ import fr.inria.eventcloud.proxies.Proxy;
  * proxies that have to be deployed as a WebService.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public abstract class WsProxyLauncher<T extends Proxy> {
 
@@ -52,6 +53,8 @@ public abstract class WsProxyLauncher<T extends Proxy> {
 
     public abstract T createProxy(ProxyFactory factory);
 
+    public abstract String exposeWsProxy(Proxy proxy);
+
     public void run() {
         ProxyFactory factory =
                 ProxyFactory.getInstance(this.registryUrl, new EventCloudId(
@@ -59,11 +62,10 @@ public abstract class WsProxyLauncher<T extends Proxy> {
 
         Proxy proxy = this.createProxy(factory);
 
-        // TODO: expose proxy as webservice
+        String wsUrl = this.exposeWsProxy(proxy);
 
         System.out.println(this.getClass().getName()
-                + " deployed and running at:");
-        System.out.println("ws address");
+                + " deployed and running at: " + wsUrl);
     }
 
 }

@@ -27,6 +27,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.api.webservices.PutGetWsApi;
 import fr.inria.eventcloud.factories.ProxyFactory;
 
 /**
@@ -38,7 +39,8 @@ import fr.inria.eventcloud.factories.ProxyFactory;
  * 
  * @see ProxyFactory
  */
-public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
+public class PutGetProxyImpl extends ProxyCache implements PutGetProxy,
+        PutGetWsApi {
 
     /**
      * Empty constructor required by ProActive.
@@ -68,8 +70,24 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      * {@inheritDoc}
      */
     @Override
+    public boolean addQuadruple(Quadruple quad) {
+        return this.add(quad);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean add(Collection<Quadruple> quads) {
         return super.selectPeer().add(quads);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean addQuadrupleCollection(Collection<Quadruple> quads) {
+        return this.add(quads);
     }
 
     /**
@@ -101,8 +119,24 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      * {@inheritDoc}
      */
     @Override
+    public boolean containsQuadruple(Quadruple quad) {
+        return this.contains(quad);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean delete(Quadruple quad) {
         return super.selectPeer().delete(quad);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteQuadruple(Quadruple quad) {
+        return this.delete(quad);
     }
 
     /**
@@ -117,6 +151,14 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      * {@inheritDoc}
      */
     @Override
+    public boolean deleteQuadrupleCollection(Collection<Quadruple> quads) {
+        return this.delete(quads);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
         return super.selectPeer().find(quadPattern);
     }
@@ -125,8 +167,24 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      * {@inheritDoc}
      */
     @Override
+    public Collection<Quadruple> deleteQuadruplePattern(QuadruplePattern quadPattern) {
+        return this.delete(quadPattern);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Collection<Quadruple> find(QuadruplePattern quadPattern) {
         return super.selectPeer().find(quadPattern);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<Quadruple> findQuadruplePattern(QuadruplePattern quadPattern) {
+        return this.find(quadPattern);
     }
 
     /**
