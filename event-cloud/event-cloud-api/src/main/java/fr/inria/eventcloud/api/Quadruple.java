@@ -195,8 +195,11 @@ public class Quadruple implements Serializable {
      * Timestamps the quadruple (i.e. adds a timestamp value which is assumed to
      * indicate when the quadruple has been published). If the quadruple is
      * already timestamped, a call to this method has no effect.
+     * 
+     * @return the instance of the quadruple which has been timestamped (this is
+     *         not a copy).
      */
-    public synchronized void timestamp() {
+    public synchronized Quadruple timestamp() {
         if (this.timestampedGraphNode == null) {
             this.timestamp = System.nanoTime();
             this.timestampedGraphNode =
@@ -205,6 +208,8 @@ public class Quadruple implements Serializable {
                                     TIMESTAMP_SEPARATOR
                                             + Long.toString(this.timestamp)));
         }
+
+        return this;
     }
 
     /**
@@ -212,7 +217,7 @@ public class Quadruple implements Serializable {
      * 
      * @return a timestamp indicating when the quadruple has been published.
      */
-    public long getPublicationTimestamp() {
+    public long getIndexationTimestamp() {
         return this.timestamp;
     }
 
