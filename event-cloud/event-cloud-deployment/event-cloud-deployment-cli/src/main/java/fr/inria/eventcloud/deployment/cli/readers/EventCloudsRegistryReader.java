@@ -21,9 +21,15 @@ import java.util.Arrays;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.core.ProActiveException;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 import fr.inria.eventcloud.deployment.cli.commands.CreateEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
@@ -37,26 +43,49 @@ import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
  */
 public class EventCloudsRegistryReader {
 
+    @Parameter(names = {"-registry"}, description = "An eventclouds registry URL to use")
+    private String registryUrl;
+
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Event clouds registry URL expected");
+        new EventCloudsRegistryReader().run(args);
+    }
+
+    public void run(String[] args) {
+        JCommander jCommander = new JCommander(this);
+        jCommander.setProgramName(EventCloudsRegistryReader.class.getCanonicalName());
+
+        try {
+            jCommander.parse(args);
+        } catch (ParameterException e) {
+            jCommander.usage();
             System.exit(1);
         }
 
         EventCloudsRegistry registry = null;
-        try {
-            registry =
-                    PAActiveObject.lookupActive(
-                            EventCloudsRegistry.class, args[0]);
-        } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
-            System.exit(1);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
+        if (this.registryUrl != null) {
+            try {
+                registry =
+                        PAActiveObject.lookupActive(
+                                EventCloudsRegistry.class, this.registryUrl);
+            } catch (ActiveObjectCreationException e) {
+                e.printStackTrace();
+                System.exit(1);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        } else {
+            registry = EventCloudsRegistryFactory.newEventCloudsRegistry();
+
+            try {
+                System.out.println(PAActiveObject.registerByName(
+                        registry, "eventclouds-registry"));
+            } catch (ProActiveException e) {
+                e.printStackTrace();
+            }
         }
 
-        System.out.println("Type 'help' to know what are the possible actions");
+        System.out.println("\nType 'help' to know what are the possible actions");
 
         @SuppressWarnings("unchecked")
         CommandLineReader<EventCloudsRegistry> reader =
