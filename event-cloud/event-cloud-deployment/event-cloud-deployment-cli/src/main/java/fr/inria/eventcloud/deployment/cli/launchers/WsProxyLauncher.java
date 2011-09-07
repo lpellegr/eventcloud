@@ -65,7 +65,7 @@ public abstract class WsProxyLauncher<T extends Proxy> {
         String wsUrl = this.exposeWsProxy(proxy);
 
         System.out.println(this.getClass().getName()
-                + " deployed and running at: " + wsUrl);
+                + " deployed and running at:\n" + wsUrl);
     }
 
 }
