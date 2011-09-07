@@ -16,20 +16,41 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.objectweb.proactive.ActiveObjectCreationException;
+import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.graph.Node;
+
+import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.overlay.SemanticPeer;
+import fr.inria.eventcloud.pubsub.Notification;
+import fr.inria.eventcloud.pubsub.NotificationId;
+import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.pubsub.SubscriptionRewriter;
+import fr.inria.eventcloud.pubsub.Subsubscription;
 
 /**
- * Indexes a {@link Subscription} into the network. The indexing operation
- * consists in reaching all the peers that match the first sub-subscription
- * contained by the subscription. Then, when one of these peers are reached, the
- * subscription is put into the local cache and into the local datastore.
+ * Request used to index a subscription that have been rewritten after the
+ * publication of a quadruple. While the rewritten subscription is indexed, it
+ * is possible to have received some quadruples that match the rewritten
+ * subscription. That's why an algorithm similar to the one from
+ * {@link PublishQuadrupleRequest} is used to rewrite the rewritten subscription
+ * for the quadruples that match the rewritten subscription.
+ * 
+ * @see PublishQuadrupleRequest
  * 
  * @author lpellegr
  */
@@ -37,14 +58,19 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger log =
-            LoggerFactory.getLogger(IndexSubscriptionRequest.class);
-
     protected SerializedValue<Subscription> subscription;
 
+    /**
+     * Constructs an IndexRewrittenSubscriptionRequest from the specified
+     * rewritten {@code subscription}.
+     * 
+     * @param subscription
+     *            the rewritten subscription to index.
+     */
     public IndexSubscriptionRequest(Subscription subscription) {
-        super(subscription.getSubSubscriptions()[0].getAtomicQuery()
-                .getQuadruplePattern());
+        super(
+                subscription.timestamp().getSubSubscriptions()[0].getAtomicQuery()
+                        .getQuadruplePattern());
         this.subscription = new SerializedValue<Subscription>(subscription);
     }
 
@@ -54,13 +80,91 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
     @Override
     public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                QuadruplePattern quadruplePattern) {
+        // writes the subscription into the cache and the local datastore
         Subscription subscription = this.subscription.getValue();
-
         ((SemanticCanOverlay) overlay).storeSubscription(subscription);
 
-        log.debug(
-                "Subscription {} has been indexed on peer {}",
-                subscription.getId(), overlay);
+        SynchronizedJenaDatasetGraph datastore =
+                (SynchronizedJenaDatasetGraph) overlay.getDatastore();
+        Subsubscription firstSubsubscription =
+                subscription.getSubSubscriptions()[0];
+
+        // finds the quadruples that match the subscription which has
+        // been indexed
+        Collection<Quadruple> quadsMatchingFirstSubsubscription =
+                datastore.find(firstSubsubscription.getAtomicQuery()
+                        .getQuadruplePattern());
+        Iterator<Quadruple> it = quadsMatchingFirstSubsubscription.iterator();
+        while (it.hasNext()) {
+            Quadruple quadMatching = it.next();
+
+            // skips the quadruples which have been published before the
+            // subscription
+            if (quadMatching.getIndexationTimestamp() < subscription.getIndexationTime()) {
+                continue;
+            }
+
+            if (subscription.getSubSubscriptions().length == 1) {
+                NotificationId notificationId =
+                        new NotificationId(
+                                subscription.getOriginalId(), System.nanoTime());
+                // sends part of the solution to the subscriber
+                // TODO: this operation can be done in parallel with the send
+                // RetrieveSubSolutionOperation
+                subscription.getSourceStub()
+                        .receive(
+                                new Notification(
+                                        notificationId,
+                                        PAActiveObject.getUrl(overlay.getStub()),
+                                        PublishSubscribeUtils.filter(
+                                                quadMatching,
+                                                subscription.getResultVars(),
+                                                firstSubsubscription.getAtomicQuery())));
+                // broadcasts a message to all the stubs contained by the
+                // subscription to say to these peers to send their
+                // sub-solutions to the subscriber
+                // TODO: send message in parallel
+                for (Subscription.Stub stub : subscription.getStubs()) {
+                    try {
+                        PAActiveObject.lookupActive(
+                                SemanticPeer.class, stub.peerUrl).receive(
+                                new RetrieveSubSolutionOperation(
+                                        notificationId, stub.quadrupleHash));
+                    } catch (ActiveObjectCreationException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                Quadruple metaQuad =
+                        PublishSubscribeUtils.createMetaQuadruple(
+                                quadMatching,
+                                PublishSubscribeUtils.createSubscriptionIdUrl(subscription.getParentId()),
+                                Node.createLiteral(subscription.getId()
+                                        .toString(), XSDDatatype.XSDlong));
+
+                datastore.add(metaQuad);
+
+                Subscription rewrittenSubscription =
+                        SubscriptionRewriter.rewrite(subscription, quadMatching);
+
+                // stores the url of the stub of the current peer in order to
+                // have the possibility to retrieve the quadruple later
+                rewrittenSubscription.addStub(new Subscription.Stub(
+                        PAActiveObject.getUrl(overlay.getStub()),
+                        quadMatching.hashValue()));
+
+                try {
+                    overlay.getStub()
+                            .send(
+                                    new IndexSubscriptionRequest(
+                                            rewrittenSubscription));
+                } catch (DispatchException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 }
