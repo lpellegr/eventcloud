@@ -1,10 +1,9 @@
 #!/bin/sh
 
-. $EVENTCLOUD_BUNDLE_HOME/scripts/configuration/set-environment.sh
+. configuration/set-environment.sh
 
 java -Xms256m -Xmx1024m \
 	 -server \
-	 -Deventcloud.bundle.home=$EVENTCLOUD_BUNDLE_HOME \
 	 -Dproactive.communication.protocol=pnp \
      -Dproactive.pnp.port=8890 \
      -Dproactive.http.port=8890 \
@@ -13,4 +12,4 @@ java -Xms256m -Xmx1024m \
      -Dlogback.configurationFile=file:$PATH_TO_RESOURCES/logback.xml \
      -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.WsSubscribeProxyLauncher $@
 
-. $EVENTCLOUD_BUNDLE_HOME/scripts/configuration/unset-environment.sh
+. configuration/unset-environment.sh

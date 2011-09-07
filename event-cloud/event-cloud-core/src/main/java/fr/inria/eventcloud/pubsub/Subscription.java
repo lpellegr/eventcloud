@@ -21,6 +21,8 @@ import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_
 import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE;
 import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ID_NODE;
 import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ID_PROPERTY;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_INDEXATION_DATETIME_NODE;
+import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY;
 import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE;
 import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
 import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
@@ -88,6 +90,8 @@ public class Subscription implements Rdfable, Serializable {
 
     private final long creationTime;
 
+    private long indexationTime;
+
     private final String source;
 
     private final String sparqlQuery;
@@ -106,13 +110,13 @@ public class Subscription implements Rdfable, Serializable {
         this(null, source, sparqlQuery);
     }
 
-    public Subscription(SubscriptionId parentId, String source,
+    public Subscription(SubscriptionId parentId, String subscribeProxyUrl,
             String sparqlQuery) {
-        this(null, parentId, source, sparqlQuery);
+        this(null, parentId, subscribeProxyUrl, sparqlQuery);
     }
 
     public Subscription(SubscriptionId originalId, SubscriptionId parentId,
-            String source, String sparqlQuery) {
+            String subscribeProxyUrl, String sparqlQuery) {
         if (!sparqlQuery.contains("GRAPH")) {
             throw new IllegalArgumentException(
                     "The SPARQL query used for a subscription must always contain a GRAPH pattern.");
@@ -127,21 +131,23 @@ public class Subscription implements Rdfable, Serializable {
         this.parentId = parentId;
         this.id =
                 new SubscriptionId(MurmurHash.hash64(
-                        source, sparqlQuery, Long.toString(this.creationTime)));
+                        subscribeProxyUrl, sparqlQuery,
+                        Long.toString(this.creationTime)));
         this.originalId = originalId == null
                 ? this.id : originalId;
-        this.source = source;
+        this.source = subscribeProxyUrl;
         this.sparqlQuery = sparqlQuery;
         this.stubs = new ArrayList<Stub>();
     }
 
     private Subscription(SubscriptionId originalId, SubscriptionId parentId,
-            SubscriptionId id, long creationTime, String source,
-            String sparqlQuery) {
+            SubscriptionId id, long creationTime, long indexationTime,
+            String source, String sparqlQuery) {
         this.originalId = originalId;
         this.parentId = parentId;
         this.id = id;
         this.creationTime = creationTime;
+        this.indexationTime = indexationTime;
         this.source = source;
         this.sparqlQuery = sparqlQuery;
         this.stubs = new ArrayList<Stub>();
@@ -207,6 +213,11 @@ public class Subscription implements Rdfable, Serializable {
                                 basicInfo.get(
                                         SUBSCRIPTION_CREATION_DATETIME_PROPERTY)
                                         .getLiteralLexicalForm())
+                                .getTimeInMillis(),
+                        DatatypeConverter.parseDateTime(
+                                basicInfo.get(
+                                        SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY)
+                                        .getLiteralLexicalForm())
                                 .getTimeInMillis(), basicInfo.get(
                                 SUBSCRIPTION_SUBSCRIBER_PROPERTY)
                                 .getLiteralLexicalForm(), basicInfo.get(
@@ -269,6 +280,10 @@ public class Subscription implements Rdfable, Serializable {
 
     public long getCreationTime() {
         return this.creationTime;
+    }
+
+    public long getIndexationTime() {
+        return this.indexationTime;
     }
 
     public String getSource() {
@@ -373,6 +388,13 @@ public class Subscription implements Rdfable, Serializable {
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime)));
 
+        calendar.setTimeInMillis(this.indexationTime);
+        quads.add(new Quadruple(
+                SUBSCRIPTION_NS_NODE, subscriptionURI,
+                SUBSCRIPTION_INDEXATION_DATETIME_NODE, Node.createLiteral(
+                        DatatypeConverter.printDateTime(calendar),
+                        XSDDatatype.XSDdateTime)));
+
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_SUBSCRIBER_NODE, Node.createLiteral(this.source)));
@@ -411,6 +433,14 @@ public class Subscription implements Rdfable, Serializable {
         return Objects.hashCode(
                 this.originalId, this.parentId, this.id, this.creationTime,
                 this.source, this.sparqlQuery);
+    }
+
+    public synchronized Subscription timestamp() {
+        if (this.indexationTime == 0) {
+            this.indexationTime = System.nanoTime();
+        }
+
+        return this;
     }
 
     /**
