@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
@@ -31,6 +32,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
@@ -52,53 +54,71 @@ public class EventCloudUsageTest implements Serializable {
 
     @Test
     public void testEventCloudInstantiationAndUsage() {
+
+        // Creates and deploy an EventCloudsRegistry locally
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
+
+        // Creates and deploy an Event Cloud composed of 15 peers
         EventCloudId eventCloudId = deployer.createEventCloud(15);
 
-        // Retrieves a factory that is specialized to the previous Event-Cloud
-        // for creating a proxy
-        ProxyFactory factory =
+        // Retrieves a proxy factory which is specialized to create
+        // proxies for the Event Cloud which has been previously created
+        ProxyFactory proxyFactory =
                 ProxyFactory.getInstance(
                         deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
-        // From the factory we can get a PutGet proxy that is used to perform
-        // some synchronous operations
-        PutGetProxy putGetProxy = factory.createPutGetProxy();
+        // From the proxy factory we can create a PutGet proxy whose the
+        // purpose is to work with historical semantic data
+        PutGetProxy putGetProxy = proxyFactory.createPutGetProxy();
+
+        // By using the PutGetProxy we can publish synchronously some
+        // historical quadruples (although these quadruples may trigger
+        // a notification)
+        putGetProxy.add(new Quadruple(
+                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                Node.createURI("http://www.nice.fr"),
+                Node.createURI("http://france.meteofrance.com/france/meteo"),
+                Node.createURI("http://france.meteofrance.com/france/meteo?PREVISIONS_PORTLET.path=previsionsville/060880")));
 
         putGetProxy.add(new Quadruple(
-                Node.createURI("http://www.inria.fr"),
-                Node.createURI("http://www.inria.fr"),
-                Node.createURI("http://www.inria.fr"),
-                Node.createURI("http://www.inria.fr")));
+                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                Node.createURI("http://www.nice.fr"),
+                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/07082011/"),
+                Node.createLiteral("29", XSDDatatype.XSDint)));
 
-        // TODO make it work
-        // try {
-        // putGetProxy.add(
-        // new FileInputStream(
-        // new File(
-        // "/user/lpellegr/home/Desktop/infobox_property_definitions_en.nq")),
-        // SerializationFormat.NQuads);
-        // } catch (FileNotFoundException e) {
-        // e.printStackTrace();
-        // }
+        putGetProxy.add(new Quadruple(
+                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                Node.createURI("http://www.nice.fr"),
+                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011/"),
+                Node.createLiteral("26", XSDDatatype.XSDint)));
 
-        // Finds all the quadruples that are contained by the Event-Cloud
+        // Once a quadruple is inserted, it is possible to retrieve some
+        // quadruples (historical data) by using a quadruple pattern.
+        // Hereafter, any quadruple which has any value as graph, subject,
+        // predicate and object value is returned
         Collection<Quadruple> result = putGetProxy.find(QuadruplePattern.ANY);
         log.info("Quadruples contained by the Event-Cloud {}", eventCloudId);
         for (Quadruple quad : result) {
             log.info(quad.toString());
         }
 
-        // You can also use the find method with a quadruple pattern.
-        // The Node.ANY plays as a variable
-        putGetProxy.find(new QuadruplePattern(
-                Node.createURI("http://uri"), Node.ANY,
-                Node.createURI("http://uri2"), Node.createLiteral("a")));
+        // Or more complex queries may be formulated by using a SPARQL query.
+        String sparqlQuery =
+                "SELECT ?day WHERE { GRAPH ?g { <http://www.nice.fr> ?day ?temp FILTER (?temp > 26) } }";
+        SparqlSelectResponse response =
+                putGetProxy.executeSparqlSelect(sparqlQuery);
 
-        // Creates and retrieved a publish subscribe proxy
-        final SubscribeProxy subscribeProxy = factory.createSubscribeProxy();
+        log.info("Answer for SPARQL query {}:", sparqlQuery);
+        log.info(response.getResult().nextSolution().get("day").toString());
 
+        // Then, it is possible to create a SubscribeProxy to
+        // subscribe to some interest and to be notified
+        final SubscribeProxy subscribeProxy =
+                proxyFactory.createSubscribeProxy();
+
+        // Once a subscription is sent to an Event Cloud for indexation,
+        // a SubscriptionId is returned to have the possibility to unsubscribe
         SubscriptionId id =
                 subscribeProxy.subscribe(
                         "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
@@ -111,11 +131,19 @@ public class EventCloudUsageTest implements Serializable {
                                 log.info("Solution received: {}", solution);
                             }
                         });
-
-        PublishProxy publishProxy = factory.createPublishProxy();
-
         log.info("Subscription with id {} has been registered", id);
 
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        
+        // Finally, we can simulate an event source by creating a PublishProxy
+        PublishProxy publishProxy = proxyFactory.createPublishProxy();
+
+        // From the publish proxy it is possible to publish quadruples (events)
         publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/107234124364605485774/"),
@@ -128,18 +156,26 @@ public class EventCloudUsageTest implements Serializable {
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
                 Node.createLiteral("laurent.pellegrino@gmail.com")));
 
+        // this quadruple shows chronicle context property because it is
+        // delivered by reconsuming the first quadruple which is published
         publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/107234124364605485774/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                Node.createLiteral("laurent.pellegrino@gmail.com[chronicle context]")));
+                Node.createLiteral("laurent.pellegrino.new.email@gmail.com")));
 
         publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/48798548797974/"),
+                Node.createURI("https://plus.google.com/107545688688906540962"),
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
                 Node.createLiteral("firstname.lastname@gmail.com")));
 
+        publishProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/746668964541235679/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                Node.createLiteral("Frederic Dupont")));
+        
         publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/746668964541235679/"),
@@ -148,25 +184,20 @@ public class EventCloudUsageTest implements Serializable {
 
         publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/746668964541235679/"),
-                Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("Frederic Dupont")));
-
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
                 Node.createURI("https://plus.google.com/48798548797974/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/name"),
                 Node.createLiteral("Firstname Lastname")));
 
-        // 4 notifications are expected
+        // 3 notifications are expected
 
         /*
          * Waits some time because Junit does not wait that internal threads end
+         * TODO test has to be rewritten to detect termination cleanly
          */
         try {
             Thread.sleep(5000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         // try {
@@ -192,13 +223,11 @@ public class EventCloudUsageTest implements Serializable {
 
         subscribeProxy.unsubscribe(id);
 
-        // System.err.println(">>> UNSUBSCRIBE REQUEST SENT!");
-
         publishProxy.publish(new Quadruple(
                 Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/48798548797974/"),
+                Node.createURI("https://plus.google.com/4879854879797418743/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("Firstname Lastname2")));
+                Node.createLiteral("Firstname Lastname")));
 
         // just to test that no notification is delivered
 
@@ -237,7 +266,16 @@ public class EventCloudUsageTest implements Serializable {
         // e.printStackTrace();
         // }
 
-        // TODO test has to be rewritten to detect termination cleanly
+        // TODO make it work
+        // try {
+        // putGetProxy.add(
+        // new FileInputStream(
+        // new File(
+        // "/user/lpellegr/home/Desktop/infobox_property_definitions_en.nq")),
+        // SerializationFormat.NQuads);
+        // } catch (FileNotFoundException e) {
+        // e.printStackTrace();
+        // }
     }
 
 }
