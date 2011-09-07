@@ -1,7 +1,7 @@
 #!/bin/sh
 
 CURRENT_DIR=$PWD/$(dirname $0)
-export PATH_TO_RESOURCES=$CURRENT_DIR/../../resources
+export PATH_TO_RESOURCES=$CURRENT_DIR/../resources
 
 unset CLASSPATH
 
