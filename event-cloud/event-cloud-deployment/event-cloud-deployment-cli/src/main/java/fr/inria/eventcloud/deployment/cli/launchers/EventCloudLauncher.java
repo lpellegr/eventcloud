@@ -24,6 +24,7 @@ import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
 
 /**
  * This launcher is used to create a new {@link EventCloud} and to register it
@@ -37,7 +38,7 @@ import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
  */
 public final class EventCloudLauncher {
 
-    @Parameter(names = {"-registryUrl"}, description = "The EventCloudsRegistry URL", required = true)
+    @Parameter(names = {"-registry"}, description = "The EventCloudsRegistry URL", required = true)
     private String registryUrl;
 
     @Parameter(names = {"-nb-peers"}, description = "Number of Peers")
@@ -67,7 +68,7 @@ public final class EventCloudLauncher {
     private void run() {
         EventCloud eventCloud =
                 EventCloud.create(
-                        this.registryUrl, null,
+                        this.registryUrl, new EventCloudDeployer(),
                         new Collection<UnalterableElaProperty>(),
                         this.nbTrackers, this.nbPeers);
 

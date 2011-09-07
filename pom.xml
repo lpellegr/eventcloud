@@ -50,14 +50,6 @@
 			<id>event-cloud-snapshots</id>
 			<url>http://maven.event-cloud.googlecode.com/hg/snapshots</url>
 		</repository>
-		<!-- Staging repository that is temporarily used to test the proactive 
-			artifact. As soon as the artifact is declared as usable in production, it 
-			has to be released in Maven Central (it takes around 2 hours to be synchronized) 
-			and this staging repository has to be removed -->
-		<repository>
-			<id>staging-orgobjectwebproactive-221</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-221</url>
-		</repository>
 	</repositories>
 
 	<developers>

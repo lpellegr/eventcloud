@@ -89,13 +89,13 @@ public class QuadrupleTest {
                 "The graph value is not the same after timestamping the quadruple",
                 graph, quad.getGraph());
 
-        long timestamp = quad.getPublicationTimestamp();
+        long timestamp = quad.getIndexationTimestamp();
 
         quad.timestamp();
 
         Assert.assertEquals(
                 "A second call to timestamp the quadruple update the timestamp value",
-                timestamp, quad.getPublicationTimestamp());
+                timestamp, quad.getIndexationTimestamp());
     }
 
     @Test

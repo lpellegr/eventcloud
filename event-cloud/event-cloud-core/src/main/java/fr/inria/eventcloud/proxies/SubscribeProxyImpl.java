@@ -194,9 +194,9 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         }
 
         try {
+            this.subscriptions.put(subscription.getId(), subscription);
             super.proxy.selectTracker().getRandomPeer().send(
                     new IndexSubscriptionRequest(subscription));
-            this.subscriptions.put(subscription.getId(), subscription);
         } catch (DispatchException e) {
             e.printStackTrace();
         }

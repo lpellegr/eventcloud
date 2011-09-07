@@ -71,7 +71,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             LoggerFactory.getLogger(PublishQuadrupleRequest.class);
 
     public PublishQuadrupleRequest(Quadruple quad) {
-        super(quad);
+        super(quad.timestamp());
     }
 
     /**
@@ -198,9 +198,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                         quad.hashValue()));
 
                 try {
-                    overlay.getStub().send(
-                            new IndexRewrittenSubscriptionRequest(
-                                    rewrittenSubscription));
+                    overlay.getStub()
+                            .send(
+                                    new IndexSubscriptionRequest(
+                                            rewrittenSubscription));
                 } catch (DispatchException e) {
                     e.printStackTrace();
                 }
