@@ -22,9 +22,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.SecureRandom;
 import java.util.HashMap;
 
 import org.etsi.uri.gcm.util.GCM;
@@ -43,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.generators.Generator;
 import fr.inria.eventcloud.api.webservices.PublishWsApi;
 import fr.inria.eventcloud.api.webservices.SubscribeWsApi;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -73,7 +71,7 @@ public class SubscribeProxyTest {
         }
     }
 
-    @Test
+    @Test(timeout = 90000)
     public void testSubscribeStringEventNotificationListenerSimulatingNetworkCongestion()
             throws Exception {
         JunitEventCloudInfrastructureDeployer deployer =
@@ -119,7 +117,7 @@ public class SubscribeProxyTest {
 
         publishWs.publishEvent(
                 this.stringFrom("/notification-01.xml"),
-                this.generateRandomUri());
+                Generator.generateRandomUri());
 
         PubSubStatus pubSubComponentStatus =
                 (PubSubStatus) pubSubComponent.getFcInterface("status-services");
@@ -202,26 +200,6 @@ public class SubscribeProxyTest {
                 return "";
             }
         } else {
-            return null;
-        }
-    }
-
-    private URI generateRandomUri() {
-        String legalChars =
-                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        StringBuilder result =
-                new StringBuilder("http://streams.play-project.eu/");
-        SecureRandom random = new SecureRandom();
-
-        for (int i = 0; i < 20; i++) {
-            result.append(random.nextInt(legalChars.length()));
-        }
-
-        try {
-            return new URI(result.toString());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
             return null;
         }
     }

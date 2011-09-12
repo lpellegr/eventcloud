@@ -73,7 +73,7 @@ public final class EventCloudLauncher {
                         this.nbTrackers, this.nbPeers);
 
         System.out.println(this.nbTrackers + " " + this.nbPeers + " "
-                + eventCloud.getId());
+                + eventCloud.getId().toUrl());
     }
 
 }

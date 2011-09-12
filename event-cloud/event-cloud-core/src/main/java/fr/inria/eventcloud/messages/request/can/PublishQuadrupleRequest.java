@@ -16,14 +16,14 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_ID_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ID_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_ID_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,6 +42,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
@@ -50,7 +51,6 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
-import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.SubscriptionRewriter;
@@ -71,7 +71,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             LoggerFactory.getLogger(PublishQuadrupleRequest.class);
 
     public PublishQuadrupleRequest(Quadruple quad) {
-        super(quad.timestamp());
+        super(quad);
     }
 
     /**
@@ -79,8 +79,11 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
+        quad = quad.toTimestampedQuadruple();
+
         SynchronizedJenaDatasetGraph datastore =
                 ((SynchronizedJenaDatasetGraph) overlay.getDatastore());
+        // the quad is stored by using its timestamped graph value
         datastore.add(quad);
 
         log.debug(
@@ -98,6 +101,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         // datastore at the same time
         List<HomogenousPair<Node>> matchingIds =
                 new ArrayList<HomogenousPair<Node>>();
+
         while (result.hasNext()) {
             QuerySolution solution = result.nextSolution();
             // the first component is composed of the subscription id whereas
@@ -121,8 +125,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             // the identifier of the sub subscription that is matched is
             // available from the result of the query which has been executed
             SubscriptionId subscriptionId =
-                    new SubscriptionId(((Number) pair.getFirst()
-                            .getLiteralValue()).longValue());
+                    SubscriptionId.parseFrom(pair.getFirst()
+                            .getLiteralLexicalForm());
 
             Subscription subscription =
                     ((SemanticCanOverlay) overlay).findSubscription(subscriptionId);
@@ -130,9 +134,14 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             // a subscription with only one sub subscription (that matches the
             // quadruple which has been inserted) has been detected
             if (subscription.getSubSubscriptions().length == 1) {
+                log.debug(
+                        "{} matches a subscription which cannot be rewritten, a notification will be delivered",
+                        quad);
+
                 NotificationId notificationId =
                         new NotificationId(
-                                subscription.getOriginalId(), System.nanoTime());
+                                subscription.getOriginalId(),
+                                System.currentTimeMillis());
 
                 // sends part of the solution to the subscriber
                 // TODO: this operation can be done in parallel with the
@@ -197,6 +206,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                         PAActiveObject.getUrl(overlay.getStub()),
                         quad.hashValue()));
 
+                log.debug(
+                        "Subscription matching {} has been rewritten to {} and is ready to be indexed",
+                        quad, rewrittenSubscription);
+
                 try {
                     overlay.getStub()
                             .send(
@@ -237,7 +250,9 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         query.append(SUBSCRIPTION_ID_PROPERTY);
         query.append("> ?subscriptionId .\n");
         query.append("        FILTER (\n");
-        query.append("            (sameTerm(?subSubscriptionGraph, ");
+        query.append("            (regex(?subSubscriptionGraph, \"^");
+        query.append(quad.getGraph().getURI());
+        query.append("\") || sameTerm(?subSubscriptionGraph, ");
         query.append(NodeFmtLib.serialize(quad.getGraph()));
         query.append(") || datatype(?subSubscriptionGraph) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);

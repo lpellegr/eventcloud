@@ -27,6 +27,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
+import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * This request is used to retrieve all the {@link Quadruple}s that match the
@@ -43,13 +44,18 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private SerializedValue<Collection<Long>> quadHashesReceived;
+    private SerializedValue<Collection<LongLong>> quadHashesReceived;
+
+    private SerializedValue<QuadruplePattern> timestampedQuadruplePattern;
 
     public ReconstructEventRequest(QuadruplePattern quadruplePattern,
-            Collection<Long> quadHashesReceived) {
-        super(quadruplePattern);
+            Collection<LongLong> quadHashesReceived) {
+        super(QuadruplePattern.removeTimestampFromGraphValue(quadruplePattern));
+
+        this.timestampedQuadruplePattern =
+                new SerializedValue<QuadruplePattern>(quadruplePattern);
         this.quadHashesReceived =
-                new SerializedValue<Collection<Long>>(quadHashesReceived);
+                new SerializedValue<Collection<LongLong>>(quadHashesReceived);
     }
 
     /**
@@ -67,16 +73,15 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 QuadruplePattern quadruplePattern) {
-        Collection<Quadruple> quads =
-                ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(quadruplePattern);
         Collection<Quadruple> result = new Collection<Quadruple>();
-        Collection<Long> quadHashesReceived =
-                this.quadHashesReceived.getValue();
 
-        // removes the quadruples that have already been received
-        for (Quadruple quad : quads) {
-            if (!quadHashesReceived.contains(quad.hashValue())) {
-                result.add(quad);
+        // TODO: use a quadruple pattern with the graph value fixed to the
+        // eventId
+        for (Quadruple q : ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(QuadruplePattern.ANY)) {
+            if (q.getGraph().equals(
+                    this.timestampedQuadruplePattern.getValue().getGraph())
+                    && !quadHashesReceived.getValue().contains(q.hashValue())) {
+                result.add(q);
             }
         }
 

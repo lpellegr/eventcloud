@@ -22,6 +22,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.openjena.riot.out.OutputLangUtils;
 import org.openjena.riot.tokens.Tokenizer;
@@ -33,6 +34,7 @@ import com.hp.hpl.jena.graph.Node_Blank;
 import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.Triple;
 
+import fr.inria.eventcloud.utils.LongLong;
 import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
@@ -58,26 +60,29 @@ public class Quadruple implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String TIMESTAMP_SEPARATOR = "#t$";
+    protected static final String TIMESTAMP_SEPARATOR = "#t$";
 
-    // contains respectively the graph, the subject, the predicate and the
-    // object value
+    // contains respectively the graph, the subject, the predicate
+    // and the object value
     private transient Node[] nodes;
 
-    private transient Node timestampedGraphNode;
+    // contains the graph value with its publication datetime
+    private transient Node timestampedNode;
 
-    private transient long timestamp;
+    // the publication datetime or -1
+    private transient AtomicLong timestamp;
 
     /**
      * Defines the different formats that are allowed to read quadruples or to
-     * write quadruples from an input stream.
+     * write quadruples from and to an input stream.
      */
     public enum SerializationFormat {
         TriG, NQuads
     }
 
-    public Quadruple() {
+    private Quadruple() {
         this.nodes = new Node[4];
+        this.timestamp = new AtomicLong(-1);
     }
 
     /**
@@ -110,7 +115,7 @@ public class Quadruple implements Serializable {
      *            the object value.
      */
     public Quadruple(Node graph, Node subject, Node predicate, Node object) {
-        this(graph, subject, predicate, object, true);
+        this(graph, subject, predicate, object, -1, true, true);
     }
 
     /**
@@ -133,11 +138,11 @@ public class Quadruple implements Serializable {
                                                             Node subject,
                                                             Node predicate,
                                                             Node object) {
-        return new Quadruple(graph, subject, predicate, object, false);
+        return new Quadruple(graph, subject, predicate, object, -1, false, true);
     }
 
     protected Quadruple(Node graph, Node subject, Node predicate, Node object,
-            boolean typeChecking) {
+            long timestamp, boolean typeChecking, boolean extractTimestamp) {
         this();
         if (typeChecking) {
             if (graph instanceof Node_Blank || subject instanceof Node_Blank
@@ -179,6 +184,15 @@ public class Quadruple implements Serializable {
         this.nodes[1] = subject;
         this.nodes[2] = predicate;
         this.nodes[3] = object;
+
+        if (timestamp != -1) {
+            this.timestamp = new AtomicLong(timestamp);
+            this.timestampedNode = graph;
+        }
+
+        if (extractTimestamp) {
+            this.tryToExtractPublicationDateTime();
+        }
     }
 
     /**
@@ -188,28 +202,77 @@ public class Quadruple implements Serializable {
      *         otherwise.
      */
     public boolean isTimestamped() {
-        return this.timestampedGraphNode != null;
+        return this.timestamp.get() != -1;
     }
 
     /**
-     * Timestamps the quadruple (i.e. adds a timestamp value which is assumed to
-     * indicate when the quadruple has been published). If the quadruple is
-     * already timestamped, a call to this method has no effect.
+     * Timestamps the quadruple with the specified publication datetime. The
+     * publication datetime is assumed to be a Java timestamp (with millisecond
+     * precision) retrieved by calling for example
+     * {@link System#currentTimeMillis()}. Once the quadruple is timestamped,
+     * any call to this method will throw an {@link IllegalStateException}.
      * 
-     * @return the instance of the quadruple which has been timestamped (this is
-     *         not a copy).
+     * @param publicationDateTime
+     *            the datatime value to use in order to timestamp this
+     *            quadruple.
+     * 
+     * @return the instance of the quadruple which has been timestamped. The
+     *         value which is return is not a copy but the original object which
+     *         has been altered.
      */
-    public synchronized Quadruple timestamp() {
-        if (this.timestampedGraphNode == null) {
-            this.timestamp = System.nanoTime();
-            this.timestampedGraphNode =
-                    Node.createURI(this.nodes[0].getURI()
-                            .concat(
-                                    TIMESTAMP_SEPARATOR
-                                            + Long.toString(this.timestamp)));
+    public Quadruple timestamp(long publicationDateTime) {
+        if (publicationDateTime <= 0) {
+            throw new IllegalArgumentException(
+                    "Expected publication datetime greater than 0 but was:"
+                            + publicationDateTime);
         }
 
-        return this;
+        if (this.timestamp.compareAndSet(-1, publicationDateTime)) {
+            StringBuilder buf = new StringBuilder();
+            buf.append(this.nodes[0].getURI());
+            buf.append(TIMESTAMP_SEPARATOR);
+            buf.append(this.timestamp);
+
+            this.timestampedNode = Node.createURI(buf.toString());
+
+            return this;
+        }
+
+        throw new IllegalStateException("Quadruple already timestamped: "
+                + this.timestamp);
+    }
+
+    /**
+     * Timestamps the quadruple with a publication datetime value equals to the
+     * current datetime when the method is called. Once the quadruple is
+     * timestamped, any call to this method will throw an
+     * {@link IllegalStateException}.
+     * 
+     * @return the instance of the quadruple which has been timestamped. The
+     *         value which is return is not a copy but the original object which
+     *         has been altered.
+     */
+    public Quadruple timestamp() {
+        return this.timestamp(System.currentTimeMillis());
+    }
+
+    /**
+     * Returns a new quadruple whose the graph value has been replaced by the
+     * concatenation of the original graph value and a datetime representing the
+     * publication datime of the quadruple.
+     * 
+     * @return a new quadruple whose the graph value has been replaced by the
+     *         concatenation of the original graph value and a datetime
+     *         representing the publication datime of the quadruple.
+     */
+    public Quadruple toTimestampedQuadruple() {
+        if (this.timestampedNode == null) {
+            return null;
+        }
+
+        return new Quadruple(
+                this.timestampedNode, this.getSubject(), this.getPredicate(),
+                this.getObject(), this.timestamp.get(), false, false);
     }
 
     /**
@@ -217,20 +280,9 @@ public class Quadruple implements Serializable {
      * 
      * @return a timestamp indicating when the quadruple has been published.
      */
-    public long getIndexationTimestamp() {
-        return this.timestamp;
+    public long getPublicationDateTime() {
+        return this.timestamp.get();
     }
-
-    // /**
-    // * Returns the timestamped graph node or {@code null} if the quadruple has
-    // * not been yet timestamped with the publication time.
-    // *
-    // * @return the timestamped graph node or {@code null} if the quadruple has
-    // * not been yet timestamped with the publication time.
-    // */
-    // public Node getTimestampedGraph() {
-    // return this.timestampedGraphNode;
-    // }
 
     /**
      * Returns the graph value.
@@ -239,6 +291,10 @@ public class Quadruple implements Serializable {
      */
     public final Node getGraph() {
         return this.nodes[0];
+    }
+
+    public Node getTimestampedGraph() {
+        return this.timestampedNode;
     }
 
     /**
@@ -269,16 +325,17 @@ public class Quadruple implements Serializable {
     }
 
     /**
-     * Returns a 64 bits hash value for the current quadruple by using
+     * Returns a 128 bits hash value for the current quadruple by using
      * {@link MurmurHash} function.
      * 
-     * @return a 64 bits hash value for the current quadruple by using
+     * @return a 128 bits hash value for the current quadruple by using
      *         {@link MurmurHash} function.
      */
-    public long hashValue() {
-        return MurmurHash.hash64(
+    public LongLong hashValue() {
+        return new LongLong(MurmurHash.hash128(
                 this.nodes[0].toString(), this.nodes[1].toString(),
-                this.nodes[2].toString(), this.nodes[3].toString());
+                this.nodes[2].toString(), this.nodes[3].toString(),
+                Long.toString(this.timestamp.get())));
     }
 
     /**
@@ -286,15 +343,11 @@ public class Quadruple implements Serializable {
      */
     @Override
     public int hashCode() {
-        int v =
-                31
-                        * (31 * (31 * (31 + this.nodes[0].hashCode()) + this.nodes[1].hashCode()) + this.nodes[2].hashCode())
-                        + this.nodes[3].hashCode();
-        if (this.timestampedGraphNode != null) {
-            v = 31 * v + this.timestampedGraphNode.hashCode();
-        }
-
-        return v;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(nodes);
+        result = prime * result + ((Long) timestamp.get()).hashCode();
+        return result;
     }
 
     /**
@@ -303,13 +356,15 @@ public class Quadruple implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Quadruple) {
-            Quadruple quad = (Quadruple) obj;
+            Quadruple other = (Quadruple) obj;
 
-            return this.nodes[0].equals(quad.nodes[0])
-                    && this.nodes[1].equals(quad.nodes[1])
-                    && this.nodes[2].equals(quad.nodes[2])
-                    && this.nodes[3].equals(quad.nodes[3])
-                    && this.timestamp == quad.timestamp;
+            boolean result = true;
+            for (int i = 0; i < this.nodes.length; i++) {
+                result &= this.nodes[i].equals(other.nodes[i]);
+            }
+
+            result &= this.timestamp.get() == other.timestamp.get();
+            return result;
         }
 
         return false;
@@ -344,16 +399,19 @@ public class Quadruple implements Serializable {
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("(");
-        for (int i = 0; i < this.nodes.length; i++) {
+
+        int startIndex = 0;
+        if (this.timestampedNode != null) {
+            result.append(this.timestampedNode);
+            result.append(", ");
+            startIndex = 1;
+        }
+
+        for (int i = startIndex; i < this.nodes.length; i++) {
             result.append(this.nodes[i].toString());
             if (i < this.nodes.length - 1) {
                 result.append(", ");
             }
-        }
-
-        if (this.isTimestamped()) {
-            result.append(", ");
-            result.append(this.timestamp);
         }
 
         result.append(")");
@@ -371,6 +429,13 @@ public class Quadruple implements Serializable {
             this.nodes[i] = tokenizer.next().asNode();
         }
 
+        this.tryToExtractPublicationDateTime();
+    }
+
+    private void tryToExtractPublicationDateTime() {
+        this.timestamp = new AtomicLong(-1);
+
+        // the graph value is not a variable
         if (this.nodes[0].isURI()) {
             String uri = this.nodes[0].getURI();
             int timestampSeparatorIndex = uri.lastIndexOf(TIMESTAMP_SEPARATOR);
@@ -378,10 +443,12 @@ public class Quadruple implements Serializable {
             // extracts the timestamp associated to the quadruple
             if (timestampSeparatorIndex != -1) {
                 this.timestamp =
-                        Long.parseLong(uri.substring(timestampSeparatorIndex
-                                + TIMESTAMP_SEPARATOR.length(), uri.length()));
+                        new AtomicLong(Long.parseLong(uri.substring(
+                                timestampSeparatorIndex
+                                        + TIMESTAMP_SEPARATOR.length(),
+                                uri.length())));
 
-                this.timestampedGraphNode = this.nodes[0];
+                this.timestampedNode = this.nodes[0];
                 this.nodes[0] =
                         Node.createURI(uri.substring(0, timestampSeparatorIndex));
             }
@@ -392,8 +459,8 @@ public class Quadruple implements Serializable {
         out.defaultWriteObject();
 
         Node graphValue = this.nodes[0];
-        if (this.timestampedGraphNode != null) {
-            graphValue = this.timestampedGraphNode;
+        if (this.timestampedNode != null) {
+            graphValue = this.timestampedNode;
         }
 
         OutputStreamWriter outWriter = new OutputStreamWriter(out);

@@ -18,13 +18,14 @@ package fr.inria.eventcloud.api;
 
 import java.io.Serializable;
 
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;
 
+import fr.inria.eventcloud.utils.LongLong;
+
 /**
- * Uniquely identify a subscription or a subsubscription that has been submitted
- * on an Event Cloud.
+ * Uniquely identify a subscription or a sub-subscription that has been
+ * submitted on an Event Cloud.
  * 
  * @author lpellegr
  */
@@ -32,44 +33,48 @@ public class SubscriptionId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private long value;
+    private LongLong hashValue;
 
     public SubscriptionId() {
-    }
-
-    public SubscriptionId(long value) {
-        this.value = value;
-    }
-
-    public void setValue(long value) {
-        this.value = value;
-    }
-
-    public long getValue() {
-        return this.value;
+        // empty constructor for webservices
     }
 
     /**
-     * Returns the current subscription id as a Jena {@link Node_Literal}.
+     * Constructs a subscription identifier from the specified hash value. The
+     * hash value is supposed to be a 128 bits hash value.
      * 
-     * @return the current subscription id as a Jena {@link Node_Literal}.
+     * @param hashValue
+     *            the hash value to use in order to create the identifier.
+     * 
+     * @throws IllegalArgumentException
+     *             if the specified hash value is not a 128 bits hash value.
      */
-    public Node asJenaNode() {
-        return Node.createLiteral(
-                Long.toString(this.value), XSDDatatype.XSDlong);
+    public SubscriptionId(LongLong hashValue) {
+        this.hashValue = hashValue;
+    }
+
+    /**
+     * Creates a new Jena {@link Node_Literal} representing the current
+     * subscription identifier.
+     * 
+     * @return a new Jena {@link Node_Literal} representing the current
+     *         subscription identifier.
+     */
+    public Node toJenaNode() {
+        return Node.createLiteral(this.hashValue.toString());
     }
 
     /**
      * Parses the string argument as a SubscriptionId.
      * 
-     * @param s
+     * @param subscriptionId
      *            a <code>String</code> containing the
      *            <code>SubscriptionId</code> representation to be parsed.
      * 
      * @return the <code>SubscriptionId</code> represented by the argument.
      */
-    public static final SubscriptionId parseFrom(String s) {
-        return new SubscriptionId(Long.parseLong(s));
+    public static final SubscriptionId parseFrom(String subscriptionId) {
+        return new SubscriptionId(LongLong.fromString(subscriptionId));
     }
 
     /**
@@ -77,8 +82,11 @@ public class SubscriptionId implements Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof SubscriptionId
-                && this.value == ((SubscriptionId) obj).value;
+        if (obj instanceof SubscriptionId) {
+            return this.hashValue.equals(((SubscriptionId) obj).hashValue);
+        }
+
+        return false;
     }
 
     /**
@@ -86,7 +94,7 @@ public class SubscriptionId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Long.valueOf(value).hashCode();
+        return this.hashValue.hashCode();
     }
 
     /**
@@ -94,7 +102,7 @@ public class SubscriptionId implements Serializable {
      */
     @Override
     public String toString() {
-        return Long.toString(this.value);
+        return this.hashValue.toString();
     }
 
 }

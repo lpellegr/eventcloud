@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.MapMaker;
 
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.reasoner.SparqlColander;
@@ -82,7 +82,8 @@ public class SemanticCanOverlay extends CanOverlay {
                     id);
             subscription =
                     Subscription.parseFrom(
-                            (PersistentJenaTdbDatastore) super.datastore, id);
+                            (SynchronizedJenaDatasetGraph) super.datastore, id);
+
             this.subscriptionsCache.putIfAbsent(
                     subscription.getId(), subscription);
         }

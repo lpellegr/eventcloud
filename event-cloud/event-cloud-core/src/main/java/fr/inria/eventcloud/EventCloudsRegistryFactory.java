@@ -18,9 +18,12 @@ package fr.inria.eventcloud;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.node.NodeException;
 
 /**
+ * This class is used to create and to deploy an {@link EventCloudsRegistry} as
+ * an active object.
  * 
  * @author lpellegr
  */
@@ -31,9 +34,13 @@ public class EventCloudsRegistryFactory {
     }
 
     public static EventCloudsRegistry newEventCloudsRegistry() {
+        return newEventCloudsRegistry(null);
+    }
+
+    public static EventCloudsRegistry newEventCloudsRegistry(Node node) {
         try {
             return PAActiveObject.newActive(
-                    EventCloudsRegistry.class, new Object[0]);
+                    EventCloudsRegistry.class, new Object[0], node);
         } catch (ActiveObjectCreationException e) {
             e.printStackTrace();
         } catch (NodeException e) {

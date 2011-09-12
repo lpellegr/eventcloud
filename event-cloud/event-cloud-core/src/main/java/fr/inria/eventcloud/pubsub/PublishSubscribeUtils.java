@@ -16,8 +16,8 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_NS;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_NS;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,10 +42,12 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 
 import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
+import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * Some utility methods for the publish/subscribe algorithm.
@@ -88,7 +90,7 @@ public final class PublishSubscribeUtils {
             e.printStackTrace();
         }
         OutputLangUtils.output(
-                osw, quadrupleMatching.getGraph(),
+                osw, quadrupleMatching.getTimestampedGraph(),
                 quadrupleMatching.getSubject(),
                 quadrupleMatching.getPredicate(),
                 quadrupleMatching.getObject(), null, null);
@@ -123,7 +125,7 @@ public final class PublishSubscribeUtils {
         query.append("?subscriptionIdUrl ");
         query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
         query.append(" ");
-        query.append(NodeFmtLib.serialize(originalSubscriptionId.asJenaNode()));
+        query.append(NodeFmtLib.serialize(originalSubscriptionId.toJenaNode()));
         query.append(" .\n        ?subscriptionIdUrl ");
         // query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE));
         // query.append(" ?subSubscriptionId .\n        ?subscriptionIdUrl ");
@@ -138,9 +140,9 @@ public final class PublishSubscribeUtils {
             Binding binding = result.nextBinding();
 
             SubscriptionId subscriptionId =
-                    new SubscriptionId(
-                            ((Number) binding.get(Var.alloc("subscriptionId"))
-                                    .getLiteralValue()).longValue());
+                    SubscriptionId.parseFrom(binding.get(
+                            Var.alloc("subscriptionId"))
+                            .getLiteralLexicalForm());
             // SubscriptionId subSubscriptionId =
             // new SubscriptionId(
             // ((Number) binding.get(
@@ -193,8 +195,7 @@ public final class PublishSubscribeUtils {
      * @return the quadruple hash URL as a Jena {@link Node_URI}.
      */
     public static final Node createQuadrupleHashUrl(Quadruple quad) {
-        return Node.createURI(PublishSubscribeConstants.QUADRUPLE_NS
-                + quad.hashValue());
+        return createQuadrupleHashUrl(quad.hashValue());
     }
 
     /**
@@ -206,8 +207,8 @@ public final class PublishSubscribeUtils {
      * 
      * @return a quadruple hash URL as a Jena {@link Node_URI}.
      */
-    public static final Node createQuadrupleHashUrl(long quadHash) {
-        return Node.createURI(PublishSubscribeConstants.QUADRUPLE_NS + quadHash);
+    public static final Node createQuadrupleHashUrl(LongLong quadHash) {
+        return Node.createURI(PublishSubscribeConstants.QUADRUPLE_NS.concat(quadHash.toString()));
     }
 
     /**

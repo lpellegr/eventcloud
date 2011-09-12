@@ -20,14 +20,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.SecureRandom;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 
 import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.generators.Generator;
 
 /**
  * A simple test that output to the standard output the translation result of
@@ -47,7 +46,7 @@ public class WsNotificationTranslatorTest {
         System.out.println("[ Output for the translation of /notification-01.xml from WS-Notification notification to an Event without using XSD information ]");
         // a first translation by using only a WS-Notification notification
         // payload
-        URI eventId = generateRandomUri();
+        URI eventId = Generator.generateRandomUri();
 
         event =
                 translator.translateWsNotifNotificationToEvent(
@@ -97,25 +96,6 @@ public class WsNotificationTranslatorTest {
         }
 
         return is;
-    }
-
-    private URI generateRandomUri() {
-        String legalChars =
-                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        StringBuilder result = new StringBuilder("http://www.inria.fr/");
-        SecureRandom random = new SecureRandom();
-
-        for (int i = 0; i < 20; i++) {
-            result.append(random.nextInt(legalChars.length()));
-        }
-
-        try {
-            return new URI(result.toString());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
 }

@@ -34,6 +34,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -51,11 +52,11 @@ import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
 import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
-import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 import fr.inria.eventcloud.pubsub.Solution;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslator;
 import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslatorImpl;
+import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * SubscribeProxyImpl is a concrete implementation of {@link SubscribeProxy}.
@@ -194,6 +195,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         }
 
         try {
+            subscription.timestamp();
             this.subscriptions.put(subscription.getId(), subscription);
             super.proxy.selectTracker().getRandomPeer().send(
                     new IndexSubscriptionRequest(subscription));
@@ -279,8 +281,11 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         int expectedNumberOfQuadruples = -1;
 
         Collection<Quadruple> quadsReceived = new Collection<Quadruple>();
-        Collection<Long> quadHashesReceived =
-                new Collection<Long>(new HashSet<Long>());
+        Collection<LongLong> quadHashesReceived =
+                new Collection<LongLong>(new HashSet<LongLong>());
+
+        QuadruplePattern reconstructPattern =
+                new QuadruplePattern(eventId, Node.ANY, Node.ANY, Node.ANY);
 
         // perform polling while all the quadruples have not been retrieved
         while (expectedNumberOfQuadruples == -1
@@ -292,9 +297,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
                                 .getRandomPeer()
                                 .send(
                                         new ReconstructEventRequest(
-                                                new QuadruplePattern(
-                                                        eventId, Node.ANY,
-                                                        Node.ANY, Node.ANY),
+                                                reconstructPattern,
                                                 quadHashesReceived)))).getResult();
             } catch (DispatchException e) {
                 e.printStackTrace();
@@ -304,8 +307,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
                 if (quad.getPredicate().equals(
                         PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
                     expectedNumberOfQuadruples =
-                            Integer.parseInt((String) quad.getObject()
-                                    .getLiteralValue());
+                            (Integer) quad.getObject().getLiteralValue();
                 }
                 quadsReceived.add(quad);
                 quadHashesReceived.add(quad.hashValue());
@@ -321,6 +323,19 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         this.eventIdsReceived.put(eventId, id);
 
         return new Event(quadsReceived);
+    }
+
+    public static Long[] toObject(long[] array) {
+        if (array == null) {
+            return null;
+        } else if (array.length == 0) {
+            return new Long[0];
+        }
+        final Long[] result = new Long[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = new Long(array[i]);
+        }
+        return result;
     }
 
     /**

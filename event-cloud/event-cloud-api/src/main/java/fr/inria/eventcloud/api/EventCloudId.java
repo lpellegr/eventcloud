@@ -19,6 +19,7 @@ package fr.inria.eventcloud.api;
 import java.io.Serializable;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * Uniquely identify an Event Cloud.
@@ -29,20 +30,32 @@ public class EventCloudId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final long value;
+    private final LongLong hashValue;
 
-    public EventCloudId(long value) {
-        this.value = value;
+    /**
+     * Constructs an event cloud identifier from the specified hash value. The
+     * hash value is supposed to be a 128 bits hash value.
+     * 
+     * @param hashValue
+     *            the hash value to use in order to create the identifier.
+     * 
+     * @throws IllegalArgumentException
+     *             if the specified hash value is not a 128 bits hash value.
+     */
+    public EventCloudId(LongLong hashValue) {
+        this.hashValue = hashValue;
     }
 
     /**
-     * Returns the EventCloudId as an URL.
+     * Constructs an URL from the current Event Cloud identifier. The prefix
+     * used to create the URL is defined by
+     * {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
      * 
-     * @return the EventCloudId as an URL.
+     * @return an URL from the current Event Cloud identifier.
      */
-    public String asUrl() {
-        return EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                + this.value;
+    public String toUrl() {
+        return EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue().concat(
+                this.hashValue.toString());
     }
 
     /**
@@ -50,8 +63,11 @@ public class EventCloudId implements Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof EventCloudId
-                && this.value == ((EventCloudId) obj).value;
+        if (obj instanceof EventCloudId) {
+            return this.hashValue.equals(((EventCloudId) obj).hashValue);
+        }
+
+        return false;
     }
 
     /**
@@ -59,7 +75,7 @@ public class EventCloudId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Long.valueOf(this.value).hashCode();
+        return this.hashValue.hashCode();
     }
 
     /**
@@ -67,7 +83,33 @@ public class EventCloudId implements Serializable {
      */
     @Override
     public String toString() {
-        return Long.toString(this.value);
+        return this.hashValue.toString();
     }
 
+    /**
+     * Parses a {@link EventCloudId} from the specified URL. The URL is supposed
+     * to start with the prefix
+     * {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
+     * 
+     * @param eventCloudIdUrl
+     *            the URL to parse.
+     * 
+     * @return a event cloud identifier which identifies uniquely an event
+     *         cloud.
+     * 
+     * @throws IllegalArgumentException
+     *             if the specified URL does no start with the prefix
+     *             {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
+     */
+    public static EventCloudId fromUrl(String eventCloudIdUrl) {
+        if (!eventCloudIdUrl.startsWith(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())) {
+            throw new IllegalArgumentException("URI must start with "
+                    + EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                    + " but was:" + eventCloudIdUrl);
+        }
+
+        return new EventCloudId(
+                LongLong.fromString(eventCloudIdUrl.substring(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                        .length())));
+    }
 }

@@ -19,6 +19,7 @@ package fr.inria.eventcloud.api;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
@@ -42,13 +43,11 @@ public class Event implements Iterable<Quadruple>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // TODO store the quadruples as a collection of triples + a graph value
-    // because all the quadruples are assumed to share the same graph value.
-    // this will reduce the size of an Event that is serialized.
-    // warning: a Jena triple is not serializable by default
     private final Collection<Quadruple> quadruples;
 
     private transient Collection<Triple> triples;
+
+    private transient Node graph;
 
     /**
      * Creates a new Event from the specified collection of quadruples.
@@ -63,6 +62,7 @@ public class Event implements Iterable<Quadruple>, Serializable {
         }
 
         this.quadruples = quads;
+        this.addMetaInformation();
     }
 
     /**
@@ -80,6 +80,18 @@ public class Event implements Iterable<Quadruple>, Serializable {
         for (Triple triple : triples) {
             this.quadruples.add(new Quadruple(graph, triple));
         }
+        this.addMetaInformation();
+    }
+
+    private void addMetaInformation() {
+        // adds a quadruple indicating what is the number
+        // of quadruples contained by the event
+        this.quadruples.add(new Quadruple(
+                this.getGraph(), this.getGraph(),
+                PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
+                Node.createLiteral(
+                        Integer.toString(this.quadruples.size() + 1),
+                        XSDDatatype.XSDint)));
     }
 
     /**
@@ -88,7 +100,7 @@ public class Event implements Iterable<Quadruple>, Serializable {
      * @return the collection of quadruples that belong to the Event.
      */
     public Collection<Quadruple> getQuadruples() {
-        return this.quadruples;
+        return new Collection<Quadruple>(this.quadruples);
     }
 
     /**
@@ -99,7 +111,11 @@ public class Event implements Iterable<Quadruple>, Serializable {
      *         quadruple or triple that is contained by the Event.
      */
     public Node getGraph() {
-        return this.quadruples.iterator().next().getGraph();
+        if (this.graph == null) {
+            this.graph = this.quadruples.iterator().next().getGraph();
+        }
+
+        return this.graph;
     }
 
     /**
@@ -136,10 +152,10 @@ public class Event implements Iterable<Quadruple>, Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Event) {
-            Event e = (Event) obj;
+            Event other = (Event) obj;
 
             for (Quadruple quad : this.quadruples) {
-                if (!e.getQuadruples().contains(quad)) {
+                if (!other.getQuadruples().contains(quad)) {
                     return false;
                 }
             }

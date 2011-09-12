@@ -16,14 +16,41 @@
  **/
 package fr.inria.eventcloud.api.generators;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.SecureRandom;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
+
 /**
+ * Class which must be extended by any generator.
  * 
  * @author lpellegr
  */
 public abstract class Generator {
 
     protected static final SecureRandom random = new SecureRandom();
+
+    public static URI generateRandomUri(String prefix) {
+        String legalChars =
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        StringBuilder result = new StringBuilder(prefix);
+
+        for (int i = 0; i < 20; i++) {
+            result.append(random.nextInt(legalChars.length()));
+        }
+
+        try {
+            return new URI(result.toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static URI generateRandomUri() {
+        return generateRandomUri(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue());
+    }
 
 }

@@ -67,8 +67,7 @@ import com.google.common.collect.Sets;
  */
 public class CanOverlay extends StructuredOverlay {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(CanOverlay.class);
+    private static final Logger log = LoggerFactory.getLogger(CanOverlay.class);
 
     private ScheduledExecutorService maintenanceTask;
 
