@@ -24,6 +24,8 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -58,6 +60,9 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger log =
+            LoggerFactory.getLogger(IndexSubscriptionRequest.class);
+
     protected SerializedValue<Subscription> subscription;
 
     /**
@@ -69,8 +74,9 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
      */
     public IndexSubscriptionRequest(Subscription subscription) {
         super(
-                subscription.timestamp().getSubSubscriptions()[0].getAtomicQuery()
-                        .getQuadruplePattern());
+                QuadruplePattern.removeTimestampFromGraphValue(subscription.getSubSubscriptions()[0].getAtomicQuery()
+                        .getQuadruplePattern()));
+
         this.subscription = new SerializedValue<Subscription>(subscription);
     }
 
@@ -91,16 +97,25 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
         // finds the quadruples that match the subscription which has
         // been indexed
+        QuadruplePattern firstSubsubscriptionQuadPattern =
+                firstSubsubscription.getAtomicQuery().getQuadruplePattern();
+
         Collection<Quadruple> quadsMatchingFirstSubsubscription =
-                datastore.find(firstSubsubscription.getAtomicQuery()
-                        .getQuadruplePattern());
+                datastore.find(firstSubsubscriptionQuadPattern);
+
         Iterator<Quadruple> it = quadsMatchingFirstSubsubscription.iterator();
+
         while (it.hasNext()) {
             Quadruple quadMatching = it.next();
 
+            log.debug(
+                    "Comparing the timestamps between the quadruple {} and the subscription matching the quadruple {}",
+                    quadMatching.getPublicationDateTime(),
+                    subscription.getIndexationTime());
+
             // skips the quadruples which have been published before the
             // subscription
-            if (quadMatching.getIndexationTimestamp() < subscription.getIndexationTime()) {
+            if (quadMatching.getPublicationDateTime() < subscription.getIndexationTime()) {
                 continue;
             }
 
@@ -108,6 +123,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 NotificationId notificationId =
                         new NotificationId(
                                 subscription.getOriginalId(), System.nanoTime());
+
                 // sends part of the solution to the subscriber
                 // TODO: this operation can be done in parallel with the send
                 // RetrieveSubSolutionOperation
@@ -120,6 +136,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                                                 quadMatching,
                                                 subscription.getResultVars(),
                                                 firstSubsubscription.getAtomicQuery())));
+
                 // broadcasts a message to all the stubs contained by the
                 // subscription to say to these peers to send their
                 // sub-solutions to the subscriber

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.pubsub;
+package fr.inria.eventcloud.api;
 
 import com.hp.hpl.jena.graph.Node;
 
@@ -87,7 +87,7 @@ public final class PublishSubscribeConstants {
 
     public static final String SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY =
             SUBSCRIPTION_NS + "indexationDateTime";
-    
+
     public static final String SUBSCRIPTION_SUBSCRIBER_PROPERTY =
             SUBSCRIPTION_NS + "subscriber";
 
@@ -145,7 +145,7 @@ public final class PublishSubscribeConstants {
 
     public static final Node SUBSCRIPTION_INDEXATION_DATETIME_NODE =
             Node.createURI(SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY);
-    
+
     public static final Node SUBSCRIPTION_SUBSCRIBER_NODE =
             Node.createURI(SUBSCRIPTION_SUBSCRIBER_PROPERTY);
 

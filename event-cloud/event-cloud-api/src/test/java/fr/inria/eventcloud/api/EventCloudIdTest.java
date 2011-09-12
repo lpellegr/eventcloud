@@ -14,18 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.webservices;
+package fr.inria.eventcloud.api;
 
-import fr.inria.eventcloud.api.Event;
+import junit.framework.Assert;
+
+import org.junit.Test;
+
+import fr.inria.eventcloud.utils.LongLong;
+import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
- * This interface defines a method which may be called to know if an
- * {@link Event} has been received.
+ * Test cases associated to the {@link EventCloudId} class.
  * 
- * @author bsauvan
+ * @author lpellegr
  */
-public interface PubSubStatus {
+public class EventCloudIdTest {
 
-    public boolean hasReceivedEvent();
+    @Test
+    public void testFromUrl() {
+        long[] hashValue = MurmurHash.hash128("test");
+
+        EventCloudId id = new EventCloudId(new LongLong(hashValue));
+
+        Assert.assertEquals(id, EventCloudId.fromUrl(id.toUrl()));
+    }
 
 }

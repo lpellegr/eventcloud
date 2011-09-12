@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 /**
@@ -82,12 +83,11 @@ public class Collection<T> implements java.util.Collection<T>, Serializable {
 
     private Collection(java.util.Collection<T> collection, boolean shallowCopy) {
         if (collection instanceof Collection) {
-            throw new IllegalArgumentException(
-                    "Recursive construction not allowed: you try to construct a Collection from a Collection");
+            collection = ((Collection<T>) collection).collection;
         }
 
         if (shallowCopy) {
-            this.collection = new ArrayList<T>();
+            this.collection = new HashSet<T>();
             this.collection.addAll(collection);
         } else {
             this.collection = collection;

@@ -33,9 +33,16 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDe
  */
 public class CollectionTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testRecursiveConstruction() {
-        new Collection<String>(new Collection<String>(new ArrayList<String>()));
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(7);
+
+        Collection<Integer> c =
+                new Collection<Integer>(new Collection<Integer>(list));
+
+        Assert.assertEquals(1, c.size());
+        Assert.assertEquals(7, (int) c.iterator().next());
     }
 
     @Test

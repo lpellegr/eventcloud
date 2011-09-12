@@ -45,7 +45,7 @@ public class EventTest {
         }
 
         Event e1 = new Event(quads);
-        Assert.assertEquals(10, e1.getQuadruples().size());
+        Assert.assertEquals(11, e1.getQuadruples().size());
 
         Event e2 = null;
         try {

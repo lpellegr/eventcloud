@@ -37,7 +37,7 @@ public abstract class WsProxyLauncher<T extends Proxy> {
     private String registryUrl;
 
     @Parameter(names = {"-id"}, description = "An eventcloud identifier to link the proxy with", required = true)
-    private long eventCloudId;
+    private String eventCloudIdUrl;
 
     protected WsProxyLauncher(String[] args) {
         JCommander jCommander = new JCommander(this);
@@ -57,8 +57,9 @@ public abstract class WsProxyLauncher<T extends Proxy> {
 
     public void run() {
         ProxyFactory factory =
-                ProxyFactory.getInstance(this.registryUrl, new EventCloudId(
-                        this.eventCloudId));
+                ProxyFactory.getInstance(
+                        this.registryUrl,
+                        EventCloudId.fromUrl(this.eventCloudIdUrl));
 
         Proxy proxy = this.createProxy(factory);
 

@@ -16,19 +16,19 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_ID_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_INDEX_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_INDEX_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_NS;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
-import static fr.inria.eventcloud.pubsub.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_ID_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_INDEX_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_INDEX_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_NS;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -46,11 +46,12 @@ import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.datastore.VariableDatatype;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
+import fr.inria.eventcloud.utils.LongLong;
 import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
- * A Subsubscription is an {@link AtomicQuery} that knows who is its parent and
- * what is its position in the parent query.
+ * A Sub-subscription is modeled by using an {@link AtomicQuery} that knows who
+ * is its parent and what is its position in the parent query.
  * 
  * @author lpellegr
  */
@@ -72,10 +73,10 @@ public class Subsubscription implements Rdfable, Serializable {
         this.atomicQuery = atomicQuery;
         this.index = index;
         this.id =
-                new SubscriptionId(MurmurHash.hash64(
+                new SubscriptionId(new LongLong(MurmurHash.hash128(
                         parentId.toString(),
                         Integer.toString(atomicQuery.hashCode()),
-                        Integer.toString(index)));
+                        Integer.toString(index))));
     }
 
     private Subsubscription(SubscriptionId parentId, SubscriptionId id,
@@ -121,8 +122,7 @@ public class Subsubscription implements Rdfable, Serializable {
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subSubscriptionURI,
-                SUBSUBSCRIPTION_ID_NODE, Node.createLiteral(
-                        this.id.toString(), XSDDatatype.XSDlong)));
+                SUBSUBSCRIPTION_ID_NODE, Node.createLiteral(this.id.toString())));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subSubscriptionURI,

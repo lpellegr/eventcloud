@@ -30,6 +30,11 @@ import fr.inria.eventcloud.api.webservices.PublishWsApi;
 import fr.inria.eventcloud.api.webservices.SubscribeWsApi;
 import fr.inria.eventcloud.api.webservices.SubscriberWsApi;
 
+/**
+ * Component used to simulate a subscriber and a publisher.
+ * 
+ * @author bsauvan
+ */
 public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         SubscriberWsApi, PubSubStatus, BindingController {
 
@@ -51,6 +56,9 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         this.hasReceivedEvent = false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SubscriptionId subscribe(String wsNotifSubscriptionPayload,
                                     String topicNameSpacePayload,
@@ -65,6 +73,9 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void unsubscribe(SubscriptionId id) {
         if (this.subscribeWs != null) {
@@ -72,6 +83,9 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void publishEvent(String xmlPayload, URI eventId) {
         if (this.publishWs != null) {
@@ -79,6 +93,9 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void publishEventWithXsd(String xmlPayload, String xsdPayload,
                                     URI eventId) {
@@ -87,6 +104,9 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyEvent(SubscriptionId id, String xmlPayload) {
         this.hasReceivedEvent = true;

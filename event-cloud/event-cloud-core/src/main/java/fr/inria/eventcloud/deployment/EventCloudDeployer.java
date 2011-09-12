@@ -70,7 +70,7 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Tracker createTracker(String networkName,
-                                    NodeProvider nodeProvider) {
+                                                 NodeProvider nodeProvider) {
         // TODO: use the nodeProvider parameter
         return SemanticFactory.newSemanticTracker(networkName);
     }

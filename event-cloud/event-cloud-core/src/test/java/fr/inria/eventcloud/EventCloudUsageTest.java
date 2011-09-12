@@ -18,6 +18,7 @@ package fr.inria.eventcloud;
 
 import java.io.Serializable;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,15 +53,17 @@ public class EventCloudUsageTest implements Serializable {
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudUsageTest.class);
 
-    @Test
-    public void testEventCloudInstantiationAndUsage() {
+    private static final Collection<Binding> bindingsReceived =
+            new Collection<Binding>();
 
+    @Test(timeout = 60000)
+    public void testEventCloudInstantiationAndUsage() {
         // Creates and deploy an EventCloudsRegistry locally
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
-        // Creates and deploy an Event Cloud composed of 15 peers
-        EventCloudId eventCloudId = deployer.createEventCloud(15);
+        // Creates and deploy an Event Cloud composed of 10 peers
+        EventCloudId eventCloudId = deployer.createEventCloud(10);
 
         // Retrieves a proxy factory which is specialized to create
         // proxies for the Event Cloud which has been previously created
@@ -81,16 +84,17 @@ public class EventCloudUsageTest implements Serializable {
                 Node.createURI("http://france.meteofrance.com/france/meteo"),
                 Node.createURI("http://france.meteofrance.com/france/meteo?PREVISIONS_PORTLET.path=previsionsville/060880")));
 
+        Node expectedNodeResult =
+                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011/");
         putGetProxy.add(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
-                Node.createURI("http://www.nice.fr"),
-                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/07082011/"),
+                Node.createURI("http://www.nice.fr"), expectedNodeResult,
                 Node.createLiteral("29", XSDDatatype.XSDint)));
 
         putGetProxy.add(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"),
-                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011/"),
+                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011/"),
                 Node.createLiteral("26", XSDDatatype.XSDint)));
 
         // Once a quadruple is inserted, it is possible to retrieve some
@@ -103,17 +107,23 @@ public class EventCloudUsageTest implements Serializable {
             log.info(quad.toString());
         }
 
+        Assert.assertEquals(3, result.size());
+
         // Or more complex queries may be formulated by using a SPARQL query.
         String sparqlQuery =
                 "SELECT ?day WHERE { GRAPH ?g { <http://www.nice.fr> ?day ?temp FILTER (?temp > 26) } }";
         SparqlSelectResponse response =
                 putGetProxy.executeSparqlSelect(sparqlQuery);
 
+        Node resultNode =
+                response.getResult().nextSolution().get("day").asNode();
         log.info("Answer for SPARQL query {}:", sparqlQuery);
-        log.info(response.getResult().nextSolution().get("day").toString());
+        log.info(resultNode.toString());
+
+        Assert.assertEquals(expectedNodeResult, resultNode);
 
         // Then, it is possible to create a SubscribeProxy to
-        // subscribe to some interest and to be notified
+        // subscribe to some interest and to be notified asynchronously
         final SubscribeProxy subscribeProxy =
                 proxyFactory.createSubscribeProxy();
 
@@ -128,76 +138,70 @@ public class EventCloudUsageTest implements Serializable {
                             @Override
                             public void onNotification(SubscriptionId id,
                                                        Binding solution) {
-                                log.info("Solution received: {}", solution);
+                                synchronized (bindingsReceived) {
+                                    bindingsReceived.add(solution);
+                                    bindingsReceived.notifyAll();
+                                }
+                                log.info("Solution received:\n{}", solution);
                             }
                         });
         log.info("Subscription with id {} has been registered", id);
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        
         // Finally, we can simulate an event source by creating a PublishProxy
         PublishProxy publishProxy = proxyFactory.createPublishProxy();
 
+        long publicationDateTime = System.currentTimeMillis();
+
         // From the publish proxy it is possible to publish quadruples (events)
         publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/107234124364605485774/"),
-                Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("Laurent Pellegrino")));
+                Node.createURI("https://plus.google.com/825349613"),
+                Node.createURI("https://plus.google.com/107234124364605485774"),
+                Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                Node.createLiteral("user1@company.com")).timestamp(publicationDateTime));
 
         publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/107234124364605485774/"),
-                Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                Node.createLiteral("laurent.pellegrino@gmail.com")));
+                Node.createURI("https://plus.google.com/825349613"),
+                Node.createURI("https://plus.google.com/107234124364605485774"),
+                Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                Node.createLiteral("User1")).timestamp(publicationDateTime));
 
         // this quadruple shows chronicle context property because it is
-        // delivered by reconsuming the first quadruple which is published
+        // delivered by reconsuming the first quadruple which was published
         publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/107234124364605485774/"),
+                Node.createURI("https://plus.google.com/825349613"),
+                Node.createURI("https://plus.google.com/107234124364605485774"),
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                Node.createLiteral("laurent.pellegrino.new.email@gmail.com")));
+                Node.createLiteral("user1.new.email@company.com")).timestamp(publicationDateTime));
+
+        publicationDateTime = System.currentTimeMillis();
 
         publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/3283940594/2011-08-30-18:13:05"),
                 Node.createURI("https://plus.google.com/107545688688906540962"),
                 Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                Node.createLiteral("firstname.lastname@gmail.com")));
+                Node.createLiteral("user2@company.com")).timestamp(publicationDateTime));
 
         publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/746668964541235679/"),
+                Node.createURI("https://plus.google.com/124324034/2011-08-30-19:04:54"),
+                Node.createURI("https://plus.google.com/14023231238123495031/"),
                 Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("Frederic Dupont")));
-        
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/746668964541235679/"),
-                Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                Node.createLiteral("frederic.dupont@gmail.com")));
+                Node.createLiteral("User 3")).timestamp());
 
         publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/48798548797974/"),
+                Node.createURI("https://plus.google.com/3283940594/2011-08-30-18:13:05"),
+                Node.createURI("https://plus.google.com/107545688688906540962"),
                 Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("Firstname Lastname")));
+                Node.createLiteral("User 2")).timestamp(publicationDateTime));
 
         // 3 notifications are expected
-
-        /*
-         * Waits some time because Junit does not wait that internal threads end
-         * TODO test has to be rewritten to detect termination cleanly
-         */
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        synchronized (bindingsReceived) {
+            while (bindingsReceived.size() != 3) {
+                try {
+                    bindingsReceived.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         // try {
@@ -221,21 +225,21 @@ public class EventCloudUsageTest implements Serializable {
         // e.printStackTrace();
         // }
 
-        subscribeProxy.unsubscribe(id);
-
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/4879854879797418743/"),
-                Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("Firstname Lastname")));
-
-        // just to test that no notification is delivered
-
-        try {
-            Thread.sleep(7000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // subscribeProxy.unsubscribe(id);
+        //
+        // publishProxy.publish(new Quadruple(
+        // Node.createURI("https://plus.google.com/"),
+        // Node.createURI("https://plus.google.com/4879854879797418743/"),
+        // Node.createURI("http://xmlns.com/foaf/0.1/name"),
+        // Node.createLiteral("Firstname Lastname")));
+        //
+        // // just to test that no notification is delivered
+        //
+        // try {
+        // Thread.sleep(7000);
+        // } catch (InterruptedException e) {
+        // e.printStackTrace();
+        // }
 
         // System.err.println(">>> UNSUBSCRIBE REQUEST ASSUMED TO BE EXECUTED!");
         //

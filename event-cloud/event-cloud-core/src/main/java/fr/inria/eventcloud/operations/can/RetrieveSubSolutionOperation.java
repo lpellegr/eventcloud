@@ -28,6 +28,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -36,9 +37,9 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
-import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subsubscription;
+import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * The class RetrieveSubSolutionOperation is used to retrieve the sub-solutions
@@ -52,9 +53,9 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
 
     private final NotificationId notificationId;
 
-    private final long hash;
+    private final LongLong hash;
 
-    public RetrieveSubSolutionOperation(NotificationId id, long hash) {
+    public RetrieveSubSolutionOperation(NotificationId id, LongLong hash) {
         super();
         this.notificationId = id;
         this.hash = hash;
@@ -83,8 +84,8 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
         }
 
         Quadruple metaQuad = result.iterator().next();
-        // TODO: find why we got an exception when the meta quad is removed at
-        // this step
+        // TODO: try to understand why we got an exception when the meta quad
+        // is removed at this step
         // datastore.delete(metaQuad);
 
         Pair<Quadruple, SubscriptionId> extractedMetaInfo =

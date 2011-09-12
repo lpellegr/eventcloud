@@ -23,7 +23,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
 
-import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 
 /**
  * A VariableDatatype is a Jena {@link RDFDatatype} that is used to store a

@@ -21,8 +21,6 @@ import java.net.URI;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 
-import com.hp.hpl.jena.graph.Node;
-
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.Quadruple;
@@ -30,7 +28,6 @@ import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.webservices.PublishWsApi;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
-import fr.inria.eventcloud.pubsub.PublishSubscribeConstants;
 import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslator;
 import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslatorImpl;
 
@@ -69,7 +66,14 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
      */
     @Override
     public void publish(Quadruple quad) {
+        if (!quad.isTimestamped()) {
+            quad.timestamp();
+        }
+
         // TODO: use an asynchronous call with no response (see issue 16)
+
+        // the quadruple is routed without taking into account the publication
+        // datetime
         try {
             super.proxy.selectTracker().getRandomPeer().send(
                     new PublishQuadrupleRequest(quad));
@@ -83,18 +87,12 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
      */
     @Override
     public void publish(Event event) {
-        // publish a quadruples that indicates what is the number of quadruples
-        // contained by the event
-        this.publish(new Quadruple(
-                event.getGraph(), event.getGraph(),
-                PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                Node.createLiteral(Integer.toString(event.getQuadruples()
-                        .size() + 1))));
+        long publicationDateTime = System.currentTimeMillis();
 
         // TODO try to improve the publication of several quadruples
         // first insight: use a thread-pool
-        for (Quadruple quad : event.getQuadruples()) {
-            this.publish(quad);
+        for (Quadruple quad : event) {
+            this.publish(quad.timestamp(publicationDateTime));
         }
     }
 

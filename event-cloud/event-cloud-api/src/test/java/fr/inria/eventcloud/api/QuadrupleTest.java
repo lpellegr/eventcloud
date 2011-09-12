@@ -80,7 +80,7 @@ public class QuadrupleTest {
     }
 
     @Test
-    public void testTimestampedQuadruple() {
+    public void testQuadrupleValuesAfterTimestampMethodCall() {
         Quadruple quad = QuadrupleGenerator.createWithLiteral();
         Node graph = quad.getGraph();
 
@@ -88,14 +88,6 @@ public class QuadrupleTest {
         Assert.assertEquals(
                 "The graph value is not the same after timestamping the quadruple",
                 graph, quad.getGraph());
-
-        long timestamp = quad.getIndexationTimestamp();
-
-        quad.timestamp();
-
-        Assert.assertEquals(
-                "A second call to timestamp the quadruple update the timestamp value",
-                timestamp, quad.getIndexationTimestamp());
     }
 
     @Test
@@ -115,7 +107,9 @@ public class QuadrupleTest {
             e.printStackTrace();
         }
 
-        Assert.assertEquals(quad, newQuad);
+        Assert.assertEquals(quad.hashCode(), newQuad.hashCode());
+        Assert.assertEquals(
+                "Quadruples not equals after serialization", quad, newQuad);
     }
 
     @Test
@@ -133,6 +127,34 @@ public class QuadrupleTest {
         }
 
         Assert.assertEquals(quad, newQuad);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testTimestamp() {
+        Quadruple quad = QuadrupleGenerator.createWithLiteral();
+        // first call allowed
+        quad.timestamp();
+
+        Assert.assertTrue(quad.isTimestamped());
+        Assert.assertNotNull(quad.getTimestampedGraph());
+
+        // second call not allowed
+        quad.timestamp();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTimestampLong() {
+        Quadruple quad = QuadrupleGenerator.createWithLiteral();
+
+        long dateTime = System.currentTimeMillis();
+
+        quad.timestamp(dateTime);
+
+        Assert.assertTrue(quad.isTimestamped());
+        Assert.assertNotNull(quad.getTimestampedGraph());
+        Assert.assertEquals(dateTime, quad.getPublicationDateTime());
+
+        quad.timestamp(-1);
     }
 
 }
