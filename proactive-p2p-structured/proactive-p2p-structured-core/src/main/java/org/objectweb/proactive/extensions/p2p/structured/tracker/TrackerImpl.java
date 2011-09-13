@@ -150,9 +150,10 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
             }
         }
 
+        PAGroup.waitAll(this.untypedGroupView.internalRemoveTracker(this.stub));
+
         this.typedGroupView = null;
         this.untypedGroupView = null;
-        PAGroup.waitAll(this.untypedGroupView.internalRemoveTracker(this.stub));
     }
 
     /**
