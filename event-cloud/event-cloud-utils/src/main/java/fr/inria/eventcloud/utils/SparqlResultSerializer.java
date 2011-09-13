@@ -19,29 +19,17 @@ package fr.inria.eventcloud.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import org.openjena.riot.out.NodeFmtLib;
-import org.openjena.riot.tokens.TokenizerFactory;
 
 import com.hp.hpl.jena.query.BIOInput;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
-
-import fr.inria.eventcloud.protobuf.SparqlResultsProtos;
-import fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding.Builder;
-import fr.inria.eventcloud.protobuf.SparqlResultsProtos.Binding.SequenceBinding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingInputStream;
+import com.hp.hpl.jena.sparql.engine.binding.BindingOutputStream;
 
 /**
  * A SparqlResultSerializer provides several methods to serialize and to
@@ -83,9 +71,6 @@ public final class SparqlResultSerializer {
      */
     public static void serialize(OutputStream out, Binding binding,
                                  boolean gzipped) {
-
-        Builder bindingBuilder = SparqlResultsProtos.Binding.newBuilder();
-
         if (gzipped) {
             try {
                 out = new GZIPOutputStream(out);
@@ -94,17 +79,10 @@ public final class SparqlResultSerializer {
             }
         }
 
-        if (binding.getParent() != null) {
-            injectSequenceBindings(bindingBuilder, binding.getParent(), true);
-        }
-        injectSequenceBindings(bindingBuilder, binding, false);
-
-        try {
-            bindingBuilder.build().writeTo(out);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        BindingOutputStream bos = new BindingOutputStream(out);
+        bos.write(binding);
+        bos.close();
+        
         if (gzipped) {
             try {
                 ((GZIPOutputStream) out).finish();
@@ -112,45 +90,6 @@ public final class SparqlResultSerializer {
                 e.printStackTrace();
             }
         }
-    }
-
-    private static void injectSequenceBindings(Builder builder,
-                                               Binding binding, boolean parent) {
-        List<Var> vars = extractConcreteVars(binding);
-
-        for (Var var : vars) {
-            SequenceBinding.Builder sequenceBinding =
-                    SparqlResultsProtos.Binding.SequenceBinding.newBuilder();
-            sequenceBinding.setVarName(var.getName());
-            sequenceBinding.setValue(NodeFmtLib.serialize(binding.get(var)));
-            if (parent) {
-                builder.addParentBinding(sequenceBinding);
-            } else {
-                builder.addBinding(sequenceBinding);
-            }
-        }
-    }
-
-    private static List<Var> extractConcreteVars(Binding binding) {
-        Iterator<Var> varsIterator = binding.vars();
-        Set<Var> parentVars = new HashSet<Var>();
-        List<Var> result = new ArrayList<Var>();
-
-        if (binding.getParent() != null) {
-            Iterator<Var> it = binding.getParent().vars();
-            while (it.hasNext()) {
-                parentVars.add(it.next());
-            }
-        }
-
-        while (varsIterator.hasNext()) {
-            Var var = varsIterator.next();
-            if (!parentVars.contains(var)) {
-                result.add(var);
-            }
-        }
-
-        return result;
     }
 
     /**
@@ -275,35 +214,8 @@ public final class SparqlResultSerializer {
             }
         }
 
-        SparqlResultsProtos.Binding bindingProto = null;
-        try {
-            bindingProto = SparqlResultsProtos.Binding.parseFrom(in);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Binding parentBinding = null;
-        if (bindingProto.getParentBindingCount() > 0) {
-            parentBinding =
-                    createBinding(bindingProto.getParentBindingList(), null);
-        }
-
-        return createBinding(bindingProto.getBindingList(), parentBinding);
-    }
-
-    private static final Binding createBinding(List<SequenceBinding> sbl,
-                                               Binding parent) {
-        Binding binding = BindingFactory.create(parent);
-
-        for (SequenceBinding sb : sbl) {
-            binding.add(
-                    Var.alloc(sb.getVarName()),
-                    TokenizerFactory.makeTokenizerString(sb.getValue())
-                            .next()
-                            .asNode());
-        }
-
-        return binding;
+        BindingInputStream bis = new BindingInputStream(in);
+        return bis.next();
     }
 
     /**
