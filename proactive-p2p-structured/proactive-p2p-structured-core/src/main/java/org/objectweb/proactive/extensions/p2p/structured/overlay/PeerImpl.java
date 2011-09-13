@@ -118,13 +118,15 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * {@inheritDoc}
      */
     public void endActivity(Body body) {
-        if (this.overlay.activated.get()) {
-            try {
-                this.leave();
-            } catch (NetworkNotJoinedException e) {
-                e.printStackTrace();
-            }
-        }
+        // TODO: enable the leave operation when it works!
+
+        // if (this.overlay.activated.get()) {
+        // try {
+        // this.leave();
+        // } catch (NetworkNotJoinedException e) {
+        // e.printStackTrace();
+        // }
+        // }
 
         if (this.overlay.datastore != null
                 && this.overlay.datastore.isInitialized()) {
