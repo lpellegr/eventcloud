@@ -130,8 +130,8 @@ public class SubscribeProxyTest {
                 e.printStackTrace();
             }
         }
-
-        deployer.destroyEventCloud(ecId);
+        
+        deployer.undeploy();
     }
 
     private Component createPubSubComponent(String subscribeWsUrl,

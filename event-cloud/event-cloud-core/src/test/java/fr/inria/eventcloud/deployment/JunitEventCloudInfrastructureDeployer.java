@@ -39,17 +39,13 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class JunitEventCloudInfrastructureDeployer {
 
-    private final EventCloudsRegistry eventCloudsRegistry;
-
-    private final String eventCloudsRegistryUrl;
-
     public final Map<EventCloudId, EventCloud> eventClouds;
 
+    private EventCloudsRegistry eventCloudsRegistry;
+
+    private String eventCloudsRegistryUrl;
+
     public JunitEventCloudInfrastructureDeployer() {
-        this.eventCloudsRegistry =
-                EventCloudsRegistryFactory.newEventCloudsRegistry();
-        this.eventCloudsRegistryUrl =
-                PAActiveObject.getUrl(this.eventCloudsRegistry);
         this.eventClouds = new HashMap<EventCloudId, EventCloud>();
     }
 
@@ -58,6 +54,8 @@ public class JunitEventCloudInfrastructureDeployer {
     }
 
     public EventCloudId createEventCloud(int nbTrackers, int nbPeers) {
+        this.initializeEventCloudsRegistry();
+
         EventCloud ec =
                 EventCloud.create(
                         PAActiveObject.getUrl(this.eventCloudsRegistry),
@@ -68,13 +66,13 @@ public class JunitEventCloudInfrastructureDeployer {
         return ec.getId();
     }
 
-    public void destroyEventCloud(EventCloudId id) {
-        if (!this.eventClouds.containsKey(id)) {
-            throw new IllegalArgumentException("Event cloud id not managed: "
-                    + id);
+    private synchronized void initializeEventCloudsRegistry() {
+        if (this.eventCloudsRegistry == null) {
+            this.eventCloudsRegistry =
+                    EventCloudsRegistryFactory.newEventCloudsRegistry();
+            this.eventCloudsRegistryUrl =
+                    PAActiveObject.getUrl(this.eventCloudsRegistry);
         }
-
-        this.eventClouds.remove(id).getEventCloudDeployer().undeploy();
     }
 
     public EventCloud find(EventCloudId id) {
@@ -106,9 +104,24 @@ public class JunitEventCloudInfrastructureDeployer {
     }
 
     public void undeploy() {
-        for (EventCloud eventCloud : this.eventClouds.values()) {
-            eventCloud.getEventCloudDeployer().undeploy();
+        for (EventCloudId id : this.eventClouds.keySet()) {
+            this.undeploy(id);
         }
+
+        PAActiveObject.terminateActiveObject(this.eventCloudsRegistry, false);
+
+        this.eventCloudsRegistry = null;
+        this.eventCloudsRegistryUrl = null;
+    }
+
+    public void undeploy(EventCloudId eventCloudId) {
+        if (!this.eventClouds.containsKey(eventCloudId)) {
+            throw new IllegalArgumentException("Event cloud id not managed: "
+                    + eventCloudId);
+        }
+
+        this.eventClouds.get(eventCloudId).getEventCloudDeployer().undeploy();
+        this.eventClouds.remove(eventCloudId);
     }
 
 }
