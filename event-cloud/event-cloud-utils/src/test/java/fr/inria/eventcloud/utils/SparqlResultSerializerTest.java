@@ -93,9 +93,7 @@ public class SparqlResultSerializerTest {
     private void testBindingSerialization(boolean gzipped) {
         Node defaultNode = Node.createURI("http://www.inria.fr");
 
-        Binding parentBinding = BindingFactory.create();
-        parentBinding.add(Var.alloc("parent"), defaultNode);
-        Binding binding = BindingFactory.create(parentBinding);
+        Binding binding = BindingFactory.create();
         binding.add(Var.alloc("var1"), defaultNode);
         binding.add(Var.alloc("var2"), defaultNode);
 
@@ -118,10 +116,6 @@ public class SparqlResultSerializerTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Binding unserializedParentBinding = unserializedBinding.getParent();
-        Assert.assertEquals(
-                unserializedParentBinding.vars().next().getName(), "parent");
 
         Set<String> vars = new HashSet<String>();
         Iterator<Var> varsIt = unserializedBinding.vars();
