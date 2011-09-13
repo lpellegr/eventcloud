@@ -73,14 +73,6 @@ public class BindingWrapper extends SparqlResultWrapper<Binding> implements
      * {@inheritDoc}
      */
     @Override
-    public Binding getParent() {
-        return super.object.getParent();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void add(Var var, Node node) {
         super.object.add(var, node);
     }
