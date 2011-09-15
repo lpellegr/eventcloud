@@ -31,7 +31,11 @@ public class LongLong implements Comparable<LongLong>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final long[] value;
+    private long[] value;
+
+    public LongLong() {
+        // empty constructor for webservices
+    }
 
     public LongLong(long[] longLongValue) {
         if (longLongValue.length != 2) {
@@ -41,6 +45,14 @@ public class LongLong implements Comparable<LongLong>, Serializable {
         }
 
         this.value = longLongValue;
+    }
+
+    public long[] getValue() {
+        return this.value;
+    }
+
+    public void setValue(long[] value) {
+        this.value = value;
     }
 
     /**

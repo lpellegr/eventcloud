@@ -53,6 +53,14 @@ public class SubscriptionId implements Serializable {
         this.hashValue = hashValue;
     }
 
+    public LongLong getHashValue() {
+        return this.hashValue;
+    }
+
+    public void setHashValue(LongLong hashValue) {
+        this.hashValue = hashValue;
+    }
+
     /**
      * Creates a new Jena {@link Node_Literal} representing the current
      * subscription identifier.
