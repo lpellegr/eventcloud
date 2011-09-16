@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.providers;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
@@ -45,8 +46,8 @@ public final class SemanticPersistentOverlayProvider extends
                                 EventCloudProperties.REPOSITORIES_PATH.getValue()),
                         EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
                 new PersistentJenaTdbDatastore(new File(
-                        System.getProperty("java.io.tmpdir"),
-                        "eventcloud-colanders"), true));
+                        System.getProperty("java.io.tmpdir"), "ec"
+                                + UUID.randomUUID().toString()), true));
     }
 
 }
