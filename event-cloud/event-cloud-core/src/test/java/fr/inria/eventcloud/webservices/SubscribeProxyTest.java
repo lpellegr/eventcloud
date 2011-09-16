@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.api.generators.Generator;
 import fr.inria.eventcloud.api.webservices.PublishWsApi;
 import fr.inria.eventcloud.api.webservices.SubscribeWsApi;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -115,9 +114,7 @@ public class SubscribeProxyTest {
         PublishWsApi publishWs =
                 (PublishWsApi) pubSubComponent.getFcInterface("publish-services");
 
-        publishWs.publishEvent(
-                this.stringFrom("/notification-01.xml"),
-                Generator.generateRandomUri());
+        publishWs.notify(this.stringFrom("/notification-01.xml"));
 
         PubSubStatus pubSubComponentStatus =
                 (PubSubStatus) pubSubComponent.getFcInterface("status-services");
@@ -130,7 +127,7 @@ public class SubscribeProxyTest {
                 e.printStackTrace();
             }
         }
-        
+
         deployer.undeploy();
     }
 
