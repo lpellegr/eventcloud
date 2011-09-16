@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.UUID;
 
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorImpl;
@@ -31,6 +33,24 @@ import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorImpl;
  */
 public class ProxyWsNotificationTranslatorImpl extends
         WsNotificationTranslatorImpl implements ProxyWsNotificationTranslator {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Event translateWsNotifNotificationToEvent(String xmlPayload) {
+        // TODO: generate event identifier with the information extracted from
+        // the payload
+
+        try {
+            return this.translateWsNotifNotificationToEvent(
+                    xmlPayload, new URI(UUID.randomUUID().toString()));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
     /**
      * {@inheritDoc}
