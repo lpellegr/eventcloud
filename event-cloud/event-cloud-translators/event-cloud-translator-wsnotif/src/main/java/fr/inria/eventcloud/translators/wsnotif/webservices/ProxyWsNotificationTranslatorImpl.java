@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.util.UUID;
 
 import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorImpl;
 
 /**
@@ -44,7 +45,10 @@ public class ProxyWsNotificationTranslatorImpl extends
 
         try {
             return this.translateWsNotifNotificationToEvent(
-                    xmlPayload, new URI(UUID.randomUUID().toString()));
+                    xmlPayload,
+                    new URI(
+                            EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                                    + "/" + UUID.randomUUID().toString()));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
