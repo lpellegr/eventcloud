@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.webservices;
 
-import java.net.URI;
-
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -87,20 +85,9 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
      * {@inheritDoc}
      */
     @Override
-    public void publishEvent(String xmlPayload, URI eventId) {
+    public void notify(String xmlPayload) {
         if (this.publishWs != null) {
-            this.publishWs.publishEvent(xmlPayload, eventId);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishEventWithXsd(String xmlPayload, String xsdPayload,
-                                    URI eventId) {
-        if (this.publishWs != null) {
-            this.publishWs.publishEventWithXsd(xmlPayload, xsdPayload, eventId);
+            this.publishWs.notify(xmlPayload);
         }
     }
 

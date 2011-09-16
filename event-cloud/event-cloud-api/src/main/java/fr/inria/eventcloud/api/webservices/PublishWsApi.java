@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.api.webservices;
 
-import java.net.URI;
-
 /**
  * Defines the publish operations that can be executed on an Event Cloud and can
  * be exposed as web services by a publish proxy component.
@@ -34,26 +32,7 @@ public interface PublishWsApi {
      * @param xmlPayload
      *            the WS-Notification notification XML payload representing the
      *            event.
-     * @param eventId
-     *            the identifier associated to the event.
      */
-    public void publishEvent(String xmlPayload, URI eventId);
-
-    /**
-     * Publishes an event represented by the specified WS-Notification
-     * notification XML payload where the literal values associated to the
-     * quadruple contained by the event are annotated by using the specified XSD
-     * payload.
-     * 
-     * @param xmlPayload
-     *            the WS-Notification notification XML payload representing the
-     *            event.
-     * @param xsdPayload
-     *            the XSD payload associated to the event.
-     * @param eventId
-     *            the identifier associated to the event.
-     */
-    public void publishEventWithXsd(String xmlPayload, String xsdPayload,
-                                    URI eventId);
+    public void notify(String xmlPayload);
 
 }

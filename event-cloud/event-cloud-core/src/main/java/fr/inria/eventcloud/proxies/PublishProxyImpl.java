@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.proxies;
 
 import java.io.InputStream;
-import java.net.URI;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 
@@ -100,23 +99,9 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
-    public void publishEvent(String xmlPayload, URI eventId) {
+    public void notify(String xmlPayload) {
         Event event =
-                this.translator.translateWsNotifNotificationToEvent(
-                        xmlPayload, eventId);
-
-        this.publish(event);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishEventWithXsd(String xmlPayload, String xsdPayload,
-                                    URI eventId) {
-        Event event =
-                this.translator.translateWsNotifNotificationToEvent(
-                        xmlPayload, xsdPayload, eventId);
+                this.translator.translateWsNotifNotificationToEvent(xmlPayload);
 
         this.publish(event);
     }
