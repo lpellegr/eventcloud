@@ -32,6 +32,20 @@ public interface ProxyWsNotificationTranslator extends WsNotificationTranslator 
      * Translates a {@code xmlPayload} standing for a WS-Notification
      * notification to an {@link Event}. Because there is no XSD information
      * that is given to the method, the literals are not annotated with a
+     * datatype. The event identifier associated to the event is created from
+     * the information contained by the payload.
+     * 
+     * @param xmlPayload
+     *            the XML payload.
+     * 
+     * @return an {@link Event}.
+     */
+    public Event translateWsNotifNotificationToEvent(String xmlPayload);
+
+    /**
+     * Translates a {@code xmlPayload} standing for a WS-Notification
+     * notification to an {@link Event}. Because there is no XSD information
+     * that is given to the method, the literals are not annotated with a
      * datatype.
      * 
      * @param xmlPayload
