@@ -31,11 +31,9 @@ public class LongLong implements Comparable<LongLong>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private long[] value;
+    private static final char SEPARATOR = 's';
 
-    public LongLong() {
-        // empty constructor for webservices
-    }
+    private long[] value;
 
     public LongLong(long[] longLongValue) {
         if (longLongValue.length != 2) {
@@ -45,14 +43,6 @@ public class LongLong implements Comparable<LongLong>, Serializable {
         }
 
         this.value = longLongValue;
-    }
-
-    public long[] getValue() {
-        return this.value;
-    }
-
-    public void setValue(long[] value) {
-        this.value = value;
     }
 
     /**
@@ -101,14 +91,14 @@ public class LongLong implements Comparable<LongLong>, Serializable {
         for (int i = 0; i < this.value.length; i++) {
             result.append(this.value[i]);
             if (i < this.value.length - 1) {
-                result.append("#");
+                result.append(SEPARATOR);
             }
         }
         return result.toString();
     }
 
     public static LongLong fromString(String longLongValue) {
-        String[] values = longLongValue.split("#");
+        String[] values = longLongValue.split(Character.toString(SEPARATOR));
         long[] result = new long[values.length];
 
         if (values.length != 2) {
