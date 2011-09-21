@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.configuration;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
@@ -45,6 +46,19 @@ public class EventCloudProperties {
      */
     public static final PropertyString REPOSITORIES_PATH = new PropertyString(
             "eventcloud.repositories.path", getDefaultRepositoriesPath());
+
+    /**
+     * This property is used to have the possibility to restore a repository
+     * which has been used in a previous run. When this property is set to
+     * {@code true} it is assumed that the network contain only <b>one</b> peer.
+     * If this property is enabled in conjunction with
+     * {@link EventCloudProperties#REPOSITORIES_AUTO_REMOVE}, it has no effect.
+     */
+    public static final PropertyBoolean REPOSITORIES_RESTORE =
+            new PropertyBoolean("eventcloud.repositories.restore", false);
+
+    public static final PropertyString REPOSITORIES_RESTORE_PATH =
+            new PropertyString("eventcloud.repositories.restore.path");
 
     /**
      * Defines whether the repositories that are instantiated must be removed
@@ -135,6 +149,30 @@ public class EventCloudProperties {
 
     private EventCloudProperties() {
 
+    }
+
+    public static final File getRepositoryPath() {
+        // a repository has to be restored
+        if (!REPOSITORIES_AUTO_REMOVE.getValue()
+                && EventCloudProperties.REPOSITORIES_RESTORE.getValue()) {
+            if (EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue() != null
+                    && !EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue()
+                            .isEmpty()) {
+                return new File(
+                        EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue());
+            } else {
+                File repositoryPath =
+                        new File(
+                                REPOSITORIES_PATH.getValue(), UUID.randomUUID()
+                                        .toString());
+                ConfigurationParser.updatePreferencesWithRestorePath(repositoryPath.getPath());
+                return repositoryPath;
+            }
+        } else {
+            // a new repository has to be created
+            return new File(REPOSITORIES_PATH.getValue(), UUID.randomUUID()
+                    .toString());
+        }
     }
 
     public static final String getPreferencesFilePath() {

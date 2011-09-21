@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.configuration;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -33,6 +36,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,6 +174,49 @@ public final class ConfigurationParser {
             log.warn("Invalid Event-Cloud Configuration file: " + source, e);
         } catch (IOException e) {
             log.error("Error while parsing Event-Cloud Configuration file", e);
+        }
+    }
+
+    public static void updatePreferencesWithRestorePath(String repositoryPath) {
+        SAXBuilder sxb = new SAXBuilder();
+        org.jdom.Document document = null;
+        try {
+            document =
+                    sxb.build(new File(
+                            EventCloudProperties.getPreferencesFilePath()));
+        } catch (JDOMException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Element propertiesElt =
+                document.getRootElement().getChild("properties");
+
+        Element restoreProperty = new Element("property");
+        restoreProperty.setAttribute(
+                "key", EventCloudProperties.REPOSITORIES_RESTORE_PATH.getName());
+        restoreProperty.setAttribute("value", repositoryPath);
+        propertiesElt.addContent(restoreProperty);
+
+        XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+        FileOutputStream fos = null;
+
+        try {
+            fos =
+                    new FileOutputStream(
+                            EventCloudProperties.getPreferencesFilePath());
+            outputter.output(document, fos);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

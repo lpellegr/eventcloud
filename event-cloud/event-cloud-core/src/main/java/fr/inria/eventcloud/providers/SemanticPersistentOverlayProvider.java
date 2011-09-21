@@ -42,8 +42,7 @@ public final class SemanticPersistentOverlayProvider extends
     public SemanticCanOverlay get() {
         return new SemanticCanOverlay(
                 new PersistentJenaTdbDatastore(
-                        new File(
-                                EventCloudProperties.REPOSITORIES_PATH.getValue()),
+                        EventCloudProperties.getRepositoryPath(),
                         EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
                 new PersistentJenaTdbDatastore(new File(
                         System.getProperty("java.io.tmpdir"), "ec"
