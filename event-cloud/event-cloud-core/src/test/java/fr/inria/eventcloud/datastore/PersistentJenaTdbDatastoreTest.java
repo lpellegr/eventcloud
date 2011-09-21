@@ -32,9 +32,10 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.ResultSet;
 
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
- * Provides tests for some methods exposed by a {@link PersistentTdbDatastore}.
+ * Test cases associated to {@link PersistentJenaTdbDatastore}.
  * 
  * @author lpellegr
  */
@@ -48,7 +49,9 @@ public final class PersistentJenaTdbDatastoreTest {
 
     @Before
     public void setUp() {
-        this.datastore = new PersistentJenaTdbDatastore();
+        this.datastore =
+                new PersistentJenaTdbDatastore(
+                        EventCloudProperties.getRepositoryPath(), true);
         this.datastore.open();
     }
 

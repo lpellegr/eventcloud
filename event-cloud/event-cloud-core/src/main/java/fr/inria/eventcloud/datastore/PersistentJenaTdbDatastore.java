@@ -24,9 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import com.hp.hpl.jena.tdb.TDB;
 import com.hp.hpl.jena.tdb.TDBFactory;
-
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
  * A persistent Jena datastore that relies on Jena TDB.
@@ -43,17 +42,6 @@ public class PersistentJenaTdbDatastore extends SynchronizedJenaDatasetGraph {
     private final boolean autoRemove;
 
     /**
-     * Creates a new persistent datastore that stores semantic data into the
-     * default repository path defined by
-     * {@link EventCloudProperties#REPOSITORIES_PATH} and set the auto remove
-     * property according to the value defined by
-     * {@link EventCloudProperties#REPOSITORIES_AUTO_REMOVE}.
-     */
-    public PersistentJenaTdbDatastore() {
-        this(new File(EventCloudProperties.REPOSITORIES_PATH.getValue()), true);
-    }
-
-    /**
      * Creates a new datastore that stores data into the specified
      * {@code repositoryPath}.
      * 
@@ -67,7 +55,7 @@ public class PersistentJenaTdbDatastore extends SynchronizedJenaDatasetGraph {
     public PersistentJenaTdbDatastore(File repositoryPath, boolean autoRemove) {
         super();
         this.autoRemove = autoRemove;
-        this.repositoryPath = new File(repositoryPath, super.id.toString());
+        this.repositoryPath = repositoryPath;
     }
 
     /**
@@ -95,12 +83,12 @@ public class PersistentJenaTdbDatastore extends SynchronizedJenaDatasetGraph {
      */
     @Override
     protected void internalClose() {
+        TDB.sync(super.datastore);
         super.datastore.close();
 
         if (this.autoRemove) {
             try {
                 Files.deleteDirectory(this.repositoryPath);
-                log.info("Repository {} has been deleted", this.repositoryPath);
             } catch (IOException e) {
                 log.error("The deletion of the repository "
                         + this.repositoryPath + " has failed", e);
