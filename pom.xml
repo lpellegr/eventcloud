@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+	<groupId>fr.inria.eventcloud</groupId>
+	<artifactId>event-cloud-parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>event-cloud-parent</name>
+	<description>Parent module for event-cloud maven related modules.</description>
+	<url>https://event-cloud.googlecode.com</url>
+	<inceptionYear>2010</inceptionYear>
+
+	<prerequisites>
+		<maven>3.0.3</maven>
+	</prerequisites>
+
+	<scm>
+		<connection>scm:hg:https://event-cloud.googlecode.com/hg/</connection>
+		<developerConnection>scm:hg:https://event-cloud.googlecode.com/hg/</developerConnection>
+		<url>http://event-cloud.googlecode.com/hg/</url>
+	</scm>
+
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://eventcloud.inria.fr/jenkins</url>
+	</ciManagement>
+
+	<issueManagement>
+		<system>google-code</system>
+		<url>http://code.google.com/p/event-cloud/issues/</url>
+	</issueManagement>
+
+	<repositories>
+		<!-- These repositories must also be removed before to release the event 
+			cloud artifacts into maven central -->
+		<!-- <repository> -->
+		<!-- <id>event-cloud-releases</id> -->
+		<!-- <url>http://maven.event-cloud.googlecode.com/hg/releases</url> -->
+		<!-- </repository> -->
+		<repository>
+			<id>event-cloud-snapshots</id>
+			<url>http://maven.event-cloud.googlecode.com/hg/snapshots</url>
+		</repository>
+	</repositories>
+
+	<developers>
+		<developer>
+			<id>bsauvan</id>
+			<name>Bastien Sauvan</name>
+			<email>bastien.sauvan@inria.fr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>lpellegr</id>
+			<name>Laurent Pellegrino</name>
+			<email>laurent.pellegrino@inria.fr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
+
+	<distributionManagement>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>sonatype-nexus-staging</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+		</repository>
+		<snapshotRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>sonatype-nexus-snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<licenses>
+		<license>
+			<name>GNU General Public License, Version 3.0</name>
+			<url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>INRIA Sophia Antipolis</name>
+		<url>http://www.inria.fr/en/</url>
+	</organization>
+
+	<modules>
+		<module>event-cloud</module>
+		<module>proactive-p2p-structured</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId>
+				<version>1.6.2</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>r09</version>
+			</dependency>
+			<dependency>
+				<groupId>org.objectweb.proactive</groupId>
+				<artifactId>proactive-programming</artifactId>
+				<version>5.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.hp.hpl.jena</groupId>
+				<artifactId>arq</artifactId>
+				<version>2.8.9-SNAPSHOT</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.hp.hpl.jena</groupId>
+				<artifactId>jena</artifactId>
+				<version>2.6.5-SNAPSHOT</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.hp.hpl.jena</groupId>
+				<artifactId>tdb</artifactId>
+				<version>0.8.11-SNAPSHOT</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>0.9.29</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.9</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<!-- this is the parent, so only define pluginManagement, not plugins. -->
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.2.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.4.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.3</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.3.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addClasspath>true</addClasspath>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.8</version>
+					<configuration>
+						<links>
+							<link>http://jena.sourceforge.net/javadoc/</link>
+							<link>http://openjena.org/ARQ/javadoc/</link>
+							<link>http://openjena.org/TDB/javadoc/</link>
+						</links>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>2.9</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.2.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>2.3</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.1.2</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.9</version>
+				</plugin>
+				<plugin>
+					<groupId>org.objectweb.proactive</groupId>
+					<artifactId>proactive-maven-plugin</artifactId>
+					<version>1.1.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<properties>
+		<!-- To force goal "eclipse:eclipse" to download javadoc and sources -->
+		<downloadJavadoc>true</downloadJavadoc>
+		<downloadSources>true</downloadSources>
+		<!-- force usage of UTF-8 encoding -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+</project>
