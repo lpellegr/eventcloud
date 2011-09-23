@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -67,10 +68,13 @@ public final class EventCloud implements EventCloudApi, Serializable {
             Collection<UnalterableElaProperty> elaProperties, int nbTrackers,
             int nbPeers) {
         this.id =
-                new EventCloudId(new LongLong(MurmurHash.hash128(
-                        registryUrl.toString(), deployer.toString(),
-                        elaProperties.toString(), Integer.toString(nbTrackers),
-                        Integer.toString(nbPeers))));
+                new EventCloudId(new LongLong(
+                        MurmurHash.hash128(
+                                registryUrl.toString(), deployer.toString(),
+                                elaProperties.toString(),
+                                Integer.toString(nbTrackers),
+                                Integer.toString(nbPeers), UUID.randomUUID()
+                                        .toString())));
 
         this.creationTime = System.currentTimeMillis();
         this.elaProperties = elaProperties;
