@@ -65,11 +65,9 @@ public class SemanticCoordinate extends StringCoordinate {
      * @return the coordinate which has been created.
      */
     public static SemanticCoordinate create(Quadruple quad) {
-        return new SemanticCoordinate(
-                new SemanticElement(quad.getGraph()), new SemanticElement(
-                        quad.getSubject()), new SemanticElement(
-                        quad.getPredicate()), new SemanticElement(
-                        quad.getObject()));
+        return create(
+                quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                quad.getObject());
     }
 
     /**
@@ -89,6 +87,13 @@ public class SemanticCoordinate extends StringCoordinate {
      */
     public static SemanticCoordinate create(Node graph, Node subject,
                                             Node predicate, Node object) {
+        // if the literal value contains an empty String we have to decide which
+        // constraint is associated to this particular case where there is no
+        // character to compare.
+        if (object.isLiteral() && object.getLiteralLexicalForm().isEmpty()) {
+            object = Node.createLiteral("A");
+        }
+
         return new SemanticCoordinate(
                 createSemanticElementWithVars(graph),
                 createSemanticElementWithVars(subject),
