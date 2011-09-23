@@ -282,4 +282,20 @@ public class EventCloudUsageTest implements Serializable {
         // }
     }
 
+    @Test
+    public void testEventCloudsInitializationWith2EventClouds() {
+        JunitEventCloudInfrastructureDeployer deployer =
+                new JunitEventCloudInfrastructureDeployer();
+
+        EventCloudId ecId1 = deployer.createEventCloud(1);
+
+        EventCloudId ecId2 = deployer.createEventCloud(1);
+
+        Assert.assertFalse(
+                "Two Event Clouds created at two different time have the same identifier",
+                ecId1.equals(ecId2));
+
+        deployer.undeploy();
+    }
+
 }

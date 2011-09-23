@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.deployment;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.objectweb.proactive.api.PAActiveObject;
@@ -104,8 +105,12 @@ public class JunitEventCloudInfrastructureDeployer {
     }
 
     public void undeploy() {
-        for (EventCloudId id : this.eventClouds.keySet()) {
-            this.undeploy(id);
+        Iterator<EventCloudId> it = this.eventClouds.keySet().iterator();
+
+        while (it.hasNext()) {
+            EventCloudId ecId = it.next();
+            this.eventClouds.get(ecId).getEventCloudDeployer().undeploy();
+            it.remove();
         }
 
         PAActiveObject.terminateActiveObject(this.eventCloudsRegistry, false);
