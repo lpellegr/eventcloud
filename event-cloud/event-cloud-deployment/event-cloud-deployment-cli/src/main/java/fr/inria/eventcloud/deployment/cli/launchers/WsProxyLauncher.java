@@ -23,10 +23,11 @@ import com.beust.jcommander.ParameterException;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.Proxy;
+import fr.inria.eventcloud.webservices.factories.WsProxyFactory;
 
 /**
  * This class is used to provide the operations which are common to all the
- * proxies that have to be deployed as a WebService.
+ * proxies that have to be deployed as a web service.
  * 
  * @author lpellegr
  * @author bsauvan
@@ -57,7 +58,7 @@ public abstract class WsProxyLauncher<T extends Proxy> {
 
     public void run() {
         ProxyFactory factory =
-                ProxyFactory.getInstance(
+                WsProxyFactory.getInstance(
                         this.registryUrl,
                         EventCloudId.fromUrl(this.eventCloudIdUrl));
 

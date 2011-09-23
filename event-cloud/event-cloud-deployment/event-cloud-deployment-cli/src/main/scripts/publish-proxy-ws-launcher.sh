@@ -16,6 +16,6 @@ java -Xms64m -Xmx128m \
      -Dproactive.communication.protocol=pnp \
      -Dproactive.pnp.port=$PNP_PORT \
      -Dproactive.http.port=$HTTP_PORT \
-     -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.WsPublishProxyLauncher $@
+     -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.PublishWsProxyLauncher $@
 
 . $(dirname $0)/configuration/unset-environment.sh

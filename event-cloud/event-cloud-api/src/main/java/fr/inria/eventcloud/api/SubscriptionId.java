@@ -33,11 +33,7 @@ public class SubscriptionId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private LongLong hashValue;
-
-    public SubscriptionId() {
-        // empty constructor for webservices
-    }
+    private final LongLong hashValue;
 
     /**
      * Constructs a subscription identifier from the specified hash value. The
@@ -50,14 +46,6 @@ public class SubscriptionId implements Serializable {
      *             if the specified hash value is not a 128 bits hash value.
      */
     public SubscriptionId(LongLong hashValue) {
-        this.hashValue = hashValue;
-    }
-
-    public LongLong getHashValue() {
-        return this.hashValue;
-    }
-
-    public void setHashValue(LongLong hashValue) {
         this.hashValue = hashValue;
     }
 

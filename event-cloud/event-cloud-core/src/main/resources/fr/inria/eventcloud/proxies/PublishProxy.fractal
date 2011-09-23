@@ -3,11 +3,10 @@
 
 <definition name="fr.inria.eventcloud.proxies.PublishProxy">
 	<interface role="server" name="publish-services" signature="fr.inria.eventcloud.proxies.PublishProxy"/>
-	<interface role="server" name="publish-webservices" signature="fr.inria.eventcloud.api.webservices.PublishWsApi"/>
 
 	<content class="fr.inria.eventcloud.proxies.PublishProxyImpl"/>
 
-	<controller desc="/org/objectweb/proactive/extensions/webservices/cxf/component/controller/cxf-component-config.xml"/>
+	<controller desc="primitive"/>
 
 	<virtual-node name="PubProxyVN"/>
 </definition>

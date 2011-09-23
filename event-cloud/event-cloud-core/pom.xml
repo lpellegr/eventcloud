@@ -50,16 +50,21 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-translator-wsnotif</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-maven-plugin</artifactId>
@@ -91,9 +96,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>-Xmx2048m</argLine>
-					<systemPropertyVariables>
-						<proactive.http.port>8888</proactive.http.port>
-					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 		</plugins>
