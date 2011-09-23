@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.webservices.pubsub;
+package fr.inria.eventcloud.webservices;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author bsauvan
  */
+// TODO Delete this class when ProActive 5.2 or 6.0 has been released
 public class JaxWsCXFWSCaller implements PAWSCaller {
 
     private static final Logger log =
