@@ -3,11 +3,10 @@
 
 <definition name="fr.inria.eventcloud.proxies.SubscribeProxy">
 	<interface role="server" name="subscribe-services" signature="fr.inria.eventcloud.proxies.SubscribeProxy"/>
-	<interface role="server" name="subscribe-webservices" signature="fr.inria.eventcloud.api.webservices.SubscribeWsApi"/>
 
 	<content class="fr.inria.eventcloud.proxies.SubscribeProxyImpl"/>
 
-	<controller desc="/org/objectweb/proactive/extensions/webservices/cxf/component/controller/cxf-component-config.xml"/>
+	<controller desc="primitive"/>
 
 	<virtual-node name="SubProxyVN"/>
 </definition>

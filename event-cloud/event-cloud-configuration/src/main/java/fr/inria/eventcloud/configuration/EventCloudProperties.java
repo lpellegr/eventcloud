@@ -105,9 +105,6 @@ public class EventCloudProperties {
     public static final PropertyString PUBLISH_PROXY_SERVICES_ITF =
             new PropertyString("publish.services.itf", "publish-services");
 
-    public static final PropertyString PUBLISH_PROXY_WEBSERVICES_ITF =
-            new PropertyString("publish.webservices.itf", "publish-webservices");
-
     public static final PropertyString SUBSCRIBE_PROXY_ADL =
             new PropertyString(
                     "sub.proxy.adl",
@@ -116,18 +113,11 @@ public class EventCloudProperties {
     public static final PropertyString SUBSCRIBE_PROXY_SERVICES_ITF =
             new PropertyString("subscribe.services.itf", "subscribe-services");
 
-    public static final PropertyString SUBSCRIBE_PROXY_WEBSERVICES_ITF =
-            new PropertyString(
-                    "subscribe.webservices.itf", "subscribe-webservices");
-
     public static final PropertyString PUTGET_PROXY_ADL = new PropertyString(
             "putget.proxy.adl", "fr.inria.eventcloud.proxies.PutGetProxy");
 
     public static final PropertyString PUTGET_PROXY_SERVICES_ITF =
             new PropertyString("putget.services.itf", "putget-services");
-
-    public static final PropertyString PUTGET_PROXY_WEBSERVICES_ITF =
-            new PropertyString("putget.webservices.itf", "putget-webservices");
 
     static {
         File preferencesFile = new File(getPreferencesFilePath());
@@ -145,10 +135,6 @@ public class EventCloudProperties {
                     "No Event-Cloud properties loaded because file {} does not exist",
                     preferencesFile);
         }
-    }
-
-    private EventCloudProperties() {
-
     }
 
     public static final File getRepositoryPath() {

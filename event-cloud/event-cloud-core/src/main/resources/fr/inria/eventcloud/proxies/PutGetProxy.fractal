@@ -3,11 +3,10 @@
 
 <definition name="fr.inria.eventcloud.proxies.PutGetProxy">
 	<interface role="server" name="putget-services" signature="fr.inria.eventcloud.proxies.PutGetProxy"/>
-	<interface role="server" name="putget-webservices" signature="fr.inria.eventcloud.api.webservices.PutGetWsApi"/>
 
 	<content class="fr.inria.eventcloud.proxies.PutGetProxyImpl"/>
 
-	<controller desc="/org/objectweb/proactive/extensions/webservices/cxf/component/controller/cxf-component-config.xml"/>
+	<controller desc="primitive"/>
 
 	<virtual-node name="PutGetProxyVN"/>
 </definition>

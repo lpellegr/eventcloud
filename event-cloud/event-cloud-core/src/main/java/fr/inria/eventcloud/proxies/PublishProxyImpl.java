@@ -24,11 +24,8 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.webservices.PublishWsApi;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
-import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslator;
-import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTranslatorImpl;
 
 /**
  * PublishProxyImpl is a concrete implementation of {@link PublishProxy}. This
@@ -39,10 +36,7 @@ import fr.inria.eventcloud.translators.wsnotif.webservices.ProxyWsNotificationTr
  * 
  * @see ProxyFactory
  */
-public class PublishProxyImpl extends ProxyCache implements PublishProxy,
-        PublishWsApi {
-
-    private ProxyWsNotificationTranslator translator;
+public class PublishProxyImpl extends ProxyCache implements PublishProxy {
 
     /**
      * Empty constructor required by ProActive.
@@ -56,7 +50,6 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
     public void init(EventCloudCache proxy) {
         if (this.proxy == null) {
             this.proxy = proxy;
-            this.translator = new ProxyWsNotificationTranslatorImpl();
         }
     }
 
@@ -93,17 +86,6 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
         for (Quadruple quad : event) {
             this.publish(quad.timestamp(publicationDateTime));
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void notify(String xmlPayload) {
-        Event event =
-                this.translator.translateWsNotifNotificationToEvent(xmlPayload);
-
-        this.publish(event);
     }
 
     /**

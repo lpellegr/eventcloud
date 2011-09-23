@@ -56,13 +56,19 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * @author lpellegr
  * @author bsauvan
  */
-public final class ProxyFactory implements Serializable {
+public class ProxyFactory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static Factory factory;
+    protected static final ConcurrentMap<EventCloudId, ProxyFactory> proxies;
 
-    private static final ConcurrentMap<EventCloudId, ProxyFactory> proxies;
+    protected static Factory factory;
+
+    protected static String publishProxyAdl;
+
+    protected static String subscribeProxyAdl;
+
+    protected static String putgetProxyAdl;
 
     static {
         // proxies may be garbage collected in response to memory demand
@@ -74,9 +80,13 @@ public final class ProxyFactory implements Serializable {
         } catch (ADLException e) {
             e.printStackTrace();
         }
+
+        publishProxyAdl = EventCloudProperties.PUBLISH_PROXY_ADL.getValue();
+        subscribeProxyAdl = EventCloudProperties.SUBSCRIBE_PROXY_ADL.getValue();
+        putgetProxyAdl = EventCloudProperties.PUTGET_PROXY_ADL.getValue();
     }
 
-    private EventCloudCache eventCloudProxy;
+    protected EventCloudCache eventCloudProxy;
 
     /**
      * Constructs a new ProxyFactory from the specified registryUrl and the
@@ -87,7 +97,7 @@ public final class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      */
-    private ProxyFactory(String registryUrl, EventCloudId id) {
+    protected ProxyFactory(String registryUrl, EventCloudId id) {
         this.eventCloudProxy = new EventCloudCache(registryUrl, id);
     }
 
@@ -100,8 +110,7 @@ public final class ProxyFactory implements Serializable {
         try {
             Component pubProxy =
                     (Component) factory.newComponent(
-                            EventCloudProperties.PUBLISH_PROXY_ADL.getValue(),
-                            new HashMap<String, Object>());
+                            publishProxyAdl, new HashMap<String, Object>());
             PublishProxy stub =
                     (PublishProxy) pubProxy.getFcInterface(EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
             GCM.getGCMLifeCycleController(pubProxy).startFc();
@@ -127,8 +136,7 @@ public final class ProxyFactory implements Serializable {
         try {
             Component subProxy =
                     (Component) factory.newComponent(
-                            EventCloudProperties.SUBSCRIBE_PROXY_ADL.getValue(),
-                            new HashMap<String, Object>());
+                            subscribeProxyAdl, new HashMap<String, Object>());
             SubscribeProxy stub =
                     (SubscribeProxy) subProxy.getFcInterface(EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
             GCM.getGCMLifeCycleController(subProxy).startFc();
@@ -154,8 +162,7 @@ public final class ProxyFactory implements Serializable {
         try {
             Component putgetProxy =
                     (Component) factory.newComponent(
-                            EventCloudProperties.PUTGET_PROXY_ADL.getValue(),
-                            new HashMap<String, Object>());
+                            putgetProxyAdl, new HashMap<String, Object>());
             PutGetProxy stub =
                     (PutGetProxy) putgetProxy.getFcInterface(EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
             GCM.getGCMLifeCycleController(putgetProxy).startFc();

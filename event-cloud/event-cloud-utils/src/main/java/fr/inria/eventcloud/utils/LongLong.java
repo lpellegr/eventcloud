@@ -33,7 +33,7 @@ public class LongLong implements Comparable<LongLong>, Serializable {
 
     private static final char SEPARATOR = 's';
 
-    private long[] value;
+    private final long[] value;
 
     public LongLong(long[] longLongValue) {
         if (longLongValue.length != 2) {
