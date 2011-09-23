@@ -50,6 +50,10 @@
 			<id>event-cloud-snapshots</id>
 			<url>http://maven.event-cloud.googlecode.com/hg/snapshots</url>
 		</repository>
+		<repository>
+			<id>sonatype-snapshots-proactive-058</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-058</url>
+		</repository>
 	</repositories>
 
 	<developers>
@@ -119,7 +123,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming</artifactId>
-				<version>5.1.0</version>
+				<version>5.1.0-custom</version>
 			</dependency>
 			<dependency>
 				<groupId>com.hp.hpl.jena</groupId>

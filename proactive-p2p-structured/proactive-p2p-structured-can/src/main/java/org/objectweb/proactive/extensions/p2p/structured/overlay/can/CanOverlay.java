@@ -183,12 +183,9 @@ public class CanOverlay extends StructuredOverlay {
         // no neighbors satisfying the coordinate on the specified dimension AND
         // direction
         if (neighbors.isEmpty() && log.isDebugEnabled()) {
-            log.debug("No neighbors satisfying the coordinate on the specified dimension "
-                    + dimension
-                    + " AND direction "
-                    + direction
-                    + ", "
-                    + this.dump());
+            log.debug("No neighbors satisfying the coordinate " + coordinate
+                    + " on the specified dimension " + dimension
+                    + " AND direction " + direction + ", " + this.dump());
         }
 
         // from neighbors which verify the dimensions get those which
