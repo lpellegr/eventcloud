@@ -19,6 +19,7 @@ package fr.inria.eventcloud.configuration;
 import java.io.File;
 import java.util.UUID;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
 import org.slf4j.Logger;
@@ -135,6 +136,9 @@ public class EventCloudProperties {
                     "No Event-Cloud properties loaded because file {} does not exist",
                     preferencesFile);
         }
+
+        // forces the number of dimensions in a CAN network to 4
+        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
     }
 
     public static final File getRepositoryPath() {

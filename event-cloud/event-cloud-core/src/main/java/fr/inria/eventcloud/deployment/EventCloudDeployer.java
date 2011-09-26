@@ -23,7 +23,6 @@ import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
@@ -59,7 +58,6 @@ public class EventCloudDeployer extends NetworkDeployer {
     public EventCloudDeployer(DeploymentConfiguration mode,
             NodeProvider nodeProvider) {
         super(mode, nodeProvider);
-        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
     }
 
     /**
