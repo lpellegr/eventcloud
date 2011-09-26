@@ -40,6 +40,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
+import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
@@ -120,16 +121,16 @@ public final class PublishSubscribeUtils {
                                                                  SubscriptionId originalSubscriptionId) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT ?subscriptionId WHERE {\n    GRAPH ");
-        query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
+        query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
         query.append(" {\n        ");
         query.append("?subscriptionIdUrl ");
-        query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
+        query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
         query.append(" ");
-        query.append(NodeFmtLib.serialize(originalSubscriptionId.toJenaNode()));
+        query.append(NodeFmtLib.str(originalSubscriptionId.toJenaNode()));
         query.append(" .\n        ?subscriptionIdUrl ");
         // query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE));
         // query.append(" ?subSubscriptionId .\n        ?subscriptionIdUrl ");
-        query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
+        query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
         query.append(" ?subscriptionId .\n    }\n}");
 
         ResultSet result = datastore.executeSparqlSelect(query.toString());
@@ -339,7 +340,7 @@ public final class PublishSubscribeUtils {
                                        AtomicQuery atomicQuery) {
         Set<Var> vars =
                 Sets.intersection(resultVars, atomicQuery.getVariables());
-        Binding binding = BindingFactory.create();
+        BindingMap binding = BindingFactory.create();
         Node[] nodes = quad.toArray();
 
         int i = 0;

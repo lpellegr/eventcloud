@@ -40,6 +40,7 @@ import com.hp.hpl.jena.sparql.core.DatasetImpl;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
+import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 /**
  * Tests associated to {@link SparqlResultSerializerTest}.
@@ -93,7 +94,7 @@ public class SparqlResultSerializerTest {
     private void testBindingSerialization(boolean gzipped) {
         Node defaultNode = Node.createURI("http://www.inria.fr");
 
-        Binding binding = BindingFactory.create();
+        BindingMap binding = BindingFactory.create();
         binding.add(Var.alloc("var1"), defaultNode);
         binding.add(Var.alloc("var2"), defaultNode);
 
