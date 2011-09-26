@@ -22,6 +22,7 @@ import java.util.Iterator;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
+import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -70,7 +71,7 @@ public final class Solution implements Serializable {
      * @return the solution that have been computed from the sub solutions.
      */
     public Binding getSolution() {
-        Binding solution = BindingFactory.create();
+        BindingMap solution = BindingFactory.create();
         for (Binding b : this.bindings) {
             Iterator<Var> varsIt = b.vars();
             while (varsIt.hasNext()) {

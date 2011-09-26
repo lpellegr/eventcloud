@@ -24,6 +24,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
+import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
@@ -137,7 +138,7 @@ public class SubscriptionRewriterTest {
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?mail WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email . ?id foaf:phone ?phone } }";
         Subscription subscription = new Subscription(source, sparqlQuery);
 
-        Binding b = BindingFactory.create();
+        BindingMap b = BindingFactory.create();
         b.add(Var.alloc("id"), id);
         b.add(Var.alloc("name"), Node.createLiteral("lpellegr"));
 
@@ -174,7 +175,7 @@ public class SubscriptionRewriterTest {
         String sparqlQuery =
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?mail WHERE { GRAPH ?g { ?id1 foaf:name ?name . ?id2 foaf:email ?email } }";
 
-        Binding b = BindingFactory.create();
+        BindingMap b = BindingFactory.create();
         b.add(
                 Var.alloc("id1"),
                 Node.createURI("http://www.inria.fr/member/6609"));

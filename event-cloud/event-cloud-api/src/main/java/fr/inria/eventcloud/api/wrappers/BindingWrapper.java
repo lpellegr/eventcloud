@@ -73,14 +73,6 @@ public class BindingWrapper extends SparqlResultWrapper<Binding> implements
      * {@inheritDoc}
      */
     @Override
-    public void add(Var var, Node node) {
-        super.object.add(var, node);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Iterator<Var> vars() {
         return super.object.vars();
     }
@@ -115,14 +107,6 @@ public class BindingWrapper extends SparqlResultWrapper<Binding> implements
     @Override
     public boolean isEmpty() {
         return super.object.isEmpty();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void addAll(Binding key) {
-        super.object.addAll(key);
     }
 
     /**
