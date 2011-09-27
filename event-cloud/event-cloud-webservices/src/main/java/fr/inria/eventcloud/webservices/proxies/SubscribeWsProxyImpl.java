@@ -62,7 +62,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      */
     public void init(EventCloudCache proxy, AlterableElaProperty[] properties) {
         if (this.proxy == null) {
-            super.init(proxy, properties);
+            super.init(proxy, null, properties);
             this.translator = new WsNotificationTranslatorAdapter();
             this.subscribers = new HashMap<SubscriptionId, Client>();
         }

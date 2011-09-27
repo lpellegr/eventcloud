@@ -36,7 +36,6 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_STU
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_PROPERTY;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,9 +48,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
-
 import com.google.common.base.Objects;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -63,6 +59,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Rdfable;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
@@ -290,16 +287,7 @@ public class Subscription implements Rdfable, Serializable {
     }
 
     public SubscribeProxy getSourceStub() {
-        try {
-            return PAActiveObject.lookupActive(
-                    SubscribeProxy.class, this.source);
-        } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return ProxyFactory.lookupSubscribeProxy(this.source);
     }
 
     public String getSparqlQuery() {

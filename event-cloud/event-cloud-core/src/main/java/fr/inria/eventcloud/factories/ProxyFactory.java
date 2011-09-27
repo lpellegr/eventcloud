@@ -16,9 +16,13 @@
  **/
 package fr.inria.eventcloud.factories;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
+
+import javax.naming.NamingException;
 
 import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.adl.ADLException;
@@ -26,6 +30,8 @@ import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
+import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -139,14 +145,24 @@ public class ProxyFactory implements Serializable {
                             subscribeProxyAdl, new HashMap<String, Object>());
             SubscribeProxy stub =
                     (SubscribeProxy) subProxy.getFcInterface(EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
+
+            // registers the subscribe proxy to have the possibility
+            // to receive notifications
+            String componentUri =
+                    Fractive.registerByName(subProxy, "subscribe-proxy-"
+                            + UUID.randomUUID().toString());
+
             GCM.getGCMLifeCycleController(subProxy).startFc();
-            stub.init(this.eventCloudProxy, properties);
+            stub.init(this.eventCloudProxy, componentUri, properties);
+
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();
         } catch (NoSuchInterfaceException e) {
             e.printStackTrace();
         } catch (IllegalLifeCycleException e) {
+            e.printStackTrace();
+        } catch (ProActiveException e) {
             e.printStackTrace();
         }
 
@@ -201,6 +217,39 @@ public class ProxyFactory implements Serializable {
         } else {
             return oldFactory;
         }
+    }
+
+    public static SubscribeProxy lookupSubscribeProxy(String componentUri) {
+        return (SubscribeProxy) lookupFcInterface(
+                componentUri,
+                EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
+    }
+
+    public static PublishProxy lookupPublishProxy(String componentUri) {
+        return (PublishProxy) lookupFcInterface(
+                componentUri,
+                EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
+    }
+
+    public static PutGetProxy lookupPutGetProxy(String componentUri) {
+        return (PutGetProxy) lookupFcInterface(
+                componentUri,
+                EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
+    }
+
+    private static Object lookupFcInterface(String componentUri,
+                                            String interfaceName) {
+        try {
+            return Fractive.lookup(componentUri).getFcInterface(interfaceName);
+        } catch (NoSuchInterfaceException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }
