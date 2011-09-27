@@ -73,11 +73,15 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param proxy
      *            the event cloud proxy instance to set to the subscribe proxy.
      * 
+     * @param componentUri
+     *            the URI at which the component is bind.
+     * 
      * @param properties
      *            a set of {@link AlterableElaProperty} properties to use for
      *            initializing the {@link SubscribeProxy}.
      */
-    public void init(EventCloudCache proxy, AlterableElaProperty[] properties);
+    public void init(EventCloudCache proxy, String componentUri,
+                     AlterableElaProperty[] properties);
 
     /**
      * Searches the {@link Subscription} associated to the specified

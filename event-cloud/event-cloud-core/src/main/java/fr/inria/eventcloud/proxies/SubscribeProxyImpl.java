@@ -101,6 +101,8 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     // http://pig.apache.org/docs/r0.7.0/api/org/apache/pig/data/DataBag.html
     private Map<Node, SubscriptionId> eventIdsReceived;
 
+    private String componentUri;
+
     /**
      * Empty constructor required by ProActive.
      */
@@ -113,9 +115,11 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
      */
     // TODO: add support for ELA properties. At least for the maximum number of
     // requests per seconds (by using a queue and a scheduled Timer).
-    public void init(EventCloudCache proxy, AlterableElaProperty[] properties) {
+    public void init(EventCloudCache proxy, String componentUri,
+                     AlterableElaProperty[] properties) {
         if (this.proxy == null) {
             this.proxy = proxy;
+            this.componentUri = componentUri;
             this.subscriptions = new HashMap<SubscriptionId, Subscription>();
             this.listeners =
                     new HashMap<SubscriptionId, NotificationListener<?>>();
@@ -149,9 +153,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     private SubscriptionId indexSubscription(String sparqlQuery,
                                              NotificationListener<?> listener) {
         Subscription subscription =
-                new Subscription(
-                        PAActiveObject.getUrl(PAActiveObject.getStubOnThis()),
-                        sparqlQuery);
+                new Subscription(this.componentUri, sparqlQuery);
 
         log.debug(
                 "New subscription has been registered from {} with id {}",
@@ -384,6 +386,15 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     @Override
     public Subscription find(SubscriptionId id) {
         return this.subscriptions.get(id);
+    }
+
+    /**
+     * Returns the URI at which the component is bind.
+     * 
+     * @return the URI at which the component is bind.
+     */
+    public String getComponentUri() {
+        return componentUri;
     }
 
 }
