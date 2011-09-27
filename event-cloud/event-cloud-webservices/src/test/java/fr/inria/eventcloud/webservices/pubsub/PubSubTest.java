@@ -43,6 +43,7 @@ import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.webservices.JaxWsCXFWSCaller;
 import fr.inria.eventcloud.webservices.adapters.WsNotificationTranslatorAdapter;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
@@ -108,11 +109,7 @@ public class PubSubTest {
                 subscriberWsUrl);
 
         // waits a little to be sure that the subscription has been indexed
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(2000);
 
         PublishWsApi publishWs =
                 (PublishWsApi) pubSubComponent.getFcInterface("publish-services");
@@ -124,11 +121,7 @@ public class PubSubTest {
 
         while (!pubSubComponentStatus.hasReceivedEvent()) {
             log.info("Waiting for the reception of event");
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Thread.sleep(500);
         }
 
         deployer.undeploy();
