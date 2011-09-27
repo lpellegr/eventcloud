@@ -269,6 +269,10 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      */
     @Override
     public String toString() {
+        if (this.overlay == null) {
+            return Integer.toString(System.identityHashCode(this));
+        }
+
         return this.overlay.toString();
     }
 
