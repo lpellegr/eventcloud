@@ -13,7 +13,7 @@ java -Xms256m -Xmx1024m \
      -Deventcloud.bundle.home=$PATH_TO_RESOURCES/../ \
      -Dlog4j.configuration=file:$PATH_TO_RESOURCES/log4j.properties \
      -Dlogback.configurationFile=file:$PATH_TO_RESOURCES/logback.xml \
-	 -Dproactive.communication.protocol=pnp \
+     -Dproactive.communication.protocol=pnp \
      -Dproactive.pnp.port=$PNP_PORT \
      -Dproactive.http.port=$HTTP_PORT \
      -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.SubscribeWsProxyLauncher $@
