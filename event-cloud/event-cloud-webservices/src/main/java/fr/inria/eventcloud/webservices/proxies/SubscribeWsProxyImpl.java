@@ -42,6 +42,8 @@ import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
 public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
         SubscribeWsApi {
 
+    private static final long serialVersionUID = 1L;
+
     private static final String NOTIFY_METHOD_NAME = "Notify";
 
     private WsNotificationTranslatorAdapter translator;
@@ -60,9 +62,11 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     /**
      * {@inheritDoc}
      */
-    public void init(EventCloudCache proxy, AlterableElaProperty[] properties) {
+    @Override
+    public void init(EventCloudCache proxy, String componentUri,
+                     AlterableElaProperty[] properties) {
         if (this.proxy == null) {
-            super.init(proxy, null, properties);
+            super.init(proxy, componentUri, properties);
             this.translator = new WsNotificationTranslatorAdapter();
             this.subscribers = new HashMap<SubscriptionId, Client>();
         }
