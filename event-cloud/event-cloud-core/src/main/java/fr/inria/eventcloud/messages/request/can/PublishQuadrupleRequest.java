@@ -26,6 +26,7 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
-import org.openjena.riot.out.NodeFmtLib;
+import org.openjena.riot.out.NodeFormatterNT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +70,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
 
     private static final Logger log =
             LoggerFactory.getLogger(PublishQuadrupleRequest.class);
+
+    private static final NodeFormatterNT nodeFormatter = new NodeFormatterNT();
 
     public PublishQuadrupleRequest(Quadruple quad) {
         super(quad);
@@ -175,13 +178,11 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             } else {
                 // stores a quadruple that contains the information about the
                 // subscription that is matched and the quadruple that matches
-                // the
-                // subscription. This is useful to create the notification
+                // the subscription. This is useful to create the notification
                 // later.
                 // The matching quadruple is not sent directly to the next peers
                 // because the quadruple value will be stored in memory on
-                // several
-                // peer. Moreover, there is no limit about the size of a
+                // several peer. Moreover, there is no limit about the size of a
                 // quadruple.
                 Quadruple metaQuad =
                         PublishSubscribeUtils.createMetaQuadruple(
@@ -223,10 +224,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     }
 
     private static final String createQueryRetrievingSubscriptionsMatching(Quadruple quad) {
-        StringBuilder query = new StringBuilder();
+        StringWriter query = new StringWriter();
         query.append("SELECT ?subscriptionId ?subSubscriptionId WHERE {\n");
         query.append("    GRAPH <");
-        query.append(SUBSCRIPTION_NS_NODE);
+        query.append(SUBSCRIPTION_NS_NODE.getURI());
         query.append("> {\n");
         query.append("        ?subSubscriptionSource <");
         query.append(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY);
@@ -250,25 +251,33 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         query.append(SUBSCRIPTION_ID_PROPERTY);
         query.append("> ?subscriptionId .\n");
         query.append("        FILTER (\n");
-        query.append("            (regex(?subSubscriptionGraph, \"^");
+        query.append("            (STRSTARTS(str(?subSubscriptionGraph), \"");
         query.append(quad.getGraph().getURI());
         query.append("\") || sameTerm(?subSubscriptionGraph, ");
-        query.append(NodeFmtLib.str(quad.getGraph()));
+
+        nodeFormatter.formatURI(query, quad.getGraph());
+
         query.append(") || datatype(?subSubscriptionGraph) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionSubject, ");
-        query.append(NodeFmtLib.str(quad.getSubject()));
+
+        nodeFormatter.formatURI(query, quad.getSubject());
+
         query.append(") || datatype(?subSubscriptionSubject) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionPredicate, ");
-        query.append(NodeFmtLib.str(quad.getPredicate()));
+
+        nodeFormatter.formatURI(query, quad.getPredicate());
+
         query.append(") || datatype(?subSubscriptionPredicate) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
         query.append("             && (sameTerm(?subSubscriptionObject, ");
-        query.append(NodeFmtLib.str(quad.getObject()));
+
+        nodeFormatter.format(query, quad.getObject());
+
         query.append(") || datatype(?subSubscriptionObject) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
         query.append(">)\n");
