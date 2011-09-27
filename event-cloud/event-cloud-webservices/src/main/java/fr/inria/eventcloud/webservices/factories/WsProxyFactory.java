@@ -29,6 +29,8 @@ import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
  */
 public final class WsProxyFactory extends ProxyFactory {
 
+    private static final long serialVersionUID = 1L;
+
     static {
         publishProxyAdl = EventCloudWsProperties.PUBLISH_PROXY_ADL.getValue();
         subscribeProxyAdl =
@@ -49,9 +51,6 @@ public final class WsProxyFactory extends ProxyFactory {
         super(registryUrl, id);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public static ProxyFactory getInstance(String registryUrl, EventCloudId id) {
         ProxyFactory newFactory = new WsProxyFactory(registryUrl, id);
 
