@@ -19,6 +19,8 @@ package fr.inria.eventcloud.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -27,6 +29,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -47,9 +51,16 @@ import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
  * 
  * @author lpellegr
  */
+@RunWith(Parameterized.class)
 public class SparqlResultSerializerTest {
 
     private DatasetGraph datastore;
+
+    private final boolean compression;
+
+    public SparqlResultSerializerTest(boolean compression) {
+        this.compression = compression;
+    }
 
     @Before
     public void setUp() {
@@ -62,49 +73,10 @@ public class SparqlResultSerializerTest {
     }
 
     @Test
-    public void testBindingSerializationWithCompressionDisabled() {
-        testBindingSerialization(false);
-    }
-
-    @Test
-    public void testBindingSerializationWithCompressionEnabled() {
-        testBindingSerialization(true);
-    }
-
-    @Test
-    public void testEmptyBindingSerializationWithCompressionDisabled() {
-        testEmptyBindingSerialization(false);
-    }
-
-    @Test
-    public void testEmptyBindingSerializationWithCompressionEnabled() {
-        testEmptyBindingSerialization(true);
-    }
-    
-    @Test
-    public void testModelSerializationWithCompressionDisabled() {
-        testModelSerialization(false);
-    }
-
-    @Test
-    public void testModelSerializationWithCompressionEnabled() {
-        testModelSerialization(true);
-    }
-
-    @Test
-    public void testResultSetSerializationWithCompressionDisabled() {
-        testResultSetSerialization(false);
-    }
-
-    @Test
-    public void testResultSetserializationWithCompressionEnabled() {
-        testResultSetSerialization(true);
-    }
-
-    private void testEmptyBindingSerialization(boolean gzipped) {
+    public void testEmptyBindingSerialization() {
         Binding binding = null;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SparqlResultSerializer.serialize(baos, binding, gzipped);
+        SparqlResultSerializer.serialize(baos, binding, this.compression);
 
         try {
             baos.close();
@@ -115,7 +87,8 @@ public class SparqlResultSerializerTest {
         ByteArrayInputStream bais =
                 new ByteArrayInputStream(baos.toByteArray());
         Binding unserializedBinding =
-                SparqlResultSerializer.deserializeBinding(bais, gzipped);
+                SparqlResultSerializer.deserializeBinding(
+                        bais, this.compression);
 
         try {
             bais.close();
@@ -126,7 +99,8 @@ public class SparqlResultSerializerTest {
         Assert.assertNull(unserializedBinding);
     }
 
-    private void testBindingSerialization(boolean gzipped) {
+    @Test
+    public void testBindingSerialization() {
         Node defaultNode = Node.createURI("http://www.inria.fr");
 
         BindingMap binding = BindingFactory.create();
@@ -134,7 +108,7 @@ public class SparqlResultSerializerTest {
         binding.add(Var.alloc("var2"), defaultNode);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SparqlResultSerializer.serialize(baos, binding, gzipped);
+        SparqlResultSerializer.serialize(baos, binding, this.compression);
 
         try {
             baos.close();
@@ -145,7 +119,8 @@ public class SparqlResultSerializerTest {
         ByteArrayInputStream bais =
                 new ByteArrayInputStream(baos.toByteArray());
         Binding unserializedBinding =
-                SparqlResultSerializer.deserializeBinding(bais, gzipped);
+                SparqlResultSerializer.deserializeBinding(
+                        bais, this.compression);
 
         try {
             bais.close();
@@ -163,7 +138,8 @@ public class SparqlResultSerializerTest {
         Assert.assertTrue(vars.contains("var2"));
     }
 
-    private void testModelSerialization(boolean gzipped) {
+    @Test
+    public void testModelSerialization() {
         QueryExecution queryExec =
                 QueryExecutionFactory.create(
                         QueryFactory.create("CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }"),
@@ -171,7 +147,7 @@ public class SparqlResultSerializerTest {
         Model model = queryExec.execConstruct();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SparqlResultSerializer.serialize(baos, model, gzipped);
+        SparqlResultSerializer.serialize(baos, model, this.compression);
 
         try {
             baos.close();
@@ -182,7 +158,7 @@ public class SparqlResultSerializerTest {
         ByteArrayInputStream bais =
                 new ByteArrayInputStream(baos.toByteArray());
         Model unserializedModel =
-                SparqlResultSerializer.deserializeModel(bais, gzipped);
+                SparqlResultSerializer.deserializeModel(bais, this.compression);
 
         try {
             bais.close();
@@ -195,7 +171,8 @@ public class SparqlResultSerializerTest {
         queryExec.close();
     }
 
-    private void testResultSetSerialization(boolean gzipped) {
+    @Test
+    public void testResultSetSerialization() {
         QueryExecution queryExec =
                 QueryExecutionFactory.create(
                         QueryFactory.create("SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }"),
@@ -203,7 +180,7 @@ public class SparqlResultSerializerTest {
         ResultSet resultSet = queryExec.execSelect();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SparqlResultSerializer.serialize(baos, resultSet, gzipped);
+        SparqlResultSerializer.serialize(baos, resultSet, this.compression);
 
         try {
             baos.close();
@@ -214,7 +191,8 @@ public class SparqlResultSerializerTest {
         ByteArrayInputStream bais =
                 new ByteArrayInputStream(baos.toByteArray());
         ResultSet unserializedResultSet =
-                SparqlResultSerializer.deserializeResultSet(bais, gzipped);
+                SparqlResultSerializer.deserializeResultSet(
+                        bais, this.compression);
 
         try {
             bais.close();
@@ -231,6 +209,12 @@ public class SparqlResultSerializerTest {
     @After
     public void tearDown() {
         this.datastore.close();
+    }
+
+    @Parameterized.Parameters
+    public static Collection<Boolean[]> parameters() {
+        Boolean[][] data = new Boolean[][] { {false}, {true}};
+        return Arrays.asList(data);
     }
 
 }
