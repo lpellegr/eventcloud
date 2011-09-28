@@ -72,6 +72,16 @@ public class SparqlResultSerializerTest {
     }
 
     @Test
+    public void testEmptyBindingSerializationWithCompressionDisabled() {
+        testEmptyBindingSerialization(false);
+    }
+
+    @Test
+    public void testEmptyBindingSerializationWithCompressionEnabled() {
+        testEmptyBindingSerialization(true);
+    }
+    
+    @Test
     public void testModelSerializationWithCompressionDisabled() {
         testModelSerialization(false);
     }
@@ -89,6 +99,31 @@ public class SparqlResultSerializerTest {
     @Test
     public void testResultSetserializationWithCompressionEnabled() {
         testResultSetSerialization(true);
+    }
+
+    private void testEmptyBindingSerialization(boolean gzipped) {
+        Binding binding = null;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        SparqlResultSerializer.serialize(baos, binding, gzipped);
+
+        try {
+            baos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ByteArrayInputStream bais =
+                new ByteArrayInputStream(baos.toByteArray());
+        Binding unserializedBinding =
+                SparqlResultSerializer.deserializeBinding(bais, gzipped);
+
+        try {
+            bais.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertNull(unserializedBinding);
     }
 
     private void testBindingSerialization(boolean gzipped) {

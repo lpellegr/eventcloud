@@ -74,15 +74,23 @@ public final class SparqlResultSerializer {
         if (gzipped) {
             try {
                 out = new GZIPOutputStream(out);
+
+                if (binding == null) {
+                    out.write(0);
+                } else {
+                    out.write(7);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
         BindingOutputStream bos = new BindingOutputStream(out);
-        bos.write(binding);
+        if (binding != null) {
+            bos.write(binding);
+        }
         bos.close();
-        
+
         if (gzipped) {
             try {
                 ((GZIPOutputStream) out).finish();
@@ -212,6 +220,20 @@ public final class SparqlResultSerializer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        try {
+            if (gzipped) {
+                if (((GZIPInputStream) in).read() == 0) {
+                    return null;
+                }
+            } else {
+                if (in.available() == 0) {
+                    return null;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         BindingInputStream bis = new BindingInputStream(in);
