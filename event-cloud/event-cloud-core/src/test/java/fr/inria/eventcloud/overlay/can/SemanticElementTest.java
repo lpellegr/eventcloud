@@ -20,8 +20,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import fr.inria.eventcloud.overlay.can.SemanticElement;
-
 /**
  * Tests some methods from the {@link SemanticHelper} class.
  * 
@@ -30,7 +28,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public final class SemanticElementTest {
 
     @Test
-    public void testParseTripleElement() {
+    public void testParseElement() {
         Assert.assertEquals(
                 "members",
                 SemanticElement.parseElement("http://www.inria.fr/sophia/members"));
@@ -60,11 +58,13 @@ public final class SemanticElementTest {
                 "literal", SemanticElement.parseElement("\"literal\""));
 
         Assert.assertEquals(
-                "test.com", SemanticElement.parseElement("http://test.com"));
+                "\u014b\u0001\u0061",
+                SemanticElement.parseElement("\u014b\u0001\u0061"));
 
+        // http://ŋa not a legal URI no transformation is expected
         Assert.assertEquals(
-                "4t84t203", SemanticElement.parseElement("http://4t84t203"));
-
+                "\u0068\u0074\u0074\u0070\u003a\u002f\u002f\u014b\u0001\u0061",
+                SemanticElement.parseElement("\u0068\u0074\u0074\u0070\u003a\u002f\u002f\u014b\u0001\u0061"));
     }
 
 }

@@ -139,9 +139,9 @@ public class EventCloudProperties {
 
         // forces the number of dimensions in a CAN network to 4
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
-        // allows UTF-16 unicode characters
+        // allows ISO 8859-1 characters
         P2PStructuredProperties.CAN_LOWER_BOUND.setValue("\u0000");
-        P2PStructuredProperties.CAN_UPPER_BOUND.setValue("\uFFFF");
+        P2PStructuredProperties.CAN_UPPER_BOUND.setValue("\u0256");
     }
 
     public static final File getRepositoryPath() {

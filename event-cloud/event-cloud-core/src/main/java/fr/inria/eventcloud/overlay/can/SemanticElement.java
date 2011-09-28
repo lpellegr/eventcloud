@@ -33,6 +33,8 @@ public class SemanticElement extends StringElement {
 
     private static final long serialVersionUID = 1L;
 
+    public static String EMPTY_STRING_ROUTING_CHARACTER = "A";
+
     /**
      * Constructs a new coordinate element with the specified {@code value}.
      * 
@@ -60,13 +62,16 @@ public class SemanticElement extends StringElement {
      * @return a String that has been improved for load balancing.
      */
     public static String parseElement(String value) {
+        // TODO: add support for opaque URI (c.f.
+        // http://download.oracle.com/javase/6/docs/api/java/net/URI.html)
+
         try {
             java.net.URI uri = new java.net.URI(value);
 
             int slashIndex = value.lastIndexOf('/');
             int sharpIndex = value.lastIndexOf('#');
 
-            // # or / is the last character
+            // if the last character is # or / it can be safely removed
             if (slashIndex == value.length() - 1
                     || sharpIndex == value.length() - 1) {
                 value = value.substring(0, value.length() - 1);
@@ -74,23 +79,37 @@ public class SemanticElement extends StringElement {
                 sharpIndex = value.lastIndexOf('#');
             }
 
-            if (slashIndex < 7 && sharpIndex == -1) {
-                if (uri.getScheme().equals("http")
-                        && value.startsWith("http://www.")) {
-                    return value.substring(11);
+            // if there is no other / or # starting from the authority part of
+            // the uri some pre-defined prefix can be removed in the authority
+            // part (e.g. scheme://www) otherwise the prefix before the last /
+            // or # is removed
+            if (uri.getScheme() != null
+                    && slashIndex < uri.getScheme().length() + 3 // +3 for ://
+                    && sharpIndex == -1) {
+                int wwwDotIndex = -1;
+
+                // the pre-defined prefix is contained in the authority part
+                if ((wwwDotIndex = value.indexOf("www.")) != -1) {
+                    return value.substring(wwwDotIndex + 4, value.length());
                 }
+
+                // no pre-defined prefix is contained in the authority part then
+                // only the scheme + :// is removed
                 return value.substring(uri.getScheme().length() + 3);
             } else if (slashIndex > sharpIndex) {
+                // remove the prefix before the last /
                 return value.substring(slashIndex + 1, value.length());
             } else if (slashIndex < sharpIndex) {
+                // remove the prefix before the last #
                 return value.substring(sharpIndex + 1, value.length());
+            } else {
+                return value;
             }
-
-            return "";
         } catch (URISyntaxException e) {
+            // blank node
             if (value.startsWith("_:")) {
                 return value.substring(2);
-            } else if (value.startsWith("\"")) {
+            } else if (value.startsWith("\"")) { // literal
                 return value.substring(1, value.length() - 1);
             } else {
                 return value;
