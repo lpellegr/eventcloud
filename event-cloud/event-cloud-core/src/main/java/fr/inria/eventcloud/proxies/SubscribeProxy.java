@@ -25,6 +25,7 @@ import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.Subscription;
@@ -34,12 +35,12 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * to be used by a user who wants to execute asynchronous subscribe operations
  * on an Event Cloud.
  * <p>
- * The proxy offers the possibility to reconstruct an Event from the binding
- * which has matched the subscription by a call to
+ * This proxy offers the possibility to reconstruct an Event from the binding
+ * which has matched a subscription by a call to
  * {@link SubscribeProxy#reconstructEvent(Subscription, Binding)} or
- * {@link SubscribeProxy#reconstructEvent(SubscriptionId, Node)} and also by
- * calling
- * {@link SubscribeProxy#subscribe(String, fr.inria.eventcloud.api.listeners.EventNotificationListener)}
+ * {@link SubscribeProxy#reconstructEvent(SubscriptionId, Node)} and also by an
+ * using an {@link EventNotificationListener} when you subscribe with
+ * {@link #subscribe(String, fr.inria.eventcloud.api.listeners.NotificationListener)}
  * . The reconstruction is an heavy operation that may be used carefully.
  * Indeed, to reconstruct an {@link Event} from its identifier, a
  * {@link QuadruplePattern} query must be sent to all the peers matching the

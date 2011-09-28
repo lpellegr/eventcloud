@@ -18,8 +18,6 @@ package fr.inria.eventcloud.benchmarks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -230,15 +228,14 @@ public class PublishSubscribeBenchmark {
             }
         };
 
-        FileInputStream fis = null;
+        InputStream fis = null;
 
         LangRIOT parser = null;
         try {
-            fis = new FileInputStream("/user/lpellegr/home/Downloads/test5");
+            fis =
+                    PublishSubscribeBenchmark.class.getResourceAsStream("/chunk.nquads");
             parser = RiotReader.createParserNQuads(fis, sink);
             parser.parse();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } finally {
             try {
                 fis.close();
@@ -247,34 +244,39 @@ public class PublishSubscribeBenchmark {
             }
         }
 
-        Quad q = quadruples.get(0);
+        int c = 1;
+        for (Quad q : quadruples) {
+            System.out.println("c=" + c + ", q=" + q);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        BindingMap b = BindingFactory.create();
-        // b.add(Var.alloc("g"), q.getGraph());
-        // b.add(Var.alloc("s"), q.getSubject());
-        // b.add(Var.alloc("p"), q.getPredicate());
-        b.add(Var.alloc("o"), q.getObject());
+            BindingMap b = BindingFactory.create();
+            b.add(Var.alloc("g"), q.getGraph());
+            b.add(Var.alloc("s"), q.getSubject());
+            b.add(Var.alloc("p"), q.getPredicate());
+            b.add(Var.alloc("o"), q.getObject());
 
-        BindingOutputStream bos = new BindingOutputStream(baos);
-        bos.write(b);
-        bos.close();
+            BindingOutputStream bos = new BindingOutputStream(baos);
+            bos.write(b);
+            bos.close();
 
-        BindingInputStream bis =
-                new BindingInputStream(new ByteArrayInputStream(
-                        baos.toByteArray()));
+            BindingInputStream bis =
+                    new BindingInputStream(new ByteArrayInputStream(
+                            baos.toByteArray()));
 
-        System.out.println(bis.next());
+            System.out.println(bis.next());
+            c++;
+        }
+
     }
 
-    private static class CustomBindingListener implements
+    private static class CustomBindingListener extends
             BindingNotificationListener {
         private static final long serialVersionUID = 1L;
 
         @Override
         public void onNotification(SubscriptionId id, Binding solution) {
-            System.out.println(solution + " number" + nbEventsReceived.count);
+            System.err.println(solution + " NUMBER " + nbEventsReceived.count);
             synchronized (nbEventsReceived) {
                 nbEventsReceived.count.incrementAndGet();
                 nbEventsReceived.notifyAll();

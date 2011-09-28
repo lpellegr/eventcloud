@@ -16,9 +16,6 @@
  **/
 package fr.inria.eventcloud.operations.can;
 
-import java.io.IOException;
-
-import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -28,16 +25,16 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
+import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.Subsubscription;
 import fr.inria.eventcloud.utils.LongLong;
 
@@ -99,40 +96,26 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
 
         // extracts only the variabless that are declared as result variables in
         // the original subscription
-        Binding binding =
-                PublishSubscribeUtils.filter(
-                        extractedMetaInfo.getFirst(),
-                        ((SemanticCanOverlay) overlay).findSubscription(
-                                subSubscription.getParentId()).getResultVars(),
-                        subSubscription.getAtomicQuery());
 
-        // retrieves the subscriber url by using the subscription id from
-        // the notification id, which is the original subscription id
-        String subscriberUrl =
-                datastore.find(
-                        new QuadruplePattern(
-                                PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
-                                PublishSubscribeUtils.createSubscriptionIdUrl(this.notificationId.getSubscriptionId()),
-                                PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
-                                Node.ANY))
-                        .iterator()
-                        .next()
-                        .getObject()
-                        .getLiteralLexicalForm();
+        Subscription sub =
+                ((SemanticCanOverlay) overlay).findSubscription(subSubscription.getParentId());
 
-        try {
-            SubscribeProxy proxy =
-                    (SubscribeProxy) PAActiveObject.lookupActive(
-                            SubscribeProxy.class, subscriberUrl);
-
-            proxy.receive(new Notification(
-                    this.notificationId,
-                    PAActiveObject.getUrl(overlay.getStub()), binding));
-        } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Binding binding = null;
+        // for a signal it is not necessary to retrieve the binding value
+        if (sub.getType() != NotificationListenerType.SIGNAL) {
+            binding =
+                    PublishSubscribeUtils.filter(
+                            extractedMetaInfo.getFirst(), sub.getResultVars(),
+                            subSubscription.getAtomicQuery());
         }
+
+        // TODO: replace PAActiveObject.getUrl(overlay.getStub()) by the
+        // component URL? (same in PublishQuadrupleRequest and
+        // IndexSubscriptionRequest)
+        sub.getSubscriberProxy().receive(
+                new Notification(
+                        this.notificationId,
+                        PAActiveObject.getUrl(overlay.getStub()), binding));
     }
 
 }

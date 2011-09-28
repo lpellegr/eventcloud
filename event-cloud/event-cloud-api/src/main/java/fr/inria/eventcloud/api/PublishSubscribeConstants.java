@@ -88,6 +88,9 @@ public final class PublishSubscribeConstants {
     public static final String SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY =
             SUBSCRIPTION_NS + "indexationDateTime";
 
+    public static final String SUBSCRIPTION_TYPE_PROPERTY = SUBSCRIPTION_NS
+            + "type";
+
     public static final String SUBSCRIPTION_SUBSCRIBER_PROPERTY =
             SUBSCRIPTION_NS + "subscriber";
 
@@ -145,6 +148,9 @@ public final class PublishSubscribeConstants {
 
     public static final Node SUBSCRIPTION_INDEXATION_DATETIME_NODE =
             Node.createURI(SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY);
+
+    public static final Node SUBSCRIPTION_TYPE_NODE =
+            Node.createURI(SUBSCRIPTION_TYPE_PROPERTY);
 
     public static final Node SUBSCRIPTION_SUBSCRIBER_NODE =
             Node.createURI(SUBSCRIPTION_SUBSCRIBER_PROPERTY);

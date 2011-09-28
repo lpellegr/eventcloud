@@ -64,7 +64,7 @@ public class SubscriptionRewriterTest {
                 subscription.getId(), rewrittenSubscription.getParentId());
         Assert.assertEquals(
                 2, rewrittenSubscription.getSubSubscriptions().length);
-        Assert.assertEquals(source, rewrittenSubscription.getSource());
+        Assert.assertEquals(source, rewrittenSubscription.getSubscriberUrl());
 
         Subsubscription[] subsubscriptions =
                 rewrittenSubscription.getSubSubscriptions();
@@ -110,7 +110,7 @@ public class SubscriptionRewriterTest {
                 subscription.getId(), rewrittenSubscription.getParentId());
         Assert.assertEquals(
                 1, rewrittenSubscription.getSubSubscriptions().length);
-        Assert.assertEquals(source, rewrittenSubscription.getSource());
+        Assert.assertEquals(source, rewrittenSubscription.getSubscriberUrl());
 
         AtomicQuery aq =
                 rewrittenSubscription.getSubSubscriptions()[0].getAtomicQuery();
@@ -190,7 +190,7 @@ public class SubscriptionRewriterTest {
                 subscription.getId(), rewrittenSubscription.getParentId());
         Assert.assertEquals(
                 1, rewrittenSubscription.getSubSubscriptions().length);
-        Assert.assertEquals(source, rewrittenSubscription.getSource());
+        Assert.assertEquals(source, rewrittenSubscription.getSubscriberUrl());
 
         AtomicQuery aq =
                 rewrittenSubscription.getSubSubscriptions()[0].getAtomicQuery();

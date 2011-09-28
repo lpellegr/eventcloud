@@ -33,6 +33,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
+import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.factories.ProxyFactory;
@@ -64,6 +65,49 @@ public class SubscribeProxyTest {
         this.proxyFactory =
                 ProxyFactory.getInstance(
                         deployer.getEventCloudsRegistryUrl(), this.eventCloudId);
+    }
+
+    /**
+     * Test a basic subscription with a {@link SignalNotificationListener}.
+     */
+    @Test(timeout = 60000)
+    public void testSubscribeStringSignalNotificationListener() {
+        SubscribeProxy subscribeProxy =
+                this.proxyFactory.createSubscribeProxy();
+
+        // subscribes for any quadruples
+        subscribeProxy.subscribe(
+                "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
+                new CustomSignalNotificationListener());
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        final Node eventId =
+                Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                        + "587d8wq8gf7we4gsd4g4qw9");
+
+        Collection<Quadruple> quads = new Collection<Quadruple>();
+        for (int i = 0; i < 4; i++) {
+            quads.add(QuadrupleGenerator.create(eventId));
+        }
+
+        Event event = new Event(quads);
+
+        this.proxyFactory.createPublishProxy().publish(event);
+
+        synchronized (events) {
+            while (events.size() != event.getQuadruples().size()) {
+                try {
+                    events.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /**
@@ -177,11 +221,14 @@ public class SubscribeProxyTest {
         events.clear();
     }
 
-    private static class CustomEventNotificationListener implements
+    private static class CustomEventNotificationListener extends
             EventNotificationListener {
 
         private static final long serialVersionUID = 1L;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void onNotification(SubscriptionId id, Event solution) {
             synchronized (events) {
@@ -189,6 +236,26 @@ public class SubscribeProxyTest {
                 events.notifyAll();
             }
             log.info("New event received:\n{}", solution);
+        }
+    }
+
+    private static class CustomSignalNotificationListener extends
+            SignalNotificationListener {
+
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void onNotification(SubscriptionId id) {
+            synchronized (events) {
+                // just a dummy event to have the possibility to count the
+                // number of signals which have been received
+                events.add(new Event(QuadrupleGenerator.create()));
+                events.notifyAll();
+            }
+            log.info("New signal received");
         }
     }
 

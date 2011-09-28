@@ -20,10 +20,24 @@ import fr.inria.eventcloud.api.Event;
 
 /**
  * This kind of notification listener will receive the notification in the form
- * of an {@link Event}.
+ * of an {@link Event}. To have the possibility to retrieve an {@link Event},
+ * the method reconstructs internally the Event from the event identifier which
+ * matches the subscription. <strong>This listener must be used
+ * carefully</strong>.
  * 
  * @author lpellegr
  */
-public interface EventNotificationListener extends NotificationListener<Event> {
+public abstract class EventNotificationListener implements
+        NotificationListener<Event> {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NotificationListenerType getType() {
+        return NotificationListenerType.EVENT;
+    }
 
 }

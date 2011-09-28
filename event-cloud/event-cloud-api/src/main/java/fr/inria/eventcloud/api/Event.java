@@ -50,6 +50,16 @@ public class Event implements Iterable<Quadruple>, Serializable {
     private transient Node graph;
 
     /**
+     * Creates a new Event from the specified list of quadruples.
+     * 
+     * @param quads
+     *            the quadruples to put into the Event.
+     */
+    public Event(Quadruple... quads) {
+        this(new Collection<Quadruple>(quads));
+    }
+
+    /**
      * Creates a new Event from the specified collection of quadruples.
      * 
      * @param quads

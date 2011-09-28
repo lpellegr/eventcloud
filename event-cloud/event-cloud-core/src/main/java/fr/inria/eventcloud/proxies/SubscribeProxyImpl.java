@@ -39,6 +39,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
+import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
@@ -133,27 +134,23 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
      * {@inheritDoc}
      */
     @Override
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingNotificationListener listener) {
-        return this.indexSubscription(sparqlQuery, listener);
-    }
+    public <T> SubscriptionId subscribe(String sparqlQuery,
+                                        NotificationListener<T> listener) {
+        if (listener instanceof EventNotificationListener) {
+            // TODO rewrite the sparqlQuery to keep only the graph variable in
+            // the
+            // solution variables. Indeed we need only the graph variable (which
+            // identify the event which is matched) to reconstruct the event
+        }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    EventNotificationListener listener) {
-        // TODO rewrite the sparqlQuery to keep only the graph variable in the
-        // solution variables. Indeed we need only the graph variable (which
-        // identify the event which is matched) to reconstruct the event
         return this.indexSubscription(sparqlQuery, listener);
     }
 
     private SubscriptionId indexSubscription(String sparqlQuery,
                                              NotificationListener<?> listener) {
         Subscription subscription =
-                new Subscription(this.componentUri, sparqlQuery);
+                new Subscription(
+                        this.componentUri, sparqlQuery, listener.getType());
 
         log.debug(
                 "New subscription has been registered from {} with id {}",
@@ -307,7 +304,6 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     }
 
     private void deliver(NotificationId id) {
-        // TODO delivers the solution according the type of the listener
         NotificationListener<?> listener =
                 this.listeners.get(id.getSubscriptionId());
 
@@ -315,6 +311,8 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
             this.deliver(id, (BindingNotificationListener) listener);
         } else if (listener instanceof EventNotificationListener) {
             this.deliver(id, (EventNotificationListener) listener);
+        } else if (listener instanceof SignalNotificationListener) {
+            ((SignalNotificationListener) listener).onNotification(id.getSubscriptionId());
         } else {
             log.error("Unknown notification listener: " + listener.getClass());
         }
