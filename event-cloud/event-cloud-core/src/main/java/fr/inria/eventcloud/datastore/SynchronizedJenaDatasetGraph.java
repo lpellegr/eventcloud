@@ -315,25 +315,24 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
 
         for (Quadruple quad : this.find(QuadruplePattern.ANY)) {
             graph = SemanticElement.parseElement(quad.getGraph().toString());
-
             subject =
                     SemanticElement.parseElement(quad.getSubject().toString());
             predicate =
                     SemanticElement.parseElement(quad.getPredicate().toString());
             object = SemanticElement.parseElement(quad.getObject().toString());
 
-            if (graph.compareTo(zone.getLowerBound((byte) 0).toString()) >= 0
-                    && graph.compareTo(zone.getUpperBound((byte) 0).toString()) < 0
+            if (graph.compareTo(zone.getLowerBound((byte) 0).getValue()) >= 0
+                    && graph.compareTo(zone.getUpperBound((byte) 0).getValue()) < 0
                     && subject.compareTo(zone.getLowerBound((byte) 1)
-                            .toString()) >= 0
+                            .getValue()) >= 0
                     && subject.compareTo(zone.getUpperBound((byte) 1)
-                            .toString()) < 0
+                            .getValue()) < 0
                     && predicate.compareTo(zone.getLowerBound((byte) 2)
-                            .toString()) >= 0
+                            .getValue()) >= 0
                     && predicate.compareTo(zone.getUpperBound((byte) 2)
-                            .toString()) < 0
-                    && object.compareTo(zone.getLowerBound((byte) 3).toString()) >= 0
-                    && object.compareTo(zone.getUpperBound((byte) 3).toString()) < 0) {
+                            .getValue()) < 0
+                    && object.compareTo(zone.getLowerBound((byte) 3).getValue()) >= 0
+                    && object.compareTo(zone.getUpperBound((byte) 3).getValue()) < 0) {
                 quads.add(quad);
                 if (action != null) {
                     action.performAction(quad);
