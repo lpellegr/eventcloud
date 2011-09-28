@@ -111,7 +111,7 @@ public class Subscription implements Rdfable, Serializable {
     private transient Node graphNode;
 
     public Subscription(String source, String sparqlQuery) {
-        this(null, sparqlQuery, NotificationListenerType.UNKNOWN);
+        this(source, sparqlQuery, NotificationListenerType.UNKNOWN);
     }
 
     public Subscription(String source, String sparqlQuery,
