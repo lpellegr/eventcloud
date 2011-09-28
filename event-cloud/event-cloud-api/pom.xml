@@ -32,7 +32,6 @@
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-utils</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
