@@ -58,7 +58,11 @@ public final class Solution implements Serializable {
      */
     public Solution(int expectedSubSolutions, Binding binding) {
         this.expectedSubSolutions = expectedSubSolutions;
-        this.bindings = new Collection<Binding>(binding);
+        if (binding == null) {
+            this.bindings = new Collection<Binding>();
+        } else {
+            this.bindings = new Collection<Binding>(binding);
+        }
         this.receivedSubSolutions = 1;
     }
 
@@ -91,7 +95,9 @@ public final class Solution implements Serializable {
      *            the sub-solution to add.
      */
     public void addSubSolution(Binding binding) {
-        this.bindings.add(binding);
+        if (binding != null) {
+            this.bindings.add(binding);
+        }
         this.receivedSubSolutions++;
     }
 

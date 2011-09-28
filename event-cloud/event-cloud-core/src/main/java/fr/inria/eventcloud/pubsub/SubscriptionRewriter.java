@@ -111,12 +111,12 @@ public final class SubscriptionRewriter {
                 subscription.getOriginalId(),
                 subscription.getId(),
                 subscription.getIndexationTime(),
-                subscription.getSource(),
+                subscription.getSubscriberUrl(),
                 OpAsQuery.asQuery(
                         Transformer.transform(
                                 tc,
                                 Algebra.compile(QueryFactory.create(subscription.getSparqlQuery()))))
-                        .toString());
+                        .toString(), subscription.getType());
     }
 
     private static final TransformCopy createBGPTransformCopy(final Quadruple quad) {

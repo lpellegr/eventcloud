@@ -14,27 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.api.listeners;
+package org.objectweb.proactive.extensions.p2p.structured.utils;
 
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * This kind of notification listener will only receive a binding (i.e. the
- * variables and their associated values) that match the subscription.
+ * Class used to retrieve an enum type from an ordinal representation for any
+ * enum that implements {@link EnumConverter}.
  * 
- * @author lpellegr
+ * @author Heinz M. Kabutz
+ * 
+ * @param <V>
  */
-public abstract class BindingNotificationListener implements
-        NotificationListener<Binding> {
+public class ReverseEnumMap<V extends Enum<V> & EnumConverter<V>> {
 
-    private static final long serialVersionUID = 1L;
+    private final Map<Short, V> map = new HashMap<Short, V>();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NotificationListenerType getType() {
-        return NotificationListenerType.BINDING;
+    public ReverseEnumMap(Class<V> valueType) {
+        for (V v : valueType.getEnumConstants()) {
+            map.put(v.convert(), v);
+        }
+    }
+
+    public V get(short num) {
+        return map.get(num);
     }
 
 }

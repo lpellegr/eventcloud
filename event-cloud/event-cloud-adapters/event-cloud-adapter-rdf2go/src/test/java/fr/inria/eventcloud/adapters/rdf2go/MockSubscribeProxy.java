@@ -18,8 +18,7 @@ package fr.inria.eventcloud.adapters.rdf2go;
 
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
+import fr.inria.eventcloud.api.listeners.NotificationListener;
 
 /**
  * This class is assumed to play the role of a mock SubscribeProxy in order to
@@ -36,17 +35,8 @@ public class MockSubscribeProxy implements SubscribeApi {
      * {@inheritDoc}
      */
     @Override
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingNotificationListener listener) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    EventNotificationListener listener) {
+    public <T> SubscriptionId subscribe(String sparqlQuery,
+                                        NotificationListener<T> listener) {
         return null;
     }
 

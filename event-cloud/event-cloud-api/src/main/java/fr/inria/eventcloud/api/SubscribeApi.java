@@ -16,8 +16,7 @@
  **/
 package fr.inria.eventcloud.api;
 
-import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
+import fr.inria.eventcloud.api.listeners.NotificationListener;
 
 /**
  * Defines the subscribe operations that can be executed on an Event Cloud.
@@ -27,37 +26,20 @@ import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 public interface SubscribeApi {
 
     /**
-     * Subscribes for notifications of type {@link BindingNotificationListener}
-     * with the specified SPARQL query.
+     * Subscribes to interest with the specified SPARQL query and the given
+     * {@link NotificationListener}.
      * 
      * @param sparqlQuery
-     *            the SPARQL query that is used to subscribe.
+     *            the SPARQL query that is used to subscribe to some interest.
+     * 
      * @param listener
-     *            the listener that defines the action to execute when a
-     *            notification is received.
+     *            the listener that defines the type of notifications and the
+     *            action to execute when a notification is received.
      * 
-     * @return the subscription identifier.
+     * @return an unique identifier which identifies the subscription.
      */
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    BindingNotificationListener listener);
-
-    /**
-     * Subscribes for notifications of type {@link EventNotificationListener}
-     * with the specified SPARQL query. To have the possibility to retrieve an
-     * {@link Event}, the method reconstructs internally the Event from the
-     * event identifier which matches the subscription. <strong>This operation
-     * must be used carefully</strong>.
-     * 
-     * @param sparqlQuery
-     *            the SPARQL query that is used to subscribe.
-     * @param listener
-     *            the listener that defines the action to execute when a
-     *            notification is received.
-     * 
-     * @return the subscription identifier.
-     */
-    public SubscriptionId subscribe(String sparqlQuery,
-                                    EventNotificationListener listener);
+    public <T> SubscriptionId subscribe(String sparqlQuery,
+                                        NotificationListener<T> listener);
 
     /**
      * Unsubscribes by using the specified subscription identifier.

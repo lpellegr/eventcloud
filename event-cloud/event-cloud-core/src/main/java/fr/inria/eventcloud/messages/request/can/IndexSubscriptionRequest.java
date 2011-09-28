@@ -29,10 +29,12 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
@@ -124,18 +126,24 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                         new NotificationId(
                                 subscription.getOriginalId(), System.nanoTime());
 
+                Binding binding = null;
+                // for a signal it is not necessary to retrieve the binding
+                // value
+                if (subscription.getType() != NotificationListenerType.SIGNAL) {
+                    binding =
+                            PublishSubscribeUtils.filter(
+                                    quadMatching, subscription.getResultVars(),
+                                    firstSubsubscription.getAtomicQuery());
+                }
+
                 // sends part of the solution to the subscriber
                 // TODO: this operation can be done in parallel with the send
                 // RetrieveSubSolutionOperation
-                subscription.getSourceStub()
-                        .receive(
-                                new Notification(
-                                        notificationId,
-                                        PAActiveObject.getUrl(overlay.getStub()),
-                                        PublishSubscribeUtils.filter(
-                                                quadMatching,
-                                                subscription.getResultVars(),
-                                                firstSubsubscription.getAtomicQuery())));
+                subscription.getSubscriberProxy().receive(
+                        new Notification(
+                                notificationId,
+                                PAActiveObject.getUrl(overlay.getStub()),
+                                binding));
 
                 // broadcasts a message to all the stubs contained by the
                 // subscription to say to these peers to send their

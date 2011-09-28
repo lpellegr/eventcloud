@@ -16,34 +16,38 @@
  **/
 package fr.inria.eventcloud.api.listeners;
 
-import java.io.Serializable;
-
 import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
- * A NotificationListener offers the possibility to define an action to execute
- * depending of the notification type which is received.
+ * This notification listener is used to report to the subscriber that an event
+ * (quadruple) matching its subscription has been detected. However, the event
+ * value is not conveyed to the subscriber.
  * 
  * @author lpellegr
  */
-public interface NotificationListener<T> extends Serializable {
+public abstract class SignalNotificationListener implements
+        NotificationListener<Object> {
+
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Handles a notification that has been received.
-     * 
-     * @param id
-     *            the subscription identifier that identified which subscription
-     *            is matched by the solution which is received.
-     * @param solution
-     *            a solution that matches the subscription.
+     * {@inheritDoc}
      */
-    public void onNotification(SubscriptionId id, T solution);
+    @Override
+    public void onNotification(SubscriptionId id, Object solution) {
+        // the solution is supposed to be null and can be discarded because only
+        // the signal is interesting for end users
+        this.onNotification(id);
+    }
+
+    public abstract void onNotification(SubscriptionId id);
 
     /**
-     * Returns the notification type.
-     * 
-     * @return the notification type.
+     * {@inheritDoc}
      */
-    public NotificationListenerType getType();
+    @Override
+    public NotificationListenerType getType() {
+        return NotificationListenerType.SIGNAL;
+    }
 
 }
