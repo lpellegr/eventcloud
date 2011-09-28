@@ -232,9 +232,9 @@ public class Subscription implements Rdfable, Serializable {
                                 .getLiteralLexicalForm(),
                         basicInfo.get(SUBSCRIPTION_SPARQL_QUERY_PROPERTY)
                                 .getLiteralLexicalForm(),
-                        NotificationListenerType.UNKNOWN.convert((Short) basicInfo.get(
+                        NotificationListenerType.UNKNOWN.convert(((Integer) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
-                                .getLiteralValue()));
+                                .getLiteralValue()).shortValue()));
 
         // retrieves the stub urls
         for (String stub : stubs) {
