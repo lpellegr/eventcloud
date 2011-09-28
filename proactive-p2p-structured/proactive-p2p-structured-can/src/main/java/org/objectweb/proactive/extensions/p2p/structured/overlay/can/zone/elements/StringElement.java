@@ -19,6 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.eleme
 import java.util.LinkedList;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
 
 /**
  * Embodies a String coordinate element.
@@ -58,18 +59,9 @@ public class StringElement extends Element<String> {
     public String toString() {
         if (P2PStructuredProperties.CAN_COORDINATE_DISPLAY.getValue().equals(
                 "codepoints")) {
-            StringBuffer result = new StringBuffer();
-            LinkedList<Integer> codePoints = fromStringtoUnicode(this);
-            for (int i = 0; i < codePoints.size(); i++) {
-                result.append(codePoints.get(i));
-                if (i < codePoints.size() - 1) {
-                    result.append(".");
-                }
-            }
-            return result.toString();
+            return UnicodeUtil.asCodePoints(super.value);
         } else {
-            // removes control characters which are interpreted by the console
-            return super.value.replaceAll("\\p{Cc}", "");
+            return UnicodeUtil.makePrintable(super.value);
         }
     }
 
@@ -85,7 +77,7 @@ public class StringElement extends Element<String> {
 
         // computes the middle code point value for each character element
         return new StringElement(
-                fromUnicodeToString(getMiddleUnicodes(sumCodePoints)));
+                reversedUnicodeToString(getMiddleUnicodes(sumCodePoints)));
     }
 
     /**
@@ -100,7 +92,7 @@ public class StringElement extends Element<String> {
      */
     public synchronized LinkedList<Integer> getUnicodeCodePoints() {
         if (this.unicodeCodePoints == null) {
-            this.unicodeCodePoints = fromStringtoUnicode(this);
+            this.unicodeCodePoints = reversedStringToUnicode(this);
         }
 
         return this.unicodeCodePoints;
@@ -229,7 +221,7 @@ public class StringElement extends Element<String> {
      * @return the reversed list of unicode code points values of characters
      *         belonging to the coordinate element.
      */
-    public static LinkedList<Integer> fromStringtoUnicode(StringElement elt) {
+    public static LinkedList<Integer> reversedStringToUnicode(StringElement elt) {
         LinkedList<Integer> codePtArray = new LinkedList<Integer>();
         for (int i = elt.getValue().length() - 1; i >= 0; i--) {
             int codePt = elt.getValue().codePointAt(i);
@@ -246,7 +238,7 @@ public class StringElement extends Element<String> {
      * 
      * @return the string value from the unicode code point values.
      */
-    public static String fromUnicodeToString(LinkedList<Integer> codePoints) {
+    public static String reversedUnicodeToString(LinkedList<Integer> codePoints) {
         StringBuilder buf = new StringBuilder();
         for (int i = codePoints.size() - 1; i >= 0; i--) {
             buf.append(Character.toChars(codePoints.get(i)));

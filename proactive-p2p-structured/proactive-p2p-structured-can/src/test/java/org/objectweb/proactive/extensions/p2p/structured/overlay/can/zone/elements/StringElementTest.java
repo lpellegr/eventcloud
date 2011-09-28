@@ -38,11 +38,11 @@ public class StringElementTest {
     @Test
     public void test() {
         LinkedList<Integer> al = this.alpha1();
-        String min = StringElement.fromUnicodeToString(al);
+        String min = StringElement.reversedUnicodeToString(al);
         StringElement emin = new StringElement(min);
 
         LinkedList<Integer> al2 = alpha2();
-        String max = StringElement.fromUnicodeToString(al2);
+        String max = StringElement.reversedUnicodeToString(al2);
 
         logger.info("Second String " + max + " " + al2);
         logger.info("Test Sum " + StringElement.sumUnicodeCodePoints(al, al2));
@@ -60,12 +60,12 @@ public class StringElementTest {
 
     public LinkedList<Integer> alpha1() {
         StringElement elt = new StringElement("a");
-        return StringElement.fromStringtoUnicode(elt);
+        return StringElement.reversedStringToUnicode(elt);
     }
 
     public LinkedList<Integer> alpha2() {
         StringElement elt = new StringElement("z");
-        return StringElement.fromStringtoUnicode(elt);
+        return StringElement.reversedStringToUnicode(elt);
 
     }
 

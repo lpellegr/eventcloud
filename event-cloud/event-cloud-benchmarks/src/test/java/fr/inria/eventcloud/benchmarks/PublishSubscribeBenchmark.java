@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
 import org.openjena.atlas.lib.Sink;
 import org.openjena.riot.RiotReader;
 import org.openjena.riot.lang.LangRIOT;
@@ -71,7 +70,7 @@ public class PublishSubscribeBenchmark {
 
     private static Counter nbEventsReceived = new Counter();
 
-    @Test
+    // @Test
     public void testRatePerSecond() {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();

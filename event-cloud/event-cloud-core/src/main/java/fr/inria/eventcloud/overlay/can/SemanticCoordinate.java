@@ -91,7 +91,8 @@ public class SemanticCoordinate extends StringCoordinate {
         // constraint is associated to this particular case where there is no
         // character to compare.
         if (object.isLiteral() && object.getLiteralLexicalForm().isEmpty()) {
-            object = Node.createLiteral("A");
+            object =
+                    Node.createLiteral(SemanticElement.EMPTY_STRING_ROUTING_CHARACTER);
         }
 
         return new SemanticCoordinate(

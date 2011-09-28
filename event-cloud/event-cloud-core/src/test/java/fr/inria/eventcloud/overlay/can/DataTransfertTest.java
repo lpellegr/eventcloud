@@ -16,16 +16,21 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
-import java.util.HashSet;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZoneView;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneView;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Collection;
@@ -38,70 +43,109 @@ import fr.inria.eventcloud.operations.can.FindQuadruplesResponseOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
- * Test the data transfert during a join operation for
+ * Test the data transfer during a join operation for
  * {@link SemanticSpaceCANOverlay}.
  * 
  * @author lpellegr
  */
 public class DataTransfertTest extends JunitByClassEventCloudDeployer {
 
-    private final static Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(DataTransfertTest.class);
 
     public DataTransfertTest() {
         super(1);
     }
 
-    private static String[][] quadrupleValues = {
-            {"http://A", "http://A", "http://A", "http://A"},
-            {"http://U", "http://U", "http://U", "http://U"},
-            {"http://Z", "http://Z", "http://Z", "http://Z"}};
-
     @Test
     public void testDataTransfert() {
-        for (String[] stmt : quadrupleValues) {
-            super.getRandomSemanticPeer().add(
-                    new Quadruple(
-                            Node.createURI(stmt[0]), Node.createURI(stmt[1]),
-                            Node.createURI(stmt[2]), Node.createURI(stmt[3])));
-        }
+        SemanticPeer firstPeer = (SemanticPeer) super.getRandomSemanticPeer();
+        SemanticPeer secondPeer = SemanticFactory.newSemanticPeer();
 
-        SemanticPeer newPeer = SemanticFactory.newSemanticPeer();
-        SemanticPeer oldPeer = super.getRandomSemanticPeer();
+        GetIdAndZoneResponseOperation response =
+                (GetIdAndZoneResponseOperation) PAFuture.getFutureValue(firstPeer.receive(new GetIdAndZoneOperation()));
 
-        Collection<Quadruple> oldPeerQuads = oldPeer.find(QuadruplePattern.ANY);
-        int nbDataContainedByOldPeer = oldPeerQuads.size();
+        UnicodeZoneView zone =
+                new UnicodeZoneView(response.getPeerZone()
+                        .getUnicodeView()
+                        .getLowerBound(), response.getPeerZone()
+                        .getUnicodeView()
+                        .getUpperBound());
 
-        logger.debug(
-                "Before join operation on old peer, the old peer contains {} data",
-                nbDataContainedByOldPeer);
+        byte dimensionSplit = 0;
+
+        // we compute the value of the split which will be done on the next join
+        // from the third peer in order to create data that will be transfered
+        // from a peer to an another
+        HomogenousPair<ZoneView<StringCoordinate, StringElement, String>> res =
+                zone.split(dimensionSplit);
+
+        // the next two elements will be contained by two different peers on the
+        // fourth dimension: one on peer one and one on peer five.
+        String elt1 =
+                res.getFirst()
+                        .getLowerBound()
+                        .getElement(dimensionSplit)
+                        .getValue();
+
+        String elt2 =
+                res.getSecond()
+                        .getLowerBound()
+                        .getElement(dimensionSplit)
+                        .getValue()
+                        + "a";
+
+        log.debug("elt1={}", UnicodeUtil.makePrintable(elt1));
+        log.debug("elt2={}", UnicodeUtil.makePrintable(elt2));
+
+        Node node1 = Node.createURI(elt1);
+        Node node2 = Node.createURI(elt2);
+
+        Quadruple quad1 =
+                new Quadruple(node1, Node.createURI(res.getFirst()
+                        .getLowerBound((byte) 1)
+                        .getValue()), Node.createURI(res.getFirst()
+                        .getLowerBound((byte) 2)
+                        .getValue()), Node.createURI(res.getFirst()
+                        .getLowerBound((byte) 3)
+                        .getValue()));
+
+        Quadruple quad2 =
+                new Quadruple(node2, Node.createURI(res.getSecond()
+                        .getLowerBound((byte) 1)
+                        .getValue()), Node.createURI(res.getSecond()
+                        .getLowerBound((byte) 2)
+                        .getValue()), Node.createURI(res.getSecond()
+                        .getLowerBound((byte) 3)
+                        .getValue()));
+
+        log.debug("quad1={}", quad1);
+        log.debug("quad2={}", quad2);
+
+        // add two quadruples whose one must be conveyed to the second peer when
+        // it joins the first peer
+        firstPeer.add(quad1);
+        firstPeer.add(quad2);
+
+        Assert.assertEquals(2, findQuadruplesOperation(
+                firstPeer, QuadruplePattern.ANY).size());
 
         try {
-            super.getRandomTracker().inject(newPeer);
+            secondPeer.join(firstPeer);
         } catch (NetworkAlreadyJoinedException e) {
             e.printStackTrace();
         }
 
-        logger.debug("Initial peer manages " + oldPeer);
-        logger.debug("New peer manages " + newPeer);
+        log.debug("first peer manages {}", firstPeer);
+        log.debug("second peer manages {}", secondPeer);
 
-        oldPeerQuads = findQuadruplesOperation(oldPeer, QuadruplePattern.ANY);
-        nbDataContainedByOldPeer = oldPeerQuads.size();
+        Collection<Quadruple> firstPeerResult =
+                findQuadruplesOperation(firstPeer, QuadruplePattern.ANY);
+        Collection<Quadruple> secondPeerResult =
+                findQuadruplesOperation(secondPeer, QuadruplePattern.ANY);
 
-        Collection<Quadruple> newPeerQuads =
-                findQuadruplesOperation(newPeer, QuadruplePattern.ANY);
-        int nbDataContainedByNewPeer = newPeerQuads.size();
-
-        logger.debug(
-                "After join operation on old peer with new peer, the old peer contains {} data whereas the new peer contains {} data",
-                nbDataContainedByOldPeer, nbDataContainedByNewPeer);
-
-        Assert.assertNotSame(0, Sets.intersection(new HashSet<Quadruple>(
-                oldPeerQuads), new HashSet<Quadruple>(newPeerQuads)));
-        Assert.assertEquals(quadrupleValues.length, nbDataContainedByOldPeer
-                + nbDataContainedByNewPeer);
-        Assert.assertTrue(nbDataContainedByOldPeer < quadrupleValues.length);
-        Assert.assertTrue(nbDataContainedByOldPeer > 0);
+        Assert.assertEquals(1, firstPeerResult.size());
+        Assert.assertEquals(1, secondPeerResult.size());
     }
 
     private static Collection<Quadruple> findQuadruplesOperation(SemanticPeer peer,
