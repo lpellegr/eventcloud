@@ -51,8 +51,8 @@
 			<url>http://maven.event-cloud.googlecode.com/hg/snapshots</url>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots-proactive-093</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-093</url>
+			<id>sonatype-snapshots-proactive-030</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-030</url>
 		</repository>
 	</repositories>
 
