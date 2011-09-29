@@ -45,11 +45,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.bind.DatatypeConverter;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.MapMaker;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -79,6 +81,9 @@ import fr.inria.eventcloud.utils.MurmurHash;
 public class Subscription implements Rdfable, Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private static final ConcurrentMap<String, SubscribeProxy> proxiesCache =
+            new MapMaker().weakValues().makeMap();
 
     // the id of the subscription before someone rewrites it
     private final SubscriptionId originalId;
@@ -319,7 +324,20 @@ public class Subscription implements Rdfable, Serializable {
      * @return the {@link SubscribeProxy} associated to the original subscriber.
      */
     public SubscribeProxy getSubscriberProxy() {
-        return ProxyFactory.lookupSubscribeProxy(this.subscriberUrl);
+        SubscribeProxy result = proxiesCache.get(this.subscriberUrl);
+
+        // to avoid the lookup operation in most of the cases
+        if (result == null) {
+            SubscribeProxy tmp =
+                    ProxyFactory.lookupSubscribeProxy(this.subscriberUrl);
+
+            // to perform concurrent put
+            if ((result = proxiesCache.putIfAbsent(this.subscriberUrl, tmp)) == null) {
+                return tmp;
+            }
+        }
+
+        return result;
     }
 
     public String getSparqlQuery() {
