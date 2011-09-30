@@ -16,10 +16,14 @@
  **/
 package fr.inria.eventcloud.operations.can;
 
+import java.io.IOException;
+
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -47,6 +51,9 @@ import fr.inria.eventcloud.utils.LongLong;
 public class RetrieveSubSolutionOperation implements AsynchronousOperation {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger log =
+            LoggerFactory.getLogger(RetrieveSubSolutionOperation.class);
 
     private final NotificationId notificationId;
 
@@ -97,25 +104,36 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
         // extracts only the variabless that are declared as result variables in
         // the original subscription
 
-        Subscription sub =
+        Subscription subscription =
                 ((SemanticCanOverlay) overlay).findSubscription(subSubscription.getParentId());
 
         Binding binding = null;
         // for a signal it is not necessary to retrieve the binding value
-        if (sub.getType() != NotificationListenerType.SIGNAL) {
+        if (subscription.getType() != NotificationListenerType.SIGNAL) {
             binding =
                     PublishSubscribeUtils.filter(
-                            extractedMetaInfo.getFirst(), sub.getResultVars(),
+                            extractedMetaInfo.getFirst(),
+                            subscription.getResultVars(),
                             subSubscription.getAtomicQuery());
         }
 
         // TODO: replace PAActiveObject.getUrl(overlay.getStub()) by the
         // component URL? (same in PublishQuadrupleRequest and
         // IndexSubscriptionRequest)
-        sub.getSubscriberProxy().receive(
-                new Notification(
-                        this.notificationId,
-                        PAActiveObject.getUrl(overlay.getStub()), binding));
+        try {
+            subscription.getSubscriberProxy().receive(
+                    new Notification(
+                            this.notificationId,
+                            PAActiveObject.getUrl(overlay.getStub()), binding));
+        } catch (IOException e) {
+            log.error("No SubscribeProxy found under the given URL: "
+                    + subscription.getSubscriberUrl(), e);
+
+            // TODO: this could be due to a subscriber which has left
+            // without unsubscribing. In that case we can remove the
+            // subscription information associated to this subscriber
+            // and also send a message
+        }
     }
 
 }
