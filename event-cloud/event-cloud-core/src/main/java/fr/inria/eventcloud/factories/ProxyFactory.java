@@ -35,6 +35,8 @@ import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.MapMaker;
 
@@ -66,6 +68,8 @@ public class ProxyFactory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger log;
+
     protected static final ConcurrentMap<EventCloudId, ProxyFactory> proxies;
 
     protected static Factory factory;
@@ -77,6 +81,8 @@ public class ProxyFactory implements Serializable {
     protected static String putgetProxyAdl;
 
     static {
+        log = LoggerFactory.getLogger(ProxyFactory.class);
+
         // proxies may be garbage collected in response to memory demand
         proxies = new MapMaker().softValues().makeMap();
 
@@ -134,7 +140,11 @@ public class ProxyFactory implements Serializable {
     }
 
     /**
-     * Creates a new {@link SubscribeProxy}.
+     * Creates a new {@link SubscribeProxy} by registering the proxy to the
+     * registry in order to have the possibility to receive notification.
+     * 
+     * @param properties
+     *            the ELA properties to set.
      * 
      * @return a new {@link SubscribeProxy}.
      */
@@ -151,6 +161,7 @@ public class ProxyFactory implements Serializable {
             String componentUri =
                     Fractive.registerByName(subProxy, "subscribe-proxy-"
                             + UUID.randomUUID().toString());
+            log.info("SubscribeProxy bound to {}", componentUri);
 
             GCM.getGCMLifeCycleController(subProxy).startFc();
             stub.init(this.eventCloudProxy, componentUri, properties);
@@ -219,37 +230,40 @@ public class ProxyFactory implements Serializable {
         }
     }
 
-    public static SubscribeProxy lookupSubscribeProxy(String componentUri) {
+    public static SubscribeProxy lookupSubscribeProxy(String componentUri)
+            throws IOException {
         return (SubscribeProxy) lookupFcInterface(
                 componentUri,
                 EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
     }
 
-    public static PublishProxy lookupPublishProxy(String componentUri) {
+    public static PublishProxy lookupPublishProxy(String componentUri)
+            throws IOException {
         return (PublishProxy) lookupFcInterface(
                 componentUri,
                 EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
     }
 
-    public static PutGetProxy lookupPutGetProxy(String componentUri) {
+    public static PutGetProxy lookupPutGetProxy(String componentUri)
+            throws IOException {
         return (PutGetProxy) lookupFcInterface(
                 componentUri,
                 EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
     }
 
     private static Object lookupFcInterface(String componentUri,
-                                            String interfaceName) {
+                                            String interfaceName)
+            throws IOException {
         try {
             return Fractive.lookup(componentUri).getFcInterface(interfaceName);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            // it is not necessary to rethrown this exception because when it
+            // occurs this means there is an issue in the code
+            log.error("Please check the interface name:" + interfaceName, e);
+            return null;
         } catch (NamingException e) {
-            e.printStackTrace();
+            throw new IOException(e);
         }
-
-        return null;
     }
 
 }

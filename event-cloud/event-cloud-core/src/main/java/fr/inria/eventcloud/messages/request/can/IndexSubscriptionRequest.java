@@ -139,27 +139,39 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 // sends part of the solution to the subscriber
                 // TODO: this operation can be done in parallel with the send
                 // RetrieveSubSolutionOperation
-                subscription.getSubscriberProxy().receive(
-                        new Notification(
-                                notificationId,
-                                PAActiveObject.getUrl(overlay.getStub()),
-                                binding));
+                try {
+                    subscription.getSubscriberProxy().receive(
+                            new Notification(
+                                    notificationId,
+                                    PAActiveObject.getUrl(overlay.getStub()),
+                                    binding));
 
-                // broadcasts a message to all the stubs contained by the
-                // subscription to say to these peers to send their
-                // sub-solutions to the subscriber
-                // TODO: send message in parallel
-                for (Subscription.Stub stub : subscription.getStubs()) {
-                    try {
-                        PAActiveObject.lookupActive(
-                                SemanticPeer.class, stub.peerUrl).receive(
-                                new RetrieveSubSolutionOperation(
-                                        notificationId, stub.quadrupleHash));
-                    } catch (ActiveObjectCreationException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    // broadcasts a message to all the stubs contained by the
+                    // subscription to say to these peers to send their
+                    // sub-solutions to the subscriber
+                    // TODO: send message in parallel
+                    for (Subscription.Stub stub : subscription.getStubs()) {
+                        try {
+                            PAActiveObject.lookupActive(
+                                    SemanticPeer.class, stub.peerUrl)
+                                    .receive(
+                                            new RetrieveSubSolutionOperation(
+                                                    notificationId,
+                                                    stub.quadrupleHash));
+                        } catch (ActiveObjectCreationException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+                } catch (IOException e) {
+                    log.error("No SubscribeProxy found under the given URL: "
+                            + subscription.getSubscriberUrl(), e);
+
+                    // TODO: this could be due to a subscriber which has left
+                    // without unsubscribing. In that case we can remove the
+                    // subscription information associated to this subscriber
+                    // and also send a message
                 }
             } else {
                 Quadruple metaQuad =

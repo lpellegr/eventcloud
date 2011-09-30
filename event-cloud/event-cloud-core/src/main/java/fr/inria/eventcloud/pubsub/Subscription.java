@@ -37,6 +37,7 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SUB
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_TYPE_PROPERTY;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -322,8 +323,11 @@ public class Subscription implements Rdfable, Serializable {
      * Returns the {@link SubscribeProxy} associated to the original subscriber.
      * 
      * @return the {@link SubscribeProxy} associated to the original subscriber.
+     * 
+     * @throws IOException
+     *             if the proxy cannot be created by using the subscriber URL.
      */
-    public SubscribeProxy getSubscriberProxy() {
+    public SubscribeProxy getSubscriberProxy() throws IOException {
         SubscribeProxy result = proxiesCache.get(this.subscriberUrl);
 
         // to avoid the lookup operation in most of the cases
