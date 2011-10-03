@@ -514,9 +514,11 @@ public class Subscription implements Rdfable, Serializable {
      */
     @Override
     public String toString() {
-        return "Subscription [id=" + this.id + ", creationTime="
-                + this.creationTime + ", source=" + this.subscriberUrl
-                + ", sparqlQuery=" + this.sparqlQuery + "]";
+        return "Subscription [originalId=" + originalId + ", parentId="
+                + parentId + ", id=" + id + ", creationTime=" + creationTime
+                + ", indexationTime=" + indexationTime + ", subscriberUrl="
+                + subscriberUrl + ", sparqlQuery=" + sparqlQuery + ", stubs="
+                + stubs + ", type=" + type + "]";
     }
 
     public static final class Stub implements Serializable {

@@ -110,10 +110,11 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         while (it.hasNext()) {
             Quadruple quadMatching = it.next();
 
-            log.debug(
-                    "Comparing the timestamps between the quadruple {} and the subscription matching the quadruple {}",
-                    quadMatching.getPublicationDateTime(),
-                    subscription.getIndexationTime());
+            if (quadMatching.getPublicationDateTime() != -1) {
+                log.debug(
+                        "Comparing the timestamps between the quadruple {} and the subscription matching the quadruple {}",
+                        quadMatching, subscription);
+            }
 
             // skips the quadruples which have been published before the
             // subscription
@@ -203,5 +204,4 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
             }
         }
     }
-
 }

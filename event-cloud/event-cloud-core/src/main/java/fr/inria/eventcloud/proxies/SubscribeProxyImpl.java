@@ -80,7 +80,8 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
      * re-execute the query for retrieving the quadruples that belongs to the
      * specified event id.
      */
-    // TODO: evaluate which value to use for this threshold
+    // TODO: evaluate which value to use for this threshold (uses exponential
+    // backoff)
     private static final int RECONSTRUCTION_RETRY_THRESHOLD = 200;
 
     // contains the subscriptions that have been registered from this proxy

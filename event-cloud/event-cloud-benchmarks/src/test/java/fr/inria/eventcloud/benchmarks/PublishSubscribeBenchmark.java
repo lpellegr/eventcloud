@@ -2,7 +2,7 @@
  * Copyright (c) 2011 INRIA.
  * 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terns of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
@@ -16,15 +16,21 @@
  **/
 package fr.inria.eventcloud.benchmarks;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.openjena.atlas.lib.Sink;
 import org.openjena.riot.RiotReader;
 import org.openjena.riot.lang.LangRIOT;
@@ -32,12 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
-import com.hp.hpl.jena.sparql.engine.binding.BindingInputStream;
-import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
-import com.hp.hpl.jena.sparql.engine.binding.BindingOutputStream;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
@@ -49,100 +50,120 @@ import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
- * 
+ * Some benchmarks to try to evaluate the performances of the publish subscribe
+ * algorithm.
  * 
  * @author lpellegr
  */
+@RunWith(Parameterized.class)
 public class PublishSubscribeBenchmark {
 
     private static final Logger log =
             LoggerFactory.getLogger(PublishSubscribeBenchmark.class);
 
-    private static final List<Binding> bindingsReceived =
-            new ArrayList<Binding>();
-
     private static Status allEventsPublished =
             new PublishSubscribeBenchmark.Status(false);
 
-    private static long nbEventsPublished;
+    private static long nbEventsPublished = 0;
 
-    private static Counter nbEventsReceived = new Counter();
+    private static Map<SubscriptionId, Counter> nbEventsReceivedBySubscriber =
+            new HashMap<SubscriptionId, Counter>();
 
-    // @Test
+    private final int nbPeers;
+
+    private final int nbSubscribers;
+
+    public PublishSubscribeBenchmark(int nbPeers, int nbSubscribers) {
+        this.nbPeers = nbPeers;
+        this.nbSubscribers = nbSubscribers;
+    }
+
+    @Test
     public void testRatePerSecond() {
+        benchmark();
+    }
+
+    @Parameters
+    public static List<Object[]> getParametres() {
+        return Arrays.asList(new Object[][] { {1, 1}, {1, 10}, {1, 100},});
+    }
+
+    private void benchmark() {
+        log.info("Benchmark with {} peer(s) and {} subscriber(s)", this.nbPeers, this.nbSubscribers);
+        
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
-        EventCloudId ecId = deployer.createEventCloud(1);
+        EventCloudId ecId = deployer.createEventCloud(this.nbPeers);
 
         final ProxyFactory proxyFactory =
                 ProxyFactory.getInstance(
                         deployer.getEventCloudsRegistryUrl(), ecId);
 
-        final PublishProxy publishProxy = proxyFactory.createPublishProxy();
+        final AlterableLong timeToPublishQuadruples = new AlterableLong();
+        final AlterableLong timeToParseQuadruples = new AlterableLong();
+        final AlterableLong timeToReceiveAllEvents = new AlterableLong();
+        final AlterableLong startTime = new AlterableLong();
 
-        final SubscribeProxy subscribeProxy =
-                proxyFactory.createSubscribeProxy();
+        allEventsPublished = new PublishSubscribeBenchmark.Status(false);
+        nbEventsPublished = 0;
+        nbEventsReceivedBySubscriber.clear();
 
-        long publishTime;
-        long subscribeTime;
+        startTime.set(System.nanoTime());
+        for (int i = 0; i < this.nbSubscribers; i++) {
+            final SubscribeProxy subscribeProxy =
+                    proxyFactory.createSubscribeProxy();
 
-        // a thread that simulates a subscription
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+            // a thread that simulates a subscription
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    SubscriptionId subscriptionId =
+                            subscribeProxy.subscribe(
+                                    "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
+                                    new CustomBindingListener());
 
-                subscribeProxy.subscribe(
-                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
-                        new CustomBindingListener());
-            }
-        }).start();
+                    nbEventsReceivedBySubscriber.put(
+                            subscriptionId, new Counter());
+                }
+            }).start();
+        }
 
+        // to ensure that the subscription is indexed before to publish
+        // quadruples
         try {
-            // to ensure that the subscription has been indexed
             Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        final PublishProxy publishProxy = proxyFactory.createPublishProxy();
         // a thread that simulates a publication
         new Thread(new Runnable() {
             @Override
             public void run() {
-                // final ExecutorService threadPool =
-                // Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
-                // Executors.newFixedThreadPool(1);
+                final List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
                 Sink<Quad> sink = new Sink<Quad>() {
                     @Override
                     public void send(final Quad quad) {
-                        // threadPool.submit(new Runnable() {
-                        // @Override
-                        // public void run() {
+
                         Quadruple q =
                                 new Quadruple(
                                         quad.getGraph(), quad.getSubject(),
                                         quad.getPredicate(), quad.getObject());
-                        publishProxy.publish(q);
-                        nbEventsPublished++;
-                        System.out.println("publication number "
-                                + nbEventsPublished);
-                        // }
-                        // });
+
+                        quadruples.add(q);
+
                     }
 
                     @Override
                     public void close() {
-                        System.out.println("nbEventsPublished="
-                                + nbEventsPublished);
-                        System.out.println("nbEventsReceived="
-                                + nbEventsReceived);
-
                         synchronized (allEventsPublished) {
                             allEventsPublished.received = true;
                             allEventsPublished.notifyAll();
                         }
-                        // threadPool.shutdown();
+
                     }
 
                     @Override
@@ -153,13 +174,27 @@ public class PublishSubscribeBenchmark {
                 };
 
                 InputStream fis = null;
-
                 LangRIOT parser = null;
                 try {
                     fis =
                             PublishSubscribeBenchmark.class.getResourceAsStream("/chunk.nquads");
                     parser = RiotReader.createParserNQuads(fis, sink);
+
+                    long startTime = System.nanoTime();
                     parser.parse();
+                    timeToParseQuadruples.set(System.nanoTime() - startTime);
+
+                    startTime = System.nanoTime();
+
+                    final CountDownLatch doneSignal =
+                            new CountDownLatch(quadruples.size());
+                    for (final Quadruple quad : quadruples) {
+                        publishProxy.publish(quad);
+                        doneSignal.countDown();
+                        nbEventsPublished++;
+                    }
+                    timeToPublishQuadruples.set(System.nanoTime() - startTime);
+
                     sink.close();
                 } finally {
                     try {
@@ -171,8 +206,7 @@ public class PublishSubscribeBenchmark {
             }
         }).start();
 
-        System.out.println("Wait for publishing events");
-
+        // waits to publish events
         synchronized (allEventsPublished) {
             while (!allEventsPublished.received) {
                 try {
@@ -183,91 +217,37 @@ public class PublishSubscribeBenchmark {
             }
         }
 
-        System.out.println("All events published");
+        log.info("It takes " + timeToParseQuadruples + " ns to parse "
+                + nbEventsPublished + " quadruples");
+        log.info("It takes " + timeToPublishQuadruples
+                + " ns to publish these quadruples");
 
-        synchronized (nbEventsReceived) {
-            while (nbEventsReceived.count.get() < nbEventsPublished) {
+        // waits to receive events
+        synchronized (nbEventsReceivedBySubscriber) {
+            while (!allEventsReceived()) {
                 try {
-                    nbEventsReceived.wait();
+                    nbEventsReceivedBySubscriber.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
 
-        try {
-            Thread.sleep(90000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        timeToReceiveAllEvents.set(System.nanoTime() - startTime.get());
 
-        System.out.println("PublishSubscribeBenchmark.testRatePerSecond() END R="
-                + nbEventsReceived.count + ", P=" + nbEventsPublished);
+        log.info("All events received in " + timeToReceiveAllEvents + " ns");
 
         deployer.undeploy();
     }
 
-    static int line = 0;
-
-    public static void main(String[] args) {
-        final List<Quad> quadruples = new ArrayList<Quad>();
-
-        Sink<Quad> sink = new Sink<Quad>() {
-            @Override
-            public void send(final Quad quad) {
-                quadruples.add(quad);
-            }
-
-            @Override
-            public void close() {
-            }
-
-            @Override
-            public void flush() {
-            }
-        };
-
-        InputStream fis = null;
-
-        LangRIOT parser = null;
-        try {
-            fis =
-                    PublishSubscribeBenchmark.class.getResourceAsStream("/chunk.nquads");
-            parser = RiotReader.createParserNQuads(fis, sink);
-            parser.parse();
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+    private static boolean allEventsReceived() {
+        for (Counter counter : nbEventsReceivedBySubscriber.values()) {
+            if (counter.get() != nbEventsPublished) {
+                return false;
             }
         }
 
-        int c = 1;
-        for (Quad q : quadruples) {
-            System.out.println("c=" + c + ", q=" + q);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            BindingMap b = BindingFactory.create();
-            b.add(Var.alloc("g"), q.getGraph());
-            b.add(Var.alloc("s"), q.getSubject());
-            b.add(Var.alloc("p"), q.getPredicate());
-            b.add(Var.alloc("o"), q.getObject());
-
-            BindingOutputStream bos = new BindingOutputStream(baos);
-            bos.write(b);
-            bos.close();
-
-            BindingInputStream bis =
-                    new BindingInputStream(new ByteArrayInputStream(
-                            baos.toByteArray()));
-
-            System.out.println(bis.next());
-            c++;
-        }
-
+        return true;
     }
 
     private static class CustomBindingListener extends
@@ -276,15 +256,16 @@ public class PublishSubscribeBenchmark {
 
         @Override
         public void onNotification(SubscriptionId id, Binding solution) {
-            System.err.println(solution + " NUMBER " + nbEventsReceived.count);
-            synchronized (nbEventsReceived) {
-                nbEventsReceived.count.incrementAndGet();
-                nbEventsReceived.notifyAll();
+            synchronized (nbEventsReceivedBySubscriber) {
+                nbEventsReceivedBySubscriber.get(id).inc();
+                nbEventsReceivedBySubscriber.notifyAll();
             }
         }
     }
 
     private static class Status implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         public boolean received = false;
 
@@ -297,7 +278,38 @@ public class PublishSubscribeBenchmark {
 
     private static class Counter implements Serializable {
 
-        public AtomicLong count = new AtomicLong();
+        private static final long serialVersionUID = 1L;
+
+        private AtomicLong count = new AtomicLong(1);
+
+        public void inc() {
+            count.incrementAndGet();
+        }
+
+        public long get() {
+            return this.count.get();
+        }
+
+    }
+
+    private static class AlterableLong implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        private long value = 0;
+
+        @Override
+        public String toString() {
+            return Long.toString(this.value);
+        }
+
+        public void set(long value) {
+            this.value = value;
+        }
+
+        public long get() {
+            return this.value;
+        }
 
     }
 
