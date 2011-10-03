@@ -65,6 +65,9 @@ public class WsNotificationTranslatorImpl implements WsNotificationTranslator {
             this.executeSaxParser(xsdPayload, null, xsdHandler);
             elementDatatypes = xsdHandler.getElementDatatypes();
         }
+        else {
+        	
+        }
 
         WsNotifNotificationToEventHandler handler =
                 new WsNotifNotificationToEventHandler(
