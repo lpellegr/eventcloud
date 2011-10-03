@@ -10,7 +10,7 @@
 	</xsd:element>
 	<xsd:complexType name="FiremanType">
 		<xsd:sequence>
-			<xsd:element name="name" type="string" />
+			<xsd:element name="name" type="xsd:string" />
 			<xsd:element ref="EndpointReference" />
 		</xsd:sequence>
 	</xsd:complexType>
