@@ -88,8 +88,8 @@ public final class SparqlResultSerializer {
         BindingOutputStream bos = new BindingOutputStream(out);
         if (binding != null) {
             bos.write(binding);
+            bos.flush();
         }
-        bos.close();
 
         if (gzipped) {
             try {
