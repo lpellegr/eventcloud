@@ -114,6 +114,7 @@ public class Subscription implements Rdfable, Serializable {
 
     private transient Subsubscription[] subSubscriptions;
 
+    // the var name associated to the graph value
     private transient Node graphNode;
 
     public Subscription(String source, String sparqlQuery) {

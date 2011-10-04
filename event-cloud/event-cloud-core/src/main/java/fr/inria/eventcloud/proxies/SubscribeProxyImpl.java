@@ -233,6 +233,12 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         // perform polling while all the quadruples have not been retrieved
         while (expectedNumberOfQuadruples == -1
                 || quadsReceived.size() != expectedNumberOfQuadruples) {
+            log.info(
+                    "Reconstructing event for subscription {} and graph value {} ({}/{})",
+                    new Object[] {
+                            id, eventId, quadsReceived.size(),
+                            expectedNumberOfQuadruples});
+
             Collection<Quadruple> quads = null;
             try {
                 quads =
@@ -265,7 +271,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
 
         this.eventIdsReceived.put(eventId, id);
 
-        return new Event(quadsReceived);
+        return Event.createWithoutAddingMetaInformation(quadsReceived);
     }
 
     public static Long[] toObject(long[] array) {
@@ -313,6 +319,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         } else if (listener instanceof EventNotificationListener) {
             this.deliver(id, (EventNotificationListener) listener);
         } else if (listener instanceof SignalNotificationListener) {
+            this.solutions.remove(id);
             ((SignalNotificationListener) listener).onNotification(id.getSubscriptionId());
         } else {
             log.error("Unknown notification listener: " + listener.getClass());
@@ -353,10 +360,8 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         }
 
         log.debug(
-                "New notification received on {} from {} for subscription id {}",
-                new Object[] {
-                        PAActiveObject.getBodyOnThis().getUrl(),
-                        notification.getSource(), subscriptionId});
+                "New notification received {} on {} for subscription id {}",
+                new Object[] {notification, this.componentUri, subscriptionId});
 
         Solution solution = this.solutions.get(notification.getId());
         if (solution == null) {

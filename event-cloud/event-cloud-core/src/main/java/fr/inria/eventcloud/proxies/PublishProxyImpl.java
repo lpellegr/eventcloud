@@ -81,9 +81,15 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
     public void publish(Event event) {
         long publicationDateTime = System.currentTimeMillis();
 
-        // TODO try to improve the publication of several quadruples
-        // first insight: use a thread-pool
+        boolean isAlreadyTimestamped = false;
+
         for (Quadruple quad : event) {
+            // reset the quadruple if it is already timestamped in order to
+            // allow to publish events which have been received as notifications
+            if (isAlreadyTimestamped
+                    || (isAlreadyTimestamped = quad.isTimestamped())) {
+                quad.reset();
+            }
             this.publish(quad.timestamp(publicationDateTime));
         }
     }
@@ -93,7 +99,6 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
      */
     @Override
     public void publish(Collection<Event> events) {
-        // TODO use a thread-pool
         for (Event event : events) {
             this.publish(event);
         }

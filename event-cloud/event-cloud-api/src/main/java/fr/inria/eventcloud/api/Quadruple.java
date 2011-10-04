@@ -257,6 +257,14 @@ public class Quadruple implements Serializable {
     }
 
     /**
+     * Resets the state of the quadruple by removing the timestamp value.
+     */
+    public synchronized void reset() {
+        this.timestamp.set(-1);
+        this.timestampedNode = null;
+    }
+
+    /**
      * Returns a new quadruple whose the graph value has been replaced by the
      * concatenation of the original graph value and a datetime representing the
      * publication datime of the quadruple.

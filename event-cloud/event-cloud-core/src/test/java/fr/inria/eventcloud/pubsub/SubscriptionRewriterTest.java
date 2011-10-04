@@ -36,14 +36,23 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  */
 public class SubscriptionRewriterTest {
 
-    private static final String source =
-            "rmi://oops.inria.fr:1099/32bf1d5d-131240b729f--7f6e--6f9e1f1e514bea7c-32bf1d5d-131240b729f--8000";
+    private static final String source;
 
-    private static final Node defaultNode =
-            Node.createURI("http://www.inria.fr");
+    private static final Node defaultNode;
 
-    private static final Quadruple defaultQuadruple = new Quadruple(
-            defaultNode, defaultNode, defaultNode, defaultNode);
+    private static final Quadruple defaultQuadruple;
+
+    static {
+        source =
+                "rmi://oops.inria.fr:1099/32bf1d5d-131240b729f--7f6e--6f9e1f1e514bea7c-32bf1d5d-131240b729f--8000";
+
+        defaultNode = Node.createURI("http://www.inria.fr");
+
+        defaultQuadruple =
+                new Quadruple(
+                        defaultNode, defaultNode, defaultNode, defaultNode);
+        defaultQuadruple.timestamp();
+    }
 
     @Test
     public void testRewriteWithQuadrupleAndBoundVariables() {
@@ -56,8 +65,9 @@ public class SubscriptionRewriterTest {
                 SubscriptionRewriter.rewrite(subscription, defaultQuadruple);
 
         for (Subsubscription s : rewrittenSubscription.getSubSubscriptions()) {
-            Assert.assertEquals(defaultQuadruple.getGraph(), s.getAtomicQuery()
-                    .getGraph());
+            Assert.assertEquals(
+                    defaultQuadruple.getTimestampedGraph(), s.getAtomicQuery()
+                            .getGraph());
         }
 
         Assert.assertEquals(
@@ -102,8 +112,9 @@ public class SubscriptionRewriterTest {
                 SubscriptionRewriter.rewrite(subscription, defaultQuadruple);
 
         for (Subsubscription s : rewrittenSubscription.getSubSubscriptions()) {
-            Assert.assertEquals(defaultQuadruple.getGraph(), s.getAtomicQuery()
-                    .getGraph());
+            Assert.assertEquals(
+                    defaultQuadruple.getTimestampedGraph(), s.getAtomicQuery()
+                            .getGraph());
         }
 
         Assert.assertEquals(

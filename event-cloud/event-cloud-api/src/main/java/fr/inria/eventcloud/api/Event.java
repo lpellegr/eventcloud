@@ -26,7 +26,10 @@ import com.hp.hpl.jena.graph.Triple;
 /**
  * An Event is a collection of {@link Quadruple}s where each quadruple is
  * assumed to share the same graph value. The graph value is kept separated from
- * the Triple value for backward compatibility with linked data tools.
+ * the Triple value for backward compatibility with linked data tools. Please
+ * note that when an event is constructed, a new quadruple (indicating the
+ * number of quadruples associated to the event) is added to the list of
+ * quadruples.
  * <p>
  * Also, it is assumed that an Event is not alterable. Hence, if you try to
  * update the content of an Event by calling {@link #getQuadruples()} followed
@@ -66,13 +69,20 @@ public class Event implements Iterable<Quadruple>, Serializable {
      *            the quadruples to put into the Event.
      */
     public Event(Collection<Quadruple> quads) {
+        this(quads, true);
+    }
+
+    private Event(Collection<Quadruple> quads, boolean addMetaInformations) {
         if (quads.size() == 0) {
             throw new IllegalArgumentException(
                     "The quads collection cannot be empty");
         }
 
-        this.quadruples = quads;
-        this.addMetaInformation();
+        this.quadruples = Collection.withShallowCopy(quads);
+
+        if (addMetaInformations) {
+            this.addMetaInformation();
+        }
     }
 
     /**
@@ -195,6 +205,20 @@ public class Event implements Iterable<Quadruple>, Serializable {
             buf.append("\n");
         }
         return buf.toString();
+    }
+
+    /**
+     * Creates a new Event from the specified collection of {@code quadruples}
+     * without adding meta quadruples (e.g. a quadruple indicating the number of
+     * quadruples contained by the Event).
+     * 
+     * @param quadruples
+     *            the quadruples to put into the Event.
+     * 
+     * @return a new Event from the specified collection of {@code quadruples}.
+     */
+    public static final Event createWithoutAddingMetaInformation(Collection<Quadruple> quadruples) {
+        return new Event(quadruples, false);
     }
 
     /**

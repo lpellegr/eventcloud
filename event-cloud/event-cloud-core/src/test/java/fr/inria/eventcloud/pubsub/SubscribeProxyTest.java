@@ -143,6 +143,20 @@ public class SubscribeProxyTest {
                 }
             }
         }
+
+        // try to republish the event which has been received
+        this.proxyFactory.createPublishProxy()
+                .publish(events.iterator().next());
+
+        synchronized (events) {
+            while (events.size() != 2) {
+                try {
+                    events.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /**

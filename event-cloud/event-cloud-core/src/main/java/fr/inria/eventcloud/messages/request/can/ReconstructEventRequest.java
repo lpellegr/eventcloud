@@ -76,10 +76,12 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
         Collection<Quadruple> result = new Collection<Quadruple>();
 
         // TODO: use a quadruple pattern with the graph value fixed to the
-        // eventId
+        // timestamped eventId
         for (Quadruple q : ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(QuadruplePattern.ANY)) {
-            if (q.getGraph().equals(
-                    this.timestampedQuadruplePattern.getValue().getGraph())
+            if (q.isTimestamped()
+                    && q.getTimestampedGraph().equals(
+                            this.timestampedQuadruplePattern.getValue()
+                                    .getTimestampedGraph())
                     && !quadHashesReceived.getValue().contains(q.hashValue())) {
                 result.add(q);
             }
