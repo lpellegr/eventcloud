@@ -115,21 +115,25 @@ public class BindingWrapper extends SparqlResultWrapper<Binding> implements
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder("(");
-        Iterator<Var> varsIt = this.vars();
 
-        int i = 0;
-        while (varsIt.hasNext()) {
-            Var var = varsIt.next();
-            buf.append(var);
-            buf.append("=");
-            buf.append(this.get(var));
-            buf.append(", ");
-            i++;
+        if (super.object != null) {
+            Iterator<Var> varsIt = this.vars();
+
+            int i = 0;
+            while (varsIt.hasNext()) {
+                Var var = varsIt.next();
+                buf.append(var);
+                buf.append("=");
+                buf.append(this.get(var));
+                buf.append(", ");
+                i++;
+            }
+
+            if (i > 0) {
+                buf = buf.delete(buf.length() - 2, buf.length());
+            }
         }
 
-        if (i > 0) {
-            buf = buf.delete(buf.length() - 2, buf.length());
-        }
         buf.append(")");
 
         return buf.toString();

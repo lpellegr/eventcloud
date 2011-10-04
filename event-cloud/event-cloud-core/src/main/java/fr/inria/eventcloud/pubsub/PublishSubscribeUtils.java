@@ -341,12 +341,20 @@ public final class PublishSubscribeUtils {
         Set<Var> vars =
                 Sets.intersection(resultVars, atomicQuery.getVariables());
         BindingMap binding = BindingFactory.create();
-        Node[] nodes = quad.toArray();
+        Node[] quadNodes = quad.toArray();
 
         int i = 0;
         for (Node node : atomicQuery.toArray()) {
             if (node.isVariable() && vars.contains(Var.alloc(node.getName()))) {
-                binding.add(Var.alloc(node.getName()), nodes[i]);
+                Node resultNode;
+                // graph value: we need the timestamped graph value
+                if (i == 0) {
+                    resultNode = quad.getTimestampedGraph();
+                } else {
+                    resultNode = quadNodes[i];
+                }
+
+                binding.add(Var.alloc(node.getName()), resultNode);
             }
             i++;
         }

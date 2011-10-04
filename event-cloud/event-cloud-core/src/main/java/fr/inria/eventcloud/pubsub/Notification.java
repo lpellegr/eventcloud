@@ -85,4 +85,13 @@ public class Notification implements Serializable {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "Notification[id=" + this.id + ", binding=" + this.binding
+                + ", source=" + this.source + "]";
+    }
+
 }
