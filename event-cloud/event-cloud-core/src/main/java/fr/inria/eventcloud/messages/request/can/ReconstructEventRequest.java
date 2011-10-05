@@ -21,6 +21,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
+import com.hp.hpl.jena.graph.Node;
+
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -73,16 +75,17 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 QuadruplePattern quadruplePattern) {
+        QuadruplePattern timestampedQP =
+                this.timestampedQuadruplePattern.getValue();
+        Collection<LongLong> hashesAlreadyReceived =
+                this.quadHashesReceived.getValue();
         Collection<Quadruple> result = new Collection<Quadruple>();
 
-        // TODO: use a quadruple pattern with the graph value fixed to the
-        // timestamped eventId
-        for (Quadruple q : ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(QuadruplePattern.ANY)) {
+        for (Quadruple q : ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(new QuadruplePattern(
+                timestampedQP.getTimestampedGraph(), Node.ANY, Node.ANY,
+                Node.ANY))) {
             if (q.isTimestamped()
-                    && q.getTimestampedGraph().equals(
-                            this.timestampedQuadruplePattern.getValue()
-                                    .getTimestampedGraph())
-                    && !quadHashesReceived.getValue().contains(q.hashValue())) {
+                    && !hashesAlreadyReceived.contains(q.hashValue())) {
                 result.add(q);
             }
         }
