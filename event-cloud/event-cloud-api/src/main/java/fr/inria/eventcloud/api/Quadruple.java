@@ -74,7 +74,7 @@ public class Quadruple implements Serializable {
 
     /**
      * Defines the different formats that are allowed to read quadruples or to
-     * write quadruples from and to an input stream.
+     * write quadruples from and/or to an input stream.
      */
     public enum SerializationFormat {
         TriG, NQuads
