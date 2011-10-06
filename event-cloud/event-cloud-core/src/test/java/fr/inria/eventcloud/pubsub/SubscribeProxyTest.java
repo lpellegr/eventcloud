@@ -52,19 +52,31 @@ public class SubscribeProxyTest {
 
     private static Collection<Event> events = new Collection<Event>();
 
+    private static Node eventId =
+            Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                    + "587d8wq8gf7we4gsd4g4qw9");
+
     private EventCloudId eventCloudId;
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
     private ProxyFactory proxyFactory;
 
+    private SubscribeProxy subscribeProxy;
+
+    private PublishProxy publishProxy;
+
     @Before
     public void setUp() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
         this.eventCloudId = deployer.createEventCloud(5);
+
         this.proxyFactory =
                 ProxyFactory.getInstance(
                         deployer.getEventCloudsRegistryUrl(), this.eventCloudId);
+
+        this.subscribeProxy = this.proxyFactory.createSubscribeProxy();
+        this.publishProxy = this.proxyFactory.createPublishProxy();
     }
 
     /**
@@ -72,23 +84,17 @@ public class SubscribeProxyTest {
      */
     @Test(timeout = 60000)
     public void testSubscribeStringSignalNotificationListener() {
-        SubscribeProxy subscribeProxy =
-                this.proxyFactory.createSubscribeProxy();
-
         // subscribes for any quadruples
-        subscribeProxy.subscribe(
+        this.subscribeProxy.subscribe(
                 "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
                 new CustomSignalNotificationListener());
 
+        // waits a little to make sure the subscription has been indexed
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        final Node eventId =
-                Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                        + "587d8wq8gf7we4gsd4g4qw9");
 
         Collection<Quadruple> quads = new Collection<Quadruple>();
         for (int i = 0; i < 4; i++) {
@@ -97,7 +103,7 @@ public class SubscribeProxyTest {
 
         Event event = new Event(quads);
 
-        this.proxyFactory.createPublishProxy().publish(event);
+        this.publishProxy.publish(event);
 
         synchronized (events) {
             while (events.size() != event.getQuadruples().size()) {
@@ -115,24 +121,24 @@ public class SubscribeProxyTest {
      */
     @Test(timeout = 60000)
     public void testSubscribeStringEventNotificationListener() {
-        SubscribeProxy subscribeProxy =
-                this.proxyFactory.createSubscribeProxy();
-
         // subscribes for any quadruples
-        subscribeProxy.subscribe(
+        this.subscribeProxy.subscribe(
                 "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
                 new CustomEventNotificationListener());
 
-        final Node eventId =
-                Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                        + "587d8wq8gf7we4gsd4g4qw9");
+        // waits a little to make sure the subscription has been indexed
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         Collection<Quadruple> quads = new Collection<Quadruple>();
         for (int i = 0; i < 4; i++) {
             quads.add(QuadrupleGenerator.create(eventId));
         }
 
-        this.proxyFactory.createPublishProxy().publish(new Event(quads));
+        this.publishProxy.publish(new Event(quads));
 
         synchronized (events) {
             while (events.size() != 1) {
@@ -145,8 +151,7 @@ public class SubscribeProxyTest {
         }
 
         // try to republish the event which has been received
-        this.proxyFactory.createPublishProxy()
-                .publish(events.iterator().next());
+        this.publishProxy.publish(events.iterator().next());
 
         synchronized (events) {
             while (events.size() != 2) {
@@ -166,26 +171,17 @@ public class SubscribeProxyTest {
      */
     @Test(timeout = 60000)
     public void testSubscribeStringEventNotificationListenerSimulatingNetworkCongestion() {
-        SubscribeProxy subscribeProxy =
-                this.proxyFactory.createSubscribeProxy();
         // subscribes for any quadruples
-        subscribeProxy.subscribe(
+        this.subscribeProxy.subscribe(
                 "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
                 new CustomEventNotificationListener());
 
-        // waits a little to be sure that the subscription has been indexed
+        // waits a little to make sure the subscription has been indexed
         try {
-            Thread.sleep(2000);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        final Node eventId =
-                Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                        + "587d8wq8gf7we4gsd4g4qw9");
-
-        final PublishProxy publishProxy =
-                this.proxyFactory.createPublishProxy();
 
         long publicationDateTime = System.currentTimeMillis();
 
@@ -195,13 +191,13 @@ public class SubscribeProxyTest {
                         PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
                         Node.createLiteral("9", XSDDatatype.XSDint));
         quadToPublish.timestamp(publicationDateTime);
-        publishProxy.publish(quadToPublish);
+        this.publishProxy.publish(quadToPublish);
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
             quadToPublish = QuadrupleGenerator.create(eventId);
             quadToPublish.timestamp(publicationDateTime);
-            publishProxy.publish(quadToPublish);
+            this.publishProxy.publish(quadToPublish);
         }
 
         // waits some time to simulate a network congestion
@@ -215,7 +211,7 @@ public class SubscribeProxyTest {
         for (int i = 0; i < 4; i++) {
             quadToPublish = QuadrupleGenerator.create(eventId);
             quadToPublish.timestamp(publicationDateTime);
-            publishProxy.publish(quadToPublish);
+            this.publishProxy.publish(quadToPublish);
         }
 
         synchronized (events) {
