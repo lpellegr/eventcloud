@@ -28,6 +28,8 @@ import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.utils.Callback;
 
 /**
  * PutGetProxyImpl is a concrete implementation of {@link PutGetProxy}. This
@@ -77,9 +79,9 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      */
     @Override
     public boolean add(InputStream in, SerializationFormat format) {
-        read(in, format, new QuadrupleAction() {
+        RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
-            public void performAction(Quadruple quad) {
+            public void execute(Quadruple quad) {
                 add(new Quadruple(
                         quad.getGraph(), quad.getSubject(),
                         quad.getPredicate(), quad.getObject()));

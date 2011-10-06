@@ -39,8 +39,8 @@ import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
-import fr.inria.eventcloud.proxies.ProxyCache;
-import fr.inria.eventcloud.proxies.ProxyCache.QuadrupleAction;
+import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.utils.Callback;
 
 /**
  * This class is assumed to play the role of a mock PutGetProxy in order to test
@@ -81,9 +81,9 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public boolean add(InputStream in, SerializationFormat format) {
-        ProxyCache.read(in, format, new QuadrupleAction() {
+        RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
-            public void performAction(Quadruple quad) {
+            public void execute(Quadruple quad) {
                 return;
             }
         });

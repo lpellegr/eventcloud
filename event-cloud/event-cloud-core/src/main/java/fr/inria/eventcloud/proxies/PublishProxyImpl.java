@@ -26,6 +26,8 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
+import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.utils.Callback;
 
 /**
  * PublishProxyImpl is a concrete implementation of {@link PublishProxy}. This
@@ -109,9 +111,9 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
      */
     @Override
     public void publish(InputStream in, SerializationFormat format) {
-        read(in, format, new QuadrupleAction() {
+        RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
-            public void performAction(Quadruple quad) {
+            public void execute(Quadruple quad) {
                 publish(quad);
             }
         });

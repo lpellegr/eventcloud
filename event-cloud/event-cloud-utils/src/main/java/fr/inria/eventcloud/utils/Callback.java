@@ -14,29 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.proxies;
-
-import fr.inria.eventcloud.overlay.SemanticPeer;
+package fr.inria.eventcloud.utils;
 
 /**
- * Any user side proxy have to implement this abstract proxy class that stores
- * an {@link EventCloudCache} which serves as a cache.
+ * Defines a callback with the specified input of type I.
  * 
  * @author lpellegr
+ * 
+ * @param <I>
+ *            the input to use in order to execute this callback.
  */
-public abstract class ProxyCache {
+public interface Callback<I> {
 
-    protected EventCloudCache proxy;
-
-    protected ProxyCache() {
-    }
-
-    protected ProxyCache(EventCloudCache proxy) {
-        this.proxy = proxy;
-    }
-
-    protected SemanticPeer selectPeer() {
-        return this.proxy.selectTracker().getRandomSemanticPeer();
-    }
+    /**
+     * An action which is executed with the specified {@code input}.
+     * 
+     * @param input
+     */
+    public void execute(I input);
 
 }
