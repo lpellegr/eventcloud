@@ -137,81 +137,77 @@ public class WsNotifNotificationToEventHandler extends DefaultHandler {
                     this.elementDatatypes.get(this.elements.getLast().localName);
             if (datatype != null) {
                 object = Node.createLiteral(textNode, datatype);
-                //System.out.println("@@@@@@ Data TYPE = "+datatype.toString());
-            }
-            else {
-            	datatype=getDatatype(textNode);
-            	//System.out.println("@@@@@@ Data TYPE = "+datatype.toString());
-            	object= Node.createLiteral(textNode, datatype);
+                // System.out.println("@@@@@@ Data TYPE = "+datatype.toString());
+            } else {
+                datatype = getDatatype(textNode);
+                // System.out.println("@@@@@@ Data TYPE = "+datatype.toString());
+                object = Node.createLiteral(textNode, datatype);
             }
         }
 
         if (object == null) {
-        	
-        		XSDDatatype datatype=getDatatype(textNode);
-				if (datatype !=null) object = Node.createLiteral(textNode,datatype);
-				else Node.createLiteral(textNode);
-			
-            
+            XSDDatatype datatype = getDatatype(textNode);
+            if (datatype != null) {
+                object = Node.createLiteral(textNode, datatype);
+            } else {
+                Node.createLiteral(textNode);
+            }
         }
 
-        this.quadruples.add(Quadruple.createWithoutTypeChecking(
+        this.quadruples.add(new Quadruple(
                 this.graphNode, this.topicFullQName,
-                Node.createURI(predicate.toString()), object));
+                Node.createURI(predicate.toString()), object, false, true));
     }
 
-    private XSDDatatype getDatatype(String textNode){
-    	//anticipate datatype 
-    	XSDDatatype expectedType =new XSDDatatype("anySimpleType");
-    	DatatypeFactory dataFactory;
-		try {
-			dataFactory = DatatypeFactory.newInstance();
-		
-    	
-    	//DateTimeDateFormat dt =new DateTimeDateFormat();
-    	
-    	try {
-    		
-			Integer.parseInt(textNode);
-			//System.out.println("the string parsed is of type INT = "+textNode);
-			expectedType=  XSDDatatype.XSDint;
-			//System.out.println("XSD EXPECTED DATA TYPE IS INT = "+textNode+"====="+expectedType.toString());
-		} catch (NumberFormatException e) {
-			try {
-				Float.parseFloat(textNode);
-				//System.out.println("the string parsed is of type FLOAT = "+textNode);
-				expectedType=  XSDDatatype.XSDfloat;
-				//System.out.println("XSD EXPECTED DATA TYPE IS FLOAT = "+textNode+"====="+expectedType.toString());
-			} catch (NumberFormatException e1) {
-				try {
-					//Calendar cl= (Calendar) expectedType.parse(textNode);
-					//Date dd=dt.parse(textNode);
-					dataFactory.newXMLGregorianCalendar(textNode).toGregorianCalendar().getTime();
-					//System.out.println("the string parsed is of type XSD DATE TIME = "+textNode+dd.toString());
-					expectedType=  XSDDatatype.XSDdateTime;
-					//System.out.println("XSD EXPECTED DATA TYPE IS DATETIME = "+textNode+"====="+expectedType.toString());
-				} catch (IllegalArgumentException e2) {
-					// TODO Auto-generated catch block
-					//System.out.println("the string parsed is of type STRING= "+textNode);
-					expectedType=  XSDDatatype.XSDstring;
-					//System.out.println("XSD EXPECTED DATA TYPE IS STRING = "+textNode+"====="+expectedType.toString());
-					
-					//e2.printStackTrace();
-				}
-								
-			}
-			
-		}
-		} catch (DatatypeConfigurationException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		}
-        
-    	
-		return expectedType;
-	}
+    private XSDDatatype getDatatype(String textNode) {
+        // anticipate datatype
+        XSDDatatype expectedType = new XSDDatatype("anySimpleType");
+        DatatypeFactory dataFactory;
+        try {
+            dataFactory = DatatypeFactory.newInstance();
 
-	public List<Quadruple> getQuadruples() {
+            // DateTimeDateFormat dt =new DateTimeDateFormat();
+
+            try {
+                Integer.parseInt(textNode);
+                // System.out.println("the string parsed is of type INT = "+textNode);
+                expectedType = XSDDatatype.XSDint;
+                // System.out.println("XSD EXPECTED DATA TYPE IS INT = "+textNode+"====="+expectedType.toString());
+            } catch (NumberFormatException e) {
+                try {
+                    Float.parseFloat(textNode);
+                    // System.out.println("the string parsed is of type FLOAT = "+textNode);
+                    expectedType = XSDDatatype.XSDfloat;
+                    // System.out.println("XSD EXPECTED DATA TYPE IS FLOAT = "+textNode+"====="+expectedType.toString());
+                } catch (NumberFormatException e1) {
+                    try {
+                        // Calendar cl= (Calendar) expectedType.parse(textNode);
+                        // Date dd=dt.parse(textNode);
+                        dataFactory.newXMLGregorianCalendar(textNode)
+                                .toGregorianCalendar()
+                                .getTime();
+                        // System.out.println("the string parsed is of type XSD DATE TIME = "+textNode+dd.toString());
+                        expectedType = XSDDatatype.XSDdateTime;
+                        // System.out.println("XSD EXPECTED DATA TYPE IS DATETIME = "+textNode+"====="+expectedType.toString());
+                    } catch (IllegalArgumentException e2) {
+                        // System.out.println("the string parsed is of type STRING= "+textNode);
+                        expectedType = XSDDatatype.XSDstring;
+                        // System.out.println("XSD EXPECTED DATA TYPE IS STRING = "+textNode+"====="+expectedType.toString());
+
+                        // e2.printStackTrace();
+                    }
+
+                }
+
+            }
+        } catch (DatatypeConfigurationException e3) {
+            e3.printStackTrace();
+        }
+
+        return expectedType;
+    }
+
+    public List<Quadruple> getQuadruples() {
         return this.quadruples;
     }
 

@@ -35,7 +35,7 @@ import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 public class QuadrupleTest {
 
     @Test(expected = IllegalArgumentException.class)
-    public void testQuadrupleInstanciationWithBlankNode() {
+    public void testInstantiationWithBlankNode() {
         new Quadruple(
                 Node.createAnon(), NodeGenerator.createUri(),
                 NodeGenerator.createUri(), NodeGenerator.createUri());
@@ -51,7 +51,7 @@ public class QuadrupleTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testQuadrupleInstanciationWithVars() {
+    public void testInstantiationWithVars() {
         new Quadruple(
                 Node.ANY, NodeGenerator.createUri(), NodeGenerator.createUri(),
                 NodeGenerator.createUri());
@@ -79,82 +79,154 @@ public class QuadrupleTest {
                 NodeGenerator.createUri(), Node.createVariable("test"));
     }
 
-    @Test
-    public void testQuadrupleValuesAfterTimestampMethodCall() {
-        Quadruple quad = QuadrupleGenerator.createWithLiteral();
-        Node graph = quad.getGraph();
-
-        quad.timestamp();
-        Assert.assertEquals(
-                "The graph value is not the same after timestamping the quadruple",
-                graph, quad.getGraph());
-    }
-
-    @Test
-    public void testSerialization() {
-        Quadruple quad =
-                new Quadruple(
-                        NodeGenerator.createUri(), NodeGenerator.createUri(),
-                        NodeGenerator.createUri(),
-                        Node.createLiteral("Literal Value"));
-
-        Quadruple newQuad = null;
-        try {
-            newQuad = (Quadruple) MakeDeepCopy.makeDeepCopy(quad);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        Assert.assertEquals(quad.hashCode(), newQuad.hashCode());
-        Assert.assertEquals(
-                "Quadruples not equals after serialization", quad, newQuad);
-    }
-
-    @Test
-    public void testSerializationWithTimestampedQuadruple() {
-        Quadruple quad = QuadrupleGenerator.createWithLiteral();
-        quad.timestamp();
-
-        Quadruple newQuad = null;
-        try {
-            newQuad = (Quadruple) MakeDeepCopy.makeDeepCopy(quad);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        Assert.assertEquals(quad, newQuad);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testTimestamp() {
-        Quadruple quad = QuadrupleGenerator.createWithLiteral();
-        // first call allowed
-        quad.timestamp();
-
-        Assert.assertTrue(quad.isTimestamped());
-        Assert.assertNotNull(quad.getTimestampedGraph());
-
-        // second call not allowed
-        quad.timestamp();
-    }
-
     @Test(expected = IllegalArgumentException.class)
-    public void testTimestampLong() {
-        Quadruple quad = QuadrupleGenerator.createWithLiteral();
+    public void testInstantiationWithNullValues() {
+        new Quadruple(
+                null, NodeGenerator.createUri(), NodeGenerator.createUri(),
+                NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), null, NodeGenerator.createUri(),
+                NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), NodeGenerator.createUri(), null,
+                NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), NodeGenerator.createUri(),
+                NodeGenerator.createUri(), null);
 
-        long dateTime = System.currentTimeMillis();
+        new Quadruple(
+                null, null, NodeGenerator.createUri(),
+                NodeGenerator.createUri());
+        new Quadruple(
+                null, NodeGenerator.createUri(), null,
+                NodeGenerator.createUri());
+        new Quadruple(
+                null, NodeGenerator.createUri(), NodeGenerator.createUri(),
+                null);
+        new Quadruple(
+                NodeGenerator.createUri(), null, null,
+                NodeGenerator.createUri());
+        new Quadruple(
+                NodeGenerator.createUri(), null, NodeGenerator.createUri(),
+                null);
+        new Quadruple(
+                NodeGenerator.createUri(), NodeGenerator.createUri(), null,
+                null);
 
-        quad.timestamp(dateTime);
+        new Quadruple(null, null, null, NodeGenerator.createUri());
+        new Quadruple(null, NodeGenerator.createUri(), null, null);
+        new Quadruple(null, null, NodeGenerator.createUri(), null);
 
-        Assert.assertTrue(quad.isTimestamped());
-        Assert.assertNotNull(quad.getTimestampedGraph());
-        Assert.assertEquals(dateTime, quad.getPublicationDateTime());
+        new Quadruple(null, null, null, null);
+    }
 
-        quad.timestamp(-1);
+    @Test
+    public void testAddMetaInformation() {
+        Quadruple q1 = QuadrupleGenerator.createWithLiteral();
+
+        long publicationTime = System.currentTimeMillis();
+        q1.setPublicationSource("publisher1");
+        q1.setPublicationTime(publicationTime);
+
+        Assert.assertEquals(publicationTime, q1.getPublicationTime());
+        Assert.assertEquals("publisher1", q1.getPublicationSource());
+    }
+
+    @Test
+    public void testEquality() {
+        Quadruple q1 = QuadrupleGenerator.createWithLiteral();
+        Quadruple q2 =
+                new Quadruple(
+                        q1.getGraph(), q1.getSubject(), q1.getPredicate(),
+                        q1.getObject());
+
+        Assert.assertEquals(q1, q2);
+
+        q1.setPublicationTime(System.currentTimeMillis());
+        q2.setPublicationTime(System.currentTimeMillis() + 1);
+
+        Assert.assertFalse(q1.equals(q2));
+        Assert.assertFalse(q1.hashCode() == q2.hashCode());
+
+        q1.setPublicationSource("p1");
+        q2.setPublicationSource("p2");
+
+        Assert.assertFalse(q1.equals(q2));
+        Assert.assertFalse(q1.hashCode() == q2.hashCode());
+
+        q2.setPublicationSource("p1");
+
+        Assert.assertFalse(q1.equals(q2));
+        Assert.assertFalse(q1.hashCode() == q2.hashCode());
+
+        q2.setPublicationTime(q1.getPublicationTime());
+
+        Assert.assertEquals(q1, q2);
+        Assert.assertTrue(q1.hashCode() == q2.hashCode());
+    }
+
+    @Test
+    public void testSerialization() throws IOException, ClassNotFoundException {
+        Quadruple q1 = QuadrupleGenerator.createWithLiteral();
+        q1.setPublicationSource("publisher1");
+        q1.setPublicationTime(System.currentTimeMillis());
+
+        Quadruple q2 = (Quadruple) MakeDeepCopy.makeDeepCopy(q1);
+
+        Assert.assertEquals(
+                "Quadruples are not equals after serialization", q1, q2);
+
+        Quadruple q3 = (Quadruple) MakeDeepCopy.makeDeepCopy(q2);
+
+        Assert.assertEquals(q2, q3);
+        Assert.assertEquals(q1, q3);
+
+        Quadruple q4 =
+                new Quadruple(
+                        q3.createMetaGraphNode(), q3.getSubject(),
+                        q3.getPredicate(), q3.getObject());
+
+        Assert.assertEquals(q3, q4);
+    }
+
+    @Test
+    public void testGetPublicationTime() {
+        Quadruple q1 = QuadrupleGenerator.create();
+
+        Assert.assertEquals(
+                -1, Quadruple.getPublicationTime(q1.createMetaGraphNode()));
+
+        long publicationTime = System.currentTimeMillis();
+        q1.setPublicationTime(publicationTime);
+
+        Assert.assertEquals(
+                publicationTime,
+                Quadruple.getPublicationTime(q1.createMetaGraphNode()));
+    }
+
+    @Test
+    public void testGetPublicationSource() {
+        Quadruple q1 = QuadrupleGenerator.create();
+
+        Assert.assertNull(Quadruple.getPublicationSource(q1.createMetaGraphNode()));
+
+        q1.setPublicationSource("publisher1");
+
+        Assert.assertEquals(
+                "publisher1",
+                Quadruple.getPublicationSource(q1.createMetaGraphNode()));
+    }
+
+    @Test
+    public void testIsMetaGraphNode() {
+        Quadruple q1 = QuadrupleGenerator.create();
+
+        Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getGraph()));
+        Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getSubject()));
+        Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getPredicate()));
+        Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getObject()));
+
+        Assert.assertTrue(Quadruple.isMetaGraphNode(q1.createMetaGraphNode()));
     }
 
 }

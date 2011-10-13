@@ -21,7 +21,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
-import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
@@ -46,18 +47,35 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private SerializedValue<Collection<LongLong>> quadHashesReceived;
+    // the hash values associated to the quadruples which have been already
+    // received by the seeker
+    private SerializedValue<Collection<LongLong>> hashValuesReceived;
 
-    private SerializedValue<QuadruplePattern> timestampedQuadruplePattern;
+    // the meta graph URI used to lookup the quadruples
+    private SerializedValue<String> metaGraphValue;
 
+    /**
+     * Creates a ReconstructEventRequest by using the specified
+     * {@code quadruplePattern} to route the request, and the given set of hash
+     * values in order to return only the quadruples which have not been yet
+     * received.
+     * 
+     * @param quadruplePattern
+     *            the quadruple pattern used to route the request.
+     * @param hashValuesReceived
+     *            the hash values associated to the quadruples which have been
+     *            already received.
+     */
     public ReconstructEventRequest(QuadruplePattern quadruplePattern,
-            Collection<LongLong> quadHashesReceived) {
-        super(QuadruplePattern.removeTimestampFromGraphValue(quadruplePattern));
+            Collection<LongLong> hashValuesReceived) {
+        super(quadruplePattern);
 
-        this.timestampedQuadruplePattern =
-                new SerializedValue<QuadruplePattern>(quadruplePattern);
-        this.quadHashesReceived =
-                new SerializedValue<Collection<LongLong>>(quadHashesReceived);
+        this.hashValuesReceived =
+                new SerializedValue<Collection<LongLong>>(hashValuesReceived);
+
+        this.metaGraphValue =
+                new SerializedValue<String>(
+                        quadruplePattern.createMetaGraphNode().getURI());
     }
 
     /**
@@ -75,18 +93,29 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 QuadruplePattern quadruplePattern) {
-        QuadruplePattern timestampedQP =
-                this.timestampedQuadruplePattern.getValue();
-        Collection<LongLong> hashesAlreadyReceived =
-                this.quadHashesReceived.getValue();
+        Collection<LongLong> hashValues = this.hashValuesReceived.getValue();
         Collection<Quadruple> result = new Collection<Quadruple>();
 
-        for (Quadruple q : ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(new QuadruplePattern(
-                timestampedQP.getTimestampedGraph(), Node.ANY, Node.ANY,
-                Node.ANY))) {
-            if (q.isTimestamped()
-                    && !hashesAlreadyReceived.contains(q.hashValue())) {
-                result.add(q);
+        StringBuilder query =
+                new StringBuilder(
+                        "SELECT ?g ?s ?p ?o WHERE {\n    GRAPH ?g {\n         ?s ?p ?o . \n        FILTER(STRSTARTS(str(?g), \"");
+        query.append(this.metaGraphValue.getValue());
+        query.append("\")) } }");
+
+        ResultSet queryResult =
+                ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).executeSparqlSelect(query.toString());
+
+        while (queryResult.hasNext()) {
+            QuerySolution solution = queryResult.next();
+            Quadruple quad =
+                    new Quadruple(
+                            solution.get("g").asNode(), solution.get("s")
+                                    .asNode(), solution.get("p").asNode(),
+                            solution.get("o").asNode());
+
+            if (quad.getPublicationTime() != -1
+                    && !hashValues.contains(quad.hashValue())) {
+                result.add(quad);
             }
         }
 

@@ -22,16 +22,23 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 
+import org.objectweb.proactive.extensions.p2p.structured.utils.EnumConverter;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ReverseEnumMap;
 import org.openjena.riot.out.OutputLangUtils;
 import org.openjena.riot.tokens.Tokenizer;
 import org.openjena.riot.tokens.TokenizerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_ANY;
 import com.hp.hpl.jena.graph.Node_Blank;
-import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.Triple;
 
 import fr.inria.eventcloud.utils.LongLong;
@@ -50,9 +57,6 @@ import fr.inria.eventcloud.utils.MurmurHash;
  * type-checking at compile time. However, these objects are not serializable,
  * that's why the quadruple abstraction overrides the readObject and writeObject
  * methods.
- * <p>
- * For backwards compatibility with linked data tools, the graph value is kept
- * separated from the Triple value.
  * 
  * @author lpellegr
  */
@@ -60,17 +64,17 @@ public class Quadruple implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected static final String TIMESTAMP_SEPARATOR = "#t$";
+    private static final Logger log = LoggerFactory.getLogger(Quadruple.class);
+
+    protected static final String META_INFORMATION_SEPARATOR = "/$";
 
     // contains respectively the graph, the subject, the predicate
-    // and the object value
+    // and the object value of the quadruple
     private transient Node[] nodes;
 
-    // contains the graph value with its publication datetime
-    private transient Node timestampedNode;
-
-    // the publication datetime or -1
-    private transient AtomicLong timestamp;
+    // contains the meta information associated to this quadruple such that the
+    // publication time, the publication source, etc.
+    private transient ConcurrentMap<MetaInformationType, Object> metaInformations;
 
     /**
      * Defines the different formats that are allowed to read quadruples or to
@@ -78,11 +82,6 @@ public class Quadruple implements Serializable {
      */
     public enum SerializationFormat {
         TriG, NQuads
-    }
-
-    private Quadruple() {
-        this.nodes = new Node[4];
-        this.timestamp = new AtomicLong(-1);
     }
 
     /**
@@ -94,6 +93,10 @@ public class Quadruple implements Serializable {
      * @param triple
      *            the triple to use in order to extract the subject, the
      *            predicate and the object.
+     * 
+     * @throws IllegalArgumentException
+     *             if the type of one element is not allowed (e.g. blank node,
+     *             variable or {@code null} value).
      */
     public Quadruple(Node graph, Triple triple) {
         this(graph, triple.getSubject(), triple.getPredicate(),
@@ -103,7 +106,9 @@ public class Quadruple implements Serializable {
     /**
      * Constructs a new Quadruple with the specified {@code graph},
      * {@code subject}, {@code predicate} and {@code object} nodes. This
-     * constructor will perform a type checking on each node value.
+     * constructor will check the type of each node and throw an
+     * {@link IllegalArgumentException} if the type of one element is not
+     * allowed.
      * 
      * @param graph
      *            the graph value.
@@ -113,15 +118,22 @@ public class Quadruple implements Serializable {
      *            the predicate value.
      * @param object
      *            the object value.
+     * 
+     * @throws IllegalArgumentException
+     *             if the type of one element is not allowed (e.g. blank node,
+     *             variable or {@code null} value).
      */
     public Quadruple(Node graph, Node subject, Node predicate, Node object) {
-        this(graph, subject, predicate, object, -1, true, true);
+        this(graph, subject, predicate, object, true, true);
     }
 
     /**
      * Creates a new Quadruple with the specified {@code graph}, {@code subject}
-     * , {@code predicate} and {@code object} nodes without checking the type of
-     * the nodes. This method has to be used with care!
+     * , {@code predicate} and {@code object}. This constructor allows to skip
+     * some steps like the type checking operation and the parse meta
+     * information operation. <strong>It must be used with care because it is
+     * possible to create quadruples which are not supported by the
+     * system</strong>.
      * 
      * @param graph
      *            the graph value.
@@ -131,165 +143,152 @@ public class Quadruple implements Serializable {
      *            the predicate value.
      * @param object
      *            the object value.
-     * 
-     * @return the quadruple which has been created.
+     * @param checkType
+     *            indicates whether the type of each element has to be check or
+     *            not.
+     * @param parseMetaInformation
+     *            indicates whether the graph value has to be parsed or not.
      */
-    public static final Quadruple createWithoutTypeChecking(Node graph,
-                                                            Node subject,
-                                                            Node predicate,
-                                                            Node object) {
-        return new Quadruple(graph, subject, predicate, object, -1, false, true);
-    }
+    public Quadruple(Node graph, Node subject, Node predicate, Node object,
+            boolean checkType, boolean parseMetaInformation) {
+        this.nodes = new Node[4];
+        this.metaInformations =
+                new ConcurrentHashMap<MetaInformationType, Object>(2);
 
-    protected Quadruple(Node graph, Node subject, Node predicate, Node object,
-            long timestamp, boolean typeChecking, boolean extractTimestamp) {
-        this();
-        if (typeChecking) {
-            if (graph instanceof Node_Blank || subject instanceof Node_Blank
-                    || predicate instanceof Node_Blank
-                    || object instanceof Node_Blank) {
-                throw new IllegalArgumentException(
-                        "Blank nodes are not supported");
-            }
-
-            if (graph instanceof Node_ANY || subject instanceof Node_ANY
-                    || predicate instanceof Node_ANY
-                    || object instanceof Node_ANY
-                    || graph instanceof Node_Variable
-                    || subject instanceof Node_Variable
-                    || predicate instanceof Node_Variable
-                    || object instanceof Node_Variable) {
-                throw new IllegalArgumentException(
-                        "Variables are not allowed in a quadruple, use a QuadruplePattern instead");
-            }
-
-            if (graph == null) {
-                throw new IllegalArgumentException("graph cannot be null");
-            }
-
-            if (subject == null) {
-                throw new IllegalArgumentException("subject cannot be null");
-            }
-
-            if (predicate == null) {
-                throw new IllegalArgumentException("predicate cannot be null");
-            }
-
-            if (object == null) {
-                throw new IllegalArgumentException("object cannot be null");
-            }
+        if (checkType) {
+            isAllowed(graph);
+            isAllowed(subject);
+            isAllowed(predicate);
+            isAllowed(object);
         }
 
-        this.nodes[0] = graph;
+        this.nodes[0] = parseMetaInformation
+                ? this.extractAndSetMetaInformation(graph) : graph;
         this.nodes[1] = subject;
         this.nodes[2] = predicate;
         this.nodes[3] = object;
-
-        if (timestamp != -1) {
-            this.timestamp = new AtomicLong(timestamp);
-            this.timestampedNode = graph;
-        }
-
-        if (extractTimestamp) {
-            this.tryToExtractPublicationDateTime();
-        }
     }
 
-    /**
-     * Indicates whether the quadruple is timestamped or not.
-     * 
-     * @return {@code true} if the quadruple is timestamped, {@code false}
-     *         otherwise.
-     */
-    public boolean isTimestamped() {
-        return this.timestamp.get() != -1;
-    }
+    private static void isAllowed(Node node) {
+        if (node == null) {
+            throw new IllegalArgumentException("Node value is null");
+        }
 
-    /**
-     * Timestamps the quadruple with the specified publication datetime. The
-     * publication datetime is assumed to be a Java timestamp (with millisecond
-     * precision) retrieved by calling for example
-     * {@link System#currentTimeMillis()}. Once the quadruple is timestamped,
-     * any call to this method will throw an {@link IllegalStateException}.
-     * 
-     * @param publicationDateTime
-     *            the datatime value to use in order to timestamp this
-     *            quadruple.
-     * 
-     * @return the instance of the quadruple which has been timestamped. The
-     *         value which is return is not a copy but the original object which
-     *         has been altered.
-     */
-    public Quadruple timestamp(long publicationDateTime) {
-        if (publicationDateTime <= 0) {
+        if (node instanceof Node_Blank) {
             throw new IllegalArgumentException(
-                    "Expected publication datetime greater than 0 but was:"
-                            + publicationDateTime);
+                    "Blank nodes are not supported: " + node.toString());
         }
 
-        if (this.timestamp.compareAndSet(-1, publicationDateTime)) {
-            StringBuilder buf = new StringBuilder();
-            buf.append(this.nodes[0].getURI());
-            buf.append(TIMESTAMP_SEPARATOR);
-            buf.append(this.timestamp);
+        if (node instanceof Node_ANY) {
+            throw new IllegalArgumentException(
+                    "Variables are not allowed in a quadruple (see QuadruplePattern): "
+                            + node.toString());
+        }
+    }
 
-            this.timestampedNode = Node.createURI(buf.toString());
+    /**
+     * Creates a new node containing the meta information associated to the
+     * quadruple. This new node contains the concatenation of the original graph
+     * value and the meta informations (e.g. the publication time, the
+     * publication source, etc.).
+     * 
+     * @return a new node for the graph value whose the content is equals to the
+     *         concatenation of the original graph value and the meta
+     *         informations.
+     */
+    public Node createMetaGraphNode() {
+        if (this.nodes[0].isURI()) {
+            StringBuilder uri = new StringBuilder();
+            uri.append(this.nodes[0].getURI());
+            uri.append(META_INFORMATION_SEPARATOR);
+            // adds the publication time in the first position
+            uri.append(this.getPublicationTime());
+            uri.append(META_INFORMATION_SEPARATOR);
+            // adds the publication source in the second position
+            uri.append(this.getPublicationSource());
 
-            return this;
+            return Node.createURI(uri.toString());
         }
 
-        throw new IllegalStateException("Quadruple already timestamped: "
-                + this.timestamp);
+        return this.nodes[0];
     }
 
     /**
-     * Timestamps the quadruple with a publication datetime value equals to the
-     * current datetime when the method is called. Once the quadruple is
-     * timestamped, any call to this method will throw an
-     * {@link IllegalStateException}.
+     * Returns a timestamp indicating when the quadruple has been published or
+     * {@code -1} if the quadruple has not been yet published.
      * 
-     * @return the instance of the quadruple which has been timestamped. The
-     *         value which is return is not a copy but the original object which
-     *         has been altered.
+     * @return a timestamp indicating when the quadruple has been published or
+     *         {@code -1} if the quadruple has not been yet published.
      */
-    public Quadruple timestamp() {
-        return this.timestamp(System.currentTimeMillis());
-    }
+    public long getPublicationTime() {
+        Object result =
+                this.metaInformations.get(MetaInformationType.PUBLICATION_TIME);
 
-    /**
-     * Resets the state of the quadruple by removing the timestamp value.
-     */
-    public synchronized void reset() {
-        this.timestamp.set(-1);
-        this.timestampedNode = null;
-    }
-
-    /**
-     * Returns a new quadruple whose the graph value has been replaced by the
-     * concatenation of the original graph value and a datetime representing the
-     * publication datime of the quadruple.
-     * 
-     * @return a new quadruple whose the graph value has been replaced by the
-     *         concatenation of the original graph value and a datetime
-     *         representing the publication datime of the quadruple.
-     */
-    public Quadruple toTimestampedQuadruple() {
-        if (this.timestampedNode == null) {
-            return null;
+        if (result == null) {
+            return -1;
         }
 
-        return new Quadruple(
-                this.timestampedNode, this.getSubject(), this.getPredicate(),
-                this.getObject(), this.timestamp.get(), false, false);
+        return (Long) result;
     }
 
     /**
-     * Returns a timestamp indicating when the quadruple has been published.
-     * 
-     * @return a timestamp indicating when the quadruple has been published.
+     * Sets the publication time of the quadruple to the current time when the
+     * method call is performed. This is strictly equivalent to
+     * {@code setPublicationTime(System.currentTimeMillis())}.
      */
-    public long getPublicationDateTime() {
-        return this.timestamp.get();
+    public void setPublicationTime() {
+        this.setPublicationTime(System.currentTimeMillis());
+    }
+
+    /**
+     * Sets the publication time of the quadruple. The publication time is
+     * assumed to be a Java timestamp (with millisecond precision) retrieved by
+     * calling for example {@link System#currentTimeMillis()}.
+     * 
+     * @param publicationTime
+     *            the time value to use in order to timestamp this quadruple.
+     */
+    public void setPublicationTime(long publicationTime) {
+        if (publicationTime <= 0) {
+            throw new IllegalArgumentException(
+                    "Expected publication datetime greater than 0 but was: "
+                            + publicationTime);
+        }
+
+        this.addMetaInformation(
+                MetaInformationType.PUBLICATION_TIME, publicationTime);
+    }
+
+    /**
+     * Returns an URL representing the endpoint of the publisher which has
+     * published the quadruple, or {@code null}.
+     * 
+     * @return an URL representing the endpoint of the publisher which has
+     *         published the quadruple, or {@code null}.
+     */
+    public String getPublicationSource() {
+        return (String) this.metaInformations.get(MetaInformationType.PUBLICATION_SOURCE);
+    }
+
+    /**
+     * Sets the publication source of the quadruple. The source is assumed to be
+     * an URL representing the endpoint of the publisher.
+     * 
+     * @param source
+     *            an URL representing the endpoint of the publisher.
+     */
+    public void setPublicationSource(String source) {
+        this.addMetaInformation(MetaInformationType.PUBLICATION_SOURCE, source);
+    }
+
+    private void addMetaInformation(MetaInformationType type, Object value) {
+        if (log.isWarnEnabled() && this.metaInformations.containsKey(type)) {
+            log.warn(
+                    "Meta information {} is already set on quadruple {} and will be overriden!",
+                    type, this);
+        }
+
+        this.metaInformations.put(type, value);
     }
 
     /**
@@ -299,10 +298,6 @@ public class Quadruple implements Serializable {
      */
     public final Node getGraph() {
         return this.nodes[0];
-    }
-
-    public Node getTimestampedGraph() {
-        return this.timestampedNode;
     }
 
     /**
@@ -340,10 +335,20 @@ public class Quadruple implements Serializable {
      *         {@link MurmurHash} function.
      */
     public LongLong hashValue() {
-        return new LongLong(MurmurHash.hash128(
-                this.nodes[0].toString(), this.nodes[1].toString(),
-                this.nodes[2].toString(), this.nodes[3].toString(),
-                Long.toString(this.timestamp.get())));
+        String[] values =
+                new String[this.nodes.length + this.metaInformations.size()];
+
+        for (int i = 0; i < this.nodes.length; i++) {
+            values[i] = this.nodes[i].toString();
+        }
+
+        Iterator<Object> iterator = this.metaInformations.values().iterator();
+        for (int i = this.nodes.length; i < this.nodes.length
+                + this.metaInformations.size(); i++) {
+            values[i] = iterator.next().toString();
+        }
+
+        return new LongLong(MurmurHash.hash128(values));
     }
 
     /**
@@ -353,8 +358,13 @@ public class Quadruple implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+
         result = prime * result + Arrays.hashCode(nodes);
-        result = prime * result + ((Long) timestamp.get()).hashCode();
+
+        for (Object metaInfo : this.metaInformations.values()) {
+            result = prime * result + metaInfo.hashCode();
+        }
+
         return result;
     }
 
@@ -371,7 +381,16 @@ public class Quadruple implements Serializable {
                 result &= this.nodes[i].equals(other.nodes[i]);
             }
 
-            result &= this.timestamp.get() == other.timestamp.get();
+            for (MetaInformationType type : this.metaInformations.keySet()) {
+                if (!other.metaInformations.containsKey(type)) {
+                    return false;
+                } else {
+                    result &=
+                            this.metaInformations.get(type).equals(
+                                    other.metaInformations.get(type));
+                }
+            }
+
             return result;
         }
 
@@ -408,18 +427,28 @@ public class Quadruple implements Serializable {
         StringBuilder result = new StringBuilder();
         result.append("(");
 
-        int startIndex = 0;
-        if (this.timestampedNode != null) {
-            result.append(this.timestampedNode);
-            result.append(", ");
-            startIndex = 1;
-        }
-
-        for (int i = startIndex; i < this.nodes.length; i++) {
+        for (int i = 0; i < this.nodes.length; i++) {
             result.append(this.nodes[i].toString());
             if (i < this.nodes.length - 1) {
                 result.append(", ");
             }
+        }
+
+        if (this.metaInformations.size() != 0) {
+            result.append(", ");
+        }
+
+        int i = 0;
+        for (Entry<MetaInformationType, Object> entry : this.metaInformations.entrySet()) {
+            result.append(entry.getKey().getName());
+            result.append("=");
+            result.append(entry.getValue());
+
+            if (i < this.metaInformations.entrySet().size() - 1) {
+                result.append(", ");
+            }
+
+            i++;
         }
 
         result.append(")");
@@ -431,48 +460,64 @@ public class Quadruple implements Serializable {
             ClassNotFoundException {
         in.defaultReadObject();
 
-        Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
         this.nodes = new Node[4];
-        for (int i = 0; i < nodes.length; i++) {
+        this.metaInformations =
+                new ConcurrentHashMap<MetaInformationType, Object>(2);
+
+        Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
+
+        this.nodes[0] =
+                this.extractAndSetMetaInformation(tokenizer.next().asNode());
+
+        for (int i = 1; i < nodes.length; i++) {
             this.nodes[i] = tokenizer.next().asNode();
         }
 
-        this.tryToExtractPublicationDateTime();
     }
 
-    private void tryToExtractPublicationDateTime() {
-        this.timestamp = new AtomicLong(-1);
+    private Node extractAndSetMetaInformation(Node graph) {
+        Object[] metaInformation = parseMetaInformation(graph);
 
-        // the graph value is not a variable
-        if (this.nodes[0].isURI()) {
-            String uri = this.nodes[0].getURI();
-            int timestampSeparatorIndex = uri.lastIndexOf(TIMESTAMP_SEPARATOR);
+        if (metaInformation != null) {
+            long publicationTime = (Long) metaInformation[1];
 
-            // extracts the timestamp associated to the quadruple
-            if (timestampSeparatorIndex != -1) {
-                this.timestamp =
-                        new AtomicLong(Long.parseLong(uri.substring(
-                                timestampSeparatorIndex
-                                        + TIMESTAMP_SEPARATOR.length(),
-                                uri.length())));
-
-                this.timestampedNode = this.nodes[0];
-                this.nodes[0] =
-                        Node.createURI(uri.substring(0, timestampSeparatorIndex));
+            if (publicationTime != -1) {
+                this.setPublicationTime(publicationTime);
             }
+
+            if (metaInformation[2] != null) {
+                this.setPublicationSource((String) metaInformation[2]);
+            }
+
+            // returns a graph value with any meta information
+            return Node.createURI((String) metaInformation[0]);
         }
+
+        return graph;
+
+    }
+
+    private static Object[] parseMetaInformation(Node graph) {
+        if (graph.isURI()
+                && graph.getURI().contains(META_INFORMATION_SEPARATOR)) {
+            String[] splits =
+                    graph.getURI().split(
+                            Pattern.quote(META_INFORMATION_SEPARATOR));
+
+            return new Object[] {
+                    splits[0], Long.parseLong(splits[1]),
+                    splits[2].equals("null")
+                            ? null : splits[2]};
+        }
+
+        return null;
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
 
-        Node graphValue = this.nodes[0];
-        if (this.timestampedNode != null) {
-            graphValue = this.timestampedNode;
-        }
-
         OutputStreamWriter outWriter = new OutputStreamWriter(out);
-        OutputLangUtils.output(outWriter, graphValue, null);
+        OutputLangUtils.output(outWriter, this.createMetaGraphNode(), null);
         outWriter.write(' ');
 
         for (int i = 1; i < this.nodes.length; i++) {
@@ -482,6 +527,112 @@ public class Quadruple implements Serializable {
             }
         }
         outWriter.flush();
+    }
+
+    /**
+     * Returns the publication time associated to the specified
+     * {@code metaGraphNode} or {@code -1} if the publication time is not
+     * defined or if the specified node is not a meta graph node.
+     * 
+     * @param metaGraphNode
+     *            the meta graph node to parse.
+     * 
+     * @return the publication time associated to the specified
+     *         {@code metaGraphNode} or {@code -1} if the publication time is
+     *         not defined or if the specified node is not a meta graph node.
+     */
+    public static long getPublicationTime(Node metaGraphNode) {
+        checkGraphType(metaGraphNode);
+
+        Object[] metaInformation = parseMetaInformation(metaGraphNode);
+
+        if (metaInformation != null) {
+            return (Long) metaInformation[1];
+        }
+
+        return -1;
+    }
+
+    /**
+     * Returns the publication source associated to the specified
+     * {@code metaGraphNode} or {@code null} if the publication source is not
+     * defined or if the specified node is not a meta graph node.
+     * 
+     * @param metaGraphNode
+     *            the meta graph node to parse.
+     * 
+     * @return the publication source associated to the specified
+     *         {@code metaGraphNode} or {@code null} if the publication source
+     *         is not defined or if the specified node is not a meta graph node.
+     */
+    public static String getPublicationSource(Node metaGraphNode) {
+        checkGraphType(metaGraphNode);
+
+        Object[] metaInformation = parseMetaInformation(metaGraphNode);
+
+        if (metaInformation != null) {
+            return (String) metaInformation[2];
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a boolean indicating whether the specified {@code node} is a meta
+     * graph node (a node containing meta information about a quadruple) or not.
+     * 
+     * @param node
+     *            the node to check.
+     * 
+     * @return a boolean indicating whether the specified {@code node} is a meta
+     *         graph node (a node containing meta information about a quadruple)
+     *         or not.
+     */
+    public static boolean isMetaGraphNode(Node node) {
+        return parseMetaInformation(node) != null;
+    }
+
+    private static void checkGraphType(Node graph) {
+        if (!graph.isURI()) {
+            throw new IllegalArgumentException(
+                    "The specified graph value is not an URI: "
+                            + graph.toString());
+        }
+    }
+
+    private enum MetaInformationType
+            implements
+            EnumConverter<MetaInformationType> {
+
+        PUBLICATION_TIME("time", (short) 0), PUBLICATION_SOURCE(
+                "source",
+                (short) 1);
+
+        private static ReverseEnumMap<MetaInformationType> map =
+                new ReverseEnumMap<MetaInformationType>(
+                        MetaInformationType.class);
+
+        private final String name;
+
+        private final short value;
+
+        MetaInformationType(String name, short value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public short convert() {
+            return value;
+        }
+
+        public MetaInformationType convert(short val) {
+            return map.get(val);
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
     }
 
 }

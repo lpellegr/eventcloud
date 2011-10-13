@@ -84,12 +84,12 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        quad = quad.toTimestampedQuadruple();
-
         SynchronizedJenaDatasetGraph datastore =
                 ((SynchronizedJenaDatasetGraph) overlay.getDatastore());
         // the quad is stored by using its timestamped graph value
-        datastore.add(quad);
+        datastore.add(new Quadruple(
+                quad.createMetaGraphNode(), quad.getSubject(),
+                quad.getPredicate(), quad.getObject(), false, false));
 
         log.debug(
                 "SPARQL query used to retrieve the sub subscriptions matching {}:\n{}",
@@ -244,67 +244,51 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         }
     }
 
-    private static final String createQueryRetrievingSubscriptionsMatching(Quadruple quad) {
+    private static String createQueryRetrievingSubscriptionsMatching(Quadruple quad) {
         StringWriter query = new StringWriter();
-        query.append("SELECT ?subscriptionId ?subSubscriptionId WHERE {\n");
-        query.append("    GRAPH <");
+        query.append("SELECT ?subscriptionId ?subSubscriptionId WHERE {\n    GRAPH <");
         query.append(SUBSCRIPTION_NS_NODE.getURI());
-        query.append("> {\n");
-        query.append("        ?subSubscriptionSource <");
+        query.append("> {\n        ?subSubscriptionSource <");
         query.append(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY);
-        query.append("> ?subSubscriptionGraph .\n");
-        query.append("        ?subSubscriptionSource <");
+        query.append("> ?subSubscriptionGraph .\n        ?subSubscriptionSource <");
         query.append(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY);
-        query.append("> ?subSubscriptionSubject .\n");
-        query.append("        ?subSubscriptionSource <");
+        query.append("> ?subSubscriptionSubject .\n        ?subSubscriptionSource <");
         query.append(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY);
-        query.append("> ?subSubscriptionPredicate .\n");
-        query.append("        ?subSubscriptionSource <");
+        query.append("> ?subSubscriptionPredicate .\n        ?subSubscriptionSource <");
         query.append(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY);
-        query.append("> ?subSubscriptionObject .\n");
-        query.append("        ?subSubscriptionSource <");
+        query.append("> ?subSubscriptionObject .\n        ?subSubscriptionSource <");
         query.append(SUBSUBSCRIPTION_ID_PROPERTY);
-        query.append("> ?subSubscriptionId .\n");
-        query.append("        ?subscriptionSource <");
+        query.append("> ?subSubscriptionId .\n        ?subscriptionSource <");
         query.append(SUBSCRIPTION_INDEXED_WITH_PROPERTY);
-        query.append("> ?subSubscriptionId .\n");
-        query.append("        ?subscriptionSource <");
+        query.append("> ?subSubscriptionId .\n        ?subscriptionSource <");
         query.append(SUBSCRIPTION_ID_PROPERTY);
-        query.append("> ?subscriptionId .\n");
-        query.append("        FILTER (\n");
-        query.append("            (STRSTARTS(str(?subSubscriptionGraph), \"");
+        query.append("> ?subscriptionId .\n        FILTER (\n            (STRSTARTS(str(?subSubscriptionGraph), \"");
         query.append(quad.getGraph().getURI());
         query.append("\") || sameTerm(?subSubscriptionGraph, ");
 
-        nodeFormatter.formatURI(query, quad.getGraph());
+        nodeFormatter.formatURI(query, quad.getGraph().getURI());
 
         query.append(") || datatype(?subSubscriptionGraph) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-        query.append(">)\n");
-        query.append("             && (sameTerm(?subSubscriptionSubject, ");
+        query.append(">)\n             && (sameTerm(?subSubscriptionSubject, ");
 
         nodeFormatter.formatURI(query, quad.getSubject());
 
         query.append(") || datatype(?subSubscriptionSubject) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-        query.append(">)\n");
-        query.append("             && (sameTerm(?subSubscriptionPredicate, ");
+        query.append(">)\n             && (sameTerm(?subSubscriptionPredicate, ");
 
         nodeFormatter.formatURI(query, quad.getPredicate());
 
         query.append(") || datatype(?subSubscriptionPredicate) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-        query.append(">)\n");
-        query.append("             && (sameTerm(?subSubscriptionObject, ");
+        query.append(">)\n             && (sameTerm(?subSubscriptionObject, ");
 
         nodeFormatter.format(query, quad.getObject());
 
         query.append(") || datatype(?subSubscriptionObject) = <");
         query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-        query.append(">)\n");
-        query.append("        )\n");
-        query.append("     }\n");
-        query.append("}");
+        query.append(">)\n        )\n     }\n}");
 
         return query.toString();
     }

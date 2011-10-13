@@ -17,7 +17,7 @@
 package fr.inria.eventcloud.messages.request.can;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.io.StringWriter;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -29,12 +29,14 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
+import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
@@ -75,9 +77,8 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
      *            the rewritten subscription to index.
      */
     public IndexSubscriptionRequest(Subscription subscription) {
-        super(
-                QuadruplePattern.removeTimestampFromGraphValue(subscription.getSubSubscriptions()[0].getAtomicQuery()
-                        .getQuadruplePattern()));
+        super(subscription.getSubSubscriptions()[0].getAtomicQuery()
+                .getQuadruplePattern());
 
         this.subscription = new SerializedValue<Subscription>(subscription);
     }
@@ -97,20 +98,20 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         Subsubscription firstSubsubscription =
                 subscription.getSubSubscriptions()[0];
 
-        // finds the quadruples that match the subscription which has
-        // been indexed
-        QuadruplePattern firstSubsubscriptionQuadPattern =
-                firstSubsubscription.getAtomicQuery().getQuadruplePattern();
+        ResultSet queryResult =
+                ((SemanticDatastore) overlay.getDatastore()).executeSparqlSelect(createQueryRetrievingQuadruplesMatching(firstSubsubscription.getAtomicQuery()
+                        .getQuadruplePattern()));
 
-        Collection<Quadruple> quadsMatchingFirstSubsubscription =
-                datastore.find(firstSubsubscriptionQuadPattern);
+        while (queryResult.hasNext()) {
+            QuerySolution solution = queryResult.next();
 
-        Iterator<Quadruple> it = quadsMatchingFirstSubsubscription.iterator();
+            Quadruple quadMatching =
+                    new Quadruple(
+                            solution.get("g").asNode(), solution.get("s")
+                                    .asNode(), solution.get("p").asNode(),
+                            solution.get("o").asNode());
 
-        while (it.hasNext()) {
-            Quadruple quadMatching = it.next();
-
-            if (quadMatching.getPublicationDateTime() != -1) {
+            if (log.isDebugEnabled() && quadMatching.getPublicationTime() != -1) {
                 log.debug(
                         "Comparing the timestamps between the quadruple {} and the subscription matching the quadruple {}",
                         quadMatching, subscription);
@@ -118,7 +119,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
             // skips the quadruples which have been published before the
             // subscription
-            if (quadMatching.getPublicationDateTime() < subscription.getIndexationTime()) {
+            if (quadMatching.getPublicationTime() < subscription.getIndexationTime()) {
                 continue;
             }
 
@@ -204,4 +205,36 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
             }
         }
     }
+
+    /**
+     * Creates a SPARQL SELECT query that retrieves all the quadruples matches
+     * the specified {@link QuadruplePattern}. It is important to note here that
+     * the query which is used, filter the quadruples according to the quadruple
+     * elements which are fixed. In the case of the graph value {@code g}
+     * associated to the given {@link QuadruplePattern}, the query filters the
+     * quadruples by verifying if their graph value starts with {@code g} only.
+     * Indeed, when a quadruple is inserted into the datastore, it is done by
+     * concatenating the meta information associated to the quadruple into the
+     * graph value.
+     * 
+     * @param qp
+     *            the {@link QuadruplePattern} to match.
+     * 
+     * @return a SPARQL SELECT query.
+     */
+    private static String createQueryRetrievingQuadruplesMatching(QuadruplePattern qp) {
+        StringWriter query = new StringWriter();
+        query.append("SELECT ?g ?s ?p ?o WHERE {\n    GRAPH ?g {\n        ?s ?p ?o . \n");
+
+        if (qp.getGraph().isURI()) {
+            query.append("        FILTER (STRSTARTS(str(?g), \"");
+            query.append(qp.getGraph().getURI());
+            query.append("\"))\n");
+        }
+
+        query.append("    }\n}\n");
+
+        return query.toString();
+    }
+
 }
