@@ -89,8 +89,10 @@ public class PublishSubscribeBenchmark {
     }
 
     private void benchmark() {
-        log.info("Benchmark with {} peer(s) and {} subscriber(s)", this.nbPeers, this.nbSubscribers);
-        
+        log.info(
+                "Benchmark with {} peer(s) and {} subscriber(s)", this.nbPeers,
+                this.nbSubscribers);
+
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
@@ -163,7 +165,6 @@ public class PublishSubscribeBenchmark {
                             allEventsPublished.received = true;
                             allEventsPublished.notifyAll();
                         }
-
                     }
 
                     @Override
@@ -235,7 +236,15 @@ public class PublishSubscribeBenchmark {
 
         timeToReceiveAllEvents.set(System.nanoTime() - startTime.get());
 
-        log.info("All events received in " + timeToReceiveAllEvents + " ns");
+        log.info("All events received in "
+                + timeToReceiveAllEvents
+                + " ns\nFor "
+                + this.nbPeers
+                + " peer(s) and "
+                + this.nbSubscribers
+                + " subscriber(s) the rate is "
+                + (nbEventsPublished / (double) (timeToReceiveAllEvents.value / (double) 10e8))
+                + " quadruple(s) per second");
 
         deployer.undeploy();
     }
