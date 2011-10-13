@@ -72,15 +72,26 @@ public class Event implements Iterable<Quadruple>, Serializable {
         this(quads, true);
     }
 
-    private Event(Collection<Quadruple> quads, boolean addMetaInformations) {
-        if (quads.size() == 0) {
+    /**
+     * Creates a new Event from the specified collection of {@code quadruples}
+     * by offering the possibility to choose whether meta information should be
+     * added or not (e.g. a quadruple indicating the number of quadruples
+     * contained by the Event).
+     * 
+     * @param quadruples
+     *            the quadruples to put into the Event.
+     * @param addMetaInformation
+     *            indicates whether meta information should be added or not.
+     */
+    public Event(Collection<Quadruple> quadruples, boolean addMetaInformation) {
+        if (quadruples.size() == 0) {
             throw new IllegalArgumentException(
                     "The quads collection cannot be empty");
         }
 
-        this.quadruples = Collection.withShallowCopy(quads);
+        this.quadruples = Collection.withShallowCopy(quadruples);
 
-        if (addMetaInformations) {
+        if (addMetaInformation) {
             this.addMetaInformation();
         }
     }
@@ -205,20 +216,6 @@ public class Event implements Iterable<Quadruple>, Serializable {
             buf.append("\n");
         }
         return buf.toString();
-    }
-
-    /**
-     * Creates a new Event from the specified collection of {@code quadruples}
-     * without adding meta quadruples (e.g. a quadruple indicating the number of
-     * quadruples contained by the Event).
-     * 
-     * @param quadruples
-     *            the quadruples to put into the Event.
-     * 
-     * @return a new Event from the specified collection of {@code quadruples}.
-     */
-    public static final Event createWithoutAddingMetaInformation(Collection<Quadruple> quadruples) {
-        return new Event(quadruples, false);
     }
 
     /**

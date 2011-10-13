@@ -270,7 +270,9 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
 
         this.eventIdsReceived.put(eventId, id);
 
-        return Event.createWithoutAddingMetaInformation(quadsReceived);
+        // We create an event from quadruples which come from a previous event.
+        // Hence we do not need to add new meta information
+        return new Event(quadsReceived, false);
     }
 
     public static Long[] toObject(long[] array) {

@@ -46,12 +46,12 @@ public class SubscriptionRewriterTest {
         source =
                 "rmi://oops.inria.fr:1099/32bf1d5d-131240b729f--7f6e--6f9e1f1e514bea7c-32bf1d5d-131240b729f--8000";
 
-        defaultNode = Node.createURI("http://www.inria.fr");
+        defaultNode = Node.createURI("http://www.inria.fr/");
 
         defaultQuadruple =
                 new Quadruple(
                         defaultNode, defaultNode, defaultNode, defaultNode);
-        defaultQuadruple.timestamp();
+        defaultQuadruple.setPublicationTime();
     }
 
     @Test
@@ -65,9 +65,8 @@ public class SubscriptionRewriterTest {
                 SubscriptionRewriter.rewrite(subscription, defaultQuadruple);
 
         for (Subsubscription s : rewrittenSubscription.getSubSubscriptions()) {
-            Assert.assertEquals(
-                    defaultQuadruple.getTimestampedGraph(), s.getAtomicQuery()
-                            .getGraph());
+            Assert.assertEquals(defaultQuadruple.getGraph(), s.getAtomicQuery()
+                    .getGraph());
         }
 
         Assert.assertEquals(
@@ -112,9 +111,8 @@ public class SubscriptionRewriterTest {
                 SubscriptionRewriter.rewrite(subscription, defaultQuadruple);
 
         for (Subsubscription s : rewrittenSubscription.getSubSubscriptions()) {
-            Assert.assertEquals(
-                    defaultQuadruple.getTimestampedGraph(), s.getAtomicQuery()
-                            .getGraph());
+            Assert.assertEquals(defaultQuadruple.getGraph(), s.getAtomicQuery()
+                    .getGraph());
         }
 
         Assert.assertEquals(

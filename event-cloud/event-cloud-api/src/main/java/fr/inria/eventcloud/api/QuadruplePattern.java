@@ -42,7 +42,7 @@ public class QuadruplePattern extends Quadruple {
             Node.ANY, Node.ANY, Node.ANY, Node.ANY);
 
     public QuadruplePattern(Node g, Node s, Node p, Node o) {
-        super(g, s, p, o, -1, false, false);
+        super(g, s, p, o, false, true);
 
         if (g instanceof Node_Variable || s instanceof Node_Variable
                 || p instanceof Node_Variable || o instanceof Node_Variable) {
@@ -67,7 +67,7 @@ public class QuadruplePattern extends Quadruple {
 
         int timestampSeparatorIndex =
                 quadruplePattern.getGraph().getURI().indexOf(
-                        Quadruple.TIMESTAMP_SEPARATOR);
+                        Quadruple.META_INFORMATION_SEPARATOR);
 
         if (timestampSeparatorIndex != -1) {
             return new QuadruplePattern(

@@ -57,7 +57,8 @@ public class EventCloudUsageTest implements Serializable {
             new Collection<Binding>();
 
     @Test(timeout = 60000)
-    public void testEventCloudInstantiationAndUsage() {
+    public void testEventCloudInstantiationAndUsage()
+            throws InterruptedException {
         // Creates and deploy an EventCloudsRegistry locally
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
@@ -147,51 +148,72 @@ public class EventCloudUsageTest implements Serializable {
                         });
         log.info("Subscription with id {} has been registered", id);
 
+        // waits a little to make sure the subscription has been indexed
+        Thread.sleep(500);
+
         // Finally, we can simulate an event source by creating a PublishProxy
         PublishProxy publishProxy = proxyFactory.createPublishProxy();
 
-        long publicationDateTime = System.currentTimeMillis();
+        long publicationTime = System.currentTimeMillis();
 
         // From the publish proxy it is possible to publish quadruples (events)
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/825349613"),
-                Node.createURI("https://plus.google.com/107234124364605485774"),
-                Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                Node.createLiteral("user1@company.com")).timestamp(publicationDateTime));
+        Quadruple q1 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/825349613"),
+                        Node.createURI("https://plus.google.com/107234124364605485774"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                        Node.createLiteral("user1@company.com"));
+        q1.setPublicationTime(publicationTime);
+        publishProxy.publish(q1);
 
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/825349613"),
-                Node.createURI("https://plus.google.com/107234124364605485774"),
-                Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("User1")).timestamp(publicationDateTime));
+        Quadruple q2 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/825349613"),
+                        Node.createURI("https://plus.google.com/107234124364605485774"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                        Node.createLiteral("User1"));
+        q2.setPublicationTime(publicationTime);
+        publishProxy.publish(q2);
 
         // this quadruple shows chronicle context property because it is
         // delivered by reconsuming the first quadruple which was published
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/825349613"),
-                Node.createURI("https://plus.google.com/107234124364605485774"),
-                Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                Node.createLiteral("user1.new.email@company.com")).timestamp(publicationDateTime));
+        Quadruple q3 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/825349613"),
+                        Node.createURI("https://plus.google.com/107234124364605485774"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                        Node.createLiteral("user1.new.email@company.com"));
+        q3.setPublicationTime(publicationTime);
+        publishProxy.publish(q3);
 
-        publicationDateTime = System.currentTimeMillis();
+        publicationTime = System.currentTimeMillis();
 
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/3283940594/2011-08-30-18:13:05"),
-                Node.createURI("https://plus.google.com/107545688688906540962"),
-                Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                Node.createLiteral("user2@company.com")).timestamp(publicationDateTime));
+        Quadruple q4 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/3283940594/2011-08-30-18:13:05"),
+                        Node.createURI("https://plus.google.com/107545688688906540962"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                        Node.createLiteral("user2@company.com"));
+        q4.setPublicationTime(publicationTime);
+        publishProxy.publish(q4);
 
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/124324034/2011-08-30-19:04:54"),
-                Node.createURI("https://plus.google.com/14023231238123495031/"),
-                Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("User 3")).timestamp());
+        Quadruple q5 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/124324034/2011-08-30-19:04:54"),
+                        Node.createURI("https://plus.google.com/14023231238123495031/"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                        Node.createLiteral("User 3"));
+        q5.setPublicationTime();
+        publishProxy.publish(q5);
 
-        publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/3283940594/2011-08-30-18:13:05"),
-                Node.createURI("https://plus.google.com/107545688688906540962"),
-                Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("User 2")).timestamp(publicationDateTime));
+        Quadruple q6 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/3283940594/2011-08-30-18:13:05"),
+                        Node.createURI("https://plus.google.com/107545688688906540962"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                        Node.createLiteral("User 2"));
+        q6.setPublicationTime(publicationTime);
+        publishProxy.publish(q6);
 
         // 3 notifications are expected
         synchronized (bindingsReceived) {

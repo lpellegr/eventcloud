@@ -44,7 +44,7 @@ public final class SerializedValue<T> implements Serializable {
 
     private byte[] bytes;
 
-    public transient T value;
+    private transient T value;
 
     public SerializedValue(T value) {
         try {

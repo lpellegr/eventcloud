@@ -179,10 +179,10 @@ public final class SubscriptionRewriter {
             @Override
             public Op transform(OpGraph opGraph, Op subOp) {
                 // if the graph node from the subscription to rewrite is a
-                // variable it has to be rewritten with the timestamped value of
-                // the graph node associated to the quadruple
+                // variable it has to be rewritten with the graph node from the
+                // quadruple which matches the subscription
                 if (opGraph.getNode().isVariable()) {
-                    return new OpGraph(quad.getTimestampedGraph(), subOp);
+                    return new OpGraph(quad.getGraph(), subOp);
                 }
 
                 return opGraph;

@@ -91,7 +91,7 @@ public final class PublishSubscribeUtils {
             e.printStackTrace();
         }
         OutputLangUtils.output(
-                osw, quadrupleMatching.getTimestampedGraph(),
+                osw, quadrupleMatching.createMetaGraphNode(),
                 quadrupleMatching.getSubject(),
                 quadrupleMatching.getPredicate(),
                 quadrupleMatching.getObject(), null, null);
@@ -347,9 +347,9 @@ public final class PublishSubscribeUtils {
         for (Node node : atomicQuery.toArray()) {
             if (node.isVariable() && vars.contains(Var.alloc(node.getName()))) {
                 Node resultNode;
-                // graph value: we need the timestamped graph value
+                // the graph value which is returned is the meta graph value
                 if (i == 0) {
-                    resultNode = quad.getTimestampedGraph();
+                    resultNode = quad.createMetaGraphNode();
                 } else {
                     resultNode = quadNodes[i];
                 }

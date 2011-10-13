@@ -60,10 +60,10 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
      */
     @Override
     public void publish(Quadruple quad) {
-        if (!quad.isTimestamped()) {
-            quad.timestamp();
+        if (quad.getPublicationTime() == -1) {
+            quad.setPublicationTime();
         }
-
+        
         // TODO: use an asynchronous call with no response (see issue 16)
 
         // the quadruple is routed without taking into account the publication
@@ -81,18 +81,11 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
      */
     @Override
     public void publish(Event event) {
-        long publicationDateTime = System.currentTimeMillis();
-
-        boolean isAlreadyTimestamped = false;
+        long publicationTime = System.currentTimeMillis();
 
         for (Quadruple quad : event) {
-            // reset the quadruple if it is already timestamped in order to
-            // allow to publish events which have been received as notifications
-            if (isAlreadyTimestamped
-                    || (isAlreadyTimestamped = quad.isTimestamped())) {
-                quad.reset();
-            }
-            this.publish(quad.timestamp(publicationDateTime));
+            quad.setPublicationTime(publicationTime);
+            this.publish(quad);
         }
     }
 
