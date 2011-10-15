@@ -28,9 +28,9 @@ import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
-import fr.inria.eventcloud.webservices.api.adapters.WsNotificationTranslatorAdapter;
 
 /**
  * SubscribeWsProxyImpl is an extension of {@link SubscribeProxyImpl} in order
@@ -46,7 +46,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
 
     private static final String NOTIFY_METHOD_NAME = "Notify";
 
-    private WsNotificationTranslatorAdapter translator;
+    private WsNotificationTranslator translator;
 
     // contains the subscriber web service clients to use in order to deliver
     // the solutions
@@ -67,7 +67,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
                      AlterableElaProperty[] properties) {
         if (this.proxy == null) {
             super.init(proxy, componentUri, properties);
-            this.translator = new WsNotificationTranslatorAdapter();
+            this.translator = new WsNotificationTranslator();
             this.subscribers = new HashMap<SubscriptionId, Client>();
         }
     }

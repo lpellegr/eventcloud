@@ -25,7 +25,7 @@ import org.oasis_open.docs.wsn.b_2.Notify;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
-import fr.inria.eventcloud.webservices.api.translators.notify.NotificationMessageTranslator;
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 
 /**
  * XML Adapter for {@link Collection} of {@link Event} objects.
@@ -34,10 +34,10 @@ import fr.inria.eventcloud.webservices.api.translators.notify.NotificationMessag
  */
 public class EventCollectionAdapter extends
         XmlAdapter<Notify, Collection<Event>> {
-    private NotificationMessageTranslator translator;
+    private WsNotificationTranslator translator;
 
     public EventCollectionAdapter() {
-        this.translator = new NotificationMessageTranslator();
+        this.translator = new WsNotificationTranslator();
     }
 
     /**
