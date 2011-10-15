@@ -16,79 +16,118 @@
  **/
 package fr.inria.eventcloud.translators.wsnotif;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.net.URI;
+import java.io.StringWriter;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
+import org.openjena.atlas.lib.Sink;
+import org.openjena.riot.RiotReader;
+import org.openjena.riot.lang.LangRIOT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 
+import com.hp.hpl.jena.sparql.core.Quad;
+
+import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
-import fr.inria.eventcloud.api.generators.Generator;
+import fr.inria.eventcloud.api.Quadruple;
 
 /**
- * A simple test that output to the standard output the translation result of
- * some predefined WS-Notification payloads.
+ * Tests cases associated to {@link WsNotificationTranslator}.
  * 
  * @author lpellegr
  */
 public class WsNotificationTranslatorTest {
 
-    @Test
-    public void test() {
-        WsNotificationTranslator translator =
-                new WsNotificationTranslatorImpl();
+    private static final Logger log =
+            LoggerFactory.getLogger(WsNotificationTranslatorTest.class);
 
-        Event event;
+    private WsNotificationTranslator translator;
 
-        System.out.println("[ Output for the translation of /notification-01.xml from WS-Notification notification to an Event without using XSD information ]");
-        // a first translation by using only a WS-Notification notification
-        // payload
-        URI eventId = Generator.generateRandomUri();
-
-        event =
-                translator.translateWsNotifNotificationToEvent(
-                        inputStreamFrom("/notification-01.xml"), eventId);
-        System.out.println(event);
-
-        System.out.println("[ Output for the translation of /notification-01.xml from WS-Notification notification to an Event by using XSD information ]");
-        // a second translation by using the WS-Notification notification
-        // payload and an associated XSD file (in that case we can see that the
-        // value "90" is annotated with http://www.w3.org/2001/XMLSchema#int,
-        // whereas in the previous case it was not done)
-        event =
-                translator.translateWsNotifNotificationToEvent(
-                        inputStreamFrom("/notification-01.xml"),
-                        inputStreamFrom("/xsd-01.xml"), eventId);
-        System.out.println(event);
-
-        System.out.println("[ Output for the translation of an Event to a WS-Notification notification for the Event which has been previously created ]");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        translator.translateEventToWsNotifNotification(baos, event);
-        System.out.println(new String(baos.toByteArray()));
-
-        System.out.println("[ Output for the translation of a WS-Notification subscription to a SPARQL query ]");
-
-        String sparqlQuery =
-                translator.translateWsNotifSubscriptionToSparqlQuery(
-                        inputStreamFrom("/subscription-01.xml"),
-                        inputStreamFrom("/topic-namespace-01.xml"),
-                        inputStreamFrom("/topic-definitions-01.xml"));
-        System.out.println(sparqlQuery);
-
-        // assertions
-        Event event2 =
-                translator.translateWsNotifNotificationToEvent(
-                        new ByteArrayInputStream(baos.toByteArray()),
-                        inputStreamFrom("/xsd-01.xml"), eventId);
-
-        Assert.assertEquals(event, event2);
-        Assert.assertTrue(sparqlQuery.contains("http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm"));
+    public WsNotificationTranslatorTest() {
+        this.translator = new WsNotificationTranslator();
     }
 
-    private InputStream inputStreamFrom(String file) {
+    @Test
+    public void testTranslation() {
+        // creates an event from a notification example
+        Event initialEvent = new Event(read("/notification01.trig"));
+
+        log.info("Initial quadruples are:");
+        logInfo(initialEvent);
+
+        Event event = initialEvent;
+        NotificationMessageHolderType message;
+        for (int i = 0; i < 2; i++) {
+            message =
+                    this.translator.translateEventToNotificationMessage(event);
+
+            log.info(
+                    "Message payload:\n{}",
+                    asString((Element) message.getMessage().getAny()));
+
+            // TODO: add assertions about the message which is issued from the
+            // translation
+
+            event =
+                    this.translator.translateNotificationMessageToEvent(message);
+
+            // TODO: add assertions about the event which is issued from the
+            // translation
+
+            log.info("Event issued from translation {}:", i + 1);
+            logInfo(event);
+
+            Assert.assertEquals(
+                    initialEvent.getQuadruples().size(), event.getQuadruples()
+                            .size());
+        }
+    }
+
+    private static String asString(Element elt) {
+        TransformerFactory transfac = TransformerFactory.newInstance();
+        Transformer trans = null;
+        try {
+            trans = transfac.newTransformer();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        }
+        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        trans.setOutputProperty(OutputKeys.INDENT, "yes");
+        trans.setOutputProperty(
+                "{http://xml.apache.org/xslt}indent-amount", "4");
+
+        StringWriter sw = new StringWriter();
+        StreamResult result = new StreamResult(sw);
+        DOMSource source = new DOMSource(elt);
+        try {
+            trans.transform(source, result);
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+
+        return sw.toString();
+    }
+
+    private static void logInfo(Event event) {
+        for (Quadruple quad : event) {
+            log.info(quad.toString());
+        }
+    }
+
+    private static InputStream inputStreamFrom(String file) {
         InputStream is = null;
 
         if (file != null) {
@@ -96,6 +135,36 @@ public class WsNotificationTranslatorTest {
         }
 
         return is;
+    }
+
+    private static Collection<Quadruple> read(String file) {
+        final Collection<Quadruple> quadruples = new Collection<Quadruple>();
+
+        Sink<Quad> sink = new Sink<Quad>() {
+            @Override
+            public void send(final Quad quad) {
+                quadruples.add(new Quadruple(
+                        quad.getGraph(), quad.getSubject(),
+                        quad.getPredicate(), quad.getObject()));
+            }
+
+            @Override
+            public void close() {
+            }
+
+            @Override
+            public void flush() {
+            }
+
+        };
+
+        LangRIOT parser =
+                RiotReader.createParserTriG(inputStreamFrom(file), null, sink);
+
+        parser.parse();
+        sink.close();
+
+        return quadruples;
     }
 
 }

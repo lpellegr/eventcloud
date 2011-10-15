@@ -45,10 +45,10 @@ import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 import fr.inria.eventcloud.webservices.JaxWsCXFWSCaller;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
-import fr.inria.eventcloud.webservices.api.adapters.WsNotificationTranslatorAdapter;
 import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
 import fr.inria.eventcloud.webservices.factories.WsProxyFactory;
 
@@ -100,8 +100,8 @@ public class PubSubTest {
         SubscribeWsApi subscribeWs =
                 (SubscribeWsApi) pubSubComponent.getFcInterface("subscribe-services");
 
-        WsNotificationTranslatorAdapter translator =
-                new WsNotificationTranslatorAdapter();
+        WsNotificationTranslator translator =
+                new WsNotificationTranslator();
 
         // subscribes for any events
         subscribeWs.subscribe(

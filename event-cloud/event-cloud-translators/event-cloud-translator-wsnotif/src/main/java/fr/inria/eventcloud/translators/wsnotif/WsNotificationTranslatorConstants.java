@@ -14,16 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.webservices.api.translators.notify;
+package fr.inria.eventcloud.translators.wsnotif;
 
 import com.hp.hpl.jena.graph.Node;
 
 /**
- * 
+ * Defines constants which are used by the WS-Notification translator.
  * 
  * @author bsauvan
  */
-public class NotificationMessageConstants {
+public class WsNotificationTranslatorConstants {
+
+    /**
+     * Defines the value of the separator that is used to concatenate several
+     * URIs into a new one.
+     */
+    public static final String URI_SEPARATOR = "$0$";
 
     public static final String SUBSCRIPTION_ADDRESS_TEXT =
             "http://docs.oasis-open.org/wsn/b-2/SubscriptionReference/Address";
@@ -44,5 +50,8 @@ public class NotificationMessageConstants {
 
     public static final String PRODUCER_METADATA_TEXT =
             "http://docs.oasis-open.org/wsn/b-2/ProducerReference/Metadata";
+
+    public static final String MESSAGE_TEXT =
+            "http://docs.oasis-open.org/wsn/b-2/Message";
 
 }

@@ -20,16 +20,19 @@ import java.util.Arrays;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
+
 /**
  * XML Adapter for subscription SPARQL queries.
  * 
  * @author bsauvan
  */
 public class SubscriptionAdapter extends XmlAdapter<String[], String> {
-    private WsNotificationTranslatorAdapter translator;
+
+    private WsNotificationTranslator translator;
 
     public SubscriptionAdapter() {
-        this.translator = new WsNotificationTranslatorAdapter();
+        this.translator = new WsNotificationTranslator();
     }
 
     /**
@@ -38,6 +41,7 @@ public class SubscriptionAdapter extends XmlAdapter<String[], String> {
      * 
      * @param sparqlQuery
      *            the SPARQL query to be converted.
+     * 
      * @return the WS-Notification notification XML payload representing the
      *         specified SPARQL query.
      */
@@ -52,6 +56,7 @@ public class SubscriptionAdapter extends XmlAdapter<String[], String> {
      * 
      * @param xmlPayload
      *            the WS-Notification notification XML payload to be converted.
+     * 
      * @return the SPARQL query represented by the specified WS-Notification
      *         notification XML payload.
      */

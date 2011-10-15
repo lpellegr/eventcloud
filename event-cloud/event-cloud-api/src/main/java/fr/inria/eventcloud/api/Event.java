@@ -33,7 +33,7 @@ import com.hp.hpl.jena.graph.Triple;
  * <p>
  * Also, it is assumed that an Event is not alterable. Hence, if you try to
  * update the content of an Event by calling {@link #getQuadruples()} followed
- * by {@link Collection#add(Object)}, then any call the methods
+ * by {@link Collection#add(Object)}, then any call to the methods
  * {@link #getGraph()} and {@link #getTriples()} may return a wrong value. This
  * is also true if you construct an Event with a collection of quadruples that
  * do not share the same graph value. Indeed, no type checking is performed for

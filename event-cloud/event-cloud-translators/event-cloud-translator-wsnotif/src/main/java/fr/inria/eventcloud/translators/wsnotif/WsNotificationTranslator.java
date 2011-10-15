@@ -16,91 +16,40 @@
  **/
 package fr.inria.eventcloud.translators.wsnotif;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
+import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 
 import fr.inria.eventcloud.api.Event;
 
 /**
- * Defines the methods exposed by a WS-Notification translator.
+ * Translator for {@link Event events} to {@link NotificationMessageHolderType
+ * notification messages} and vice versa.
  * 
- * @author lpellegr
+ * @author bsauvan
  */
-public interface WsNotificationTranslator {
+public class WsNotificationTranslator {
 
     /**
-     * Defines the value of the separator that is used to concatenate several
-     * URIs into a new one.
-     */
-    public static final String URI_SEPARATOR = "$0$";
-
-    /**
-     * Translates a {@code xmlPayload} standing for a WS-Notification
-     * notification to an {@link Event}. Because there is no XSD information
-     * that is given to the method, the literals are not annotated with a
-     * datatype.
+     * Translates the specified event to its corresponding notification message.
      * 
-     * @param xmlPayload
-     *            the XML payload.
-     * @param eventId
-     *            the identifier associated to the event.
-     * 
-     * @return an {@link Event}.
-     */
-    public Event translateWsNotifNotificationToEvent(InputStream xmlPayload,
-                                                     URI eventId);
-
-    /**
-     * Translates a {@code xmlPayload} standing for a WS-Notification
-     * notification to an {@link Event} where the literal values associated to
-     * the quadruple contained by the event are annotated by using the
-     * {@code xsdPayload}.
-     * 
-     * @param xmlPayload
-     *            the XML payload.
-     * @param xsdPayload
-     *            the XSD payload.
-     * @param eventId
-     *            the identifier associated to the event.
-     * 
-     * @return an {@link Event}.
-     */
-    public Event translateWsNotifNotificationToEvent(InputStream xmlPayload,
-                                                     InputStream xsdPayload,
-                                                     URI eventId);
-
-    /**
-     * Translates a {@code xmlPayload} standing for a WS-Notification
-     * subscription to a SPARQL query as String.
-     * 
-     * @param wsNotifSubscriptionPayload
-     *            the WS-Notification subscription payload to translate to a
-     *            SPARQL query.
-     * @param topicNameSpacePayload
-     *            the topicNameSpace payload that defines an event.
-     * @param topicsDefinitionPayloads
-     *            the definition of the topics. Several inputStream can be
-     *            specified because each topic may corresponds to a message
-     *            defined in a WSDL.
-     * 
-     * @return a SPARQL query associated to the information that have been given
-     *         into parameters or {@code null} if some information are missing.
-     */
-    public String translateWsNotifSubscriptionToSparqlQuery(InputStream wsNotifSubscriptionPayload,
-                                                            InputStream topicNameSpacePayload,
-                                                            InputStream... topicsDefinitionPayloads);
-
-    /**
-     * Translates an {@link Event} to a WS-Notification notification XML
-     * payload.
-     * 
-     * @param output
-     *            where the output goes.
      * @param event
-     *            the event to translate.
+     *            the event to be translated.
+     * 
+     * @return the notification message corresponding to the specified event.
      */
-    public void translateEventToWsNotifNotification(OutputStream output,
-                                                    Event event);
+    public NotificationMessageHolderType translateEventToNotificationMessage(Event event) {
+        return new EventToNotificationMessageTranslator().translate(event);
+    }
+
+    /**
+     * Translates the specified notification message to its corresponding event.
+     * 
+     * @param notificationMessage
+     *            the notification message to be translated.
+     * 
+     * @return the event corresponding to the specified notification message.
+     */
+    public Event translateNotificationMessageToEvent(NotificationMessageHolderType notificationMessage) {
+        return new NotificationMessageToEventTranslator().translate(notificationMessage);
+    }
 
 }
