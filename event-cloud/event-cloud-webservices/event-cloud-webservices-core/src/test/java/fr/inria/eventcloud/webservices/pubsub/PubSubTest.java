@@ -35,17 +35,22 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 import org.objectweb.proactive.extensions.webservices.component.Utils;
 import org.objectweb.proactive.extensions.webservices.component.controller.PAWebServicesController;
+import org.openjena.atlas.lib.Sink;
+import org.openjena.riot.RiotReader;
+import org.openjena.riot.lang.LangRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.sparql.core.Quad;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
-import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 import fr.inria.eventcloud.webservices.JaxWsCXFWSCaller;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
@@ -100,9 +105,6 @@ public class PubSubTest {
         SubscribeWsApi subscribeWs =
                 (SubscribeWsApi) pubSubComponent.getFcInterface("subscribe-services");
 
-        WsNotificationTranslator translator =
-                new WsNotificationTranslator();
-
         // subscribes for any events
         subscribeWs.subscribe(
                 this.stringFrom("/subscription-01.xml"),
@@ -117,7 +119,7 @@ public class PubSubTest {
                 (PublishWsApi) pubSubComponent.getFcInterface("publish-services");
 
         Collection<Event> events = new Collection<Event>();
-        events.add(translator.translateWsNotifNotificationToEvent(this.stringFrom("/notification-01.xml")));
+        events.add(new Event(read("/notification01.trig")));
         publishWs.publish(events);
 
         PubSubStatus pubSubComponentStatus =
@@ -175,6 +177,46 @@ public class PubSubTest {
         }
 
         return null;
+    }
+
+    private static Collection<Quadruple> read(String file) {
+        final Collection<Quadruple> quadruples = new Collection<Quadruple>();
+
+        Sink<Quad> sink = new Sink<Quad>() {
+            @Override
+            public void send(final Quad quad) {
+                quadruples.add(new Quadruple(
+                        quad.getGraph(), quad.getSubject(),
+                        quad.getPredicate(), quad.getObject()));
+            }
+
+            @Override
+            public void close() {
+            }
+
+            @Override
+            public void flush() {
+            }
+
+        };
+
+        LangRIOT parser =
+                RiotReader.createParserTriG(inputStreamFrom(file), null, sink);
+
+        parser.parse();
+        sink.close();
+
+        return quadruples;
+    }
+
+    private static InputStream inputStreamFrom(String file) {
+        InputStream is = null;
+
+        if (file != null) {
+            is = PubSubTest.class.getResourceAsStream(file);
+        }
+
+        return is;
     }
 
     private String stringFrom(String file) throws Exception {

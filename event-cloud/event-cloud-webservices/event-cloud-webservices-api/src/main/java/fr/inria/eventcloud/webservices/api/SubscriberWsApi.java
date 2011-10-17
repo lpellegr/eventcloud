@@ -16,15 +16,16 @@
  **/
 package fr.inria.eventcloud.webservices.api;
 
+import javax.jws.Oneway;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
-import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.webservices.api.adapters.EventAdapter;
-import fr.inria.eventcloud.webservices.api.adapters.SubscriptionIdAdapter;
+import fr.inria.eventcloud.webservices.api.adapters.EventCollectionAdapter;
 
 /**
  * Defines the notification operation that is exposed as a web service by the
@@ -34,19 +35,23 @@ import fr.inria.eventcloud.webservices.api.adapters.SubscriptionIdAdapter;
  * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudSubscriber", portName = "EventCloudSubscriberPort", targetNamespace = "http://webservices.eventcloud.inria.fr/", name = "EventCloudSubscriberPortType")
+@WebService(serviceName = "EventCloudSubscriber", portName = "EventCloudSubscriberPort", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2", name = "EventCloudSubscriberPortType")
+@XmlSeeAlso({
+        org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
+        org.oasis_open.docs.wsn.b_2.ObjectFactory.class,
+        org.oasis_open.docs.wsrf.r_2.ObjectFactory.class,
+        org.oasis_open.docs.wsrf.bf_2.ObjectFactory.class})
 public interface SubscriberWsApi {
 
     /**
-     * Notifies that an event matching a subscription has been received.
+     * Notifies that a collection of events matching a subscription have been
+     * received.
      * 
-     * @param id
-     *            the subscription identifier.
-     * @param event
-     *            the event.
+     * @param events
+     *            the collection of events.
      */
-    @WebMethod(operationName = "Notify")
-    public void notify(@WebParam(name = "id") @XmlJavaTypeAdapter(SubscriptionIdAdapter.class) SubscriptionId id,
-                       @WebParam(name = "xmlPayload") @XmlJavaTypeAdapter(EventAdapter.class) Event event);
+    @Oneway
+    @WebMethod(operationName = "Notify", action = "http://www.petalslink.com/wsn/service/WsnConsumer/Notify")
+    public void notify(@WebParam(partName = "Notify", name = "Notify", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(EventCollectionAdapter.class) Collection<Event> event);
 
 }
