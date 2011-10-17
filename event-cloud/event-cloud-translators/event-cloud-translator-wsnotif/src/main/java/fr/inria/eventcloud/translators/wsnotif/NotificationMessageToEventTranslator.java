@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.translators.wsnotif;
 
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +26,21 @@ import java.util.Map.Entry;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import javax.xml.namespace.QName;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
+import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
@@ -49,6 +62,9 @@ import fr.inria.eventcloud.api.generators.Generator;
  */
 public class NotificationMessageToEventTranslator {
 
+    private static Logger log =
+            LoggerFactory.getLogger(NotificationMessageToEventTranslator.class);
+
     /**
      * Translates the specified notification message to its corresponding event.
      * 
@@ -66,13 +82,17 @@ public class NotificationMessageToEventTranslator {
         Map<Node, Node> producerMetadatas = new HashMap<Node, Node>();
         Map<Node, Node> messages = new HashMap<Node, Node>();
 
+        logNotificationMessage(notificationMessage);
+
         String subscriptionAddressText =
                 (String) getFieldValue(getFieldValue(
                         notificationMessage.getSubscriptionReference(),
                         "address"), "uri");
+
         subscriptionAddress = Node.createLiteral(subscriptionAddressText);
 
         List<Object> topicContent = notificationMessage.getTopic().getContent();
+
         if (topicContent.size() > 0) {
             topic = Node.createLiteral((String) topicContent.get(0));
         }
@@ -82,6 +102,7 @@ public class NotificationMessageToEventTranslator {
                         getFieldValue(
                                 notificationMessage.getProducerReference(),
                                 "address"), "uri");
+
         producerAddress = Node.createLiteral(producerAddressText);
 
         @SuppressWarnings("unchecked")
@@ -90,13 +111,17 @@ public class NotificationMessageToEventTranslator {
                         getFieldValue(
                                 notificationMessage.getProducerReference(),
                                 "metadata"), "elements");
+
         producerMetadatas = parseElements(producerMetadataElements);
 
         // creates the event identifier by trying to retrieve it from the
         // metadata part. If it is not available, a random identifier is created
         String eventId = null;
         for (Entry<Node, Node> entry : producerMetadatas.entrySet()) {
-            if (entry.getKey().getURI().contains(WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+            if (entry.getKey()
+                    .getURI()
+                    .contains(
+                            WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
                 eventId = entry.getValue().getLiteralLexicalForm();
                 break;
             }
@@ -149,6 +174,131 @@ public class NotificationMessageToEventTranslator {
         }
 
         return new Event(new Collection<Quadruple>(quads));
+    }
+
+    private static void logNotificationMessage(NotificationMessageHolderType msg) {
+        logW3CEndpointReference(msg.getProducerReference(), "producer");
+        logW3CEndpointReference(msg.getSubscriptionReference(), "subscriber");
+
+        TopicExpressionType topicType = msg.getTopic();
+        if (topicType != null) {
+            List<Object> topicContent = topicType.getContent();
+            if (topicContent != null) {
+                log.info("topicContent(dialect={}) :", topicType.getDialect());
+                for (Object obj : topicContent) {
+                    log.info("  {} (class {})", obj, obj.getClass().getName());
+                }
+
+                logAttributes("topicAttribute", topicType, "otherAttributes");
+            } else {
+                log.info("topicContent is null");
+            }
+        } else {
+            log.info("topicType is null");
+        }
+
+        Message message = msg.getMessage();
+
+        if (message != null) {
+            if (message.getAny() instanceof Element) {
+                log.info(
+                        "message is:\n{} ",
+                        asString((Element) message.getAny()));
+            } else {
+                log.info("message class type is {} ", message.getAny()
+                        .getClass()
+                        .getName());
+            }
+        } else {
+            log.info("message is null");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void logW3CEndpointReference(W3CEndpointReference ref,
+                                                String type) {
+        Object address = getFieldValue(ref, "address");
+        if (address != null) {
+            log.info("type={}, address={}", type, (String) getFieldValue(
+                    address, "uri"));
+            logAttributes(type + " Address Attributes", address, "attributes");
+        } else {
+            log.info("type={}, address is null", type);
+        }
+
+        // referenceParameters
+
+        Object metadata = getFieldValue(ref, "metadata");
+        if (metadata != null) {
+            Object metadataElts = getFieldValue(metadata, "elements");
+
+            if (metadataElts != null) {
+                log.info("type={}, metadata=", type);
+                for (Element elt : (List<Element>) metadataElts) {
+                    log.info("  {} ", asString(elt));
+                }
+            } else {
+                log.info("type={}, metadata elements is null", type);
+            }
+
+            logAttributes(
+                    type + " metadata Elements Attributes", metadata,
+                    "attributes");
+        } else {
+            log.info("type={}, metadata is null", type);
+        }
+
+        logAttributes(type + " Attributes", ref, "attributes");
+
+        Object elements = getFieldValue(ref, "elements");
+        if (elements != null) {
+            log.info("type={}, elements=", type);
+            for (Element elt : (List<Element>) elements) {
+                log.info("  {} ", asString(elt));
+            }
+        } else {
+            log.info("type={}, elements is null", type);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void logAttributes(String type, Object obj, String fieldName) {
+        Map<QName, String> attributes =
+                (Map<QName, String>) getFieldValue(obj, fieldName);
+
+        if (attributes != null) {
+            for (Entry<QName, String> entry : attributes.entrySet()) {
+                log.info("type={}, attributes=<{}, {}>", new Object[] {
+                        type, entry.getKey(), entry.getValue()});
+            }
+        } else {
+            log.info("type={}, attributes is null", type);
+        }
+    }
+
+    private static String asString(Element elt) {
+        TransformerFactory transfac = TransformerFactory.newInstance();
+        Transformer trans = null;
+        try {
+            trans = transfac.newTransformer();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        }
+        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        trans.setOutputProperty(OutputKeys.INDENT, "yes");
+        trans.setOutputProperty(
+                "{http://xml.apache.org/xslt}indent-amount", "4");
+
+        StringWriter sw = new StringWriter();
+        StreamResult result = new StreamResult(sw);
+        DOMSource source = new DOMSource(elt);
+        try {
+            trans.transform(source, result);
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+
+        return sw.toString();
     }
 
     private static Object getFieldValue(Object object, String fieldName) {
