@@ -81,30 +81,27 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
                                     String topicNameSpacePayload,
                                     String[] topicsDefinitionPayloads,
                                     String subscriberUrl) {
+
+        // TODO: to translate the WS-Notification subscription to a SPARQL query
+        // by using:
+        // this.translator.translateSubscribeToSparqlQuery(subscription)
         SubscriptionId id =
-                super.subscribe(
-                        this.translator.translateWsNotifSubscriptionToSparqlQuery(
-                                wsNotifSubscriptionPayload,
-                                topicNameSpacePayload, topicsDefinitionPayloads),
-                        new EventNotificationListener() {
+                super.subscribe("TODO", new EventNotificationListener() {
 
-                            private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 1L;
 
-                            @Override
-                            public void onNotification(SubscriptionId id,
-                                                       Event event) {
-                                try {
-                                    Collection<Event> events =
-                                            new Collection<Event>();
-                                    events.add(event);
-                                    subscribers.get(id).invoke(
-                                            NOTIFY_METHOD_NAME,
-                                            new Object[] {events});
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
+                    @Override
+                    public void onNotification(SubscriptionId id, Event event) {
+                        try {
+                            Collection<Event> events = new Collection<Event>();
+                            events.add(event);
+                            subscribers.get(id).invoke(
+                                    NOTIFY_METHOD_NAME, new Object[] {events});
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
 
         JaxWsClientFactoryBean clientFactory = new JaxWsClientFactoryBean();
         clientFactory.setServiceClass(SubscriberWsApi.class);

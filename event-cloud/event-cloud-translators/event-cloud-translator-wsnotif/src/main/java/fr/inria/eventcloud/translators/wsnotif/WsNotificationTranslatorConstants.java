@@ -48,10 +48,16 @@ public class WsNotificationTranslatorConstants {
     public static final Node PRODUCER_ADDRESS_NODE =
             Node.createURI(PRODUCER_ADDRESS_TEXT);
 
+    public static final String PRODUCER_METADATA_NAMESPACE =
+            "http://docs.oasis-open.org/wsn/b-2/ProducerReference";
+
     public static final String PRODUCER_METADATA_TEXT =
             "http://docs.oasis-open.org/wsn/b-2/ProducerReference/Metadata";
 
     public static final String MESSAGE_TEXT =
             "http://docs.oasis-open.org/wsn/b-2/Message";
+
+    public static final String PRODUCER_METADATA_EVENT_NAMESPACE =
+            "http://eventcloud.inria.fr";
 
 }
