@@ -29,7 +29,6 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
-import fr.inria.eventcloud.webservices.pubsub.PubSubStatus;
 
 /**
  * Component used to simulate a subscriber and a publisher.
@@ -98,9 +97,11 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
      * {@inheritDoc}
      */
     @Override
-    public void notify(SubscriptionId id, Event event) {
+    public void notify(Collection<Event> events) {
         this.hasReceivedEvent = true;
-        log.info("New event received: {}", event.toString());
+        for (Event event : events) {
+            log.info("New event received: {}", event.toString());
+        }
     }
 
     /**

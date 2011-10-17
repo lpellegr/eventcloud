@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 
+import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
@@ -93,9 +94,12 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
                             public void onNotification(SubscriptionId id,
                                                        Event event) {
                                 try {
+                                    Collection<Event> events =
+                                            new Collection<Event>();
+                                    events.add(event);
                                     subscribers.get(id).invoke(
                                             NOTIFY_METHOD_NAME,
-                                            new Object[] {id, event});
+                                            new Object[] {events});
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

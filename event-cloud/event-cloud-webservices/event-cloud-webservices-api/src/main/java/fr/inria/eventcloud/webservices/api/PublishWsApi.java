@@ -43,10 +43,10 @@ import fr.inria.eventcloud.webservices.api.adapters.EventCollectionAdapter;
 public interface PublishWsApi {
 
     /**
-     * Publishes the specified event.
+     * Publishes the specified collection of events.
      * 
-     * @param event
-     *            the event to publish.
+     * @param events
+     *            the collection of events to publish.
      */
     @Oneway
     @WebMethod(operationName = "Notify", action = "http://www.petalslink.com/wsn/service/WsnConsumer/Notify")
