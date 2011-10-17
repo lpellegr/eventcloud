@@ -63,7 +63,7 @@ public class WsNotificationTranslatorTest {
     @Test
     public void testTranslation() {
         // creates an event from a notification example
-        Event initialEvent = new Event(read("/notification01.trig"));
+        Event initialEvent = new Event(read("/notification-01.trig"));
 
         log.info("Initial quadruples are:");
         logInfo(initialEvent);
@@ -81,6 +81,11 @@ public class WsNotificationTranslatorTest {
             // TODO: add assertions about the message which is issued from the
             // translation
 
+            Assert.assertEquals(1, message.getTopic().getContent().size());
+            Assert.assertEquals(
+                    "fireman_event:cardiacRythmFiremanTopic",
+                    message.getTopic().getContent().get(0));
+
             event =
                     this.translator.translateNotificationMessageToEvent(message);
 
@@ -91,8 +96,9 @@ public class WsNotificationTranslatorTest {
             logInfo(event);
 
             Assert.assertEquals(
-                    initialEvent.getQuadruples().size(), event.getQuadruples()
-                            .size());
+                    // +1 for the metadata containing the event id
+                    initialEvent.getQuadruples().size() + 1,
+                    event.getQuadruples().size());
         }
     }
 

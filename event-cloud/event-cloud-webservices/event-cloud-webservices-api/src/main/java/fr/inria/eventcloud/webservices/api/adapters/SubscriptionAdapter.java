@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.webservices.api.adapters;
 
-import java.util.Arrays;
-
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
@@ -62,12 +60,14 @@ public class SubscriptionAdapter extends XmlAdapter<String[], String> {
      */
     @Override
     public String unmarshal(String[] xmlPayload) throws Exception {
-        if (xmlPayload.length >= 3) {
-            return this.translator.translateWsNotifSubscriptionToSparqlQuery(
-                    xmlPayload[0], xmlPayload[1], Arrays.copyOfRange(
-                            xmlPayload, 2, xmlPayload.length));
-        } else {
-            return null;
-        }
+        // TODO: fixes it
+        // if (xmlPayload.length >= 3) {
+        // return this.translator.translateWsNotifSubscriptionToSparqlQuery(
+        // xmlPayload[0], xmlPayload[1], Arrays.copyOfRange(
+        // xmlPayload, 2, xmlPayload.length));
+        // } else {
+        // return null;
+        // }
+        return null;
     }
 }

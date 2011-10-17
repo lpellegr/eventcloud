@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,6 +32,7 @@ import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 import com.hp.hpl.jena.graph.Node;
 
@@ -75,7 +77,8 @@ public class EventToNotificationMessageTranslator {
         Element messagePayload = null;
 
         String topic = null;
-
+        String eventId = null;
+        
         for (Quadruple quad : event.getQuadruples()) {
             if (quad.getPredicate()
                     .equals(
@@ -96,9 +99,20 @@ public class EventToNotificationMessageTranslator {
                 metadatas.add(this.getMetadataElement(quad));
             } else if (predicateValue.startsWith(WsNotificationTranslatorConstants.MESSAGE_TEXT)) {
                 messagePayload = this.createElement(quad, messagePayload);
+            } else if (predicateValue.contains(WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+                eventId = quad.getObject().getLiteralLexicalForm();
             }
         }
 
+        if (eventId == null) {
+            eventId = event.getGraph().getURI();
+        }
+        
+        metadatas.add(this.createMetadataElement(
+                new QName(
+                        WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE,
+                        "id"), eventId));
+        
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
 
@@ -132,6 +146,22 @@ public class EventToNotificationMessageTranslator {
         }
 
         return notificationMessage;
+    }
+
+    private Element createMetadataElement(QName qname, String value) {
+        Element metadataElt =
+                document.createElementNS(
+                        WsNotificationTranslatorConstants.PRODUCER_METADATA_NAMESPACE,
+                        "Metadata");
+        Element childElt =
+                document.createElementNS(
+                        qname.getNamespaceURI(), qname.getLocalPart());
+        Text textNode = document.createTextNode(value);
+
+        metadataElt.appendChild(childElt);
+        childElt.appendChild(textNode);
+
+        return metadataElt;
     }
 
     private Element getMetadataElement(Quadruple quad) {

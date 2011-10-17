@@ -59,7 +59,6 @@ public class NotificationMessageToEventTranslator {
      */
     public Event translate(NotificationMessageHolderType notificationMessage) {
         List<Quadruple> quads = new ArrayList<Quadruple>();
-        Node eventId = Node.createURI(Generator.generateRandomUri().toString());
         Node subjectNode = null;
         Node subscriptionAddress = null;
         Node topic = null;
@@ -93,6 +92,24 @@ public class NotificationMessageToEventTranslator {
                                 "metadata"), "elements");
         producerMetadatas = parseElements(producerMetadataElements);
 
+        // creates the event identifier by trying to retrieve it from the
+        // metadata part. If it is not available, a random identifier is created
+        String eventId = null;
+        for (Entry<Node, Node> entry : producerMetadatas.entrySet()) {
+            if (entry.getKey().getURI().contains(WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+                eventId = entry.getValue().getLiteralLexicalForm();
+                break;
+            }
+        }
+
+        Node eventIdNode;
+        if (eventId != null) {
+            eventIdNode = Node.createURI(eventId);
+        } else {
+            eventIdNode =
+                    Node.createURI(Generator.generateRandomUri().toString());
+        }
+
         Message message = notificationMessage.getMessage();
         messages = parseElement((Element) message.getAny());
 
@@ -105,29 +122,29 @@ public class NotificationMessageToEventTranslator {
                         + firstElt.getLocalName());
 
         quads.add(new Quadruple(
-                eventId, subjectNode,
+                eventIdNode, subjectNode,
                 WsNotificationTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
                 subscriptionAddress, false, true));
 
         quads.add(new Quadruple(
-                eventId, subjectNode,
+                eventIdNode, subjectNode,
                 WsNotificationTranslatorConstants.TOPIC_NODE, topic, false,
                 true));
 
         quads.add(new Quadruple(
-                eventId, subjectNode,
+                eventIdNode, subjectNode,
                 WsNotificationTranslatorConstants.PRODUCER_ADDRESS_NODE,
                 producerAddress, false, true));
 
         for (Entry<Node, Node> entry : producerMetadatas.entrySet()) {
             quads.add(new Quadruple(
-                    eventId, subjectNode, entry.getKey(), entry.getValue(),
+                    eventIdNode, subjectNode, entry.getKey(), entry.getValue(),
                     false, true));
         }
 
         for (Entry<Node, Node> entry : messages.entrySet()) {
             quads.add(new Quadruple(
-                    eventId, subjectNode, entry.getKey(), entry.getValue(),
+                    eventIdNode, subjectNode, entry.getKey(), entry.getValue(),
                     false, true));
         }
 
