@@ -18,14 +18,19 @@ package fr.inria.eventcloud.webservices.api.adapters;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
+import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
+
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.utils.LongLong;
+import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
  * XML Adapter for {@link SubscriptionId} objects.
  * 
  * @author lpellegr
  */
-public class SubscriptionIdAdapter extends XmlAdapter<String, SubscriptionId> {
+public class SubscriptionIdAdapter extends
+        XmlAdapter<SubscribeResponse, SubscriptionId> {
 
     public SubscriptionIdAdapter() {
     }
@@ -38,8 +43,8 @@ public class SubscriptionIdAdapter extends XmlAdapter<String, SubscriptionId> {
      * @return the string representing the specified SubscriptionId.
      */
     @Override
-    public String marshal(SubscriptionId id) throws Exception {
-        return id.toString();
+    public SubscribeResponse marshal(SubscriptionId id) throws Exception {
+        return new SubscribeResponse();
     }
 
     /**
@@ -51,8 +56,8 @@ public class SubscriptionIdAdapter extends XmlAdapter<String, SubscriptionId> {
      * @return the SubscriptionId represented by the specified string.
      */
     @Override
-    public SubscriptionId unmarshal(String id) throws Exception {
-        return SubscriptionId.parseFrom(id);
+    public SubscriptionId unmarshal(SubscribeResponse id) throws Exception {
+        return new SubscriptionId(new LongLong(MurmurHash.hash128("dummy")));
     }
 
 }

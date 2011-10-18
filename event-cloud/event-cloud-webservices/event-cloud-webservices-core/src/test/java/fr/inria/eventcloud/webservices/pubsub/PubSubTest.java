@@ -16,16 +16,16 @@
  **/
 package fr.inria.eventcloud.webservices.pubsub;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.HashMap;
+
+import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.etsi.uri.gcm.util.GCM;
 import org.junit.Test;
+import org.oasis_open.docs.wsn.b_2.FilterType;
+import org.oasis_open.docs.wsn.b_2.Subscribe;
+import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
@@ -53,6 +53,7 @@ import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.webservices.JaxWsCXFWSCaller;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
+import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
 import fr.inria.eventcloud.webservices.factories.WsProxyFactory;
@@ -105,12 +106,20 @@ public class PubSubTest {
         SubscribeWsApi subscribeWs =
                 (SubscribeWsApi) pubSubComponent.getFcInterface("subscribe-services");
 
+//        Subscribe subscribeRequest = new Subscribe();
+//        FilterType filterType = new FilterType();
+//        TopicExpressionType tet = new TopicExpressionType();
+//        tet.getContent().add("fireman_event:cardiacRythmFiremanTopic");
+//        filterType.getAny().add(tet);
+//        subscribeRequest.setFilter(filterType);
+//
+//        W3CEndpointReferenceBuilder endPointReferenceBuilder =
+//                new W3CEndpointReferenceBuilder();
+//        endPointReferenceBuilder.address(subscriberWsUrl);
+//        subscribeRequest.setConsumerReference(endPointReferenceBuilder.build());
+
         // subscribes for any events
-        subscribeWs.subscribe(
-                this.stringFrom("/subscription-01.xml"),
-                this.stringFrom("/topic-namespace-01.xml"),
-                new String[] {this.stringFrom("/topic-definitions-01.xml")},
-                subscriberWsUrl);
+        subscribeWs.subscribe(new SubscribeInfos("fireman_event:cardiacRythmFiremanTopic", subscriberWsUrl));
 
         // waits a little to be sure that the subscription has been indexed
         Thread.sleep(2000);
@@ -217,33 +226,6 @@ public class PubSubTest {
         }
 
         return is;
-    }
-
-    private String stringFrom(String file) throws Exception {
-        if (file != null) {
-            InputStream is = PubSubTest.class.getResourceAsStream(file);
-            if (is != null) {
-                Writer writer = new StringWriter();
-
-                char[] buffer = new char[1024];
-                try {
-                    Reader reader =
-                            new BufferedReader(new InputStreamReader(
-                                    is, "UTF-8"));
-                    int n;
-                    while ((n = reader.read(buffer)) != -1) {
-                        writer.write(buffer, 0, n);
-                    }
-                } finally {
-                    is.close();
-                }
-                return writer.toString();
-            } else {
-                return "";
-            }
-        } else {
-            return null;
-        }
     }
 
 }

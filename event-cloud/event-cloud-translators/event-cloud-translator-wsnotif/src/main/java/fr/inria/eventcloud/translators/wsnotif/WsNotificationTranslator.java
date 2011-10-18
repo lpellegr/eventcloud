@@ -20,6 +20,9 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 
 import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
+import fr.inria.eventcloud.translators.wsnotif.notify.NotificationMessageToEventTranslator;
+import fr.inria.eventcloud.translators.wsnotif.subscribe.SubscribeToSparqlQueryTranslator;
 
 /**
  * Translator for {@link Event events} to {@link NotificationMessageHolderType
@@ -57,15 +60,14 @@ public class WsNotificationTranslator {
      * Translates the specified WS-Notification subscription to its
      * corresponding SPARQL query.
      * 
-     * @param subscription
+     * @param subscribeRequest
      *            the subscription to be translated.
      * 
      * @return the specified WS-Notification subscription to its corresponding
      *         SPARQL query.
      */
-    public String translateSubscribeToSparqlQuery(Subscribe subscription) {
-        // TODO
-        return null;
+    public String translateSubscribeToSparqlQuery(Subscribe subscribeRequest) {
+        return new SubscribeToSparqlQueryTranslator().translate(subscribeRequest);
     }
 
 }

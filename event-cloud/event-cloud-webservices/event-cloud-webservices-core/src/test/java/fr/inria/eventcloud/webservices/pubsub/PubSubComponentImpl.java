@@ -27,6 +27,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
+import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
 
@@ -60,14 +61,9 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
      * {@inheritDoc}
      */
     @Override
-    public SubscriptionId subscribe(String wsNotifSubscriptionPayload,
-                                    String topicNameSpacePayload,
-                                    String[] topicsDefinitionPayloads,
-                                    String subscriberWsUrl) {
+    public SubscriptionId subscribe(SubscribeInfos subscribeInfos) {
         if (this.subscribeWs != null) {
-            return this.subscribeWs.subscribe(
-                    wsNotifSubscriptionPayload, topicNameSpacePayload,
-                    topicsDefinitionPayloads, subscriberWsUrl);
+            return this.subscribeWs.subscribe(subscribeInfos);
         } else {
             return null;
         }
@@ -76,12 +72,12 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void unsubscribe(SubscriptionId id) {
-        if (this.subscribeWs != null) {
-            this.subscribeWs.unsubscribe(id);
-        }
-    }
+//    @Override
+//    public void unsubscribe(SubscriptionId id) {
+//        if (this.subscribeWs != null) {
+//            this.subscribeWs.unsubscribe(id);
+//        }
+//    }
 
     /**
      * {@inheritDoc}

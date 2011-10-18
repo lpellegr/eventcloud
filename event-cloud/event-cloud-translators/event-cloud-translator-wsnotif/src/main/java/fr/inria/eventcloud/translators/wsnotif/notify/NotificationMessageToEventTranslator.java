@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.translators.wsnotif;
+package fr.inria.eventcloud.translators.wsnotif.notify;
 
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +51,8 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.Generator;
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
+import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
  * Translator for {@link NotificationMessageHolderType notification messages} to
@@ -85,21 +86,23 @@ public class NotificationMessageToEventTranslator {
         logNotificationMessage(notificationMessage);
 
         String subscriptionAddressText =
-                (String) getFieldValue(getFieldValue(
-                        notificationMessage.getSubscriptionReference(),
-                        "address"), "uri");
+                (String) ReflectionUtils.getFieldValue(
+                        ReflectionUtils.getFieldValue(
+                                notificationMessage.getSubscriptionReference(),
+                                "address"), "uri");
 
         subscriptionAddress = Node.createLiteral(subscriptionAddressText);
 
         List<Object> topicContent = notificationMessage.getTopic().getContent();
 
         if (topicContent.size() > 0) {
+            subjectNode = Node.createURI((String) topicContent.get(0));
             topic = Node.createLiteral((String) topicContent.get(0));
         }
 
         String producerAddressText =
-                (String) getFieldValue(
-                        getFieldValue(
+                (String) ReflectionUtils.getFieldValue(
+                        ReflectionUtils.getFieldValue(
                                 notificationMessage.getProducerReference(),
                                 "address"), "uri");
 
@@ -107,8 +110,8 @@ public class NotificationMessageToEventTranslator {
 
         @SuppressWarnings("unchecked")
         List<Element> producerMetadataElements =
-                (List<Element>) getFieldValue(
-                        getFieldValue(
+                (List<Element>) ReflectionUtils.getFieldValue(
+                        ReflectionUtils.getFieldValue(
                                 notificationMessage.getProducerReference(),
                                 "metadata"), "elements");
 
@@ -137,14 +140,6 @@ public class NotificationMessageToEventTranslator {
 
         Message message = notificationMessage.getMessage();
         messages = parseElement((Element) message.getAny());
-
-        // the subject value is equals to the full qualified name of the first
-        // element contained in the message payload
-        org.w3c.dom.Node firstElt =
-                ((Element) message.getAny()).getChildNodes().item(0);
-        subjectNode =
-                Node.createURI(firstElt.getNamespaceURI() + "/"
-                        + firstElt.getLocalName());
 
         quads.add(new Quadruple(
                 eventIdNode, subjectNode,
@@ -217,10 +212,11 @@ public class NotificationMessageToEventTranslator {
     @SuppressWarnings("unchecked")
     private static void logW3CEndpointReference(W3CEndpointReference ref,
                                                 String type) {
-        Object address = getFieldValue(ref, "address");
+        Object address = ReflectionUtils.getFieldValue(ref, "address");
         if (address != null) {
-            log.info("type={}, address={}", type, (String) getFieldValue(
-                    address, "uri"));
+            log.info(
+                    "type={}, address={}", type,
+                    (String) ReflectionUtils.getFieldValue(address, "uri"));
             logAttributes(type + " Address Attributes", address, "attributes");
         } else {
             log.info("type={}, address is null", type);
@@ -228,9 +224,10 @@ public class NotificationMessageToEventTranslator {
 
         // referenceParameters
 
-        Object metadata = getFieldValue(ref, "metadata");
+        Object metadata = ReflectionUtils.getFieldValue(ref, "metadata");
         if (metadata != null) {
-            Object metadataElts = getFieldValue(metadata, "elements");
+            Object metadataElts =
+                    ReflectionUtils.getFieldValue(metadata, "elements");
 
             if (metadataElts != null) {
                 log.info("type={}, metadata=", type);
@@ -250,7 +247,7 @@ public class NotificationMessageToEventTranslator {
 
         logAttributes(type + " Attributes", ref, "attributes");
 
-        Object elements = getFieldValue(ref, "elements");
+        Object elements = ReflectionUtils.getFieldValue(ref, "elements");
         if (elements != null) {
             log.info("type={}, elements=", type);
             for (Element elt : (List<Element>) elements) {
@@ -264,7 +261,8 @@ public class NotificationMessageToEventTranslator {
     @SuppressWarnings("unchecked")
     private static void logAttributes(String type, Object obj, String fieldName) {
         Map<QName, String> attributes =
-                (Map<QName, String>) getFieldValue(obj, fieldName);
+                (Map<QName, String>) ReflectionUtils.getFieldValue(
+                        obj, fieldName);
 
         if (attributes != null) {
             for (Entry<QName, String> entry : attributes.entrySet()) {
@@ -299,22 +297,6 @@ public class NotificationMessageToEventTranslator {
         }
 
         return sw.toString();
-    }
-
-    private static Object getFieldValue(Object object, String fieldName) {
-        try {
-            Field field = object.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field.get(object);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     private Map<Node, Node> parseElements(List<Element> elements) {
