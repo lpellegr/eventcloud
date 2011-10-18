@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.translators.wsnotif;
+package fr.inria.eventcloud.translators.wsnotif.notify;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,7 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
 
 /**
  * Translator for {@link Event events} to {@link NotificationMessageHolderType

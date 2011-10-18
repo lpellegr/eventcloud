@@ -18,10 +18,13 @@ package fr.inria.eventcloud.webservices.api;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import javax.jws.WebResult;
 import javax.jws.WebService;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.webservices.api.adapters.SubscribeInfosAdapter;
 import fr.inria.eventcloud.webservices.api.adapters.SubscriptionIdAdapter;
 
 /**
@@ -31,41 +34,25 @@ import fr.inria.eventcloud.webservices.api.adapters.SubscriptionIdAdapter;
  * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", targetNamespace = "http://webservices.eventcloud.inria.fr/", name = "EventCloudSubscribePortType")
+@WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", name = "EventCloudSubscribePortType")
+@XmlSeeAlso({
+        org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
+        org.oasis_open.docs.wsn.b_2.ObjectFactory.class,
+        org.oasis_open.docs.wsrf.bf_2.ObjectFactory.class,
+        org.oasis_open.docs.wsrf.r_2.ObjectFactory.class,
+        org.oasis_open.docs.wsrf.rp_2.ObjectFactory.class})
 public interface SubscribeWsApi {
 
     /**
-     * Subscribes for notifications of the specified SPARQL query.
+     * Subscribes for notifications with the specified {@link SubscribeInfos}.
      * 
-     * @param wsNotifSubscriptionPayload
-     *            the WS-Notification subscription payload representing the
-     *            SPARQL query.
-     * @param topicNameSpacePayload
-     *            the topicNameSpace payload that defines an event.
-     * @param topicsDefinitionPayloads
-     *            the definition of the topics. Several string can be specified
-     *            because each topic may corresponds to a message defined in a
-     *            WSDL.
-     * @param subscriberWsUrl
-     *            the web service URL of the subscriber. The web service must
-     *            implement the {@link SubscriberWsApi}.
+     * @param subscribeInfos
      * 
      * @return the subscription identifier.
      */
-    @WebMethod(operationName = "Subscribe")
+    @WebResult(name = "SubscribeResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", partName = "SubscribeResponse")
+    @WebMethod(operationName = "Subscribe", action = "http://www.petalslink.com/wsn/service/WsnProducer/Subscribe")
     @XmlJavaTypeAdapter(SubscriptionIdAdapter.class)
-    public SubscriptionId subscribe(@WebParam(name = "wsNotifSubscriptionPayload") String wsNotifSubscriptionPayload,
-                                    @WebParam(name = "topicNameSpacePayload") String topicNameSpacePayload,
-                                    @WebParam(name = "topicsDefinitionPayloads") String[] topicsDefinitionPayloads,
-                                    @WebParam(name = "subscriberWsUrl") String subscriberWsUrl);
-
-    /**
-     * Unsubscribes by using the specified subscription identifier.
-     * 
-     * @param id
-     *            the subscription identifier.
-     */
-    @WebMethod(operationName = "Unsubscribe")
-    public void unsubscribe(@WebParam(name = "id") @XmlJavaTypeAdapter(SubscriptionIdAdapter.class) SubscriptionId id);
+    public SubscriptionId subscribe(@WebParam(partName = "SubscribeRequest", name = "Subscribe", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(SubscribeInfosAdapter.class) SubscribeInfos subscribeInfos);
 
 }

@@ -29,7 +29,7 @@ import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
-import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
+import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
 
@@ -46,8 +46,6 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     private static final long serialVersionUID = 1L;
 
     private static final String NOTIFY_METHOD_NAME = "Notify";
-
-    private WsNotificationTranslator translator;
 
     // contains the subscriber web service clients to use in order to deliver
     // the solutions
@@ -68,7 +66,6 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
                      AlterableElaProperty[] properties) {
         if (this.proxy == null) {
             super.init(proxy, componentUri, properties);
-            this.translator = new WsNotificationTranslator();
             this.subscribers = new HashMap<SubscriptionId, Client>();
         }
     }
@@ -77,35 +74,37 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    public SubscriptionId subscribe(String wsNotifSubscriptionPayload,
-                                    String topicNameSpacePayload,
-                                    String[] topicsDefinitionPayloads,
-                                    String subscriberUrl) {
+    public SubscriptionId subscribe(SubscribeInfos subscribeInfos) {
 
         // TODO: to translate the WS-Notification subscription to a SPARQL query
         // by using:
         // this.translator.translateSubscribeToSparqlQuery(subscription)
         SubscriptionId id =
-                super.subscribe("TODO", new EventNotificationListener() {
+                super.subscribe(
+                        subscribeInfos.getSparqlQuery(),
+                        new EventNotificationListener() {
 
-                    private static final long serialVersionUID = 1L;
+                            private static final long serialVersionUID = 1L;
 
-                    @Override
-                    public void onNotification(SubscriptionId id, Event event) {
-                        try {
-                            Collection<Event> events = new Collection<Event>();
-                            events.add(event);
-                            subscribers.get(id).invoke(
-                                    NOTIFY_METHOD_NAME, new Object[] {events});
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+                            @Override
+                            public void onNotification(SubscriptionId id,
+                                                       Event event) {
+                                try {
+                                    Collection<Event> events =
+                                            new Collection<Event>();
+                                    events.add(event);
+                                    subscribers.get(id).invoke(
+                                            NOTIFY_METHOD_NAME,
+                                            new Object[] {events});
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
 
         JaxWsClientFactoryBean clientFactory = new JaxWsClientFactoryBean();
         clientFactory.setServiceClass(SubscriberWsApi.class);
-        clientFactory.setAddress(subscriberUrl);
+        clientFactory.setAddress(subscribeInfos.getSubscriberWsUrl());
         Client client = clientFactory.create();
 
         this.subscribers.put(id, client);

@@ -52,6 +52,6 @@ public interface SubscriberWsApi {
      */
     @Oneway
     @WebMethod(operationName = "Notify", action = "http://www.petalslink.com/wsn/service/WsnConsumer/Notify")
-    public void notify(@WebParam(partName = "Notify", name = "Notify", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(EventCollectionAdapter.class) Collection<Event> event);
+    public void notify(@WebParam(partName = "Notify", name = "Notify", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(EventCollectionAdapter.class) Collection<Event> events);
 
 }
