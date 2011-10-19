@@ -16,6 +16,11 @@
  **/
 package fr.inria.eventcloud.webservices.deployment;
 
+import java.net.UnknownHostException;
+
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
+import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
@@ -31,6 +36,8 @@ import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
+import fr.inria.eventcloud.webservices.services.PublishService;
+import fr.inria.eventcloud.webservices.services.SubscribeService;
 
 /**
  * WsProxyDeployer is used to ease web service operations (expose and unexpose)
@@ -188,6 +195,47 @@ public class WsProxyDeployer {
         } catch (WebServicesException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String deployPublishWebService(String registryUrl,
+                                                 String eventCloudIdUrl,
+                                                 String urlSuffix, int port) {
+        return deployWebService(
+                new PublishService(registryUrl, eventCloudIdUrl), urlSuffix,
+                port);
+    }
+
+    public static String deploySubscribeWebService(String registryUrl,
+                                                   String eventCloudIdUrl,
+                                                   String urlSuffix, int port) {
+        return deployWebService(new SubscribeService(
+                registryUrl, eventCloudIdUrl), urlSuffix, port);
+    }
+
+    public static String deployWebService(Object service, String addressSuffix,
+                                          int port) {
+        StringBuilder address = new StringBuilder("http://");
+        try {
+            address.append(java.net.InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        address.append(":");
+        address.append(port);
+        address.append("/");
+        if (addressSuffix != null) {
+            address.append(addressSuffix);
+        }
+
+        JaxWsServerFactoryBean svrFactory = new JaxWsServerFactoryBean();
+        svrFactory.setServiceClass(service.getClass());
+        svrFactory.setAddress(address.toString());
+        svrFactory.setServiceBean(service);
+        svrFactory.getInInterceptors().add(new LoggingInInterceptor());
+        svrFactory.getOutInterceptors().add(new LoggingOutInterceptor());
+        svrFactory.create();
+
+        return svrFactory.getAddress();
     }
 
 }

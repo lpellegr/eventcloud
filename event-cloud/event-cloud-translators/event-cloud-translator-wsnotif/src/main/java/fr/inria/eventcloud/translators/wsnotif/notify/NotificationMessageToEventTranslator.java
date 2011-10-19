@@ -80,7 +80,7 @@ public class NotificationMessageToEventTranslator {
         Node subscriptionAddress = null;
         Node topic = null;
         Node producerAddress = null;
-        Map<Node, Node> producerMetadatas = new HashMap<Node, Node>();
+        Map<Node, Node> producerMetadata = new HashMap<Node, Node>();
         Map<Node, Node> messages = new HashMap<Node, Node>();
 
         logNotificationMessage(notificationMessage);
@@ -96,7 +96,9 @@ public class NotificationMessageToEventTranslator {
         List<Object> topicContent = notificationMessage.getTopic().getContent();
 
         if (topicContent.size() > 0) {
-            subjectNode = Node.createURI((String) topicContent.get(0));
+            subjectNode =
+                    Node.createURI(WsNotificationTranslatorConstants.DEFAULT_TOPIC_NAMESPACE
+                            + "/" + ((String) topicContent.get(0)));
             topic = Node.createLiteral((String) topicContent.get(0));
         }
 
@@ -108,25 +110,30 @@ public class NotificationMessageToEventTranslator {
 
         producerAddress = Node.createLiteral(producerAddressText);
 
-        @SuppressWarnings("unchecked")
-        List<Element> producerMetadataElements =
-                (List<Element>) ReflectionUtils.getFieldValue(
-                        ReflectionUtils.getFieldValue(
-                                notificationMessage.getProducerReference(),
-                                "metadata"), "elements");
+        Object metadata =
+                ReflectionUtils.getFieldValue(
+                        notificationMessage.getProducerReference(), "metadata");
 
-        producerMetadatas = parseElements(producerMetadataElements);
-
-        // creates the event identifier by trying to retrieve it from the
-        // metadata part. If it is not available, a random identifier is created
         String eventId = null;
-        for (Entry<Node, Node> entry : producerMetadatas.entrySet()) {
-            if (entry.getKey()
-                    .getURI()
-                    .contains(
-                            WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
-                eventId = entry.getValue().getLiteralLexicalForm();
-                break;
+        if (metadata != null) {
+            @SuppressWarnings("unchecked")
+            List<Element> producerMetadataElements =
+                    (List<Element>) ReflectionUtils.getFieldValue(
+                            metadata, "elements");
+            producerMetadata = parseElements(producerMetadataElements);
+
+            // creates the event identifier by trying to retrieve it from the
+            // metadata part. If it is not available, a random identifier is
+            // created
+
+            for (Entry<Node, Node> entry : producerMetadata.entrySet()) {
+                if (entry.getKey()
+                        .getURI()
+                        .contains(
+                                WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+                    eventId = entry.getValue().getLiteralLexicalForm();
+                    break;
+                }
             }
         }
 
@@ -156,7 +163,7 @@ public class NotificationMessageToEventTranslator {
                 WsNotificationTranslatorConstants.PRODUCER_ADDRESS_NODE,
                 producerAddress, false, true));
 
-        for (Entry<Node, Node> entry : producerMetadatas.entrySet()) {
+        for (Entry<Node, Node> entry : producerMetadata.entrySet()) {
             quads.add(new Quadruple(
                     eventIdNode, subjectNode, entry.getKey(), entry.getValue(),
                     false, true));
@@ -197,12 +204,16 @@ public class NotificationMessageToEventTranslator {
         if (message != null) {
             if (message.getAny() instanceof Element) {
                 log.info(
-                        "message is:\n{} ",
+                        "message any is:\n{} ",
                         asString((Element) message.getAny()));
             } else {
-                log.info("message class type is {} ", message.getAny()
-                        .getClass()
-                        .getName());
+                if (message.getAny() == null) {
+                    log.info("message any is null");
+                } else {
+                    log.info("message any class type is {} ", message.getAny()
+                            .getClass()
+                            .getName());
+                }
             }
         } else {
             log.info("message is null");

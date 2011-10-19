@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
 
 /**
  * Translator for {@link NotificationMessageHolderType notification messages} to
@@ -69,8 +70,9 @@ public class SubscribeToSparqlQueryTranslator {
                 (TopicExpressionType) ((List<Object>) subscribeRequest.getFilter()
                         .getAny()).get(0);
 
-        return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { "
-                + tet.getContent().get(0) + " ?p ?o . } }";
+        return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { <"
+                + WsNotificationTranslatorConstants.DEFAULT_TOPIC_NAMESPACE
+                + "/" + tet.getContent().get(0) + "> ?p ?o . } }";
     }
 
     private static void logSubscribe(Subscribe subscribeRequest) {

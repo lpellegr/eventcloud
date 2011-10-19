@@ -15,7 +15,6 @@ java -Xms64m -Xmx128m \
      -Dlogback.configurationFile=file:$PATH_TO_RESOURCES/logback.xml \
      -Dproactive.communication.protocol=pnp \
      -Dproactive.pnp.port=$PNP_PORT \
-     -Dproactive.http.port=$HTTP_PORT \
-     -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.PublishWsProxyLauncher $@
+     -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.PublishWsProxyLauncher $@ -port $HTTP_PORT
 
 . $(dirname $0)/configuration/unset-environment.sh
