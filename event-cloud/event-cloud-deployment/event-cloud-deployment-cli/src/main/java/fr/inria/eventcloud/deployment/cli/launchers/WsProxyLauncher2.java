@@ -20,11 +20,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
-import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.Proxy;
-import fr.inria.eventcloud.webservices.factories.WsProxyFactory;
-
 /**
  * This class is used to provide the operations which are common to all the
  * proxies that have to be deployed as a web service.
@@ -32,7 +27,7 @@ import fr.inria.eventcloud.webservices.factories.WsProxyFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public abstract class WsProxyLauncher<T extends Proxy> {
+public abstract class WsProxyLauncher2 {
 
     @Parameter(names = {"-registry"}, description = "An eventclouds registry URL to use", required = true)
     protected String registryUrl;
@@ -40,7 +35,10 @@ public abstract class WsProxyLauncher<T extends Proxy> {
     @Parameter(names = {"-id"}, description = "An eventcloud identifier to link the proxy with", required = true)
     protected String eventCloudIdUrl;
 
-    protected WsProxyLauncher(String[] args) {
+    @Parameter(names = {"-port"}, description = "The HTTP port to use in order to deploy the webservice", required = true)
+    protected int port;
+
+    protected WsProxyLauncher2(String[] args) {
         JCommander jCommander = new JCommander(this);
         jCommander.setProgramName(this.getClass().getCanonicalName());
 
@@ -52,22 +50,12 @@ public abstract class WsProxyLauncher<T extends Proxy> {
         }
     }
 
-    public abstract T createProxy(ProxyFactory factory);
-
-    public abstract String exposeWsProxy(Proxy proxy);
+    public abstract String deployWsProxy();
 
     public void run() {
-        ProxyFactory factory =
-                WsProxyFactory.getInstance(
-                        this.registryUrl,
-                        EventCloudId.fromUrl(this.eventCloudIdUrl));
+        String wsUrl = this.deployWsProxy();
 
-        Proxy proxy = this.createProxy(factory);
-
-        String wsUrl = this.exposeWsProxy(proxy);
-
-        System.out.println(this.getClass().getName()
-                + " deployed and running at:\n" + wsUrl);
+        System.out.println("Webservice deployed and running at:\n" + wsUrl);
     }
 
 }

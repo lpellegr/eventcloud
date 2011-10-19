@@ -16,9 +16,6 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.Proxy;
-import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
 
 /**
@@ -27,7 +24,7 @@ import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
  * @author lpellegr
  * @author bsauvan
  */
-public final class PublishWsProxyLauncher extends WsProxyLauncher<PublishProxy> {
+public final class PublishWsProxyLauncher extends WsProxyLauncher2 {
 
     public PublishWsProxyLauncher(String[] args) {
         super(args);
@@ -41,16 +38,10 @@ public final class PublishWsProxyLauncher extends WsProxyLauncher<PublishProxy> 
      * {@inheritDoc}
      */
     @Override
-    public PublishProxy createProxy(ProxyFactory factory) {
-        return factory.createPublishProxy();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String exposeWsProxy(Proxy proxy) {
-        return WsProxyDeployer.exposePublishWebService((PublishProxy) proxy);
+    public String deployWsProxy() {
+        return WsProxyDeployer.deployPublishWebService(
+                super.registryUrl, super.eventCloudIdUrl,
+                "proactive/services/EventCloud_publish-webservices", super.port);
     }
 
 }

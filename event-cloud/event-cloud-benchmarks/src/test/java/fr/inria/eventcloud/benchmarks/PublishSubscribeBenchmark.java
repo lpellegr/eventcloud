@@ -85,7 +85,9 @@ public class PublishSubscribeBenchmark {
 
     @Parameters
     public static List<Object[]> getParametres() {
-        return Arrays.asList(new Object[][] { {1, 1}, {1, 10}, {1, 100},});
+        return Arrays.asList(new Object[][] {
+                {1, 1}, {1, 10}, {1, 100}, {10, 1}, {10, 10}, {10, 100},
+                {50, 1}, {50, 10}, {50, 100}});
     }
 
     private void benchmark() {

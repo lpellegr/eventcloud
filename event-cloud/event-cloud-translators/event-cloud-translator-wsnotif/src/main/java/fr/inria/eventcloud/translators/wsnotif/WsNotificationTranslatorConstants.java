@@ -60,4 +60,7 @@ public class WsNotificationTranslatorConstants {
     public static final String PRODUCER_METADATA_EVENT_NAMESPACE =
             "http://eventcloud.inria.fr";
 
+    public static final String DEFAULT_TOPIC_NAMESPACE =
+            "http://eventcloud.inria.fr/replace/me/with/a/correct/namespace";
+
 }
