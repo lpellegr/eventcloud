@@ -19,13 +19,8 @@ package fr.inria.eventcloud.webservices.pubsub;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
-
 import org.etsi.uri.gcm.util.GCM;
 import org.junit.Test;
-import org.oasis_open.docs.wsn.b_2.FilterType;
-import org.oasis_open.docs.wsn.b_2.Subscribe;
-import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
@@ -48,15 +43,11 @@ import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
-import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.webservices.JaxWsCXFWSCaller;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
-import fr.inria.eventcloud.webservices.factories.WsProxyFactory;
 
 /**
  * Class used to test a subscribe proxy component and a publish proxy component
@@ -87,17 +78,15 @@ public class PubSubTest {
 
         EventCloudId ecId = deployer.createEventCloud(10);
 
-        final ProxyFactory proxyFactory =
-                WsProxyFactory.getInstance(
-                        deployer.getEventCloudsRegistryUrl(), ecId);
-
-        SubscribeProxy subscribeProxy = proxyFactory.createSubscribeProxy();
         String subscribeWsUrl =
-                WsProxyDeployer.exposeSubscribeWebService(subscribeProxy);
+                WsProxyDeployer.deploySubscribeWebService(
+                        deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
+                        "subscribe", 8888);
 
-        PublishProxy publishProxy = proxyFactory.createPublishProxy();
         String publishWsUrl =
-                WsProxyDeployer.exposePublishWebService(publishProxy);
+                WsProxyDeployer.deployPublishWebService(
+                        deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
+                        "publish", 8889);
 
         Component pubSubComponent =
                 this.createPubSubComponent(subscribeWsUrl, publishWsUrl);
@@ -106,20 +95,22 @@ public class PubSubTest {
         SubscribeWsApi subscribeWs =
                 (SubscribeWsApi) pubSubComponent.getFcInterface("subscribe-services");
 
-//        Subscribe subscribeRequest = new Subscribe();
-//        FilterType filterType = new FilterType();
-//        TopicExpressionType tet = new TopicExpressionType();
-//        tet.getContent().add("fireman_event:cardiacRythmFiremanTopic");
-//        filterType.getAny().add(tet);
-//        subscribeRequest.setFilter(filterType);
-//
-//        W3CEndpointReferenceBuilder endPointReferenceBuilder =
-//                new W3CEndpointReferenceBuilder();
-//        endPointReferenceBuilder.address(subscriberWsUrl);
-//        subscribeRequest.setConsumerReference(endPointReferenceBuilder.build());
+        // Subscribe subscribeRequest = new Subscribe();
+        // FilterType filterType = new FilterType();
+        // TopicExpressionType tet = new TopicExpressionType();
+        // tet.getContent().add("fireman_event:cardiacRythmFiremanTopic");
+        // filterType.getAny().add(tet);
+        // subscribeRequest.setFilter(filterType);
+        //
+        // W3CEndpointReferenceBuilder endPointReferenceBuilder =
+        // new W3CEndpointReferenceBuilder();
+        // endPointReferenceBuilder.address(subscriberWsUrl);
+        // subscribeRequest.setConsumerReference(endPointReferenceBuilder.build());
 
         // subscribes for any events
-        subscribeWs.subscribe(new SubscribeInfos("fireman_event:cardiacRythmFiremanTopic", subscriberWsUrl));
+        subscribeWs.subscribe(new SubscribeInfos(
+                "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { <http://eventcloud.inria.fr/replace/me/with/a/correct/namespace/fireman_event:cardiacRythmFiremanTopic> ?p ?o } }",
+                subscriberWsUrl));
 
         // waits a little to be sure that the subscription has been indexed
         Thread.sleep(2000);
@@ -128,7 +119,7 @@ public class PubSubTest {
                 (PublishWsApi) pubSubComponent.getFcInterface("publish-services");
 
         Collection<Event> events = new Collection<Event>();
-        events.add(new Event(read("/notification01.trig")));
+        events.add(new Event(read("/notification-01.trig")));
         publishWs.publish(events);
 
         PubSubStatus pubSubComponentStatus =
