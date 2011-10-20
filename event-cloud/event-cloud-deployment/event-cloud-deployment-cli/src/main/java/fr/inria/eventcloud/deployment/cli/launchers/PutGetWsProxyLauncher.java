@@ -16,9 +16,6 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.Proxy;
-import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
 
 /**
@@ -27,7 +24,7 @@ import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
  * @author lpellegr
  * @author bsauvan
  */
-public final class PutGetWsProxyLauncher extends WsProxyLauncher<PutGetProxy> {
+public final class PutGetWsProxyLauncher extends WsProxyLauncher2 {
 
     public PutGetWsProxyLauncher(String[] args) {
         super(args);
@@ -37,20 +34,11 @@ public final class PutGetWsProxyLauncher extends WsProxyLauncher<PutGetProxy> {
         new PutGetWsProxyLauncher(args).run();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public PutGetProxy createProxy(ProxyFactory factory) {
-        return factory.createPutGetProxy();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String exposeWsProxy(Proxy proxy) {
-        return WsProxyDeployer.exposePutGetWebService((PutGetProxy) proxy);
+    public String deployWsProxy() {
+        return WsProxyDeployer.deployPutGetWebService(
+                super.registryUrl, super.eventCloudIdUrl,
+                "proactive/services/EventCloud_putget-webservices", super.port);
     }
 
 }

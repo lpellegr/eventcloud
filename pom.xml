@@ -46,6 +46,7 @@
 		<!-- <id>event-cloud-releases</id> -->
 		<!-- <url>http://maven.event-cloud.googlecode.com/hg/releases</url> -->
 		<!-- </repository> -->
+		<!-- Repository used to retrieve snapshot version of Jena -->
 		<repository>
 			<id>event-cloud-snapshots</id>
 			<url>http://maven.event-cloud.googlecode.com/hg/snapshots</url>

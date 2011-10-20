@@ -37,6 +37,7 @@ import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
 import fr.inria.eventcloud.webservices.services.PublishService;
+import fr.inria.eventcloud.webservices.services.PutGetService;
 import fr.inria.eventcloud.webservices.services.SubscribeService;
 
 /**
@@ -210,6 +211,14 @@ public class WsProxyDeployer {
                                                    String urlSuffix, int port) {
         return deployWebService(new SubscribeService(
                 registryUrl, eventCloudIdUrl), urlSuffix, port);
+    }
+
+    public static String deployPutGetWebService(String registryUrl,
+                                                String eventCloudIdUrl,
+                                                String urlSuffix, int port) {
+        return deployWebService(
+                new PutGetService(registryUrl, eventCloudIdUrl), urlSuffix,
+                port);
     }
 
     public static String deployWebService(Object service, String addressSuffix,
