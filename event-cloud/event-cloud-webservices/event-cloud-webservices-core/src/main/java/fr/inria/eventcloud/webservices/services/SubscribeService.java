@@ -19,6 +19,7 @@ package fr.inria.eventcloud.webservices.services;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
@@ -68,6 +69,7 @@ import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
  * 
  * @author lpellegr
  */
+@WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", name = "EventCloudSubscribePortType")
 public class SubscribeService extends EventCloudService<SubscribeProxy>
         implements NotificationProducer {
 

@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.webservices.services;
 
+import javax.jws.WebService;
+
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 
@@ -32,6 +34,7 @@ import fr.inria.eventcloud.proxies.PublishProxy;
  * 
  * @author lpellegr
  */
+@WebService(serviceName = "EventCloudPublish", portName = "EventCloudPublishPort", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2", name = "EventCloudPublishPortType")
 public class PublishService extends EventCloudService<PublishProxy> implements
         NotificationConsumer {
 
@@ -45,8 +48,11 @@ public class PublishService extends EventCloudService<PublishProxy> implements
     @Override
     public void notify(org.oasis_open.docs.wsn.b_2.Notify notifyRequest) {
         for (NotificationMessageHolderType msg : notifyRequest.getNotificationMessage()) {
-            Event event = this.translator.translateNotificationMessageToEvent(msg);
-            log.info("Translated event to insert to the Event Cloud is {}", event);
+            Event event =
+                    this.translator.translateNotificationMessageToEvent(msg);
+            log.info(
+                    "Translated event to insert to the Event Cloud is {}",
+                    event);
             super.proxy.publish(event);
         }
 
