@@ -73,7 +73,7 @@ public class PutGetTest {
         String putGetWsUrl =
                 WsProxyDeployer.deployPutGetWebService(
                         deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
-                        "putget", 8888);
+                        "putget", 8889);
 
         Component putGetComponent = this.createPutGetComponent(putGetWsUrl);
 
