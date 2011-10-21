@@ -25,8 +25,7 @@ import fr.inria.eventcloud.translators.wsnotif.notify.NotificationMessageToEvent
 import fr.inria.eventcloud.translators.wsnotif.subscribe.SubscribeToSparqlQueryTranslator;
 
 /**
- * Translator for {@link Event events} to {@link NotificationMessageHolderType
- * notification messages} and vice versa.
+ * Translator for WS notification objects.
  * 
  * @author bsauvan
  */
@@ -57,17 +56,17 @@ public class WsNotificationTranslator {
     }
 
     /**
-     * Translates the specified WS-Notification subscription to its
-     * corresponding SPARQL query.
+     * Translates the specified subscribe notification to its corresponding
+     * SPARQL query.
      * 
-     * @param subscribeRequest
-     *            the subscription to be translated.
+     * @param subscribe
+     *            the subscribe notification to be translated.
      * 
-     * @return the specified WS-Notification subscription to its corresponding
-     *         SPARQL query.
+     * @return the SPARQL query corresponding to the specified subscribe
+     *         notification.
      */
-    public String translateSubscribeToSparqlQuery(Subscribe subscribeRequest) {
-        return new SubscribeToSparqlQueryTranslator().translate(subscribeRequest);
+    public String translateSubscribeToSparqlQuery(Subscribe subscribe) {
+        return new SubscribeToSparqlQueryTranslator().translate(subscribe);
     }
 
 }

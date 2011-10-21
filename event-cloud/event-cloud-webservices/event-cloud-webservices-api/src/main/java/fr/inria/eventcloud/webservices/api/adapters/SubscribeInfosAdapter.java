@@ -16,12 +16,19 @@
  **/
 package fr.inria.eventcloud.webservices.api.adapters;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.namespace.QName;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
@@ -39,9 +46,13 @@ import fr.inria.eventcloud.webservices.api.SubscribeInfos;
  * XML Adapter for {@link SubscribeInfos} objects.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public class SubscribeInfosAdapter extends
         XmlAdapter<Subscribe, SubscribeInfos> {
+
+    private static Logger log =
+            LoggerFactory.getLogger(SubscribeInfosAdapter.class);
 
     private WsNotificationTranslator translator;
 
@@ -50,18 +61,19 @@ public class SubscribeInfosAdapter extends
     }
 
     /**
-     * Converts the specified SubscribeInfos to its string representation.
+     * Converts the specified subscribe infos to its subscribe object
+     * representation.
      * 
      * @param subscribeInfos
-     *            the SubscribeInfos to be converted.
+     *            the subscribe infos to be converted.
      * 
-     * @return the string representing the specified SubscribeInfos.
+     * @return the subscribe object representing the specified subscribe infos.
      */
     @Override
     public Subscribe marshal(SubscribeInfos subscribeInfos) throws Exception {
-        Subscribe subscribeRequest = new Subscribe();
+        Subscribe subscribe = new Subscribe();
         FilterType filterType = new FilterType();
-        TopicExpressionType tet = new TopicExpressionType();
+        TopicExpressionType topicExpressionType = new TopicExpressionType();
 
         // retrieve topic name from SPARQL query
         final StringBuilder topicName = new StringBuilder();
@@ -79,39 +91,65 @@ public class SubscribeInfosAdapter extends
                 },
                 Algebra.compile(QueryFactory.create(subscribeInfos.getSparqlQuery()))));
 
-        tet.getContent().add(topicName.toString());
-        filterType.getAny().add(tet);
-        subscribeRequest.setFilter(filterType);
+        topicExpressionType.getContent().add(topicName.toString());
+        JAXBContext jaxbContext =
+                JAXBContext.newInstance(TopicExpressionType.class);
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        JAXBElement<TopicExpressionType> jaxbElement =
+                new JAXBElement<TopicExpressionType>(
+                        new QName(
+                                "http://docs.oasis-open.org/wsn/b-2",
+                                "TopicExpressionType"),
+                        TopicExpressionType.class, topicExpressionType);
+        marshaller.marshal(jaxbElement, System.out);
+        filterType.getAny().add(jaxbElement);
+        subscribe.setFilter(filterType);
 
         W3CEndpointReferenceBuilder endPointReferenceBuilder =
                 new W3CEndpointReferenceBuilder();
         endPointReferenceBuilder.address(subscribeInfos.getSubscriberWsUrl());
-        subscribeRequest.setConsumerReference(endPointReferenceBuilder.build());
+        subscribe.setConsumerReference(endPointReferenceBuilder.build());
 
-        return subscribeRequest;
+        return subscribe;
     }
 
     /**
-     * Converts the specified {@link Subscribe} request to its corresponding
-     * {@link SubscribeInfos}.
+     * Converts the specified subscribe object to its corresponding subscribe
+     * infos.
      * 
-     * @param subscribeRequest
-     *            the Subscribe representation to be converted.
+     * @param subscribe
+     *            the subscribe object to be converted.
      * 
-     * @return the SubscribeInfos represented by the specified Subscribe object.
+     * @return the subscribe infos represented by the specified subscribe
+     *         object.
      */
     @Override
-    public SubscribeInfos unmarshal(Subscribe subscribeRequest)
-            throws Exception {
-        String subscriberUrl =
-                (String) ReflectionUtils.getFieldValue(
-                        ReflectionUtils.getFieldValue(
-                                subscribeRequest.getConsumerReference(),
-                                "address"), "uri");
+    public SubscribeInfos unmarshal(Subscribe subscribe) throws Exception {
+        W3CEndpointReference consumerReference =
+                subscribe.getConsumerReference();
 
-        return new SubscribeInfos(
-                this.translator.translateSubscribeToSparqlQuery(subscribeRequest),
-                subscriberUrl);
+        if (consumerReference != null) {
+            Object address =
+                    ReflectionUtils.getFieldValue(consumerReference, "address");
+            if (address != null) {
+                String subscriberUrl =
+                        (String) ReflectionUtils.getFieldValue(address, "uri");
+                if (subscriberUrl != null) {
+                    String sparqlQuery =
+                            this.translator.translateSubscribeToSparqlQuery(subscribe);
+                    if (sparqlQuery != null) {
+                        return new SubscribeInfos(sparqlQuery, subscriberUrl);
+                    } else {
+                        log.error("SPARQL query cannot be extracted from subscribe notification");
+                    }
+                }
+            }
+
+            log.error("Consumer reference cannot be extracted from subscribe notification");
+        } else {
+            log.error("Subscribe notification does not contain consumer reference");
+        }
+
+        return null;
     }
-
 }

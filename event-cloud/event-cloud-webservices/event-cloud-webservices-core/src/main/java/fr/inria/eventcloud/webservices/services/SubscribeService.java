@@ -31,23 +31,7 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
-import org.oasis_open.docs.wsn.bw_2.InvalidFilterFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidMessageContentExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidProducerPropertiesExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.MultipleTopicsSpecifiedFault;
-import org.oasis_open.docs.wsn.bw_2.NoCurrentMessageOnTopicFault;
-import org.oasis_open.docs.wsn.bw_2.NotifyMessageNotSupportedFault;
-import org.oasis_open.docs.wsn.bw_2.SubscribeCreationFailedFault;
-import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
-import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
-import org.oasis_open.docs.wsn.bw_2.UnacceptableInitialTerminationTimeFault;
-import org.oasis_open.docs.wsn.bw_2.UnrecognizedPolicyRequestFault;
-import org.oasis_open.docs.wsn.bw_2.UnsupportedPolicyRequestFault;
 import org.oasis_open.docs.wsrf.rp_2.GetResourcePropertyResponse;
-import org.oasis_open.docs.wsrf.rpw_2.InvalidResourcePropertyQNameFault;
-import org.oasis_open.docs.wsrf.rw_2.ResourceUnavailableFault;
-import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
 
 import com.petalslink.wsn.service.wsnproducer.NotificationProducer;
 
@@ -56,15 +40,13 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.utils.ReflectionUtils;
-import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
 
 /**
  * Defines a subscribe web service as defined by the WS-Notification
- * specification. All the calls to the Notify request will be translated and
- * redirected to a {@link PublishProxy} in order to be published into an Event
+ * specification. All the calls to the subscribe request will be translated and
+ * redirected to a {@link SubscribeProxy} in order to be treated into an Event
  * Cloud.
  * 
  * @author lpellegr
@@ -85,10 +67,7 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
      * {@inheritDoc}
      */
     @Override
-    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage currentMessage)
-            throws TopicNotSupportedFault, InvalidTopicExpressionFault,
-            ResourceUnknownFault, TopicExpressionDialectUnknownFault,
-            NoCurrentMessageOnTopicFault, MultipleTopicsSpecifiedFault {
+    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage currentMessage) {
         return null;
     }
 
@@ -96,9 +75,7 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
      * {@inheritDoc}
      */
     @Override
-    public GetResourcePropertyResponse getResourceProperty(QName qname)
-            throws ResourceUnknownFault, InvalidResourcePropertyQNameFault,
-            ResourceUnavailableFault {
+    public GetResourcePropertyResponse getResourceProperty(QName qname) {
         return null;
     }
 
@@ -106,71 +83,75 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
      * {@inheritDoc}
      */
     @Override
-    public SubscribeResponse subscribe(Subscribe subscribeRequest)
-            throws NotifyMessageNotSupportedFault, TopicNotSupportedFault,
-            InvalidFilterFault, InvalidTopicExpressionFault,
-            ResourceUnknownFault, TopicExpressionDialectUnknownFault,
-            UnrecognizedPolicyRequestFault, SubscribeCreationFailedFault,
-            InvalidMessageContentExpressionFault,
-            UnsupportedPolicyRequestFault,
-            UnacceptableInitialTerminationTimeFault,
-            InvalidProducerPropertiesExpressionFault {
-
+    public SubscribeResponse subscribe(Subscribe subscribe) {
         if (this.subscribers == null) {
             this.subscribers = new HashMap<SubscriptionId, Client>();
         }
 
         // TODO: maintain mapping between subscription Id, subscriber
-        SubscriptionId subscriptionId =
-                super.proxy.subscribe(
-                        super.translator.translateSubscribeToSparqlQuery(subscribeRequest),
-                        new EventNotificationListener() {
-                            private static final long serialVersionUID = 1L;
 
-                            @Override
-                            public void onNotification(SubscriptionId id,
-                                                       Event solution) {
+        String sparqlQuery =
+                super.translator.translateSubscribeToSparqlQuery(subscribe);
 
-                                NotificationMessageHolderType msg =
-                                        translator.translateEventToNotificationMessage(solution);
-                                Notify notifyMessage = new Notify();
-                                notifyMessage.getNotificationMessage().add(msg);
+        if (sparqlQuery != null) {
+            SubscriptionId subscriptionId =
+                    super.proxy.subscribe(
+                            sparqlQuery, new EventNotificationListener() {
+                                private static final long serialVersionUID = 1L;
 
-                                try {
-                                    subscribers.get(id).invoke(
-                                            NOTIFY_METHOD_NAME,
-                                            new Object[] {notifyMessage});
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                                @Override
+                                public void onNotification(SubscriptionId id,
+                                                           Event solution) {
+
+                                    Notify notify = new Notify();
+                                    NotificationMessageHolderType notificationMessage =
+                                            translator.translateEventToNotificationMessage(solution);
+                                    notify.getNotificationMessage().add(
+                                            notificationMessage);
+
+                                    if (subscribers.containsKey(id)) {
+                                        try {
+                                            subscribers.get(id).invoke(
+                                                    NOTIFY_METHOD_NAME,
+                                                    new Object[] {notify});
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
                                 }
-                            }
-                        });
+                            });
 
-        if (!this.subscribers.containsKey(subscriptionId)) {
-            W3CEndpointReference consumerReference =
-                    subscribeRequest.getConsumerReference();
-            Object address =
-                    ReflectionUtils.getFieldValue(consumerReference, "address");
+            if (!this.subscribers.containsKey(subscriptionId)) {
+                W3CEndpointReference consumerReference =
+                        subscribe.getConsumerReference();
 
-            String subscriberAddress = null;
-            if (address != null) {
-                Object uri = ReflectionUtils.getFieldValue(address, "uri");
+                if (consumerReference != null) {
+                    Object address =
+                            ReflectionUtils.getFieldValue(
+                                    consumerReference, "address");
+                    if (address != null) {
+                        String subscriberUrl =
+                                (String) ReflectionUtils.getFieldValue(
+                                        address, "uri");
+                        if (subscriberUrl != null) {
+                            JaxWsClientFactoryBean clientFactory =
+                                    new JaxWsClientFactoryBean();
+                            clientFactory.setServiceClass(NotificationProducer.class);
+                            clientFactory.setAddress(subscriberUrl);
+                            Client client = clientFactory.create();
+                            this.subscribers.put(subscriptionId, client);
+                        } else {
+                            log.info("Subscribe notification received but no subscriber address is specified: the subscriber will receive no notification");
+                        }
+                    }
 
-                if (uri != null) {
-                    subscriberAddress = (String) uri;
+                    log.error("Consumer reference cannot be extracted from subscribe notification");
+                } else {
+                    log.error("Subscribe notification does not contain consumer reference");
                 }
             }
-
-            if (subscriberAddress != null) {
-                JaxWsClientFactoryBean clientFactory =
-                        new JaxWsClientFactoryBean();
-                clientFactory.setServiceClass(SubscriberWsApi.class);
-                clientFactory.setAddress(subscriberAddress);
-                Client client = clientFactory.create();
-                this.subscribers.put(subscriptionId, client);
-            } else {
-                log.info("Subscribe request received but no subscriber address is specified: the subscriber will receive no notification");
-            }
+        } else {
+            log.error("SPARQL query cannot be extracted from subscribe notification");
         }
 
         return new SubscribeResponse();

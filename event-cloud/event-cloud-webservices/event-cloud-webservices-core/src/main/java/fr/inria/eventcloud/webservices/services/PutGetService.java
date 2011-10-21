@@ -30,6 +30,9 @@ import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
 
 /**
+ * Defines a put/get web service. All the calls to the requests will be
+ * redirected to a {@link PutGetProxy} in order to be treated into an Event
+ * Cloud.
  * 
  * @author lpellegr
  */

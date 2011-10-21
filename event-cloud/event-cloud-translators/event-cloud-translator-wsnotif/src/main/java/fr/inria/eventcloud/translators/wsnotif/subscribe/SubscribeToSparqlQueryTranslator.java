@@ -17,11 +17,11 @@
 package fr.inria.eventcloud.translators.wsnotif.subscribe;
 
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -33,19 +33,17 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.oasis_open.docs.wsn.b_2.FilterType;
-import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
+import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
- * Translator for {@link NotificationMessageHolderType notification messages} to
- * {@link Event events}.
+ * Translator for {@link Subscribe subscribe notifications} to SPARQL queries.
  * 
  * @author bsauvan
  * @author lpellegr
@@ -56,30 +54,51 @@ public class SubscribeToSparqlQueryTranslator {
             LoggerFactory.getLogger(SubscribeToSparqlQueryTranslator.class);
 
     /**
-     * Translates the specified notification message to its corresponding event.
+     * Translates the specified subscribe notification to its corresponding
+     * SPARQL query.
      * 
-     * @param subscribeRequest
-     *            the subscribe request to be translated.
+     * @param subscribe
+     *            the subscribe notification to be translated.
      * 
-     * @return the event corresponding to the specified notification message.
+     * @return the SPARQL query corresponding to the specified subscribe
+     *         notification.
      */
-    public String translate(Subscribe subscribeRequest) {
-        logSubscribe(subscribeRequest);
+    @SuppressWarnings("unchecked")
+    public String translate(Subscribe subscribe) {
+        logSubscribe(subscribe);
 
-        TopicExpressionType tet =
-                (TopicExpressionType) ((List<Object>) subscribeRequest.getFilter()
-                        .getAny()).get(0);
+        FilterType filterType = subscribe.getFilter();
+        if (filterType != null) {
+            List<Object> any = filterType.getAny();
+            if (any.size() > 0) {
+                try {
+                    TopicExpressionType topicExpressionType =
+                            ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
+                    List<Object> content = topicExpressionType.getContent();
+                    if (content.size() > 0) {
+                        return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { <"
+                                + WsNotificationTranslatorConstants.DEFAULT_TOPIC_NAMESPACE
+                                + "/" + content.get(0) + "> ?p ?o . } }";
+                    } else {
+                        log.error("No topic content set in the subscribe notification");
+                    }
+                } catch (ClassCastException cce) {
+                    cce.printStackTrace();
+                }
+            } else {
+                log.error("No any object set in the subscribe notification");
+            }
+        } else {
+            log.error("No filter set in the subscribe notification");
+        }
 
-        return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { <"
-                + WsNotificationTranslatorConstants.DEFAULT_TOPIC_NAMESPACE
-                + "/" + tet.getContent().get(0) + "> ?p ?o . } }";
+        return null;
     }
 
-    private static void logSubscribe(Subscribe subscribeRequest) {
-        logW3CEndpointReference(
-                subscribeRequest.getConsumerReference(), "consumer");
+    private static void logSubscribe(Subscribe subscribe) {
+        logW3CEndpointReference(subscribe.getConsumerReference(), "consumer");
 
-        List<Object> any = subscribeRequest.getAny();
+        List<Object> any = subscribe.getAny();
         if (any != null) {
             log.info("any values are:");
             for (Object obj : any) {
@@ -89,7 +108,7 @@ public class SubscribeToSparqlQueryTranslator {
             log.info("any is null");
         }
 
-        FilterType filterType = subscribeRequest.getFilter();
+        FilterType filterType = subscribe.getFilter();
 
         if (filterType != null) {
             any = filterType.getAny();
@@ -136,54 +155,62 @@ public class SubscribeToSparqlQueryTranslator {
     @SuppressWarnings("unchecked")
     private static void logW3CEndpointReference(W3CEndpointReference ref,
                                                 String type) {
-        Object address = getFieldValue(ref, "address");
-        if (address != null) {
-            log.info("type={}, address={}", type, (String) getFieldValue(
-                    address, "uri"));
-            logAttributes(type + " Address Attributes", address, "attributes");
-        } else {
-            log.info("type={}, address is null", type);
-        }
+        if (ref != null) {
+            Object address = ReflectionUtils.getFieldValue(ref, "address");
+            if (address != null) {
+                log.info(
+                        "type={}, address={}", type,
+                        ReflectionUtils.getFieldValue(address, "uri"));
+                logAttributes(
+                        type + " Address Attributes", address, "attributes");
+            } else {
+                log.info("type={}, address is null", type);
+            }
 
-        // referenceParameters
+            // referenceParameters
 
-        Object metadata = getFieldValue(ref, "metadata");
-        if (metadata != null) {
-            Object metadataElts = getFieldValue(metadata, "elements");
+            Object metadata = ReflectionUtils.getFieldValue(ref, "metadata");
+            if (metadata != null) {
+                Object metadataElts =
+                        ReflectionUtils.getFieldValue(metadata, "elements");
 
-            if (metadataElts != null) {
-                log.info("type={}, metadata=", type);
-                for (Element elt : (List<Element>) metadataElts) {
+                if (metadataElts != null) {
+                    log.info("type={}, metadata=", type);
+                    for (Element elt : (List<Element>) metadataElts) {
+                        log.info("  {} ", asString(elt));
+                    }
+                } else {
+                    log.info("type={}, metadata elements is null", type);
+                }
+
+                logAttributes(
+                        type + " metadata Elements Attributes", metadata,
+                        "attributes");
+            } else {
+                log.info("type={}, metadata is null", type);
+            }
+
+            logAttributes(type + " Attributes", ref, "attributes");
+
+            Object elements = ReflectionUtils.getFieldValue(ref, "elements");
+            if (elements != null) {
+                log.info("type={}, elements=", type);
+                for (Element elt : (List<Element>) elements) {
                     log.info("  {} ", asString(elt));
                 }
             } else {
-                log.info("type={}, metadata elements is null", type);
-            }
-
-            logAttributes(
-                    type + " metadata Elements Attributes", metadata,
-                    "attributes");
-        } else {
-            log.info("type={}, metadata is null", type);
-        }
-
-        logAttributes(type + " Attributes", ref, "attributes");
-
-        Object elements = getFieldValue(ref, "elements");
-        if (elements != null) {
-            log.info("type={}, elements=", type);
-            for (Element elt : (List<Element>) elements) {
-                log.info("  {} ", asString(elt));
+                log.info("type={}, elements is null", type);
             }
         } else {
-            log.info("type={}, elements is null", type);
+            log.info("type={} is null", type);
         }
     }
 
     @SuppressWarnings("unchecked")
     private static void logAttributes(String type, Object obj, String fieldName) {
         Map<QName, String> attributes =
-                (Map<QName, String>) getFieldValue(obj, fieldName);
+                (Map<QName, String>) ReflectionUtils.getFieldValue(
+                        obj, fieldName);
 
         if (attributes != null) {
             for (Entry<QName, String> entry : attributes.entrySet()) {
@@ -218,22 +245,6 @@ public class SubscribeToSparqlQueryTranslator {
         }
 
         return sw.toString();
-    }
-
-    private static Object getFieldValue(Object object, String fieldName) {
-        try {
-            Field field = object.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field.get(object);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
 }
