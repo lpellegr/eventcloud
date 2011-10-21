@@ -57,7 +57,7 @@ public class PublishService extends EventCloudService<PublishProxy> implements
             super.proxy.publish(event);
         }
 
-        log.info("New notify request handled");
+        log.info("New notify notification handled");
     }
 
     /**

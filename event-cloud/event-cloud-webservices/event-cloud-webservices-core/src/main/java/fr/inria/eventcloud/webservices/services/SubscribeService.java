@@ -92,6 +92,7 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
 
         String sparqlQuery =
                 super.translator.translateSubscribeToSparqlQuery(subscribe);
+        log.info("Translated SPARQL query is {}", sparqlQuery);
 
         if (sparqlQuery != null) {
             SubscriptionId subscriptionId =
@@ -134,6 +135,7 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
                                 (String) ReflectionUtils.getFieldValue(
                                         address, "uri");
                         if (subscriberUrl != null) {
+                            log.info("Subscriber URL is {}", subscriberUrl);
                             JaxWsClientFactoryBean clientFactory =
                                     new JaxWsClientFactoryBean();
                             clientFactory.setServiceClass(NotificationProducer.class);
@@ -143,6 +145,8 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
                         } else {
                             log.info("Subscribe notification received but no subscriber address is specified: the subscriber will receive no notification");
                         }
+
+                        log.info("New subscribe notification handled");
                     }
 
                     log.error("Consumer reference cannot be extracted from subscribe notification");
