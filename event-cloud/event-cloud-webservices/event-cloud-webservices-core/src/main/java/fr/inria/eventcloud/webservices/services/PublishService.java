@@ -19,6 +19,7 @@ package fr.inria.eventcloud.webservices.services;
 import javax.jws.WebService;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
+import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 
 import fr.inria.eventcloud.api.Event;
@@ -28,7 +29,7 @@ import fr.inria.eventcloud.proxies.PublishProxy;
 
 /**
  * Defines a publish web service as defined by the WS-Notification
- * specification. All the calls to the Notify request will be translated and
+ * specification. All the calls to the notify request will be translated and
  * redirected to a {@link PublishProxy} in order to be published into an Event
  * Cloud.
  * 
@@ -46,10 +47,10 @@ public class PublishService extends EventCloudService<PublishProxy> implements
      * {@inheritDoc}
      */
     @Override
-    public void notify(org.oasis_open.docs.wsn.b_2.Notify notifyRequest) {
-        for (NotificationMessageHolderType msg : notifyRequest.getNotificationMessage()) {
+    public void notify(Notify notify) {
+        for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
             Event event =
-                    this.translator.translateNotificationMessageToEvent(msg);
+                    this.translator.translateNotificationMessageToEvent(notificationMessage);
             log.info(
                     "Translated event to insert to the Event Cloud is {}",
                     event);

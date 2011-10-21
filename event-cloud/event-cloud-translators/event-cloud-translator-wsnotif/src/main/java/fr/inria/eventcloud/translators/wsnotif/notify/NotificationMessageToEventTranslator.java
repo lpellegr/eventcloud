@@ -76,68 +76,89 @@ public class NotificationMessageToEventTranslator {
      */
     public Event translate(NotificationMessageHolderType notificationMessage) {
         List<Quadruple> quads = new ArrayList<Quadruple>();
+        String eventId = null;
+        Node eventIdNode = null;
         Node subjectNode = null;
-        Node subscriptionAddress = null;
-        Node topic = null;
-        Node producerAddress = null;
-        Map<Node, Node> producerMetadata = new HashMap<Node, Node>();
-        Map<Node, Node> messages = new HashMap<Node, Node>();
+        Node subscriptionAddressNode = null;
+        Node topicNode = null;
+        Node producerAddressNode = null;
+        Map<Node, Node> producerMetadataNodes = new HashMap<Node, Node>();
+        Map<Node, Node> messageNodes = new HashMap<Node, Node>();
 
         logNotificationMessage(notificationMessage);
 
-        String subscriptionAddressText =
-                (String) ReflectionUtils.getFieldValue(
-                        ReflectionUtils.getFieldValue(
-                                notificationMessage.getSubscriptionReference(),
-                                "address"), "uri");
-
-        subscriptionAddress = Node.createLiteral(subscriptionAddressText);
-
-        List<Object> topicContent = notificationMessage.getTopic().getContent();
-
-        if (topicContent.size() > 0) {
-            subjectNode =
-                    Node.createURI(WsNotificationTranslatorConstants.DEFAULT_TOPIC_NAMESPACE
-                            + "/" + ((String) topicContent.get(0)));
-            topic = Node.createLiteral((String) topicContent.get(0));
-        }
-
-        String producerAddressText =
-                (String) ReflectionUtils.getFieldValue(
-                        ReflectionUtils.getFieldValue(
-                                notificationMessage.getProducerReference(),
-                                "address"), "uri");
-
-        producerAddress = Node.createLiteral(producerAddressText);
-
-        Object metadata =
-                ReflectionUtils.getFieldValue(
-                        notificationMessage.getProducerReference(), "metadata");
-
-        String eventId = null;
-        if (metadata != null) {
-            @SuppressWarnings("unchecked")
-            List<Element> producerMetadataElements =
-                    (List<Element>) ReflectionUtils.getFieldValue(
-                            metadata, "elements");
-            producerMetadata = parseElements(producerMetadataElements);
-
-            // creates the event identifier by trying to retrieve it from the
-            // metadata part. If it is not available, a random identifier is
-            // created
-
-            for (Entry<Node, Node> entry : producerMetadata.entrySet()) {
-                if (entry.getKey()
-                        .getURI()
-                        .contains(
-                                WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
-                    eventId = entry.getValue().getLiteralLexicalForm();
-                    break;
+        W3CEndpointReference subscriptionReference =
+                notificationMessage.getSubscriptionReference();
+        if (subscriptionReference != null) {
+            Object subscriptionAddress =
+                    ReflectionUtils.getFieldValue(
+                            subscriptionReference, "address");
+            if (subscriptionAddress != null) {
+                String subscriptionAddressUri =
+                        (String) ReflectionUtils.getFieldValue(
+                                subscriptionAddress, "uri");
+                if (subscriptionAddressUri != null) {
+                    subscriptionAddressNode =
+                            Node.createLiteral(subscriptionAddressUri);
                 }
             }
         }
 
-        Node eventIdNode;
+        TopicExpressionType topicExpressionType =
+                notificationMessage.getTopic();
+        if (topicExpressionType != null) {
+            List<Object> topicContent = topicExpressionType.getContent();
+            if (topicContent.size() > 0) {
+                String topic = (String) topicContent.get(0);
+                subjectNode =
+                        Node.createURI(WsNotificationTranslatorConstants.DEFAULT_TOPIC_NAMESPACE
+                                + "/" + topic);
+                topicNode = Node.createLiteral(topic);
+            }
+        }
+
+        W3CEndpointReference producerReference =
+                notificationMessage.getProducerReference();
+        if (producerReference != null) {
+            Object producerAddress =
+                    ReflectionUtils.getFieldValue(producerReference, "address");
+            if (producerAddress != null) {
+                String producerAddressUri =
+                        (String) ReflectionUtils.getFieldValue(
+                                producerAddress, "uri");
+                if (producerAddressUri != null) {
+                    producerAddressNode =
+                            Node.createLiteral(producerAddressUri);
+                }
+            }
+
+            Object metadata =
+                    ReflectionUtils.getFieldValue(
+                            notificationMessage.getProducerReference(),
+                            "metadata");
+            if (metadata != null) {
+                @SuppressWarnings("unchecked")
+                List<Element> producerMetadataElements =
+                        (List<Element>) ReflectionUtils.getFieldValue(
+                                metadata, "elements");
+                producerMetadataNodes = parseElements(producerMetadataElements);
+
+                // creates the event identifier by trying to retrieve it from
+                // the
+                // metadata part. If it is not available, a random identifier is
+                // created
+                for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
+                    if (entry.getKey()
+                            .getURI()
+                            .contains(
+                                    WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+                        eventId = entry.getValue().getLiteralLexicalForm();
+                        break;
+                    }
+                }
+            }
+        }
+
         if (eventId != null) {
             eventIdNode = Node.createURI(eventId);
         } else {
@@ -146,40 +167,58 @@ public class NotificationMessageToEventTranslator {
         }
 
         Message message = notificationMessage.getMessage();
-        messages = parseElement((Element) message.getAny());
+        messageNodes = parseElement((Element) message.getAny());
 
-        quads.add(new Quadruple(
-                eventIdNode, subjectNode,
-                WsNotificationTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
-                subscriptionAddress, false, true));
+        if (subjectNode != null) {
+            if (subscriptionAddressNode != null) {
+                quads.add(new Quadruple(
+                        eventIdNode,
+                        subjectNode,
+                        WsNotificationTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
+                        subscriptionAddressNode, false, true));
+            } else {
+                log.warn("No subscription reference address set in the WS Notification message");
+            }
 
-        quads.add(new Quadruple(
-                eventIdNode, subjectNode,
-                WsNotificationTranslatorConstants.TOPIC_NODE, topic, false,
-                true));
+            if (topicNode != null) {
+                quads.add(new Quadruple(
+                        eventIdNode, subjectNode,
+                        WsNotificationTranslatorConstants.TOPIC_NODE,
+                        topicNode, false, true));
+            } else {
+                log.warn("No topic set in the WS Notification message");
+            }
 
-        quads.add(new Quadruple(
-                eventIdNode, subjectNode,
-                WsNotificationTranslatorConstants.PRODUCER_ADDRESS_NODE,
-                producerAddress, false, true));
+            if (producerAddressNode != null) {
+                quads.add(new Quadruple(
+                        eventIdNode,
+                        subjectNode,
+                        WsNotificationTranslatorConstants.PRODUCER_ADDRESS_NODE,
+                        producerAddressNode, false, true));
+            } else {
+                log.warn("No producer reference address set in the WS Notification message");
+            }
 
-        for (Entry<Node, Node> entry : producerMetadata.entrySet()) {
-            quads.add(new Quadruple(
-                    eventIdNode, subjectNode, entry.getKey(), entry.getValue(),
-                    false, true));
+            for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
+                quads.add(new Quadruple(
+                        eventIdNode, subjectNode, entry.getKey(),
+                        entry.getValue(), false, true));
+            }
+
+            for (Entry<Node, Node> entry : messageNodes.entrySet()) {
+                quads.add(new Quadruple(
+                        eventIdNode, subjectNode, entry.getKey(),
+                        entry.getValue(), false, true));
+            }
+
+            return new Event(new Collection<Quadruple>(quads));
+        } else {
+            log.error("Cannot construct Event because no subject can be extracted from the WS Notification message");
+            return null;
         }
-
-        for (Entry<Node, Node> entry : messages.entrySet()) {
-            quads.add(new Quadruple(
-                    eventIdNode, subjectNode, entry.getKey(), entry.getValue(),
-                    false, true));
-        }
-
-        return new Event(new Collection<Quadruple>(quads));
     }
 
     private static void logNotificationMessage(NotificationMessageHolderType msg) {
-        logW3CEndpointReference(msg.getProducerReference(), "producer");
         logW3CEndpointReference(msg.getSubscriptionReference(), "subscriber");
 
         TopicExpressionType topicType = msg.getTopic();
@@ -198,6 +237,8 @@ public class NotificationMessageToEventTranslator {
         } else {
             log.info("topicType is null");
         }
+
+        logW3CEndpointReference(msg.getProducerReference(), "producer");
 
         Message message = msg.getMessage();
 
@@ -223,49 +264,54 @@ public class NotificationMessageToEventTranslator {
     @SuppressWarnings("unchecked")
     private static void logW3CEndpointReference(W3CEndpointReference ref,
                                                 String type) {
-        Object address = ReflectionUtils.getFieldValue(ref, "address");
-        if (address != null) {
-            log.info(
-                    "type={}, address={}", type,
-                    (String) ReflectionUtils.getFieldValue(address, "uri"));
-            logAttributes(type + " Address Attributes", address, "attributes");
-        } else {
-            log.info("type={}, address is null", type);
-        }
+        if (ref != null) {
+            Object address = ReflectionUtils.getFieldValue(ref, "address");
+            if (address != null) {
+                log.info(
+                        "type={}, address={}", type,
+                        ReflectionUtils.getFieldValue(address, "uri"));
+                logAttributes(
+                        type + " Address Attributes", address, "attributes");
+            } else {
+                log.info("type={}, address is null", type);
+            }
 
-        // referenceParameters
+            // referenceParameters
 
-        Object metadata = ReflectionUtils.getFieldValue(ref, "metadata");
-        if (metadata != null) {
-            Object metadataElts =
-                    ReflectionUtils.getFieldValue(metadata, "elements");
+            Object metadata = ReflectionUtils.getFieldValue(ref, "metadata");
+            if (metadata != null) {
+                Object metadataElts =
+                        ReflectionUtils.getFieldValue(metadata, "elements");
 
-            if (metadataElts != null) {
-                log.info("type={}, metadata=", type);
-                for (Element elt : (List<Element>) metadataElts) {
+                if (metadataElts != null) {
+                    log.info("type={}, metadata=", type);
+                    for (Element elt : (List<Element>) metadataElts) {
+                        log.info("  {} ", asString(elt));
+                    }
+                } else {
+                    log.info("type={}, metadata elements is null", type);
+                }
+
+                logAttributes(
+                        type + " metadata Elements Attributes", metadata,
+                        "attributes");
+            } else {
+                log.info("type={}, metadata is null", type);
+            }
+
+            logAttributes(type + " Attributes", ref, "attributes");
+
+            Object elements = ReflectionUtils.getFieldValue(ref, "elements");
+            if (elements != null) {
+                log.info("type={}, elements=", type);
+                for (Element elt : (List<Element>) elements) {
                     log.info("  {} ", asString(elt));
                 }
             } else {
-                log.info("type={}, metadata elements is null", type);
-            }
-
-            logAttributes(
-                    type + " metadata Elements Attributes", metadata,
-                    "attributes");
-        } else {
-            log.info("type={}, metadata is null", type);
-        }
-
-        logAttributes(type + " Attributes", ref, "attributes");
-
-        Object elements = ReflectionUtils.getFieldValue(ref, "elements");
-        if (elements != null) {
-            log.info("type={}, elements=", type);
-            for (Element elt : (List<Element>) elements) {
-                log.info("  {} ", asString(elt));
+                log.info("type={}, elements is null", type);
             }
         } else {
-            log.info("type={}, elements is null", type);
+            log.info("type={} is null", type);
         }
     }
 
@@ -313,8 +359,10 @@ public class NotificationMessageToEventTranslator {
     private Map<Node, Node> parseElements(List<Element> elements) {
         Map<Node, Node> elementNodes = new HashMap<Node, Node>();
 
-        for (Element element : elements) {
-            elementNodes.putAll(parseElement(element));
+        if (elements != null) {
+            for (Element element : elements) {
+                elementNodes.putAll(parseElement(element));
+            }
         }
 
         return elementNodes;
@@ -323,7 +371,9 @@ public class NotificationMessageToEventTranslator {
     private Map<Node, Node> parseElement(Element element) {
         Map<Node, Node> result = new HashMap<Node, Node>();
 
-        this.parseElement(element, new StringBuilder(), result);
+        if (element != null) {
+            this.parseElement(element, new StringBuilder(), result);
+        }
 
         return result;
     }
