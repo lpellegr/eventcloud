@@ -81,12 +81,12 @@ public class PubSubTest {
         String subscribeWsUrl =
                 WsProxyDeployer.deploySubscribeWebService(
                         deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
-                        "subscribe", 8888);
+                        "subscribe", 8889);
 
         String publishWsUrl =
                 WsProxyDeployer.deployPublishWebService(
                         deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
-                        "publish", 8889);
+                        "publish", 8890);
 
         Component pubSubComponent =
                 this.createPubSubComponent(subscribeWsUrl, publishWsUrl);
