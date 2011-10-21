@@ -51,10 +51,12 @@ public class PublishService extends EventCloudService<PublishProxy> implements
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
             Event event =
                     this.translator.translateNotificationMessageToEvent(notificationMessage);
-            log.info(
-                    "Translated event to insert to the Event Cloud is {}",
-                    event);
-            super.proxy.publish(event);
+            if (event != null) {
+                log.info(
+                        "Translated event to insert to the Event Cloud is {}",
+                        event);
+                super.proxy.publish(event);
+            }
         }
 
         log.info("New notify notification handled");

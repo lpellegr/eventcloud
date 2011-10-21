@@ -177,7 +177,7 @@ public class NotificationMessageToEventTranslator {
                         WsNotificationTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
                         subscriptionAddressNode, false, true));
             } else {
-                log.warn("No subscription reference address set in the WS Notification message");
+                log.warn("No subscription reference address set in the notification message");
             }
 
             if (topicNode != null) {
@@ -186,7 +186,7 @@ public class NotificationMessageToEventTranslator {
                         WsNotificationTranslatorConstants.TOPIC_NODE,
                         topicNode, false, true));
             } else {
-                log.warn("No topic set in the WS Notification message");
+                log.warn("No topic set in the notification message");
             }
 
             if (producerAddressNode != null) {
@@ -196,7 +196,7 @@ public class NotificationMessageToEventTranslator {
                         WsNotificationTranslatorConstants.PRODUCER_ADDRESS_NODE,
                         producerAddressNode, false, true));
             } else {
-                log.warn("No producer reference address set in the WS Notification message");
+                log.warn("No producer reference address set in the notification message");
             }
 
             for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
@@ -213,7 +213,7 @@ public class NotificationMessageToEventTranslator {
 
             return new Event(new Collection<Quadruple>(quads));
         } else {
-            log.error("Cannot construct Event because no subject can be extracted from the WS Notification message");
+            log.error("Cannot construct Event because no subject can be extracted from the notification message");
             return null;
         }
     }
