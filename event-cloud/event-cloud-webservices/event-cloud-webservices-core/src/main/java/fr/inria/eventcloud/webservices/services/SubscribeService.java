@@ -23,25 +23,20 @@ import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
-import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
-import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsrf.rp_2.GetResourcePropertyResponse;
 
 import com.petalslink.wsn.service.wsnproducer.NotificationProducer;
 
-import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.utils.ReflectionUtils;
+import fr.inria.eventcloud.webservices.WsEventNotificationListener;
 
 /**
  * Defines a subscribe web service as defined by the WS-Notification
@@ -55,12 +50,11 @@ import fr.inria.eventcloud.utils.ReflectionUtils;
 public class SubscribeService extends EventCloudService<SubscribeProxy>
         implements NotificationProducer {
 
-    private static final String NOTIFY_METHOD_NAME = "Notify";
-
-    private Map<SubscriptionId, Client> subscribers;
+    private Map<SubscriptionId, String> subscribers;
 
     public SubscribeService(String registryUrl, String eventCloudIdUrl) {
         super(registryUrl, eventCloudIdUrl);
+        this.subscribers = new HashMap<SubscriptionId, String>();
     }
 
     /**
@@ -84,76 +78,45 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
      */
     @Override
     public SubscribeResponse subscribe(Subscribe subscribe) {
-        if (this.subscribers == null) {
-            this.subscribers = new HashMap<SubscriptionId, Client>();
-        }
-
-        // TODO: maintain mapping between subscription Id, subscriber
-
         String sparqlQuery =
                 super.translator.translateSubscribeToSparqlQuery(subscribe);
+
         log.info("Translated SPARQL query is {}", sparqlQuery);
 
         if (sparqlQuery != null) {
-            SubscriptionId subscriptionId =
-                    super.proxy.subscribe(
-                            sparqlQuery, new EventNotificationListener() {
-                                private static final long serialVersionUID = 1L;
+            W3CEndpointReference consumerReference =
+                    subscribe.getConsumerReference();
 
-                                @Override
-                                public void onNotification(SubscriptionId id,
-                                                           Event solution) {
+            if (consumerReference != null) {
+                Object address =
+                        ReflectionUtils.getFieldValue(
+                                consumerReference, "address");
+                if (address != null) {
+                    String subscriberUrl =
+                            (String) ReflectionUtils.getFieldValue(
+                                    address, "uri");
+                    if (subscriberUrl != null) {
+                        log.info("Subscriber URL is {}", subscriberUrl);
 
-                                    Notify notify = new Notify();
-                                    NotificationMessageHolderType notificationMessage =
-                                            translator.translateEventToNotificationMessage(solution);
-                                    notify.getNotificationMessage().add(
-                                            notificationMessage);
+                        SubscriptionId id =
+                                super.proxy.subscribe(
+                                        sparqlQuery,
+                                        new WsEventNotificationListener(
+                                                subscriberUrl));
 
-                                    if (subscribers.containsKey(id)) {
-                                        try {
-                                            subscribers.get(id).invoke(
-                                                    NOTIFY_METHOD_NAME,
-                                                    new Object[] {notify});
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                            });
-
-            if (!this.subscribers.containsKey(subscriptionId)) {
-                W3CEndpointReference consumerReference =
-                        subscribe.getConsumerReference();
-
-                if (consumerReference != null) {
-                    Object address =
-                            ReflectionUtils.getFieldValue(
-                                    consumerReference, "address");
-                    if (address != null) {
-                        String subscriberUrl =
-                                (String) ReflectionUtils.getFieldValue(
-                                        address, "uri");
-                        if (subscriberUrl != null) {
-                            log.info("Subscriber URL is {}", subscriberUrl);
-                            JaxWsClientFactoryBean clientFactory =
-                                    new JaxWsClientFactoryBean();
-                            clientFactory.setServiceClass(NotificationProducer.class);
-                            clientFactory.setAddress(subscriberUrl);
-                            Client client = clientFactory.create();
-                            this.subscribers.put(subscriptionId, client);
-                        } else {
-                            log.info("Subscribe notification received but no subscriber address is specified: the subscriber will receive no notification");
-                        }
-
-                        log.info("New subscribe notification handled");
+                        this.subscribers.put(id, subscriberUrl);
+                    } else {
+                        log.info("Subscribe notification received but no subscriber address is specified: the subscriber will receive no notification");
                     }
 
-                    log.error("Consumer reference cannot be extracted from subscribe notification");
-                } else {
-                    log.error("Subscribe notification does not contain consumer reference");
+                    log.info("New subscribe notification handled");
                 }
+
+                log.error("Consumer reference cannot be extracted from subscribe notification");
+            } else {
+                log.error("Subscribe notification does not contain consumer reference");
             }
+
         } else {
             log.error("SPARQL query cannot be extracted from subscribe notification");
         }
