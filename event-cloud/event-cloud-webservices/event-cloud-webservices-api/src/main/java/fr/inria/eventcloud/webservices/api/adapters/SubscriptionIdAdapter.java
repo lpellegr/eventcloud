@@ -57,7 +57,8 @@ public class SubscriptionIdAdapter extends
      */
     @Override
     public SubscriptionId unmarshal(SubscribeResponse id) throws Exception {
-        return new SubscriptionId(new LongLong(MurmurHash.hash128("dummy")));
+        return new SubscriptionId(new LongLong(
+                MurmurHash.hash128(id.toString())));
     }
 
 }
