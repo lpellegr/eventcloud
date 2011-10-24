@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.translators.wsnotif.notify;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +29,12 @@ import java.util.Map.Entry;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -43,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -65,6 +74,50 @@ public class NotificationMessageToEventTranslator {
 
     private static Logger log =
             LoggerFactory.getLogger(NotificationMessageToEventTranslator.class);
+
+    /**
+     * This method removes all white spaces between > < elements for a node
+     * 
+     * @param incomingNode
+     * @return
+     */
+    public static org.w3c.dom.Node removeWhiteSpacesFromNode(org.w3c.dom.Node incomingNode) {
+        try {
+            byte[] nodeBytes = xmlNodeToByteArray(incomingNode);
+            String nodeString = new String(nodeBytes, "UTF-8");
+            nodeString = nodeString.replaceAll(">\\s*<", "><");
+            incomingNode = byteArrayToXmlNode(nodeString.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return incomingNode;
+    }
+
+    public static byte[] xmlNodeToByteArray(org.w3c.dom.Node node) {
+        try {
+            Source source = new DOMSource(node);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            Result result = new StreamResult(out);
+            TransformerFactory factory = TransformerFactory.newInstance();
+            Transformer transformer = factory.newTransformer();
+            transformer.transform(source, result);
+            return out.toByteArray();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static org.w3c.dom.Node byteArrayToXmlNode(byte[] xml)
+            throws SAXException, ParserConfigurationException, IOException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.parse(new ByteArrayInputStream(xml))
+                .getDocumentElement();
+    }
 
     /**
      * Translates the specified notification message to its corresponding event.
@@ -147,6 +200,8 @@ public class NotificationMessageToEventTranslator {
                 // the
                 // metadata part. If it is not available, a random identifier is
                 // created
+
+                // Map<predicate, object
                 for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
                     if (entry.getKey()
                             .getURI()
@@ -167,7 +222,7 @@ public class NotificationMessageToEventTranslator {
         }
 
         Message message = notificationMessage.getMessage();
-        messageNodes = parseElement((Element) message.getAny());
+        messageNodes = parseElement((Element) message.getAny(), false);
 
         if (subjectNode != null) {
             if (subscriptionAddressNode != null) {
@@ -331,7 +386,7 @@ public class NotificationMessageToEventTranslator {
         }
     }
 
-    private static String asString(Element elt) {
+    public static String asString(Element elt) {
         TransformerFactory transfac = TransformerFactory.newInstance();
         Transformer trans = null;
         try {
@@ -361,31 +416,47 @@ public class NotificationMessageToEventTranslator {
 
         if (elements != null) {
             for (Element element : elements) {
-                elementNodes.putAll(parseElement(element));
+                elementNodes.putAll(parseElement(element, true));
             }
         }
 
         return elementNodes;
     }
 
-    private Map<Node, Node> parseElement(Element element) {
+    private Map<Node, Node> parseElement(Element element, boolean isMetadata) {
         Map<Node, Node> result = new HashMap<Node, Node>();
 
         if (element != null) {
-            this.parseElement(element, new StringBuilder(), result);
+            this.parseElement(
+                    removeWhiteSpacesFromNode(element), new StringBuilder(),
+                    result, isMetadata);
         }
 
         return result;
     }
 
     private void parseElement(org.w3c.dom.Node node, StringBuilder predicate,
-                              Map<Node, Node> result) {
-        if (node instanceof Text) {
+                              Map<Node, Node> result, boolean metadata) {
+        if (!node.hasChildNodes()) {
+
             String literalValue = ((Text) node).getTextContent();
 
-            result.put(
-                    Node.createURI(predicate.toString()), Node.createLiteral(
-                            literalValue, findDatatype(literalValue)));
+            if (metadata) {
+                result.put(
+                        Node.createURI(predicate.toString()),
+                        Node.createLiteral(
+                                literalValue, findDatatype(literalValue)));
+            } else {
+                result.put(
+                        Node.createURI(WsNotificationTranslatorConstants.MESSAGE_TEXT
+                                + WsNotificationTranslatorConstants.URI_SEPARATOR
+                                + predicate.toString()), Node.createLiteral(
+                                literalValue, findDatatype(literalValue)));
+            }
+
+            // result.put(
+            // Node.createURI(predicate.toString()), Node.createLiteral(
+            // literalValue, findDatatype(literalValue)));
         } else {
             if (predicate.length() > 0) {
                 predicate.append(WsNotificationTranslatorConstants.URI_SEPARATOR);
@@ -401,7 +472,8 @@ public class NotificationMessageToEventTranslator {
             NodeList nodes = node.getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
                 this.parseElement(
-                        nodes.item(i), new StringBuilder(predicate), result);
+                        nodes.item(i), new StringBuilder(predicate), result,
+                        metadata);
             }
         }
     }

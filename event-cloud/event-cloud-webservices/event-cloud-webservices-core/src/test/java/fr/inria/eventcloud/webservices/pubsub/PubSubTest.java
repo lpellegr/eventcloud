@@ -17,19 +17,21 @@
 package fr.inria.eventcloud.webservices.pubsub;
 
 import java.io.InputStream;
-import java.util.HashMap;
 
-import org.etsi.uri.gcm.util.GCM;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
+import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
+
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 import org.junit.Test;
-import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Factory;
-import org.objectweb.fractal.api.Component;
-import org.objectweb.proactive.core.component.adl.FactoryFactory;
-import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.webservices.WSConstants;
-import org.objectweb.proactive.extensions.webservices.component.Utils;
-import org.objectweb.proactive.extensions.webservices.component.controller.PAWebServicesController;
+import org.oasis_open.docs.wsn.b_2.FilterType;
+import org.oasis_open.docs.wsn.b_2.Notify;
+import org.oasis_open.docs.wsn.b_2.Subscribe;
+import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
+import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.openjena.atlas.lib.Sink;
 import org.openjena.riot.RiotReader;
 import org.openjena.riot.lang.LangRIOT;
@@ -37,17 +39,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.sparql.core.Quad;
+import com.petalslink.wsn.service.wsnproducer.NotificationProducer;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
-import fr.inria.eventcloud.webservices.JaxWsCXFWSCaller;
-import fr.inria.eventcloud.webservices.api.PublishWsApi;
-import fr.inria.eventcloud.webservices.api.SubscribeInfos;
-import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
+import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
 import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
+import fr.inria.eventcloud.webservices.services.ISubscriberService;
+import fr.inria.eventcloud.webservices.services.SubscriberService;
 
 /**
  * Class used to test a subscribe proxy component and a publish proxy component
@@ -60,24 +62,22 @@ public class PubSubTest {
 
     private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
 
-    private static Factory factory;
-
-    static {
-        CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
-        try {
-            factory = FactoryFactory.getFactory();
-        } catch (ADLException e) {
-            e.printStackTrace();
-        }
+    private static <T> Client createWsClient(Class<T> serviceClass,
+                                             String serviceAddress) {
+        JaxWsClientFactoryBean factory = new JaxWsClientFactoryBean();
+        factory.setServiceClass(serviceClass);
+        factory.setAddress(serviceAddress);
+        return factory.create();
     }
 
-    @Test(timeout = 90000)
+    @Test
     public void testPublishSubscribeWsProxies() throws Exception {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
         EventCloudId ecId = deployer.createEventCloud(10);
 
+        // Web services which are deployed
         String subscribeWsUrl =
                 WsProxyDeployer.deploySubscribeWebService(
                         deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
@@ -88,95 +88,70 @@ public class PubSubTest {
                         deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
                         "publish", 8890);
 
-        Component pubSubComponent =
-                this.createPubSubComponent(subscribeWsUrl, publishWsUrl);
-        String subscriberWsUrl = this.exposeSubscriberWs(pubSubComponent);
+        SubscriberService subscriberService = new SubscriberService();
 
-        SubscribeWsApi subscribeWs =
-                (SubscribeWsApi) pubSubComponent.getFcInterface("subscribe-services");
+        String subscriberWsUrl =
+                WsProxyDeployer.deployWebService(
+                        subscriberService, "subscriber", 8891);
 
+        // WsProxyDeployer.deploySubscriberWebService("subscriber", 8891);
+
+        // Clients associated to Web services
+        // Client subscribeClient =
+        // createWsClient(NotificationProducer.class, subscribeWsUrl);
+        //
+        // Client publishClient =
+        // createWsClient(NotificationConsumer.class, publishWsUrl);
+
+        Client subscriberClient =
+                createWsClient(ISubscriberService.class, subscriberWsUrl);
+
+        // Creates the subscribe request
         // Subscribe subscribeRequest = new Subscribe();
         // FilterType filterType = new FilterType();
         // TopicExpressionType tet = new TopicExpressionType();
         // tet.getContent().add("fireman_event:cardiacRythmFiremanTopic");
-        // filterType.getAny().add(tet);
+        //
+        // JAXBElement<TopicExpressionType> jaxbElement =
+        // new JAXBElement<TopicExpressionType>(
+        // new QName(
+        // "http://docs.oasis-open.org/wsn/b-2",
+        // "TopicExpressionType"),
+        // TopicExpressionType.class, tet);
+        // filterType.getAny().add(jaxbElement);
         // subscribeRequest.setFilter(filterType);
         //
         // W3CEndpointReferenceBuilder endPointReferenceBuilder =
         // new W3CEndpointReferenceBuilder();
         // endPointReferenceBuilder.address(subscriberWsUrl);
         // subscribeRequest.setConsumerReference(endPointReferenceBuilder.build());
-
-        // subscribes for any events
-        subscribeWs.subscribe(new SubscribeInfos(
-                "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { <http://eventcloud.inria.fr/replace/me/with/a/correct/namespace/fireman_event:cardiacRythmFiremanTopic> ?p ?o } }",
-                subscriberWsUrl));
+        //
+        // // subscribes for any events with topic
+        // // fireman_event:cardiacRythmFiremanTopic
+        // subscribeClient.invoke("Subscribe", subscribeRequest);
 
         // waits a little to be sure that the subscription has been indexed
-        Thread.sleep(2000);
+        // Thread.sleep(2000);
+        //
+        // Collection<Event> events = new Collection<Event>();
+        // events.add(new Event(read("/notification-01.trig")));
+        // EventToNotificationMessageTranslator translator =
+        // new EventToNotificationMessageTranslator();
+        //
+        // // creates the notify request
+        // Notify notifyRequest = new Notify();
+        // for (Event event : events) {
+        // notifyRequest.getNotificationMessage().add(
+        // translator.translate(event));
+        // }
+        // publishClient.invoke("Notify", notifyRequest);
 
-        PublishWsApi publishWs =
-                (PublishWsApi) pubSubComponent.getFcInterface("publish-services");
-
-        Collection<Event> events = new Collection<Event>();
-        events.add(new Event(read("/notification-01.trig")));
-        publishWs.publish(events);
-
-        PubSubStatus pubSubComponentStatus =
-                (PubSubStatus) pubSubComponent.getFcInterface("status-services");
-
-        while (!pubSubComponentStatus.hasReceivedEvent()) {
+        while (subscriberService.eventsReceived.size() == 0) {
             log.info("Waiting for the reception of event");
             Thread.sleep(500);
         }
 
         deployer.undeploy();
-    }
-
-    private Component createPubSubComponent(String subscribeWsUrl,
-                                            String publishWsUrl) {
-        try {
-            Component pubSubComponent =
-                    (Component) factory.newComponent(
-                            "fr.inria.eventcloud.webservices.pubsub.PubSubComponent",
-                            new HashMap<String, Object>());
-
-            GCM.getBindingController(pubSubComponent).bindFc(
-                    PubSubComponentImpl.SUBSCRIBE_WEBSERVICES_NAME,
-                    subscribeWsUrl + "(" + JaxWsCXFWSCaller.class.getName()
-                            + ")");
-            GCM.getBindingController(pubSubComponent)
-                    .bindFc(
-                            PubSubComponentImpl.PUBLISH_WEBSERVICES_NAME,
-                            publishWsUrl + "("
-                                    + JaxWsCXFWSCaller.class.getName() + ")");
-
-            GCM.getGCMLifeCycleController(pubSubComponent).startFc();
-
-            return pubSubComponent;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private String exposeSubscriberWs(Component pubSubComponent) {
-        try {
-            PAWebServicesController wsc =
-                    Utils.getPAWebServicesController(pubSubComponent);
-
-            wsc.initServlet();
-            wsc.exposeComponentAsWebService(
-                    "EventCloud", new String[] {"subscriber-webservices"});
-
-            return wsc.getLocalUrl() + WSConstants.SERVICES_PATH
-                    + "EventCloud_subscriber-webservices";
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     private static Collection<Quadruple> read(String file) {

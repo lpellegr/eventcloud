@@ -110,9 +110,9 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
                     }
 
                     log.info("New subscribe notification handled");
+                } else {
+                    log.error("Consumer address cannot be extracted from subscribe notification");
                 }
-
-                log.error("Consumer reference cannot be extracted from subscribe notification");
             } else {
                 log.error("Subscribe notification does not contain consumer reference");
             }

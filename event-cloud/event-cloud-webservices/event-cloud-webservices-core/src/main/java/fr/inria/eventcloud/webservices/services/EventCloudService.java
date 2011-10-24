@@ -32,7 +32,7 @@ import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
  */
 public abstract class EventCloudService<T extends Proxy> {
 
-    protected static Logger log = LoggerFactory.getLogger(PublishService.class);
+    protected static Logger log = LoggerFactory.getLogger(EventCloudService.class);
 
     protected T proxy;
 

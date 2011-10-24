@@ -20,6 +20,7 @@ import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
+import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,6 @@ import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
-import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
 
 /**
  * An {@link EventNotificationListener}
@@ -63,14 +63,11 @@ public class WsEventNotificationListener extends EventNotificationListener {
      */
     @Override
     public void onNotification(SubscriptionId id, Event solution) {
-        synchronized (this) {
-            if (this.wsClient == null) {
-                JaxWsClientFactoryBean clientFactory =
-                        new JaxWsClientFactoryBean();
-                clientFactory.setServiceClass(SubscriberWsApi.class);
-                clientFactory.setAddress(this.subscriberWsUrl);
-                this.wsClient = clientFactory.create();
-            }
+        if (this.wsClient == null) {
+            JaxWsClientFactoryBean clientFactory = new JaxWsClientFactoryBean();
+            clientFactory.setServiceClass(NotificationConsumer.class);
+            clientFactory.setAddress(this.subscriberWsUrl);
+            this.wsClient = clientFactory.create();
         }
 
         Notify notify = new Notify();
@@ -80,7 +77,7 @@ public class WsEventNotificationListener extends EventNotificationListener {
         try {
             this.wsClient.invoke(NOTIFY_METHOD_NAME, new Object[] {notify});
             log.info(
-                    "Web service {} invoked to notify for {}",
+                    "Web service {} invoked to notify for:\n {}",
                     this.subscriberWsUrl, solution);
         } catch (Exception e) {
             log.error(
