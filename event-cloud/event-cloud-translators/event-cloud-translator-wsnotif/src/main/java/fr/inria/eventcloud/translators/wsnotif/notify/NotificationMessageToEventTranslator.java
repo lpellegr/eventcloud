@@ -50,7 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -437,26 +436,20 @@ public class NotificationMessageToEventTranslator {
 
     private void parseElement(org.w3c.dom.Node node, StringBuilder predicate,
                               Map<Node, Node> result, boolean metadata) {
-        if (!node.hasChildNodes()) {
+        if (!node.hasChildNodes()
+                && node.getNodeType() == org.w3c.dom.Node.TEXT_NODE) {
+            String literalValue = node.getNodeValue();
 
-            String literalValue = ((Text) node).getTextContent();
+            Node predicateNode = Node.createURI(predicate.toString());
 
-            if (metadata) {
-                result.put(
-                        Node.createURI(predicate.toString()),
-                        Node.createLiteral(
-                                literalValue, findDatatype(literalValue)));
-            } else {
-                result.put(
-                        Node.createURI(WsNotificationTranslatorConstants.MESSAGE_TEXT
-                                + WsNotificationTranslatorConstants.URI_SEPARATOR
-                                + predicate.toString()), Node.createLiteral(
-                                literalValue, findDatatype(literalValue)));
+            if (!metadata) {
+                Node.createURI(WsNotificationTranslatorConstants.MESSAGE_TEXT
+                        + WsNotificationTranslatorConstants.URI_SEPARATOR
+                        + predicate.toString());
             }
 
-            // result.put(
-            // Node.createURI(predicate.toString()), Node.createLiteral(
-            // literalValue, findDatatype(literalValue)));
+            result.put(predicateNode, Node.createLiteral(
+                    literalValue, findDatatype(literalValue)));
         } else {
             if (predicate.length() > 0) {
                 predicate.append(WsNotificationTranslatorConstants.URI_SEPARATOR);
