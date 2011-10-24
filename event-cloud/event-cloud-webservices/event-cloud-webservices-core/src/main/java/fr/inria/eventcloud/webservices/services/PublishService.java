@@ -48,12 +48,16 @@ public class PublishService extends EventCloudService<PublishProxy> implements
      */
     @Override
     public void notify(Notify notify) {
+        if (super.proxy == null) {
+            return;
+        }
+
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
             Event event =
                     this.translator.translateNotificationMessageToEvent(notificationMessage);
             if (event != null) {
                 log.info(
-                        "Translated event to insert to the Event Cloud is {}",
+                        "Translated event to insert to the Event Cloud is:\n {}",
                         event);
                 super.proxy.publish(event);
             }
