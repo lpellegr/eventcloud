@@ -78,6 +78,10 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
      */
     @Override
     public SubscribeResponse subscribe(Subscribe subscribe) {
+        if (super.proxy == null) {
+            return null;
+        }
+        
         String sparqlQuery =
                 super.translator.translateSubscribeToSparqlQuery(subscribe);
 
