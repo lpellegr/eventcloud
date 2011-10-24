@@ -16,13 +16,25 @@
  **/
 package fr.inria.eventcloud.translators.wsnotif.subscribe;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -37,7 +49,10 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
 import fr.inria.eventcloud.utils.ReflectionUtils;
@@ -72,13 +87,52 @@ public class SubscribeToSparqlQueryTranslator {
             List<Object> any = filterType.getAny();
             if (any.size() > 0) {
                 try {
-                    TopicExpressionType topicExpressionType =
-                            ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
+                    TopicExpressionType topicExpressionType = null;
+                    if (any.get(0) instanceof JAXBElement) {
+                        topicExpressionType =
+                                ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
+                    } else {
+                        JAXBContext jc;
+                        try {
+                            jc =
+                                    JAXBContext.newInstance(TopicExpressionType.class.getName());
+                            Unmarshaller u = jc.createUnmarshaller();
+
+                            DocumentBuilderFactory dbf =
+                                    DocumentBuilderFactory.newInstance();
+                            dbf.setNamespaceAware(true);
+                            DocumentBuilder db = dbf.newDocumentBuilder();
+
+                            ByteArrayOutputStream baos =
+                                    new ByteArrayOutputStream();
+                            ObjectOutputStream oos =
+                                    new ObjectOutputStream(baos);
+                            oos.writeObject(any.get(0));
+
+                            Document doc =
+                                    db.parse(new ByteArrayInputStream(
+                                            baos.toByteArray()));
+                            Object o = u.unmarshal(doc);
+
+                            topicExpressionType = (TopicExpressionType) o;
+                        } catch (JAXBException e) {
+                            e.printStackTrace();
+                        } catch (ParserConfigurationException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (SAXException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                     List<Object> content = topicExpressionType.getContent();
                     if (content.size() > 0) {
                         return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { <"
                                 + WsNotificationTranslatorConstants.DEFAULT_TOPIC_NAMESPACE
-                                + "/" + content.get(0) + "> ?p ?o . } }";
+                                + "/"
+                                + ((String) content.get(0)).trim().replaceAll(
+                                        "\n", "") + "> ?p ?o . } }";
                     } else {
                         log.error("No topic content set in the subscribe notification");
                     }

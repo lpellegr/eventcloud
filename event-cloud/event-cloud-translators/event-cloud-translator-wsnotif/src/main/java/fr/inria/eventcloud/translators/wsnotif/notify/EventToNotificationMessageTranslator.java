@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.translators.wsnotif.notify;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -79,7 +80,7 @@ public class EventToNotificationMessageTranslator {
 
         String topic = null;
         String eventId = null;
-        
+
         for (Quadruple quad : event.getQuadruples()) {
             if (quad.getPredicate()
                     .equals(
@@ -108,12 +109,12 @@ public class EventToNotificationMessageTranslator {
         if (eventId == null) {
             eventId = event.getGraph().getURI();
         }
-        
+
         metadatas.add(this.createMetadataElement(
                 new QName(
                         WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE,
                         "id"), eventId));
-        
+
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
 
@@ -177,6 +178,38 @@ public class EventToNotificationMessageTranslator {
         }
     }
 
+    private static Element findByName(org.w3c.dom.Node node, String namespace, String localName) {
+        if (node.hasChildNodes()) {
+            if (namespace != null) {
+                if (node.getNodeName().equals(localName) && namespace.equals(node.getNamespaceURI())) {
+                    return (Element) node;
+                } else {
+                    NodeList list = node.getChildNodes();
+                    for (int i=0; i<list.getLength(); i++) {
+                        Element elt = findByName(list.item(0), namespace, localName);
+                        if (elt != null) {
+                            return elt;
+                        }
+                    }
+                }
+            } else {
+                if (node.getNodeName().equals(localName)) {
+                    return (Element) node;
+                } else {
+                    NodeList list = node.getChildNodes();
+                    for (int i=0; i<list.getLength(); i++) {
+                        Element elt = findByName(list.item(0), namespace, localName);
+                        if (elt != null) {
+                            return elt;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+    
     /**
      * Creates an XML tree (represented by its root {@link Element}) from the
      * specified {@code quadruple} and {@code prevRootElt}. The
@@ -205,18 +238,20 @@ public class EventToNotificationMessageTranslator {
             // iterates on the String elements extracted from the predicate
             // we start from 1 because if the previous root element is not
             // empty it means that the wsnt:Message has been already created
-            for (int i = 1; i < elements.length; i++) {
+            for (int i = 0; i < elements.length; i++) {
                 // splits the uri into namespace + localname
                 String[] parts = splitUri(elements[i]);
                 String namespace = parts[0];
                 String localName = parts[1];
 
-                NodeList elts =
-                        namespace.isEmpty()
-                                ? rootElt.getElementsByTagName(localName)
-                                : rootElt.getElementsByTagNameNS(
-                                        namespace, localName);
-                if (elts.getLength() == 0) {
+//                NodeList elts =
+//                        namespace.isEmpty()
+//                                ? rootElt.getElementsByTagName(localName)
+//                                : rootElt.getElementsByTagNameNS(
+//                                        namespace, localName);
+                Element eltFound = findByName(rootElt, namespace, localName);
+                
+                if (eltFound == null) {
                     // here we assume we have only one element that matches
                     Element elt =
                             namespace.isEmpty()
@@ -231,7 +266,7 @@ public class EventToNotificationMessageTranslator {
                                 .getLiteralLexicalForm()));
                     }
                 } else {
-                    lastElt = (Element) elts.item(0);
+                    lastElt = eltFound;
                 }
             }
         } else {
@@ -292,8 +327,17 @@ public class EventToNotificationMessageTranslator {
     }
 
     private static String[] getXmlElements(Quadruple quadruple) {
-        return quadruple.getPredicate().getURI().split(
-                Pattern.quote(WsNotificationTranslatorConstants.URI_SEPARATOR));
+        String[] elements =
+                quadruple.getPredicate()
+                        .getURI()
+                        .split(
+                                Pattern.quote(WsNotificationTranslatorConstants.URI_SEPARATOR));
+
+        if (elements[0].startsWith(WsNotificationTranslatorConstants.MESSAGE_TEXT)) {
+            elements = Arrays.copyOfRange(elements, 1, elements.length);
+        }
+
+        return elements;
     }
 
     private static String[] splitUri(String uri) {

@@ -39,6 +39,7 @@ import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
 import fr.inria.eventcloud.webservices.services.PublishService;
 import fr.inria.eventcloud.webservices.services.PutGetService;
 import fr.inria.eventcloud.webservices.services.SubscribeService;
+import fr.inria.eventcloud.webservices.services.SubscriberService;
 
 /**
  * WsProxyDeployer is used to ease web service operations (expose and unexpose)
@@ -219,6 +220,10 @@ public class WsProxyDeployer {
         return deployWebService(
                 new PutGetService(registryUrl, eventCloudIdUrl), urlSuffix,
                 port);
+    }
+
+    public static String deploySubscriberWebService(String urlSuffix, int port) {
+        return deployWebService(new SubscriberService(), urlSuffix, port);
     }
 
     public static String deployWebService(Object service, String addressSuffix,
