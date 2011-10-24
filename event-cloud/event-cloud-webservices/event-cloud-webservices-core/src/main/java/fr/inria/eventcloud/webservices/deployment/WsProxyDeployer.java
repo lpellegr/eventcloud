@@ -245,10 +245,16 @@ public class WsProxyDeployer {
         svrFactory.setServiceClass(service.getClass());
         svrFactory.setAddress(address.toString());
         svrFactory.setServiceBean(service);
-        svrFactory.getInInterceptors().add(new LoggingInInterceptor());
-        svrFactory.getOutInterceptors().add(new LoggingOutInterceptor());
-        svrFactory.create();
 
+        LoggingInInterceptor in = new LoggingInInterceptor();
+        svrFactory.getInInterceptors().add(in);
+        svrFactory.getInFaultInterceptors().add(in);
+
+        LoggingOutInterceptor out = new LoggingOutInterceptor();
+        svrFactory.getOutInterceptors().add(out);
+        svrFactory.getOutFaultInterceptors().add(out);
+
+        svrFactory.create();
         return svrFactory.getAddress();
     }
 
