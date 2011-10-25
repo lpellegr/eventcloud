@@ -18,6 +18,8 @@ package fr.inria.eventcloud.messages.request.can;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -102,15 +104,20 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 ((SemanticDatastore) overlay.getDatastore()).executeSparqlSelect(createQueryRetrievingQuadruplesMatching(firstSubsubscription.getAtomicQuery()
                         .getQuadruplePattern()));
 
+        // stores the quadruples into a list in order to avoid a concurrent
+        // exception if a add operation (or more generally a write operation) is
+        // done on the datastore while we are iterating on the ResultSet.
+        // Indeed, the result set does not contain the solutions but knows how
+        // to retrieve a solution each time a call to next is performed.
+        List<Quadruple> quadruplesMatching = new ArrayList<Quadruple>();
         while (queryResult.hasNext()) {
             QuerySolution solution = queryResult.next();
+            quadruplesMatching.add(new Quadruple(
+                    solution.get("g").asNode(), solution.get("s").asNode(),
+                    solution.get("p").asNode(), solution.get("o").asNode()));
+        }
 
-            Quadruple quadMatching =
-                    new Quadruple(
-                            solution.get("g").asNode(), solution.get("s")
-                                    .asNode(), solution.get("p").asNode(),
-                            solution.get("o").asNode());
-
+        for (Quadruple quadMatching : quadruplesMatching) {
             if (log.isDebugEnabled() && quadMatching.getPublicationTime() != -1) {
                 log.debug(
                         "Comparing the timestamps between the quadruple {} and the subscription matching the quadruple {}",
