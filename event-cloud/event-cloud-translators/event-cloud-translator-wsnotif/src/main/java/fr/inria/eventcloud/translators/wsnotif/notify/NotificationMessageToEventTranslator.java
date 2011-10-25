@@ -440,12 +440,14 @@ public class NotificationMessageToEventTranslator {
                 && node.getNodeType() == org.w3c.dom.Node.TEXT_NODE) {
             String literalValue = node.getNodeValue();
 
-            Node predicateNode = Node.createURI(predicate.toString());
-
+            Node predicateNode = null;
             if (!metadata) {
-                Node.createURI(WsNotificationTranslatorConstants.MESSAGE_TEXT
-                        + WsNotificationTranslatorConstants.URI_SEPARATOR
-                        + predicate.toString());
+                predicateNode =
+                        Node.createURI(WsNotificationTranslatorConstants.MESSAGE_TEXT
+                                + WsNotificationTranslatorConstants.URI_SEPARATOR
+                                + predicate.toString());
+            } else {
+                predicateNode = Node.createURI(predicate.toString());
             }
 
             result.put(predicateNode, Node.createLiteral(
