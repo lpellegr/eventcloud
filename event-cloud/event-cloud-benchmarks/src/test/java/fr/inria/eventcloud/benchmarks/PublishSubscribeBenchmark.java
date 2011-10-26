@@ -16,34 +16,32 @@
  **/
 package fr.inria.eventcloud.benchmarks;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.openjena.atlas.lib.Sink;
-import org.openjena.riot.RiotReader;
-import org.openjena.riot.lang.LangRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.generators.NodeGenerator;
+import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
+import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
@@ -72,6 +70,8 @@ public class PublishSubscribeBenchmark {
     private final int nbPeers;
 
     private final int nbSubscribers;
+
+    private static final int NB_EVENTS = 5;
 
     public PublishSubscribeBenchmark(int nbPeers, int nbSubscribers) {
         this.nbPeers = nbPeers;
@@ -136,88 +136,48 @@ public class PublishSubscribeBenchmark {
         // to ensure that the subscription is indexed before to publish
         // quadruples
         try {
-            Thread.sleep(500);
+            TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         final PublishProxy publishProxy = proxyFactory.createPublishProxy();
         // a thread that simulates a publication
+
+        final CountDownLatch doneSignal = new CountDownLatch(NB_EVENTS);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final List<Quadruple> quadruples = new ArrayList<Quadruple>();
+                long startTime = System.nanoTime();
 
-                Sink<Quad> sink = new Sink<Quad>() {
-                    @Override
-                    public void send(final Quad quad) {
-
-                        Quadruple q =
-                                new Quadruple(
-                                        quad.getGraph(), quad.getSubject(),
-                                        quad.getPredicate(), quad.getObject());
-
-                        quadruples.add(q);
-
+                Collection<Quadruple> quadruples = null;
+                for (int i = 0; i < 20; i++) {
+                    quadruples = new Collection<Quadruple>();
+                    Node graphNode =
+                            NodeGenerator.createUri("http://streams.play-project.eu/");
+                    for (int j = 0; j < 6; j++) {
+                        quadruples.add(QuadrupleGenerator.create(graphNode));
                     }
 
-                    @Override
-                    public void close() {
-                        synchronized (allEventsPublished) {
-                            allEventsPublished.received = true;
-                            allEventsPublished.notifyAll();
-                        }
-                    }
-
-                    @Override
-                    public void flush() {
-
-                    }
-
-                };
-
-                InputStream fis = null;
-                LangRIOT parser = null;
-                try {
-                    fis =
-                            PublishSubscribeBenchmark.class.getResourceAsStream("/chunk.nquads");
-                    parser = RiotReader.createParserNQuads(fis, sink);
-
-                    long startTime = System.nanoTime();
-                    parser.parse();
-                    timeToParseQuadruples.set(System.nanoTime() - startTime);
-
-                    startTime = System.nanoTime();
-
-                    final CountDownLatch doneSignal =
-                            new CountDownLatch(quadruples.size());
-                    for (final Quadruple quad : quadruples) {
-                        publishProxy.publish(quad);
-                        doneSignal.countDown();
-                        nbEventsPublished++;
-                    }
-                    timeToPublishQuadruples.set(System.nanoTime() - startTime);
-
-                    sink.close();
-                } finally {
-                    try {
-                        fis.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    // the publish is asynchronous but then the Peer.send
+                    // request inside the publish method is handled in IS, hence
+                    // each
+                    // publish is finally done in parallel
+                    publishProxy.publish(new Event(quadruples));
+                    doneSignal.countDown();
+                    nbEventsPublished++;
                 }
+
+                timeToPublishQuadruples.set(System.nanoTime() - startTime);
             }
         }).start();
 
         // waits to publish events
-        synchronized (allEventsPublished) {
-            while (!allEventsPublished.received) {
-                try {
-                    allEventsPublished.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+        try {
+            doneSignal.await();
+        } catch (InterruptedException e1) {
+            Thread.currentThread().interrupt();
         }
 
         log.info("It takes " + timeToParseQuadruples + " ns to parse "
@@ -262,11 +222,12 @@ public class PublishSubscribeBenchmark {
     }
 
     private static class CustomBindingListener extends
-            BindingNotificationListener {
+            EventNotificationListener {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void onNotification(SubscriptionId id, Binding solution) {
+        public void onNotification(SubscriptionId id, Event solution) {
+            log.info("New Event Received");
             synchronized (nbEventsReceivedBySubscriber) {
                 nbEventsReceivedBySubscriber.get(id).inc();
                 nbEventsReceivedBySubscriber.notifyAll();

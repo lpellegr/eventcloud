@@ -74,10 +74,14 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
                 (SynchronizedJenaDatasetGraph) overlay.getDatastore();
 
         // finds the matching quadruple meta information
-        Collection<Quadruple> result =
-                datastore.find(new QuadruplePattern(
-                        PublishSubscribeUtils.createQuadrupleHashUrl(this.hash),
-                        Node.ANY, Node.ANY, Node.ANY));
+        Collection<Quadruple> result = null;
+
+        synchronized (datastore) {
+            result =
+                    datastore.find(new QuadruplePattern(
+                            PublishSubscribeUtils.createQuadrupleHashUrl(this.hash),
+                            Node.ANY, Node.ANY, Node.ANY));
+        }
 
         if (result.size() != 1) {
             throw new IllegalStateException(

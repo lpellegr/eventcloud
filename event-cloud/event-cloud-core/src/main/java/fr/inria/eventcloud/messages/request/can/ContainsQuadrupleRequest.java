@@ -44,9 +44,14 @@ public class ContainsQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        return new BooleanForwardResponse(
-                this,
-                ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).contains(super.getQuadruple()));
+        boolean result = false;
+
+        synchronized (overlay.getDatastore()) {
+            result =
+                    ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).contains(super.getQuadruple());
+        }
+
+        return new BooleanForwardResponse(this, result);
     }
 
 }

@@ -47,7 +47,9 @@ public class DeleteQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).delete(quad);
+        synchronized (overlay.getDatastore()) {
+            ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).delete(quad);
+        }
         logger.info("Quadruple {} has been removed from {}", quad, overlay);
     }
 

@@ -42,9 +42,12 @@ public class DeleteQuadruplesRequest extends StatelessQuadruplePatternRequest {
     @Override
     public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                QuadruplePattern quadruplePattern) {
-        ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).deleteAny(
-                quadruplePattern.getGraph(), quadruplePattern.getSubject(),
-                quadruplePattern.getPredicate(), quadruplePattern.getObject());
+        synchronized (overlay.getDatastore()) {
+            ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).deleteAny(
+                    quadruplePattern.getGraph(), quadruplePattern.getSubject(),
+                    quadruplePattern.getPredicate(),
+                    quadruplePattern.getObject());
+        }
     }
 
 }

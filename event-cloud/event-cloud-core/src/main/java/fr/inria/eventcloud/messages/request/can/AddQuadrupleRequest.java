@@ -46,7 +46,9 @@ public class AddQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).add(quad);
+        synchronized (overlay.getDatastore()) {
+            ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).add(quad);
+        }
         logger.info("Quadruple {} has been added on {}", quad, overlay);
     }
 

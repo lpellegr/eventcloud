@@ -86,34 +86,41 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
         SynchronizedJenaDatasetGraph datastore =
                 ((SynchronizedJenaDatasetGraph) overlay.getDatastore());
-        // the quad is stored by using its timestamped graph value
-        datastore.add(new Quadruple(
-                quad.createMetaGraphNode(), quad.getSubject(),
-                quad.getPredicate(), quad.getObject(), false, false));
 
-        log.debug(
-                "SPARQL query used to retrieve the sub subscriptions matching {}:\n{}",
-                quad, createQueryRetrievingSubscriptionsMatching(quad));
+        List<HomogenousPair<Node>> matchingIds = null;
 
-        // finds the sub subscription which are stored locally and that are
-        // matching the quadruple that have been just inserted into the local
-        // datastore
-        ResultSet result =
-                datastore.executeSparqlSelect(createQueryRetrievingSubscriptionsMatching(quad));
+        synchronized (datastore) {
+            // the quad is stored by using its timestamped graph value
+            datastore.add(new Quadruple(
+                    quad.createMetaGraphNode(), quad.getSubject(),
+                    quad.getPredicate(), quad.getObject(), false, false));
 
-        // we have to store the identifiers found into a new list because
-        // we cannot iterate on a Jena iterator and perform operations on the
-        // datastore at the same time
-        List<HomogenousPair<Node>> matchingIds =
-                new ArrayList<HomogenousPair<Node>>();
+            log.debug(
+                    "SPARQL query used to retrieve the sub subscriptions matching {}:\n{}",
+                    quad, createQueryRetrievingSubscriptionsMatching(quad));
 
-        while (result.hasNext()) {
-            QuerySolution solution = result.nextSolution();
-            // the first component is composed of the subscription id whereas
-            // the second contains the sub subscription id
-            matchingIds.add(new HomogenousPair<Node>(solution.get(
-                    "subscriptionId").asNode(), solution.get(
-                    "subSubscriptionId").asNode()));
+            // finds the sub subscription which are stored locally and that are
+            // matching the quadruple that have been just inserted into the
+            // local
+            // datastore
+            ResultSet result =
+                    datastore.executeSparqlSelect(createQueryRetrievingSubscriptionsMatching(quad));
+
+            // we have to store the identifiers found into a new list because
+            // we cannot iterate on a Jena iterator and perform operations on
+            // the
+            // datastore at the same time
+            matchingIds = new ArrayList<HomogenousPair<Node>>();
+
+            while (result.hasNext()) {
+                QuerySolution solution = result.nextSolution();
+                // the first component is composed of the subscription id
+                // whereas
+                // the second contains the sub subscription id
+                matchingIds.add(new HomogenousPair<Node>(solution.get(
+                        "subscriptionId").asNode(), solution.get(
+                        "subSubscriptionId").asNode()));
+            }
         }
 
         for (HomogenousPair<Node> pair : matchingIds) {
@@ -208,7 +215,9 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 Quadruple metaQuad =
                         PublishSubscribeUtils.createMetaQuadruple(
                                 quad, subscriptionIdURL, pair.getSecond());
-                datastore.add(metaQuad);
+                synchronized (datastore) {
+                    datastore.add(metaQuad);
+                }
 
                 // a subscription with more that one sub subscription (that
                 // matches the quadruple which has been inserted) has been
