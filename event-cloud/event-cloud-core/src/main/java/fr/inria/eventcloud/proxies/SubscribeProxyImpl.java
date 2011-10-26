@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -121,11 +122,11 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         if (this.proxy == null) {
             this.proxy = proxy;
             this.componentUri = componentUri;
-            this.subscriptions = new HashMap<SubscriptionId, Subscription>();
+            this.subscriptions = Collections.synchronizedMap(new HashMap<SubscriptionId, Subscription>());
             this.listeners =
-                    new HashMap<SubscriptionId, NotificationListener<?>>();
-            this.solutions = new HashMap<NotificationId, Solution>();
-            this.eventIdsReceived = new HashMap<Node, SubscriptionId>();
+                    Collections.synchronizedMap(new HashMap<SubscriptionId, NotificationListener<?>>());
+            this.solutions =  Collections.synchronizedMap(new HashMap<NotificationId, Solution>());
+            this.eventIdsReceived =  Collections.synchronizedMap(new HashMap<Node, SubscriptionId>());
             // TODO: use the properties field to initialize ELA properties
         }
     }

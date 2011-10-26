@@ -13,6 +13,7 @@ java -Xms256m -Xmx1024m \
      -Dlogback.configurationFile=file:$PATH_TO_RESOURCES/logback.xml \
      -Dproactive.communication.protocol=pnp \
      -Dproactive.pnp.port=$PORT \
+     -Deventcloud.dcep.nb.subscriptions=1 \
      -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.EventCloudLauncher $@
 
 . $(dirname $0)/configuration/unset-environment.sh

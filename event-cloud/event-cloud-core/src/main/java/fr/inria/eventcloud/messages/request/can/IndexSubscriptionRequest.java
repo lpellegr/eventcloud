@@ -16,10 +16,12 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -69,6 +71,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
             LoggerFactory.getLogger(IndexSubscriptionRequest.class);
 
     protected SerializedValue<Subscription> subscription;
+    private static AtomicInteger nbSubscriptionsReceived = new AtomicInteger(0);
 
     /**
      * Constructs an IndexRewrittenSubscriptionRequest from the specified
@@ -214,6 +217,15 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 }
             }
         }
+
+        if (nbSubscriptionsReceived.incrementAndGet() == Integer.parseInt(System.getProperty("eventcloud.dcep.nb.subscriptions"))) {
+            try {
+                new File(System.getProperty("java.io.tmpdir") + "/eventcloudws").createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**
