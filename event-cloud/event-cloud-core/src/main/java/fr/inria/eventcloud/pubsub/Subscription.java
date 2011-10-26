@@ -180,9 +180,13 @@ public class Subscription implements Rdfable, Serializable {
 
     public static final Subscription parseFrom(SemanticDatastore datastore,
                                                SubscriptionId id) {
-        Collection<Quadruple> quads =
-                datastore.find(Node.ANY, Node.createURI(SUBSCRIPTION_NS
-                        + id.toString()), Node.ANY, Node.ANY);
+
+        Collection<Quadruple> quads = null;
+        synchronized (datastore) {
+            quads =
+                    datastore.find(Node.ANY, Node.createURI(SUBSCRIPTION_NS
+                            + id.toString()), Node.ANY, Node.ANY);
+        }
 
         // contains the data about the subscription itself
         Map<String, Node> basicInfo = new HashMap<String, Node>();

@@ -98,9 +98,9 @@ public class SemanticCanOverlay extends CanOverlay {
      * @param subscription
      *            the subscription to store.
      */
-    public void storeSubscription(Subscription subscription) {
-        synchronized (this.subscriptionsCache) {
-            this.subscriptionsCache.put(subscription.getId(), subscription);
+    public synchronized void storeSubscription(Subscription subscription) {
+        this.subscriptionsCache.putIfAbsent(subscription.getId(), subscription);
+        synchronized (super.datastore) {
             ((SemanticDatastore) super.datastore).add(subscription.toQuadruples());
         }
     }
@@ -114,10 +114,10 @@ public class SemanticCanOverlay extends CanOverlay {
      *            associated to the first subscription which has not been
      *            rewritten) to use.
      */
-    public void deleteSubscription(SubscriptionId originalSubscriptionId) {
-        synchronized (this.subscriptionsCache) {
-            this.subscriptionsCache.remove(originalSubscriptionId);
+    public synchronized void deleteSubscription(SubscriptionId originalSubscriptionId) {
+        this.subscriptionsCache.remove(originalSubscriptionId);
 
+        synchronized (super.datastore) {
             // TODO: a write lock has to be acquired for all the deletes
             for (SubscriptionId id : PublishSubscribeUtils.findSubscriptionIds(
                     (SemanticDatastore) super.datastore, originalSubscriptionId)) {

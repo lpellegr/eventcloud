@@ -65,7 +65,9 @@ public class SparqlAtomicRequest extends
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 fr.inria.eventcloud.api.QuadruplePattern quadruplePattern) {
-        return ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(quadruplePattern);
+        synchronized (overlay.getDatastore()) {
+            return ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(quadruplePattern);
+        }
     }
 
 }

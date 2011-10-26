@@ -102,20 +102,22 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
         query.append(this.metaGraphValue.getValue());
         query.append("\")) } }");
 
-        ResultSet queryResult =
-                ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).executeSparqlSelect(query.toString());
+        synchronized (overlay.getDatastore()) {
+            ResultSet queryResult =
+                    ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).executeSparqlSelect(query.toString());
 
-        while (queryResult.hasNext()) {
-            QuerySolution solution = queryResult.next();
-            Quadruple quad =
-                    new Quadruple(
-                            solution.get("g").asNode(), solution.get("s")
-                                    .asNode(), solution.get("p").asNode(),
-                            solution.get("o").asNode());
+            while (queryResult.hasNext()) {
+                QuerySolution solution = queryResult.next();
+                Quadruple quad =
+                        new Quadruple(
+                                solution.get("g").asNode(), solution.get("s")
+                                        .asNode(), solution.get("p").asNode(),
+                                solution.get("o").asNode());
 
-            if (quad.getPublicationTime() != -1
-                    && !hashValues.contains(quad.hashValue())) {
-                result.add(quad);
+                if (quad.getPublicationTime() != -1
+                        && !hashValues.contains(quad.hashValue())) {
+                    result.add(quad);
+                }
             }
         }
 

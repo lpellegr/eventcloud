@@ -47,9 +47,6 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
 
-    // TODO: to see whether it is possible to improve concurrency by using the
-    // new transaction features introduced with TDB? (transaction !=
-    // synchronization != thread-safe)
     protected DatasetGraph datastore;
 
     public SynchronizedJenaDatasetGraph() {
@@ -78,15 +75,9 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
      */
     @Override
     public void add(Quadruple quad) {
-        this.datastore.getLock().enterCriticalSection(Lock.WRITE);
-
-        try {
-            this.datastore.add(
-                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                    quad.getObject());
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
+        this.datastore.add(
+                quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                quad.getObject());
     }
 
     /**
@@ -94,16 +85,10 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
      */
     @Override
     public void add(Collection<Quadruple> quads) {
-        this.datastore.getLock().enterCriticalSection(Lock.WRITE);
-
-        try {
-            for (Quadruple quad : quads) {
-                this.datastore.add(
-                        quad.getGraph(), quad.getSubject(),
-                        quad.getPredicate(), quad.getObject());
-            }
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
+        for (Quadruple quad : quads) {
+            this.datastore.add(
+                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                    quad.getObject());
         }
     }
 
@@ -112,15 +97,9 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
      */
     @Override
     public void delete(Quadruple quad) {
-        this.datastore.getLock().enterCriticalSection(Lock.WRITE);
-
-        try {
-            this.datastore.delete(
-                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                    quad.getObject());
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
+        this.datastore.delete(
+                quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                quad.getObject());
     }
 
     /**
@@ -128,20 +107,9 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
      */
     @Override
     public boolean contains(Quadruple quad) {
-        boolean result;
-
-        this.datastore.getLock().enterCriticalSection(Lock.READ);
-
-        try {
-            result =
-                    this.datastore.contains(
-                            quad.getGraph(), quad.getSubject(),
-                            quad.getPredicate(), quad.getObject());
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
-
-        return result;
+        return this.datastore.contains(
+                quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                quad.getObject());
     }
 
     /**
@@ -149,13 +117,7 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
      */
     @Override
     public void deleteAny(Node g, Node s, Node p, Node o) {
-        this.datastore.getLock().enterCriticalSection(Lock.WRITE);
-
-        try {
-            this.datastore.deleteAny(g, s, p, o);
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
+        this.datastore.deleteAny(g, s, p, o);
     }
 
     public Collection<Quadruple> find(QuadruplePattern quadruplePattern) {
@@ -171,20 +133,14 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
     public Collection<Quadruple> find(Node g, Node s, Node p, Node o) {
         Collection<Quadruple> result = new Collection<Quadruple>();
 
-        this.datastore.getLock().enterCriticalSection(Lock.READ);
+        Iterator<Quad> quads = this.datastore.find(g, s, p, o);
 
-        try {
-            Iterator<Quad> quads = this.datastore.find(g, s, p, o);
-
-            Quad quad;
-            while (quads.hasNext()) {
-                quad = quads.next();
-                result.add(new Quadruple(
-                        quad.getGraph(), quad.getSubject(),
-                        quad.getPredicate(), quad.getObject()));
-            }
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
+        Quad quad;
+        while (quads.hasNext()) {
+            quad = quads.next();
+            result.add(new Quadruple(
+                    quad.getGraph(), quad.getSubject(), quad.getPredicate(),
+                    quad.getObject()));
         }
 
         return result;
@@ -195,17 +151,7 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
      */
     @Override
     public boolean isEmpty() {
-        boolean result;
-
-        this.datastore.getLock().enterCriticalSection(Lock.READ);
-
-        try {
-            result = this.datastore.isEmpty();
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
-
-        return result;
+        return this.datastore.isEmpty();
     }
 
     /**
@@ -215,15 +161,10 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
     public boolean executeSparqAsk(String sparqlAskQuery) {
         Query query = QueryFactory.create(sparqlAskQuery);
 
-        this.datastore.getLock().enterCriticalSection(Lock.READ);
-        try {
-            QueryExecution qe =
-                    QueryExecutionFactory.create(
-                            query, DatasetFactory.create(this.datastore));
-            return qe.execAsk();
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
+        QueryExecution qe =
+                QueryExecutionFactory.create(
+                        query, DatasetFactory.create(this.datastore));
+        return qe.execAsk();
     }
 
     /**
@@ -233,16 +174,10 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
     public Model executeSparqlConstruct(String sparqlConstructQuery) {
         Query query = QueryFactory.create(sparqlConstructQuery);
 
-        this.datastore.getLock().enterCriticalSection(Lock.READ);
-
-        try {
-            QueryExecution qe =
-                    QueryExecutionFactory.create(
-                            query, DatasetFactory.create(this.datastore));
-            return qe.execConstruct();
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
+        QueryExecution qe =
+                QueryExecutionFactory.create(
+                        query, DatasetFactory.create(this.datastore));
+        return qe.execConstruct();
     }
 
     /**
@@ -254,14 +189,10 @@ public abstract class SynchronizedJenaDatasetGraph extends SemanticDatastore {
 
         this.datastore.getLock().enterCriticalSection(Lock.READ);
 
-        try {
-            QueryExecution qe =
-                    QueryExecutionFactory.create(
-                            query, DatasetFactory.create(this.datastore));
-            return qe.execSelect();
-        } finally {
-            this.datastore.getLock().leaveCriticalSection();
-        }
+        QueryExecution qe =
+                QueryExecutionFactory.create(
+                        query, DatasetFactory.create(this.datastore));
+        return qe.execSelect();
     }
 
     /*

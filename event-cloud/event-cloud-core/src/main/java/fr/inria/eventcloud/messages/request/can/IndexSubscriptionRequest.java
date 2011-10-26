@@ -38,7 +38,6 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
@@ -93,6 +92,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                                                QuadruplePattern quadruplePattern) {
         // writes the subscription into the cache and the local datastore
         Subscription subscription = this.subscription.getValue();
+
         ((SemanticCanOverlay) overlay).storeSubscription(subscription);
 
         SynchronizedJenaDatasetGraph datastore =
@@ -100,21 +100,22 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         Subsubscription firstSubsubscription =
                 subscription.getSubSubscriptions()[0];
 
-        ResultSet queryResult =
-                ((SemanticDatastore) overlay.getDatastore()).executeSparqlSelect(createQueryRetrievingQuadruplesMatching(firstSubsubscription.getAtomicQuery()
-                        .getQuadruplePattern()));
-
         // stores the quadruples into a list in order to avoid a concurrent
         // exception if a add operation (or more generally a write operation) is
         // done on the datastore while we are iterating on the ResultSet.
         // Indeed, the result set does not contain the solutions but knows how
         // to retrieve a solution each time a call to next is performed.
         List<Quadruple> quadruplesMatching = new ArrayList<Quadruple>();
-        while (queryResult.hasNext()) {
-            QuerySolution solution = queryResult.next();
-            quadruplesMatching.add(new Quadruple(
-                    solution.get("g").asNode(), solution.get("s").asNode(),
-                    solution.get("p").asNode(), solution.get("o").asNode()));
+        synchronized (datastore) {
+            ResultSet queryResult =
+                    datastore.executeSparqlSelect(createQueryRetrievingQuadruplesMatching(firstSubsubscription.getAtomicQuery()
+                            .getQuadruplePattern()));
+            while (queryResult.hasNext()) {
+                QuerySolution solution = queryResult.next();
+                quadruplesMatching.add(new Quadruple(
+                        solution.get("g").asNode(), solution.get("s").asNode(),
+                        solution.get("p").asNode(), solution.get("o").asNode()));
+            }
         }
 
         for (Quadruple quadMatching : quadruplesMatching) {
@@ -190,7 +191,9 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                                 Node.createLiteral(subscription.getId()
                                         .toString(), XSDDatatype.XSDlong));
 
-                datastore.add(metaQuad);
+                synchronized (datastore) {
+                    datastore.add(metaQuad);
+                }
 
                 Subscription rewrittenSubscription =
                         SubscriptionRewriter.rewrite(subscription, quadMatching);

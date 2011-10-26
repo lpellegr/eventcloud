@@ -20,6 +20,8 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
+import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
 
@@ -44,8 +46,14 @@ public final class FindQuadruplesOperation implements SynchronousOperation {
      */
     @Override
     public ResponseOperation handle(StructuredOverlay overlay) {
-        return new FindQuadruplesResponseOperation(
-                ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(this.quadruplePattern));
+        Collection<Quadruple> result = null;
+
+        synchronized (overlay.getDatastore()) {
+            result =
+                    ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(this.quadruplePattern);
+        }
+
+        return new FindQuadruplesResponseOperation(result);
     }
 
 }

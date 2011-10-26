@@ -210,9 +210,13 @@ public class Subsubscription implements Rdfable, Serializable {
     public static final Subsubscription parseFrom(SemanticDatastore datastore,
                                                   SubscriptionId subscriptionId,
                                                   SubscriptionId subSubscriptionId) {
-        Collection<Quadruple> quads =
-                datastore.find(Node.ANY, Node.createURI(SUBSUBSCRIPTION_NS
-                        + subSubscriptionId), Node.ANY, Node.ANY);
+        Collection<Quadruple> quads = null;
+
+        synchronized (datastore) {
+            quads =
+                    datastore.find(Node.ANY, Node.createURI(SUBSUBSCRIPTION_NS
+                            + subSubscriptionId), Node.ANY, Node.ANY);
+        }
 
         // contains the properties and their associated values that are read
         // from the datastore for the given subSubscriptionId

@@ -64,7 +64,9 @@ public class QuadruplePatternRequest extends
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 QuadruplePattern quadruplePattern) {
-        return ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(quadruplePattern);
+        synchronized (overlay.getDatastore()) {
+            return ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(quadruplePattern);
+        }
     }
 
 }
