@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>fr.inria.eventcloud</groupId>
+		<artifactId>event-cloud-webservices</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>fr.inria.eventcloud</groupId>
+	<artifactId>event-cloud-webservices-api</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<name>event-cloud-webservices-api</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>fr.inria.eventcloud</groupId>
+			<artifactId>event-cloud-api</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.inria.eventcloud</groupId>
+			<artifactId>event-cloud-translator-wsnotif</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.petalslink.research.commons</groupId>
+			<artifactId>commons-wsn-api</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.cxf</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Xmx2048m</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
