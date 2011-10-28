@@ -16,9 +16,7 @@
  **/
 package fr.inria.eventcloud.webservices.api.adapters;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
@@ -75,7 +73,7 @@ public class SubscribeInfosAdapter extends
         FilterType filterType = new FilterType();
         TopicExpressionType topicExpressionType = new TopicExpressionType();
 
-        // retrieve topic name from SPARQL query
+        // Retrieve topic name from SPARQL query
         final StringBuilder topicName = new StringBuilder();
         OpAsQuery.asQuery(Transformer.transform(
                 new TransformBase() {
@@ -90,18 +88,13 @@ public class SubscribeInfosAdapter extends
 
                 },
                 Algebra.compile(QueryFactory.create(subscribeInfos.getSparqlQuery()))));
-
         topicExpressionType.getContent().add(topicName.toString());
-        JAXBContext jaxbContext =
-                JAXBContext.newInstance(TopicExpressionType.class);
-        Marshaller marshaller = jaxbContext.createMarshaller();
         JAXBElement<TopicExpressionType> jaxbElement =
                 new JAXBElement<TopicExpressionType>(
                         new QName(
                                 "http://docs.oasis-open.org/wsn/b-2",
-                                "TopicExpressionType"),
-                        TopicExpressionType.class, topicExpressionType);
-        marshaller.marshal(jaxbElement, System.out);
+                                "TopicExpression"), TopicExpressionType.class,
+                        topicExpressionType);
         filterType.getAny().add(jaxbElement);
         subscribe.setFilter(filterType);
 
