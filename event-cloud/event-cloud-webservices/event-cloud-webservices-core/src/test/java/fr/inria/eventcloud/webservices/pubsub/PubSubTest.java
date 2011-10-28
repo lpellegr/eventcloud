@@ -18,9 +18,7 @@ package fr.inria.eventcloud.webservices.pubsub;
 
 import java.io.InputStream;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
@@ -48,7 +46,6 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
 import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
-import fr.inria.eventcloud.webservices.services.ISubscriberService;
 import fr.inria.eventcloud.webservices.services.SubscriberService;
 
 /**
@@ -70,7 +67,7 @@ public class PubSubTest {
         return factory.create();
     }
 
-    @Test
+    @Test(timeout = 90000)
     public void testPublishSubscribeWsProxies() throws Exception {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
@@ -89,62 +86,56 @@ public class PubSubTest {
                         "publish", 8890);
 
         SubscriberService subscriberService = new SubscriberService();
-
         String subscriberWsUrl =
                 WsProxyDeployer.deployWebService(
                         subscriberService, "subscriber", 8891);
 
-        // WsProxyDeployer.deploySubscriberWebService("subscriber", 8891);
-
         // Clients associated to Web services
-        // Client subscribeClient =
-        // createWsClient(NotificationProducer.class, subscribeWsUrl);
-        //
-        // Client publishClient =
-        // createWsClient(NotificationConsumer.class, publishWsUrl);
+        Client subscribeClient =
+                createWsClient(NotificationProducer.class, subscribeWsUrl);
 
-        Client subscriberClient =
-                createWsClient(ISubscriberService.class, subscriberWsUrl);
+        Client publishClient =
+                createWsClient(NotificationConsumer.class, publishWsUrl);
 
         // Creates the subscribe request
-        // Subscribe subscribeRequest = new Subscribe();
-        // FilterType filterType = new FilterType();
-        // TopicExpressionType tet = new TopicExpressionType();
-        // tet.getContent().add("fireman_event:cardiacRythmFiremanTopic");
-        //
-        // JAXBElement<TopicExpressionType> jaxbElement =
-        // new JAXBElement<TopicExpressionType>(
-        // new QName(
-        // "http://docs.oasis-open.org/wsn/b-2",
-        // "TopicExpressionType"),
-        // TopicExpressionType.class, tet);
-        // filterType.getAny().add(jaxbElement);
-        // subscribeRequest.setFilter(filterType);
-        //
-        // W3CEndpointReferenceBuilder endPointReferenceBuilder =
-        // new W3CEndpointReferenceBuilder();
-        // endPointReferenceBuilder.address(subscriberWsUrl);
-        // subscribeRequest.setConsumerReference(endPointReferenceBuilder.build());
-        //
-        // // subscribes for any events with topic
-        // // fireman_event:cardiacRythmFiremanTopic
-        // subscribeClient.invoke("Subscribe", subscribeRequest);
+        Subscribe subscribeRequest = new Subscribe();
+        FilterType filterType = new FilterType();
+        TopicExpressionType topicExpressionType = new TopicExpressionType();
+        topicExpressionType.getContent().add(
+                "fireman_event:cardiacRythmFiremanTopic");
 
-        // waits a little to be sure that the subscription has been indexed
-        // Thread.sleep(2000);
-        //
-        // Collection<Event> events = new Collection<Event>();
-        // events.add(new Event(read("/notification-01.trig")));
-        // EventToNotificationMessageTranslator translator =
-        // new EventToNotificationMessageTranslator();
-        //
-        // // creates the notify request
-        // Notify notifyRequest = new Notify();
-        // for (Event event : events) {
-        // notifyRequest.getNotificationMessage().add(
-        // translator.translate(event));
-        // }
-        // publishClient.invoke("Notify", notifyRequest);
+        JAXBElement<TopicExpressionType> jaxbElement =
+                new JAXBElement<TopicExpressionType>(
+                        new QName(
+                                "http://docs.oasis-open.org/wsn/b-2",
+                                "TopicExpression"), TopicExpressionType.class,
+                        topicExpressionType);
+        filterType.getAny().add(jaxbElement);
+        subscribeRequest.setFilter(filterType);
+
+        W3CEndpointReferenceBuilder endPointReferenceBuilder =
+                new W3CEndpointReferenceBuilder();
+        endPointReferenceBuilder.address(subscriberWsUrl);
+        subscribeRequest.setConsumerReference(endPointReferenceBuilder.build());
+
+        // Subscribes for any events with topic
+        // fireman_event:cardiacRythmFiremanTopic
+        subscribeClient.invoke("Subscribe", subscribeRequest);
+
+        // Waits a little to be sure that the subscription has been indexed
+        Thread.sleep(2000);
+
+        // Creates the notify request
+        Notify notifyRequest = new Notify();
+        Collection<Event> events = new Collection<Event>();
+        events.add(new Event(read("/notification-01.trig")));
+        EventToNotificationMessageTranslator translator =
+                new EventToNotificationMessageTranslator();
+        for (Event event : events) {
+            notifyRequest.getNotificationMessage().add(
+                    translator.translate(event));
+        }
+        publishClient.invoke("Notify", notifyRequest);
 
         while (subscriberService.eventsReceived.size() == 0) {
             log.info("Waiting for the reception of event");
