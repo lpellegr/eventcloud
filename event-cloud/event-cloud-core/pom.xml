@@ -29,13 +29,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>jena</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>tdb</artifactId>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-tdb</artifactId>
 		</dependency>
 
 		<dependency>
