@@ -16,42 +16,26 @@
  **/
 package fr.inria.eventcloud.datastore;
 
-import com.hp.hpl.jena.sparql.core.DatasetGraph;
-import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
+import com.hp.hpl.jena.tdb.ReadWrite;
 
 /**
- * A simple non-persistent, in-memory Jena store. Useful for unit testing.
+ * Encapsulates the default Jena access modes to an enum type with a more
+ * understandable name.
  * 
  * @author lpellegr
  */
-public class InMemoryJenaDatastore extends SynchronizedJenaDatasetGraph {
+public enum AccessMode {
 
-    public InMemoryJenaDatastore() {
-        super();
+    READ_ONLY(ReadWrite.READ), WRITE(ReadWrite.WRITE);
+
+    private ReadWrite mode;
+
+    AccessMode(ReadWrite mode) {
+        this.mode = mode;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DatasetGraph createDatasetGraph() {
-        return DatasetGraphFactory.createMem();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void internalOpen() {
-        super.datastore = this.createDatasetGraph();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void internalClose() {
-        super.datastore.close();
+    public ReadWrite toJena() {
+        return this.mode;
     }
 
 }
