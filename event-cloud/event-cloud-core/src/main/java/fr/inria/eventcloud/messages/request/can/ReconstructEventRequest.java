@@ -23,13 +23,14 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.utils.LongLong;
@@ -96,62 +97,23 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
      */
     @Override
     public synchronized Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                                                AnycastRequest request,
-                                                                QuadruplePattern quadruplePattern) {
-        log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step1 mGV="
-                + this.metaGraphValue.getValue());
-
+                                                                             AnycastRequest request,
+                                                                             QuadruplePattern quadruplePattern) {
         Collection<LongLong> hashValues = this.hashValuesReceived.getValue();
-        log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step2");
         Collection<Quadruple> result = new Collection<Quadruple>();
-        log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step3");
-        StringBuilder query =
-                new StringBuilder(
-                        "SELECT ?g ?s ?p ?o WHERE {\n    GRAPH ?g {\n         ?s ?p ?o . \n  } }");
-        log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step4");
-        // query.append(this.metaGraphValue.getValue());
-        // query.append("\" ||  sameTerm(?g, <" + this.metaGraphValue.getValue()
-        // + ">)) } }");
-        log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step5");
-        synchronized (overlay.getDatastore()) {
-            ResultSet queryResult =
-                    ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).executeSparqlSelect(query.toString());
-            log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step6");
-            while (queryResult.hasNext()) {
-                QuerySolution solution = queryResult.next();
 
-                log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step7 --> "
-                        + solution.get("g").asNode().getURI()
-                        + " equals "
-                        + this.metaGraphValue.getValue()
-                        + "?"
-                        + solution.get("g").asNode().getURI().equals(
-                                this.metaGraphValue.getValue()));
-                if (solution.get("g").asNode().getURI().equals(this.metaGraphValue.getValue())) {
-
-                    Quadruple quad =
-                            new Quadruple(
-                                    solution.get("g").asNode(), solution.get(
-                                            "s").asNode(), solution.get("p")
-                                            .asNode(), solution.get("o")
-                                            .asNode());
-                    log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step8");
-                    log.info(
-                            "RECONSTRUCTINGREQUEST quad={}, pubtime={}, contained={}",
-                            new Object[] {
-                                    quad, quad.getPublicationTime(),
-                                    hashValues.contains(quad.hashValue())});
-
-                    if (quad.getPublicationTime() != -1
-                            && !hashValues.contains(quad.hashValue())) {
-                        log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step9");
-                        result.add(quad);
-                    }
-                }
+        TransactionalDatasetGraph txnGraph =
+                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+        for (Quadruple quadruple : txnGraph.find(
+                Node.createURI(this.metaGraphValue.getValue()), Node.ANY,
+                Node.ANY, Node.ANY)) {
+            if (quadruple.getPublicationTime() != -1
+                    && !hashValues.contains(quadruple.hashValue())) {
+                result.add(quadruple);
             }
         }
+        txnGraph.close();
 
-        log.info("ReconstructEventRequest.onPeerValidatingKeyConstraints() step10");
         return result;
     }
 

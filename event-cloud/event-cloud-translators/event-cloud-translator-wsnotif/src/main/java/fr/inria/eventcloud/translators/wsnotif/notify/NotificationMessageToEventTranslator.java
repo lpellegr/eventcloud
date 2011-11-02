@@ -78,7 +78,8 @@ public class NotificationMessageToEventTranslator {
      * This method removes all white spaces between > < elements for a node
      * 
      * @param incomingNode
-     * @return
+     * 
+     * @return xml tree without white spaces between nodes.
      */
     public static org.w3c.dom.Node removeWhiteSpacesFromNode(org.w3c.dom.Node incomingNode) {
         try {

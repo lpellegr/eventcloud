@@ -21,7 +21,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 
 /**
@@ -87,11 +86,27 @@ public class Collection<T> implements java.util.Collection<T>, Serializable {
         }
 
         if (shallowCopy) {
-            this.collection = new HashSet<T>();
+            this.collection = new ArrayList<T>();
             this.collection.addAll(collection);
         } else {
             this.collection = collection;
         }
+    }
+
+    /**
+     * Creates a collection of type {@code T} from the specified iterator.
+     * 
+     * @param iterator
+     *            the iterator to iterator over elements of type T.
+     * 
+     * @return a collection containing the elements returned by the iterator.
+     */
+    public static <T> Collection<T> from(Iterator<T> iterator) {
+        Collection<T> result = new Collection<T>();
+        while (iterator.hasNext()) {
+            result.add(iterator.next());
+        }
+        return result;
     }
 
     /**

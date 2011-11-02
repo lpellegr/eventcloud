@@ -23,11 +23,13 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 
 /**
- * Operation used to query the datastore managed by a peer with a call to
- * {@link SynchronizedJenaDatasetGraph#find(QuadruplePattern)}.
+ * Operation used to query the datastore managed by <strong>one peer</strong>
+ * with a call to {@link TransactionalDatasetGraph#find(QuadruplePattern)}.
  * 
  * @author lpellegr
  */
@@ -48,10 +50,10 @@ public final class FindQuadruplesOperation implements SynchronousOperation {
     public ResponseOperation handle(StructuredOverlay overlay) {
         Collection<Quadruple> result = null;
 
-        synchronized (overlay.getDatastore()) {
-            result =
-                    ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).find(this.quadruplePattern);
-        }
+        TransactionalDatasetGraph txnGraph =
+                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+        result = Collection.from(txnGraph.find(this.quadruplePattern));
+        txnGraph.close();
 
         return new FindQuadruplesResponseOperation(result);
     }

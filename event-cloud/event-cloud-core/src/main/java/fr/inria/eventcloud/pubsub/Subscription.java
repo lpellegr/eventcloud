@@ -64,7 +64,9 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Rdfable;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
@@ -178,16 +180,8 @@ public class Subscription implements Rdfable, Serializable {
         this.stubs.add(stub);
     }
 
-    public static final Subscription parseFrom(SemanticDatastore datastore,
+    public static final Subscription parseFrom(TransactionalTdbDatastore datastore,
                                                SubscriptionId id) {
-
-        Collection<Quadruple> quads = null;
-        synchronized (datastore) {
-            quads =
-                    datastore.find(Node.ANY, Node.createURI(SUBSCRIPTION_NS
-                            + id.toString()), Node.ANY, Node.ANY);
-        }
-
         // contains the data about the subscription itself
         Map<String, Node> basicInfo = new HashMap<String, Node>();
         // contains the identifier of the sub-subscriptions
@@ -195,7 +189,11 @@ public class Subscription implements Rdfable, Serializable {
         // contains the stub urls associated to the subscription
         List<String> stubs = new ArrayList<String>();
 
-        for (Quadruple quad : quads) {
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        for (Quadruple quad : txnGraph.find(
+                Node.ANY, Node.createURI(SUBSCRIPTION_NS + id.toString()),
+                Node.ANY, Node.ANY)) {
             if (quad.getPredicate().equals(
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
                 subSubscriptionsId.add(quad.getObject().getLiteralLexicalForm());
@@ -205,6 +203,7 @@ public class Subscription implements Rdfable, Serializable {
                 basicInfo.put(quad.getPredicate().toString(), quad.getObject());
             }
         }
+        txnGraph.close();
 
         SubscriptionId parentId = null;
         if (basicInfo.get(SUBSCRIPTION_PARENT_ID_PROPERTY) != null) {

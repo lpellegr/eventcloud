@@ -82,9 +82,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
             public void execute(Quadruple quad) {
-                add(new Quadruple(
-                        quad.getGraph(), quad.getSubject(),
-                        quad.getPredicate(), quad.getObject()));
+                add(quad);
             }
         });
 

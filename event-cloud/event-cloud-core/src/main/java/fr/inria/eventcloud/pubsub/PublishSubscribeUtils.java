@@ -36,6 +36,8 @@ import org.openjena.riot.tokens.TokenizerFactory;
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -46,7 +48,9 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.utils.LongLong;
 
@@ -117,7 +121,7 @@ public final class PublishSubscribeUtils {
      *         original subscription identifier (several rewritten subscriptions
      *         may be issued from the same original subscription).
      */
-    public static final List<SubscriptionId> findSubscriptionIds(SemanticDatastore datastore,
+    public static final List<SubscriptionId> findSubscriptionIds(TransactionalTdbDatastore datastore,
                                                                  SubscriptionId originalSubscriptionId) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT ?subscriptionId WHERE {\n    GRAPH ");
@@ -133,23 +137,33 @@ public final class PublishSubscribeUtils {
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
         query.append(" ?subscriptionId .\n    }\n}");
 
-        ResultSet result = datastore.executeSparqlSelect(query.toString());
-
         List<SubscriptionId> ids = new ArrayList<SubscriptionId>();
 
-        while (result.hasNext()) {
-            Binding binding = result.nextBinding();
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        query.toString(), txnGraph.toDataset());
+        ResultSet result = queryExecution.execSelect();
 
-            SubscriptionId subscriptionId =
-                    SubscriptionId.parseFrom(binding.get(
-                            Var.alloc("subscriptionId"))
-                            .getLiteralLexicalForm());
-            // SubscriptionId subSubscriptionId =
-            // new SubscriptionId(
-            // ((Number) binding.get(
-            // Var.alloc("subSubscriptionId"))
-            // .getLiteralValue()).longValue());
-            ids.add(subscriptionId);
+        try {
+            while (result.hasNext()) {
+                Binding binding = result.nextBinding();
+
+                SubscriptionId subscriptionId =
+                        SubscriptionId.parseFrom(binding.get(
+                                Var.alloc("subscriptionId"))
+                                .getLiteralLexicalForm());
+                // SubscriptionId subSubscriptionId =
+                // new SubscriptionId(
+                // ((Number) binding.get(
+                // Var.alloc("subSubscriptionId"))
+                // .getLiteralValue()).longValue());
+                ids.add(subscriptionId);
+            }
+        } finally {
+            queryExecution.close();
+            txnGraph.close();
         }
 
         return ids;
@@ -271,28 +285,35 @@ public final class PublishSubscribeUtils {
      * @param subscriptionId
      *            the subscriptions to remove.
      */
-    public static final void deleteSubscription(SemanticDatastore datastore,
+    public static final void deleteSubscription(TransactionalTdbDatastore datastore,
                                                 SubscriptionId subscriptionId) {
         Node subscriptionIdUrl =
                 PublishSubscribeUtils.createSubscriptionIdUrl(subscriptionId);
 
+        TransactionalDatasetGraph tnxGraph =
+                datastore.begin(AccessMode.READ_ONLY);
         Collection<Quadruple> subscriptionQuadruples =
-                datastore.find(
+                Collection.from(tnxGraph.find(
                         PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
                         subscriptionIdUrl,
                         PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
-                        Node.ANY);
+                        Node.ANY));
+        tnxGraph.close();
 
-        // removes the quadruples about the sub subscriptions associated to the
-        // subscription
+        tnxGraph = datastore.begin(AccessMode.WRITE);
         for (Quadruple quad : subscriptionQuadruples) {
-            datastore.deleteAny(
+            // removes the quadruples about the sub subscriptions associated to
+            // the
+            // subscription
+            tnxGraph.delete(
                     Node.ANY, createSubSubscriptionIdUrl(quad.getObject()
                             .getLiteralLexicalForm()), Node.ANY, Node.ANY);
         }
 
         // removes the quadruples about the subscription
-        datastore.deleteAny(Node.ANY, subscriptionIdUrl, Node.ANY, Node.ANY);
+        tnxGraph.delete(Node.ANY, subscriptionIdUrl, Node.ANY, Node.ANY);
+        tnxGraph.commit();
+        tnxGraph.close();
     }
 
     /**

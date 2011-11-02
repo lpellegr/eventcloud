@@ -28,12 +28,13 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
@@ -70,28 +71,26 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
      */
     @Override
     public void handle(StructuredOverlay overlay) {
-        SynchronizedJenaDatasetGraph datastore =
-                (SynchronizedJenaDatasetGraph) overlay.getDatastore();
+        TransactionalTdbDatastore datastore =
+                (TransactionalTdbDatastore) overlay.getDatastore();
 
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
         // finds the matching quadruple meta information
-        Collection<Quadruple> result = null;
+        QuadrupleIterator result =
+                txnGraph.find(
+                        PublishSubscribeUtils.createQuadrupleHashUrl(this.hash),
+                        Node.ANY, Node.ANY, Node.ANY);
 
-        synchronized (datastore) {
-            result =
-                    datastore.find(new QuadruplePattern(
-                            PublishSubscribeUtils.createQuadrupleHashUrl(this.hash),
-                            Node.ANY, Node.ANY, Node.ANY));
-        }
-
-        if (result.size() != 1) {
-            throw new IllegalStateException(
-                    "The peer "
-                            + overlay
-                            + " is expected to have a matching quadruple meta information for hash "
-                            + this.hash);
+        if (!result.hasNext()) {
+            log.error(
+                    "Peer {} is expected to have a matching quadruple meta information for hash {}",
+                    overlay, this.hash);
         }
 
         Quadruple metaQuad = result.iterator().next();
+        txnGraph.close();
+
         // TODO: try to understand why we got an exception when the meta quad
         // is removed at this step
         // datastore.delete(metaQuad);
@@ -105,7 +104,7 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
                         PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()),
                         extractedMetaInfo.getSecond());
 
-        // extracts only the variabless that are declared as result variables in
+        // extracts only the variables that are declared as result variables in
         // the original subscription
 
         Subscription subscription =

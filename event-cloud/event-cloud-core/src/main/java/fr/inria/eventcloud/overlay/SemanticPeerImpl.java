@@ -29,8 +29,10 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerComponentIm
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 
 import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -39,8 +41,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
@@ -49,13 +50,16 @@ import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
+import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.utils.Callback;
 
 /**
  * SemanticPeerImpl is a concrete implementation of {@link SemanticPeer}. It is
  * a peer constructed by using a {@link CanOverlay} and a
- * {@link PersistentJenaTdbDatastore}. It exposes the methods provided by the
- * {@link SemanticDatastore} interface in order to provide semantic operations
- * like add, delete, find, etc. but also to execute a SPARQL query.
+ * {@link TransactionalTdbDatastore}. It exposes the methods provided by the
+ * {@link PutGetApi} interface in order to provide semantic operations like
+ * {@code add}, {@code delete}, {@code find}, etc. but also to execute a SPARQL
+ * query.
  * <p>
  * Warning, you have to use the {@link SemanticFactory} in order to create a new
  * SemanticPeer component.
@@ -85,7 +89,8 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
     public boolean init(Peer stub,
                         SerializableProvider<? extends StructuredOverlay> overlayProvider) {
         super.init(stub, overlayProvider);
-        this.threadPool = Executors.newFixedThreadPool(50);
+        this.threadPool =
+                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
         return true;
     }
 
@@ -130,7 +135,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
         try {
             doneSignal.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
 
         return true;
@@ -141,8 +146,14 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      */
     @Override
     public boolean add(InputStream in, SerializationFormat format) {
-        // TODO Auto-generated method stub
-        return false;
+        RdfParser.parse(in, format, new Callback<Quadruple>() {
+            @Override
+            public void execute(Quadruple quad) {
+                add(quad);
+            }
+        });
+
+        return true;
     }
 
     /**
@@ -193,7 +204,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
         try {
             doneSignal.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
 
         return true;
@@ -205,15 +216,15 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
     @Override
     public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
         try {
-            PAFuture.waitFor(super.send(new DeleteQuadruplesRequest(
-                    quadPattern.getGraph(), quadPattern.getSubject(),
-                    quadPattern.getPredicate(), quadPattern.getObject())));
+            QuadruplePatternResponse response =
+                    (QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new DeleteQuadruplesRequest(
+                            quadPattern.getGraph(), quadPattern.getSubject(),
+                            quadPattern.getPredicate(), quadPattern.getObject())));
+            return response.getResult();
         } catch (DispatchException e) {
             e.printStackTrace();
+            return null;
         }
-
-        // TODO retrieve the quadruples that have been removed
-        return null;
     }
 
     /**

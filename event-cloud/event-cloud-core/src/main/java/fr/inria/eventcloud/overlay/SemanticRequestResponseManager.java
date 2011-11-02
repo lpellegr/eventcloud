@@ -39,7 +39,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
 import fr.inria.eventcloud.messages.response.can.SparqlAtomicResponse;
 import fr.inria.eventcloud.reasoner.SparqlColander;
@@ -64,7 +64,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     private ExecutorService threadPool;
 
-    public SemanticRequestResponseManager(SemanticDatastore datastore) {
+    public SemanticRequestResponseManager(TransactionalTdbDatastore datastore) {
         super();
         this.colander = new SparqlColander(datastore);
         this.pendingResults =

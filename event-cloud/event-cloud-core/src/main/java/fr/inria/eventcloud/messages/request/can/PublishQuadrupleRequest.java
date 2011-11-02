@@ -40,6 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -48,7 +50,9 @@ import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
@@ -84,45 +88,59 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        SynchronizedJenaDatasetGraph datastore =
-                ((SynchronizedJenaDatasetGraph) overlay.getDatastore());
+        TransactionalTdbDatastore datastore =
+                ((TransactionalTdbDatastore) overlay.getDatastore());
 
-        List<HomogenousPair<Node>> matchingIds = null;
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.WRITE);
+        // the quadruple is stored by using its timestamped graph value
+        txnGraph.add(
+                quad.createMetaGraphNode(), quad.getSubject(),
+                quad.getPredicate(), quad.getObject());
+        txnGraph.commit();
+        txnGraph.close();
 
-        synchronized (datastore) {
-            // the quad is stored by using its timestamped graph value
-            datastore.add(new Quadruple(
-                    quad.createMetaGraphNode(), quad.getSubject(),
-                    quad.getPredicate(), quad.getObject(), false, false));
+        log.debug(
+                "SPARQL query used to retrieve the sub subscriptions matching {}:\n{}",
+                quad, createQueryRetrievingSubscriptionsMatching(quad));
 
-            log.debug(
-                    "SPARQL query used to retrieve the sub subscriptions matching {}:\n{}",
-                    quad, createQueryRetrievingSubscriptionsMatching(quad));
+        // we have to store the identifiers found into a new list because
+        // we cannot iterate on a Jena iterator and perform operations on
+        // the datastore at the same time
+        List<HomogenousPair<Node>> matchingIds =
+                new ArrayList<HomogenousPair<Node>>();
 
-            // finds the sub subscription which are stored locally and that are
-            // matching the quadruple that have been just inserted into the
-            // local
-            // datastore
-            ResultSet result =
-                    datastore.executeSparqlSelect(createQueryRetrievingSubscriptionsMatching(quad));
+        // finds the sub subscriptions which are stored locally and that are
+        // matching the quadruple which have been just inserted into the
+        // local datastore
+        txnGraph = datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        createQueryRetrievingSubscriptionsMatching(quad),
+                        txnGraph.toDataset());
 
-            // we have to store the identifiers found into a new list because
-            // we cannot iterate on a Jena iterator and perform operations on
-            // the
-            // datastore at the same time
-            matchingIds = new ArrayList<HomogenousPair<Node>>();
-
+        ResultSet result = queryExecution.execSelect();
+        try {
             while (result.hasNext()) {
                 QuerySolution solution = result.nextSolution();
                 // the first component is composed of the subscription id
-                // whereas
-                // the second contains the sub subscription id
+                // whereas the second contains the sub subscription id
                 matchingIds.add(new HomogenousPair<Node>(solution.get(
                         "subscriptionId").asNode(), solution.get(
                         "subSubscriptionId").asNode()));
             }
+        } catch (Exception e) {
+            txnGraph.abort();
+            log.error("Error while retrieving subscriptions matchings", e);
+        } finally {
+            queryExecution.close();
+            txnGraph.close();
         }
 
+        if (matchingIds.isEmpty()) {
+            log.debug("No subscription matching {} has been found on {}.", quad, overlay);
+        }
+        
         for (HomogenousPair<Node> pair : matchingIds) {
             log.debug(
                     "The peer {} has a sub subscription {} that matches the quadruple {} ",
@@ -215,9 +233,11 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 Quadruple metaQuad =
                         PublishSubscribeUtils.createMetaQuadruple(
                                 quad, subscriptionIdURL, pair.getSecond());
-                synchronized (datastore) {
-                    datastore.add(metaQuad);
-                }
+
+                txnGraph = datastore.begin(AccessMode.WRITE);
+                txnGraph.add(metaQuad);
+                txnGraph.commit();
+                txnGraph.close();
 
                 // a subscription with more that one sub subscription (that
                 // matches the quadruple which has been inserted) has been
@@ -227,6 +247,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 // first sub-subscription.
                 Subscription rewrittenSubscription =
                         SubscriptionRewriter.rewrite(subscription, quad);
+
                 // the hash value associated to the quadruple that matches the
                 // subscription and the stub url for the current peer is stored
                 // into the message which is sent to the peers for indexing the
