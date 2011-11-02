@@ -65,13 +65,5 @@ public class SubscriberService implements NotificationConsumer {
             }
         }
     }
-//
-//    public List<Event> getEventsReceived() {
-//        return this.eventsReceived;
-//    }
-//
-//    public int getNbEventsReceived() {
-//        return this.eventsReceived.size();
-//    }
 
 }

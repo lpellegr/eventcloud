@@ -94,7 +94,9 @@ public class EventToNotificationMessageTranslator {
             if (predicateValue.equals(WsNotificationTranslatorConstants.SUBSCRIPTION_ADDRESS_TEXT)) {
                 subscriptionAddress = quad.getObject().getLiteralLexicalForm();
             } else if (predicateValue.equals(WsNotificationTranslatorConstants.TOPIC_TEXT)) {
-                topic = quad.getObject().getLiteralLexicalForm();
+                String value = quad.getObject().getLiteralLexicalForm();
+                int start = value.lastIndexOf("/") + 1;
+                topic = value.substring(start);
             } else if (predicateValue.equals(WsNotificationTranslatorConstants.PRODUCER_ADDRESS_TEXT)) {
                 producerAddress = quad.getObject().getLiteralLexicalForm();
             } else if (predicateValue.startsWith(WsNotificationTranslatorConstants.PRODUCER_METADATA_TEXT)) {
@@ -178,15 +180,18 @@ public class EventToNotificationMessageTranslator {
         }
     }
 
-    private static Element findByName(org.w3c.dom.Node node, String namespace, String localName) {
+    private static Element findByName(org.w3c.dom.Node node, String namespace,
+                                      String localName) {
         if (node.hasChildNodes()) {
             if (namespace != null) {
-                if (node.getNodeName().equals(localName) && namespace.equals(node.getNamespaceURI())) {
+                if (node.getNodeName().equals(localName)
+                        && namespace.equals(node.getNamespaceURI())) {
                     return (Element) node;
                 } else {
                     NodeList list = node.getChildNodes();
-                    for (int i=0; i<list.getLength(); i++) {
-                        Element elt = findByName(list.item(0), namespace, localName);
+                    for (int i = 0; i < list.getLength(); i++) {
+                        Element elt =
+                                findByName(list.item(0), namespace, localName);
                         if (elt != null) {
                             return elt;
                         }
@@ -197,8 +202,9 @@ public class EventToNotificationMessageTranslator {
                     return (Element) node;
                 } else {
                     NodeList list = node.getChildNodes();
-                    for (int i=0; i<list.getLength(); i++) {
-                        Element elt = findByName(list.item(0), namespace, localName);
+                    for (int i = 0; i < list.getLength(); i++) {
+                        Element elt =
+                                findByName(list.item(0), namespace, localName);
                         if (elt != null) {
                             return elt;
                         }
@@ -206,10 +212,10 @@ public class EventToNotificationMessageTranslator {
                 }
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Creates an XML tree (represented by its root {@link Element}) from the
      * specified {@code quadruple} and {@code prevRootElt}. The
@@ -244,13 +250,13 @@ public class EventToNotificationMessageTranslator {
                 String namespace = parts[0];
                 String localName = parts[1];
 
-//                NodeList elts =
-//                        namespace.isEmpty()
-//                                ? rootElt.getElementsByTagName(localName)
-//                                : rootElt.getElementsByTagNameNS(
-//                                        namespace, localName);
+                // NodeList elts =
+                // namespace.isEmpty()
+                // ? rootElt.getElementsByTagName(localName)
+                // : rootElt.getElementsByTagNameNS(
+                // namespace, localName);
                 Element eltFound = findByName(rootElt, namespace, localName);
-                
+
                 if (eltFound == null) {
                     // here we assume we have only one element that matches
                     Element elt =
