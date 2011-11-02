@@ -42,7 +42,9 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Rdfable;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.VariableDatatype;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
@@ -193,8 +195,8 @@ public class Subsubscription implements Rdfable, Serializable {
 
     /**
      * Parses a {@link Subsubscription} from the specified
-     * {@link SemanticDatastore} by using the specified {@code subscriptionId}
-     * and {@code subSubscriptionId}.
+     * {@link TransactionalTdbDatastore} by using the specified
+     * {@code subscriptionId} and {@code subSubscriptionId}.
      * 
      * @param datastore
      *            the datastore where the information about the sub subscription
@@ -207,31 +209,28 @@ public class Subsubscription implements Rdfable, Serializable {
      * 
      * @return the sub subscription which has been parsed.
      */
-    public static final Subsubscription parseFrom(SemanticDatastore datastore,
+    public static final Subsubscription parseFrom(TransactionalTdbDatastore datastore,
                                                   SubscriptionId subscriptionId,
                                                   SubscriptionId subSubscriptionId) {
-        Collection<Quadruple> quads = null;
-
-        synchronized (datastore) {
-            quads =
-                    datastore.find(Node.ANY, Node.createURI(SUBSUBSCRIPTION_NS
-                            + subSubscriptionId), Node.ANY, Node.ANY);
-        }
-
         // contains the properties and their associated values that are read
         // from the datastore for the given subSubscriptionId
         Map<String, Node> properties = new HashMap<String, Node>();
 
-        for (Quadruple quad : quads) {
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        for (Quadruple quad : txnGraph.find(
+                Node.ANY,
+                Node.createURI(SUBSUBSCRIPTION_NS + subSubscriptionId),
+                Node.ANY, Node.ANY)) {
             properties.put(quad.getPredicate().toString(), quad.getObject());
         }
+        txnGraph.close();
 
         return new Subsubscription(
                 subscriptionId,
                 subSubscriptionId,
                 (Integer) properties.get(SUBSUBSCRIPTION_INDEX_PROPERTY)
                         .getLiteralValue(),
-
                 // when they are serialized, variables are serialized as
                 // typed-literal with VariableDatatype datatype. To get a
                 // Node_Variable we have to get the parsed literal value but

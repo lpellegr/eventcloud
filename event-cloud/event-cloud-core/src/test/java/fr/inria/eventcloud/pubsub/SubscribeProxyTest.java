@@ -89,15 +89,18 @@ public class SubscribeProxyTest {
      * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeStringBindingNotificationListener()
-            throws InterruptedException {
+    public void testSubscribeStringBindingNotificationListener() {
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
                 new CustomBindingNotificationListener());
 
         // waits a little to make sure the subscription has been indexed
-        Thread.sleep(500);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         long publicationTime = System.currentTimeMillis();
 

@@ -21,12 +21,17 @@ import java.io.IOException;
 import java.util.List;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
+import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 
 /**
  * SparqlColander is used to filter the results from a set of
@@ -44,9 +49,9 @@ import fr.inria.eventcloud.datastore.SemanticDatastore;
  */
 public class SparqlColander implements Closeable {
 
-    private SemanticDatastore datastore;
+    private TransactionalTdbDatastore datastore;
 
-    public SparqlColander(SemanticDatastore datastore) {
+    public SparqlColander(TransactionalTdbDatastore datastore) {
         this.datastore = datastore;
         this.datastore.open();
     }
@@ -66,7 +71,18 @@ public class SparqlColander implements Closeable {
     public synchronized boolean filterSparqlAsk(String sparqlAskQuery,
                                                 List<Quadruple> quadruples) {
         this.cleanAndFill(this.datastore, quadruples);
-        return this.datastore.executeSparqAsk(sparqlAskQuery);
+
+        boolean result;
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlAskQuery, txnGraph.toDataset());
+        result = queryExecution.execAsk();
+        queryExecution.close();
+        txnGraph.close();
+
+        return result;
     }
 
     /**
@@ -84,7 +100,18 @@ public class SparqlColander implements Closeable {
     public synchronized Model filterSparqlConstruct(String sparqlConstructQuery,
                                                     List<Quadruple> quadruples) {
         this.cleanAndFill(this.datastore, quadruples);
-        return this.datastore.executeSparqlConstruct(sparqlConstructQuery);
+
+        Model result;
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlConstructQuery, txnGraph.toDataset());
+        result = queryExecution.execConstruct();
+        queryExecution.close();
+        txnGraph.close();
+
+        return result;
     }
 
     /**
@@ -102,15 +129,29 @@ public class SparqlColander implements Closeable {
     public synchronized ResultSet filterSparqlSelect(String sparqlSelectQuery,
                                                      List<Quadruple> quadruples) {
         this.cleanAndFill(this.datastore, quadruples);
-        return this.datastore.executeSparqlSelect(sparqlSelectQuery);
+
+        ResultSet result;
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlSelectQuery, txnGraph.toDataset());
+        result = new ResultSetWrapper(queryExecution.execSelect());
+        queryExecution.close();
+        txnGraph.close();
+
+        return result;
     }
 
-    private void cleanAndFill(SemanticDatastore datastore,
+    private void cleanAndFill(TransactionalTdbDatastore datastore,
                               List<Quadruple> quadruples) {
-        this.datastore.deleteAny(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
+        TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
+        txnGraph.delete(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
         for (Quadruple quad : quadruples) {
-            this.datastore.add(quad);
+            txnGraph.add(quad);
         }
+        txnGraph.commit();
+        txnGraph.close();
     }
 
     /**

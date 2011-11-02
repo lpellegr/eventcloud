@@ -22,7 +22,10 @@ import org.junit.Test;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.datastore.InMemoryJenaDatastore;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
 
 /**
  * Test cases associated to {@link Subscription}.
@@ -40,20 +43,26 @@ public class SubscriptionTest {
 
         Collection<Quadruple> quads = subscription.toQuadruples();
 
-        InMemoryJenaDatastore datastore = new InMemoryJenaDatastore();
+        TransactionalTdbDatastore datastore =
+                new TransactionalTdbDatastoreMem();
         datastore.open();
-        datastore.add(quads);
+
+        TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
+        txnGraph.add(quads);
+        txnGraph.commit();
+        txnGraph.close();
 
         Subscription deserializedSubscription =
                 Subscription.parseFrom(datastore, subscription.getId());
 
         Collection<Quadruple> newQuads =
                 deserializedSubscription.toQuadruples();
-
         for (Quadruple quad : newQuads) {
             Assert.assertTrue(quads.contains(quad));
         }
 
+        Assert.assertEquals(quads.size(), newQuads.size());
+        
         datastore.close();
     }
 

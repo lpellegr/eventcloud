@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.overlay;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -25,8 +26,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.MapMaker;
 
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.datastore.SemanticDatastore;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.reasoner.SparqlColander;
@@ -54,8 +56,8 @@ public class SemanticCanOverlay extends CanOverlay {
      *            the datastore instance to set for filtering sparql answers
      *            from a {@link SparqlColander}.
      */
-    public SemanticCanOverlay(SemanticDatastore peerDatastore,
-            SemanticDatastore colanderDatastore) {
+    public SemanticCanOverlay(TransactionalTdbDatastore peerDatastore,
+            TransactionalTdbDatastore colanderDatastore) {
         super(new SemanticRequestResponseManager(colanderDatastore),
                 peerDatastore);
         this.subscriptionsCache =
@@ -82,7 +84,7 @@ public class SemanticCanOverlay extends CanOverlay {
                     id);
             subscription =
                     Subscription.parseFrom(
-                            (SynchronizedJenaDatasetGraph) super.datastore, id);
+                            (TransactionalTdbDatastore) super.datastore, id);
 
             this.subscriptionsCache.putIfAbsent(
                     subscription.getId(), subscription);
@@ -100,9 +102,12 @@ public class SemanticCanOverlay extends CanOverlay {
      */
     public synchronized void storeSubscription(Subscription subscription) {
         this.subscriptionsCache.putIfAbsent(subscription.getId(), subscription);
-        synchronized (super.datastore) {
-            ((SemanticDatastore) super.datastore).add(subscription.toQuadruples());
-        }
+
+        TransactionalDatasetGraph txnGraph =
+                ((TransactionalTdbDatastore) super.datastore).begin(AccessMode.WRITE);
+        txnGraph.add(subscription.toQuadruples());
+        txnGraph.commit();
+        txnGraph.close();
     }
 
     /**
@@ -117,14 +122,14 @@ public class SemanticCanOverlay extends CanOverlay {
     public synchronized void deleteSubscription(SubscriptionId originalSubscriptionId) {
         this.subscriptionsCache.remove(originalSubscriptionId);
 
-        synchronized (super.datastore) {
-            // TODO: a write lock has to be acquired for all the deletes
-            for (SubscriptionId id : PublishSubscribeUtils.findSubscriptionIds(
-                    (SemanticDatastore) super.datastore, originalSubscriptionId)) {
-                PublishSubscribeUtils.deleteSubscription(
-                        (SemanticDatastore) super.datastore, id);
+        TransactionalTdbDatastore datastore =
+                (TransactionalTdbDatastore) super.datastore;
+        List<SubscriptionId> subscriptionIds =
+                PublishSubscribeUtils.findSubscriptionIds(
+                        datastore, originalSubscriptionId);
 
-            }
+        for (SubscriptionId id : subscriptionIds) {
+            PublishSubscribeUtils.deleteSubscription(datastore, id);
         }
     }
 

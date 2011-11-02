@@ -16,19 +16,29 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 
 /**
  * Removes all the quadruples that match the given quadpattern.
  * 
  * @author lpellegr
  */
-public class DeleteQuadruplesRequest extends StatelessQuadruplePatternRequest {
+public class DeleteQuadruplesRequest extends
+        StatefulQuadruplePatternRequest<Collection<Quadruple>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,14 +50,31 @@ public class DeleteQuadruplesRequest extends StatelessQuadruplePatternRequest {
      * {@inheritDoc}
      */
     @Override
-    public void onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                               QuadruplePattern quadruplePattern) {
-        synchronized (overlay.getDatastore()) {
-            ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).deleteAny(
-                    quadruplePattern.getGraph(), quadruplePattern.getSubject(),
-                    quadruplePattern.getPredicate(),
-                    quadruplePattern.getObject());
-        }
+    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
+        return new QuadruplePatternResponse(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
+                                                                AnycastRequest request,
+                                                                QuadruplePattern quadruplePattern) {
+        Collection<Quadruple> result;
+
+        TransactionalDatasetGraph txnGraph =
+                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+        result = Collection.from(txnGraph.find(quadruplePattern));
+        txnGraph.close();
+
+        txnGraph =
+                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.WRITE);
+        txnGraph.delete(quadruplePattern);
+        txnGraph.commit();
+        txnGraph.close();
+
+        return result;
     }
 
 }

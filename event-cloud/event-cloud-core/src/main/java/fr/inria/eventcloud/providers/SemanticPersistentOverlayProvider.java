@@ -16,18 +16,17 @@
  **/
 package fr.inria.eventcloud.providers;
 
-import java.io.File;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.datastore.PersistentJenaTdbDatastore;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
  * This class is used to build a {@link SemanticCanOverlay} with a
- * {@link PersistentJenaTdbDatastore} .
+ * {@link TransactionalTdbDatastore} .
  * 
  * @author lpellegr
  */
@@ -41,12 +40,13 @@ public final class SemanticPersistentOverlayProvider extends
      */
     public SemanticCanOverlay get() {
         return new SemanticCanOverlay(
-                new PersistentJenaTdbDatastore(
-                        EventCloudProperties.getRepositoryPath(),
+                new TransactionalTdbDatastore(
+                        EventCloudProperties.getRepositoryPath()
+                                .getAbsolutePath(),
                         EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
-                new PersistentJenaTdbDatastore(new File(
-                        System.getProperty("java.io.tmpdir"), "ec"
-                                + UUID.randomUUID().toString()), true));
+                new TransactionalTdbDatastore(
+                        System.getProperty("java.io.tmpdir") + "/eventcloud/"
+                                + UUID.randomUUID().toString(), true));
     }
 
 }

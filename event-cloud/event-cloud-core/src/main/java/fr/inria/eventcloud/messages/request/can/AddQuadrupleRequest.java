@@ -21,7 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 
 /**
  * An AddQuadrupleRequest is used to insert a quadruple into the network. The
@@ -46,9 +48,12 @@ public class AddQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
-        synchronized (overlay.getDatastore()) {
-            ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).add(quad);
-        }
+        TransactionalDatasetGraph txnGraph =
+                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.WRITE);
+        txnGraph.add(quad);
+        txnGraph.commit();
+        txnGraph.close();
+
         logger.info("Quadruple {} has been added on {}", quad, overlay);
     }
 

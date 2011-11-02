@@ -55,4 +55,8 @@ public final class Files {
         }
     }
 
+    public static void deleteDirectory(String path) throws IOException {
+        deleteDirectory(new File(path));
+    }
+
 }

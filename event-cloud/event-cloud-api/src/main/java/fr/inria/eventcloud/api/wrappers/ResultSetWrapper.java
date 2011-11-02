@@ -25,6 +25,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.resultset.ResultSetMem;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.utils.SparqlResultSerializer;
@@ -46,7 +47,9 @@ public class ResultSetWrapper extends SparqlResultWrapper<ResultSet> implements
      *            the result set to wrap.
      */
     public ResultSetWrapper(ResultSet resultSet) {
-        super(resultSet);
+        // puts the content of the resultset into memory if the specified
+        // resultset is not an in-memory resultset.
+        super(new ResultSetMem(resultSet));
     }
 
     /**

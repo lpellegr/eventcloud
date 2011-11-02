@@ -17,15 +17,9 @@
 package fr.inria.eventcloud.adapters.rdf2go;
 
 import java.io.InputStream;
-import java.util.Iterator;
 
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.tdb.store.DatasetGraphTDB;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PutGetApi;
@@ -39,6 +33,10 @@ import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
 
@@ -50,10 +48,11 @@ import fr.inria.eventcloud.utils.Callback;
  */
 public class MockPutGetProxy implements PutGetApi {
 
-    private DatasetGraphTDB dataset;
+    private TransactionalTdbDatastore datastore;
 
     public MockPutGetProxy() {
-        this.dataset = TDBFactory.createDatasetGraph();
+        this.datastore = new TransactionalTdbDatastoreMem();
+        this.datastore.open();
     }
 
     /**
@@ -61,7 +60,12 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public boolean add(Quadruple quad) {
-        this.dataset.add(toJenaQuad(quad));
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.WRITE);
+        txnGraph.add(quad);
+        txnGraph.commit();
+        txnGraph.close();
+
         return true;
     }
 
@@ -70,9 +74,14 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public boolean add(Collection<Quadruple> quads) {
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.WRITE);
         for (Quadruple quad : quads) {
-            this.add(quad);
+            txnGraph.add(quad);
         }
+        txnGraph.commit();
+        txnGraph.close();
+
         return true;
     }
 
@@ -81,12 +90,16 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public boolean add(InputStream in, SerializationFormat format) {
+        final Collection<Quadruple> quadruples = new Collection<Quadruple>();
+
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
             public void execute(Quadruple quad) {
-                return;
+                quadruples.add(quad);
             }
         });
+
+        this.add(quadruples);
 
         return true;
     }
@@ -96,7 +109,15 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public boolean contains(Quadruple quad) {
-        return this.dataset.contains(toJenaQuad(quad));
+        boolean result = false;
+
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.READ_ONLY);
+        result = txnGraph.contains(quad);
+        txnGraph.commit();
+        txnGraph.close();
+
+        return result;
     }
 
     /**
@@ -104,7 +125,12 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public boolean delete(Quadruple quad) {
-        this.dataset.delete(toJenaQuad(quad));
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.WRITE);
+        txnGraph.delete(quad);
+        txnGraph.commit();
+        txnGraph.close();
+
         return true;
     }
 
@@ -124,10 +150,18 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
-        Collection<Quadruple> result = this.find(quadPattern);
-        this.dataset.deleteAny(
-                quadPattern.getGraph(), quadPattern.getSubject(),
-                quadPattern.getPredicate(), quadPattern.getObject());
+        Collection<Quadruple> result;
+
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.READ_ONLY);
+        result = Collection.from(txnGraph.find(quadPattern));
+        txnGraph.close();
+
+        txnGraph = this.datastore.begin(AccessMode.WRITE);
+        txnGraph.delete(quadPattern);
+        txnGraph.commit();
+        txnGraph.close();
+
         return result;
     }
 
@@ -136,17 +170,14 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public Collection<Quadruple> find(QuadruplePattern quadPattern) {
-        Iterator<Quad> it =
-                this.dataset.findNG(
-                        quadPattern.getGraph(), quadPattern.getSubject(),
-                        quadPattern.getPredicate(), quadPattern.getObject());
+        Collection<Quadruple> result;
 
-        Collection<Quadruple> quads = new Collection<Quadruple>();
-        while (it.hasNext()) {
-            quads.add(toQuadruple(it.next()));
-        }
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.READ_ONLY);
+        result = Collection.from(txnGraph.find(quadPattern));
+        txnGraph.close();
 
-        return quads;
+        return result;
     }
 
     /**
@@ -164,11 +195,18 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
-        Query query = QueryFactory.create(sparqlAskQuery);
-        QueryExecution qe =
-                QueryExecutionFactory.create(query, dataset.toDataset());
+        boolean result = false;
 
-        return new SparqlAskResponse(0, 0, 0, 0, qe.execAsk());
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlAskQuery, txnGraph.toDataset());
+        result = queryExecution.execAsk();
+        queryExecution.close();
+        txnGraph.close();
+
+        return new SparqlAskResponse(0, 0, 0, 0, result);
     }
 
     /**
@@ -176,12 +214,18 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery) {
-        Query query = QueryFactory.create(sparqlConstructQuery);
-        QueryExecution qe =
-                QueryExecutionFactory.create(query, dataset.toDataset());
+        ModelWrapper result = null;
 
-        return new SparqlConstructResponse(0, 0, 0, 0, new ModelWrapper(
-                qe.execConstruct()));
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlConstructQuery, txnGraph.toDataset());
+        result = new ModelWrapper(queryExecution.execConstruct());
+        queryExecution.close();
+        txnGraph.close();
+
+        return new SparqlConstructResponse(0, 0, 0, 0, result);
     }
 
     /**
@@ -197,24 +241,18 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
-        Query query = QueryFactory.create(sparqlSelectQuery);
-        QueryExecution qe =
-                QueryExecutionFactory.create(query, dataset.toDataset());
+        ResultSetWrapper result = null;
 
-        return new SparqlSelectResponse(0, 0, 0, 0, new ResultSetWrapper(
-                qe.execSelect()));
-    }
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlSelectQuery, txnGraph.toDataset());
+        result = new ResultSetWrapper(queryExecution.execSelect());
+        queryExecution.close();
+        txnGraph.close();
 
-    private static final Quad toJenaQuad(Quadruple quad) {
-        return new Quad(
-                quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                quad.getObject());
-    }
-
-    private static final Quadruple toQuadruple(Quad quad) {
-        return new Quadruple(
-                quad.getGraph(), quad.getSubject(), quad.getPredicate(),
-                quad.getObject());
+        return new SparqlSelectResponse(0, 0, 0, 0, result);
     }
 
 }

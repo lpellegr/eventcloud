@@ -85,7 +85,7 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
                 // received. I mean does this condition is not already checked
                 // in the super method?
                 if (!messagingManager.hasReceivedRequest(request.getId())) {
-                    // query the datastore while the query is propagated
+                    // query the action while the query is propagated
                     messagingManager.getPendingResults().put(
                             request.getId(),
                             messagingManager.getThreadPool().submit(

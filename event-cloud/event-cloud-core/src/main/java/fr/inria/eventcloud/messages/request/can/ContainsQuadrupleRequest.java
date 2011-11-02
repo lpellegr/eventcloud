@@ -21,7 +21,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.datastore.SynchronizedJenaDatasetGraph;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 
 /**
@@ -46,10 +48,10 @@ public class ContainsQuadrupleRequest extends QuadrupleRequest {
     public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
         boolean result = false;
 
-        synchronized (overlay.getDatastore()) {
-            result =
-                    ((SynchronizedJenaDatasetGraph) overlay.getDatastore()).contains(super.getQuadruple());
-        }
+        TransactionalDatasetGraph txnGraph =
+                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+        result = txnGraph.contains(super.getQuadruple());
+        txnGraph.close();
 
         return new BooleanForwardResponse(this, result);
     }

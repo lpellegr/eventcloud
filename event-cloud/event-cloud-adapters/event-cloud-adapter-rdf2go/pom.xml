@@ -55,6 +55,14 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>com.hp.hpl.jena</groupId>
+					<artifactId>arq</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.hp.hpl.jena</groupId>
+					<artifactId>jena</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
