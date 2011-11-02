@@ -18,16 +18,16 @@ package fr.inria.eventcloud.providers;
 
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
-import fr.inria.eventcloud.datastore.InMemoryJenaDatastore;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * This class is used to build a {@link SemanticCanOverlay} with an
- * {@link InMemoryJenaDatastore} .
+ * This class is used to build a {@link SemanticCanOverlay} with a
+ * {@link TransactionalTdbDatastoreMem} .
  * 
  * @author lpellegr
  */
-public final class SemanticNonPersistentOverlayProvider extends
+public final class SemanticInMemoryOverlayProvider extends
         SerializableProvider<SemanticCanOverlay> {
 
     private static final long serialVersionUID = 1L;
@@ -38,7 +38,8 @@ public final class SemanticNonPersistentOverlayProvider extends
     @Override
     public SemanticCanOverlay get() {
         return new SemanticCanOverlay(
-                new InMemoryJenaDatastore(), new InMemoryJenaDatastore());
+                new TransactionalTdbDatastoreMem(),
+                new TransactionalTdbDatastoreMem());
     }
 
 }

@@ -19,6 +19,7 @@ package fr.inria.eventcloud.datastore;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Assert;
 
@@ -28,45 +29,48 @@ import org.junit.Test;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.query.ResultSet;
-
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
- * Test cases associated to {@link PersistentJenaTdbDatastore}.
+ * Test cases associated to {@link TransactionalTdbDatastore}.
  * 
  * @author lpellegr
  */
-public final class PersistentJenaTdbDatastoreTest {
+public final class TransactionalTdbDatastoreTest {
+
+    private static final int SEQUENTIAL_ADD_OPERATIONS = 100;
 
     private static final int CONCURRENT_ADD_OPERATIONS = 100;
 
-    private static final int CONCURRENT_RANDOM_OPERATIONS = 100;
+    private static final int CONCURRENT_RANDOM_OPERATIONS = 1000;
 
-    private PersistentJenaTdbDatastore datastore;
+    private TransactionalTdbDatastore datastore;
 
     @Before
     public void setUp() {
-        this.datastore =
-                new PersistentJenaTdbDatastore(
-                        EventCloudProperties.getRepositoryPath(), true);
+        this.datastore = new TransactionalTdbDatastoreMem();
         this.datastore.open();
     }
 
     @Test
-    public void testAddSingleThread() {
-        for (int i = 0; i < 100; i++) {
-            this.datastore.add(QuadrupleGenerator.create());
+    public void testSequentialAdd() {
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.WRITE);
+        try {
+            for (int i = 0; i < SEQUENTIAL_ADD_OPERATIONS; i++) {
+                txnGraph.add(QuadrupleGenerator.create());
+            }
+        } finally {
+            txnGraph.commit();
+            txnGraph.close();
         }
 
-        Assert.assertEquals(100, this.datastore.find(
-                Node.ANY, Node.ANY, Node.ANY, Node.ANY).size());
+        assertNbQuadruples(datastore, SEQUENTIAL_ADD_OPERATIONS);
     }
 
     @Test
-    public void testAddMultiThread() {
+    public void testMultithreadedAdd() {
         ExecutorService executor =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
 
@@ -76,9 +80,13 @@ public final class PersistentJenaTdbDatastoreTest {
         for (int i = 0; i < CONCURRENT_ADD_OPERATIONS; i++) {
             executor.execute(new Runnable() {
                 public void run() {
+                    TransactionalDatasetGraph txnGraph =
+                            datastore.begin(AccessMode.WRITE);
                     try {
-                        datastore.add(QuadrupleGenerator.create());
+                        txnGraph.add(QuadrupleGenerator.create());
                     } finally {
+                        txnGraph.commit();
+                        txnGraph.close();
                         doneSignal.countDown();
                     }
                 }
@@ -88,18 +96,18 @@ public final class PersistentJenaTdbDatastoreTest {
         try {
             doneSignal.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
 
-        Assert.assertEquals(
-                CONCURRENT_ADD_OPERATIONS,
-                size(this.datastore.executeSparqlSelect("SELECT ?s WHERE { GRAPH ?g { ?s ?p ?o } }")));
+        assertNbQuadruples(datastore, CONCURRENT_ADD_OPERATIONS);
     }
 
     @Test
     public void testRandomConcurrentAccess() {
         ExecutorService executor =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
+
+        final AtomicInteger nbQuadruplesAdded = new AtomicInteger();
 
         final CountDownLatch doneSignal =
                 new CountDownLatch(CONCURRENT_RANDOM_OPERATIONS);
@@ -109,9 +117,18 @@ public final class PersistentJenaTdbDatastoreTest {
                 public void run() {
                     try {
                         if (ProActiveRandom.nextInt(2) == 0) {
-                            datastore.add(QuadrupleGenerator.create());
+                            TransactionalDatasetGraph txnGraph = null;
+                            txnGraph = datastore.begin(AccessMode.WRITE);
+                            txnGraph.add(QuadrupleGenerator.create());
+                            txnGraph.commit();
+                            txnGraph.close();
+
+                            nbQuadruplesAdded.incrementAndGet();
                         } else {
-                            datastore.executeSparqlSelect("SELECT ?s WHERE { GRAPH ?g { ?s ?p ?o } }");
+                            TransactionalDatasetGraph txnGraph =
+                                    datastore.begin(AccessMode.READ_ONLY);
+                            txnGraph.find(QuadruplePattern.ANY);
+                            txnGraph.close();
                         }
                     } finally {
                         doneSignal.countDown();
@@ -123,32 +140,33 @@ public final class PersistentJenaTdbDatastoreTest {
         try {
             doneSignal.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
             Thread.currentThread().interrupt();
         }
+
+        assertNbQuadruples(datastore, nbQuadruplesAdded.get());
     }
 
     @Test
-    public void testDeleteAny() {
-        for (int i = 0; i < 100; i++) {
-            this.datastore.add(QuadrupleGenerator.create());
-        }
+    public void testDelete() {
+        // adds some quadruples
+        this.testMultithreadedAdd();
 
-        this.datastore.deleteAny(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
+        TransactionalDatasetGraph txnGraph =
+                this.datastore.begin(AccessMode.WRITE);
+        txnGraph.delete(QuadruplePattern.ANY);
+        txnGraph.commit();
+        txnGraph.close();
 
-        Assert.assertEquals(0, this.datastore.find(
-                Node.ANY, Node.ANY, Node.ANY, Node.ANY).size());
+        assertNbQuadruples(datastore, 0);
     }
 
-    private static int size(ResultSet resultSet) {
-        int count = 0;
-
-        while (resultSet.hasNext()) {
-            resultSet.next();
-            count++;
-        }
-
-        return count;
+    private void assertNbQuadruples(TransactionalTdbDatastore datastore,
+                                    int expectedNbQuadruples) {
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        Assert.assertEquals(expectedNbQuadruples, txnGraph.find(
+                QuadruplePattern.ANY).count());
+        txnGraph.close();
     }
 
     @After
