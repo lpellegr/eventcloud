@@ -34,7 +34,6 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
