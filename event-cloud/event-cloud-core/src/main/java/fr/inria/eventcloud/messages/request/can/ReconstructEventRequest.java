@@ -96,7 +96,7 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
      * {@inheritDoc}
      */
     @Override
-    public synchronized Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
+    public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                              AnycastRequest request,
                                                                              QuadruplePattern quadruplePattern) {
         Collection<LongLong> hashValues = this.hashValuesReceived.getValue();
