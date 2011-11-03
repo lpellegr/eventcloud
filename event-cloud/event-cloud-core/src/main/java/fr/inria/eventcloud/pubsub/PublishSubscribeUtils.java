@@ -27,22 +27,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.mutable.MutableObject;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.openjena.riot.out.NodeFmtLib;
 import org.openjena.riot.out.OutputLangUtils;
 import org.openjena.riot.tokens.Tokenizer;
 import org.openjena.riot.tokens.TokenizerFactory;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.algebra.Algebra;
+import com.hp.hpl.jena.sparql.algebra.Op;
+import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
+import com.hp.hpl.jena.sparql.algebra.TransformBase;
+import com.hp.hpl.jena.sparql.algebra.Transformer;
+import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
+import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
+import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
+import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
@@ -381,6 +394,46 @@ public final class PublishSubscribeUtils {
         }
 
         return binding;
+    }
+
+    /**
+     * Rewrites the specified {@code subscription} (written by using a SPARQL
+     * Select query) to a new one where all the result vars have been removed
+     * except for the graph variable.
+     * 
+     * @param subscription
+     *            the subscription to rewrite.
+     * 
+     * @return new subscription where all the result vars have been removed
+     *         except for the graph variable.
+     */
+    public static final String removeResultVarsExceptGraphVar(String subscription) {
+        Query query = QueryFactory.create(subscription);
+
+        final MutableObject graphNode = new MutableObject();
+
+        ElementWalker.walk(query.getQueryPattern(), new ElementVisitorBase() {
+            @Override
+            public void visit(ElementNamedGraph el) {
+                if (!el.getGraphNameNode().isVariable()) {
+                    throw new IllegalArgumentException(
+                            "The specified subscription does not have a graph variable: "
+                                    + el.getGraphNameNode());
+                }
+
+                graphNode.setValue(el.getGraphNameNode());
+            }
+        });
+
+        Op op = Transformer.transform(new TransformBase() {
+            @Override
+            public Op transform(OpProject opProject, Op subOp) {
+                return new OpProject(
+                        subOp, Lists.newArrayList((Var) graphNode.getValue()));
+            }
+        }, Algebra.compile(query));
+
+        return OpAsQuery.asQuery(op).toString();
     }
 
 }

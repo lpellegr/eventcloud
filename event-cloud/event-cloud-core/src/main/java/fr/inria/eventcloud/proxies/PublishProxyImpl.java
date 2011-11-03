@@ -63,7 +63,7 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
         if (quad.getPublicationTime() == -1) {
             quad.setPublicationTime();
         }
-        
+
         // TODO: use an asynchronous call with no response (see issue 16)
 
         // the quadruple is routed without taking into account the publication

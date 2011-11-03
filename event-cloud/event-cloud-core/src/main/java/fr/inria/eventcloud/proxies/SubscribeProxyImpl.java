@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.proxies;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,6 +49,7 @@ import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
 import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
+import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Solution;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.utils.LongLong;
@@ -122,11 +122,11 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         if (this.proxy == null) {
             this.proxy = proxy;
             this.componentUri = componentUri;
-            this.subscriptions = Collections.synchronizedMap(new HashMap<SubscriptionId, Subscription>());
+            this.subscriptions = new HashMap<SubscriptionId, Subscription>();
             this.listeners =
-                    Collections.synchronizedMap(new HashMap<SubscriptionId, NotificationListener<?>>());
-            this.solutions =  Collections.synchronizedMap(new HashMap<NotificationId, Solution>());
-            this.eventIdsReceived =  Collections.synchronizedMap(new HashMap<Node, SubscriptionId>());
+                    new HashMap<SubscriptionId, NotificationListener<?>>();
+            this.solutions = new HashMap<NotificationId, Solution>();
+            this.eventIdsReceived = new HashMap<Node, SubscriptionId>();
             // TODO: use the properties field to initialize ELA properties
         }
     }
@@ -138,10 +138,12 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     public <T> SubscriptionId subscribe(String sparqlQuery,
                                         NotificationListener<T> listener) {
         if (listener instanceof EventNotificationListener) {
-            // TODO rewrite the sparqlQuery to keep only the graph variable in
-            // the
-            // solution variables. Indeed we need only the graph variable (which
-            // identify the event which is matched) to reconstruct the event
+            // rewrites the sparqlQuery to keep only the graph variable in
+            // the result variables. Indeed we need only the graph variable
+            // (which identifies the event which is matched) to reconstruct the
+            // event
+            sparqlQuery =
+                    PublishSubscribeUtils.removeResultVarsExceptGraphVar(sparqlQuery);
         }
 
         return this.indexSubscription(sparqlQuery, listener);
@@ -274,19 +276,6 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         // We create an event from quadruples which come from a previous event.
         // Hence we do not need to add new meta information
         return new Event(quadsReceived, false);
-    }
-
-    public static Long[] toObject(long[] array) {
-        if (array == null) {
-            return null;
-        } else if (array.length == 0) {
-            return new Long[0];
-        }
-        final Long[] result = new Long[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = new Long(array[i]);
-        }
-        return result;
     }
 
     /**
