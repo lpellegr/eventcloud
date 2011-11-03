@@ -17,15 +17,18 @@
 package fr.inria.eventcloud.overlay;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.MapMaker;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
@@ -43,7 +46,7 @@ public class SemanticCanOverlay extends CanOverlay {
     private static final Logger log =
             LoggerFactory.getLogger(SemanticCanOverlay.class);
 
-    private final ConcurrentMap<SubscriptionId, Subscription> subscriptionsCache;
+    private final Cache<SubscriptionId, Subscription> subscriptionsCache;
 
     /**
      * Constructs a new overlay with the specified {@code dataHandler} and
@@ -60,8 +63,18 @@ public class SemanticCanOverlay extends CanOverlay {
             TransactionalTdbDatastore colanderDatastore) {
         super(new SemanticRequestResponseManager(colanderDatastore),
                 peerDatastore);
+
         this.subscriptionsCache =
-                new MapMaker().concurrencyLevel(4).softValues().makeMap();
+                CacheBuilder.newBuilder()
+                        .maximumSize(
+                                EventCloudProperties.SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE.getValue())
+                        .build(new CacheLoader<SubscriptionId, Subscription>() {
+                            public Subscription load(SubscriptionId key) {
+                                return Subscription.parseFrom(
+                                        (TransactionalTdbDatastore) datastore,
+                                        key);
+                            }
+                        });
     }
 
     /**
@@ -76,21 +89,14 @@ public class SemanticCanOverlay extends CanOverlay {
      * @return the subscription found or {@code null}.
      */
     public Subscription findSubscription(SubscriptionId id) {
-        Subscription subscription = this.subscriptionsCache.get(id);
-
-        if (subscription == null) {
-            log.debug(
-                    "SemanticRequestResponseManager.find({}) subscription not in cache, retrieving it from the datastore",
-                    id);
-            subscription =
-                    Subscription.parseFrom(
-                            (TransactionalTdbDatastore) super.datastore, id);
-
-            this.subscriptionsCache.putIfAbsent(
-                    subscription.getId(), subscription);
+        try {
+            return this.subscriptionsCache.get(id);
+        } catch (ExecutionException e) {
+            log.error(
+                    "Error while retrieving subscription {} from the cache",
+                    id, e);
+            return null;
         }
-
-        return subscription;
     }
 
     /**
@@ -100,9 +106,7 @@ public class SemanticCanOverlay extends CanOverlay {
      * @param subscription
      *            the subscription to store.
      */
-    public synchronized void storeSubscription(Subscription subscription) {
-        this.subscriptionsCache.putIfAbsent(subscription.getId(), subscription);
-
+    public void storeSubscription(Subscription subscription) {
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) super.datastore).begin(AccessMode.WRITE);
         txnGraph.add(subscription.toQuadruples());
@@ -120,7 +124,7 @@ public class SemanticCanOverlay extends CanOverlay {
      *            rewritten) to use.
      */
     public synchronized void deleteSubscription(SubscriptionId originalSubscriptionId) {
-        this.subscriptionsCache.remove(originalSubscriptionId);
+        this.subscriptionsCache.invalidate(originalSubscriptionId);
 
         TransactionalTdbDatastore datastore =
                 (TransactionalTdbDatastore) super.datastore;

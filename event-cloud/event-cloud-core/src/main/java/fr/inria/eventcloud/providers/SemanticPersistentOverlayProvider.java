@@ -39,14 +39,12 @@ public final class SemanticPersistentOverlayProvider extends
      * {@inheritDoc}
      */
     public SemanticCanOverlay get() {
-        return new SemanticCanOverlay(
-                new TransactionalTdbDatastore(
-                        EventCloudProperties.getRepositoryPath()
-                                .getAbsolutePath(),
-                        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
-                new TransactionalTdbDatastore(
-                        System.getProperty("java.io.tmpdir") + "/eventcloud/"
-                                + UUID.randomUUID().toString(), true));
+        return new SemanticCanOverlay(new TransactionalTdbDatastore(
+                EventCloudProperties.getRepositoryPath().getAbsolutePath(),
+                EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
+        // TODO: add a property to choose whether in-memory or not
+        new TransactionalTdbDatastore(System.getProperty("java.io.tmpdir")
+                + "/eventcloud/" + UUID.randomUUID().toString(), true));
     }
 
 }

@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyInteger;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,10 @@ public class EventCloudProperties {
 
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudProperties.class);
+
+    public static final PropertyInteger SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE =
+            new PropertyInteger(
+                    "eventcloud.subscriptions.cache.maximum.size", 10000);
 
     /**
      * Specifies where the repositories that store the RDF data are created.
