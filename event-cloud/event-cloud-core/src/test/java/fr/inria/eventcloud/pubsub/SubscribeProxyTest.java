@@ -16,6 +16,14 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +89,76 @@ public class SubscribeProxyTest {
 
         this.subscribeProxy = this.proxyFactory.createSubscribeProxy();
         this.publishProxy = this.proxyFactory.createPublishProxy();
+    }
+
+    @Test
+    public void testSubscribeWithConcurrentPublications() {
+        final int NB_PRODUCERS = 10;
+        final int NB_EVENTS_TO_WAIT = 100;
+
+        final List<PublishProxy> publishProxies =
+                this.createPublishProxies(NB_PRODUCERS);
+
+        ScheduledExecutorService threadPool =
+                Executors.newScheduledThreadPool(NB_PRODUCERS);
+
+        List<ScheduledFuture<?>> futures = new ArrayList<ScheduledFuture<?>>();
+
+        // simulates producers publishing at different rates
+        for (int i = 0; i < NB_PRODUCERS; i++) {
+            final PublishProxy publishProxy = publishProxies.get(i);
+            final int threadIndex = i;
+
+            threadPool.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    log.debug(
+                            "Publishing a quadruple from thread {}",
+                            threadIndex);
+
+                    publishProxy.publish(new Event(
+                            QuadrupleGenerator.create(Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                                    + "/" + UUID.randomUUID().toString()))));
+                }
+                // }, 0, 50 + ProActiveRandom.nextInt((i + 1) * 500),
+            }, 0, (i + 1) * 50, TimeUnit.MILLISECONDS);
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        this.subscribeProxy.subscribe(
+                "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
+                new CustomEventNotificationListener());
+
+        synchronized (events) {
+            while (events.size() < NB_EVENTS_TO_WAIT) {
+                try {
+                    events.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        for (ScheduledFuture<?> future : futures) {
+            future.cancel(true);
+        }
+
+        threadPool.shutdown();
+    }
+
+    private List<PublishProxy> createPublishProxies(int nb) {
+        List<PublishProxy> proxies = new ArrayList<PublishProxy>(nb);
+
+        for (int i = 0; i < nb; i++) {
+            proxies.add(this.proxyFactory.createPublishProxy());
+        }
+
+        return proxies;
     }
 
     /**
