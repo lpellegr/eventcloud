@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +95,7 @@ public class SubscribeProxyTest {
     @Test
     public void testSubscribeWithConcurrentPublications() {
         final int NB_PRODUCERS = 10;
-        final int NB_EVENTS_TO_WAIT = 100;
+        final int NB_EVENTS_TO_WAIT = 10;
 
         final List<PublishProxy> publishProxies =
                 this.createPublishProxies(NB_PRODUCERS);
@@ -112,16 +113,23 @@ public class SubscribeProxyTest {
             threadPool.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    log.debug(
-                            "Publishing a quadruple from thread {}",
-                            threadIndex);
+                    Collection<Quadruple> quadruples =
+                            new Collection<Quadruple>();
+                    Node graphValue =
+                            Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                                    + "/" + UUID.randomUUID().toString());
+                    for (int j = 0; j < 1 + ProActiveRandom.nextInt(30); j++) {
+                        quadruples.add(QuadrupleGenerator.create(graphValue));
+                    }
 
-                    publishProxy.publish(new Event(
-                            QuadrupleGenerator.create(Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                                    + "/" + UUID.randomUUID().toString()))));
+                    log.debug(
+                            "Publishing an event composed of {} quadruples from thread {}",
+                            quadruples.size(), threadIndex);
+
+                    publishProxy.publish(new Event(quadruples));
                 }
                 // }, 0, 50 + ProActiveRandom.nextInt((i + 1) * 500),
-            }, 0, (i + 1) * 50, TimeUnit.MILLISECONDS);
+            }, 0, (i + 1) * 500, TimeUnit.MILLISECONDS);
         }
 
         try {
