@@ -66,7 +66,7 @@ public final class TransactionalTdbDatastoreTest {
             txnGraph.close();
         }
 
-        assertNbQuadruples(datastore, SEQUENTIAL_ADD_OPERATIONS);
+        this.assertNbQuadruples(datastore, SEQUENTIAL_ADD_OPERATIONS);
     }
 
     @Test
@@ -97,9 +97,11 @@ public final class TransactionalTdbDatastoreTest {
             doneSignal.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
+            executor.shutdown();
         }
 
-        assertNbQuadruples(datastore, CONCURRENT_ADD_OPERATIONS);
+        this.assertNbQuadruples(datastore, CONCURRENT_ADD_OPERATIONS);
     }
 
     @Test
@@ -122,7 +124,6 @@ public final class TransactionalTdbDatastoreTest {
                             txnGraph.add(QuadrupleGenerator.create());
                             txnGraph.commit();
                             txnGraph.close();
-
                             nbQuadruplesAdded.incrementAndGet();
                         } else {
                             TransactionalDatasetGraph txnGraph =
@@ -141,9 +142,11 @@ public final class TransactionalTdbDatastoreTest {
             doneSignal.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
+            executor.shutdown();
         }
 
-        assertNbQuadruples(datastore, nbQuadruplesAdded.get());
+        this.assertNbQuadruples(datastore, nbQuadruplesAdded.get());
     }
 
     @Test
@@ -157,7 +160,7 @@ public final class TransactionalTdbDatastoreTest {
         txnGraph.commit();
         txnGraph.close();
 
-        assertNbQuadruples(datastore, 0);
+        this.assertNbQuadruples(datastore, 0);
     }
 
     private void assertNbQuadruples(TransactionalTdbDatastore datastore,
