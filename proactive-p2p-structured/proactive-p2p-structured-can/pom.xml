@@ -21,8 +21,8 @@
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-core</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
-			<type>jar</type>
 		</dependency>
+
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-core</artifactId>
@@ -30,7 +30,7 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -45,7 +45,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
-						<java.security.policy>${basedir}/src/test/resources/proactive.security.policy</java.security.policy>
+						<java.security.policy>${project.build.testOutputDirectory}/proactive.security.policy</java.security.policy>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>
