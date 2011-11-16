@@ -33,6 +33,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -40,7 +41,6 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
-import com.hp.hpl.jena.sparql.core.DatasetImpl;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
@@ -143,7 +143,7 @@ public class SparqlResultSerializerTest {
         QueryExecution queryExec =
                 QueryExecutionFactory.create(
                         QueryFactory.create("CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }"),
-                        new DatasetImpl(this.datastore));
+                        DatasetFactory.create(this.datastore));
         Model model = queryExec.execConstruct();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -176,7 +176,7 @@ public class SparqlResultSerializerTest {
         QueryExecution queryExec =
                 QueryExecutionFactory.create(
                         QueryFactory.create("SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }"),
-                        new DatasetImpl(this.datastore));
+                        DatasetFactory.create(this.datastore));
         ResultSet resultSet = queryExec.execSelect();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.datastore;
 
-import com.hp.hpl.jena.tdb.ReadWrite;
+import com.hp.hpl.jena.query.ReadWrite;
 
 /**
  * Encapsulates the default Jena access modes to an enum type with a more
