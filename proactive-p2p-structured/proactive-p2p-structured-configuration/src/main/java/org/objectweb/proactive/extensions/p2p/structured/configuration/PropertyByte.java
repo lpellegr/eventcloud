@@ -21,50 +21,18 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
  * 
  * @author lpellegr
  */
-public class PropertyByte extends Property {
+public class PropertyByte extends Property<Byte> {
 
-    public PropertyByte(String name) {
-        super(name, PropertyType.BYTE);
-    }
-
-    public PropertyByte(String name, byte defaultValue) {
-        this(name);
-        this.setDefaultValue(Byte.valueOf(defaultValue).toString());
+    public PropertyByte(String name, Byte defaultValue) {
+        super(name, defaultValue);
     }
 
     /**
-     * Returns the value of this property.
-     * 
-     * @return the value of this property.
+     * {@inheritDoc}
      */
-    public byte getValue() {
-        String str = super.getValueAsString();
-        try {
-            return Byte.parseByte(str);
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("Invalid value for property "
-                    + super.name + " must be a byte", e);
-        }
-    }
-
-    /**
-     * Updates the value of this property.
-     * 
-     * @param value
-     *            the new value.
-     */
-    public void setValue(byte value) {
-        super.setValue(Byte.valueOf(value).toString());
-    }
-
     @Override
-    public boolean isValid(String value) {
-        try {
-            Byte.parseByte(value);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+    public void setValueAsString(String value) {
+        super.value = Byte.valueOf(value);
     }
 
 }

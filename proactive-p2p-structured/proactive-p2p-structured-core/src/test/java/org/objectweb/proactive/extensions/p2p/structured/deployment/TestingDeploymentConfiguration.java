@@ -34,7 +34,7 @@ public final class TestingDeploymentConfiguration implements
      */
     @Override
     public void configure() {
-        P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.setValue(1);
+        P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.setValue(1.0);
     }
 
 }

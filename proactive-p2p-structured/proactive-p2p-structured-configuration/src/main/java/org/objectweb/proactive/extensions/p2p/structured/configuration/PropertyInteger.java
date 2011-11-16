@@ -21,50 +21,18 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
  * 
  * @author lpellegr
  */
-public class PropertyInteger extends Property {
+public class PropertyInteger extends Property<Integer> {
 
-    public PropertyInteger(String name) {
-        super(name, PropertyType.INTEGER);
-    }
-
-    public PropertyInteger(String name, int defaultValue) {
-        this(name);
-        this.setDefaultValue(Integer.valueOf(defaultValue).toString());
+    public PropertyInteger(String name, Integer defaultValue) {
+        super(name, defaultValue);
     }
 
     /**
-     * Returns the value of this property.
-     * 
-     * @return the value of this property.
+     * {@inheritDoc}
      */
-    public int getValue() {
-        String str = super.getValueAsString();
-        try {
-            return Integer.parseInt(str);
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("Invalid value for property "
-                    + super.name + " must be an integer", e);
-        }
-    }
-
-    /**
-     * Updates the value of this property.
-     * 
-     * @param value
-     *            the new value.
-     */
-    public void setValue(int value) {
-        super.setValue(Integer.valueOf(value).toString());
-    }
-
     @Override
-    public boolean isValid(String value) {
-        try {
-            Integer.parseInt(value);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+    public void setValueAsString(String value) {
+        super.value = Integer.valueOf(value);
     }
 
 }

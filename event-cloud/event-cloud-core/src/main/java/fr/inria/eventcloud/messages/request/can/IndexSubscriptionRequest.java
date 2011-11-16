@@ -143,8 +143,8 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                         quadMatching, subscription);
             }
 
-            // skips the quadruples which have been published before the
-            // subscription TODO: do it in the SPARQL query
+            // TODO: skips the quadruples which have been published before the
+            // subscription in the SPARQL query
             if (quadMatching.getPublicationTime() < subscription.getIndexationTime()) {
                 continue;
             }

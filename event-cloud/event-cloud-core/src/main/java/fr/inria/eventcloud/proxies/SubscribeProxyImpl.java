@@ -196,7 +196,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
         if ((eventId =
                 binding.get(Var.alloc(subscription.getGraphNode().getName()))) == null) {
             throw new IllegalArgumentException(
-                    "the specified binding does not contain the specified graph value: "
+                    "The specified binding does not contain the specified graph value: "
                             + subscription.getGraphNode());
         }
 
