@@ -17,11 +17,14 @@
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
 /**
- * Defines properties for the p2p-structured module.
+ * Defines properties for the p2p-structured modules.
  * 
  * @author lpellegr
  */
 public class P2PStructuredProperties {
+
+    private P2PStructuredProperties() {
+    }
 
     public static final PropertyString GCM_PROVIDER = new PropertyString(
             "gcm.provider", "org.objectweb.proactive.core.component.Fractive");
@@ -42,7 +45,7 @@ public class P2PStructuredProperties {
             new PropertyString("tracker.services.itf", "tracker-services");
 
     public static final PropertyByte CAN_NB_DIMENSIONS = new PropertyByte(
-            "can.nb.dimensions", (byte) 3);
+            "can.nb.dimensions", Byte.valueOf((byte) 3));
 
     public static final PropertyString CAN_LOWER_BOUND = new PropertyString(
             "can.lower.bound", "0");
@@ -71,41 +74,17 @@ public class P2PStructuredProperties {
     public static final PropertyString CAN_COORDINATE_DISPLAY =
             new PropertyString("can.coordinate.display", "alpha");
 
-    public static final PropertyString CHORD_ID_REPRESENTATION =
-            new PropertyString("chord.id.representation", "hexadecimal");
-
-    public static final PropertyInteger CHORD_ID_DISPLAYED_BYTES =
-            new PropertyInteger("chord.id.displayed.bytes", 4);
-
-    public static final PropertyInteger CHORD_NB_TOLERANT_FAILURES =
-            new PropertyInteger("chord.nb.tolerant.failures", 0);
-
-    public static final PropertyInteger CHORD_CHECK_PREDECESSOR_TASK_START =
-            new PropertyInteger("chord.check.predecessor.task.start", 6000);
-
-    public static final PropertyInteger CHORD_CHECK_PREDECESSOR_TASK_INTERVAL =
-            new PropertyInteger("chord.check.predecessor.task.interval", 12000);
-
-    public static final PropertyInteger CHORD_FIX_FINGER_TASK_START =
-            new PropertyInteger("chord.fix.finger.task.start", 0);
-
-    public static final PropertyInteger CHORD_FIX_FINGER_TASK_INTERVAL =
-            new PropertyInteger("chord.fix.finger.task.interval", 12000);
-
-    public static final PropertyInteger CHORD_STABILIZE_TASK_START =
-            new PropertyInteger("chord.stabilize.task.start", 12000);
-
-    public static final PropertyInteger CHORD_STABILIZE_TASK_INTERVAL =
-            new PropertyInteger("chord.stabilize.task.interval", 12000);
-
     public static final PropertyDouble TRACKER_STORAGE_PROBABILITY =
             new PropertyDouble("tracker.storage.probability", 1.0);
 
     public static final PropertyInteger TRACKER_JOIN_RETRY_INTERVAL =
             new PropertyInteger("tracker.join.retry.interval", 500);
 
-    private P2PStructuredProperties() {
-
+    static {
+        ConfigurationParser.load(
+                P2PStructuredProperties.class,
+                "proactive.p2p.structured.configuration",
+                System.getProperty("user.home") + "/.proactive/p2p-structured.properties");
     }
 
 }

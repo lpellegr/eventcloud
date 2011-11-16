@@ -17,14 +17,18 @@
 package fr.inria.eventcloud.configuration;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.UUID;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.ConfigurationParser;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyInteger;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Contains default values for Event-Cloud properties.
@@ -39,41 +43,6 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  */
 public class EventCloudProperties {
-
-    private static final Logger log =
-            LoggerFactory.getLogger(EventCloudProperties.class);
-
-    public static final PropertyInteger SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE =
-            new PropertyInteger(
-                    "eventcloud.subscriptions.cache.maximum.size", 10000);
-
-    /**
-     * Specifies where the repositories that store the RDF data are created.
-     */
-    public static final PropertyString REPOSITORIES_PATH = new PropertyString(
-            "eventcloud.repositories.path", getDefaultRepositoriesPath());
-
-    /**
-     * This property is used to have the possibility to restore a repository
-     * which has been used in a previous run. When this property is set to
-     * {@code true} it is assumed that the network contain only <b>one</b> peer.
-     * If this property is enabled in conjunction with
-     * {@link EventCloudProperties#REPOSITORIES_AUTO_REMOVE}, it has no effect.
-     */
-    public static final PropertyBoolean REPOSITORIES_RESTORE =
-            new PropertyBoolean("eventcloud.repositories.restore", false);
-
-    public static final PropertyString REPOSITORIES_RESTORE_PATH =
-            new PropertyString("eventcloud.repositories.restore.path");
-
-    /**
-     * Defines whether the repositories that are instantiated must be removed
-     * automatically when they are closed. This value is set by default to
-     * {@code false} but setting it to {@code true} is really useful for testing
-     * purposes.
-     */
-    public static final PropertyBoolean REPOSITORIES_AUTO_REMOVE =
-            new PropertyBoolean("eventcloud.repositories.autoremove", false);
 
     /**
      * Defines whether the Event-Cloud has to compress the data that are
@@ -96,6 +65,38 @@ public class EventCloudProperties {
      */
     public static final PropertyString EVENT_CLOUD_NS = new PropertyString(
             "eventcloud.namespace", "http://www.play-project.eu/event-cloud/");
+
+    /**
+     * Specifies where the repositories that store the RDF data are created.
+     */
+    public static final PropertyString REPOSITORIES_PATH = new PropertyString(
+            "eventcloud.repositories.path", getDefaultRepositoriesPath());
+
+    /**
+     * This property is used to have the possibility to restore a repository
+     * which has been used in a previous run. When this property is set to
+     * {@code true} it is assumed that the network contain only <b>one</b> peer.
+     * If this property is enabled in conjunction with
+     * {@link EventCloudProperties#REPOSITORIES_AUTO_REMOVE}, it has no effect.
+     */
+    public static final PropertyBoolean REPOSITORIES_RESTORE =
+            new PropertyBoolean("eventcloud.repositories.restore", false);
+
+    public static final PropertyString REPOSITORIES_RESTORE_PATH =
+            new PropertyString("eventcloud.repositories.restore.path", null);
+
+    /**
+     * Defines whether the repositories that are instantiated must be removed
+     * automatically when they are closed. This value is set by default to
+     * {@code false} but setting it to {@code true} is really useful for testing
+     * purposes.
+     */
+    public static final PropertyBoolean REPOSITORIES_AUTO_REMOVE =
+            new PropertyBoolean("eventcloud.repositories.autoremove", false);
+
+    public static final PropertyInteger SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE =
+            new PropertyInteger(
+                    "eventcloud.subscriptions.cache.maximum.size", 10000);
 
     public static final PropertyString SEMANTIC_PEER_ADL = new PropertyString(
             "semantic.peer.adl", "fr.inria.eventcloud.overlay.SemanticPeer");
@@ -125,22 +126,14 @@ public class EventCloudProperties {
     public static final PropertyString PUTGET_PROXY_SERVICES_ITF =
             new PropertyString("putget.services.itf", "putget-services");
 
-    static {
-        File preferencesFile = new File(getPreferencesFilePath());
-        String eventCloudConfigurationProperty =
-                System.getProperty("eventcloud.configuration");
-        if (eventCloudConfigurationProperty != null) {
-            preferencesFile = new File(eventCloudConfigurationProperty);
-        }
+    private static final File configurationFileLoaded;
 
-        if (preferencesFile.exists()) {
-            log.info("Loading properties from {}", preferencesFile);
-            ConfigurationParser.parse(preferencesFile.toString());
-        } else {
-            log.info(
-                    "No Event-Cloud properties loaded because file {} does not exist",
-                    preferencesFile);
-        }
+    static {
+        configurationFileLoaded =
+                ConfigurationParser.load(
+                        EventCloudProperties.class, "eventcloud.configuration",
+                        System.getProperty("user.home")
+                                + "/.eventcloud/eventcloud.properties");
 
         // forces the number of dimensions in a CAN network to 4
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
@@ -153,17 +146,47 @@ public class EventCloudProperties {
         // a repository has to be restored
         if (!REPOSITORIES_AUTO_REMOVE.getValue()
                 && EventCloudProperties.REPOSITORIES_RESTORE.getValue()) {
+            File repositoryPath;
+
             if (EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue() != null
                     && !EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue()
-                            .isEmpty()) {
-                return new File(
-                        EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue());
+                            .isEmpty()
+                    && (repositoryPath =
+                            new File(
+                                    EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue())).exists()) {
+                return repositoryPath;
             } else {
-                File repositoryPath =
+                repositoryPath =
                         new File(
                                 REPOSITORIES_PATH.getValue(), UUID.randomUUID()
                                         .toString());
-                ConfigurationParser.updatePreferencesWithRestorePath(repositoryPath.getPath());
+
+                Properties props = new Properties();
+                FileInputStream fis = null;
+                FileOutputStream fos = null;
+
+                try {
+                    fis = new FileInputStream(configurationFileLoaded);
+                    fos = new FileOutputStream(configurationFileLoaded);
+
+                    props.load(fis);
+                    props.setProperty(
+                            REPOSITORIES_RESTORE_PATH.getName(),
+                            repositoryPath.toString());
+                    props.store(fos, "");
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        fis.close();
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 return repositoryPath;
             }
         } else {

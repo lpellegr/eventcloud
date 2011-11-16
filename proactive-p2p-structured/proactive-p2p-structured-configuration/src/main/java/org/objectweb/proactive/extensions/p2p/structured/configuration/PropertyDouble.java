@@ -21,50 +21,18 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
  * 
  * @author lpellegr
  */
-public class PropertyDouble extends Property {
+public class PropertyDouble extends Property<Double> {
 
-    public PropertyDouble(String name) {
-        super(name, PropertyType.DOUBLE);
-    }
-
-    public PropertyDouble(String name, double defaultValue) {
-        this(name);
-        this.setDefaultValue(new Double(defaultValue).toString());
+    public PropertyDouble(String name, Double defaultValue) {
+        super(name, defaultValue);
     }
 
     /**
-     * Returns the value of this property.
-     * 
-     * @return the value of this property.
+     * {@inheritDoc}
      */
-    public double getValue() {
-        String str = super.getValueAsString();
-        try {
-            return Double.parseDouble(str);
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("Invalid value for property "
-                    + super.name + " must be a double", e);
-        }
-    }
-
-    /**
-     * Updates the value of this property.
-     * 
-     * @param value
-     *            the new value.
-     */
-    public void setValue(double value) {
-        super.setValue(new Double(value).toString());
-    }
-
     @Override
-    public boolean isValid(String value) {
-        try {
-            Double.parseDouble(value);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+    public void setValueAsString(String value) {
+        super.value = Double.valueOf(value);
     }
 
 }
