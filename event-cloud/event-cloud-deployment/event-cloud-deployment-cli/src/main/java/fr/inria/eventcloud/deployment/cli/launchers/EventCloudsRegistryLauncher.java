@@ -23,31 +23,36 @@ import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryFactory;
 
 /**
- * This launcher is used to deploy a new {@link EventCloudsRegistry}. Before to
- * return, the Java application print on the standard output the URL indicating
- * where the registry is binded.
+ * This launcher is used to deploy a new {@link EventCloudsRegistry}. Once the
+ * registry is deployed an instance file is created. This instance file contains
+ * an URL indicating where the registry is bind.
  * 
  * @author lpellegr
  */
-public final class EventCloudsRegistryLauncher {
+public final class EventCloudsRegistryLauncher extends Launcher {
 
     private EventCloudsRegistryLauncher() {
-        super();
+        super(INSTANCE_FILE_JAVA_PROPERTY_NAME);
     }
 
     public static void main(String[] args) {
-        new EventCloudsRegistryLauncher().run();
+        new EventCloudsRegistryLauncher().launch();
     }
 
-    private void run() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String run() {
         EventCloudsRegistry registry =
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
 
         try {
-            System.out.println(PAActiveObject.registerByName(
-                    registry, "eventclouds-registry"));
+            return PAActiveObject.registerByName(
+                    registry, "eventclouds-registry");
         } catch (ProActiveException e) {
             e.printStackTrace();
+            return e.getMessage();
         }
     }
 

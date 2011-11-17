@@ -1,6 +1,7 @@
 #!/bin/sh
 
 CURRENT_DIR=$PWD/$(dirname $0)
+export BUNDLE_HOME=$CURRENT_DIR/../
 export PATH_TO_RESOURCES=$CURRENT_DIR/../resources
 
 unset CLASSPATH
@@ -16,6 +17,7 @@ export CLASSPATH
 
 if [ $DEBUG ];
 then
+    echo "--> Using BUNDLE_HOME=${BUNDLE_HOME}"
     echo "--> Using PATH_TO_RESOURCES=${PATH_TO_RESOURCES}"
     echo "--> Using CLASSPATH=${CLASSPATH}"
 fi

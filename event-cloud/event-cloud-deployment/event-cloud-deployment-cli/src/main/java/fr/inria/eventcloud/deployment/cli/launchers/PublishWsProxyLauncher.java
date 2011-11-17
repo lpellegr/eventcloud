@@ -24,14 +24,14 @@ import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
  * @author lpellegr
  * @author bsauvan
  */
-public final class PublishWsProxyLauncher extends WsProxyLauncher2 {
+public final class PublishWsProxyLauncher extends WsProxyLauncher {
 
     public PublishWsProxyLauncher(String[] args) {
         super(args);
     }
 
     public static void main(String[] args) {
-        new PublishWsProxyLauncher(args).run();
+        new PublishWsProxyLauncher(args).launch();
     }
 
     /**

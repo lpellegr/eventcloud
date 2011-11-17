@@ -29,14 +29,14 @@ import fr.inria.eventcloud.deployment.EventCloudDeployer;
 /**
  * This launcher is used to create a new {@link EventCloud} and to register it
  * to the specified {@link EventCloudsRegistry} URL. If the deployment succeed,
- * a three columns value is returned like for example {@code 1 1 -932949592}.
- * The first number indicates the number of trackers deployed, the second the
- * number of peers deployed and the last the identifier associated to the event
- * cloud.
+ * an instance file is created. This instance file contains a three columns
+ * value such as {@code 1 1 -932949592}. The first number indicates the number
+ * of trackers deployed, the second the number of peers deployed and the last is
+ * an unique URL which identifies the eventcloud.
  * 
  * @author lpellegr
  */
-public final class EventCloudLauncher {
+public final class EventCloudLauncher extends Launcher {
 
     @Parameter(names = {"-registry"}, description = "The EventCloudsRegistry URL", required = true)
     private String registryUrl;
@@ -48,7 +48,7 @@ public final class EventCloudLauncher {
     private int nbTrackers = 1;
 
     private EventCloudLauncher() {
-
+        super(INSTANCE_FILE_JAVA_PROPERTY_NAME);
     }
 
     public static void main(String[] args) {
@@ -62,18 +62,22 @@ public final class EventCloudLauncher {
             System.exit(1);
         }
 
-        launcher.run();
+        launcher.launch();
     }
 
-    private void run() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String run() {
         EventCloud eventCloud =
                 EventCloud.create(
                         this.registryUrl, new EventCloudDeployer(),
                         new Collection<UnalterableElaProperty>(),
                         this.nbTrackers, this.nbPeers);
 
-        System.out.println(this.nbTrackers + " " + this.nbPeers + " "
-                + eventCloud.getId().toUrl());
+        return this.nbTrackers + " " + this.nbPeers + " "
+                + eventCloud.getId().toUrl();
     }
 
 }
