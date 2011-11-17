@@ -16,7 +16,7 @@
 
 	<name>event-cloud-parent</name>
 	<description>Parent module for event-cloud maven related modules.</description>
-	<url>https://event-cloud.googlecode.com</url>
+	<url>https://bitbucket.org/lp/eventcloud</url>
 	<inceptionYear>2010</inceptionYear>
 
 	<prerequisites>
@@ -24,9 +24,9 @@
 	</prerequisites>
 
 	<scm>
-		<connection>scm:hg:https://event-cloud.googlecode.com/hg/</connection>
-		<developerConnection>scm:hg:https://event-cloud.googlecode.com/hg/</developerConnection>
-		<url>http://event-cloud.googlecode.com/hg/</url>
+		<connection>scm:hg:https://bitbucket.org/lp/eventcloud</connection>
+		<developerConnection>scm:hg:https://bitbucket.org/lp/eventcloud</developerConnection>
+		<url>https://bitbucket.org/lp/eventcloud</url>
 	</scm>
 
 	<ciManagement>
@@ -35,8 +35,8 @@
 	</ciManagement>
 
 	<issueManagement>
-		<system>google-code</system>
-		<url>http://code.google.com/p/event-cloud/issues/</url>
+		<system>Bitbucket</system>
+		<url>https://bitbucket.org/lp/eventcloud/issues/</url>
 	</issueManagement>
 
 	<repositories>
