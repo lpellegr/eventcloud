@@ -154,9 +154,9 @@ public final class TransactionalDatasetGraphImpl implements
     /**
      * {@inheritDoc}
      */
-    @Override
+    @Override   
     public void close() {
-        this.dataset.close();
+        this.dataset.end();
     }
 
     /**
