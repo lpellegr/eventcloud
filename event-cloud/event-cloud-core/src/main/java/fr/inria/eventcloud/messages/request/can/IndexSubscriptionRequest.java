@@ -18,6 +18,8 @@ package fr.inria.eventcloud.messages.request.can;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -29,6 +31,10 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
@@ -107,36 +113,33 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         // done on the datastore while we are iterating on the ResultSet.
         // Indeed, the result set does not contain the solutions but knows how
         // to retrieve a solution each time a call to next is performed.
-        // List<Quadruple> quadruplesMatching = new ArrayList<Quadruple>();
-        //
-        // log.debug(
-        // "Executed the following query:\n {}",
-        // createQueryRetrievingQuadruplesMatching(firstSubsubscription.getAtomicQuery()
-        // .getQuadruplePattern()));
-        //
-        // TransactionalDatasetGraph txnGraph =
-        // datastore.begin(AccessMode.READ_ONLY);
-        // QueryExecution queryExecution =
-        // QueryExecutionFactory.create(
-        // createQueryRetrievingQuadruplesMatching(firstSubsubscription.getAtomicQuery()
-        // .getQuadruplePattern()), txnGraph.toDataset());
-        //
-        // ResultSet queryResult = queryExecution.execSelect();
-        // while (queryResult.hasNext()) {
-        // QuerySolution solution = queryResult.next();
-        // quadruplesMatching.add(new Quadruple(
-        // solution.get("g").asNode(), solution.get("s").asNode(),
-        // solution.get("p").asNode(), solution.get("o").asNode()));
-        // }
-        // queryExecution.close();
-        // txnGraph.close();
+        List<Quadruple> quadruplesMatching = new ArrayList<Quadruple>();
 
-        // TODO: replace findQuadruplesMatching by the previous code as soon as
-        // the issue with STRSTARTS is solved:
-        // http://markmail.org/search/?q=list:org.apache.incubator.jena-*#query:list%3Aorg.apache.incubator.jena-*+page:1+mid:42d4mio2blkxcbda+state:results
-        for (Quadruple quadMatching : findQuadruplesMatching(
-                firstSubsubscription.getAtomicQuery().getQuadruplePattern(),
-                datastore)) {
+        String queryRetrievingQuadruplesMatching =
+                createQueryRetrievingQuadruplesMatching(firstSubsubscription.getAtomicQuery()
+                        .getQuadruplePattern());
+
+        log.debug(
+                "Executed the following query:\n {}",
+                queryRetrievingQuadruplesMatching);
+
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        queryRetrievingQuadruplesMatching, txnGraph.toDataset());
+
+        ResultSet queryResult = queryExecution.execSelect();
+        while (queryResult.hasNext()) {
+            QuerySolution solution = queryResult.next();
+            quadruplesMatching.add(new Quadruple(
+                    solution.get("g").asNode(), solution.get("s").asNode(),
+                    solution.get("p").asNode(), solution.get("o").asNode()));
+        }
+        queryExecution.close();
+        txnGraph.close();
+
+        for (Quadruple quadMatching : quadruplesMatching) {
             if (log.isDebugEnabled() && quadMatching.getPublicationTime() != -1) {
                 log.debug(
                         "Comparing the timestamps between the quadruple {} and the subscription matching the quadruple {}",
@@ -209,8 +212,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                                 Node.createLiteral(subscription.getId()
                                         .toString(), XSDDatatype.XSDlong));
 
-                TransactionalDatasetGraph txnGraph =
-                        datastore.begin(AccessMode.WRITE);
+                txnGraph = datastore.begin(AccessMode.WRITE);
                 txnGraph.add(metaQuad);
                 txnGraph.commit();
                 txnGraph.close();
@@ -265,25 +267,6 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         query.append("}\n");
 
         return query.toString();
-    }
-
-    private static Collection<Quadruple> findQuadruplesMatching(QuadruplePattern quadruplePattern,
-                                                                TransactionalTdbDatastore datastore) {
-        Collection<Quadruple> result = new Collection<Quadruple>();
-
-        TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
-        QuadrupleIterator it = txnGraph.find(QuadruplePattern.ANY);
-
-        while (it.hasNext()) {
-            Quadruple q = it.next();
-
-            if (q.getGraph().equals(quadruplePattern.getGraph())) {
-                result.add(q);
-            }
-        }
-
-        return result;
     }
 
 }
