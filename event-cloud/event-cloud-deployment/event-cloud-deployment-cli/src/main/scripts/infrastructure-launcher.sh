@@ -43,8 +43,6 @@ function main() {
     mkdir -p $INSTANCES_DIR;
     mkdir -p $OUTPUTS_DIR;
 
-    cd $BUNDLE_HOME/scripts
-
     # deploy the eventclouds registry
     deploy_eventclouds_registry
     
