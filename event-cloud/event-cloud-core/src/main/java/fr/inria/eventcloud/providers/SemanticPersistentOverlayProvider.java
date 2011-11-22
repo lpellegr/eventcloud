@@ -22,6 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -42,9 +43,15 @@ public final class SemanticPersistentOverlayProvider extends
         return new SemanticCanOverlay(new TransactionalTdbDatastore(
                 EventCloudProperties.getRepositoryPath().getAbsolutePath(),
                 EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
-        // TODO: add a property to choose whether in-memory or not
-        new TransactionalTdbDatastore(System.getProperty("java.io.tmpdir")
-                + "/eventcloud/" + UUID.randomUUID().toString(), true));
+
+        // the repositories used for colanders may be in-memory or
+        // persistent
+                EventCloudProperties.COLANDER_IN_MEMORY.getValue()
+                        ? new TransactionalTdbDatastoreMem()
+                        : new TransactionalTdbDatastore(
+                                EventCloudProperties.COLANDER_REPOSITORIES_PATH.getValue()
+                                        + "/" + UUID.randomUUID().toString(),
+                                true));
     }
 
 }
