@@ -11,6 +11,7 @@ java -Xms256m -Xmx1024m \
      -server \
      -Djava.security.policy=$PATH_TO_RESOURCES/proactive.security.policy \
      -Deventcloud.bundle.home=$BUNDLE_HOME \
+     -Deventcloud.configuration=$PATH_TO_RESOURCES/eventcloud.properties \
      -Deventcloud.instance.file=$WS_INSTANCE_FILE \
      -Dlog4j.configuration=file:$PATH_TO_RESOURCES/log4j.properties \
      -Dlogback.configurationFile=file:$PATH_TO_RESOURCES/logback.xml \

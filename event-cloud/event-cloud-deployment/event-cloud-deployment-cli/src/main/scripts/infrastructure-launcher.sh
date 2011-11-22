@@ -24,6 +24,8 @@ NB_TRACKERS_BY_EVENTCLOUD=1
 trap undeploy 1 2 15
 
 function main() {
+	cd $BUNDLE_HOME
+
     if [[ "$(whereis inotifywait)" == "inotifywait:" ]];
         then echo "Library 'inotify-tools' is required, please install it.";
     fi;
@@ -172,7 +174,7 @@ function wait_file_creation() {
 }
 
 function undeploy() {
-    rm -rf /tmp/eventcloud
+    rm -rf $BUNDLE_HOME/repositories
 
     kill_process $REGISTRY_INSTANCE_FILE
   
@@ -198,4 +200,4 @@ function kill_process() {
 
 main $@
 
-. $(dirname $0)/configuration/unset-environment.sh
+. $BUNDLE_HOME/scripts/configuration/unset-environment.sh

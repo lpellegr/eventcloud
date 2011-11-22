@@ -45,11 +45,13 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyS
 public class EventCloudProperties {
 
     /**
-     * Defines whether the Event-Cloud has to compress the data that are
-     * transfered between the peers and the users when it is possible.
+     * Defines whether the eventcloud has to compress the data which are
+     * transfered between the peers and the users when it is possible. When this
+     * property is enabled, all the entities communicating with the eventcloud
+     * must also enable the compression.
      */
     public static final PropertyBoolean COMPRESSION = new PropertyBoolean(
-            "eventcloud.compression", false);
+            "compression", false);
 
     /**
      * Defines the prefix that is used for transforming an event cloud
@@ -70,7 +72,25 @@ public class EventCloudProperties {
      * Specifies where the repositories that store the RDF data are created.
      */
     public static final PropertyString REPOSITORIES_PATH = new PropertyString(
-            "eventcloud.repositories.path", getDefaultRepositoriesPath());
+            "repositories.path", getDefaultRepositoriesPath());
+
+    /**
+     * Defines whether the colander (c.f. SparqlColander) uses an in-memory or a
+     * persistent datastore for filtering results.
+     */
+    public static final PropertyBoolean COLANDER_IN_MEMORY =
+            new PropertyBoolean("colander.inmemory", false);
+
+    /**
+     * Defines where the repositories associated to the colanders (c.f.
+     * SparqlColander) are created. This property is used in conjunction to
+     * {@link #COLANDER_IN_MEMORY} when it is set to {@code true}.
+     */
+    public static final PropertyString COLANDER_REPOSITORIES_PATH =
+            new PropertyString(
+                    "colander.repositories.path",
+                    System.getProperty("java.io.tmpdir")
+                            + "/eventcloud/colanders/");
 
     /**
      * This property is used to have the possibility to restore a repository
@@ -80,10 +100,13 @@ public class EventCloudProperties {
      * {@link EventCloudProperties#REPOSITORIES_AUTO_REMOVE}, it has no effect.
      */
     public static final PropertyBoolean REPOSITORIES_RESTORE =
-            new PropertyBoolean("eventcloud.repositories.restore", false);
+            new PropertyBoolean("repositories.restore", false);
 
+    /**
+     * Defines the location of the repositories which are created by each peer.
+     */
     public static final PropertyString REPOSITORIES_RESTORE_PATH =
-            new PropertyString("eventcloud.repositories.restore.path", null);
+            new PropertyString("repositories.restore.path", null);
 
     /**
      * Defines whether the repositories that are instantiated must be removed
