@@ -23,7 +23,7 @@ import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
@@ -88,10 +88,10 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
 
                             @Override
                             public void onNotification(SubscriptionId id,
-                                                       Event event) {
+                                                       CompoundEvent event) {
                                 try {
-                                    Collection<Event> events =
-                                            new Collection<Event>();
+                                    Collection<CompoundEvent> events =
+                                            new Collection<CompoundEvent>();
                                     events.add(event);
                                     subscribers.get(id).invoke(
                                             NOTIFY_METHOD_NAME,

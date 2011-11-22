@@ -25,7 +25,7 @@ import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 
@@ -44,11 +44,11 @@ public class SubscriberService implements NotificationConsumer {
 
     private WsNotificationTranslator translator;
 
-    public List<Event> eventsReceived;
+    public List<CompoundEvent> eventsReceived;
 
     public SubscriberService() {
         this.translator = new WsNotificationTranslator();
-        this.eventsReceived = new ArrayList<Event>();
+        this.eventsReceived = new ArrayList<CompoundEvent>();
     }
 
     /**
@@ -57,7 +57,7 @@ public class SubscriberService implements NotificationConsumer {
     @Override
     public void notify(Notify notify) {
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
-            Event event =
+            CompoundEvent event =
                     this.translator.translateNotificationMessageToEvent(notificationMessage);
             if (event != null) {
                 this.eventsReceived.add(event);

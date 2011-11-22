@@ -16,11 +16,11 @@
  **/
 package fr.inria.eventcloud.api.listeners;
 
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 
 /**
  * This kind of notification listener will receive the notification in the form
- * of an {@link Event}. To have the possibility to retrieve an {@link Event},
+ * of an {@link CompoundEvent}. To have the possibility to retrieve an {@link CompoundEvent},
  * the method reconstructs internally the Event from the event identifier which
  * matches the subscription. <strong>This listener must be used
  * carefully</strong>.
@@ -28,7 +28,7 @@ import fr.inria.eventcloud.api.Event;
  * @author lpellegr
  */
 public abstract class EventNotificationListener implements
-        NotificationListener<Event> {
+        NotificationListener<CompoundEvent> {
 
     private static final long serialVersionUID = 1L;
 

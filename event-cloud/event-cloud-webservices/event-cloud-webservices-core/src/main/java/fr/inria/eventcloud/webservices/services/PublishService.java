@@ -22,7 +22,7 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
@@ -53,7 +53,7 @@ public class PublishService extends EventCloudService<PublishProxy> implements
         }
 
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
-            Event event =
+            CompoundEvent event =
                     this.translator.translateNotificationMessageToEvent(notificationMessage);
             if (event != null) {
                 log.info(

@@ -31,7 +31,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -184,7 +184,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
      * {@inheritDoc}
      */
     @Override
-    public final Event reconstructEvent(Subscription subscription,
+    public final CompoundEvent reconstructEvent(Subscription subscription,
                                         Binding binding) {
 
         if (!subscription.getGraphNode().isVariable()) {
@@ -207,7 +207,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
      * {@inheritDoc}
      */
     @Override
-    public final Event reconstructEvent(SubscriptionId id, Node eventId) {
+    public final CompoundEvent reconstructEvent(SubscriptionId id, Node eventId) {
         if (!eventId.isURI()
                 || !eventId.getURI().startsWith(
                         EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())) {
@@ -275,7 +275,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
 
         // We create an event from quadruples which come from a previous event.
         // Hence we do not need to add new meta information
-        return new Event(quadsReceived, false);
+        return new CompoundEvent(quadsReceived, false);
     }
 
     /**
@@ -325,7 +325,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     }
 
     private void deliver(NotificationId id, EventNotificationListener listener) {
-        Event event =
+        CompoundEvent event =
                 this.reconstructEvent(
                         this.subscriptions.get(id.getSubscriptionId()),
                         this.solutions.remove(id).getSolution());

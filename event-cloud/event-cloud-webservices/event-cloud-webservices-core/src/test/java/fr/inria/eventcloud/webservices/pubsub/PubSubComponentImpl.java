@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
@@ -83,7 +83,7 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
      * {@inheritDoc}
      */
     @Override
-    public void publish(Collection<Event> events) {
+    public void publish(Collection<CompoundEvent> events) {
         if (this.publishWs != null) {
             this.publishWs.publish(events);
         }
@@ -93,9 +93,9 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
      * {@inheritDoc}
      */
     @Override
-    public void notify(Collection<Event> events) {
+    public void notify(Collection<CompoundEvent> events) {
         this.hasReceivedEvent = true;
-        for (Event event : events) {
+        for (CompoundEvent event : events) {
             log.info("New event received: {}", event.toString());
         }
     }

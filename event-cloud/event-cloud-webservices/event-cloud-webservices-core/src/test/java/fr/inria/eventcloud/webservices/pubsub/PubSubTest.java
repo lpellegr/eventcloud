@@ -40,7 +40,7 @@ import com.hp.hpl.jena.sparql.core.Quad;
 import com.petalslink.wsn.service.wsnproducer.NotificationProducer;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -127,11 +127,11 @@ public class PubSubTest {
 
         // Creates the notify request
         Notify notifyRequest = new Notify();
-        Collection<Event> events = new Collection<Event>();
-        events.add(new Event(read("/notification-01.trig")));
+        Collection<CompoundEvent> events = new Collection<CompoundEvent>();
+        events.add(new CompoundEvent(read("/notification-01.trig")));
         EventToNotificationMessageTranslator translator =
                 new EventToNotificationMessageTranslator();
-        for (Event event : events) {
+        for (CompoundEvent event : events) {
             notifyRequest.getNotificationMessage().add(
                     translator.translate(event));
         }

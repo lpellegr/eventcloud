@@ -21,7 +21,7 @@ import java.io.InputStream;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.factories.ProxyFactory;
@@ -80,7 +80,7 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
      * {@inheritDoc}
      */
     @Override
-    public void publish(Event event) {
+    public void publish(CompoundEvent event) {
         long publicationTime = System.currentTimeMillis();
 
         for (Quadruple quad : event) {
@@ -93,8 +93,8 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
      * {@inheritDoc}
      */
     @Override
-    public void publish(Collection<Event> events) {
-        for (Event event : events) {
+    public void publish(Collection<CompoundEvent> events) {
+        for (CompoundEvent event : events) {
             this.publish(event);
         }
     }
