@@ -24,7 +24,7 @@ import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.EventNotificationListener;
 import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
@@ -62,7 +62,7 @@ public class WsEventNotificationListener extends EventNotificationListener {
      * {@inheritDoc}
      */
     @Override
-    public void onNotification(SubscriptionId id, Event solution) {
+    public void onNotification(SubscriptionId id, CompoundEvent solution) {
         if (this.wsClient == null) {
             JaxWsClientFactoryBean clientFactory = new JaxWsClientFactoryBean();
             clientFactory.setServiceClass(NotificationConsumer.class);

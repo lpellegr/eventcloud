@@ -36,7 +36,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -62,7 +62,7 @@ public class SubscribeProxyTest {
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxyTest.class);
 
-    private static Collection<Event> events = new Collection<Event>();
+    private static Collection<CompoundEvent> events = new Collection<CompoundEvent>();
 
     private static Collection<Binding> bindings = new Collection<Binding>();
 
@@ -126,7 +126,7 @@ public class SubscribeProxyTest {
                             "Publishing an event composed of {} quadruples from thread {}",
                             quadruples.size(), threadIndex);
 
-                    publishProxy.publish(new Event(quadruples));
+                    publishProxy.publish(new CompoundEvent(quadruples));
                 }
                 // }, 0, 50 + ProActiveRandom.nextInt((i + 1) * 500),
             }, 0, (i + 1) * 500, TimeUnit.MILLISECONDS);
@@ -282,7 +282,7 @@ public class SubscribeProxyTest {
             quads.add(QuadrupleGenerator.create(eventId));
         }
 
-        Event event = new Event(quads);
+        CompoundEvent event = new CompoundEvent(quads);
 
         this.publishProxy.publish(event);
 
@@ -318,7 +318,7 @@ public class SubscribeProxyTest {
             quads.add(QuadrupleGenerator.create(eventId));
         }
 
-        this.publishProxy.publish(new Event(quads));
+        this.publishProxy.publish(new CompoundEvent(quads));
 
         synchronized (events) {
             while (events.size() != 1) {
@@ -439,7 +439,7 @@ public class SubscribeProxyTest {
          * {@inheritDoc}
          */
         @Override
-        public void onNotification(SubscriptionId id, Event solution) {
+        public void onNotification(SubscriptionId id, CompoundEvent solution) {
             synchronized (events) {
                 events.add(solution);
                 events.notifyAll();
@@ -461,7 +461,7 @@ public class SubscribeProxyTest {
             synchronized (events) {
                 // just a dummy event to have the possibility to count the
                 // number of signals which have been received
-                events.add(new Event(QuadrupleGenerator.create()));
+                events.add(new CompoundEvent(QuadrupleGenerator.create()));
                 events.notifyAll();
             }
             log.info("New signal received");

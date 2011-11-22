@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -60,7 +59,7 @@ import fr.inria.eventcloud.utils.MurmurHash;
  * 
  * @author lpellegr
  */
-public class Quadruple implements Serializable {
+public class Quadruple implements Event {
 
     private static final long serialVersionUID = 1L;
 

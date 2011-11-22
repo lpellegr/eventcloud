@@ -56,7 +56,7 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.Generator;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
@@ -64,7 +64,7 @@ import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
  * Translator for {@link NotificationMessageHolderType notification messages} to
- * {@link Event events}.
+ * {@link CompoundEvent events}.
  * 
  * @author bsauvan
  * @author lpellegr
@@ -127,7 +127,7 @@ public class NotificationMessageToEventTranslator {
      * 
      * @return the event corresponding to the specified notification message.
      */
-    public Event translate(NotificationMessageHolderType notificationMessage) {
+    public CompoundEvent translate(NotificationMessageHolderType notificationMessage) {
         List<Quadruple> quads = new ArrayList<Quadruple>();
         String eventId = null;
         Node eventIdNode = null;
@@ -266,7 +266,7 @@ public class NotificationMessageToEventTranslator {
                         entry.getValue(), false, true));
             }
 
-            return new Event(new Collection<Quadruple>(quads));
+            return new CompoundEvent(new Collection<Quadruple>(quads));
         } else {
             log.error("Cannot construct Event because no subject can be extracted from the notification message");
             return null;

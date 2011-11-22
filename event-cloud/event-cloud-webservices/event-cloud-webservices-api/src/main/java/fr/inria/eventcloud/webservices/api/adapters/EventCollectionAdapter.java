@@ -24,16 +24,16 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 
 /**
- * XML Adapter for {@link Collection} of {@link Event} objects.
+ * XML Adapter for {@link Collection} of {@link CompoundEvent} objects.
  * 
  * @author bsauvan
  */
 public class EventCollectionAdapter extends
-        XmlAdapter<Notify, Collection<Event>> {
+        XmlAdapter<Notify, Collection<CompoundEvent>> {
     private WsNotificationTranslator translator;
 
     public EventCollectionAdapter() {
@@ -50,10 +50,10 @@ public class EventCollectionAdapter extends
      *         events.
      */
     @Override
-    public Notify marshal(Collection<Event> events) throws Exception {
+    public Notify marshal(Collection<CompoundEvent> events) throws Exception {
         Notify notify = new Notify();
 
-        for (Event event : events) {
+        for (CompoundEvent event : events) {
             NotificationMessageHolderType notificationMessage =
                     this.translator.translateEventToNotificationMessage(event);
             notify.getNotificationMessage().add(notificationMessage);
@@ -72,8 +72,8 @@ public class EventCollectionAdapter extends
      *         object.
      */
     @Override
-    public Collection<Event> unmarshal(Notify notify) throws Exception {
-        Collection<Event> events = new Collection<Event>();
+    public Collection<CompoundEvent> unmarshal(Notify notify) throws Exception {
+        Collection<CompoundEvent> events = new Collection<CompoundEvent>();
         List<NotificationMessageHolderType> notificationMessages =
                 notify.getNotificationMessage();
 

@@ -26,15 +26,15 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDe
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 
 /**
- * Test cases associated to the {@link Event} class.
+ * Test cases associated to the {@link CompoundEvent} class.
  * 
  * @author lpellegr
  */
-public class EventTest {
+public class CompoundEventTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testInstanciationWithEmptyCollection() {
-        new Event(new Collection<Quadruple>());
+        new CompoundEvent(new Collection<Quadruple>());
     }
 
     @Test
@@ -44,12 +44,12 @@ public class EventTest {
             quads.add(QuadrupleGenerator.create());
         }
 
-        Event e1 = new Event(quads);
+        CompoundEvent e1 = new CompoundEvent(quads);
         Assert.assertEquals(11, e1.getQuadruples().size());
 
-        Event e2 = null;
+        CompoundEvent e2 = null;
         try {
-            e2 = (Event) MakeDeepCopy.makeDeepCopy(e1);
+            e2 = (CompoundEvent) MakeDeepCopy.makeDeepCopy(e1);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

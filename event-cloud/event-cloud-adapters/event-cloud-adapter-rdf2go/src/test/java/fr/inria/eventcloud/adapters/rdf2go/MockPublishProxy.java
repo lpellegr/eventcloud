@@ -19,7 +19,7 @@ package fr.inria.eventcloud.adapters.rdf2go;
 import java.io.InputStream;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -43,14 +43,14 @@ public class MockPublishProxy implements PublishApi {
      * {@inheritDoc}
      */
     @Override
-    public void publish(Event event) {
+    public void publish(CompoundEvent event) {
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void publish(Collection<Event> events) {
+    public void publish(Collection<CompoundEvent> events) {
     }
 
     /**

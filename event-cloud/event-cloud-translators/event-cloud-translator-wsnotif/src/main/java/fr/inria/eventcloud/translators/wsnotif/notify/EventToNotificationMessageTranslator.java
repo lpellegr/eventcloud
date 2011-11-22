@@ -37,13 +37,13 @@ import org.w3c.dom.Text;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
 
 /**
- * Translator for {@link Event events} to {@link NotificationMessageHolderType
+ * Translator for {@link CompoundEvent events} to {@link NotificationMessageHolderType
  * notification messages}.
  * 
  * @author bsauvan
@@ -72,7 +72,7 @@ public class EventToNotificationMessageTranslator {
      *            the event to be translated.
      * @return the notification message corresponding to the specified event.
      */
-    public NotificationMessageHolderType translate(Event event) {
+    public NotificationMessageHolderType translate(CompoundEvent event) {
         String subscriptionAddress = null;
         String producerAddress = null;
         List<Element> metadatas = new ArrayList<Element>();

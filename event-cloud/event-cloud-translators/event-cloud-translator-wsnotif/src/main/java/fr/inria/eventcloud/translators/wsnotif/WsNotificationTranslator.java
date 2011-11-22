@@ -19,7 +19,7 @@ package fr.inria.eventcloud.translators.wsnotif;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
 import fr.inria.eventcloud.translators.wsnotif.notify.NotificationMessageToEventTranslator;
 import fr.inria.eventcloud.translators.wsnotif.subscribe.SubscribeToSparqlQueryTranslator;
@@ -39,7 +39,7 @@ public class WsNotificationTranslator {
      * 
      * @return the notification message corresponding to the specified event.
      */
-    public NotificationMessageHolderType translateEventToNotificationMessage(Event event) {
+    public NotificationMessageHolderType translateEventToNotificationMessage(CompoundEvent event) {
         return new EventToNotificationMessageTranslator().translate(event);
     }
 
@@ -51,7 +51,7 @@ public class WsNotificationTranslator {
      * 
      * @return the event corresponding to the specified notification message.
      */
-    public Event translateNotificationMessageToEvent(NotificationMessageHolderType notificationMessage) {
+    public CompoundEvent translateNotificationMessageToEvent(NotificationMessageHolderType notificationMessage) {
         return new NotificationMessageToEventTranslator().translate(notificationMessage);
     }
 

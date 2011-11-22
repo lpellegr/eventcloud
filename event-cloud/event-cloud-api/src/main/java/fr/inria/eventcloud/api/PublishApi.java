@@ -36,20 +36,20 @@ public interface PublishApi {
     public void publish(Quadruple quad);
 
     /**
-     * Publishes the specified event.
+     * Publishes the specified compound event.
      * 
      * @param event
      *            the event to publish.
      */
-    public void publish(Event event);
+    public void publish(CompoundEvent event);
 
     /**
-     * Publishes the specified collection of {@link Event}s.
+     * Publishes the specified collection of {@link CompoundEvent}s.
      * 
      * @param events
      *            the events to publish.
      */
-    public void publish(Collection<Event> events);
+    public void publish(Collection<CompoundEvent> events);
 
     /**
      * Publishes the quadruples that are read from the specified input stream.

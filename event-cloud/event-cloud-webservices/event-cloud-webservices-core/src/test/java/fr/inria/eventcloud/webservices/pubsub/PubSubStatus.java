@@ -16,11 +16,11 @@
  **/
 package fr.inria.eventcloud.webservices.pubsub;
 
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 
 /**
  * This interface defines a method which may be called to know if an
- * {@link Event} has been received.
+ * {@link CompoundEvent} has been received.
  * 
  * @author bsauvan
  */

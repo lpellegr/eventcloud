@@ -41,7 +41,7 @@ import org.w3c.dom.Element;
 import com.hp.hpl.jena.sparql.core.Quad;
 
 import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
@@ -63,12 +63,12 @@ public class WsNotificationTranslatorTest {
     @Test
     public void testTranslation() {
         // creates an event from a notification example
-        Event initialEvent = new Event(read("/notification-01.trig"));
+        CompoundEvent initialEvent = new CompoundEvent(read("/notification-01.trig"));
 
         log.info("Initial quadruples are:");
         logInfo(initialEvent);
 
-        Event event = initialEvent;
+        CompoundEvent event = initialEvent;
         NotificationMessageHolderType message;
         for (int i = 0; i < 2; i++) {
             message =
@@ -127,7 +127,7 @@ public class WsNotificationTranslatorTest {
         return sw.toString();
     }
 
-    private static void logInfo(Event event) {
+    private static void logInfo(CompoundEvent event) {
         for (Quadruple quad : event) {
             log.info(quad.toString());
         }
