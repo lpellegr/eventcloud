@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.operations.can;
 
-import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
@@ -128,7 +128,7 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
                     new Notification(
                             this.notificationId,
                             PAActiveObject.getUrl(overlay.getStub()), binding));
-        } catch (IOException e) {
+        } catch (ExecutionException e) {
             log.error("No SubscribeProxy found under the given URL: "
                     + subscription.getSubscriberUrl(), e);
 

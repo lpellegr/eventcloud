@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -91,8 +92,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         TransactionalTdbDatastore datastore =
                 ((TransactionalTdbDatastore) overlay.getDatastore());
 
-        TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.WRITE);
+        TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
         // the quadruple is stored by using its timestamped graph value
         txnGraph.add(
                 quad.createMetaGraphNode(), quad.getSubject(),
@@ -138,9 +138,11 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         }
 
         if (matchingIds.isEmpty()) {
-            log.debug("No subscription matching {} has been found on {}.", quad, overlay);
+            log.debug(
+                    "No subscription matching {} has been found on {}", quad,
+                    overlay);
         }
-        
+
         for (HomogenousPair<Node> pair : matchingIds) {
             log.debug(
                     "The peer {} has a sub subscription {} that matches the quadruple {} ",
@@ -212,7 +214,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                             e.printStackTrace();
                         }
                     }
-                } catch (IOException e) {
+                } catch (ExecutionException e) {
                     log.error("No SubscribeProxy found under the given URL: "
                             + subscription.getSubscriberUrl(), e);
 

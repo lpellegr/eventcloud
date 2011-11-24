@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -193,7 +194,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                             e.printStackTrace();
                         }
                     }
-                } catch (IOException e) {
+                } catch (ExecutionException e) {
                     log.error("No SubscribeProxy found under the given URL: "
                             + subscription.getSubscriberUrl(), e);
 

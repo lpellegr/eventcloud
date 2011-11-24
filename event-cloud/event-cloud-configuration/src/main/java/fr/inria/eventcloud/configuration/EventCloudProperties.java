@@ -117,9 +117,22 @@ public class EventCloudProperties {
     public static final PropertyBoolean REPOSITORIES_AUTO_REMOVE =
             new PropertyBoolean("eventcloud.repositories.autoremove", false);
 
+    /**
+     * Specifies the maximum number of entries the cache associated to
+     * subscriptions may contain.
+     */
     public static final PropertyInteger SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE =
             new PropertyInteger(
-                    "eventcloud.subscriptions.cache.maximum.size", 10000);
+                    "eventcloud.subscriptions.cache.maximum.size", 1000);
+
+    /**
+     * Specifies the maximum number of entries the cache associated to subscribe
+     * proxies (the proxies to contact when a notification has to be delivered)
+     * may contain.
+     */
+    public static final PropertyInteger SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE =
+            new PropertyInteger(
+                    "eventcloud.subscribe.proxies.cache.maximum.size", 1000);
 
     public static final PropertyString SEMANTIC_PEER_ADL = new PropertyString(
             "semantic.peer.adl", "fr.inria.eventcloud.overlay.SemanticPeer");
