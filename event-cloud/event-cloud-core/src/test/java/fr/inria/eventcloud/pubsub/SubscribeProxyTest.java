@@ -44,7 +44,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
+import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -298,7 +298,7 @@ public class SubscribeProxyTest {
     }
 
     /**
-     * Test a basic subscription with an {@link EventNotificationListener}.
+     * Test a basic subscription with an {@link CompoundEventNotificationListener}.
      * 
      * @throws InterruptedException
      */
@@ -345,7 +345,7 @@ public class SubscribeProxyTest {
     }
 
     /**
-     * Test a subscription with an {@link EventNotificationListener} by
+     * Test a subscription with an {@link CompoundEventNotificationListener} by
      * simulating a network congestion between the publication of two sets of
      * quadruples that belong to the same event.
      * 
@@ -431,7 +431,7 @@ public class SubscribeProxyTest {
     }
 
     private static class CustomEventNotificationListener extends
-            EventNotificationListener {
+            CompoundEventNotificationListener {
 
         private static final long serialVersionUID = 1L;
 

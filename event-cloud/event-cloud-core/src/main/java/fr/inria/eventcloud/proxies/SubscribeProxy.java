@@ -25,7 +25,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
+import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.Subscription;
@@ -37,9 +37,10 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * <p>
  * This proxy offers the possibility to reconstruct an Event from the binding
  * which has matched a subscription by a call to
- * {@link SubscribeProxy#reconstructEvent(Subscription, Binding)} or
- * {@link SubscribeProxy#reconstructEvent(SubscriptionId, Node)} and also by an
- * using an {@link EventNotificationListener} when you subscribe with
+ * {@link SubscribeProxy#reconstructCompoundEvent(Subscription, Binding)} or
+ * {@link SubscribeProxy#reconstructCompoundEvent(SubscriptionId, Node)} and
+ * also by an using an {@link CompoundEventNotificationListener} when you
+ * subscribe with
  * {@link #subscribe(String, fr.inria.eventcloud.api.listeners.NotificationListener)}
  * . The reconstruction is an heavy operation that may be used carefully.
  * Indeed, to reconstruct an {@link CompoundEvent} from its identifier, a
@@ -99,11 +100,11 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
     public Subscription find(SubscriptionId id);
 
     /**
-     * Reconstructs an {@link CompoundEvent} from the specified {@code subscription} and
-     * {@code binding}. A call to this method block until the whole event has
-     * been retrieved. <strong>This operation must be used carefully</strong>.
-     * It is the invoker responsability to parallelize several calls to this
-     * method.
+     * Reconstructs a {@link CompoundEvent} from the specified
+     * {@code subscription} and {@code binding}. A call to this method block
+     * until the whole event has been retrieved. <strong>This operation must be
+     * used carefully</strong>. It is the invoker responsability to parallelize
+     * several calls to this method.
      * 
      * @param subscription
      *            the subscription that is used to retrieve the name of the
@@ -114,15 +115,16 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      *            variable extracted from the subscription. The value which is
      *            read from the binding is the event identifier.
      * 
-     * @return the event which has been reconstructed.
+     * @return the compound event which has been reconstructed.
      */
-    public CompoundEvent reconstructEvent(Subscription subscription, Binding binding);
+    public CompoundEvent reconstructCompoundEvent(Subscription subscription,
+                                                  Binding binding);
 
     /**
-     * Reconstructs an {@link CompoundEvent} from the specified {@code eventId}. A call
-     * to this method block until the whole event has been retrieved.
-     * <strong>This operation must be used carefully</strong>. It is the invoker
-     * responsability to parallelize several calls to this method.
+     * Reconstructs a {@link CompoundEvent} from the specified {@code eventId}.
+     * A call to this method block until the whole compound event has been
+     * retrieved. <strong>This operation must be used carefully</strong>. It is
+     * the invoker responsibility to parallelize several calls to this method.
      * 
      * @param id
      *            the subscription identifier that identifies which subscription
@@ -130,11 +132,12 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * 
      * @param eventId
      *            the event identifier to use for retrieving the quadruples that
-     *            belong to the event.
+     *            belong to the compound event.
      * 
      * @return the event which has been reconstructed.
      */
-    public CompoundEvent reconstructEvent(SubscriptionId id, Node eventId);
+    public CompoundEvent reconstructCompoundEvent(SubscriptionId id,
+                                                  Node eventId);
 
     /**
      * Used internally to send back a notification.

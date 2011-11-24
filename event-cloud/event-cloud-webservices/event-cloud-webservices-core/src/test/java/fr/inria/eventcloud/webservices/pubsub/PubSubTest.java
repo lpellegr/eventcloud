@@ -138,7 +138,7 @@ public class PubSubTest {
         publishClient.invoke("Notify", notifyRequest);
 
         while (subscriberService.eventsReceived.size() == 0) {
-            log.info("Waiting for the reception of event");
+            log.info("Waiting for the reception of compound events");
             Thread.sleep(500);
         }
 

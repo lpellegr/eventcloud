@@ -33,6 +33,7 @@ import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
+import org.objectweb.proactive.core.component.representative.PAComponentRepresentative;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.slf4j.Logger;
@@ -255,7 +256,12 @@ public class ProxyFactory implements Serializable {
                                             String interfaceName)
             throws IOException {
         try {
-            return Fractive.lookup(componentUri).getFcInterface(interfaceName);
+            System.out.println("ProxyFactory.lookupFcInterface(1) componentUri=" + componentUri);
+            PAComponentRepresentative obj = Fractive.lookup(componentUri);
+            System.out.println("ProxyFactory.lookupFcInterface(2)");
+            Object res = obj.getFcInterface(interfaceName);
+            System.out.println("ProxyFactory.lookupFcInterface(3)");
+            return res;
         } catch (NoSuchInterfaceException e) {
             // it is not necessary to rethrown this exception because when it
             // occurs this means there is an issue in the code
@@ -263,6 +269,11 @@ public class ProxyFactory implements Serializable {
             return null;
         } catch (NamingException e) {
             throw new IOException(e);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            System.out.println("ProxyFactory.lookupFcInterface(exception) "
+                    + t.getMessage());
+            return null;
         }
     }
 

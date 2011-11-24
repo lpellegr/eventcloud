@@ -30,7 +30,7 @@ public enum NotificationListenerType
 
     UNKNOWN((short) -1),
     BINDING((short) 0),
-    EVENT((short) 1),
+    COMPOUND_EVENT((short) 1),
     SIGNAL((short) 2);
 
     private static ReverseEnumMap<NotificationListenerType> map =

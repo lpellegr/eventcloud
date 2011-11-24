@@ -26,15 +26,15 @@ import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
+import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
 
 /**
- * An {@link EventNotificationListener}
+ * An {@link CompoundEventNotificationListener}
  * 
  * @author lpellegr
  */
-public class WsEventNotificationListener extends EventNotificationListener {
+public class WsEventNotificationListener extends CompoundEventNotificationListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,7 +51,7 @@ public class WsEventNotificationListener extends EventNotificationListener {
     private transient Client wsClient;
 
     /**
-     * Creates an {@link EventNotificationListener} with the specified
+     * Creates an {@link CompoundEventNotificationListener} with the specified
      * subscriber URL to invoke the Web service to notify.
      */
     public WsEventNotificationListener(String subscriberWsUrl) {

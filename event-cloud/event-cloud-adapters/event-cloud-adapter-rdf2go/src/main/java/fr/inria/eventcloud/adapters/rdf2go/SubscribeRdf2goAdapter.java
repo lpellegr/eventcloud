@@ -19,7 +19,7 @@ package fr.inria.eventcloud.adapters.rdf2go;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
+import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 
 /**
  * This class is used as an adapter for any object that implements the
@@ -47,7 +47,7 @@ public final class SubscribeRdf2goAdapter extends Rdf2goAdapter<SubscribeApi> {
     }
 
     public SubscriptionId subscribe(String sparqlQuery,
-                                    EventNotificationListener listener) {
+                                    CompoundEventNotificationListener listener) {
         return super.delegate.subscribe(sparqlQuery, listener);
     }
 
