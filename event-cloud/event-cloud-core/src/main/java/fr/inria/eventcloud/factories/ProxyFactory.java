@@ -256,11 +256,8 @@ public class ProxyFactory implements Serializable {
                                             String interfaceName)
             throws IOException {
         try {
-            System.out.println("ProxyFactory.lookupFcInterface(1) componentUri=" + componentUri);
             PAComponentRepresentative obj = Fractive.lookup(componentUri);
-            System.out.println("ProxyFactory.lookupFcInterface(2)");
             Object res = obj.getFcInterface(interfaceName);
-            System.out.println("ProxyFactory.lookupFcInterface(3)");
             return res;
         } catch (NoSuchInterfaceException e) {
             // it is not necessary to rethrown this exception because when it
@@ -269,11 +266,6 @@ public class ProxyFactory implements Serializable {
             return null;
         } catch (NamingException e) {
             throw new IOException(e);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            System.out.println("ProxyFactory.lookupFcInterface(exception) "
-                    + t.getMessage());
-            return null;
         }
     }
 

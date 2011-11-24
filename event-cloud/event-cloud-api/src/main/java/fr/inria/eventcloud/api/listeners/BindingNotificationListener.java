@@ -20,7 +20,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 /**
  * This kind of notification listener will only receive a binding (i.e. the
- * variables and their associated values) that match the subscription.
+ * variables and their associated values) that matches the subscription.
  * 
  * @author lpellegr
  */
