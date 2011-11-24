@@ -37,7 +37,6 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SUB
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_TYPE_PROPERTY;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,13 +45,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.bind.DatatypeConverter;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.MapMaker;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -64,6 +65,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Rdfable;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
@@ -85,8 +87,16 @@ public class Subscription implements Rdfable, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final ConcurrentMap<String, SubscribeProxy> proxiesCache =
-            new MapMaker().weakValues().makeMap();
+    private static final Cache<String, SubscribeProxy> proxiesCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(
+                            EventCloudProperties.SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE.getValue())
+                    .build(new CacheLoader<String, SubscribeProxy>() {
+                        public SubscribeProxy load(String subscriberUrl)
+                                throws Exception {
+                            return ProxyFactory.lookupSubscribeProxy(subscriberUrl);
+                        }
+                    });
 
     // the id of the subscription before someone rewrites it
     private final SubscriptionId originalId;
@@ -328,24 +338,11 @@ public class Subscription implements Rdfable, Serializable {
      * 
      * @return the {@link SubscribeProxy} associated to the original subscriber.
      * 
-     * @throws IOException
-     *             if the proxy cannot be created by using the subscriber URL.
+     * @throws ExecutionException
+     *             when the lookup operation fails.
      */
-    public SubscribeProxy getSubscriberProxy() throws IOException {
-        SubscribeProxy result = proxiesCache.get(this.subscriberUrl);
-
-        // to avoid the lookup operation in most of the cases
-        if (result == null) {
-            SubscribeProxy tmp =
-                    ProxyFactory.lookupSubscribeProxy(this.subscriberUrl);
-
-            // to perform concurrent put
-            if ((result = proxiesCache.putIfAbsent(this.subscriberUrl, tmp)) == null) {
-                return tmp;
-            }
-        }
-
-        return result;
+    public SubscribeProxy getSubscriberProxy() throws ExecutionException {
+        return proxiesCache.get(this.subscriberUrl);
     }
 
     public String getSparqlQuery() {
