@@ -118,7 +118,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      */
     @Override
     public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
-        return super.selectPeer().find(quadPattern);
+        return super.selectPeer().delete(quadPattern);
     }
 
     /**
