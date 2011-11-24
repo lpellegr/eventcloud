@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
@@ -145,8 +147,10 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             super.getRandomSemanticPeer().add(quadruple);
         }
 
-        super.getRandomSemanticPeer().delete(
-                new QuadruplePattern(graphValue, Node.ANY, Node.ANY, Node.ANY));
+        Collection<Quadruple> quadruplesRemoved =
+                super.getRandomSemanticPeer().delete(
+                        new QuadruplePattern(
+                                graphValue, Node.ANY, Node.ANY, Node.ANY));
 
         Collection<Quadruple> quadruplesFound =
                 super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
@@ -155,6 +159,18 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         for (Quadruple quad : quadruplesFound) {
             Assert.assertTrue(quadruples.contains(quad));
+        }
+
+        SetView<Quadruple> expectedQuadruplesRemoved =
+                Sets.difference(quadruples, new HashSet<Quadruple>(
+                        quadruplesFound));
+
+        Assert.assertEquals(20, expectedQuadruplesRemoved.size());
+        Assert.assertEquals(
+                expectedQuadruplesRemoved.size(), quadruplesRemoved.size());
+
+        for (Quadruple q : quadruplesRemoved) {
+            Assert.assertTrue(expectedQuadruplesRemoved.contains(q));
         }
     }
 

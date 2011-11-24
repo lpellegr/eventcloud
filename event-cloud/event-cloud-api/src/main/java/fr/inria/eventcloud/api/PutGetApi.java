@@ -113,7 +113,7 @@ public interface PutGetApi {
      * @param quadPattern
      *            the quadruple pattern that is used to remove the quadruples.
      * 
-     * @return the quadruples that have been removed from the Event-Cloud
+     * @return the quadruples which have been removed from the Event-Cloud
      *         according to the quadruple pattern.
      */
     public Collection<Quadruple> delete(QuadruplePattern quadPattern);
