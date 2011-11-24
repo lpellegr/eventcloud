@@ -20,14 +20,14 @@ import fr.inria.eventcloud.api.CompoundEvent;
 
 /**
  * This kind of notification listener will receive the notification in the form
- * of an {@link CompoundEvent}. To have the possibility to retrieve an {@link CompoundEvent},
- * the method reconstructs internally the Event from the event identifier which
- * matches the subscription. <strong>This listener must be used
- * carefully</strong>.
+ * of a {@link CompoundEvent}. To have the possibility to retrieve a
+ * {@link CompoundEvent}, the method reconstructs internally the
+ * {@link CompoundEvent} from the event identifier which matches the
+ * subscription. <strong>This listener must be used carefully</strong>.
  * 
  * @author lpellegr
  */
-public abstract class EventNotificationListener implements
+public abstract class CompoundEventNotificationListener implements
         NotificationListener<CompoundEvent> {
 
     private static final long serialVersionUID = 1L;
@@ -37,7 +37,7 @@ public abstract class EventNotificationListener implements
      */
     @Override
     public NotificationListenerType getType() {
-        return NotificationListenerType.EVENT;
+        return NotificationListenerType.COMPOUND_EVENT;
     }
 
 }

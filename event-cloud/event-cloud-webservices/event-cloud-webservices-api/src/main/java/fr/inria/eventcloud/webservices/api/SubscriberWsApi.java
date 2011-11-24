@@ -48,7 +48,7 @@ public interface SubscriberWsApi {
      * received.
      * 
      * @param events
-     *            the collection of events.
+     *            the collection of compound events.
      */
     @Oneway
     @WebMethod(operationName = "Notify", action = "http://www.petalslink.com/wsn/service/WsnConsumer/Notify")

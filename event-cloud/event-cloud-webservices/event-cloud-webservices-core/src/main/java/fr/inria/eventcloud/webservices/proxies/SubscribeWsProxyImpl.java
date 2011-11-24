@@ -25,7 +25,7 @@ import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.EventNotificationListener;
+import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
@@ -82,7 +82,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
         SubscriptionId id =
                 super.subscribe(
                         subscribeInfos.getSparqlQuery(),
-                        new EventNotificationListener() {
+                        new CompoundEventNotificationListener() {
 
                             private static final long serialVersionUID = 1L;
 

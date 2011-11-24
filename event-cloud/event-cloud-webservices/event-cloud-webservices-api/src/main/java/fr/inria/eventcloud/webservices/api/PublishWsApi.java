@@ -46,7 +46,7 @@ public interface PublishWsApi {
      * Publishes the specified collection of events.
      * 
      * @param events
-     *            the collection of events to publish.
+     *            the collection of compound events to publish.
      */
     @Oneway
     @WebMethod(operationName = "Notify", action = "http://www.petalslink.com/wsn/service/WsnConsumer/Notify")

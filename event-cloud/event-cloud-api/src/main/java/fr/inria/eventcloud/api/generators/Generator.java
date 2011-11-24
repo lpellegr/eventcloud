@@ -31,14 +31,19 @@ public abstract class Generator {
 
     protected static final SecureRandom random = new SecureRandom();
 
-    public static URI generateRandomUri(String prefix) {
-        String legalChars =
-                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    protected static final String LEGAL_CHARS =
+            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    /**
+     * Generates an URI with a random suffix and the specified {@code prefix}.
+     * 
+     * @return an URI with a random suffix and the specified {@code prefix}.
+     */
+    public static URI generateRandomUri(String prefix) {
         StringBuilder result = new StringBuilder(prefix);
 
         for (int i = 0; i < 20; i++) {
-            result.append(random.nextInt(legalChars.length()));
+            result.append(random.nextInt(LEGAL_CHARS.length()));
         }
 
         try {
@@ -49,6 +54,13 @@ public abstract class Generator {
         }
     }
 
+    /**
+     * Generates an URI with a random suffix and a prefix equals to
+     * {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
+     * 
+     * @return an URI with a random suffix and a prefix equals to
+     *         {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
+     */
     public static URI generateRandomUri() {
         return generateRandomUri(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue());
     }

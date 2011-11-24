@@ -39,7 +39,7 @@ public interface PublishApi {
      * Publishes the specified compound event.
      * 
      * @param event
-     *            the event to publish.
+     *            the compound event to publish.
      */
     public void publish(CompoundEvent event);
 
@@ -47,7 +47,7 @@ public interface PublishApi {
      * Publishes the specified collection of {@link CompoundEvent}s.
      * 
      * @param events
-     *            the events to publish.
+     *            the compound events to publish.
      */
     public void publish(Collection<CompoundEvent> events);
 

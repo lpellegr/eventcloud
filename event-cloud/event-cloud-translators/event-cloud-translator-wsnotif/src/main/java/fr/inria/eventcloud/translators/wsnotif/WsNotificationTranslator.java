@@ -32,10 +32,11 @@ import fr.inria.eventcloud.translators.wsnotif.subscribe.SubscribeToSparqlQueryT
 public class WsNotificationTranslator {
 
     /**
-     * Translates the specified event to its corresponding notification message.
+     * Translates the specified compound event to its corresponding notification
+     * message.
      * 
      * @param event
-     *            the event to be translated.
+     *            the compound event to be translated.
      * 
      * @return the notification message corresponding to the specified event.
      */
@@ -49,7 +50,8 @@ public class WsNotificationTranslator {
      * @param notificationMessage
      *            the notification message to be translated.
      * 
-     * @return the event corresponding to the specified notification message.
+     * @return the compound event corresponding to the specified notification
+     *         message.
      */
     public CompoundEvent translateNotificationMessageToEvent(NotificationMessageHolderType notificationMessage) {
         return new NotificationMessageToEventTranslator().translate(notificationMessage);

@@ -96,7 +96,7 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
     public void notify(Collection<CompoundEvent> events) {
         this.hasReceivedEvent = true;
         for (CompoundEvent event : events) {
-            log.info("New event received: {}", event.toString());
+            log.info("New compound event received: {}", event.toString());
         }
     }
 
