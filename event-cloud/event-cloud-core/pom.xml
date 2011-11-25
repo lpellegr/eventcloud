@@ -70,6 +70,7 @@
 						</goals>
 						<configuration>
 							<includes>
+								<include>java.util.List</include>
 								<include>fr.inria.eventcloud.api.Collection</include>
 								<include>fr.inria.eventcloud.api.Event</include>
 								<include>fr.inria.eventcloud.api.Quadruple</include>
@@ -78,9 +79,9 @@
 								<include>fr.inria.eventcloud.EventCloudsRegistry</include>
 								<include>fr.inria.eventcloud.tracker.SemanticTrackerImpl</include>
 								<include>fr.inria.eventcloud.overlay.SemanticPeerImpl</include>
-								<include>fr.inria.eventcloud.proxies.SubscribeProxy</include>
 								<include>fr.inria.eventcloud.proxies.SubscribeProxyImpl</include>
-								<include>java.util.List</include>
+								<include>fr.inria.eventcloud.proxies.PublishProxyImpl</include>
+								<include>fr.inria.eventcloud.proxies.PutGetProxyImpl</include>
 							</includes>
 						</configuration>
 					</execution>
