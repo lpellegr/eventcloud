@@ -24,6 +24,9 @@
 	<logger name="proactive.mop.stubgeneration">
 		<level value="off" />
 	</logger>
+	<logger name="proactive.components.gen.interface">
+		<level value="off" />
+	</logger>
 
 	<root>
 		<priority value="off" />
