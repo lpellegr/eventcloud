@@ -277,7 +277,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
 
         this.eventIdsReceived.put(eventId, id);
 
-        // We create an event from quadruples which come from a previous event.
+        // We create an event from quadruples which comes from a previous event.
         // Hence we do not need to add new meta information
         return new CompoundEvent(quadsReceived, false);
     }
@@ -397,9 +397,15 @@ public class SubscribeProxyImpl extends ProxyCache implements
         return componentUri;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void initComponentActivity(Body body) {
-        body.setImmediateService("getComponentParameters", false);
+        // FIXME: to avoid some deadlock with components the method
+        // setImmediateServices has to be handled in immediate services. This
+        // configuration should be done in the ProActive source code.
+        body.setImmediateService("setImmediateServices", false);
     }
 
 }
