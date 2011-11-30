@@ -40,14 +40,26 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class JunitEventCloudInfrastructureDeployer {
 
-    public final Map<EventCloudId, EventCloud> eventClouds;
+    private final Map<EventCloudId, EventCloud> eventClouds;
+
+    private final DatastoreType datastoreType;
 
     private EventCloudsRegistry eventCloudsRegistry;
 
     private String eventCloudsRegistryUrl;
 
+    /**
+     * Creates an infrastructure deployer for testing purposes. By default this
+     * deployer will create peers inside an event cloud by using an in-memory
+     * datastore.
+     */
     public JunitEventCloudInfrastructureDeployer() {
+        this(DatastoreType.IN_MEMORY);
+    }
+
+    public JunitEventCloudInfrastructureDeployer(DatastoreType type) {
         this.eventClouds = new HashMap<EventCloudId, EventCloud>();
+        this.datastoreType = type;
     }
 
     public EventCloudId createEventCloud(int nbPeers) {
@@ -60,7 +72,7 @@ public class JunitEventCloudInfrastructureDeployer {
         EventCloud ec =
                 EventCloud.create(
                         PAActiveObject.getUrl(this.eventCloudsRegistry),
-                        new JunitEventCloudDeployer(),
+                        new JunitEventCloudDeployer(this.datastoreType),
                         new Collection<UnalterableElaProperty>(), nbTrackers,
                         nbPeers);
         this.eventClouds.put(ec.getId(), ec);
