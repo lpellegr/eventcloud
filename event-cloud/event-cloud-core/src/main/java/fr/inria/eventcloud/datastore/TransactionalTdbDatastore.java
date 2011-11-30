@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.tdb.StoreConnection;
 import com.hp.hpl.jena.tdb.base.file.Location;
+import com.hp.hpl.jena.tdb.transaction.TDBTransactionException;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
@@ -106,7 +107,25 @@ public class TransactionalTdbDatastore extends Datastore {
      */
     @Override
     protected void internalClose() {
-        StoreConnection.release(this.storeConnection.getLocation());
+        boolean released = false;
+
+        // TODO: avoid active wait. The best solution consist in providing a
+        // patch to Jena in order to force a wait by using wait/notify mechanism
+        // when Location#release is called
+        while (!released) {
+            try {
+                StoreConnection.release(this.storeConnection.getLocation());
+                released = true;
+            } catch (TDBTransactionException e) {
+                // it is only used to detect that they are still some
+                // active transactions to close before to release
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
 
         if (this.autoRemove) {
             try {
