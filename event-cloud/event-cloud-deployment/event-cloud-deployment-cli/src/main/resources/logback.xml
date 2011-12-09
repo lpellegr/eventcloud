@@ -5,7 +5,7 @@
 		<file>${eventcloud.bundle.home}/logs/${logging.output.filename}.logback
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logging.output.filename}.%d{yyyy-MM-dd}.logback</fileNamePattern>
+			<fileNamePattern>${eventcloud.bundle.home}/logs/${logging.output.filename}.%d{yyyy-MM-dd_HH}.logback</fileNamePattern>
 		</rollingPolicy>
 
 		<encoder>
