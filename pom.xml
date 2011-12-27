@@ -118,7 +118,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>10.0.1</version>
+				<version>11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
@@ -128,32 +128,7 @@
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-arq</artifactId>
-				<version>2.8.9-incubating-SNAPSHOT</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-log4j12</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>jena-core</artifactId>
-				<version>2.6.5-incubating-SNAPSHOT</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-log4j12</artifactId>
-					</exclusion>
-				</exclusions>
+				<version>2.9.0-incubating</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -180,12 +155,12 @@
 	</dependencyManagement>
 
 	<build>
-		<!-- this is the parent, so only define pluginManagement, not plugins. -->
+		<!-- this is the parent, we only define pluginManagement, not plugins. -->
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>2.2.1</version>
+					<version>2.2.2</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-clean-plugin</artifactId>
@@ -201,7 +176,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.3</version>
+					<version>2.4</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-deploy-plugin</artifactId>
@@ -232,7 +207,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.2.1</version>
+					<version>2.2.2</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-resources-plugin</artifactId>
@@ -240,7 +215,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>2.3</version>
+					<version>3.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-source-plugin</artifactId>
@@ -248,7 +223,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.10</version>
+					<version>2.11</version>
 				</plugin>
 				<plugin>
 					<groupId>org.objectweb.proactive</groupId>
@@ -260,10 +235,10 @@
 	</build>
 
 	<properties>
-		<!-- To force goal "eclipse:eclipse" to download javadoc and sources -->
+		<!-- Compels to download javadoc and sources -->
 		<downloadJavadoc>true</downloadJavadoc>
 		<downloadSources>true</downloadSources>
-		<!-- force usage of UTF-8 encoding -->
+		<!-- Compels usage of UTF-8 encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
