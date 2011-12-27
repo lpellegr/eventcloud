@@ -346,11 +346,11 @@ public class CanOverlay extends StructuredOverlay {
 
     public String dump() {
         StringBuilder buf = new StringBuilder();
-        buf.append("Peer managing ");
-        buf.append(this);
-        buf.append(" with id ");
+        buf.append("Peer with id ");
         buf.append(super.id);
-        buf.append(" has neighbor(s):\n");
+        buf.append(" manages zone ");
+        buf.append(this);
+        buf.append(" and has the following neighbor(s):\n");
 
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
