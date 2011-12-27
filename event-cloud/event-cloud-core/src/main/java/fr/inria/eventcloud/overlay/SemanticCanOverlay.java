@@ -23,9 +23,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -46,7 +46,7 @@ public class SemanticCanOverlay extends CanOverlay {
     private static final Logger log =
             LoggerFactory.getLogger(SemanticCanOverlay.class);
 
-    private final Cache<SubscriptionId, Subscription> subscriptionsCache;
+    private final LoadingCache<SubscriptionId, Subscription> subscriptionsCache;
 
     /**
      * Constructs a new overlay with the specified {@code dataHandler} and
@@ -66,6 +66,7 @@ public class SemanticCanOverlay extends CanOverlay {
 
         this.subscriptionsCache =
                 CacheBuilder.newBuilder()
+                        .softValues()
                         .maximumSize(
                                 EventCloudProperties.SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE.getValue())
                         .build(new CacheLoader<SubscriptionId, Subscription>() {
@@ -88,7 +89,7 @@ public class SemanticCanOverlay extends CanOverlay {
      * 
      * @return the subscription found or {@code null}.
      */
-    public Subscription findSubscription(SubscriptionId id) {
+    public final Subscription findSubscription(SubscriptionId id) {
         try {
             return this.subscriptionsCache.get(id);
         } catch (ExecutionException e) {
@@ -135,6 +136,16 @@ public class SemanticCanOverlay extends CanOverlay {
         for (SubscriptionId id : subscriptionIds) {
             PublishSubscribeUtils.deleteSubscription(datastore, id);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String dump() {
+        StringBuilder result = new StringBuilder(super.dump());
+        result.append(this.subscriptionsCache.stats());
+        return result.toString();
     }
 
 }

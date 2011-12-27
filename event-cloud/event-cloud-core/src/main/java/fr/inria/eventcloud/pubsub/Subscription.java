@@ -51,9 +51,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.xml.bind.DatatypeConverter;
 
 import com.google.common.base.Objects;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -87,8 +87,9 @@ public class Subscription implements Rdfable, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Cache<String, SubscribeProxy> proxiesCache =
+    private static final LoadingCache<String, SubscribeProxy> proxiesCache =
             CacheBuilder.newBuilder()
+                    .softValues()
                     .maximumSize(
                             EventCloudProperties.SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE.getValue())
                     .build(new CacheLoader<String, SubscribeProxy>() {
