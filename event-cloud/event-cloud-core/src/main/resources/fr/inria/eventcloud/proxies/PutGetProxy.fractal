@@ -8,5 +8,5 @@
 
 	<controller desc="primitive"/>
 
-	<virtual-node name="PutGetProxyVN"/>
+	<virtual-node name="ProxyVN"/>
 </definition>
