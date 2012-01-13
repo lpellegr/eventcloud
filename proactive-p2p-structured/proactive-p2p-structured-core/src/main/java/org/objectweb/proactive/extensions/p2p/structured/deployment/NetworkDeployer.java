@@ -116,10 +116,9 @@ public abstract class NetworkDeployer extends
 
         this.trackers = new Tracker[nbTrackers];
 
+        String networkName = UUID.randomUUID().toString();
         for (int i = 0; i < nbTrackers; i++) {
-            this.trackers[i] =
-                    this.createTracker(
-                            UUID.randomUUID().toString(), this.nodeProvider);
+            this.trackers[i] = this.createTracker(networkName, this.nodeProvider);
             if (i > 0) {
                 this.trackers[i].join(this.trackers[i - 1]);
             }

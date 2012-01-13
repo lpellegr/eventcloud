@@ -162,7 +162,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
     @Override
     public boolean join(Tracker landmarkTracker) {
         if (!this.networkName.equals(landmarkTracker.getNetworkName())
-                && this.type == landmarkTracker.getType()) {
+                || ((this.type != null) && (this.type != landmarkTracker.getType()))) {
             return false;
         }
 
@@ -247,6 +247,10 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
      */
     @Override
     public BooleanWrapper internalStorePeer(Peer peerReference) {
+        if (this.type == null) {
+            this.type = peerReference.getType();
+        }
+
         return new BooleanWrapper(this.peers.add(peerReference));
     }
 
