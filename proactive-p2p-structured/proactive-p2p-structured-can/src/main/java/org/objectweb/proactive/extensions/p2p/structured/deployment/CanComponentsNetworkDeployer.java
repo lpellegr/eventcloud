@@ -41,7 +41,7 @@ public final class CanComponentsNetworkDeployer extends NetworkDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized Peer createPeer(NodeProvider nodeProvider) {
+    protected synchronized Peer createPeer() {
         // TODO use the node provider parameter
         return PeerFactory.newComponentPeer(SerializableProvider.create(CanOverlay.class));
     }
@@ -50,8 +50,7 @@ public final class CanComponentsNetworkDeployer extends NetworkDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized Tracker createTracker(String networkName,
-                                                 NodeProvider nodeProvider) {
+    protected synchronized Tracker createTracker(String networkName) {
         // TODO use the node provider parameter
         return TrackerFactory.newComponentTracker(networkName);
     }

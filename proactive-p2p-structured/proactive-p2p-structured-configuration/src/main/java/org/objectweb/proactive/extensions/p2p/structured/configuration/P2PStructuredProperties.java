@@ -36,6 +36,9 @@ public class P2PStructuredProperties {
     public static final PropertyString PEER_SERVICES_ITF = new PropertyString(
             "peer.services.itf", "peer-services");
 
+    public static final PropertyString PEER_VN = new PropertyString(
+            "peer.vn", "PeerVN");
+
     public static final PropertyString TRACKER_ADL =
             new PropertyString(
                     "tracker.adl",
@@ -43,6 +46,9 @@ public class P2PStructuredProperties {
 
     public static final PropertyString TRACKER_SERVICES_ITF =
             new PropertyString("tracker.services.itf", "tracker-services");
+
+    public static final PropertyString TRACKER_VN = new PropertyString(
+            "tracker.vn", "TrackerVN");
 
     public static final PropertyByte CAN_NB_DIMENSIONS = new PropertyByte(
             "can.nb.dimensions", Byte.valueOf((byte) 3));
@@ -84,7 +90,8 @@ public class P2PStructuredProperties {
         ConfigurationParser.load(
                 P2PStructuredProperties.class,
                 "proactive.p2p.structured.configuration",
-                System.getProperty("user.home") + "/.proactive/p2p-structured.properties");
+                System.getProperty("user.home")
+                        + "/.proactive/p2p-structured.properties");
     }
 
 }

@@ -23,6 +23,7 @@ import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
@@ -38,10 +39,11 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
  * Initializes an Event Cloud (i.e. a Content-Addressable-Network composed of
- * four dimensions) on a local machine or by distributing the active objects on
+ * four dimensions) on a local machine or by distributing the components on
  * several machines.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public class EventCloudDeployer extends NetworkDeployer {
 
@@ -55,6 +57,10 @@ public class EventCloudDeployer extends NetworkDeployer {
         this(mode, null);
     }
 
+    public EventCloudDeployer(NodeProvider nodeProvider) {
+        super(new EmptyDeploymentConfiguration(), nodeProvider);
+    }
+
     public EventCloudDeployer(DeploymentConfiguration mode,
             NodeProvider nodeProvider) {
         super(mode, nodeProvider);
@@ -64,19 +70,26 @@ public class EventCloudDeployer extends NetworkDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized Peer createPeer(NodeProvider nodeProvider) {
-        // TODO: use the nodeProvider parameter
-        return SemanticFactory.newSemanticPeer();
+    protected synchronized Peer createPeer() {
+        if (this.nodeProvider != null) {
+            return SemanticFactory.newSemanticPeer(this.nodeProvider.getGcmVirtualNode(P2PStructuredProperties.PEER_VN.getValue()));
+        } else {
+            return SemanticFactory.newSemanticPeer();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected synchronized Tracker createTracker(String networkName,
-                                                 NodeProvider nodeProvider) {
-        // TODO: use the nodeProvider parameter
-        return SemanticFactory.newSemanticTracker(networkName);
+    protected synchronized Tracker createTracker(String networkName) {
+        if (this.nodeProvider != null) {
+            return SemanticFactory.newSemanticTracker(
+                    networkName,
+                    this.nodeProvider.getGcmVirtualNode(P2PStructuredProperties.TRACKER_VN.getValue()));
+        } else {
+            return SemanticFactory.newSemanticTracker(networkName);
+        }
     }
 
     public SemanticPeer getRandomSemanticPeer() {
