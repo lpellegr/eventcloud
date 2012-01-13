@@ -43,8 +43,8 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
 
 /**
- * Translator for {@link CompoundEvent events} to {@link NotificationMessageHolderType
- * notification messages}.
+ * Translator for {@link CompoundEvent events} to
+ * {@link NotificationMessageHolderType notification messages}.
  * 
  * @author bsauvan
  * @author lpellegr
@@ -269,7 +269,10 @@ public class EventToNotificationMessageTranslator {
 
                     if (i == elements.length - 1) {
                         lastElt.appendChild(document.createTextNode(quadruple.getObject()
-                                .getLiteralLexicalForm()));
+                                .getLiteralLexicalForm()
+                                .replaceAll(
+                                        WsNotificationTranslatorConstants.SHARP_ESCAPE,
+                                        "#")));
                     }
                 } else {
                     lastElt = eltFound;
@@ -325,7 +328,10 @@ public class EventToNotificationMessageTranslator {
 
             if (i == elements.length - 1) {
                 lastElt.appendChild(document.createTextNode(quadruple.getObject()
-                        .getLiteralLexicalForm()));
+                        .getLiteralLexicalForm()
+                        .replaceAll(
+                                WsNotificationTranslatorConstants.SHARP_ESCAPE,
+                                "#")));
             }
         }
 
@@ -336,6 +342,9 @@ public class EventToNotificationMessageTranslator {
         String[] elements =
                 quadruple.getPredicate()
                         .getURI()
+                        .replaceAll(
+                                WsNotificationTranslatorConstants.SHARP_ESCAPE,
+                                "#")
                         .split(
                                 Pattern.quote(WsNotificationTranslatorConstants.URI_SEPARATOR));
 

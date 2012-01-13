@@ -75,17 +75,21 @@ public class NotificationMessageToEventTranslator {
             LoggerFactory.getLogger(NotificationMessageToEventTranslator.class);
 
     /**
-     * This method removes all white spaces between > < elements for a node
+     * This method removes all white spaces between > < elements for a node and
+     * also replaces all '#' character by '$1$'.
      * 
      * @param incomingNode
      * 
      * @return xml tree without white spaces between nodes.
      */
-    public static org.w3c.dom.Node removeWhiteSpacesFromNode(org.w3c.dom.Node incomingNode) {
+    public static org.w3c.dom.Node removeWhiteSpacesAndSharpFromNode(org.w3c.dom.Node incomingNode) {
         try {
             byte[] nodeBytes = xmlNodeToByteArray(incomingNode);
             String nodeString = new String(nodeBytes, "UTF-8");
             nodeString = nodeString.replaceAll(">\\s*<", "><");
+            nodeString =
+                    nodeString.replaceAll(
+                            "#", WsNotificationTranslatorConstants.SHARP_ESCAPE);
             incomingNode = byteArrayToXmlNode(nodeString.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
@@ -222,7 +226,9 @@ public class NotificationMessageToEventTranslator {
         }
 
         Message message = notificationMessage.getMessage();
-        messageNodes = parseElement((Element) message.getAny(), false);
+        if (message != null) {
+            messageNodes = parseElement((Element) message.getAny(), false);
+        }
 
         if (subjectNode != null) {
             if (subscriptionAddressNode != null) {
@@ -428,8 +434,8 @@ public class NotificationMessageToEventTranslator {
 
         if (element != null) {
             this.parseElement(
-                    removeWhiteSpacesFromNode(element), new StringBuilder(),
-                    result, isMetadata);
+                    removeWhiteSpacesAndSharpFromNode(element),
+                    new StringBuilder(), result, isMetadata);
         }
 
         return result;

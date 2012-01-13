@@ -31,6 +31,8 @@ public class WsNotificationTranslatorConstants {
      */
     public static final String URI_SEPARATOR = "$0$";
 
+    public static final String SHARP_ESCAPE = "\\$1\\$";
+
     public static final String SUBSCRIPTION_ADDRESS_TEXT =
             "http://docs.oasis-open.org/wsn/b-2/SubscriptionReference/Address";
 
