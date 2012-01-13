@@ -20,6 +20,7 @@ import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.node.NodeException;
+import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
 /**
  * This class is used to create and to deploy an {@link EventCloudsRegistry} as
@@ -34,7 +35,7 @@ public class EventCloudsRegistryFactory {
     }
 
     public static EventCloudsRegistry newEventCloudsRegistry() {
-        return newEventCloudsRegistry(null);
+        return newEventCloudsRegistry((Node) null);
     }
 
     public static EventCloudsRegistry newEventCloudsRegistry(Node node) {
@@ -48,6 +49,14 @@ public class EventCloudsRegistryFactory {
         }
 
         return null;
+    }
+
+    public static EventCloudsRegistry newEventCloudsRegistry(GCMVirtualNode vn) {
+        if (vn != null) {
+            return newEventCloudsRegistry(vn.getANode());
+        } else {
+            return newEventCloudsRegistry((Node) null);
+        }
     }
 
 }
