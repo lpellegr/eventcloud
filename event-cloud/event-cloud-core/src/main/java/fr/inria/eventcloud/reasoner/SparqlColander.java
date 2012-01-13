@@ -1,0 +1,165 @@
+/**
+ * Copyright (c) 2011 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
+package fr.inria.eventcloud.reasoner;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.List;
+
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
+
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.responses.SparqlResponse;
+import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+
+/**
+ * SparqlColander is used to filter the results from a set of
+ * {@link SparqlResponse} by using the original SPARQL request. Indeed, due to
+ * the infrastructure, we can route only a sub-set of SPARQL queries. This mean
+ * that the {@link SparqlResponse} does not contains the final result. To get
+ * the final result we have to use a {@link SparqlColander} to remove some extra
+ * values.
+ * <p>
+ * TODO provide a SemanticDatastorePool in order to have the possibility to
+ * filter several queries in parallel. TODO 2 compute filter time and add it to
+ * the response.
+ * 
+ * @author lpellegr
+ */
+public class SparqlColander implements Closeable {
+
+    private TransactionalTdbDatastore datastore;
+
+    public SparqlColander(TransactionalTdbDatastore datastore) {
+        this.datastore = datastore;
+        this.datastore.open();
+    }
+
+    /**
+     * Filters a set of {@link Quadruple}s with the specified
+     * {@code sparqlAskQuery}.
+     * 
+     * @param sparqlAskQuery
+     *            the SPARQL query to use for filtering quadruples.
+     * @param quadruples
+     *            the quadruples to filter
+     * 
+     * @return {@code true} if there are some values matching the
+     *         {@code sparqlAskQuery}, {@code false} otherwise.
+     */
+    public synchronized boolean filterSparqlAsk(String sparqlAskQuery,
+                                                List<Quadruple> quadruples) {
+        this.cleanAndFill(this.datastore, quadruples);
+
+        boolean result;
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlAskQuery, txnGraph.toDataset());
+        result = queryExecution.execAsk();
+        queryExecution.close();
+        txnGraph.close();
+
+        return result;
+    }
+
+    /**
+     * Filters a set of {@link Quadruple}s with the specified
+     * {@code sparqlConstructQuery}.
+     * 
+     * @param sparqlConstructQuery
+     *            the SPARQL query to use for filtering quadruples.
+     * @param quadruples
+     *            the quadruples to filter
+     * 
+     * @return {@code true} if there are some values matching the
+     *         {@code sparqlConstructQuery}, {@code false} otherwise.
+     */
+    public synchronized Model filterSparqlConstruct(String sparqlConstructQuery,
+                                                    List<Quadruple> quadruples) {
+        this.cleanAndFill(this.datastore, quadruples);
+
+        Model result;
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlConstructQuery, txnGraph.toDataset());
+        result = queryExecution.execConstruct();
+        queryExecution.close();
+        txnGraph.close();
+
+        return result;
+    }
+
+    /**
+     * Filters a set of {@link Quadruple}s with the specified
+     * {@code sparqlSelectQuery}.
+     * 
+     * @param sparqlSelectQuery
+     *            the SPARQL query to use for filtering quadruples.
+     * @param quadruples
+     *            the quadruples to filter
+     * 
+     * @return {@code true} if there are some values matching the
+     *         {@code sparqlSelectQuery}, {@code false} otherwise.
+     */
+    public synchronized ResultSet filterSparqlSelect(String sparqlSelectQuery,
+                                                     List<Quadruple> quadruples) {
+        this.cleanAndFill(this.datastore, quadruples);
+
+        ResultSet result;
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+        QueryExecution queryExecution =
+                QueryExecutionFactory.create(
+                        sparqlSelectQuery, txnGraph.toDataset());
+        result = new ResultSetWrapper(queryExecution.execSelect());
+        queryExecution.close();
+        txnGraph.close();
+
+        return result;
+    }
+
+    private void cleanAndFill(TransactionalTdbDatastore datastore,
+                              List<Quadruple> quadruples) {
+        TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
+        txnGraph.delete(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
+        for (Quadruple quad : quadruples) {
+            txnGraph.add(quad);
+        }
+        txnGraph.commit();
+        txnGraph.close();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() throws IOException {
+        this.datastore.close();
+    }
+
+}
