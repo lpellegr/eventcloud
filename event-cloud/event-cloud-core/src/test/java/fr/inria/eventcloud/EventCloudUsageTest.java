@@ -117,7 +117,7 @@ public class EventCloudUsageTest implements Serializable {
                 putGetProxy.executeSparqlSelect(sparqlQuery);
 
         Assert.assertTrue(response.getResult().hasNext());
-        
+
         Node resultNode =
                 response.getResult().nextSolution().get("day").asNode();
         log.info("Answer for SPARQL query {}:", sparqlQuery);

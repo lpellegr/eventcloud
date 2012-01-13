@@ -52,7 +52,7 @@ public abstract class NetworkDeployer extends
 
     private Tracker[] trackers;
 
-    private final NodeProvider nodeProvider;
+    protected final NodeProvider nodeProvider;
 
     // this atomic reference is used to detect the deployer state and the
     // interleaving of some methods in multi-threaded environment.
@@ -71,7 +71,7 @@ public abstract class NetworkDeployer extends
         this.state =
                 new AtomicReference<NetworkDeployerState>(
                         NetworkDeployerState.STANDBY);
-        this.nodeProvider = null;
+        this.nodeProvider = nodeProvider;
 
         configuration.configure();
     }
@@ -118,7 +118,7 @@ public abstract class NetworkDeployer extends
 
         String networkName = UUID.randomUUID().toString();
         for (int i = 0; i < nbTrackers; i++) {
-            this.trackers[i] = this.createTracker(networkName, this.nodeProvider);
+            this.trackers[i] = this.createTracker(networkName);
             if (i > 0) {
                 this.trackers[i].join(this.trackers[i - 1]);
             }
@@ -141,7 +141,7 @@ public abstract class NetworkDeployer extends
                     nbPeers);
             Peer peerCreated;
             for (int i = 0; i < nbPeers; i++) {
-                peerCreated = this.createPeer(this.nodeProvider);
+                peerCreated = this.createPeer();
                 try {
                     this.getRandomTracker().inject(peerCreated);
                 } catch (NetworkAlreadyJoinedException e) {
@@ -162,7 +162,7 @@ public abstract class NetworkDeployer extends
             threadsPool.execute(new Runnable() {
                 public void run() {
                     try {
-                        getRandomTracker().inject(createPeer(nodeProvider));
+                        getRandomTracker().inject(createPeer());
                     } catch (NetworkAlreadyJoinedException e) {
                         e.printStackTrace();
                     } finally {
@@ -215,32 +215,25 @@ public abstract class NetworkDeployer extends
     }
 
     /**
-     * Creates a new {@link Peer} and deploy it to by using the specified
-     * {@code nodeProvider}. If the {@link NodeProvider} provided as parameter
-     * is {@code null}, the peer has be deployed on the local machine.
-     * 
-     * @param nodeProvider
-     *            the node provider that is used to deploy the peer.
+     * Creates a new {@link Peer} and deploy it to by using the
+     * {@code nodeProvider}. If the {@link NodeProvider} is {@code null}, the
+     * peer will be deployed on the local machine.
      * 
      * @return the new peer created.
      */
-    protected abstract Peer createPeer(NodeProvider nodeProvider);
+    protected abstract Peer createPeer();
 
     /**
-     * Creates a new {@link Tracker} and deploy it to by using the specified
-     * {@code nodeProvider}. If the {@link NodeProvider} provided as parameter
-     * is {@code null}, the tracker has be deployed on the local machine.
+     * Creates a new {@link Tracker} and deploy it to by using the
+     * {@code nodeProvider}. If the {@link NodeProvider} is {@code null}, the
+     * tracker will be deployed on the local machine.
      * 
      * @param networkName
      *            the network name managed by the tracker that is created
      * 
-     * @param nodeProvider
-     *            the node provider that is used to deploy the peer.
-     * 
      * @return the new tracker created.
      */
-    protected abstract Tracker createTracker(String networkName,
-                                             NodeProvider nodeProvider);
+    protected abstract Tracker createTracker(String networkName);
 
     /**
      * Returns the peer associated to the specified index from the list of peers

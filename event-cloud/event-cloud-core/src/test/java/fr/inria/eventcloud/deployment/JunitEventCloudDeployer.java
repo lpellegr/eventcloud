@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.deployment;
 
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -51,7 +50,7 @@ public class JunitEventCloudDeployer extends EventCloudDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized Peer createPeer(NodeProvider nodeProvider) {
+    protected synchronized Peer createPeer() {
         SerializableProvider<SemanticCanOverlay> provider;
 
         if (this.datastoreType == DatastoreType.IN_MEMORY) {

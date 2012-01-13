@@ -45,7 +45,7 @@ public final class CanActiveObjectsNetworkDeployer extends NetworkDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected Peer createPeer(NodeProvider nodeProvider) {
+    protected Peer createPeer() {
         // TODO use the node provider parameter
         return PeerFactory.newActivePeer(SerializableProvider.create(CanOverlay.class));
     }
@@ -54,8 +54,7 @@ public final class CanActiveObjectsNetworkDeployer extends NetworkDeployer {
      * {@inheritDoc}
      */
     @Override
-    protected Tracker createTracker(String networkName,
-                                    NodeProvider nodeProvider) {
+    protected Tracker createTracker(String networkName) {
         // TODO use the node provider parameter
         return TrackerFactory.newActiveTracker(networkName);
     }
