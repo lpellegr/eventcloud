@@ -59,7 +59,7 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
 
     @Test
     public void testDataTransfert() {
-        SemanticPeer firstPeer = (SemanticPeer) super.getRandomSemanticPeer();
+        SemanticPeer firstPeer = super.getRandomSemanticPeer();
         SemanticPeer secondPeer = SemanticFactory.newSemanticPeer();
 
         GetIdAndZoneResponseOperation response =
