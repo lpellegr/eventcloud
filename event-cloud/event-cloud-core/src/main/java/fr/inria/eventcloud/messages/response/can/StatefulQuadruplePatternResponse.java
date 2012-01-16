@@ -90,8 +90,7 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
                     // ensure that the query operation has terminated
                     // before to send back the request
                     try {
-                        ((StatefulQuadruplePatternResponse<T>) response).subResults.add(new SerializedValue<T>(
-                                result.get().result));
+                        ((StatefulQuadruplePatternResponse<T>) response).subResults.add(SerializedValue.create(result.get().result));
                         ((StatefulQuadruplePatternResponse<T>) response).stateActionTime +=
                                 result.get().duration;
                     } catch (InterruptedException e) {

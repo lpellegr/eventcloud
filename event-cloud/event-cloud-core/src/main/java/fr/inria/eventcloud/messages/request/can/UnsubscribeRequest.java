@@ -39,7 +39,7 @@ public class UnsubscribeRequest extends StatelessQuadruplePatternRequest {
         super(subscription.getSubSubscriptions()[0].getAtomicQuery()
                 .getQuadruplePattern());
         this.originalSubscriptionId =
-                new SerializedValue<SubscriptionId>(subscription.getId());
+                SerializedValue.create(subscription.getId());
     }
 
     /**

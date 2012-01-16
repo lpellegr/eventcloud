@@ -38,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.Object
  * @param <T>
  *            the value type to serialize.
  */
-public final class SerializedValue<T> implements Serializable {
+public class SerializedValue<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,12 +46,24 @@ public final class SerializedValue<T> implements Serializable {
 
     private transient T value;
 
-    public SerializedValue(T value) {
+    protected SerializedValue(T value) {
         try {
             this.bytes = ObjectToByteConverter.convert(value);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Creates a new serialized value from the specified {@code value}.
+     * 
+     * @param value
+     *            the value to serialize and to keep as a byte array.
+     * 
+     * @return an instance of {@link SerializedValue} for the given value.
+     */
+    public static <T> SerializedValue<T> create(T value) {
+        return new SerializedValue<T>(value);
     }
 
     @SuppressWarnings("unchecked")
@@ -65,6 +77,7 @@ public final class SerializedValue<T> implements Serializable {
                 e.printStackTrace();
             }
         }
+
         return this.value;
     }
 

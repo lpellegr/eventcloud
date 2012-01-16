@@ -43,7 +43,7 @@ public abstract class ConstraintsValidator<K> implements Serializable {
     protected final SerializedValue<K> key;
 
     public ConstraintsValidator(K key) {
-        this.key = new SerializedValue<K>(key);
+        this.key = SerializedValue.create(key);
     }
 
     public abstract boolean validatesKeyConstraints(StructuredOverlay overlay);
