@@ -61,7 +61,7 @@ public class SubscriberService implements NotificationConsumer {
                     this.translator.translateNotificationMessageToEvent(notificationMessage);
             if (event != null) {
                 this.eventsReceived.add(event);
-                log.info("New compound event received:\n {}", event);
+                log.info("New compound event received:\n{}", event);
             }
         }
     }

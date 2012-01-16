@@ -248,7 +248,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
                             id, eventId, quadsReceived.size(),
                             expectedNumberOfQuadruples});
 
-            Collection<Quadruple> quads = null;
+            Collection<Quadruple> quads;
             try {
                 quads =
                         ((ReconstructEventResponse) PAFuture.getFutureValue(super.proxy.selectTracker()
@@ -258,7 +258,8 @@ public class SubscribeProxyImpl extends ProxyCache implements
                                                 reconstructPattern,
                                                 quadHashesReceived)))).getResult();
             } catch (DispatchException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
+                quads = new Collection<Quadruple>();
             }
 
             for (Quadruple quad : quads) {

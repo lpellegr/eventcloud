@@ -59,10 +59,10 @@ public class EventToNotificationMessageTranslator {
         DocumentBuilder docBuilder = null;
         try {
             docBuilder = dbfac.newDocumentBuilder();
+            document = docBuilder.newDocument();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-        document = docBuilder.newDocument();
     }
 
     /**

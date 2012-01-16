@@ -117,17 +117,17 @@ public final class EventCloud implements EventCloudApi, Serializable {
             registry =
                     PAActiveObject.lookupActive(
                             EventCloudsRegistry.class, this.registryUrl);
+
+            registry.register(this);
+
+            log.info(
+                    "Eventcloud '{}' registered into registry '{}'", this.id,
+                    this.registryUrl);
         } catch (ActiveObjectCreationException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        registry.register(this);
-
-        log.info(
-                "Eventcloud '{}' registered into registry '{}'", this.id,
-                this.registryUrl);
     }
 
     /**

@@ -59,16 +59,16 @@ public class CollectionTest {
         try {
             deserializedCollection =
                     (Collection<Integer>) MakeDeepCopy.makeDeepCopy(collection);
+
+            Iterator<Integer> it = collection.iterator();
+            Iterator<Integer> it2 = deserializedCollection.iterator();
+            while (it.hasNext()) {
+                Assert.assertEquals(it.next(), it2.next());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-        }
-
-        Iterator<Integer> it = collection.iterator();
-        Iterator<Integer> it2 = deserializedCollection.iterator();
-        while (it.hasNext()) {
-            Assert.assertEquals(it.next(), it2.next());
         }
     }
 

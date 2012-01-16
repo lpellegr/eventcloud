@@ -54,7 +54,9 @@ public class QuadruplePatternTest {
             e.printStackTrace();
         } finally {
             try {
-                oos.close();
+                if (oos != null) {
+                    oos.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -74,7 +76,9 @@ public class QuadruplePatternTest {
             e.printStackTrace();
         } finally {
             try {
-                ois.close();
+                if (ois != null) {
+                    ois.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

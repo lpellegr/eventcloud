@@ -32,39 +32,42 @@ import fr.inria.eventcloud.utils.Callback;
  */
 public class RdfParserTest {
 
-    private static int counter = 0;
+    private int counter;
+
+    private final Callback<Quadruple> callback;
+
+    public RdfParserTest() {
+        this.counter = 0;
+
+        this.callback = new Callback<Quadruple>() {
+            @Override
+            public void execute(Quadruple quad) {
+                counter++;
+            }
+        };
+    }
 
     @Test
     public void parseNQuadsFileTest() {
         RdfParser.parse(
                 RdfParser.class.getResourceAsStream("/example.nquads"),
-                SerializationFormat.NQuads, new Callback<Quadruple>() {
-                    @Override
-                    public void execute(Quadruple quad) {
-                        counter++;
-                    }
-                });
+                SerializationFormat.NQuads, this.callback);
 
-        Assert.assertEquals(15, counter);
+        Assert.assertEquals(15, this.counter);
     }
 
     @Test
     public void parseTrigFileTest() {
         RdfParser.parse(
                 RdfParser.class.getResourceAsStream("/example.trig"),
-                SerializationFormat.TriG, new Callback<Quadruple>() {
-                    @Override
-                    public void execute(Quadruple quad) {
-                        counter++;
-                    }
-                });
+                SerializationFormat.TriG, this.callback);
 
-        Assert.assertEquals(15, counter);
+        Assert.assertEquals(15, this.counter);
     }
 
     @After
     public void tearDown() {
-        counter = 0;
+        this.counter = 0;
     }
 
 }
