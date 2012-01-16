@@ -77,12 +77,11 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
             Collection<LongLong> hashValuesReceived) {
         super(quadruplePattern);
 
-        this.hashValuesReceived =
-                new SerializedValue<Collection<LongLong>>(hashValuesReceived);
+        this.hashValuesReceived = SerializedValue.create(hashValuesReceived);
 
         this.metaGraphValue =
-                new SerializedValue<String>(
-                        quadruplePattern.createMetaGraphNode().getURI());
+                SerializedValue.create(quadruplePattern.createMetaGraphNode()
+                        .getURI());
     }
 
     /**

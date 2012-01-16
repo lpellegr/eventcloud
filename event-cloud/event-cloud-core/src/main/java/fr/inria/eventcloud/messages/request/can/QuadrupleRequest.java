@@ -41,7 +41,7 @@ public abstract class QuadrupleRequest extends ForwardRequest {
 
     public QuadrupleRequest(final Quadruple quad) {
         super(SemanticCoordinate.create(quad));
-        this.quadruple = new SerializedValue<Quadruple>(quad);
+        this.quadruple = SerializedValue.create(quad);
     }
 
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {

@@ -48,8 +48,7 @@ public abstract class StatelessQuadruplePatternRequest extends AnycastRequest {
     public StatelessQuadruplePatternRequest(QuadruplePattern quadPattern) {
         super(new DefaultAnycastConstraintsValidator(
                 SemanticCoordinate.create(quadPattern)));
-        this.quadruplePattern =
-                new SerializedValue<QuadruplePattern>(quadPattern);
+        this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 
     /**
