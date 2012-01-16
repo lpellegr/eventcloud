@@ -22,11 +22,12 @@ import org.junit.Test;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -36,18 +37,15 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  */
 public class SubscriptionRewriterTest {
 
-    private static final String source;
+    private static final String source =
+            "rmi://oops.inria.fr:1099/32bf1d5d-131240b729f--7f6e--6f9e1f1e514bea7c-32bf1d5d-131240b729f--8000";
 
-    private static final Node defaultNode;
+    private static final Node defaultNode =
+            Node.createURI("http://www.inria.fr/");;
 
     private static final Quadruple defaultQuadruple;
 
     static {
-        source =
-                "rmi://oops.inria.fr:1099/32bf1d5d-131240b729f--7f6e--6f9e1f1e514bea7c-32bf1d5d-131240b729f--8000";
-
-        defaultNode = Node.createURI("http://www.inria.fr/");
-
         defaultQuadruple =
                 new Quadruple(
                         defaultNode, defaultNode, defaultNode, defaultNode);
@@ -59,7 +57,7 @@ public class SubscriptionRewriterTest {
         String sparqlQuery =
                 "SELECT ?s ?a1 WHERE { GRAPH ?g { ?s <http://v1> <http://v2> . ?s <http://v3> ?a1 . ?s <http://v4> ?a2 } }";
 
-        Subscription subscription = new Subscription(source, sparqlQuery);
+        Subscription subscription = createSubscription(sparqlQuery);
 
         Subscription rewrittenSubscription =
                 SubscriptionRewriter.rewrite(subscription, defaultQuadruple);
@@ -105,7 +103,7 @@ public class SubscriptionRewriterTest {
         String sparqlQuery =
                 "SELECT ?s ?o WHERE { GRAPH ?g { ?s <http://v1> <http://v2> . <http://v3> <http://v4> ?o } }";
 
-        Subscription subscription = new Subscription(source, sparqlQuery);
+        Subscription subscription = createSubscription(sparqlQuery);
 
         Subscription rewrittenSubscription =
                 SubscriptionRewriter.rewrite(subscription, defaultQuadruple);
@@ -134,7 +132,7 @@ public class SubscriptionRewriterTest {
         String sparqlQuery =
                 "SELECT ?s ?o WHERE { GRAPH ?g { ?s <http://v1> ?o } }";
 
-        Subscription subscription = new Subscription(source, sparqlQuery);
+        Subscription subscription = createSubscription(sparqlQuery);
 
         SubscriptionRewriter.rewrite(subscription, defaultQuadruple);
     }
@@ -145,7 +143,7 @@ public class SubscriptionRewriterTest {
 
         String sparqlQuery =
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?mail WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email . ?id foaf:phone ?phone } }";
-        Subscription subscription = new Subscription(source, sparqlQuery);
+        Subscription subscription = createSubscription(sparqlQuery);
 
         BindingMap b = BindingFactory.create();
         b.add(Var.alloc("id"), id);
@@ -190,7 +188,7 @@ public class SubscriptionRewriterTest {
                 Node.createURI("http://www.inria.fr/member/6609"));
         b.add(Var.alloc("name"), Node.createLiteral("lpellegr"));
 
-        Subscription subscription = new Subscription(source, sparqlQuery);
+        Subscription subscription = createSubscription(sparqlQuery);
 
         Subscription rewrittenSubscription =
                 SubscriptionRewriter.rewrite(subscription, defaultQuadruple);
@@ -216,10 +214,16 @@ public class SubscriptionRewriterTest {
         String sparqlQuery =
                 "SELECT ?s ?o WHERE { GRAPH ?g { ?s <http://v1> ?o } }";
 
-        Subscription subscription = new Subscription(source, sparqlQuery);
+        Subscription subscription = createSubscription(sparqlQuery);
 
-        Binding b = BindingFactory.create();
-        SubscriptionRewriter.rewrite(subscription, b);
+        SubscriptionRewriter.rewrite(subscription, BindingFactory.create());
+    }
+
+    private static Subscription createSubscription(String sparqlQuery) {
+        return new Subscription(
+                SubscriptionId.random(), SubscriptionId.random(),
+                SubscriptionId.random(), System.currentTimeMillis(),
+                sparqlQuery, source, NotificationListenerType.UNKNOWN);
     }
 
 }

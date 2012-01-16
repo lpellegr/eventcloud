@@ -29,17 +29,15 @@ public interface SubscribeApi {
      * Subscribes to interest with the specified SPARQL query and the given
      * {@link NotificationListener}.
      * 
-     * @param sparqlQuery
-     *            the SPARQL query that is used to subscribe to some interest.
+     * @param subscription
+     *            the subscription object.
      * 
      * @param listener
      *            the listener that defines the type of notifications and the
      *            action to execute when a notification is received.
-     * 
-     * @return an unique identifier which identifies the subscription.
      */
-    public <T> SubscriptionId subscribe(String sparqlQuery,
-                                        NotificationListener<T> listener);
+    public <T> void subscribe(Subscription subscription,
+                              NotificationListener<T> listener);
 
     /**
      * Unsubscribes by using the specified subscription identifier.

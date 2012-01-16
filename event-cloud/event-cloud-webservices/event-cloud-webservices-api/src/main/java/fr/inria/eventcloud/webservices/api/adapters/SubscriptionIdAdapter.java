@@ -21,8 +21,6 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.utils.LongLong;
-import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
  * XML Adapter for {@link SubscriptionId} objects.
@@ -57,8 +55,7 @@ public class SubscriptionIdAdapter extends
      */
     @Override
     public SubscriptionId unmarshal(SubscribeResponse id) throws Exception {
-        return new SubscriptionId(new LongLong(
-                MurmurHash.hash128(id.toString())));
+        return SubscriptionId.random();
     }
 
 }

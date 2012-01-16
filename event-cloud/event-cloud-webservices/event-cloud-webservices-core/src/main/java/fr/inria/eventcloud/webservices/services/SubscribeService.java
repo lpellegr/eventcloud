@@ -32,6 +32,7 @@ import org.oasis_open.docs.wsrf.rp_2.GetResourcePropertyResponse;
 import com.petalslink.wsn.service.wsnproducer.NotificationProducer;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -81,7 +82,7 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
         if (super.proxy == null) {
             return null;
         }
-        
+
         String sparqlQuery =
                 super.translator.translateSubscribeToSparqlQuery(subscribe);
 
@@ -102,13 +103,14 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
                     if (subscriberUrl != null) {
                         log.info("Subscriber URL is {}", subscriberUrl);
 
-                        SubscriptionId id =
-                                super.proxy.subscribe(
-                                        sparqlQuery,
-                                        new WsEventNotificationListener(
-                                                subscriberUrl));
+                        Subscription subscription =
+                                new Subscription(sparqlQuery);
+                        this.subscribers.put(
+                                subscription.getId(), subscriberUrl);
 
-                        this.subscribers.put(id, subscriberUrl);
+                        super.proxy.subscribe(
+                                subscription, new WsEventNotificationListener(
+                                        subscriberUrl));
                     } else {
                         log.info("Subscribe notification received but no subscriber address is specified: the subscriber will receive no notification");
                     }

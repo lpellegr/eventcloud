@@ -33,19 +33,19 @@ public final class PublishSubscribeConstants {
      */
 
     public static final String EVENT_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "event/";
+            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "event:";
 
     public static final String SUBSCRIPTION_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "subscription/";
+            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "subscription:";
 
     public static final String SUBSUBSCRIPTION_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "subsubscription/";
+            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "subsubscription:";
 
     public static final String PUBLICATION_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "publication/";
+            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "publication:";
 
     public static final String QUADRUPLE_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "quadruple/";
+            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "quadruple:";
 
     /*
      * Nodes associated to namespaces

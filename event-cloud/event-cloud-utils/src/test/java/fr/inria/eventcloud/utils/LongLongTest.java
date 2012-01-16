@@ -29,7 +29,7 @@ public class LongLongTest {
 
     @Test
     public void fromStringTest() {
-        LongLong longlong = new LongLong(new long[] {1, 2});
+        LongLong longlong = new LongLong(1, 2);
         String stringLonglong = longlong.toString();
         Assert.assertEquals(longlong, LongLong.fromString(stringLonglong));
     }

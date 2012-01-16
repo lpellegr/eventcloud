@@ -31,6 +31,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
@@ -117,7 +118,7 @@ public class EventCloudUsageTest implements Serializable {
                 putGetProxy.executeSparqlSelect(sparqlQuery);
 
         Assert.assertTrue(response.getResult().hasNext());
-        
+
         Node resultNode =
                 response.getResult().nextSolution().get("day").asNode();
         log.info("Answer for SPARQL query {}:", sparqlQuery);
@@ -130,24 +131,28 @@ public class EventCloudUsageTest implements Serializable {
         final SubscribeProxy subscribeProxy =
                 proxyFactory.createSubscribeProxy();
 
-        // Once a subscription is sent to an Event Cloud for indexation,
-        // a SubscriptionId is returned to have the possibility to unsubscribe
-        SubscriptionId id =
-                subscribeProxy.subscribe(
-                        "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
-                        new BindingNotificationListener() {
-                            private static final long serialVersionUID = 1L;
+        // Once a subscription is created, a SubscriptionId can be retrived from
+        // the subscription object to have the possibility to perform an
+        // unsubscribe operation
+        Subscription subscription =
+                new Subscription(
+                        "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }");
+        SubscriptionId id = subscription.getId();
 
-                            @Override
-                            public void onNotification(SubscriptionId id,
-                                                       Binding solution) {
-                                synchronized (bindingsReceived) {
-                                    bindingsReceived.add(solution);
-                                    bindingsReceived.notifyAll();
-                                }
-                                log.info("Solution received:\n{}", solution);
-                            }
-                        });
+        subscribeProxy.subscribe(
+                subscription, new BindingNotificationListener() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void onNotification(SubscriptionId id,
+                                               Binding solution) {
+                        synchronized (bindingsReceived) {
+                            bindingsReceived.add(solution);
+                            bindingsReceived.notifyAll();
+                        }
+                        log.info("Solution received:\n{}", solution);
+                    }
+                });
         log.info("Subscription with id {} has been registered", id);
 
         // waits a little to make sure the subscription has been indexed

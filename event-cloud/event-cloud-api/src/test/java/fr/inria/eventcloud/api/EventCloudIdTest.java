@@ -20,7 +20,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import fr.inria.eventcloud.utils.LongLong;
 import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
@@ -32,9 +31,7 @@ public class EventCloudIdTest {
 
     @Test
     public void testFromUrl() {
-        long[] hashValue = MurmurHash.hash128("test");
-
-        EventCloudId id = new EventCloudId(new LongLong(hashValue));
+        EventCloudId id = new EventCloudId(MurmurHash.hash128("test"));
 
         Assert.assertEquals(id, EventCloudId.fromUrl(id.toUrl()));
     }

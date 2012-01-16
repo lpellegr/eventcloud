@@ -40,6 +40,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
@@ -84,6 +85,8 @@ public class PublishSubscribeBenchmarkTest {
 
     private final int publishersWaitInterval;
 
+    private final Stopwatch receiveExpectedEventsStopwatch;
+
     public PublishSubscribeBenchmarkTest(int nbPeers, int nbPublishers,
             int nbSubscribers, int expectedNbEvents,
             int publishersWaitInterval, Supplier<? extends Event> supplier,
@@ -99,6 +102,7 @@ public class PublishSubscribeBenchmarkTest {
         this.supplier = supplier;
         this.notificationListenerType = notificationListenerType;
         this.datastoreType = type;
+        this.receiveExpectedEventsStopwatch = new Stopwatch();
     }
 
     @Parameters
@@ -114,7 +118,7 @@ public class PublishSubscribeBenchmarkTest {
                         BindingNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
-                        1, 10, 1, 100, 120, new CompoundEventSupplier(5, 10),
+                        1, 10, 1, 100, 120, new CompoundEventSupplier(10),
                         CompoundEventNotificationListener.class,
                         DatastoreType.PERSISTENT}});
     }
@@ -125,7 +129,7 @@ public class PublishSubscribeBenchmarkTest {
                 "Benchmark with {} peer(s), {} publisher(s) and {} subscriber(s) using {}",
                 new Object[] {
                         this.nbPeers, this.nbPublishers, this.nbSubscribers,
-                        notificationListenerType.getSimpleName()});
+                        this.notificationListenerType.getSimpleName()});
 
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer(this.datastoreType);
@@ -141,9 +145,8 @@ public class PublishSubscribeBenchmarkTest {
         final List<SubscribeProxy> subscribeProxies =
                 this.createSubscribeProxies(proxyFactory, this.nbSubscribers);
 
-        final Stopwatch receiveExpectedEventsStopwatch = new Stopwatch();
-
         nbEventsReceivedBySubscriber.clear();
+        this.receiveExpectedEventsStopwatch.reset();
 
         Timer timer = new Timer(false);
 
@@ -161,21 +164,24 @@ public class PublishSubscribeBenchmarkTest {
                 }
             };
 
-            // ~10 ms seems to be the lower interval to use in order to publish
-            // events on an intel xeon E5520@2.27GHz with in-memory datastores
-            // with persistent datastore the lower interval seems to be ~120ms
             timer.schedule(timerTask, 0, this.publishersWaitInterval);
         }
 
         for (int i = 0; i < this.nbSubscribers; i++) {
             final SubscribeProxy subscribeProxy = subscribeProxies.get(i);
 
+            Subscription subscription =
+                    new Subscription(
+                            "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
             nbEventsReceivedBySubscriber.put(
-                    subscribeProxy.subscribe(
-                            "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
-                            createNotificationListener(notificationListenerType)),
-                    new AtomicLong());
+                    subscription.getId(), new AtomicLong());
+
+            subscribeProxy.subscribe(
+                    subscription,
+                    createNotificationListener(this.notificationListenerType));
         }
+
         receiveExpectedEventsStopwatch.start();
 
         // waits to receive at least the number of expected events
@@ -199,6 +205,9 @@ public class PublishSubscribeBenchmarkTest {
                         ((this.expectedNbEvents * 10e2) / receiveExpectedEventsStopwatch.elapsedMillis()),
                         this.nbPeers, this.nbPublishers, this.nbSubscribers,
                         notificationListenerType.getSimpleName()});
+
+        // System.err.println("DUMP:\n"
+        // + deployer.getRandomSemanticPeer(ecId).dump());
 
         deployer.undeploy();
     }
@@ -237,10 +246,6 @@ public class PublishSubscribeBenchmarkTest {
     }
 
     private boolean allEventsReceived() {
-        if (nbEventsReceivedBySubscriber.isEmpty()) {
-            return false;
-        }
-
         for (AtomicLong counter : nbEventsReceivedBySubscriber.values()) {
             if (counter.get() < this.expectedNbEvents) {
                 return false;
@@ -263,7 +268,14 @@ public class PublishSubscribeBenchmarkTest {
         }
     }
 
-    private static class CustomBindingListener extends
+    private static void handleNewEvent(SubscriptionId id) {
+        synchronized (nbEventsReceivedBySubscriber) {
+            nbEventsReceivedBySubscriber.get(id).incrementAndGet();
+            nbEventsReceivedBySubscriber.notifyAll();
+        }
+    }
+
+    private static final class CustomBindingListener extends
             BindingNotificationListener {
         private static final long serialVersionUID = 1L;
 
@@ -272,15 +284,11 @@ public class PublishSubscribeBenchmarkTest {
             log.trace(
                     "New binding received for subscription {}: {}", id,
                     solution);
-
-            synchronized (nbEventsReceivedBySubscriber) {
-                nbEventsReceivedBySubscriber.get(id).incrementAndGet();
-                nbEventsReceivedBySubscriber.notifyAll();
-            }
+            handleNewEvent(id);
         }
     }
 
-    private static class CustomEventListener extends
+    private static final class CustomEventListener extends
             CompoundEventNotificationListener {
         private static final long serialVersionUID = 1L;
 
@@ -289,25 +297,18 @@ public class PublishSubscribeBenchmarkTest {
             log.trace(
                     "New compound event received for subscription {}: {}", id,
                     solution);
-
-            synchronized (nbEventsReceivedBySubscriber) {
-                nbEventsReceivedBySubscriber.get(id).incrementAndGet();
-                nbEventsReceivedBySubscriber.notifyAll();
-            }
+            handleNewEvent(id);
         }
     }
 
-    private static class CustomSignalListener extends
+    private static final class CustomSignalListener extends
             SignalNotificationListener {
         private static final long serialVersionUID = 1L;
 
         @Override
         public void onNotification(SubscriptionId id) {
             log.trace("New signal received for subscription {}", id);
-            synchronized (nbEventsReceivedBySubscriber) {
-                nbEventsReceivedBySubscriber.get(id).incrementAndGet();
-                nbEventsReceivedBySubscriber.notifyAll();
-            }
+            handleNewEvent(id);
         }
     }
 

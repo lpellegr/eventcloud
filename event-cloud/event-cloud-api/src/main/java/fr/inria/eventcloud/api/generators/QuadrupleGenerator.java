@@ -34,20 +34,18 @@ import fr.inria.eventcloud.api.Quadruple;
  */
 public final class QuadrupleGenerator extends Generator {
 
-    private static final int DEFAULT_MIN_LENGTH = 10;
-
-    private static final int DEFAULT_MAX_LENGTH = 20;
+    private static final int DEFAULT_LENGTH = 10;
 
     private QuadrupleGenerator() {
 
     }
 
     public static Quadruple create() {
-        return create(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
+        return create(DEFAULT_LENGTH, DEFAULT_LENGTH);
     }
 
     public static Quadruple create(Node graphValue) {
-        return create(graphValue, DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
+        return create(graphValue, DEFAULT_LENGTH, DEFAULT_LENGTH);
     }
 
     public static Quadruple create(int exactLength) {
@@ -78,26 +76,26 @@ public final class QuadrupleGenerator extends Generator {
 
     public static Quadruple createWithLiteral() {
         return new Quadruple(
-                createUri(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH), createUri(
-                        DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH), createUri(
-                        DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH), createLiteral(
-                        DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH));
+                createUri(DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
+                        DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
+                        DEFAULT_LENGTH, DEFAULT_LENGTH), createLiteral(
+                        DEFAULT_LENGTH, DEFAULT_LENGTH));
     }
 
     public static Quadruple createWithLiteral(String literalValue) {
         return new Quadruple(
-                createUri(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH), createUri(
-                        DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH), createUri(
-                        DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH),
+                createUri(DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
+                        DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
+                        DEFAULT_LENGTH, DEFAULT_LENGTH),
                 createLiteral(literalValue));
     }
 
     public static Quadruple createWithoutLiteral() {
         return new Quadruple(
-                createUri(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH), createUri(
-                        DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH), createUri(
-                        DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH), createUri(
-                        DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH));
+                createUri(DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
+                        DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
+                        DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
+                        DEFAULT_LENGTH, DEFAULT_LENGTH));
     }
 
 }

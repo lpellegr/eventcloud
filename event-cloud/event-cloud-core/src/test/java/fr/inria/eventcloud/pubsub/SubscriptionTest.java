@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
@@ -36,10 +38,16 @@ public class SubscriptionTest {
 
     @Test
     public void testParseSubscription() {
+        String sparqlQuery =
+                "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?mail WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }";
+
         Subscription subscription =
                 new Subscription(
-                        "rmi://oops:1099",
-                        "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?mail WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }");
+                        SubscriptionId.random(),
+                        SubscriptionId.random(),
+                        SubscriptionId.random(),
+                        System.currentTimeMillis(), sparqlQuery,
+                        "rmi://oops:1099", NotificationListenerType.UNKNOWN);
 
         Collection<Quadruple> quads = subscription.toQuadruples();
 
@@ -57,12 +65,13 @@ public class SubscriptionTest {
 
         Collection<Quadruple> newQuads =
                 deserializedSubscription.toQuadruples();
+
         for (Quadruple quad : newQuads) {
             Assert.assertTrue(quads.contains(quad));
         }
 
         Assert.assertEquals(quads.size(), newQuads.size());
-        
+
         datastore.close();
     }
 
