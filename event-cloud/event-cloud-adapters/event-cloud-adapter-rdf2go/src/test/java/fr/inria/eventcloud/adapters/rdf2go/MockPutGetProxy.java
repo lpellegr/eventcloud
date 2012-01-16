@@ -255,4 +255,20 @@ public class MockPutGetProxy implements PutGetApi {
         return new SparqlSelectResponse(0, 0, 0, 0, result);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long count(QuadruplePattern quadPattern) {
+        return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long count(String sparqlQuery) {
+        return 0;
+    }
+
 }
