@@ -30,21 +30,20 @@ import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
-import org.openjena.atlas.lib.Sink;
-import org.openjena.riot.RiotReader;
-import org.openjena.riot.lang.LangRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.sparql.core.Quad;
 import com.petalslink.wsn.service.wsnproducer.NotificationProducer;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
+import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
+import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
 import fr.inria.eventcloud.webservices.services.SubscriberService;
 
@@ -122,9 +121,6 @@ public class PubSubTest {
         // fireman_event:cardiacRythmFiremanTopic
         subscribeClient.invoke("Subscribe", subscribeRequest);
 
-        // Waits a little to be sure that the subscription has been indexed
-        Thread.sleep(2000);
-
         // Creates the notify request
         Notify notifyRequest = new Notify();
         Collection<CompoundEvent> events = new Collection<CompoundEvent>();
@@ -148,29 +144,14 @@ public class PubSubTest {
     private static Collection<Quadruple> read(String file) {
         final Collection<Quadruple> quadruples = new Collection<Quadruple>();
 
-        Sink<Quad> sink = new Sink<Quad>() {
-            @Override
-            public void send(final Quad quad) {
-                quadruples.add(new Quadruple(
-                        quad.getGraph(), quad.getSubject(),
-                        quad.getPredicate(), quad.getObject()));
-            }
-
-            @Override
-            public void close() {
-            }
-
-            @Override
-            public void flush() {
-            }
-
-        };
-
-        LangRIOT parser =
-                RiotReader.createParserTriG(inputStreamFrom(file), null, sink);
-
-        parser.parse();
-        sink.close();
+        RdfParser.parse(
+                inputStreamFrom(file), SerializationFormat.TriG,
+                new Callback<Quadruple>() {
+                    @Override
+                    public void execute(Quadruple quadruple) {
+                        quadruples.add(quadruple);
+                    }
+                });
 
         return quadruples;
     }

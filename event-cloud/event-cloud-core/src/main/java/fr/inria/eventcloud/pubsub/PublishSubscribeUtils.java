@@ -26,16 +26,23 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.mutable.MutableObject;
+import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.openjena.riot.out.NodeFmtLib;
 import org.openjena.riot.out.OutputLangUtils;
 import org.openjena.riot.tokens.Tokenizer;
 import org.openjena.riot.tokens.TokenizerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.query.Query;
@@ -61,9 +68,15 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
+import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.overlay.SemanticPeer;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.utils.LongLong;
 
@@ -73,6 +86,9 @@ import fr.inria.eventcloud.utils.LongLong;
  * @author lpellegr
  */
 public final class PublishSubscribeUtils {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(PublishSubscribeUtils.class);
 
     private PublishSubscribeUtils() {
 
@@ -122,7 +138,6 @@ public final class PublishSubscribeUtils {
                 createQuadrupleHashUrl(quadrupleMatching), subscriptionIdUrl,
                 PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
                 Node.createLiteral(new String(baos.toByteArray())));
-
     }
 
     /**
@@ -335,6 +350,7 @@ public final class PublishSubscribeUtils {
      * 
      * @param subscriptionIdUrl
      *            the subscription id url to use.
+     * 
      * @return the {@link SubscriptionId} which has been extracted from the
      *         specified {@code subscriptionIdUrl}.
      */
@@ -346,7 +362,7 @@ public final class PublishSubscribeUtils {
         }
 
         return SubscriptionId.parseFrom(subscriptionIdUrl.getURI().substring(
-                subscriptionIdUrl.getURI().lastIndexOf("/") + 1));
+                subscriptionIdUrl.getURI().lastIndexOf(':') + 1));
     }
 
     /**
@@ -434,6 +450,208 @@ public final class PublishSubscribeUtils {
         }, Algebra.compile(query));
 
         return OpAsQuery.asQuery(op).toString();
+    }
+
+    /**
+     * Rewrites the subscription which is matched if some sub-subscriptions are
+     * available or notify the subscriber about the solution if the subscription
+     * cannot be rewritten.
+     * 
+     * @param semanticOverlay
+     *            the overlay used to access to the datastore and to send
+     *            requests.
+     * @param subscription
+     *            the subscription which is matched.
+     * @param quadruple
+     *            the quadruple matching the subscription.
+     */
+    public static void rewriteSubscriptionOrNotifySender(final SemanticCanOverlay semanticOverlay,
+                                                         final Subscription subscription,
+                                                         final Quadruple quadruple) {
+        if (subscription.getSubSubscriptions().length == 1) {
+            log.debug(
+                    "{} matches a subscription which cannot be rewritten, a notification will be delivered",
+                    quadruple);
+
+            PublishSubscribeUtils.notifySubscriberAboutSolution(
+                    semanticOverlay, subscription, quadruple);
+        } else {
+            PublishSubscribeUtils.rewriteAndIndexSubscription(
+                    semanticOverlay, subscription, quadruple);
+        }
+    }
+
+    /**
+     * Notifies the subscriber associated to the specified subscription about a
+     * solution that matches his subscription.
+     * 
+     * @param overlay
+     *            the overlay used to send requests.
+     * @param subscription
+     *            the subscription which is matched.
+     * @param quadruple
+     *            the quadruple that matches the subscription.
+     */
+    private static void notifySubscriberAboutSolution(final CanOverlay overlay,
+                                                      final Subscription subscription,
+                                                      final Quadruple quadruple) {
+        try {
+            final SubscribeProxy subscriber = subscription.getSubscriberProxy();
+
+            final NotificationId notificationId =
+                    new NotificationId(subscription.getOriginalId());
+
+            final Notification n =
+                    new Notification(
+                            notificationId,
+                            PAActiveObject.getUrl(overlay.getStub()),
+                            createBindingSolution(subscription, quadruple));
+
+            // FIXME issue #24
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    subscriber.receive(n);
+                }
+            }).start();
+
+            if (subscription.getType() == NotificationListenerType.BINDING) {
+                // broadcasts a message to all the stubs contained by
+                // the subscription to say to these peers to send their
+                // sub-solutions to the subscriber
+                for (final Subscription.Stub stub : subscription.getStubs()) {
+                    final SemanticPeer peerStub =
+                            ((SemanticCanOverlay) overlay).findPeerStub(stub.peerUrl);
+
+                    if (peerStub != null) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                peerStub.receive(new RetrieveSubSolutionOperation(
+                                        notificationId, stub.quadrupleHash));
+                            }
+                        }).start();
+                    } else {
+                        log.error(
+                                "Error while retrieving peer stub for url: {}",
+                                stub.peerUrl);
+                    }
+                }
+            }
+        } catch (ExecutionException e) {
+            log.warn(
+                    "Notification cannot be sent because no SubscribeProxy found under URL: "
+                            + subscription.getSubscriberUrl(), e);
+
+            // TODO: this could be due to a subscriber which has left
+            // without unsubscribing. In that case we can remove the
+            // subscription information associated to this subscriber
+            // and also send a message
+        }
+    }
+
+    /**
+     * Creates a binding containing variables and their solution according to
+     * the quadruple which is matched and the type of notification listener used
+     * for the specified subscription.
+     * 
+     * @param subscription
+     *            the subscription which is partially matched by the given
+     *            quadruple.
+     * @param quadruple
+     *            the quadruple matching the first subsubscription of the
+     *            specified subscription.
+     * 
+     * @return a binding containing variables and their solution according to
+     *         the quadruple which is matched and the type of notification
+     *         listener used for the specified subscription.
+     */
+    private static Binding createBindingSolution(final Subscription subscription,
+                                                 Quadruple quadruple) {
+        Binding binding = null;
+
+        // for a signal notification listener no binding are returned
+        if (subscription.getType() == NotificationListenerType.BINDING) {
+            // only the solutions for the result variables from the
+            // original SPARQL query have to be returned to the
+            // subscriber
+            binding =
+                    PublishSubscribeUtils.filter(
+                            quadruple,
+                            subscription.getResultVars(),
+                            subscription.getSubSubscriptions()[0].getAtomicQuery());
+        } else if (subscription.getType() == NotificationListenerType.COMPOUND_EVENT) {
+            // only the graph value has to be returned to the subscriber
+            binding =
+                    BindingFactory.binding(
+                            Var.alloc("g"), quadruple.createMetaGraphNode());
+        }
+
+        return binding;
+    }
+
+    /**
+     * Rewrites a subscription which is matched by the specified quadruple and
+     * indexes it. Also, if the given subscription is associated to a binding
+     * notification listener, a meta-quadruple containing the meta-information
+     * to retrieve later is created.
+     * 
+     * @param overlay
+     *            the overlay used to access to the datastore and to send
+     *            requests.
+     * @param subscription
+     *            the subscription which is matched.
+     * @param quadrupleMatching
+     *            the quadruple that matches the specified subscription.
+     */
+    private static void rewriteAndIndexSubscription(final SemanticCanOverlay overlay,
+                                                    final Subscription subscription,
+                                                    final Quadruple quadrupleMatching) {
+        TransactionalTdbDatastore datastore =
+                (TransactionalTdbDatastore) overlay.getDatastore();
+
+        TransactionalDatasetGraph txnGraph;
+        if (subscription.getType() == NotificationListenerType.BINDING) {
+            // stores a quadruple that contains the information about the
+            // subscription that is matched and the quadruple that matches the
+            // subscription. This is useful to create the notification later.
+            // The matching quadruple is not sent directly to the next peers
+            // because the quadruple value will be stored in memory on several
+            // peer. Moreover, there is no limit about the size of a quadruple.
+            Quadruple metaQuad =
+                    PublishSubscribeUtils.createMetaQuadruple(
+                            quadrupleMatching,
+                            PublishSubscribeUtils.createSubscriptionIdUrl(subscription.getId()),
+                            Node.createLiteral(
+                                    subscription.getId().toString(),
+                                    XSDDatatype.XSDlong));
+
+            txnGraph = datastore.begin(AccessMode.WRITE);
+            txnGraph.add(metaQuad);
+            txnGraph.commit();
+            txnGraph.close();
+        }
+
+        // a subscription with more that one sub subscription (that matches the
+        // quadruple which has been inserted) has been detected. Then we find
+        // the subscription object associated to the subscriptionId that is
+        // matched and we rewrite the subscription according to the quadruple
+        // that matches the first sub-subscription.
+        Subscription rewrittenSubscription =
+                SubscriptionRewriter.rewrite(subscription, quadrupleMatching);
+
+        // stores the stub URL of the current peer in order to
+        // have the possibility to retrieve the sub-solution later
+        rewrittenSubscription.addStub(new Subscription.Stub(
+                PAActiveObject.getUrl(overlay.getStub()),
+                quadrupleMatching.hashValue()));
+
+        try {
+            overlay.getStub().send(
+                    new IndexSubscriptionRequest(rewrittenSubscription));
+        } catch (DispatchException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -29,6 +29,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
@@ -97,22 +98,34 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
      */
     @Override
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                                                             AnycastRequest request,
-                                                                             QuadruplePattern quadruplePattern) {
+                                                                AnycastRequest request,
+                                                                QuadruplePattern quadruplePattern) {
         Collection<LongLong> hashValues = this.hashValuesReceived.getValue();
         Collection<Quadruple> result = new Collection<Quadruple>();
 
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
-        for (Quadruple quadruple : txnGraph.find(
-                Node.createURI(this.metaGraphValue.getValue()), Node.ANY,
-                Node.ANY, Node.ANY)) {
+
+        // all events which belong to a compound event share the same graph
+        // value and the same meta information (e.g. publication time, source)
+        QuadrupleIterator iterator =
+                txnGraph.find(
+                        Node.createURI(this.metaGraphValue.getValue()),
+                        Node.ANY, Node.ANY, Node.ANY);
+
+        for (Quadruple quadruple : iterator) {
             if (quadruple.getPublicationTime() != -1
                     && !hashValues.contains(quadruple.hashValue())) {
                 result.add(quadruple);
             }
         }
+
         txnGraph.close();
+
+        log.info(
+                "Retrieved {} new event(s) on {} for meta graph node {}",
+                new Object[] {
+                        result.size(), overlay, this.metaGraphValue.getValue()});
 
         return result;
     }

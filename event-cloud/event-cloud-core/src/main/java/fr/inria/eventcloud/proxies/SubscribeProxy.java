@@ -41,7 +41,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * {@link SubscribeProxy#reconstructCompoundEvent(SubscriptionId, Node)} and
  * also by an using an {@link CompoundEventNotificationListener} when you
  * subscribe with
- * {@link #subscribe(String, fr.inria.eventcloud.api.listeners.NotificationListener)}
+ * {@link #subscribe(fr.inria.eventcloud.api.Subscription, fr.inria.eventcloud.api.listeners.NotificationListener)}
  * . The reconstruction is an heavy operation that may be used carefully.
  * Indeed, to reconstruct an {@link CompoundEvent} from its identifier, a
  * {@link QuadruplePattern} query must be sent to all the peers matching the

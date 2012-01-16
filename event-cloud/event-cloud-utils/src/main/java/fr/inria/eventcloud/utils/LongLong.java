@@ -17,7 +17,10 @@
 package fr.inria.eventcloud.utils;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * This class is used to wrap a 128 bits value (which is an array composed of 2
@@ -31,18 +34,21 @@ public class LongLong implements Comparable<LongLong>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final char SEPARATOR = 's';
-
     private final long[] value;
 
-    public LongLong(long[] longLongValue) {
-        if (longLongValue.length != 2) {
-            throw new IllegalArgumentException(
-                    "Expected 128 bits value but was: "
-                            + (2 << (4 + longLongValue.length)) + " bits");
-        }
-
-        this.value = longLongValue;
+    /**
+     * Constructs a LongLong from the two specified long values.
+     * 
+     * @param mostSigBits
+     *            The most significant bits of the {@code LongLong}.
+     * 
+     * @param leastSigBits
+     *            The least significant bits of the {@code LongLong}.
+     */
+    public LongLong(long mostSigBits, long leastSigBits) {
+        this.value = new long[2];
+        this.value[0] = mostSigBits;
+        this.value[1] = leastSigBits;
     }
 
     /**
@@ -87,30 +93,25 @@ public class LongLong implements Comparable<LongLong>, Serializable {
      */
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < this.value.length; i++) {
-            result.append(this.value[i]);
-            if (i < this.value.length - 1) {
-                result.append(SEPARATOR);
-            }
-        }
-        return result.toString();
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
+        buffer.putLong(this.value[0]);
+        buffer.putLong(this.value[1]);
+
+        return Base64.encodeBase64URLSafeString(buffer.array());
     }
 
-    public static LongLong fromString(String longLongValue) {
-        String[] values = longLongValue.split(Character.toString(SEPARATOR));
-        long[] result = new long[values.length];
-
-        if (values.length != 2) {
-            throw new IllegalArgumentException(longLongValue
-                    + " is not a LongLong");
+    public static LongLong fromString(String base64uuid) {
+        if (base64uuid.length() != 22) {
+            throw new IllegalArgumentException(
+                    "Not a valid Base64 encoded LongLong");
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(Base64.decodeBase64(base64uuid));
+        if (buffer.capacity() != 16) {
+            throw new IllegalArgumentException(
+                    "Not a valid Base64 encoded LongLong");
         }
 
-        for (int i = 0; i < values.length; i++) {
-            result[i] = Long.parseLong(values[i]);
-        }
-
-        return new LongLong(result);
+        return new LongLong(buffer.getLong(), buffer.getLong());
     }
 
 }

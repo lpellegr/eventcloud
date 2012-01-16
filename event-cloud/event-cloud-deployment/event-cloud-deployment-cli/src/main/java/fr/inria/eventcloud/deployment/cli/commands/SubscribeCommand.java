@@ -22,6 +22,7 @@ import com.beust.jcommander.Parameter;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.EventCloud;
+import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
@@ -35,7 +36,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  */
 public class SubscribeCommand extends Command<SubscribeProxy> {
 
-    @Parameter(names = {"-query"}, description = "The SPARQL query to use for the subscription", required = true)
+    @Parameter(names = {"-q", "--sparql-query"}, description = "The SPARQL query to use for the subscription", required = true)
     private String sparqlQuery;
 
     public SubscribeCommand() {
@@ -49,25 +50,23 @@ public class SubscribeCommand extends Command<SubscribeProxy> {
     @Override
     public void execute(final CommandLineReader<SubscribeProxy> reader,
                         SubscribeProxy proxy) {
-        SubscriptionId id =
-                proxy.subscribe(
-                        this.sparqlQuery, new BindingNotificationListener() {
-                            private static final long serialVersionUID = 1L;
+        Subscription subscription = new Subscription(this.sparqlQuery);
 
-                            @Override
-                            public void onNotification(SubscriptionId id,
-                                                       Binding solution) {
-                                try {
-                                    reader.getReader().println(
-                                            solution.toString());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
+        proxy.subscribe(subscription, new BindingNotificationListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onNotification(SubscriptionId id, Binding solution) {
+                try {
+                    reader.getReader().println(solution.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         System.out.println("Subscription for query '" + this.sparqlQuery
-                + "' has been registered with id " + id);
+                + "' has been registered with id " + subscription.getId());
     }
 
 }

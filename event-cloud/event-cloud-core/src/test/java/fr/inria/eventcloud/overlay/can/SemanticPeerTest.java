@@ -336,7 +336,6 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         Assert.assertTrue(
                 "Latency is not greater than 0", response.getLatency() > 0);
-        // TODO: use System.nanoTime?
         // Assert.assertTrue(
         // "The time to query the datastore is not greater than 0",
         // response.getQueryDatastoreTime() > 0);
