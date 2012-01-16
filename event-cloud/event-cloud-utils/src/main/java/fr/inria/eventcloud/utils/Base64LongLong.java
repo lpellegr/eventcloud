@@ -22,29 +22,49 @@ import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
 
 /**
+ * Utility class that defines methods to encode/decode two long as a String
+ * encoded by using base 64 url safe.
  * 
  * @author lpellegr
  */
-public class Base64UUID {
+public class Base64LongLong {
 
     public static String encode(UUID uuid) {
+        return encode(
+                uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+    }
+
+    public static String encode(long mostSigBits, long leastSigBits) {
         ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
-        buffer.putLong(uuid.getMostSignificantBits());
-        buffer.putLong(uuid.getLeastSignificantBits());
+        buffer.putLong(mostSigBits);
+        buffer.putLong(leastSigBits);
         return Base64.encodeBase64URLSafeString(buffer.array());
     }
 
-    public static UUID decode(String base64uuid) {
-        if (base64uuid.length() != 22) {
+    public static UUID decodeUUID(String longlong) {
+        ByteBuffer buffer = decode(longlong);
+        return new UUID(buffer.getLong(), buffer.getLong());
+    }
+
+    public static LongLong decodeLongLong(String longlong) {
+        ByteBuffer buffer = decode(longlong);
+        return new LongLong(buffer.getLong(), buffer.getLong());
+    }
+
+    private static ByteBuffer decode(String longlong) {
+        if (longlong.length() != 22) {
             throw new IllegalArgumentException(
                     "Not a valid Base64 encoded UUID");
         }
-        ByteBuffer buffer = ByteBuffer.wrap(Base64.decodeBase64(base64uuid));
+
+        ByteBuffer buffer = ByteBuffer.wrap(Base64.decodeBase64(longlong));
+
         if (buffer.capacity() != 16) {
             throw new IllegalArgumentException(
                     "Not a valid Base64 encoded UUID");
         }
-        return new UUID(buffer.getLong(), buffer.getLong());
+
+        return buffer;
     }
 
 }

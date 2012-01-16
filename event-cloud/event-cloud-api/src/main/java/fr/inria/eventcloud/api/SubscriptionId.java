@@ -16,96 +16,45 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;
 
-import fr.inria.eventcloud.utils.Base64UUID;
+import fr.inria.eventcloud.utils.Base64LongLong;
+import fr.inria.eventcloud.utils.UniqueId;
 
 /**
  * Uniquely identify a subscription which has been submitted on an eventcloud.
  * 
  * @author lpellegr
  */
-public class SubscriptionId implements Serializable {
+public class SubscriptionId extends UniqueId {
 
     private static final long serialVersionUID = 1L;
 
-    private final String value;
-
     /**
-     * Constructs a subscription identifier from the specified value.
-     * 
-     * @param value
-     *            the value to use in order to create the identifier.
+     * Creates a unique subscription id .
      */
-    private SubscriptionId(String value) {
-        this.value = value;
+    public SubscriptionId() {
+        super();
+    }
+
+    private SubscriptionId(UUID uuid) {
+        super(uuid);
     }
 
     /**
-     * Creates a new Jena {@link Node_Literal} representing the current
-     * subscription identifier.
+     * Creates a Jena {@link Node_Literal} representing the subscription id.
      * 
-     * @return a new Jena {@link Node_Literal} representing the current
-     *         subscription identifier.
+     * @return a Jena {@link Node_Literal} representing the subscription id.
      */
     public Node toJenaNode() {
-        return Node.createLiteral(this.value.toString());
+        return Node.createLiteral(super.toString());
     }
 
-    /**
-     * Parses the string argument as a SubscriptionId.
-     * 
-     * @param base64uuid
-     *            a <code>String</code> containing the
-     *            <code>SubscriptionId</code> representation to be parsed.
-     * 
-     * @return the <code>SubscriptionId</code> represented by the argument.
-     */
-    public static final SubscriptionId parseFrom(String base64uuid) {
-        return new SubscriptionId(base64uuid);
-    }
-
-    /**
-     * Generates a new subscription identifier randomly by using
-     * {@link UUID#randomUUID()}.
-     * 
-     * @return a new subscription identifier generated randomly by using
-     *         {@link UUID#randomUUID()}.
-     */
-    public static final SubscriptionId random() {
-        return new SubscriptionId(Base64UUID.encode(UUID.randomUUID()));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof SubscriptionId) {
-            return this.value.equals(((SubscriptionId) obj).value);
-        }
-
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return this.value.hashCode();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return this.value.toString();
+    public static SubscriptionId parseSubscriptionId(String subscriptionId) {
+        return new SubscriptionId(Base64LongLong.decodeUUID(subscriptionId));
     }
 
 }

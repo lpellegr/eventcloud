@@ -179,7 +179,7 @@ public final class PublishSubscribeUtils {
                 Binding binding = result.nextBinding();
 
                 SubscriptionId subscriptionId =
-                        SubscriptionId.parseFrom(binding.get(
+                        SubscriptionId.parseSubscriptionId(binding.get(
                                 Var.alloc("subscriptionId"))
                                 .getLiteralLexicalForm());
                 // SubscriptionId subSubscriptionId =
@@ -226,7 +226,7 @@ public final class PublishSubscribeUtils {
                 new Quadruple(tokenizer.next().asNode(), tokenizer.next()
                         .asNode(), tokenizer.next().asNode(), tokenizer.next()
                         .asNode()),
-                SubscriptionId.parseFrom(subSubscriptionId.getLiteralLexicalForm()));
+                SubscriptionId.parseSubscriptionId(subSubscriptionId.getLiteralLexicalForm()));
     }
 
     /**
@@ -361,7 +361,7 @@ public final class PublishSubscribeUtils {
                     + subscriptionIdUrl);
         }
 
-        return SubscriptionId.parseFrom(subscriptionIdUrl.getURI().substring(
+        return SubscriptionId.parseSubscriptionId(subscriptionIdUrl.getURI().substring(
                 subscriptionIdUrl.getURI().lastIndexOf(':') + 1));
     }
 

@@ -68,7 +68,7 @@ public class Subsubscription implements Rdfable {
         this.parentId = parentId;
         this.atomicQuery = atomicQuery;
         this.index = index;
-        this.id = SubscriptionId.random();
+        this.id = new SubscriptionId();
     }
 
     private Subsubscription(SubscriptionId parentId, SubscriptionId id,

@@ -158,7 +158,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             // the identifier of the sub subscription that is matched is
             // available from the result of the query which has been executed
             SubscriptionId subscriptionId =
-                    SubscriptionId.parseFrom(pair.getFirst()
+                    SubscriptionId.parseSubscriptionId(pair.getFirst()
                             .getLiteralLexicalForm());
 
             Subscription subscription =

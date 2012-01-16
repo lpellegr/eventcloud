@@ -42,7 +42,7 @@ public final class Subscription implements Serializable {
     public Subscription(String sparqlQuery) {
         // TODO: check SPARQL query syntax
 
-        this.id = SubscriptionId.random();
+        this.id = new SubscriptionId();
         this.creationTime = System.currentTimeMillis();
         this.sparqlQuery = sparqlQuery;
     }

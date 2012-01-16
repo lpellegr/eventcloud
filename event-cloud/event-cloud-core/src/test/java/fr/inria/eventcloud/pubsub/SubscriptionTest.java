@@ -43,11 +43,10 @@ public class SubscriptionTest {
 
         Subscription subscription =
                 new Subscription(
-                        SubscriptionId.random(),
-                        SubscriptionId.random(),
-                        SubscriptionId.random(),
-                        System.currentTimeMillis(), sparqlQuery,
-                        "rmi://oops:1099", NotificationListenerType.UNKNOWN);
+                        new SubscriptionId(), new SubscriptionId(),
+                        new SubscriptionId(), System.currentTimeMillis(),
+                        sparqlQuery, "rmi://oops:1099",
+                        NotificationListenerType.UNKNOWN);
 
         Collection<Quadruple> quads = subscription.toQuadruples();
 
