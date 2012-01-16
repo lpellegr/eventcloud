@@ -119,6 +119,28 @@ public interface PutGetApi {
     public Collection<Quadruple> delete(QuadruplePattern quadPattern);
 
     /**
+     * Returns the number of quadruples that match the specified
+     * {@code quadPattern}.
+     * 
+     * @param quadPattern
+     *            the quadruple pattern to use.
+     * 
+     * @return the number of quadruples that match the specified
+     *         {@code quadPattern}.
+     */
+    public long count(QuadruplePattern quadPattern);
+
+    /**
+     * Returns the number of solutions for the specified {@code sparqlQuery}.
+     * 
+     * @param sparqlQuery
+     *            the sparqlQuery to execute.
+     * 
+     * @return the number of solutions for the specified {@code sparqlQuery}.
+     */
+    public long count(String sparqlQuery);
+
+    /**
      * Finds all the quadruples that match the specified quadruple pattern.
      * 
      * @param quadPattern
@@ -128,7 +150,7 @@ public interface PutGetApi {
      *         specified.
      */
     public Collection<Quadruple> find(QuadruplePattern quadPattern);
-    
+
     /**
      * Executes on the Event-Cloud the specified SPARQL query. This SPARQL query
      * can have any query form.

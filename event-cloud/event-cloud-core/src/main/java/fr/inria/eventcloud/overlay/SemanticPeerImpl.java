@@ -31,6 +31,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
@@ -41,6 +43,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
@@ -225,6 +228,49 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long count(QuadruplePattern quadPattern) {
+        // TODO: provide an optimized version by retrieving only the number of
+        // solutions from each peer
+        return this.find(quadPattern).size();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long count(String sparqlQuery) {
+        SparqlResponse<?> response = this.executeSparqlQuery(sparqlQuery);
+
+        if (response instanceof SparqlAskResponse) {
+            return ((SparqlAskResponse) response).getResult()
+                    ? 1 : 0;
+        } else if (response instanceof SparqlConstructResponse) {
+            StmtIterator it =
+                    ((SparqlConstructResponse) response).getResult()
+                            .listStatements();
+            long result = 0;
+            while (it.hasNext()) {
+                it.next();
+                result++;
+            }
+            return result;
+        } else if (response instanceof SparqlSelectResponse) {
+            ResultSetWrapper it = ((SparqlSelectResponse) response).getResult();
+            long result = 0;
+            while (it.hasNext()) {
+                it.nextBinding();
+                result++;
+            }
+            return result;
+        }
+
+        return -1;
     }
 
     /**
