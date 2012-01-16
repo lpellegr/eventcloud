@@ -17,10 +17,7 @@
 package fr.inria.eventcloud.utils;
 
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * This class is used to wrap a 128 bits value (which is an array composed of 2
@@ -93,25 +90,11 @@ public class LongLong implements Comparable<LongLong>, Serializable {
      */
     @Override
     public String toString() {
-        ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
-        buffer.putLong(this.value[0]);
-        buffer.putLong(this.value[1]);
-
-        return Base64.encodeBase64URLSafeString(buffer.array());
+        return Base64LongLong.encode(this.value[0], this.value[1]);
     }
 
-    public static LongLong fromString(String base64uuid) {
-        if (base64uuid.length() != 22) {
-            throw new IllegalArgumentException(
-                    "Not a valid Base64 encoded LongLong");
-        }
-        ByteBuffer buffer = ByteBuffer.wrap(Base64.decodeBase64(base64uuid));
-        if (buffer.capacity() != 16) {
-            throw new IllegalArgumentException(
-                    "Not a valid Base64 encoded LongLong");
-        }
-
-        return new LongLong(buffer.getLong(), buffer.getLong());
+    public static LongLong parseLongLong(String longlong) {
+        return Base64LongLong.decodeLongLong(longlong);
     }
 
 }

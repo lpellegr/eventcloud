@@ -136,7 +136,7 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
     @Override
     public SubscribeProxy createProxy() {
         return ProxyFactory.getInstance(
-                super.registryUrl, EventCloudId.fromUrl(super.eventCloudIdUrl))
+                super.registryUrl, EventCloudId.parseEventCloudIdUrl(super.eventCloudIdUrl))
                 .createSubscribeProxy();
     }
 

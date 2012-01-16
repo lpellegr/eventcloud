@@ -111,7 +111,7 @@ public final class SubscriptionRewriter {
         return new Subscription(
                 subscription.getOriginalId(),
                 subscription.getId(),
-                SubscriptionId.random(),
+                new SubscriptionId(),
                 subscription.getIndexationTime(),
                 OpAsQuery.asQuery(
                         Transformer.transform(

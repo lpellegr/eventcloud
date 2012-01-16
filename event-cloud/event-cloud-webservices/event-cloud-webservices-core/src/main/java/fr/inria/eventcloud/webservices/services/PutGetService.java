@@ -145,7 +145,7 @@ public class PutGetService extends EventCloudService<PutGetProxy> implements
     @Override
     public PutGetProxy createProxy() {
         return ProxyFactory.getInstance(
-                super.registryUrl, EventCloudId.fromUrl(super.eventCloudIdUrl))
+                super.registryUrl, EventCloudId.parseEventCloudIdUrl(super.eventCloudIdUrl))
                 .createPutGetProxy();
     }
 

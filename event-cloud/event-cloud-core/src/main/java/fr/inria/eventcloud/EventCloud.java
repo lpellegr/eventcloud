@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -34,7 +33,6 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
-import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
  * EventCloud is an object that is used to model an EventCloud and to register
@@ -66,15 +64,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
     private EventCloud(String registryUrl, EventCloudDeployer deployer,
             Collection<UnalterableElaProperty> elaProperties, int nbTrackers,
             int nbPeers) {
-        this.id =
-                new EventCloudId(
-                        MurmurHash.hash128(
-                                registryUrl.toString(), deployer.toString(),
-                                elaProperties.toString(),
-                                Integer.toString(nbTrackers),
-                                Integer.toString(nbPeers), UUID.randomUUID()
-                                        .toString()));
-
+        this.id = new EventCloudId();
         this.creationTime = System.currentTimeMillis();
         this.elaProperties = elaProperties;
         this.deployer = deployer;

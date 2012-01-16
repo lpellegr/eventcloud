@@ -101,7 +101,7 @@ public class UnicodeUtil {
             codePtArray.add(codePt);
         }
 
-        return (codePtArray);
+        return codePtArray;
     }
 
 }

@@ -191,7 +191,7 @@ public class Subscription implements Rdfable, Serializable {
         SubscriptionId parentId = null;
         if (basicInfo.get(SUBSCRIPTION_PARENT_ID_PROPERTY) != null) {
             parentId =
-                    SubscriptionId.parseFrom(basicInfo.get(
+                    SubscriptionId.parseSubscriptionId(basicInfo.get(
                             SUBSCRIPTION_PARENT_ID_PROPERTY)
                             .getLiteralLexicalForm());
         }
@@ -199,7 +199,7 @@ public class Subscription implements Rdfable, Serializable {
         SubscriptionId originalId = null;
         if (basicInfo.get(SUBSCRIPTION_ORIGINAL_ID_PROPERTY) != null) {
             originalId =
-                    SubscriptionId.parseFrom(basicInfo.get(
+                    SubscriptionId.parseSubscriptionId(basicInfo.get(
                             SUBSCRIPTION_ORIGINAL_ID_PROPERTY)
                             .getLiteralLexicalForm());
         }
@@ -208,7 +208,7 @@ public class Subscription implements Rdfable, Serializable {
                 new Subscription(
                         originalId,
                         parentId,
-                        SubscriptionId.parseFrom(basicInfo.get(
+                        SubscriptionId.parseSubscriptionId(basicInfo.get(
                                 SUBSCRIPTION_ID_PROPERTY)
                                 .getLiteralLexicalForm()),
                         DatatypeConverter.parseDateTime(
@@ -233,7 +233,7 @@ public class Subscription implements Rdfable, Serializable {
         for (String stub : stubs) {
             String[] parsedStub = stub.split(" ");
             subscription.addStub(new Stub(
-                    parsedStub[1], LongLong.fromString(parsedStub[0])));
+                    parsedStub[1], LongLong.parseLongLong(parsedStub[0])));
         }
 
         // recreates the sub-subscriptions
@@ -243,10 +243,10 @@ public class Subscription implements Rdfable, Serializable {
         for (int i = 0; i < subSubscriptionsId.size(); i++) {
             Subsubscription s =
                     Subsubscription.parseFrom(
-                            datastore, SubscriptionId.parseFrom(basicInfo.get(
+                            datastore, SubscriptionId.parseSubscriptionId(basicInfo.get(
                                     SUBSCRIPTION_ID_PROPERTY)
                                     .getLiteralLexicalForm()),
-                            SubscriptionId.parseFrom(subSubscriptionsId.get(i)));
+                            SubscriptionId.parseSubscriptionId(subSubscriptionsId.get(i)));
             subscription.subSubscriptions[s.getIndex()] = s;
         }
 

@@ -31,7 +31,7 @@ public class LongLongTest {
     public void fromStringTest() {
         LongLong longlong = new LongLong(1, 2);
         String stringLonglong = longlong.toString();
-        Assert.assertEquals(longlong, LongLong.fromString(stringLonglong));
+        Assert.assertEquals(longlong, LongLong.parseLongLong(stringLonglong));
     }
 
 }

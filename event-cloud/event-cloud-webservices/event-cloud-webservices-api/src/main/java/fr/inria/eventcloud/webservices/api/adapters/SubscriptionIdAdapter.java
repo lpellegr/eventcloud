@@ -55,7 +55,7 @@ public class SubscriptionIdAdapter extends
      */
     @Override
     public SubscriptionId unmarshal(SubscribeResponse id) throws Exception {
-        return SubscriptionId.random();
+        return new SubscriptionId();
     }
 
 }

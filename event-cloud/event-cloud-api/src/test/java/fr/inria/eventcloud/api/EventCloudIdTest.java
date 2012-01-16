@@ -20,8 +20,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import fr.inria.eventcloud.utils.MurmurHash;
-
 /**
  * Test cases associated to the {@link EventCloudId} class.
  * 
@@ -31,9 +29,8 @@ public class EventCloudIdTest {
 
     @Test
     public void testFromUrl() {
-        EventCloudId id = new EventCloudId(MurmurHash.hash128("test"));
-
-        Assert.assertEquals(id, EventCloudId.fromUrl(id.toUrl()));
+        EventCloudId id = new EventCloudId();
+        Assert.assertEquals(id, EventCloudId.parseEventCloudIdUrl(id.toUrl()));
     }
 
 }
