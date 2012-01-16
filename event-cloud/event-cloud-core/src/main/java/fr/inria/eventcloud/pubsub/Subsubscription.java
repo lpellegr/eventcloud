@@ -30,7 +30,6 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,9 +53,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
  * 
  * @author lpellegr
  */
-public class Subsubscription implements Rdfable, Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Subsubscription implements Rdfable {
 
     private final SubscriptionId parentId;
 

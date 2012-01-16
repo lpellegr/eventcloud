@@ -72,7 +72,8 @@ public abstract class SparqlResultWrapper<T> implements Serializable {
     @Override
     @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
-        return ((SparqlResultWrapper<T>) obj).equals(obj);
+        return obj instanceof SparqlResultWrapper
+                && this.object.equals(((SparqlResultWrapper<T>) obj).object);
     }
 
 }

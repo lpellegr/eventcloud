@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.api.properties;
 
+import java.io.Serializable;
+
 import fr.inria.eventcloud.api.Rdfable;
 
 /**
@@ -24,7 +26,9 @@ import fr.inria.eventcloud.api.Rdfable;
  * 
  * @author lpellegr
  */
-public abstract class ElaProperty implements Rdfable {
+public abstract class ElaProperty implements Serializable, Rdfable {
+
+    private static final long serialVersionUID = 1L;
 
     protected String name;
 

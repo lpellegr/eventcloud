@@ -83,7 +83,7 @@ public class Main {
                     filePath = filePath.replaceAll("%20", " ");
                 if (filePath != null) {
                     if ((filePath.indexOf('!') > 0)
-                            & (filePath.indexOf(".jar") > 0)) {
+                            && (filePath.indexOf(".jar") > 0)) {
                         String jarPath =
                                 filePath.substring(0, filePath.indexOf('!'))
                                         .substring(filePath.indexOf(':') + 1);

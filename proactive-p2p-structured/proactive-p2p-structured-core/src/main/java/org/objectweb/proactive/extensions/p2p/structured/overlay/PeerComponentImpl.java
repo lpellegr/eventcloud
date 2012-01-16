@@ -78,7 +78,7 @@ public class PeerComponentImpl extends PeerImpl implements Peer,
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PeerComponentImpl
+        return obj instanceof Peer
                 && this.getId().equals(((PeerComponentImpl) obj).getId());
     }
 

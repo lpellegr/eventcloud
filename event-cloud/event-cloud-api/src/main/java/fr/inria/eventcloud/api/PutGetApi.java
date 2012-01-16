@@ -128,7 +128,7 @@ public interface PutGetApi {
      *         specified.
      */
     public Collection<Quadruple> find(QuadruplePattern quadPattern);
-
+    
     /**
      * Executes on the Event-Cloud the specified SPARQL query. This SPARQL query
      * can have any query form.
