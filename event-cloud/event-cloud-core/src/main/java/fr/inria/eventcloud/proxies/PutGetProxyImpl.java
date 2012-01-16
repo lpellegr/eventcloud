@@ -125,6 +125,22 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      * {@inheritDoc}
      */
     @Override
+    public long count(QuadruplePattern quadPattern) {
+        return super.selectPeer().count(quadPattern);   
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long count(String sparqlQuery) {
+        return super.selectPeer().count(sparqlQuery);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Collection<Quadruple> find(QuadruplePattern quadPattern) {
         return super.selectPeer().find(quadPattern);
     }
