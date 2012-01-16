@@ -24,6 +24,7 @@ import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
@@ -79,37 +80,35 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
         // TODO: to translate the WS-Notification subscription to a SPARQL query
         // by using:
         // this.translator.translateSubscribeToSparqlQuery(subscription)
-        SubscriptionId id =
-                super.subscribe(
-                        subscribeInfos.getSparqlQuery(),
-                        new CompoundEventNotificationListener() {
-
-                            private static final long serialVersionUID = 1L;
-
-                            @Override
-                            public void onNotification(SubscriptionId id,
-                                                       CompoundEvent event) {
-                                try {
-                                    Collection<CompoundEvent> events =
-                                            new Collection<CompoundEvent>();
-                                    events.add(event);
-                                    subscribers.get(id).invoke(
-                                            NOTIFY_METHOD_NAME,
-                                            new Object[] {events});
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
+        Subscription subscription =
+                new Subscription(subscribeInfos.getSparqlQuery());
 
         JaxWsClientFactoryBean clientFactory = new JaxWsClientFactoryBean();
         clientFactory.setServiceClass(SubscriberWsApi.class);
         clientFactory.setAddress(subscribeInfos.getSubscriberWsUrl());
         Client client = clientFactory.create();
 
-        this.subscribers.put(id, client);
+        this.subscribers.put(subscription.getId(), client);
 
-        return id;
+        super.subscribe(subscription, new CompoundEventNotificationListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onNotification(SubscriptionId id, CompoundEvent event) {
+                try {
+                    Collection<CompoundEvent> events =
+                            new Collection<CompoundEvent>();
+                    events.add(event);
+                    subscribers.get(id).invoke(
+                            NOTIFY_METHOD_NAME, new Object[] {events});
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        return subscription.getId();
     }
 
     /**

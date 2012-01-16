@@ -18,7 +18,10 @@ package fr.inria.eventcloud.overlay;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +49,11 @@ public class SemanticCanOverlay extends CanOverlay {
     private static final Logger log =
             LoggerFactory.getLogger(SemanticCanOverlay.class);
 
+    private final LoadingCache<String, SemanticPeer> peerStubsCache;
+
     private final LoadingCache<SubscriptionId, Subscription> subscriptionsCache;
+
+    public final ExecutorService datastoreThreadPool;
 
     /**
      * Constructs a new overlay with the specified {@code dataHandler} and
@@ -63,6 +70,21 @@ public class SemanticCanOverlay extends CanOverlay {
             TransactionalTdbDatastore colanderDatastore) {
         super(new SemanticRequestResponseManager(colanderDatastore),
                 peerDatastore);
+
+        this.datastoreThreadPool = Executors.newFixedThreadPool(10);
+
+        this.peerStubsCache =
+                CacheBuilder.newBuilder()
+                        .softValues()
+                        .maximumSize(
+                                EventCloudProperties.PEER_STUBS_CACHE_MAXIMUM_SIZE.getValue())
+                        .build(new CacheLoader<String, SemanticPeer>() {
+                            public SemanticPeer load(String peerUrl)
+                                    throws Exception {
+                                return PAActiveObject.lookupActive(
+                                        SemanticPeer.class, peerUrl);
+                            }
+                        });
 
         this.subscriptionsCache =
                 CacheBuilder.newBuilder()
@@ -96,6 +118,28 @@ public class SemanticCanOverlay extends CanOverlay {
             log.error(
                     "Error while retrieving subscription {} from the cache",
                     id, e);
+            return null;
+        }
+    }
+
+    /**
+     * Finds the peer stub associated to the specified {@code peerUrl} from the
+     * cache. When no stub is found into the cache, the stub is created on the
+     * fly. If an error occurs during the creation of the stub, a {@code null}
+     * value is returned.
+     * 
+     * @param peerUrl
+     *            the peer URL used to lookup the stub.
+     * 
+     * @return the subscription found or {@code null}.
+     */
+    public final SemanticPeer findPeerStub(String peerUrl) {
+        try {
+            return this.peerStubsCache.get(peerUrl);
+        } catch (ExecutionException e) {
+            log.error(
+                    "Error while creating stub from the cache for url: {}",
+                    peerUrl, e);
             return null;
         }
     }
@@ -144,7 +188,12 @@ public class SemanticCanOverlay extends CanOverlay {
     @Override
     public String dump() {
         StringBuilder result = new StringBuilder(super.dump());
+        result.append("Subscriptions cache:\n");
         result.append(this.subscriptionsCache.stats());
+        result.append("\nPeer stubs cache:\n");
+        result.append(this.peerStubsCache.stats());
+        result.append("\nSubscriber proxies cache:\n");
+        result.append(Subscription.subscribeProxiesCache.stats());
         return result.toString();
     }
 

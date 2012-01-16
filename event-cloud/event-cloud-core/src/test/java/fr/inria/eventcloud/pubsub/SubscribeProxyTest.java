@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +41,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
@@ -62,7 +64,8 @@ public class SubscribeProxyTest {
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxyTest.class);
 
-    private static Collection<CompoundEvent> events = new Collection<CompoundEvent>();
+    private static Collection<CompoundEvent> events =
+            new Collection<CompoundEvent>();
 
     private static Collection<Binding> bindings = new Collection<Binding>();
 
@@ -138,9 +141,12 @@ public class SubscribeProxyTest {
             e.printStackTrace();
         }
 
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
         this.subscribeProxy.subscribe(
-                "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
-                new CustomEventNotificationListener());
+                subscription, new CustomEventNotificationListener());
 
         synchronized (events) {
             while (events.size() < NB_EVENTS_TO_WAIT) {
@@ -175,18 +181,14 @@ public class SubscribeProxyTest {
      * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeStringBindingNotificationListener() {
+    public void testSubscribeBindingNotificationListener() {
+        Subscription subscription =
+                new Subscription(
+                        "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }");
+
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
-                "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
-                new CustomBindingNotificationListener());
-
-        // waits a little to make sure the subscription has been indexed
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+                subscription, new CustomBindingNotificationListener());
 
         long publicationTime = System.currentTimeMillis();
 
@@ -267,15 +269,15 @@ public class SubscribeProxyTest {
      * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeStringSignalNotificationListener()
+    public void testSubscribeSignalNotificationListener()
             throws InterruptedException {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
-                "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
-                new CustomSignalNotificationListener());
-
-        // waits a little to make sure the subscription has been indexed
-        Thread.sleep(500);
+                subscription, new CustomSignalNotificationListener());
 
         Collection<Quadruple> quads = new Collection<Quadruple>();
         for (int i = 0; i < 4; i++) {
@@ -298,27 +300,30 @@ public class SubscribeProxyTest {
     }
 
     /**
-     * Test a basic subscription with an {@link CompoundEventNotificationListener}.
+     * Test a basic subscription with a
+     * {@link CompoundEventNotificationListener}.
      * 
      * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeStringEventNotificationListener()
+    public void testSubscribeEventNotificationListener()
             throws InterruptedException {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
-                "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
-                new CustomEventNotificationListener());
-
-        // waits a little to make sure the subscription has been indexed
-        Thread.sleep(500);
+                subscription, new CustomEventNotificationListener());
 
         Collection<Quadruple> quads = new Collection<Quadruple>();
         for (int i = 0; i < 4; i++) {
             quads.add(QuadrupleGenerator.create(eventId));
         }
 
-        this.publishProxy.publish(new CompoundEvent(quads));
+        CompoundEvent ce = new CompoundEvent(quads);
+
+        this.publishProxy.publish(ce);
 
         synchronized (events) {
             while (events.size() != 1) {
@@ -330,8 +335,10 @@ public class SubscribeProxyTest {
             }
         }
 
+        ce = events.iterator().next();
+
         // try to republish the event which has been received
-        this.publishProxy.publish(events.iterator().next());
+        this.publishProxy.publish(ce);
 
         synchronized (events) {
             while (events.size() != 2) {
@@ -345,19 +352,80 @@ public class SubscribeProxyTest {
     }
 
     /**
-     * Test a subscription with an {@link CompoundEventNotificationListener} by
-     * simulating a network congestion between the publication of two sets of
-     * quadruples that belong to the same event.
+     * Test a basic subscription with a
+     * {@link CompoundEventNotificationListener}.
      * 
      * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeStringEventNotificationListenerSimulatingNetworkCongestion()
+    public void testSubscribeEventNotificationListenerWeatherUsecase()
             throws InterruptedException {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g WHERE { GRAPH ?g { "
+                                + "<urn:city:Nice> <urn:weather:avgtemp> ?temperature ."
+                                + "<urn:city:Nice> <urn:weather:datetime> ?date } }");
+
+        int nbDays = 10;
+
+        this.subscribeProxy.subscribe(
+                subscription, new CustomEventNotificationListener());
+
+        Node subject = Node.createURI("urn:city:Nice");
+
+        Collection<Quadruple> quads;
+
+        DateTime datetime = new DateTime();
+
+        for (int i = 0; i < nbDays; i++) {
+            Node graphId =
+                    Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                            + Integer.toString(i));
+            quads = new Collection<Quadruple>();
+            quads.add(new Quadruple(
+                    graphId, subject, Node.createURI("urn:weather:avgtemp"),
+                    Node.createLiteral(
+                            Integer.toString(ProActiveRandom.nextInt(30)),
+                            XSDDatatype.XSDint)));
+            quads.add(new Quadruple(
+                    graphId, subject, Node.createURI("urn:weather:datetime"),
+                    Node.createLiteral(datetime.toString())));
+
+            CompoundEvent ce = new CompoundEvent(quads);
+
+            this.publishProxy.publish(ce);
+
+            datetime = datetime.plusDays(1);
+        }
+
+        synchronized (events) {
+            while (events.size() != nbDays) {
+                try {
+                    events.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Test a subscription with a {@link CompoundEventNotificationListener} by
+     * simulating a network congestion between the publication of two sets of
+     * quadruples that belong to the same compound event.
+     * 
+     * @throws InterruptedException
+     */
+    @Test(timeout = 60000)
+    public void testSubscribeEventNotificationListenerSimulatingNetworkCongestion()
+            throws InterruptedException {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
-                "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } }",
-                new CustomEventNotificationListener());
+                subscription, new CustomEventNotificationListener());
 
         // waits a little to make sure the subscription has been indexed
         Thread.sleep(500);

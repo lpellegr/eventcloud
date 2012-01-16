@@ -19,7 +19,8 @@ package fr.inria.eventcloud.api.generators;
 import com.hp.hpl.jena.graph.Node;
 
 /**
- * Utility class that defines some convenient methods to create {@link Node}s.
+ * Utility class that defines some convenient methods to create arbitrary
+ * {@link Node}s.
  * 
  * @author lpellegr
  */
@@ -32,16 +33,14 @@ public class NodeGenerator extends Generator {
 
     public static final String DEFAULT_URN_PREFIX = "urn:inria:";
 
-    private static final int DEFAULT_MIN_LENGTH = 10;
-
-    private static final int DEFAULT_MAX_LENGTH = 20;
+    private static final int DEFAULT_LENGTH = 10;
 
     private NodeGenerator() {
 
     }
 
     public static Node createNode() {
-        return createNode(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
+        return createNode(DEFAULT_LENGTH, DEFAULT_LENGTH);
     }
 
     public static Node createNode(int exactLength) {
@@ -61,12 +60,12 @@ public class NodeGenerator extends Generator {
     }
 
     public static Node createUri() {
-        return createUri(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
+        return createUri(DEFAULT_LENGTH, DEFAULT_LENGTH);
     }
 
     public static Node createUri(String prefix) {
         return Node.createURI(StringGenerator.create(
-                prefix, DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH, DEFAULT_BOUNDS));
+                prefix, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_BOUNDS));
     }
 
     public static Node createUri(int exactLength) {
@@ -80,7 +79,7 @@ public class NodeGenerator extends Generator {
     }
 
     public static Node createLiteral() {
-        return createLiteral(DEFAULT_MIN_LENGTH, DEFAULT_MAX_LENGTH);
+        return createLiteral(DEFAULT_LENGTH, DEFAULT_LENGTH);
     }
 
     public static Node createLiteral(int exactLength) {

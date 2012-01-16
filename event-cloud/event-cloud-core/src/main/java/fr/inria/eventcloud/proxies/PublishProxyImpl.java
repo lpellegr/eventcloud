@@ -40,76 +40,76 @@ import fr.inria.eventcloud.utils.Callback;
  */
 public class PublishProxyImpl extends ProxyCache implements PublishProxy {
 
-    /**
-     * Empty constructor required by ProActive.
-     */
-    public PublishProxyImpl() {
-    }
+	/**
+	 * Empty constructor required by ProActive.
+	 */
+	public PublishProxyImpl() {
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void init(EventCloudCache proxy) {
-        if (this.proxy == null) {
-            this.proxy = proxy;
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public void init(EventCloudCache proxy) {
+		if (this.proxy == null) {
+			this.proxy = proxy;
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Quadruple quad) {
-        if (quad.getPublicationTime() == -1) {
-            quad.setPublicationTime();
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void publish(Quadruple quad) {
+		if (quad.getPublicationTime() == -1) {
+			quad.setPublicationTime();
+		}
 
-        // TODO: use an asynchronous call with no response (see issue 16)
+		// TODO: use an asynchronous call with no response (see issue 16)
 
-        // the quadruple is routed without taking into account the publication
-        // datetime
-        try {
-            super.proxy.selectTracker().getRandomPeer().send(
-                    new PublishQuadrupleRequest(quad));
-        } catch (DispatchException e) {
-            e.printStackTrace();
-        }
-    }
+		// the quadruple is routed without taking into account the publication
+		// datetime
+		try {
+			super.proxy.selectTracker().getRandomPeer()
+					.send(new PublishQuadrupleRequest(quad));
+		} catch (DispatchException e) {
+			e.printStackTrace();
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(CompoundEvent event) {
-        long publicationTime = System.currentTimeMillis();
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void publish(CompoundEvent event) {
+		long publicationTime = System.currentTimeMillis();
 
-        for (Quadruple quad : event) {
-            quad.setPublicationTime(publicationTime);
-            this.publish(quad);
-        }
-    }
+		for (Quadruple quad : event) {
+			quad.setPublicationTime(publicationTime);
+			this.publish(quad);
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(Collection<CompoundEvent> events) {
-        for (CompoundEvent event : events) {
-            this.publish(event);
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void publish(Collection<CompoundEvent> events) {
+		for (CompoundEvent event : events) {
+			this.publish(event);
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(InputStream in, SerializationFormat format) {
-        RdfParser.parse(in, format, new Callback<Quadruple>() {
-            @Override
-            public void execute(Quadruple quad) {
-                publish(quad);
-            }
-        });
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void publish(InputStream in, SerializationFormat format) {
+		RdfParser.parse(in, format, new Callback<Quadruple>() {
+			@Override
+			public void execute(Quadruple quad) {
+				publish(quad);
+			}
+		});
+	}
 
 }

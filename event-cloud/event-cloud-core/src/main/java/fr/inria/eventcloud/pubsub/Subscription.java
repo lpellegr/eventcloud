@@ -46,11 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.bind.DatatypeConverter;
 
-import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -74,7 +72,6 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
 import fr.inria.eventcloud.utils.LongLong;
-import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
  * A subscription is a continuous query that is registered into an Event Cloud.
@@ -87,7 +84,7 @@ public class Subscription implements Rdfable, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final LoadingCache<String, SubscribeProxy> proxiesCache =
+    public static final LoadingCache<String, SubscribeProxy> subscribeProxiesCache =
             CacheBuilder.newBuilder()
                     .softValues()
                     .maximumSize(
@@ -111,7 +108,7 @@ public class Subscription implements Rdfable, Serializable {
 
     private final long creationTime;
 
-    private final AtomicLong indexationTime;
+    private final long indexationTime;
 
     private final String subscriberUrl;
 
@@ -130,59 +127,34 @@ public class Subscription implements Rdfable, Serializable {
     // the var name associated to the graph value
     private transient Node graphNode;
 
-    public Subscription(String source, String sparqlQuery) {
-        this(source, sparqlQuery, NotificationListenerType.UNKNOWN);
-    }
-
-    public Subscription(String source, String sparqlQuery,
-            NotificationListenerType type) {
-        this(null, source, sparqlQuery, type);
-    }
-
-    public Subscription(SubscriptionId parentId, String subscribeProxyUrl,
-            String sparqlQuery, NotificationListenerType listenerType) {
-        this(null, parentId, -1, subscribeProxyUrl, sparqlQuery, listenerType);
-    }
-
+    /**
+     * 
+     * @param originalId
+     * @param parentId
+     * @param id
+     * @param indexationTime
+     * @param sparqlQuery
+     * @param subscribeProxyUrl
+     * @param listenerType
+     */
     public Subscription(SubscriptionId originalId, SubscriptionId parentId,
-            long originalIndexationTime, String subscribeProxyUrl,
-            String sparqlQuery, NotificationListenerType listenerType) {
-        if (!sparqlQuery.contains("GRAPH")) {
-            throw new IllegalArgumentException(
-                    "The SPARQL query used for a subscription must always contain a GRAPH pattern.");
-        }
-
-        if (!sparqlQuery.contains("SELECT")) {
-            throw new IllegalArgumentException(
-                    "The SPARQL query used for a subscription must always use the SELECT query form.");
-        }
-
-        this.creationTime = System.currentTimeMillis();
-        this.indexationTime = new AtomicLong(originalIndexationTime);
-        this.parentId = parentId;
-        this.id =
-                new SubscriptionId(new LongLong(MurmurHash.hash128(
-                        subscribeProxyUrl, sparqlQuery,
-                        Long.toString(this.creationTime))));
-        this.originalId = originalId == null
-                ? this.id : originalId;
-        this.subscriberUrl = subscribeProxyUrl;
-        this.sparqlQuery = sparqlQuery;
-        this.type = listenerType;
-        this.stubs = new ArrayList<Stub>();
+            SubscriptionId id, long indexationTime, String sparqlQuery,
+            String subscribeProxyUrl, NotificationListenerType listenerType) {
+        this(originalId, parentId, id, System.currentTimeMillis(),
+                indexationTime, sparqlQuery, subscribeProxyUrl, listenerType);
     }
 
     private Subscription(SubscriptionId originalId, SubscriptionId parentId,
             SubscriptionId id, long creationTime, long indexationTime,
-            String source, String sparqlQuery,
+            String sparqlQuery, String subscriberUrl,
             NotificationListenerType listenerType) {
         this.originalId = originalId;
         this.parentId = parentId;
         this.id = id;
         this.creationTime = creationTime;
-        this.indexationTime = new AtomicLong(indexationTime);
-        this.subscriberUrl = source;
+        this.indexationTime = indexationTime;
         this.sparqlQuery = sparqlQuery;
+        this.subscriberUrl = subscriberUrl;
         this.type = listenerType;
         this.stubs = new ArrayList<Stub>();
     }
@@ -249,9 +221,9 @@ public class Subscription implements Rdfable, Serializable {
                                         SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY)
                                         .getLiteralLexicalForm())
                                 .getTimeInMillis(),
-                        basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
-                                .getLiteralLexicalForm(),
                         basicInfo.get(SUBSCRIPTION_SPARQL_QUERY_PROPERTY)
+                                .getLiteralLexicalForm(),
+                        basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
                                 .getLiteralLexicalForm(),
                         NotificationListenerType.UNKNOWN.convert(((Integer) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
@@ -316,7 +288,7 @@ public class Subscription implements Rdfable, Serializable {
     }
 
     public long getIndexationTime() {
-        return this.indexationTime.get();
+        return this.indexationTime;
     }
 
     /**
@@ -330,6 +302,13 @@ public class Subscription implements Rdfable, Serializable {
         return this.subscriberUrl;
     }
 
+    /**
+     * Returns the type identifying the notification listener which is used to
+     * deliver notifications for this subscription.
+     * 
+     * @return the type identifying the notification listener which is used to
+     *         deliver notifications for this subscription.
+     */
     public NotificationListenerType getType() {
         return this.type;
     }
@@ -343,7 +322,7 @@ public class Subscription implements Rdfable, Serializable {
      *             when the lookup operation fails.
      */
     public SubscribeProxy getSubscriberProxy() throws ExecutionException {
-        return proxiesCache.get(this.subscriberUrl);
+        return subscribeProxiesCache.get(this.subscriberUrl);
     }
 
     public String getSparqlQuery() {
@@ -396,32 +375,33 @@ public class Subscription implements Rdfable, Serializable {
     public Collection<Quadruple> toQuadruples() {
         Collection<Quadruple> quads = new Collection<Quadruple>();
         Node subscriptionURI =
-                Node.createURI(SUBSCRIPTION_NS + this.id.toString());
+                PublishSubscribeUtils.createSubscriptionIdUrl(this.id);
 
         // the output is something which is similar to what is described at
         // http://code.google.com/p/event-cloud/wiki/PublishSubscribeRdfFormat
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI, SUBSCRIPTION_ID_NODE,
-                Node.createLiteral(this.id.toString())));
+                Node.createLiteral(this.id.toString()), false, false));
 
         if (this.parentId != null) {
             quads.add(new Quadruple(
                     SUBSCRIPTION_NS_NODE, subscriptionURI,
                     SUBSCRIPTION_PARENT_ID_NODE,
-                    Node.createLiteral(this.parentId.toString())));
+                    Node.createLiteral(this.parentId.toString()), false, false));
         }
 
         if (this.originalId != null) {
             quads.add(new Quadruple(
                     SUBSCRIPTION_NS_NODE, subscriptionURI,
                     SUBSCRIPTION_ORIGINAL_ID_NODE,
-                    Node.createLiteral(this.originalId.toString())));
+                    Node.createLiteral(this.originalId.toString()), false,
+                    false));
         }
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_SERIALIZED_VALUE_NODE,
-                Node.createLiteral(this.sparqlQuery)));
+                Node.createLiteral(this.sparqlQuery), false, false));
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(this.creationTime);
@@ -429,46 +409,47 @@ public class Subscription implements Rdfable, Serializable {
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_CREATION_DATETIME_NODE, Node.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
-                        XSDDatatype.XSDdateTime)));
+                        XSDDatatype.XSDdateTime), false, false));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 PublishSubscribeConstants.SUBSCRIPTION_TYPE_NODE,
                 Node.createLiteral(
                         Short.toString(this.type.convert()),
-                        XSDDatatype.XSDshort)));
+                        XSDDatatype.XSDshort), false, false));
 
-        calendar.setTimeInMillis(this.indexationTime.get());
+        calendar.setTimeInMillis(this.indexationTime);
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_INDEXATION_DATETIME_NODE, Node.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
-                        XSDDatatype.XSDdateTime)));
+                        XSDDatatype.XSDdateTime), false, false));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_SUBSCRIBER_NODE,
-                Node.createLiteral(this.subscriberUrl)));
+                Node.createLiteral(this.subscriberUrl), false, false));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_INDEXED_WITH_NODE,
                 Node.createLiteral(this.getSubSubscriptions()[0].getId()
-                        .toString())));
+                        .toString()), false, false));
 
         for (Stub stub : this.stubs) {
             quads.add(new Quadruple(
                     SUBSCRIPTION_NS_NODE, subscriptionURI,
                     SUBSCRIPTION_STUB_NODE,
                     Node.createLiteral(stub.quadrupleHash.toString() + " "
-                            + stub.peerUrl)));
+                            + stub.peerUrl), false, false));
         }
 
         for (Subsubscription ssubscription : this.getSubSubscriptions()) {
             quads.add(new Quadruple(
                     SUBSCRIPTION_NS_NODE, subscriptionURI,
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
-                    Node.createLiteral(ssubscription.getId().toString())));
+                    Node.createLiteral(ssubscription.getId().toString()),
+                    false, false));
             quads.addAll(ssubscription.toQuadruples());
         }
 
@@ -480,18 +461,7 @@ public class Subscription implements Rdfable, Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(
-                this.originalId, this.parentId, this.id, this.creationTime,
-                this.subscriberUrl, this.sparqlQuery);
-    }
-
-    public Subscription timestamp() {
-        if (this.indexationTime.compareAndSet(-1, System.currentTimeMillis())) {
-            return this;
-        }
-
-        throw new IllegalStateException("Subscription already timestamped: "
-                + this.indexationTime);
+        return this.id.hashCode();
     }
 
     /**
@@ -499,16 +469,8 @@ public class Subscription implements Rdfable, Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Subscription) {
-            Subscription s = (Subscription) obj;
-            return this.id.equals(s.id) && this.parentId.equals(s.parentId)
-                    && this.originalId.equals(s.originalId)
-                    && this.creationTime == s.creationTime
-                    && this.subscriberUrl.equals(s.subscriberUrl)
-                    && this.sparqlQuery.equals(s.sparqlQuery);
-        }
-
-        return false;
+        return obj instanceof Subscription
+                && this.id.equals(((Subscription) obj).id);
     }
 
     /**
@@ -527,7 +489,7 @@ public class Subscription implements Rdfable, Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        // the url that identify the peer to visit
+        // the url which identifies the peer to visit
         public final String peerUrl;
 
         // hash value that identifies the quadruple to retrieve

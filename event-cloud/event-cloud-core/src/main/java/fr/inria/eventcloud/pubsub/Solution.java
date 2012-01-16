@@ -67,12 +67,11 @@ public final class Solution implements Serializable {
     }
 
     /**
-     * Merges the sub solutions and returns the solution. The result of this
-     * operation is not put into a cache. Hence, you have to take care when
-     * calling this method because the merge will be computed each time you call
-     * it.
+     * Merges the sub-solutions and returns the final solution. The result of
+     * this operation is not put in a cache. Hence, you have to take care when
+     * calling this method because the merge will be computed on each call.
      * 
-     * @return the solution that have been computed from the sub solutions.
+     * @return the solution resulting from the merge of sub-solutions.
      */
     public Binding getSolution() {
         BindingMap solution = BindingFactory.create();
@@ -94,10 +93,13 @@ public final class Solution implements Serializable {
      * @param binding
      *            the sub-solution to add.
      */
-    public void addSubSolution(Binding binding) {
+    public synchronized void addSubSolution(Binding binding) {
         if (binding != null) {
             this.bindings.add(binding);
         }
+
+        // does not add null bindings but increment sub-solution counters to
+        // manage signal notification listener
         this.receivedSubSolutions++;
     }
 

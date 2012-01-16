@@ -45,7 +45,10 @@ public final class StringGenerator extends Generator {
         StringBuffer buf = new StringBuffer();
         int lineIndex = 0;
 
-        int length = minLength + random.nextInt(maxLength - minLength);
+        int delta = maxLength - minLength;
+
+        int length = minLength + (delta > 0
+                ? random.nextInt(delta) : 0);
 
         for (int i = 0; i < length; i++) {
             lineIndex = random.nextInt(bounds.length);

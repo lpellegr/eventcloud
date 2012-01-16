@@ -17,19 +17,14 @@
 package fr.inria.eventcloud.pubsub;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import com.google.common.base.Objects;
 
 import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
- * This class uniquely identify a {@link Notification}. The identifier is made
- * of a {@link SubscriptionId} and a timestamp value that defines when the
- * notification has been created.
- * <p>
- * Two {@link NotificationId}s with the same {@code subscriptionId} and
- * {@code timestamp} value identify two {@link Notification}s that are
- * complementary and are assumed to be delivered together.
+ * This class uniquely identify a {@link Notification}.
  * 
  * @author lpellegr
  */
@@ -40,7 +35,7 @@ public class NotificationId implements Serializable {
     // original subscription identifier
     private final SubscriptionId subscriptionId;
 
-    private final long timestamp;
+    private final UUID uuid;
 
     /**
      * Constructs a NotificationId from the specified parameters.
@@ -48,15 +43,10 @@ public class NotificationId implements Serializable {
      * @param id
      *            the subscription identifier that identifies the subscription
      *            which is matched by the notification.
-     * 
-     * @param timestamp
-     *            a timestamp that identify when the notification has been
-     *            created.
      */
-    public NotificationId(SubscriptionId id, long timestamp) {
+    public NotificationId(SubscriptionId id) {
         this.subscriptionId = id;
-        // TODO: is it necessary to use a UUID to ensure uniqueness?
-        this.timestamp = timestamp;
+        this.uuid = UUID.randomUUID();
     }
 
     public SubscriptionId getSubscriptionId() {
@@ -64,22 +54,11 @@ public class NotificationId implements Serializable {
     }
 
     /**
-     * Returns the timestamp value associated to the notification. The timestamp
-     * value is used to identify a set of notifications that have to be
-     * delivered together.
-     * 
-     * @return the timestamp value associated to the notification.
-     */
-    public long getTimestamp() {
-        return this.timestamp;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.subscriptionId, this.timestamp);
+        return Objects.hashCode(this.subscriptionId, this.uuid);
     }
 
     /**
@@ -88,9 +67,9 @@ public class NotificationId implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof NotificationId) {
-            NotificationId id = (NotificationId) obj;
-            return this.subscriptionId.equals(id.subscriptionId)
-                    && this.timestamp == id.timestamp;
+            NotificationId nid = (NotificationId) obj;
+            return this.subscriptionId.equals(nid.subscriptionId)
+                    && this.uuid.equals(nid.uuid);
         }
 
         return false;
@@ -101,8 +80,10 @@ public class NotificationId implements Serializable {
      */
     @Override
     public String toString() {
-        return "[subscriptionId=" + this.subscriptionId + ", timestamp="
-                + this.timestamp + "]";
+        return Objects.toStringHelper(this)
+                .add("subscriptionId", this.subscriptionId)
+                .add("uuid", this.uuid)
+                .toString();
     }
 
 }

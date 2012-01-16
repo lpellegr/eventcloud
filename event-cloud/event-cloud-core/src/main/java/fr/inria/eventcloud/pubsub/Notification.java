@@ -28,6 +28,9 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * notification contains the smallest entity which can be received (i.e. a
  * {@link Binding}) as a sub-solution for a given subscription.
  * 
+ * Two notifications with the same {@link NotificationId} are complementary:
+ * they contain independent sub-solutions which belong to the same solution.
+ * 
  * @author lpellegr
  */
 public class Notification implements Serializable {

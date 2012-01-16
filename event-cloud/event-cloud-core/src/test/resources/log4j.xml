@@ -14,7 +14,7 @@
 	</logger>
 
 	<logger name="proactive">
-		<level value="off" />
+		<level value="info" />
 	</logger>
 
 	<logger name="proactive.mop">

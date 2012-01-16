@@ -283,7 +283,7 @@ public class Quadruple implements Event {
     private void addMetaInformation(MetaInformationType type, Object value) {
         if (log.isWarnEnabled() && this.metaInformations.containsKey(type)) {
             log.warn(
-                    "Meta information {} is already set on quadruple {} and will be overriden!",
+                    "Meta information {} is already set on quadruple {} and will be overriden! This is correct only if you are publishing an event which has been received",
                     type, this);
         }
 
@@ -347,7 +347,7 @@ public class Quadruple implements Event {
             values[i] = iterator.next().toString();
         }
 
-        return new LongLong(MurmurHash.hash128(values));
+        return MurmurHash.hash128(values);
     }
 
     /**
@@ -432,9 +432,10 @@ public class Quadruple implements Event {
                 result.append(", ");
             }
         }
+        result.append(")");
 
         if (this.metaInformations.size() != 0) {
-            result.append(", ");
+            result.append("{");
         }
 
         int i = 0;
@@ -450,7 +451,9 @@ public class Quadruple implements Event {
             i++;
         }
 
-        result.append(")");
+        if (this.metaInformations.size() != 0) {
+            result.append("}");
+        }
 
         return result.toString();
     }
