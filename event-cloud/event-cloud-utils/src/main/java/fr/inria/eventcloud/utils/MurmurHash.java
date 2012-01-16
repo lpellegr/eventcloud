@@ -283,8 +283,8 @@ public final class MurmurHash {
         return hash64(text.substring(from, from + length));
     }
 
-    public static long[] hash128(ByteBuffer key, int offset, int length,
-                                 long seed) {
+    public static LongLong hash128(ByteBuffer key, int offset, int length,
+                                   long seed) {
         // process as 128-bit blocks.
         final int nblocks = length >> 4;
 
@@ -388,7 +388,7 @@ public final class MurmurHash {
         h1 += h2;
         h2 += h1;
 
-        return (new long[] {h1, h2});
+        return new LongLong(h1, h2);
     }
 
     /**
@@ -401,7 +401,7 @@ public final class MurmurHash {
      * 
      * @return 128 bit hash of the given string.
      */
-    public static long[] hash128(final byte[] data, int length) {
+    public static LongLong hash128(final byte[] data, int length) {
         return hash128(ByteBuffer.wrap(data), 0, length, 0xe17a1465);
     }
 
@@ -413,7 +413,7 @@ public final class MurmurHash {
      * 
      * @return 128 bit hash of the given string.
      */
-    public static long[] hash128(final String text) {
+    public static LongLong hash128(final String text) {
         final byte[] bytes = text.getBytes();
         return hash128(bytes, bytes.length);
     }
@@ -426,7 +426,7 @@ public final class MurmurHash {
      * 
      * @return 128 bit hash of the given array of strings.
      */
-    public static long[] hash128(final String... strings) {
+    public static LongLong hash128(final String... strings) {
         return hash128(append(strings));
     }
 
@@ -442,7 +442,7 @@ public final class MurmurHash {
      * 
      * @return 128 bit hash of the given array.
      */
-    public static long[] hash128(final String text, int from, int length) {
+    public static LongLong hash128(final String text, int from, int length) {
         return hash128(text.substring(from, from + length));
     }
 

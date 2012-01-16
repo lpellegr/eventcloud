@@ -53,11 +53,8 @@ public class Collection<T> implements java.util.Collection<T>, Serializable {
 
     /**
      * Creates a collection from a Java {@link java.util.Collection} which has a
-     * concrete type that is serializable. The constructor does not perform a
-     * shallow or a deep copy. Hence, any modifications to the specified
-     * collection is reflected to the created collection. If you want to create
-     * a collection from a Java collection by performing a shallow copy you can
-     * use {@link #withShallowCopy(java.util.Collection)}.
+     * concrete type that is serializable. This constructor performs a shallow
+     * copy of the specified {@code collection}.
      * 
      * @param collection
      *            the Java collection to use in order to create the serializable
@@ -243,6 +240,21 @@ public class Collection<T> implements java.util.Collection<T>, Serializable {
     @Override
     public int hashCode() {
         return this.collection.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result =
+                new StringBuilder(this.getClass().getSimpleName());
+        result.append("{\n");
+        for (T t : this.collection) {
+            result.append("  ");
+            result.append(t);
+            result.append(",\n");
+        }
+        result.append("}");
+
+        return result.toString();
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {

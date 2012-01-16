@@ -8,7 +8,7 @@
 	</appender>
 
 	<logger name="fr.inria.eventcloud" level="debug" />
-	<logger name="org.objectweb.proactive.extensions.p2p" level="debug" />
+	<logger name="org.objectweb.proactive.extensions.p2p" level="info" />
 
 	<root level="off">
 		<appender-ref ref="stdout" />

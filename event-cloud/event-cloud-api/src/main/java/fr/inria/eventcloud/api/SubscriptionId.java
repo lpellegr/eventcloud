@@ -17,15 +17,15 @@
 package fr.inria.eventcloud.api;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;
 
-import fr.inria.eventcloud.utils.LongLong;
+import fr.inria.eventcloud.utils.Base64UUID;
 
 /**
- * Uniquely identify a subscription or a sub-subscription that has been
- * submitted on an Event Cloud.
+ * Uniquely identify a subscription which has been submitted on an eventcloud.
  * 
  * @author lpellegr
  */
@@ -33,20 +33,16 @@ public class SubscriptionId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final LongLong hashValue;
+    private final String value;
 
     /**
-     * Constructs a subscription identifier from the specified hash value. The
-     * hash value is supposed to be a 128 bits hash value.
+     * Constructs a subscription identifier from the specified value.
      * 
-     * @param hashValue
-     *            the hash value to use in order to create the identifier.
-     * 
-     * @throws IllegalArgumentException
-     *             if the specified hash value is not a 128 bits hash value.
+     * @param value
+     *            the value to use in order to create the identifier.
      */
-    public SubscriptionId(LongLong hashValue) {
-        this.hashValue = hashValue;
+    private SubscriptionId(String value) {
+        this.value = value;
     }
 
     /**
@@ -57,20 +53,31 @@ public class SubscriptionId implements Serializable {
      *         subscription identifier.
      */
     public Node toJenaNode() {
-        return Node.createLiteral(this.hashValue.toString());
+        return Node.createLiteral(this.value.toString());
     }
 
     /**
      * Parses the string argument as a SubscriptionId.
      * 
-     * @param subscriptionId
+     * @param base64uuid
      *            a <code>String</code> containing the
      *            <code>SubscriptionId</code> representation to be parsed.
      * 
      * @return the <code>SubscriptionId</code> represented by the argument.
      */
-    public static final SubscriptionId parseFrom(String subscriptionId) {
-        return new SubscriptionId(LongLong.fromString(subscriptionId));
+    public static final SubscriptionId parseFrom(String base64uuid) {
+        return new SubscriptionId(base64uuid);
+    }
+
+    /**
+     * Generates a new subscription identifier randomly by using
+     * {@link UUID#randomUUID()}.
+     * 
+     * @return a new subscription identifier generated randomly by using
+     *         {@link UUID#randomUUID()}.
+     */
+    public static final SubscriptionId random() {
+        return new SubscriptionId(Base64UUID.encode(UUID.randomUUID()));
     }
 
     /**
@@ -79,7 +86,7 @@ public class SubscriptionId implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SubscriptionId) {
-            return this.hashValue.equals(((SubscriptionId) obj).hashValue);
+            return this.value.equals(((SubscriptionId) obj).value);
         }
 
         return false;
@@ -90,7 +97,7 @@ public class SubscriptionId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return this.hashValue.hashCode();
+        return this.value.hashCode();
     }
 
     /**
@@ -98,7 +105,7 @@ public class SubscriptionId implements Serializable {
      */
     @Override
     public String toString() {
-        return this.hashValue.toString();
+        return this.value.toString();
     }
 
 }

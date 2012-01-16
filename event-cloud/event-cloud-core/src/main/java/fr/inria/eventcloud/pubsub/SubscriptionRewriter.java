@@ -35,6 +35,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
  * This class is used to rewrite a {@link Subscription}. For more information
@@ -110,13 +111,14 @@ public final class SubscriptionRewriter {
         return new Subscription(
                 subscription.getOriginalId(),
                 subscription.getId(),
+                SubscriptionId.random(),
                 subscription.getIndexationTime(),
-                subscription.getSubscriberUrl(),
                 OpAsQuery.asQuery(
                         Transformer.transform(
                                 tc,
                                 Algebra.compile(QueryFactory.create(subscription.getSparqlQuery()))))
-                        .toString(), subscription.getType());
+                        .toString(), subscription.getSubscriberUrl(),
+                subscription.getType());
     }
 
     private static final TransformCopy createBGPTransformCopy(final Quadruple quad) {

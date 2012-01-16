@@ -8,11 +8,11 @@
 	</appender>
 
 	<logger name="com.hp" level="off" />
-	<logger name="org.objectweb.proactive.extensions.p2p" level="info" />
-	<logger name="fr.inria.eventcloud" level="info" />
+	<logger name="org.objectweb.proactive.extensions.p2p" level="off" />
+	<logger name="fr.inria.eventcloud" level="off" />
 	<logger name="fr.inria.eventcloud.benchmarks.PublishSubscribeBenchmarkTest"
-		level="trace" />
-	<!-- <logger name="com.hp.hpl.jena.tdb.info" level="debug" /> -->
+		level="info" />
+	<logger name="com.hp.hpl.jena.tdb.info" level="off" />
 	<root level="off">
 		<appender-ref ref="STDOUT" />
 	</root>

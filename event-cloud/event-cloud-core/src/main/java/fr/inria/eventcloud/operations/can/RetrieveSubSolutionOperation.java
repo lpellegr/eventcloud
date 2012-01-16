@@ -30,7 +30,6 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
@@ -40,7 +39,6 @@ import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
-import fr.inria.eventcloud.pubsub.Subsubscription;
 import fr.inria.eventcloud.utils.LongLong;
 
 /**
@@ -71,6 +69,9 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
      */
     @Override
     public void handle(StructuredOverlay overlay) {
+        // when this operation is handled we can suppose that a binding
+        // notification listener is used
+
         TransactionalTdbDatastore datastore =
                 (TransactionalTdbDatastore) overlay.getDatastore();
 
@@ -88,37 +89,32 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
                     overlay, this.hash);
         }
 
-        Quadruple metaQuad = result.iterator().next();
+        Quadruple metaQuad = result.next();
         txnGraph.close();
 
-        // TODO: try to understand why we got an exception when the meta quad
-        // is removed at this step
-        // datastore.delete(metaQuad);
+        txnGraph = datastore.begin(AccessMode.WRITE);
+        txnGraph.delete(metaQuad);
+        txnGraph.close();
 
         Pair<Quadruple, SubscriptionId> extractedMetaInfo =
                 PublishSubscribeUtils.extractMetaInformation(metaQuad);
 
-        Subsubscription subSubscription =
-                Subsubscription.parseFrom(
-                        datastore,
-                        PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()),
-                        extractedMetaInfo.getSecond());
+        // Subsubscription subSubscription =
+        // Subsubscription.parseFrom(
+        // datastore,
+        // PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()),
+        // extractedMetaInfo.getSecond());
 
         // extracts only the variables that are declared as result variables in
         // the original subscription
-
         Subscription subscription =
-                ((SemanticCanOverlay) overlay).findSubscription(subSubscription.getParentId());
+                ((SemanticCanOverlay) overlay).findSubscription(PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()));
 
-        Binding binding = null;
-        // for a signal it is not necessary to retrieve the binding value
-        if (subscription.getType() != NotificationListenerType.SIGNAL) {
-            binding =
-                    PublishSubscribeUtils.filter(
-                            extractedMetaInfo.getFirst(),
-                            subscription.getResultVars(),
-                            subSubscription.getAtomicQuery());
-        }
+        Binding binding =
+                PublishSubscribeUtils.filter(
+                        extractedMetaInfo.getFirst(),
+                        subscription.getResultVars(),
+                        subscription.getSubSubscriptions()[0].getAtomicQuery());
 
         // TODO: replace PAActiveObject.getUrl(overlay.getStub()) by the
         // component URL? (same in PublishQuadrupleRequest and

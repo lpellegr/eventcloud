@@ -19,6 +19,8 @@ package fr.inria.eventcloud.proxies;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -41,6 +43,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
+import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -79,14 +82,6 @@ public class SubscribeProxyImpl extends ProxyCache implements
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxy.class);
 
-    /**
-     * The retry threshold defines the time to wait in milliseconds before to
-     * re-execute the query for retrieving the quadruples that belongs to the
-     * specified event id.
-     */
-    // TODO: to use an exponential backoff algorithm?
-    private static final int RECONSTRUCTION_RETRY_THRESHOLD = 300;
-
     // contains the subscriptions that have been registered from this proxy
     private Map<SubscriptionId, Subscription> subscriptions;
 
@@ -94,7 +89,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
     private Map<SubscriptionId, NotificationListener<?>> listeners;
 
     // contains the solutions that are being received
-    private Map<NotificationId, Solution> solutions;
+    private ConcurrentMap<NotificationId, Solution> solutions;
 
     // TODO: this set has to be replace by a DataBag. The number of events ids
     // received will grow quickly and after some time it is possible to get an
@@ -104,7 +99,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
     // threshold is reached, the data write are spilled to the disk
     // example from pig:
     // http://pig.apache.org/docs/r0.7.0/api/org/apache/pig/data/DataBag.html
-    private Map<Node, SubscriptionId> eventIdsReceived;
+    private ConcurrentMap<Node, SubscriptionId> eventIdsReceived;
 
     private String componentUri;
 
@@ -119,7 +114,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
      * {@inheritDoc}
      */
     // TODO: add support for ELA properties. At least for the maximum number of
-    // requests per seconds (by using a queue and a scheduled Timer).
+    // requests per seconds (by using a queue and a scheduled Timer?).
     public void init(EventCloudCache proxy, String componentUri,
                      AlterableElaProperty[] properties) {
         if (this.proxy == null) {
@@ -128,8 +123,9 @@ public class SubscribeProxyImpl extends ProxyCache implements
             this.subscriptions = new HashMap<SubscriptionId, Subscription>();
             this.listeners =
                     new HashMap<SubscriptionId, NotificationListener<?>>();
-            this.solutions = new HashMap<NotificationId, Solution>();
-            this.eventIdsReceived = new HashMap<Node, SubscriptionId>();
+            this.solutions = new ConcurrentHashMap<NotificationId, Solution>();
+            this.eventIdsReceived =
+                    new ConcurrentHashMap<Node, SubscriptionId>();
             // TODO: use the properties field to initialize ELA properties
         }
     }
@@ -138,49 +134,53 @@ public class SubscribeProxyImpl extends ProxyCache implements
      * {@inheritDoc}
      */
     @Override
-    public <T> SubscriptionId subscribe(String sparqlQuery,
-                                        NotificationListener<T> listener) {
+    public <T> void subscribe(fr.inria.eventcloud.api.Subscription subscription,
+                              NotificationListener<T> listener) {
+        String sparqlQuery = subscription.getSparqlQuery();
+
         if (listener instanceof CompoundEventNotificationListener) {
-            // rewrites the sparqlQuery to keep only the graph variable in
+            // rewrites the sparql query to keep only the graph variable in
             // the result variables. Indeed we need only the graph variable
-            // (which identifies the event which is matched) to reconstruct the
-            // event
+            // (which identifies the event which is matched) to
+            // reconstruct the compound event
             sparqlQuery =
                     PublishSubscribeUtils.removeResultVarsExceptGraphVar(sparqlQuery);
         }
 
-        return this.indexSubscription(sparqlQuery, listener);
-    }
-
-    private SubscriptionId indexSubscription(String sparqlQuery,
-                                             NotificationListener<?> listener) {
-        Subscription subscription =
+        Subscription internalSubscription =
                 new Subscription(
-                        this.componentUri, sparqlQuery, listener.getType());
-
-        log.debug(
-                "New subscription has been registered from {} with id {}",
-                PAActiveObject.getBodyOnThis().getUrl(), subscription.getId());
+                        subscription.getId(), null, subscription.getId(),
+                        subscription.getCreationTime(), sparqlQuery,
+                        this.componentUri, listener.getType());
 
         NotificationListener<?> result =
                 this.listeners.put(subscription.getId(), listener);
 
         if (result != null) {
-            log.warn("The subscription is canceled because a listener associated to the same subscription id has been detected: "
-                    + subscription.getId());
-            return subscription.getId();
+            // same subscription with same creation time
+            throw new IllegalArgumentException(
+                    "Listener already exists for subscription id: "
+                            + subscription.getId());
+        }
+
+        if (this.subscriptions.put(
+                internalSubscription.getId(), internalSubscription) != null) {
+            // same subscription with same creation time
+            throw new IllegalArgumentException(
+                    "Subscription already exists for subscription id: "
+                            + subscription.getId());
         }
 
         try {
-            subscription.timestamp();
-            this.subscriptions.put(subscription.getId(), subscription);
-            super.proxy.selectTracker().getRandomPeer().send(
-                    new IndexSubscriptionRequest(subscription));
+            super.proxy.selectTracker().getRandomSemanticPeer().send(
+                    new IndexSubscriptionRequest(internalSubscription));
         } catch (DispatchException e) {
             e.printStackTrace();
         }
 
-        return subscription.getId();
+        log.info(
+                "New subscription has been registered from {} with id {}",
+                PAActiveObject.getBodyOnThis().getUrl(), subscription.getId());
     }
 
     /**
@@ -196,11 +196,9 @@ public class SubscribeProxyImpl extends ProxyCache implements
         }
 
         Node eventId;
-        if ((eventId =
-                binding.get(Var.alloc(subscription.getGraphNode().getName()))) == null) {
+        if ((eventId = binding.get(Var.alloc("g"))) == null) {
             throw new IllegalArgumentException(
-                    "The specified binding does not contain the specified graph value: "
-                            + subscription.getGraphNode());
+                    "The specified binding does not contain a graph value");
         }
 
         return this.reconstructCompoundEvent(subscription.getId(), eventId);
@@ -237,10 +235,15 @@ public class SubscribeProxyImpl extends ProxyCache implements
                 new QuadruplePattern(eventId, Node.ANY, Node.ANY, Node.ANY);
 
         // perform polling while all the quadruples have not been retrieved
-        while (expectedNumberOfQuadruples == -1
-                || quadsReceived.size() != expectedNumberOfQuadruples) {
+        while (quadsReceived.size() != expectedNumberOfQuadruples) {
+            // the reconstruct operation is stopped if an another thread has
+            // already reconstructed the compound event before the current one
+            if (this.eventIdsReceived.containsKey(eventId)) {
+                return null;
+            }
+
             log.info(
-                    "Reconstructing event for subscription {} and graph value {} ({}/{})",
+                    "Reconstructing compound event for subscription {} and graph value {} ({}/{})",
                     new Object[] {
                             id, eventId, quadsReceived.size(),
                             expectedNumberOfQuadruples});
@@ -269,13 +272,16 @@ public class SubscribeProxyImpl extends ProxyCache implements
             }
 
             try {
-                Thread.sleep(RECONSTRUCTION_RETRY_THRESHOLD);
+                Thread.sleep(EventCloudProperties.RECONSTRUCTION_RETRY_THRESHOLD.getValue());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
 
-        this.eventIdsReceived.put(eventId, id);
+        if (this.eventIdsReceived.putIfAbsent(eventId, id) != null) {
+            // an another thread has already reconstructed the same event
+            return null;
+        }
 
         // We create an event from quadruples which comes from a previous event.
         // Hence we do not need to add new meta information
@@ -309,35 +315,46 @@ public class SubscribeProxyImpl extends ProxyCache implements
         NotificationListener<?> listener =
                 this.listeners.get(id.getSubscriptionId());
 
+        Solution solution = this.solutions.remove(id);
+
         if (listener instanceof BindingNotificationListener) {
-            this.deliver(id, (BindingNotificationListener) listener);
+            this.deliver(id, (BindingNotificationListener) listener, solution);
         } else if (listener instanceof CompoundEventNotificationListener) {
-            this.deliver(id, (CompoundEventNotificationListener) listener);
+            this.deliver(
+                    id, (CompoundEventNotificationListener) listener, solution);
         } else if (listener instanceof SignalNotificationListener) {
-            this.solutions.remove(id);
-            ((SignalNotificationListener) listener).onNotification(id.getSubscriptionId());
+            this.deliver(id, (SignalNotificationListener) listener);
         } else {
-            log.error("Unknown notification listener: " + listener.getClass());
+            log.error(
+                    "Unknown notification listener for delivery: {}",
+                    listener.getClass());
         }
 
-        log.debug("Notification {} has been delivered", id);
+        log.info("Notification {} has been delivered", id);
     }
 
-    private void deliver(NotificationId id, BindingNotificationListener listener) {
-        listener.onNotification(id.getSubscriptionId(), this.solutions.remove(
-                id).getSolution());
+    private final void deliver(NotificationId id,
+                               BindingNotificationListener listener,
+                               Solution solution) {
+        listener.onNotification(id.getSubscriptionId(), solution.getSolution());
     }
 
-    private void deliver(NotificationId id,
-                         CompoundEventNotificationListener listener) {
-        CompoundEvent event =
+    private final void deliver(NotificationId id,
+                               CompoundEventNotificationListener listener,
+                               Solution solution) {
+        CompoundEvent compoundEvent =
                 this.reconstructCompoundEvent(
                         this.subscriptions.get(id.getSubscriptionId()),
-                        this.solutions.remove(id).getSolution());
+                        solution.getSolution());
 
-        if (event != null) {
-            listener.onNotification(id.getSubscriptionId(), event);
+        if (compoundEvent != null) {
+            listener.onNotification(id.getSubscriptionId(), compoundEvent);
         }
+    }
+
+    private final void deliver(NotificationId id,
+                               SignalNotificationListener listener) {
+        listener.onNotification(id.getSubscriptionId());
     }
 
     /**
@@ -347,6 +364,8 @@ public class SubscribeProxyImpl extends ProxyCache implements
     public void receive(Notification notification) {
         SubscriptionId subscriptionId =
                 notification.getId().getSubscriptionId();
+
+        Subscription subscription = this.subscriptions.get(subscriptionId);
 
         // this condition is used to ignore the notifications which may be
         // received after an unsubscribe operation because the unsubscribe
@@ -359,23 +378,33 @@ public class SubscribeProxyImpl extends ProxyCache implements
                 "New notification received {} on {} for subscription id {}",
                 new Object[] {notification, this.componentUri, subscriptionId});
 
+        // avoid creation of solution object when possible
         Solution solution = this.solutions.get(notification.getId());
+
         if (solution == null) {
             solution =
                     new Solution(
-                            this.subscriptions.get(subscriptionId)
-                                    .getSubSubscriptions().length,
+                            subscription.getSubSubscriptions().length,
                             notification.getBinding());
-            this.solutions.put(notification.getId(), solution);
+
+            Solution solution2 = null;
+            if ((solution2 =
+                    this.solutions.putIfAbsent(notification.getId(), solution)) != null) {
+                solution = solution2;
+                // an another thread has already put the solution
+                solution.addSubSolution(notification.getBinding());
+            }
         } else {
             solution.addSubSolution(notification.getBinding());
         }
 
-        // checks whether all the sub-solutions have been received or not
-        if (solution.isReady()) {
+        // checks whether all the sub-solutions have been received
+        if (solution.isReady()
+                || subscription.getType() == NotificationListenerType.COMPOUND_EVENT
+                || subscription.getType() == NotificationListenerType.SIGNAL) {
             // TODO checks whether the ELA properties are verified
-            // if yes, deliver the solution
-            // else do nothing and wait for an ELA property that is verified
+            // if yes, deliver the solution else do nothing and wait for an ELA
+            // property that is verified
             this.deliver(notification.getId());
         }
     }
@@ -394,7 +423,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
      * @return the URI at which the component is bind.
      */
     public String getComponentUri() {
-        return componentUri;
+        return this.componentUri;
     }
 
     /**
@@ -406,6 +435,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
         // setImmediateServices has to be handled in immediate services. This
         // configuration should be done in the ProActive source code.
         body.setImmediateService("setImmediateServices", false);
+        body.setImmediateService("receive", false);
     }
 
 }

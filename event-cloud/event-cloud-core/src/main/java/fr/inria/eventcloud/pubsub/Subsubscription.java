@@ -34,7 +34,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.base.Objects;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
@@ -48,8 +47,6 @@ import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.VariableDatatype;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
-import fr.inria.eventcloud.utils.LongLong;
-import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
  * A Sub-subscription is modeled by using an {@link AtomicQuery} that knows who
@@ -74,11 +71,7 @@ public class Subsubscription implements Rdfable, Serializable {
         this.parentId = parentId;
         this.atomicQuery = atomicQuery;
         this.index = index;
-        this.id =
-                new SubscriptionId(new LongLong(MurmurHash.hash128(
-                        parentId.toString(),
-                        Integer.toString(atomicQuery.hashCode()),
-                        Integer.toString(index))));
+        this.id = SubscriptionId.random();
     }
 
     private Subsubscription(SubscriptionId parentId, SubscriptionId id,
@@ -124,36 +117,42 @@ public class Subsubscription implements Rdfable, Serializable {
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subSubscriptionURI,
-                SUBSUBSCRIPTION_ID_NODE, Node.createLiteral(this.id.toString())));
+                SUBSUBSCRIPTION_ID_NODE,
+                Node.createLiteral(this.id.toString()), false, false));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subSubscriptionURI,
                 SUBSUBSCRIPTION_INDEX_NODE, Node.createLiteral(
-                        Integer.toString(this.index), XSDDatatype.XSDint)));
+                        Integer.toString(this.index), XSDDatatype.XSDint),
+                false, false));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_GRAPH_VALUE_NODE,
-                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getGraph())));
+                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getGraph()),
+                false, false));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_SUBJECT_VALUE_NODE,
-                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getSubject())));
+                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getSubject()),
+                false, false));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_PREDICATE_VALUE_NODE,
-                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getPredicate())));
+                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getPredicate()),
+                false, false));
 
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_OBJECT_VALUE_NODE,
-                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getObject())));
+                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getObject()),
+                false, false));
 
         return quads;
     }
@@ -163,8 +162,7 @@ public class Subsubscription implements Rdfable, Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(
-                this.parentId, this.id, this.index, this.atomicQuery);
+        return this.id.hashCode();
     }
 
     /**
@@ -172,15 +170,8 @@ public class Subsubscription implements Rdfable, Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Subsubscription) {
-            Subsubscription s = (Subsubscription) obj;
-            return this.id.equals(s.id)
-                    && this.atomicQuery.equals(s.atomicQuery)
-                    && this.index == s.index
-                    && this.parentId.equals(s.parentId);
-        }
-
-        return false;
+        return obj instanceof Subsubscription
+                && this.id.equals(((Subsubscription) obj).id);
     }
 
     /**
@@ -220,7 +211,7 @@ public class Subsubscription implements Rdfable, Serializable {
                 datastore.begin(AccessMode.READ_ONLY);
         for (Quadruple quad : txnGraph.find(
                 Node.ANY,
-                Node.createURI(SUBSUBSCRIPTION_NS + subSubscriptionId),
+                PublishSubscribeUtils.createSubSubscriptionIdUrl(subSubscriptionId),
                 Node.ANY, Node.ANY)) {
             properties.put(quad.getPredicate().toString(), quad.getObject());
         }

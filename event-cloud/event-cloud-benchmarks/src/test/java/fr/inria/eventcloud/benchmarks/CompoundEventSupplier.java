@@ -30,8 +30,8 @@ import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
- * This class provides a randomly generated {@link CompoundEvent} each time a call to
- * {@link CompoundEventSupplier#get()} is performed.
+ * This class provides a randomly generated {@link CompoundEvent} each time a
+ * call to {@link CompoundEventSupplier#get()} is performed.
  * 
  * @author lpellegr
  */
@@ -40,6 +40,9 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
     private final int minSize;
 
     private final int maxSize;
+
+    // maxSize - minSize
+    private final int delta;
 
     /**
      * Constructs an Event supplier that builds events composed of the specified
@@ -69,6 +72,7 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
     public CompoundEventSupplier(int minSize, int maxSize) {
         this.minSize = minSize;
         this.maxSize = maxSize;
+        this.delta = this.maxSize - this.minSize;
     }
 
     /**
@@ -81,8 +85,8 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
                 Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                         + UUID.randomUUID().toString());
 
-        for (int i = 0; i < this.minSize
-                + ProActiveRandom.nextInt(this.maxSize - this.minSize); i++) {
+        for (int i = 0; i < this.minSize + (this.delta > 0
+                ? ProActiveRandom.nextInt(this.delta) : 0); i++) {
             quadruples.add(QuadrupleGenerator.create(graph));
         }
 

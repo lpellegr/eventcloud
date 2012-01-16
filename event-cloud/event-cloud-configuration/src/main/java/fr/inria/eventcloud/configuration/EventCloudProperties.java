@@ -38,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyS
  * set to {@code %HOMEPATH%\.eventcloud\preferences} on Windows and to
  * {@code $HOME/.eventcloud/preferences} on Unix systems. You can also override
  * the default location by using the java property
- * {@code eventcloud.configuration}.
+ * {@code -Deventcloud.configuration=/path/to/configurationFile.properties}.
  * 
  * @author lpellegr
  */
@@ -66,7 +66,7 @@ public class EventCloudProperties {
      * into the project.
      */
     public static final PropertyString EVENT_CLOUD_NS = new PropertyString(
-            "eventcloud.namespace", "http://www.play-project.eu/event-cloud/");
+            "eventcloud.namespace", "urn:eventcloud:");
 
     /**
      * Specifies where the repositories that store the RDF data are created.
@@ -118,17 +118,38 @@ public class EventCloudProperties {
             new PropertyBoolean("eventcloud.repositories.autoremove", false);
 
     /**
-     * Specifies the maximum number of entries the cache associated to
-     * subscriptions may contain.
+     * Specifies the maximum number of peer stubs to put in cache. This property
+     * does not guarantee that the specified number of entries will be put in
+     * cache but only at most the given number (e.g. if there is not enough
+     * memory, entries are evicted).
+     */
+    public static final PropertyInteger PEER_STUBS_CACHE_MAXIMUM_SIZE =
+            new PropertyInteger("eventcloud.peer.stubs.cache.maximum.size", 100);
+
+    /**
+     * Defines the time to wait in milliseconds before to re-execute the query
+     * for retrieving the quadruples that belongs to the specified event id when
+     * the mode to reconstruct compound events is based on polling.
+     */
+    public static final PropertyInteger RECONSTRUCTION_RETRY_THRESHOLD =
+            new PropertyInteger(
+                    "eventcloud.reconstruction.retry.threshold", 300);
+
+    /**
+     * Specifies the maximum number of subscriptions to put in cache. This
+     * property does not guarantee that the specified number of entries will be
+     * put in cache but only at most the given number (e.g. if there is not
+     * enough memory, entries are evicted).
      */
     public static final PropertyInteger SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE =
             new PropertyInteger(
                     "eventcloud.subscriptions.cache.maximum.size", 1000);
 
     /**
-     * Specifies the maximum number of entries the cache associated to subscribe
-     * proxies (the proxies to contact when a notification has to be delivered)
-     * may contain.
+     * Specifies the maximum number of subscribe proxies to put in cache. This
+     * property does not guarantee that the specified number of entries will be
+     * put in cache but only at most the given number (e.g. if there is not
+     * enough memory, entries are evicted).
      */
     public static final PropertyInteger SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE =
             new PropertyInteger(

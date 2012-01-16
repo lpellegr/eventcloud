@@ -34,7 +34,6 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
-import fr.inria.eventcloud.utils.LongLong;
 import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
@@ -68,13 +67,13 @@ public final class EventCloud implements EventCloudApi, Serializable {
             Collection<UnalterableElaProperty> elaProperties, int nbTrackers,
             int nbPeers) {
         this.id =
-                new EventCloudId(new LongLong(
+                new EventCloudId(
                         MurmurHash.hash128(
                                 registryUrl.toString(), deployer.toString(),
                                 elaProperties.toString(),
                                 Integer.toString(nbTrackers),
                                 Integer.toString(nbPeers), UUID.randomUUID()
-                                        .toString())));
+                                        .toString()));
 
         this.creationTime = System.currentTimeMillis();
         this.elaProperties = elaProperties;
