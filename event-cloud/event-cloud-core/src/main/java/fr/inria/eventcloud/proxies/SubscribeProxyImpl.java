@@ -49,9 +49,9 @@ import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.can.ReconstructEventRequest;
+import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
-import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
+import fr.inria.eventcloud.messages.response.can.ReconstructCompoundEventResponse;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -251,10 +251,10 @@ public class SubscribeProxyImpl extends ProxyCache implements
             Collection<Quadruple> quads;
             try {
                 quads =
-                        ((ReconstructEventResponse) PAFuture.getFutureValue(super.proxy.selectTracker()
+                        ((ReconstructCompoundEventResponse) PAFuture.getFutureValue(super.proxy.selectTracker()
                                 .getRandomPeer()
                                 .send(
-                                        new ReconstructEventRequest(
+                                        new ReconstructCompoundEventRequest(
                                                 reconstructPattern,
                                                 quadHashesReceived)))).getResult();
             } catch (DispatchException e) {
