@@ -32,7 +32,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.messages.response.can.ReconstructEventResponse;
+import fr.inria.eventcloud.messages.response.can.ReconstructCompoundEventResponse;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.utils.LongLong;
 
@@ -47,12 +47,12 @@ import fr.inria.eventcloud.utils.LongLong;
  * 
  * @author lpellegr
  */
-public class ReconstructEventRequest extends QuadruplePatternRequest {
+public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
 
     private static final long serialVersionUID = 1L;
 
     private static final Logger log =
-            LoggerFactory.getLogger(ReconstructEventRequest.class);
+            LoggerFactory.getLogger(ReconstructCompoundEventRequest.class);
 
     // the hash values associated to the quadruples which have been already
     // received by the seeker
@@ -73,7 +73,7 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
      *            the hash values associated to the quadruples which have been
      *            already received.
      */
-    public ReconstructEventRequest(QuadruplePattern quadruplePattern,
+    public ReconstructCompoundEventRequest(QuadruplePattern quadruplePattern,
             Collection<LongLong> hashValuesReceived) {
         super(quadruplePattern);
 
@@ -88,8 +88,8 @@ public class ReconstructEventRequest extends QuadruplePatternRequest {
      * {@inheritDoc}
      */
     @Override
-    public ReconstructEventResponse createResponse(StructuredOverlay overlay) {
-        return new ReconstructEventResponse(this);
+    public ReconstructCompoundEventResponse createResponse(StructuredOverlay overlay) {
+        return new ReconstructCompoundEventResponse(this);
     }
 
     /**

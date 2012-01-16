@@ -16,18 +16,19 @@
  **/
 package fr.inria.eventcloud.messages.response.can;
 
-import fr.inria.eventcloud.messages.request.can.ReconstructEventRequest;
+import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
 
 /**
- * Response associated to {@link ReconstructEventRequest}.
+ * Response associated to {@link ReconstructCompoundEventRequest}.
  * 
  * @author lpellegr
  */
-public class ReconstructEventResponse extends QuadruplePatternResponse {
+public class ReconstructCompoundEventResponse extends QuadruplePatternResponse {
 
     private static final long serialVersionUID = 1L;
 
-    public ReconstructEventResponse(ReconstructEventRequest request) {
+    public ReconstructCompoundEventResponse(
+            ReconstructCompoundEventRequest request) {
         super(request);
     }
 
