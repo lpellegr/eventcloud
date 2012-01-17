@@ -53,8 +53,6 @@ public class SemanticCanOverlay extends CanOverlay {
 
     private final LoadingCache<SubscriptionId, Subscription> subscriptionsCache;
 
-    public final ExecutorService datastoreThreadPool;
-
     /**
      * Constructs a new overlay with the specified {@code dataHandler} and
      * {@code requestResponseManager}.
@@ -70,8 +68,6 @@ public class SemanticCanOverlay extends CanOverlay {
             TransactionalTdbDatastore colanderDatastore) {
         super(new SemanticRequestResponseManager(colanderDatastore),
                 peerDatastore);
-
-        this.datastoreThreadPool = Executors.newFixedThreadPool(10);
 
         this.peerStubsCache =
                 CacheBuilder.newBuilder()
