@@ -151,7 +151,7 @@ function ws_instance_file() {
 # $1 is webservice name 
 # $2 is eventcloud index associated to webservice (1, 2, ...)
 function ws_output_file() {
-    echo "$OUTPUTS_DIR/$1$2"
+    echo "$OUTPUTS_DIR/$1$2.output"
 }
 
 # $1 is an eventcloud URL

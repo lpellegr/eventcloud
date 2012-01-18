@@ -1,6 +1,14 @@
 #!/bin/sh
 
-. $(dirname $0)/configuration/set-environment.sh
+if [ ! "$PATH_TO_RESOURCES" ];
+then
+    LOAD_ENVIRONMENT=1
+fi;
+
+if [ "$LOAD_ENVIRONMENT" ];
+then
+    . $(dirname $0)/configuration/set-environment.sh
+fi;
 
 REGISTRY_INSTANCE_FILE=$1
 PORT=$2
@@ -21,4 +29,8 @@ java -Xms128m -Xmx256m \
 
 echo $! > $REGISTRY_INSTANCE_FILE.pid
 
-. $(dirname $0)/configuration/unset-environment.sh
+if [ "$LOAD_ENVIRONMENT" ];
+then
+    . $(dirname $0)/configuration/unset-environment.sh
+fi;
+
