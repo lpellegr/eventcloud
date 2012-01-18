@@ -21,15 +21,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.objectweb.proactive.core.util.MutableInteger;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +74,7 @@ public class PublishSubscribeBenchmarkTest {
 
     private final int nbSubscribers;
 
-    private final AtomicInteger nbEventsPublished;
+    private final MutableInteger nbEventsPublished;
 
     private final int expectedNbEvents;
 
@@ -83,26 +84,27 @@ public class PublishSubscribeBenchmarkTest {
 
     private final DatastoreType datastoreType;
 
-    private final int publishersWaitInterval;
-
     private final Stopwatch receiveExpectedEventsStopwatch;
+
+    private ExecutorService threadPool;
 
     public PublishSubscribeBenchmarkTest(int nbPeers, int nbPublishers,
             int nbSubscribers, int expectedNbEvents,
-            int publishersWaitInterval, Supplier<? extends Event> supplier,
+            Supplier<? extends Event> supplier,
             Class<? extends NotificationListener<?>> notificationListenerType,
             DatastoreType type) {
         super();
         this.nbPeers = nbPeers;
         this.nbPublishers = nbPublishers;
         this.nbSubscribers = nbSubscribers;
-        this.nbEventsPublished = new AtomicInteger();
-        this.publishersWaitInterval = publishersWaitInterval;
+        this.nbEventsPublished = new MutableInteger();
         this.expectedNbEvents = expectedNbEvents;
         this.supplier = supplier;
         this.notificationListenerType = notificationListenerType;
         this.datastoreType = type;
         this.receiveExpectedEventsStopwatch = new Stopwatch();
+        this.threadPool =
+                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
     }
 
     @Parameters
@@ -110,20 +112,20 @@ public class PublishSubscribeBenchmarkTest {
         // scenarios
         return Arrays.asList(new Object[][] {
                 {
-                        1, 10, 1, 100, 120, new QuadrupleSupplier(),
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
                         SignalNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
-                        1, 10, 1, 100, 120, new QuadrupleSupplier(),
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
                         BindingNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
-                        1, 10, 1, 100, 120, new CompoundEventSupplier(10),
+                        1, 1, 1, 100, new CompoundEventSupplier(10),
                         CompoundEventNotificationListener.class,
                         DatastoreType.PERSISTENT}});
     }
 
-    @Test(timeout = 300000)
+    @Test(timeout = 1800000)
     public void execute() {
         log.info(
                 "Benchmark with {} peer(s), {} publisher(s) and {} subscriber(s) using {}",
@@ -148,25 +150,6 @@ public class PublishSubscribeBenchmarkTest {
         nbEventsReceivedBySubscriber.clear();
         this.receiveExpectedEventsStopwatch.reset();
 
-        Timer timer = new Timer(false);
-
-        for (int i = 0; i < this.nbPublishers; i++) {
-            final PublishProxy publishProxy = publishProxies.get(i);
-
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    if (nbEventsPublished.incrementAndGet() <= expectedNbEvents) {
-                        publish(publishProxy, supplier);
-                    } else {
-                        this.cancel();
-                    }
-                }
-            };
-
-            timer.schedule(timerTask, 0, this.publishersWaitInterval);
-        }
-
         for (int i = 0; i < this.nbSubscribers; i++) {
             final SubscribeProxy subscribeProxy = subscribeProxies.get(i);
 
@@ -183,6 +166,26 @@ public class PublishSubscribeBenchmarkTest {
         }
 
         receiveExpectedEventsStopwatch.start();
+
+        boolean running = true;
+        while (running) {
+            for (int i = 0; i < nbPublishers; i++) {
+                final PublishProxy publishProxy = publishProxies.get(i);
+
+                if (nbEventsPublished.getValue() <= expectedNbEvents) {
+                    threadPool.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            publish(publishProxy, supplier);
+                        }
+                    });
+                    nbEventsPublished.add(1);
+                } else {
+                    running = false;
+                    break;
+                }
+            }
+        }
 
         // waits to receive at least the number of expected events
         synchronized (nbEventsReceivedBySubscriber) {
