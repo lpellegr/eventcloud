@@ -1,6 +1,14 @@
 #!/bin/sh
 
-. $(dirname $0)/configuration/set-environment.sh
+if [ ! "$PATH_TO_RESOURCES" ];
+then
+    LOAD_ENVIRONMENT=1
+fi;
+
+if [ "$LOAD_ENVIRONMENT" ];
+then
+    . $(dirname $0)/configuration/set-environment.sh
+fi;
 
 WS_INSTANCE_FILE=$1
 PNP_PORT=$2
@@ -22,5 +30,7 @@ java -Xms64m -Xmx128m \
 
 echo $! > $WS_INSTANCE_FILE.pid
 
-. $(dirname $0)/configuration/unset-environment.sh
-     
+if [ "$LOAD_ENVIRONMENT" ];
+then
+    . $(dirname $0)/configuration/unset-environment.sh
+fi;
