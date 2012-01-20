@@ -18,7 +18,7 @@ package fr.inria.eventcloud.datastore;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.tdb.DatasetGraphTxn;
+import com.hp.hpl.jena.tdb.transaction.DatasetGraphTxn;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
