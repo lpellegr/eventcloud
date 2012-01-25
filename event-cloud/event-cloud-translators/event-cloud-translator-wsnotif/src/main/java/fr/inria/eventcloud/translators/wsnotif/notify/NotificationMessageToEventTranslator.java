@@ -75,8 +75,7 @@ public class NotificationMessageToEventTranslator {
             LoggerFactory.getLogger(NotificationMessageToEventTranslator.class);
 
     /**
-     * This method removes all white spaces between > < elements for a node and
-     * also replaces all '#' character by '$1$'.
+     * This method removes all white spaces between > < elements for a node
      * 
      * @param incomingNode
      * 
@@ -93,6 +92,7 @@ public class NotificationMessageToEventTranslator {
             incomingNode = byteArrayToXmlNode(nodeString.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
         return incomingNode;
     }
@@ -228,6 +228,8 @@ public class NotificationMessageToEventTranslator {
         Message message = notificationMessage.getMessage();
         if (message != null) {
             messageNodes = parseElement((Element) message.getAny(), false);
+            if (messageNodes == null)
+                return null;
         }
 
         if (subjectNode != null) {
@@ -422,7 +424,12 @@ public class NotificationMessageToEventTranslator {
 
         if (elements != null) {
             for (Element element : elements) {
-                elementNodes.putAll(parseElement(element, true));
+                Map<Node, Node> result = parseElement(element, true);
+                if (result != null)
+                    elementNodes.putAll(result);
+                else {
+                    return null;
+                }
             }
         }
 
@@ -433,9 +440,12 @@ public class NotificationMessageToEventTranslator {
         Map<Node, Node> result = new HashMap<Node, Node>();
 
         if (element != null) {
-            this.parseElement(
-                    removeWhiteSpacesAndSharpFromNode(element),
-                    new StringBuilder(), result, isMetadata);
+            org.w3c.dom.Node nn = removeWhiteSpacesAndSharpFromNode(element);
+            if (nn != null) {
+                this.parseElement(nn, new StringBuilder(), result, isMetadata);
+            } else {
+                return null;
+            }
         }
 
         return result;
