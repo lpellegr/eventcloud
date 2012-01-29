@@ -67,6 +67,7 @@ public final class EventCloudLauncher extends Launcher {
         result.append(this.nbTrackers);
         result.append(" ");
         result.append(this.nbPeers);
+        result.append(" ");
         result.append(eventCloud.getId().toUrl());
 
         return result.toString();
