@@ -16,32 +16,31 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
+import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 
 /**
- * This launcher is used to deploy a publish proxy component as a web service.
+ * This launcher is used to deploy a subscribe proxy component as a web service.
  * 
  * @author lpellegr
  * @author bsauvan
  */
-public final class PublishWsProxyLauncher extends WsProxyLauncher {
-
-    public PublishWsProxyLauncher(String[] args) {
-        super(args);
-    }
+public final class SubscribeWsLauncher extends WsProxyLauncher {
 
     public static void main(String[] args) {
-        new PublishWsProxyLauncher(args).launch();
+        SubscribeWsLauncher launcher = new SubscribeWsLauncher();
+        launcher.parseArguments(launcher, args);
+        launcher.launch();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String deployWsProxy() {
-        return WsProxyDeployer.deployPublishWebService(
+    public String run() {
+        return WebServiceDeployer.deploySubscribeWebService(
                 super.registryUrl, super.eventCloudIdUrl,
-                "proactive/services/EventCloud_publish-webservices", super.port);
+                "proactive/services/EventCloud_subscribe-webservices",
+                super.port);
     }
 
 }

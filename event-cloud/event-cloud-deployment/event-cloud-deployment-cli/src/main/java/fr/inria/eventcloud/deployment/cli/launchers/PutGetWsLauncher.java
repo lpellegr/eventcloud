@@ -16,33 +16,30 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
+import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 
 /**
- * This launcher is used to deploy a subscribe proxy component as a web service.
+ * This launcher is used to deploy a put/get proxy component as a web service.
  * 
  * @author lpellegr
  * @author bsauvan
  */
-public final class SubscribeWsProxyLauncher extends WsProxyLauncher {
-
-    public SubscribeWsProxyLauncher(String[] args) {
-        super(args);
-    }
+public final class PutGetWsLauncher extends WsProxyLauncher {
 
     public static void main(String[] args) {
-        new SubscribeWsProxyLauncher(args).launch();
+        PutGetWsLauncher launcher = new PutGetWsLauncher();
+        launcher.parseArguments(launcher, args);
+        launcher.launch();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String deployWsProxy() {
-        return WsProxyDeployer.deploySubscribeWebService(
+    public String run() {
+        return WebServiceDeployer.deployPutGetWebService(
                 super.registryUrl, super.eventCloudIdUrl,
-                "proactive/services/EventCloud_subscribe-webservices",
-                super.port);
+                "proactive/services/EventCloud_putget-webservices", super.port);
     }
 
 }

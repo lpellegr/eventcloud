@@ -41,7 +41,7 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.webservices.JaxWsCXFWSCaller;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
-import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
+import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 
 /**
  * Class used to test a put/get proxy component by using web services.
@@ -71,7 +71,7 @@ public class PutGetTest {
         EventCloudId ecId = deployer.createEventCloud(10);
 
         String putGetWsUrl =
-                WsProxyDeployer.deployPutGetWebService(
+                WebServiceDeployer.deployPutGetWebService(
                         deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
                         "putget", 8889);
 

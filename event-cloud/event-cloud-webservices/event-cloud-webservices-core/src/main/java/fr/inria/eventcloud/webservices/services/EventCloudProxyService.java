@@ -22,37 +22,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.proxies.Proxy;
-import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
+import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
+ * Contains information which are necessary to deploy an eventcloud proxy (e.g.
+ * {@link PublishProxy}, {@link SubscribeProxy}, ...) as a web service.
  * 
  * @author lpellegr
  * 
  * @param <T>
+ *            proxy type.
  */
-public abstract class EventCloudService<T extends Proxy> {
+public abstract class EventCloudProxyService<T extends Proxy> {
 
-    protected static Logger log = LoggerFactory.getLogger(EventCloudService.class);
+    protected static Logger log =
+            LoggerFactory.getLogger(EventCloudProxyService.class);
+
+    protected final String registryUrl;
+
+    protected final String eventcloudIdUrl;
 
     protected T proxy;
 
-    protected WsNotificationTranslator translator;
-
-    protected String registryUrl;
-
-    protected String eventCloudIdUrl;
-
-    public EventCloudService(String registryUrl, String eventCloudIdUrl) {
+    public EventCloudProxyService(String registryUrl, String eventcloudIdUrl) {
         this.registryUrl = registryUrl;
-        this.eventCloudIdUrl = eventCloudIdUrl;
+        this.eventcloudIdUrl = eventcloudIdUrl;
     }
 
     @PostConstruct
-    public void setUp() {
-        this.translator = new WsNotificationTranslator();
+    public void init() {
         this.proxy = this.createProxy();
-
-        log.info("New proxy of type {} deployed", proxy.getClass().getName());
+        log.info("{} proxy deployed", proxy.getClass().getName());
     }
 
     public abstract T createProxy();

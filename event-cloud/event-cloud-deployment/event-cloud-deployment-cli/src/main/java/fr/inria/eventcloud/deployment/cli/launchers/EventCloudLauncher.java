@@ -16,9 +16,7 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -31,37 +29,26 @@ import fr.inria.eventcloud.deployment.EventCloudDeployer;
  * to the specified {@link EventCloudsRegistry} URL. If the deployment succeed,
  * an instance file is created. This instance file contains a three columns
  * value such as {@code 1 1 -932949592}. The first number indicates the number
- * of trackers deployed, the second the number of peers deployed and the last is
- * an unique URL which identifies the eventcloud.
+ * of trackers deployed, the second the number of peers deployed and the last
+ * information is an URL which uniquely identifies the eventcloud which is
+ * running.
  * 
  * @author lpellegr
  */
 public final class EventCloudLauncher extends Launcher {
 
-    @Parameter(names = {"-registry"}, description = "The EventCloudsRegistry URL", required = true)
+    @Parameter(names = {"--registry-url", "-r"}, description = "Eventclouds registry URL", required = true)
     private String registryUrl;
 
-    @Parameter(names = {"-nb-peers"}, description = "Number of Peers")
+    @Parameter(names = {"--nb-peers"}, description = "Number of peers")
     private int nbPeers = 1;
 
-    @Parameter(names = {"-nb-trackers"}, description = "Number of Trackers")
+    @Parameter(names = {"--nb-trackers"}, description = "Number of trackers")
     private int nbTrackers = 1;
-
-    private EventCloudLauncher() {
-        super(INSTANCE_FILE_JAVA_PROPERTY_NAME);
-    }
 
     public static void main(String[] args) {
         EventCloudLauncher launcher = new EventCloudLauncher();
-
-        try {
-            JCommander jc = new JCommander(launcher);
-            jc.parse(args);
-        } catch (ParameterException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
+        launcher.parseArguments(launcher, args);
         launcher.launch();
     }
 
@@ -76,8 +63,13 @@ public final class EventCloudLauncher extends Launcher {
                         new Collection<UnalterableElaProperty>(),
                         this.nbTrackers, this.nbPeers);
 
-        return this.nbTrackers + " " + this.nbPeers + " "
-                + eventCloud.getId().toUrl();
+        StringBuilder result = new StringBuilder();
+        result.append(this.nbTrackers);
+        result.append(" ");
+        result.append(this.nbPeers);
+        result.append(eventCloud.getId().toUrl());
+
+        return result.toString();
     }
 
 }

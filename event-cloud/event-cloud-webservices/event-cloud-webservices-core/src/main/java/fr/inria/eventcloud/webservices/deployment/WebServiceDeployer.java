@@ -36,10 +36,11 @@ import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
-import fr.inria.eventcloud.webservices.services.PublishService;
-import fr.inria.eventcloud.webservices.services.PutGetService;
-import fr.inria.eventcloud.webservices.services.SubscribeService;
-import fr.inria.eventcloud.webservices.services.SubscriberService;
+import fr.inria.eventcloud.webservices.services.EventCloudManagementServiceImpl;
+import fr.inria.eventcloud.webservices.services.PublishServiceImpl;
+import fr.inria.eventcloud.webservices.services.PutGetServiceImpl;
+import fr.inria.eventcloud.webservices.services.SubscribeServiceImpl;
+import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
 
 /**
  * WsProxyDeployer is used to ease web service operations (expose and unexpose)
@@ -47,7 +48,7 @@ import fr.inria.eventcloud.webservices.services.SubscriberService;
  * 
  * @author bsauvan
  */
-public class WsProxyDeployer {
+public class WebServiceDeployer {
 
     /**
      * Exposes as a web service the {@code publish-webservices} interface of a
@@ -199,31 +200,37 @@ public class WsProxyDeployer {
         }
     }
 
+    public static String deployEventCloudManagementWebService(String registryUrl,
+                                                              int portLowerBound,
+                                                              String urlSuffix,
+                                                              int webServicePort) {
+        return deployWebService(new EventCloudManagementServiceImpl(
+                registryUrl, portLowerBound), urlSuffix, webServicePort);
+    }
+
     public static String deployPublishWebService(String registryUrl,
                                                  String eventCloudIdUrl,
                                                  String urlSuffix, int port) {
-        return deployWebService(
-                new PublishService(registryUrl, eventCloudIdUrl), urlSuffix,
-                port);
+        return deployWebService(new PublishServiceImpl(
+                registryUrl, eventCloudIdUrl), urlSuffix, port);
     }
 
     public static String deploySubscribeWebService(String registryUrl,
                                                    String eventCloudIdUrl,
                                                    String urlSuffix, int port) {
-        return deployWebService(new SubscribeService(
+        return deployWebService(new SubscribeServiceImpl(
                 registryUrl, eventCloudIdUrl), urlSuffix, port);
     }
 
     public static String deployPutGetWebService(String registryUrl,
                                                 String eventCloudIdUrl,
                                                 String urlSuffix, int port) {
-        return deployWebService(
-                new PutGetService(registryUrl, eventCloudIdUrl), urlSuffix,
-                port);
+        return deployWebService(new PutGetServiceImpl(
+                registryUrl, eventCloudIdUrl), urlSuffix, port);
     }
 
     public static String deploySubscriberWebService(String urlSuffix, int port) {
-        return deployWebService(new SubscriberService(), urlSuffix, port);
+        return deployWebService(new SubscriberServiceImpl(), urlSuffix, port);
     }
 
     public static String deployWebService(Object service, String addressSuffix,
