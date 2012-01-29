@@ -26,7 +26,7 @@ java -Xms64m -Xmx128m \
      -Dlogging.output.filename=$(basename $WS_INSTANCE_FILE) \
      -Dproactive.communication.protocol=pnp \
      -Dproactive.pnp.port=$PNP_PORT \
-     -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.PutGetWsProxyLauncher $@ &
+     -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.PutGetWsLauncher $@ &
 
 echo $! > $WS_INSTANCE_FILE.pid
 

@@ -63,7 +63,7 @@ public abstract class Launcher {
 
     private void createInstanceFile(String msg) {
         if (this.instanceFile.exists()) {
-            throw new IllegalArgumentException("Instance file already exists: "
+            throw new IllegalStateException("Instance file already exists: "
                     + this.instanceFile.toString());
         }
 
