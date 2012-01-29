@@ -24,6 +24,12 @@
 			<directoryMode>0744</directoryMode>
 			<fileMode>0744</fileMode>
 		</dependencySet>
+		<dependencySet>
+			<excludes>
+				<exclude>org.ow2.proactive:scheduling-common-core</exclude>
+				<exclude>org.ow2.proactive:scheduling-scheduler-core</exclude>
+			</excludes>
+		</dependencySet>
 	</dependencySets>
 
 	<fileSets>
