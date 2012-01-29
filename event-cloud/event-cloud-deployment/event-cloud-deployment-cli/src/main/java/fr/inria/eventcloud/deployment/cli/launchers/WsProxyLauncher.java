@@ -16,50 +16,24 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 
 /**
- * This class is used to provide the operations which are common to all the
- * proxies that have to be deployed as a web service.
+ * This class provides JCommander parameters which are compulsory to launch web
+ * service proxies.
  * 
  * @author lpellegr
  * @author bsauvan
  */
 public abstract class WsProxyLauncher extends Launcher {
 
-    @Parameter(names = {"-registry"}, description = "An eventclouds registry URL to use", required = true)
+    @Parameter(names = {"--registry-url", "-r"}, description = "Eventclouds registry URL", required = true)
     protected String registryUrl;
 
-    @Parameter(names = {"-id"}, description = "An eventcloud identifier to link the proxy with", required = true)
+    @Parameter(names = {"--eventcloud-url", "-e"}, description = "URL identifying an eventcloud which is deployed and running", required = true)
     protected String eventCloudIdUrl;
 
-    @Parameter(names = {"-port"}, description = "The HTTP port to use in order to deploy the webservice", required = true)
+    @Parameter(names = {"--port", "-p"}, description = "Deploys the web service at the specified port", required = true)
     protected int port;
-
-    protected WsProxyLauncher(String[] args) {
-        super(INSTANCE_FILE_JAVA_PROPERTY_NAME);
-
-        JCommander jCommander = new JCommander(this);
-        jCommander.setProgramName(this.getClass().getCanonicalName());
-
-        try {
-            jCommander.parse(args);
-        } catch (ParameterException e) {
-            jCommander.usage();
-            System.exit(1);
-        }
-    }
-
-    public abstract String deployWsProxy();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String run() {
-        return this.deployWsProxy();
-    }
 
 }

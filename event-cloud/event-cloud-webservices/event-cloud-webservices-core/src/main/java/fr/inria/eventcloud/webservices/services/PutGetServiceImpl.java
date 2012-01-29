@@ -36,10 +36,10 @@ import fr.inria.eventcloud.webservices.api.PutGetWsApi;
  * 
  * @author lpellegr
  */
-public class PutGetService extends EventCloudService<PutGetProxy> implements
+public class PutGetServiceImpl extends EventCloudProxyService<PutGetProxy> implements
         PutGetWsApi {
 
-    public PutGetService(String registryUrl, String eventCloudIdUrl) {
+    public PutGetServiceImpl(String registryUrl, String eventCloudIdUrl) {
         super(registryUrl, eventCloudIdUrl);
     }
 
@@ -145,7 +145,8 @@ public class PutGetService extends EventCloudService<PutGetProxy> implements
     @Override
     public PutGetProxy createProxy() {
         return ProxyFactory.getInstance(
-                super.registryUrl, EventCloudId.parseEventCloudIdUrl(super.eventCloudIdUrl))
+                super.registryUrl,
+                EventCloudId.parseEventCloudIdUrl(super.eventcloudIdUrl))
                 .createPutGetProxy();
     }
 

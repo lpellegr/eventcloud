@@ -16,16 +16,18 @@
  **/
 package fr.inria.eventcloud.webservices.services;
 
-import javax.jws.WebService;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 
 /**
  * Defines a publish web service as defined by the WS-Notification
@@ -35,12 +37,18 @@ import fr.inria.eventcloud.proxies.PublishProxy;
  * 
  * @author lpellegr
  */
-@WebService(serviceName = "EventCloudPublish", portName = "EventCloudPublishPort", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2", name = "EventCloudPublishPortType")
-public class PublishService extends EventCloudService<PublishProxy> implements
-        NotificationConsumer {
+public class SubscriberServiceImpl implements NotificationConsumer {
 
-    public PublishService(String registryUrl, String eventCloudIdUrl) {
-        super(registryUrl, eventCloudIdUrl);
+    private static Logger log =
+            LoggerFactory.getLogger(SubscriberServiceImpl.class);
+
+    private final WsNotificationTranslator translator;
+
+    public final List<CompoundEvent> eventsReceived;
+
+    public SubscriberServiceImpl() {
+        this.translator = new WsNotificationTranslator();
+        this.eventsReceived = new ArrayList<CompoundEvent>();
     }
 
     /**
@@ -48,32 +56,15 @@ public class PublishService extends EventCloudService<PublishProxy> implements
      */
     @Override
     public void notify(Notify notify) {
-        if (super.proxy == null) {
-            return;
-        }
-
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
             CompoundEvent event =
                     this.translator.translateNotificationMessageToEvent(notificationMessage);
+
             if (event != null) {
-                log.info(
-                        "Translated event to insert to the Event Cloud is:\n {}",
-                        event);
-                super.proxy.publish(event);
+                this.eventsReceived.add(event);
+                log.info("New compound event received:\n{}", event);
             }
         }
-
-        log.info("New notify notification handled");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PublishProxy createProxy() {
-        return ProxyFactory.getInstance(
-                super.registryUrl, EventCloudId.parseEventCloudIdUrl(super.eventCloudIdUrl))
-                .createPublishProxy();
     }
 
 }

@@ -48,12 +48,13 @@ import fr.inria.eventcloud.webservices.WsEventNotificationListener;
  * @author lpellegr
  */
 @WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", name = "EventCloudSubscribePortType")
-public class SubscribeService extends EventCloudService<SubscribeProxy>
-        implements NotificationProducer {
+public class SubscribeServiceImpl extends
+        EventCloudTranslatableProxyService<SubscribeProxy> implements
+        NotificationProducer {
 
-    private Map<SubscriptionId, String> subscribers;
+    private final Map<SubscriptionId, String> subscribers;
 
-    public SubscribeService(String registryUrl, String eventCloudIdUrl) {
+    public SubscribeServiceImpl(String registryUrl, String eventCloudIdUrl) {
         super(registryUrl, eventCloudIdUrl);
         this.subscribers = new HashMap<SubscriptionId, String>();
     }
@@ -105,6 +106,7 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
 
                         Subscription subscription =
                                 new Subscription(sparqlQuery);
+
                         this.subscribers.put(
                                 subscription.getId(), subscriberUrl);
 
@@ -112,7 +114,7 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
                                 subscription, new WsEventNotificationListener(
                                         subscriberUrl));
                     } else {
-                        log.info("Subscribe notification received but no subscriber address is specified: the subscriber will receive no notification");
+                        log.warn("Subscribe notification received but no subscriber address is specified: the subscriber will receive no notification");
                     }
 
                     log.info("New subscribe notification handled");
@@ -136,7 +138,8 @@ public class SubscribeService extends EventCloudService<SubscribeProxy>
     @Override
     public SubscribeProxy createProxy() {
         return ProxyFactory.getInstance(
-                super.registryUrl, EventCloudId.parseEventCloudIdUrl(super.eventCloudIdUrl))
+                super.registryUrl,
+                EventCloudId.parseEventCloudIdUrl(super.eventcloudIdUrl))
                 .createSubscribeProxy();
     }
 

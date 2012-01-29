@@ -44,8 +44,8 @@ import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
 import fr.inria.eventcloud.utils.Callback;
-import fr.inria.eventcloud.webservices.deployment.WsProxyDeployer;
-import fr.inria.eventcloud.webservices.services.SubscriberService;
+import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
+import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
 
 /**
  * Class used to test a subscribe proxy component and a publish proxy component
@@ -75,18 +75,18 @@ public class PubSubTest {
 
         // Web services which are deployed
         String subscribeWsUrl =
-                WsProxyDeployer.deploySubscribeWebService(
+                WebServiceDeployer.deploySubscribeWebService(
                         deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
                         "subscribe", 8889);
 
         String publishWsUrl =
-                WsProxyDeployer.deployPublishWebService(
+                WebServiceDeployer.deployPublishWebService(
                         deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
                         "publish", 8890);
 
-        SubscriberService subscriberService = new SubscriberService();
+        SubscriberServiceImpl subscriberService = new SubscriberServiceImpl();
         String subscriberWsUrl =
-                WsProxyDeployer.deployWebService(
+                WebServiceDeployer.deployWebService(
                         subscriberService, "subscriber", 8891);
 
         // Clients associated to Web services

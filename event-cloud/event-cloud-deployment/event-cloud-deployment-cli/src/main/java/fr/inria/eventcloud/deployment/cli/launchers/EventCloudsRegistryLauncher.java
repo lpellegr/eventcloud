@@ -31,10 +31,6 @@ import fr.inria.eventcloud.EventCloudsRegistryFactory;
  */
 public final class EventCloudsRegistryLauncher extends Launcher {
 
-    private EventCloudsRegistryLauncher() {
-        super(INSTANCE_FILE_JAVA_PROPERTY_NAME);
-    }
-
     public static void main(String[] args) {
         new EventCloudsRegistryLauncher().launch();
     }

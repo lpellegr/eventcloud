@@ -55,11 +55,32 @@ public class EventCloudId extends UniqueId {
     }
 
     /**
+     * Returns {@code true} if the specified {@code eventcloudIdUrl} is a valid,
+     * {@code false} otherwise.
+     * 
+     * @param eventcloudIdUrl
+     *            the url to check.
+     * 
+     * @return {@code true} if the specified {@code eventcloudIdUrl} is a valid,
+     *         {@code false} otherwise.
+     */
+    public static boolean isEventCloudIdUrl(String eventcloudIdUrl) {
+        if (eventcloudIdUrl.startsWith(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())
+                && eventcloudIdUrl.substring(
+                        EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                                .length()).length() == 22) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Parses a {@link EventCloudId} from the specified URL. The URL is supposed
      * to start with the prefix
      * {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
      * 
-     * @param eventCloudIdUrl
+     * @param eventcloudIdUrl
      *            the URL to parse.
      * 
      * @return a event cloud identifier which identifies uniquely an event
@@ -69,15 +90,15 @@ public class EventCloudId extends UniqueId {
      *             if the specified URL does no start with the prefix
      *             {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
      */
-    public static EventCloudId parseEventCloudIdUrl(String eventCloudIdUrl) {
-        if (!eventCloudIdUrl.startsWith(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())) {
+    public static EventCloudId parseEventCloudIdUrl(String eventcloudIdUrl) {
+        if (!eventcloudIdUrl.startsWith(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())) {
             throw new IllegalArgumentException("URI must start with "
                     + EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                    + " but was:" + eventCloudIdUrl);
+                    + " but was:" + eventcloudIdUrl);
         }
 
         return new EventCloudId(
-                Base64LongLong.decodeUUID(eventCloudIdUrl.substring(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                Base64LongLong.decodeUUID(eventcloudIdUrl.substring(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                         .length())));
     }
 

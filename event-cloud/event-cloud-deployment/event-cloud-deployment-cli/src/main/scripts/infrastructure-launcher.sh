@@ -76,8 +76,8 @@ function deploy_eventclouds() {
 	EVENTCLOUD_INSTANCE_FILE=$(eventcloud_instance_file $i)
 
 	. $BUNDLE_HOME/scripts/eventcloud-launcher.sh $EVENTCLOUD_INSTANCE_FILE $PNP_PORT \
-            -registry $EVENTCLOUDS_REGISTRY_URL -nb-trackers $NB_TRACKERS_BY_EVENTCLOUD \
-            -nb-peers $NB_PEERS_BY_EVENTCLOUD &> $(eventcloud_output_file $i) &
+            --registry-url $EVENTCLOUDS_REGISTRY_URL --nb-trackers $NB_TRACKERS_BY_EVENTCLOUD \
+            --nb-peers $NB_PEERS_BY_EVENTCLOUD &> $(eventcloud_output_file $i) &
 	
 	wait_file_creation $INSTANCES_DIR $(basename $EVENTCLOUD_INSTANCE_FILE)
 
@@ -129,7 +129,7 @@ function deploy_ws_proxy() {
     WS_INSTANCE_FILE=$(ws_instance_file $1 $3)
 
     . $BUNDLE_HOME/scripts/$1-launcher.sh $WS_INSTANCE_FILE $PNP_PORT $HTTP_PORT \
-        -registry $EVENTCLOUDS_REGISTRY_URL -id $4 -port $HTTP_PORT &> $(ws_output_file $1 $3) &
+        --registry-url $EVENTCLOUDS_REGISTRY_URL --eventcloud-url $4 -p $HTTP_PORT &> $(ws_output_file $1 $3) &
 }
 
 # $1 is eventcloud index (1, 2, ...)

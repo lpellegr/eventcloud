@@ -20,36 +20,48 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import com.beust.jcommander.JCommander;
+
 /**
- * Any launchers extends this abstract class to have the possibility to create
- * easily an instance file which indicates that the launcher has finished to
- * deploy the application.
+ * This class offers the possibility to any launcher to redirect the output of
+ * the {@link #run()} method either to the standard output or to a file which is
+ * named instance file when a Java property with name
+ * {@link Launcher#INSTANCE_FILE_JAVA_PROPERTY_NAME} is defined.
  * 
  * @author lpellegr
  */
 public abstract class Launcher {
 
-    protected static final String INSTANCE_FILE_JAVA_PROPERTY_NAME =
+    private static final String INSTANCE_FILE_JAVA_PROPERTY_NAME =
             "eventcloud.instance.file";
 
-    private final File instanceFile;
+    private File instanceFile;
 
-    protected Launcher(String javaPropertyName) {
-        if (System.getProperty(javaPropertyName) == null) {
-            throw new IllegalArgumentException("Java property '"
-                    + javaPropertyName + "' undefined");
+    protected Launcher() {
+        if (System.getProperty(INSTANCE_FILE_JAVA_PROPERTY_NAME) != null) {
+            this.instanceFile =
+                    new File(
+                            System.getProperty(INSTANCE_FILE_JAVA_PROPERTY_NAME));
         }
+    }
 
-        this.instanceFile = new File(System.getProperty(javaPropertyName));
+    protected void parseArguments(Launcher instance, String[] args) {
+        new JCommander(instance).parse(args);
     }
 
     public void launch() {
-        this.createInstanceFile(this.run());
+        String bindingName = this.run();
+
+        if (this.instanceFile != null) {
+            this.createInstanceFile(bindingName);
+        } else {
+            System.out.println(bindingName);
+        }
     }
 
     protected abstract String run();
 
-    protected void createInstanceFile(String message) {
+    private void createInstanceFile(String msg) {
         if (this.instanceFile.exists()) {
             throw new IllegalArgumentException("Instance file already exists: "
                     + this.instanceFile.toString());
@@ -58,7 +70,7 @@ public abstract class Launcher {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(this.instanceFile);
-            fos.write(message.getBytes());
+            fos.write(msg.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
