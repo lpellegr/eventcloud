@@ -81,7 +81,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
         SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
 
-        // writes the subscription into the cache and the local datastoreT
+        // writes the subscription into the cache and the local datastore
         final Subscription subscription = this.subscription.getValue();
 
         log.debug("Indexing subscription {} on peer {}", subscription, overlay);

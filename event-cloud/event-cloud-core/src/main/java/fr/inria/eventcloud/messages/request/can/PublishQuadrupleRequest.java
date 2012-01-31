@@ -16,30 +16,32 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ID_PROPERTY;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_PROPERTY;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_ID_PROPERTY;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
-
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
-import org.openjena.riot.out.NodeFormatterNT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.algebra.Algebra;
+import com.hp.hpl.jena.sparql.algebra.Op;
+import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
+import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
+import com.hp.hpl.jena.sparql.algebra.op.OpProject;
+import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.QueryIterator;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.expr.E_Datatype;
+import com.hp.hpl.jena.sparql.expr.E_Equals;
+import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
+import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
+import com.hp.hpl.jena.sparql.expr.E_SameTerm;
+import com.hp.hpl.jena.sparql.expr.E_Str;
+import com.hp.hpl.jena.sparql.expr.E_StrStartsWith;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -66,7 +68,25 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     private static final Logger log =
             LoggerFactory.getLogger(PublishQuadrupleRequest.class);
 
-    private static final NodeFormatterNT nodeFormatter = new NodeFormatterNT();
+    /*
+     * Jena variables used to build the algebra
+     */
+    private static final Var subscriptionIdVar = Var.alloc("sId");
+
+    private static final Var subscriptionSourceVar = Var.alloc("sSrc");
+
+    private static final Var subSubscriptionIdVar = Var.alloc("ssId");
+
+    private static final Var subSubscriptionSourceVar = Var.alloc("ssSrc");
+
+    private static final Var subSubscriptionGraphVar = Var.alloc("ssGraph");
+
+    private static final Var subSubscriptionSubjectVar = Var.alloc("ssSubject");
+
+    private static final Var subSubscriptionPredicateVar =
+            Var.alloc("ssPredicate");
+
+    private static final Var subSubscriptionObjectVar = Var.alloc("ssObject");
 
     public PublishQuadrupleRequest(Quadruple quad) {
         super(quad);
@@ -78,146 +98,142 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     @Override
     public void onDestinationReached(final StructuredOverlay overlay,
                                      final Quadruple quadrupleMatching) {
-        SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
         final TransactionalTdbDatastore datastore =
                 ((TransactionalTdbDatastore) overlay.getDatastore());
 
-        // Future<?> future =
-        // semanticOverlay.datastoreThreadPool.submit((new Runnable() {
-        // @Override
-        // public void run() {
         TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
-        // the quadruple is stored by using its timestamped
-        // graph value
+
+        // the quadruple is stored by using its timestamped graph value
         txnGraph.add(
                 quadrupleMatching.createMetaGraphNode(),
                 quadrupleMatching.getSubject(),
                 quadrupleMatching.getPredicate(), quadrupleMatching.getObject());
         txnGraph.commit();
         txnGraph.close();
-        // }
-        // }));
-        //
-        // try {
-        // future.get();
-        // } catch (InterruptedException e1) {
-        // e1.printStackTrace();
-        // } catch (ExecutionException e1) {
-        // e1.printStackTrace();
-        // }
-
-        log.debug(
-                "SPARQL query used to retrieve the sub subscriptions matching {}:\n{}",
-                quadrupleMatching,
-                createQueryRetrievingSubscriptionsMatching(quadrupleMatching));
-
-        // we have to store the identifiers found into a new list because
-        // we cannot iterate on a Jena iterator and perform operations on
-        // the datastore at the same time
-        List<HomogenousPair<Node>> matchingIds =
-                new ArrayList<HomogenousPair<Node>>();
 
         // finds the sub subscriptions which are stored locally and that are
         // matching the quadruple which have been just inserted into the
         // local datastore
         txnGraph = datastore.begin(AccessMode.READ_ONLY);
-        QueryExecution queryExecution =
-                QueryExecutionFactory.create(
-                        createQueryRetrievingSubscriptionsMatching(quadrupleMatching),
+
+        QueryIterator it =
+                Algebra.exec(
+                        createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
                         txnGraph.toDataset());
 
-        ResultSet result = queryExecution.execSelect();
         try {
-            while (result.hasNext()) {
-                QuerySolution solution = result.nextSolution();
+            while (it.hasNext()) {
+                final Binding binding = it.nextBinding();
 
-                // the first component is composed of the subscription id
-                // whereas the second contains the sub-subscription id
-                matchingIds.add(new HomogenousPair<Node>(solution.get(
-                        "subscriptionId").asNode(), solution.get(
-                        "subSubscriptionId").asNode()));
+                log.debug(
+                        "Peer {} has a sub-subscription that matches the quadruple {} ",
+                        overlay, quadrupleMatching);
+
+                // the identifier of the sub subscription that is matched is
+                // available from the result of the query which has been
+                // executed
+                SubscriptionId subscriptionId =
+                        SubscriptionId.parseSubscriptionId(binding.get(
+                                Var.alloc("sId")).getLiteralLexicalForm());
+
+                Subscription subscription =
+                        ((SemanticCanOverlay) overlay).findSubscription(subscriptionId);
+
+                // a subscription with only one sub subscription (that matches
+                // the quadruple which has been inserted) has been detected
+                PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
+                        (SemanticCanOverlay) overlay, subscription,
+                        quadrupleMatching);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
-            queryExecution.close();
+            it.close();
             txnGraph.close();
-        }
-
-        if (matchingIds.isEmpty()) {
-            log.debug(
-                    "No subscription matching {} has been found on {}",
-                    quadrupleMatching, overlay);
-        }
-
-        for (HomogenousPair<Node> pair : matchingIds) {
-            log.debug(
-                    "Peer {} has a sub-subscription {} that matches the quadruple {} ",
-                    new Object[] {
-                            overlay, pair.getSecond().getLiteralLexicalForm(),
-                            quadrupleMatching});
-
-            // the identifier of the sub subscription that is matched is
-            // available from the result of the query which has been executed
-            SubscriptionId subscriptionId =
-                    SubscriptionId.parseSubscriptionId(pair.getFirst()
-                            .getLiteralLexicalForm());
-
-            Subscription subscription =
-                    semanticOverlay.findSubscription(subscriptionId);
-
-            // a subscription with only one sub subscription (that matches the
-            // quadruple which has been inserted) has been detected
-            PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
-                    semanticOverlay, subscription, quadrupleMatching);
         }
     }
 
-    private static String createQueryRetrievingSubscriptionsMatching(Quadruple quad) {
-        StringWriter query = new StringWriter();
-        query.append("SELECT ?subscriptionId ?subSubscriptionId WHERE {\n    GRAPH <");
-        query.append(SUBSCRIPTION_NS_NODE.getURI());
-        query.append("> {\n        ?subSubscriptionSource <");
-        query.append(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY);
-        query.append("> ?subSubscriptionGraph .\n        ?subSubscriptionSource <");
-        query.append(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY);
-        query.append("> ?subSubscriptionSubject .\n        ?subSubscriptionSource <");
-        query.append(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY);
-        query.append("> ?subSubscriptionPredicate .\n        ?subSubscriptionSource <");
-        query.append(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY);
-        query.append("> ?subSubscriptionObject .\n        ?subSubscriptionSource <");
-        query.append(SUBSUBSCRIPTION_ID_PROPERTY);
-        query.append("> ?subSubscriptionId .\n        ?subscriptionSource <");
-        query.append(SUBSCRIPTION_INDEXED_WITH_PROPERTY);
-        query.append("> ?subSubscriptionId .\n        ?subscriptionSource <");
-        query.append(SUBSCRIPTION_ID_PROPERTY);
-        query.append("> ?subscriptionId .\n        FILTER (\n            (STRSTARTS(str(?subSubscriptionGraph), \"");
-        query.append(quad.getGraph().getURI());
-        query.append("\") || sameTerm(?subSubscriptionGraph, ");
+    private static Op createAlgebraRetrievingSubscriptionsMatching(Quadruple quad) {
+        // Basic Graph Pattern
+        BasicPattern bp = new BasicPattern();
+        bp.add(Triple.create(
+                subSubscriptionSourceVar,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_NODE,
+                subSubscriptionGraphVar));
+        bp.add(Triple.create(
+                subSubscriptionSourceVar,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE,
+                subSubscriptionSubjectVar));
+        bp.add(Triple.create(
+                subSubscriptionSourceVar,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_NODE,
+                subSubscriptionPredicateVar));
+        bp.add(Triple.create(
+                subSubscriptionSourceVar,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_NODE,
+                subSubscriptionObjectVar));
+        bp.add(Triple.create(
+                subSubscriptionSourceVar,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_ID_NODE,
+                subSubscriptionIdVar));
+        bp.add(Triple.create(
+                subscriptionSourceVar,
+                PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE,
+                subSubscriptionIdVar));
+        bp.add(Triple.create(
+                subscriptionSourceVar,
+                PublishSubscribeConstants.SUBSCRIPTION_ID_NODE,
+                subscriptionIdVar));
 
-        nodeFormatter.formatURI(query, quad.getGraph().getURI());
+        // Conditions
+        NodeValue ssVariableExpr =
+                NodeValue.makeNode(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE);
+        ExprVar ssGraphExprVar = new ExprVar(subSubscriptionGraphVar);
+        E_LogicalOr graphConditions =
+                new E_LogicalOr(new E_StrStartsWith(
+                        new E_Str(ssGraphExprVar),
+                        NodeValue.makeNode(quad.getGraph())), new E_Equals(
+                        new E_Datatype(ssGraphExprVar), ssVariableExpr));
 
-        query.append(") || datatype(?subSubscriptionGraph) = <");
-        query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-        query.append(">)\n             && (sameTerm(?subSubscriptionSubject, ");
+        ExprVar ssSubjectExprVar = new ExprVar(subSubscriptionSubjectVar);
+        E_LogicalOr subjectConditions =
+                new E_LogicalOr(
+                        new E_SameTerm(
+                                ssSubjectExprVar,
+                                NodeValue.makeNode(quad.getSubject())),
+                        new E_Equals(
+                                new E_Datatype(ssSubjectExprVar),
+                                ssVariableExpr));
 
-        nodeFormatter.formatURI(query, quad.getSubject());
+        ExprVar ssPredicateExprVar = new ExprVar(subSubscriptionPredicateVar);
+        E_LogicalOr predicateConditions =
+                new E_LogicalOr(new E_SameTerm(
+                        ssPredicateExprVar,
+                        NodeValue.makeNode(quad.getPredicate())), new E_Equals(
+                        new E_Datatype(ssPredicateExprVar), ssVariableExpr));
 
-        query.append(") || datatype(?subSubscriptionSubject) = <");
-        query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-        query.append(">)\n             && (sameTerm(?subSubscriptionPredicate, ");
+        ExprVar ssObjectExprVar = new ExprVar(subSubscriptionObjectVar);
+        E_LogicalOr objectConditions =
+                new E_LogicalOr(
+                        new E_SameTerm(
+                                ssObjectExprVar,
+                                NodeValue.makeNode(quad.getObject())),
+                        new E_Equals(
+                                new E_Datatype(ssObjectExprVar), ssVariableExpr));
 
-        nodeFormatter.formatURI(query, quad.getPredicate());
+        // Filter based on conditions
+        Op filter =
+                OpFilter.filter(
+                        new E_LogicalAnd(graphConditions, new E_LogicalAnd(
+                                subjectConditions, new E_LogicalAnd(
+                                        predicateConditions, objectConditions))),
+                        new OpBGP(bp));
 
-        query.append(") || datatype(?subSubscriptionPredicate) = <");
-        query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-        query.append(">)\n             && (sameTerm(?subSubscriptionObject, ");
-
-        nodeFormatter.format(query, quad.getObject());
-
-        query.append(") || datatype(?subSubscriptionObject) = <");
-        query.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-        query.append(">)\n        )\n     }\n}");
-
-        return query.toString();
+        // Named Graph + Projection
+        return new OpProject(
+                new OpGraph(
+                        PublishSubscribeConstants.SUBSCRIPTION_NS_NODE, filter),
+                Arrays.asList(subscriptionIdVar));
     }
 
 }
