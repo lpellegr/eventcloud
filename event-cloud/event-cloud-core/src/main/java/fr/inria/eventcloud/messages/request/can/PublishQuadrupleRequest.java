@@ -189,11 +189,19 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         NodeValue ssVariableExpr =
                 NodeValue.makeNode(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE);
         ExprVar ssGraphExprVar = new ExprVar(subSubscriptionGraphVar);
+        NodeValue graphExpr = NodeValue.makeNode(quad.getGraph());
+
         E_LogicalOr graphConditions =
-                new E_LogicalOr(new E_StrStartsWith(
-                        new E_Str(ssGraphExprVar),
-                        NodeValue.makeNode(quad.getGraph())), new E_Equals(
-                        new E_Datatype(ssGraphExprVar), ssVariableExpr));
+                new E_LogicalOr(
+                        new E_StrStartsWith(
+                                new E_Str(ssGraphExprVar), graphExpr),
+                        new E_LogicalOr(new E_Equals(new E_Datatype(
+                                ssGraphExprVar), ssVariableExpr),
+                        // the following condition is here for finding
+                        // subscriptions which have been rewritten by using the
+                        // graph value (but not the meta graph value) associated
+                        // to the quadruple which is matching the subscription
+                                new E_Equals(ssGraphExprVar, graphExpr)));
 
         ExprVar ssSubjectExprVar = new ExprVar(subSubscriptionSubjectVar);
         E_LogicalOr subjectConditions =
