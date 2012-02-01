@@ -28,6 +28,7 @@ import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.objectweb.proactive.core.util.MutableInteger;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,8 @@ public class SubscribeProxyTest {
             new Collection<CompoundEvent>();
 
     private static Collection<Binding> bindings = new Collection<Binding>();
+
+    private static MutableInteger signals = new MutableInteger();
 
     private static Node eventId =
             NodeGenerator.createUri(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue());
@@ -146,7 +149,7 @@ public class SubscribeProxyTest {
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
 
         this.subscribeProxy.subscribe(
-                subscription, new CustomEventNotificationListener());
+                subscription, new CustomCompoundEventNotificationListener());
 
         synchronized (events) {
             while (events.size() < NB_EVENTS_TO_WAIT) {
@@ -288,10 +291,10 @@ public class SubscribeProxyTest {
 
         this.publishProxy.publish(event);
 
-        synchronized (events) {
-            while (events.size() != event.getQuadruples().size()) {
+        synchronized (signals) {
+            while (signals.getValue() != event.getQuadruples().size()) {
                 try {
-                    events.wait();
+                    signals.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -314,7 +317,7 @@ public class SubscribeProxyTest {
 
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
-                subscription, new CustomEventNotificationListener());
+                subscription, new CustomCompoundEventNotificationListener());
 
         Collection<Quadruple> quads = new Collection<Quadruple>();
         for (int i = 0; i < 4; i++) {
@@ -369,7 +372,7 @@ public class SubscribeProxyTest {
         int nbDays = 10;
 
         this.subscribeProxy.subscribe(
-                subscription, new CustomEventNotificationListener());
+                subscription, new CustomCompoundEventNotificationListener());
 
         Node subject = Node.createURI("urn:city:Nice");
 
@@ -425,7 +428,7 @@ public class SubscribeProxyTest {
 
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
-                subscription, new CustomEventNotificationListener());
+                subscription, new CustomCompoundEventNotificationListener());
 
         // waits a little to make sure the subscription has been indexed
         Thread.sleep(500);
@@ -475,6 +478,7 @@ public class SubscribeProxyTest {
     @After
     public void tearDown() {
         this.deployer.undeploy();
+        signals.setValue(0);
         bindings.clear();
         events.clear();
     }
@@ -498,7 +502,7 @@ public class SubscribeProxyTest {
 
     }
 
-    private static class CustomEventNotificationListener extends
+    private static class CustomCompoundEventNotificationListener extends
             CompoundEventNotificationListener {
 
         private static final long serialVersionUID = 1L;
@@ -526,11 +530,9 @@ public class SubscribeProxyTest {
          */
         @Override
         public void onNotification(SubscriptionId id) {
-            synchronized (events) {
-                // just a dummy event to have the possibility to count the
-                // number of signals which have been received
-                events.add(new CompoundEvent(QuadrupleGenerator.create()));
-                events.notifyAll();
+            synchronized (signals) {
+                signals.add(1);
+                signals.notifyAll();
             }
             log.info("New signal received");
         }
