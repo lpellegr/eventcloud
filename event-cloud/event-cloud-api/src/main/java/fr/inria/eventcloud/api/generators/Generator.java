@@ -16,53 +16,22 @@
  **/
 package fr.inria.eventcloud.api.generators;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.SecureRandom;
-
-import fr.inria.eventcloud.configuration.EventCloudProperties;
+import java.util.Random;
 
 /**
- * Class which must be extended by any generator.
+ * Class extended by any generator. It shares a number generator which is by
+ * default an instance of {@link Random}.
  * 
  * @author lpellegr
  */
 public abstract class Generator {
 
-    protected static final SecureRandom random = new SecureRandom();
+    protected static Random RANDOM = new Random();
 
-    protected static final String LEGAL_CHARS =
-            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    protected static final int DEFAULT_LENGTH = 10;
 
-    /**
-     * Generates an URI with a random suffix and the specified {@code prefix}.
-     * 
-     * @return an URI with a random suffix and the specified {@code prefix}.
-     */
-    public static URI generateRandomUri(String prefix) {
-        StringBuilder result = new StringBuilder(prefix);
-
-        for (int i = 0; i < 20; i++) {
-            result.append(random.nextInt(LEGAL_CHARS.length()));
-        }
-
-        try {
-            return new URI(result.toString());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Generates an URI with a random suffix and a prefix equals to
-     * {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
-     * 
-     * @return an URI with a random suffix and a prefix equals to
-     *         {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
-     */
-    public static URI generateRandomUri() {
-        return generateRandomUri(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue());
+    public static void setNumberGenerator(Random random) {
+        RANDOM = random;
     }
 
 }

@@ -37,92 +37,86 @@ public class QuadrupleTest {
     @Test(expected = IllegalArgumentException.class)
     public void testInstantiationWithBlankNode() {
         new Quadruple(
-                Node.createAnon(), NodeGenerator.createUri(),
-                NodeGenerator.createUri(), NodeGenerator.createUri());
+                Node.createAnon(), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), Node.createAnon(),
-                NodeGenerator.createUri(), NodeGenerator.createUri());
+                NodeGenerator.randomUri(), Node.createAnon(),
+                NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(),
-                Node.createAnon(), NodeGenerator.createUri());
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                Node.createAnon(), NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(),
-                NodeGenerator.createUri(), Node.createAnon());
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), Node.createAnon());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testInstantiationWithVars() {
         new Quadruple(
-                Node.ANY, NodeGenerator.createUri(), NodeGenerator.createUri(),
-                NodeGenerator.createUri());
+                Node.ANY, NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), Node.ANY, NodeGenerator.createUri(),
-                NodeGenerator.createUri());
+                NodeGenerator.randomUri(), Node.ANY, NodeGenerator.randomUri(),
+                NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(), Node.ANY,
-                NodeGenerator.createUri());
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(), Node.ANY,
+                NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(),
-                NodeGenerator.createUri(), Node.ANY);
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), Node.ANY);
 
         new Quadruple(
-                Node.createVariable("test"), NodeGenerator.createUri(),
-                NodeGenerator.createUri(), NodeGenerator.createUri());
+                Node.createVariable("test"), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), Node.createVariable("test"),
-                NodeGenerator.createUri(), NodeGenerator.createUri());
+                NodeGenerator.randomUri(), Node.createVariable("test"),
+                NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(),
-                Node.createVariable("test"), NodeGenerator.createUri());
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                Node.createVariable("test"), NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(),
-                NodeGenerator.createUri(), Node.createVariable("test"));
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), Node.createVariable("test"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testInstantiationWithNullValues() {
         new Quadruple(
-                null, NodeGenerator.createUri(), NodeGenerator.createUri(),
-                NodeGenerator.createUri());
+                null, NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), null, NodeGenerator.createUri(),
-                NodeGenerator.createUri());
+                NodeGenerator.randomUri(), null, NodeGenerator.randomUri(),
+                NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(), null,
-                NodeGenerator.createUri());
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(), null,
+                NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(),
-                NodeGenerator.createUri(), null);
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.random(), null);
 
         new Quadruple(
-                null, null, NodeGenerator.createUri(),
-                NodeGenerator.createUri());
+                null, null, NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
-                null, NodeGenerator.createUri(), null,
-                NodeGenerator.createUri());
+                null, NodeGenerator.randomUri(), null, NodeGenerator.random());
         new Quadruple(
-                null, NodeGenerator.createUri(), NodeGenerator.createUri(),
-                null);
+                null, NodeGenerator.randomUri(), NodeGenerator.randomUri(), null);
         new Quadruple(
-                NodeGenerator.createUri(), null, null,
-                NodeGenerator.createUri());
+                NodeGenerator.randomUri(), null, null, NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.createUri(), null, NodeGenerator.createUri(),
-                null);
+                NodeGenerator.randomUri(), null, NodeGenerator.randomUri(), null);
         new Quadruple(
-                NodeGenerator.createUri(), NodeGenerator.createUri(), null,
-                null);
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(), null, null);
 
-        new Quadruple(null, null, null, NodeGenerator.createUri());
-        new Quadruple(null, NodeGenerator.createUri(), null, null);
-        new Quadruple(null, null, NodeGenerator.createUri(), null);
+        new Quadruple(null, null, null, NodeGenerator.random());
+        new Quadruple(null, NodeGenerator.randomUri(), null, null);
+        new Quadruple(null, null, NodeGenerator.randomUri(), null);
 
         new Quadruple(null, null, null, null);
     }
 
     @Test
     public void testAddMetaInformation() {
-        Quadruple q1 = QuadrupleGenerator.createWithLiteral();
+        Quadruple q1 = QuadrupleGenerator.randomWithLiteral();
 
         long publicationTime = System.currentTimeMillis();
         q1.setPublicationSource("publisher1");
@@ -134,7 +128,7 @@ public class QuadrupleTest {
 
     @Test
     public void testEquality() {
-        Quadruple q1 = QuadrupleGenerator.createWithLiteral();
+        Quadruple q1 = QuadrupleGenerator.randomWithLiteral();
         Quadruple q2 =
                 new Quadruple(
                         q1.getGraph(), q1.getSubject(), q1.getPredicate(),
@@ -167,7 +161,7 @@ public class QuadrupleTest {
 
     @Test
     public void testSerialization() throws IOException, ClassNotFoundException {
-        Quadruple q1 = QuadrupleGenerator.createWithLiteral();
+        Quadruple q1 = QuadrupleGenerator.randomWithLiteral();
         q1.setPublicationSource("publisher1");
         q1.setPublicationTime(System.currentTimeMillis());
 
@@ -191,7 +185,7 @@ public class QuadrupleTest {
 
     @Test
     public void testGetPublicationTime() {
-        Quadruple q1 = QuadrupleGenerator.create();
+        Quadruple q1 = QuadrupleGenerator.random();
 
         Assert.assertEquals(
                 -1, Quadruple.getPublicationTime(q1.createMetaGraphNode()));
@@ -206,7 +200,7 @@ public class QuadrupleTest {
 
     @Test
     public void testGetPublicationSource() {
-        Quadruple q1 = QuadrupleGenerator.create();
+        Quadruple q1 = QuadrupleGenerator.random();
 
         Assert.assertNull(Quadruple.getPublicationSource(q1.createMetaGraphNode()));
 
@@ -219,7 +213,7 @@ public class QuadrupleTest {
 
     @Test
     public void testIsMetaGraphNode() {
-        Quadruple q1 = QuadrupleGenerator.create();
+        Quadruple q1 = QuadrupleGenerator.random();
 
         Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getGraph()));
         Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getSubject()));

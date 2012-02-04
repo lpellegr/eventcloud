@@ -73,7 +73,7 @@ public class SubscribeProxyTest {
     private static MutableInteger signals = new MutableInteger();
 
     private static Node eventId =
-            NodeGenerator.createUri(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue());
+            NodeGenerator.randomUri(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue());
 
     private EventCloudId eventCloudId;
 
@@ -125,7 +125,7 @@ public class SubscribeProxyTest {
                             Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                                     + "/" + UUID.randomUUID().toString());
                     for (int j = 0; j < 1 + ProActiveRandom.nextInt(30); j++) {
-                        quadruples.add(QuadrupleGenerator.create(graphValue));
+                        quadruples.add(QuadrupleGenerator.random(graphValue));
                     }
 
                     log.debug(
@@ -284,7 +284,7 @@ public class SubscribeProxyTest {
 
         Collection<Quadruple> quads = new Collection<Quadruple>();
         for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.create(eventId));
+            quads.add(QuadrupleGenerator.random(eventId));
         }
 
         CompoundEvent event = new CompoundEvent(quads);
@@ -321,7 +321,7 @@ public class SubscribeProxyTest {
 
         Collection<Quadruple> quads = new Collection<Quadruple>();
         for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.create(eventId));
+            quads.add(QuadrupleGenerator.random(eventId));
         }
 
         CompoundEvent ce = new CompoundEvent(quads);
@@ -445,7 +445,7 @@ public class SubscribeProxyTest {
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            quadToPublish = QuadrupleGenerator.create(eventId);
+            quadToPublish = QuadrupleGenerator.random(eventId);
             quadToPublish.setPublicationTime(publicationTime);
             this.publishProxy.publish(quadToPublish);
         }
@@ -459,7 +459,7 @@ public class SubscribeProxyTest {
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            quadToPublish = QuadrupleGenerator.create(eventId);
+            quadToPublish = QuadrupleGenerator.random(eventId);
             quadToPublish.setPublicationTime(publicationTime);
             this.publishProxy.publish(quadToPublish);
         }

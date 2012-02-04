@@ -58,7 +58,8 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.generators.Generator;
+import fr.inria.eventcloud.api.generators.UriGenerator;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 
@@ -222,7 +223,10 @@ public class NotificationMessageToEventTranslator {
             eventIdNode = Node.createURI(eventId);
         } else {
             eventIdNode =
-                    Node.createURI(Generator.generateRandomUri().toString());
+                    Node.createURI(UriGenerator.randomPrefixed(
+                            10,
+                            EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())
+                            .toString());
         }
 
         Message message = notificationMessage.getMessage();

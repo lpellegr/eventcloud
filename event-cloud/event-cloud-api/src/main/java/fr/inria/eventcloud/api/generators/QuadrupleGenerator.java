@@ -17,85 +17,144 @@
 package fr.inria.eventcloud.api.generators;
 
 import static com.hp.hpl.jena.graph.Node.createLiteral;
-import static fr.inria.eventcloud.api.generators.NodeGenerator.createLiteral;
-import static fr.inria.eventcloud.api.generators.NodeGenerator.createNode;
-import static fr.inria.eventcloud.api.generators.NodeGenerator.createUri;
 
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
- * QuadrupleGenerator offers several convenient methods to create a quadruple
- * with several criteria (e.g. with or without a literal value, with the
- * specified length for each component, etc).
+ * QuadrupleGenerator offers several convenient methods to create quadruples
+ * randomly by using several criteria (e.g. with or without a literal value,
+ * with the specified length for each component, ...).
  * 
  * @author lpellegr
  */
 public final class QuadrupleGenerator extends Generator {
 
-    private static final int DEFAULT_LENGTH = 10;
-
     private QuadrupleGenerator() {
 
     }
 
-    public static Quadruple create() {
-        return create(DEFAULT_LENGTH, DEFAULT_LENGTH);
+    /**
+     * Creates a quadruple whose each component is randomly generated. The
+     * object component can be either an URI or a literal.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple random() {
+        return random(DEFAULT_LENGTH);
     }
 
-    public static Quadruple create(Node graphValue) {
-        return create(graphValue, DEFAULT_LENGTH, DEFAULT_LENGTH);
-    }
-
-    public static Quadruple create(int exactLength) {
+    /**
+     * Creates a quadruple by using the specified {@code graph} value and whose
+     * the other components are randomly generated. The object component can be
+     * either an URI or a literal.
+     * 
+     * @param graph
+     *            the graph value to use.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple random(Node graph) {
         return new Quadruple(
-                createUri(exactLength), createUri(exactLength),
-                createUri(exactLength), createNode(exactLength));
+                graph, NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.random(DEFAULT_LENGTH));
     }
 
-    public static Quadruple create(Node graphValue, int exactLength) {
+    /**
+     * Creates a quadruple whose each component is randomly generated. The
+     * object component can be either an URI or a literal.
+     * 
+     * @param length
+     *            number of characters which are randomly generated for each
+     *            node which is created.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple random(int length) {
         return new Quadruple(
-                graphValue, createUri(exactLength), createUri(exactLength),
-                createNode(exactLength));
+                NodeGenerator.randomUri(length),
+                NodeGenerator.randomUri(length),
+                NodeGenerator.randomUri(length), NodeGenerator.random(length));
     }
 
-    public static Quadruple create(int minLength, int maxLength) {
+    /**
+     * Creates a quadruple by using the specified {@code graph} value and whose
+     * the other components are randomly generated. The object component can be
+     * either an URI or a literal.
+     * 
+     * @param graph
+     *            the graph value to use.
+     * 
+     * @param length
+     *            number of characters which are randomly generated for each
+     *            node which is created.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple random(Node graph, int length) {
         return new Quadruple(
-                createUri(minLength, maxLength),
-                createUri(minLength, maxLength),
-                createUri(minLength, maxLength), createNode(
-                        minLength, maxLength));
+                graph, NodeGenerator.randomUri(length),
+                NodeGenerator.randomUri(length), NodeGenerator.random(length));
     }
 
-    public static Quadruple create(Node graphValue, int minLength, int maxLength) {
+    /**
+     * Creates a quadruple with random node values and whose the object value is
+     * a literal.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple randomWithLiteral() {
         return new Quadruple(
-                graphValue, createUri(minLength, maxLength), createUri(
-                        minLength, maxLength), createNode(minLength, maxLength));
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomLiteral(DEFAULT_LENGTH));
     }
 
-    public static Quadruple createWithLiteral() {
+    /**
+     * Creates a quadruple with random node values and whose the object value is
+     * a literal with the specified {@code literal} value.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple randomWithLiteral(String literal) {
         return new Quadruple(
-                createUri(DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
-                        DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
-                        DEFAULT_LENGTH, DEFAULT_LENGTH), createLiteral(
-                        DEFAULT_LENGTH, DEFAULT_LENGTH));
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomUri(DEFAULT_LENGTH), createLiteral(literal));
     }
 
-    public static Quadruple createWithLiteral(String literalValue) {
+    /**
+     * Creates a quadruple with random node values and whose the object value is
+     * not a literal but an URI.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple randomWithoutLiteral() {
         return new Quadruple(
-                createUri(DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
-                        DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
-                        DEFAULT_LENGTH, DEFAULT_LENGTH),
-                createLiteral(literalValue));
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                NodeGenerator.randomUri(DEFAULT_LENGTH));
     }
 
-    public static Quadruple createWithoutLiteral() {
-        return new Quadruple(
-                createUri(DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
-                        DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
-                        DEFAULT_LENGTH, DEFAULT_LENGTH), createUri(
-                        DEFAULT_LENGTH, DEFAULT_LENGTH));
+    public static void main(String[] args) {
+        System.out.println("random");
+        System.out.println(random());
+        System.out.println("randomNode");
+        System.out.println(random(NodeGenerator.randomUri()));
+        System.out.println("randomInt");
+        System.out.println(random(5));
+        System.out.println("randomNodeInt");
+        System.out.println(random(NodeGenerator.randomUri(), 5));
+        System.out.println("randomWithLiteral");
+        System.out.println(randomWithLiteral());
+        System.out.println("randomWithLiteralString");
+        System.out.println(randomWithLiteral("test"));
+        System.out.println("randomWithoutLiteral");
+        System.out.println(randomWithoutLiteral());
     }
 
 }
