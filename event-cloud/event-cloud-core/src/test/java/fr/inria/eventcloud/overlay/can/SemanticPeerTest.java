@@ -60,7 +60,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         Quadruple quadruple;
         for (int i = 0; i < 100; i++) {
-            quadruple = QuadrupleGenerator.create();
+            quadruple = QuadrupleGenerator.random();
             quadruples.add(quadruple);
             super.getRandomSemanticPeer().add(quadruple);
         }
@@ -80,7 +80,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         for (int i = 0; i < 100; i++) {
-            quadruples.add(QuadrupleGenerator.create());
+            quadruples.add(QuadrupleGenerator.random());
         }
 
         super.getRandomSemanticPeer()
@@ -98,7 +98,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
     @Test
     public void testContainsQuadruple() {
-        Quadruple quadToCheck = QuadrupleGenerator.create();
+        Quadruple quadToCheck = QuadrupleGenerator.random();
         Assert.assertFalse(super.getRandomSemanticPeer().contains(quadToCheck));
 
         super.getRandomSemanticPeer().add(quadToCheck);
@@ -107,7 +107,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
     @Test
     public void testDeleteQuadruple() {
-        Quadruple quad = QuadrupleGenerator.create();
+        Quadruple quad = QuadrupleGenerator.random();
         super.getRandomSemanticPeer().add(quad);
         Assert.assertTrue(super.getRandomSemanticPeer().contains(quad));
 
@@ -120,7 +120,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         for (int i = 0; i < 100; i++) {
-            quadruples.add(QuadrupleGenerator.create());
+            quadruples.add(QuadrupleGenerator.random());
         }
 
         super.getRandomSemanticPeer().delete(
@@ -135,13 +135,13 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         Quadruple quadruple;
-        Node graphValue = NodeGenerator.createNode();
+        Node graphValue = NodeGenerator.randomUri();
         for (int i = 0; i < 100; i++) {
             if (i < 20) {
                 // some nodes with the same graph value
-                quadruple = QuadrupleGenerator.create(graphValue);
+                quadruple = QuadrupleGenerator.random(graphValue);
             } else {
-                quadruple = QuadrupleGenerator.create();
+                quadruple = QuadrupleGenerator.random();
             }
             quadruples.add(quadruple);
             super.getRandomSemanticPeer().add(quadruple);
@@ -180,7 +180,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
         Quadruple quad =
-                QuadrupleGenerator.create(Node.createURI("http://sparql.org"));
+                QuadrupleGenerator.random(Node.createURI("http://sparql.org"));
         super.getRandomSemanticPeer().add(quad);
 
         Assert.assertTrue(super.getRandomSemanticPeer().executeSparqlAsk(
@@ -200,7 +200,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         Quadruple quadruple;
         for (int i = 0; i < 100; i++) {
-            quadruple = QuadrupleGenerator.create();
+            quadruple = QuadrupleGenerator.random();
             quadruples.add(quadruple);
             super.getRandomSemanticPeer().add(quadruple);
         }
@@ -220,7 +220,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         Quadruple quadruple;
         for (int i = 0; i < 100; i++) {
-            quadruple = QuadrupleGenerator.create();
+            quadruple = QuadrupleGenerator.random();
             quadruples.add(quadruple);
             super.getRandomSemanticPeer().add(quadruple);
         }
@@ -274,23 +274,23 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
     @Test
     public void testExecuteSparqlWithConjunctionsAndOneJoinVariable() {
-        Node commonURI = NodeGenerator.createUri();
-        Node graphValue = NodeGenerator.createUri();
+        Node commonURI = NodeGenerator.randomUri();
+        Node graphValue = NodeGenerator.randomUri();
 
         // two quadruples share the same value respectively for the object and
         // subject component and they have the same graphValue
         Quadruple[] quads =
                 {
                         new Quadruple(
-                                graphValue, NodeGenerator.createUri(),
-                                NodeGenerator.createUri(), commonURI),
+                                graphValue, NodeGenerator.randomUri(),
+                                NodeGenerator.randomUri(), commonURI),
                         new Quadruple(
                                 graphValue, commonURI,
-                                NodeGenerator.createUri(),
-                                NodeGenerator.createUri()),
-                        QuadrupleGenerator.create(),
-                        QuadrupleGenerator.create(),
-                        QuadrupleGenerator.create()};
+                                NodeGenerator.randomUri(),
+                                NodeGenerator.random()),
+                        QuadrupleGenerator.random(),
+                        QuadrupleGenerator.random(),
+                        QuadrupleGenerator.random()};
 
         for (Quadruple quad : quads) {
             super.getRandomSemanticPeer().add(quad);

@@ -59,7 +59,7 @@ public final class TransactionalTdbDatastoreTest {
                 this.datastore.begin(AccessMode.WRITE);
         try {
             for (int i = 0; i < SEQUENTIAL_ADD_OPERATIONS; i++) {
-                txnGraph.add(QuadrupleGenerator.create());
+                txnGraph.add(QuadrupleGenerator.random());
             }
         } finally {
             txnGraph.commit();
@@ -83,7 +83,7 @@ public final class TransactionalTdbDatastoreTest {
                     TransactionalDatasetGraph txnGraph =
                             datastore.begin(AccessMode.WRITE);
                     try {
-                        txnGraph.add(QuadrupleGenerator.create());
+                        txnGraph.add(QuadrupleGenerator.random());
                     } finally {
                         txnGraph.commit();
                         txnGraph.close();
@@ -121,7 +121,7 @@ public final class TransactionalTdbDatastoreTest {
                         if (ProActiveRandom.nextInt(2) == 0) {
                             TransactionalDatasetGraph txnGraph = null;
                             txnGraph = datastore.begin(AccessMode.WRITE);
-                            txnGraph.add(QuadrupleGenerator.create());
+                            txnGraph.add(QuadrupleGenerator.random());
                             txnGraph.commit();
                             txnGraph.close();
                             nbQuadruplesAdded.incrementAndGet();

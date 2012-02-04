@@ -41,7 +41,7 @@ public class CompoundEventTest {
     public void testInstanciation() {
         Collection<Quadruple> quads = new Collection<Quadruple>();
         for (int i = 0; i < 10; i++) {
-            quads.add(QuadrupleGenerator.create());
+            quads.add(QuadrupleGenerator.random());
         }
 
         CompoundEvent e1 = new CompoundEvent(quads);

@@ -87,7 +87,7 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
 
         for (int i = 0; i < this.minSize + (this.delta > 0
                 ? ProActiveRandom.nextInt(this.delta) : 0); i++) {
-            quadruples.add(QuadrupleGenerator.create(graph));
+            quadruples.add(QuadrupleGenerator.random(graph));
         }
 
         return new CompoundEvent(quadruples);

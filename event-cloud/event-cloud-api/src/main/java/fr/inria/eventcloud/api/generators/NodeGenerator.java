@@ -26,70 +26,91 @@ import com.hp.hpl.jena.graph.Node;
  */
 public class NodeGenerator extends Generator {
 
-    public static final char[][] DEFAULT_BOUNDS = new char[][] {
-            {'0', '9'}, {'A', 'Z'}, {'a', 'z'}};
-
-    public static final String DEFAULT_URL_PREFIX = "http://";
-
-    public static final String DEFAULT_URN_PREFIX = "urn:inria:";
-
-    private static final int DEFAULT_LENGTH = 10;
-
     private NodeGenerator() {
 
     }
 
-    public static Node createNode() {
-        return createNode(DEFAULT_LENGTH, DEFAULT_LENGTH);
+    /**
+     * Creates a random Node whose length is the number of characters specified.
+     * The node can be either an URI or a literal.
+     * 
+     * @return the random node.
+     */
+    public static Node random() {
+        return random(DEFAULT_LENGTH);
     }
 
-    public static Node createNode(int exactLength) {
-        if (random.nextInt(2) == 0) {
-            return createUri(exactLength);
+    /**
+     * Creates a random Node whose length is the number of characters specified.
+     * The node can be either an URI or a literal. If the node which is
+     * generated is an URI the final length is equals to
+     * {@code length + "http://".size()}.
+     * 
+     * @param length
+     *            the length of random string to create.
+     * 
+     * @return the random node.
+     */
+    public static Node random(int length) {
+        if (RANDOM.nextInt(2) == 0) {
+            return randomUri(length);
         } else {
-            return createLiteral(exactLength);
+            return randomLiteral(length);
         }
     }
 
-    public static Node createNode(int minLength, int maxLength) {
-        if (random.nextInt(2) == 0) {
-            return createUri(minLength, maxLength);
-        } else {
-            return createLiteral(minLength, maxLength);
-        }
+    /**
+     * Creates a random URI node by using the specified {@code prefix}.
+     * 
+     * @return the random node.
+     */
+    public static Node randomUri(String prefix) {
+        return Node.createURI(UriGenerator.randomPrefixed(
+                DEFAULT_LENGTH, prefix));
     }
 
-    public static Node createUri() {
-        return createUri(DEFAULT_LENGTH, DEFAULT_LENGTH);
+    /**
+     * Creates a random URI node by using the {@code http} scheme name.
+     * 
+     * @return the random node.
+     */
+    public static Node randomUri() {
+        return Node.createURI(UriGenerator.random(DEFAULT_LENGTH, "http"));
     }
 
-    public static Node createUri(String prefix) {
-        return Node.createURI(StringGenerator.create(
-                prefix, DEFAULT_LENGTH, DEFAULT_LENGTH, DEFAULT_BOUNDS));
+    /**
+     * Creates a random URI node whose the final length is equals to
+     * {@code length + "http://".size()}.
+     * 
+     * @param length
+     *            the length of random string to create.
+     * 
+     * @return the random node.
+     */
+    public static Node randomUri(int length) {
+        return Node.createURI(UriGenerator.random(length, "http"));
     }
 
-    public static Node createUri(int exactLength) {
-        return Node.createURI(StringGenerator.create(
-                DEFAULT_URL_PREFIX, exactLength, DEFAULT_BOUNDS));
+    /**
+     * Creates a random literal node.
+     * 
+     * @return the random node.
+     */
+    public static Node randomLiteral() {
+        return randomLiteral(DEFAULT_LENGTH);
     }
 
-    public static Node createUri(int minLength, int maxLength) {
-        return Node.createURI(StringGenerator.create(
-                DEFAULT_URL_PREFIX, minLength, maxLength, DEFAULT_BOUNDS));
-    }
-
-    public static Node createLiteral() {
-        return createLiteral(DEFAULT_LENGTH, DEFAULT_LENGTH);
-    }
-
-    public static Node createLiteral(int exactLength) {
-        return Node.createLiteral(StringGenerator.create(
-                exactLength, DEFAULT_BOUNDS));
-    }
-
-    public static Node createLiteral(int minLength, int maxLength) {
-        return Node.createLiteral(StringGenerator.create(
-                minLength, maxLength, DEFAULT_BOUNDS));
+    /**
+     * Creates a random literal node whose length is the number of characters
+     * specified.
+     * 
+     * @param length
+     *            the length of random string to create.
+     * 
+     * @return the random node.
+     */
+    public static Node randomLiteral(int length) {
+        return Node.createLiteral(StringGenerator.randomPrintableAscii(length));
     }
 
 }
