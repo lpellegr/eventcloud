@@ -16,7 +16,15 @@
  **/
 package fr.inria.eventcloud.webservices.services;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.objectweb.proactive.ActiveObjectCreationException;
+import org.objectweb.proactive.api.PAActiveObject;
+
 import fr.inria.eventcloud.EventCloud;
+import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
@@ -25,7 +33,7 @@ import fr.inria.eventcloud.webservices.api.EventCloudManagementWsApi;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 
 /**
- * 
+ * Web service implementation for {@link EventCloudManagementWsApi}.
  * 
  * @author lpellegr
  */
@@ -58,6 +66,33 @@ public class EventCloudManagementServiceImpl implements
     @Override
     public String getRegistryEndpointUrl() {
         return this.registryUrl;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> getEventCloudIds() {
+        try {
+            EventCloudsRegistry registry =
+                    PAActiveObject.lookupActive(
+                            EventCloudsRegistry.class, this.registryUrl);
+
+            Collection<EventCloudId> ecIds = registry.listEventClouds();
+            List<String> result = new ArrayList<String>(ecIds.size());
+
+            for (EventCloudId ecId : ecIds) {
+                result.add(ecId.toUrl());
+            }
+
+            return result;
+        } catch (ActiveObjectCreationException e) {
+            e.printStackTrace();
+            throw new IllegalStateException(e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
