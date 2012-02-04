@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.webservices.api;
 
+import java.util.List;
+
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -48,6 +50,16 @@ public interface EventCloudManagementWsApi {
      */
     @WebMethod
     String getRegistryEndpointUrl();
+
+    /**
+     * Returns the identifiers (as URLs) of the eventclouds which are managed by
+     * the eventclouds registry used by this webservice.
+     * 
+     * @return the identifiers (as URLs) of the eventclouds which are managed by
+     *         the eventclouds registry used by this webservice.
+     */
+    @WebMethod
+    List<String> getEventCloudIds();
 
     /**
      * Creates, deploys and exposes as a web service a publish proxy for the
