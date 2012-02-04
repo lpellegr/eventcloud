@@ -99,13 +99,16 @@ public class QuadrupleTest {
         new Quadruple(
                 null, NodeGenerator.randomUri(), null, NodeGenerator.random());
         new Quadruple(
-                null, NodeGenerator.randomUri(), NodeGenerator.randomUri(), null);
+                null, NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                null);
         new Quadruple(
                 NodeGenerator.randomUri(), null, null, NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.randomUri(), null, NodeGenerator.randomUri(), null);
+                NodeGenerator.randomUri(), null, NodeGenerator.randomUri(),
+                null);
         new Quadruple(
-                NodeGenerator.randomUri(), NodeGenerator.randomUri(), null, null);
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(), null,
+                null);
 
         new Quadruple(null, null, null, NodeGenerator.random());
         new Quadruple(null, NodeGenerator.randomUri(), null, null);

@@ -29,7 +29,8 @@ public class EventCloudManagementWsLaucher extends Launcher {
     protected String run() {
         return WebServiceDeployer.deployEventCloudManagementWebService(
                 this.registryUrl, this.portLowerBound,
-                "proactive/services/EventCloud_management-webservices", this.port);
+                "proactive/services/EventCloud_management-webservices",
+                this.port);
     }
 
 }

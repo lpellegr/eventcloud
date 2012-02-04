@@ -54,7 +54,7 @@ public class DeleteQuadrupleRequest extends QuadrupleRequest {
         txnGraph.delete(quad);
         txnGraph.commit();
         txnGraph.close();
-        
+
         logger.info("Quadruple {} has been removed from {}", quad, overlay);
     }
 

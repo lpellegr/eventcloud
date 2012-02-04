@@ -126,7 +126,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      */
     @Override
     public long count(QuadruplePattern quadPattern) {
-        return super.selectPeer().count(quadPattern);   
+        return super.selectPeer().count(quadPattern);
     }
 
     /**

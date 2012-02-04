@@ -1,4 +1,5 @@
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
+
 /**
  * Copyright (c) 2011 INRIA.
  * 
@@ -24,9 +25,6 @@ import junit.framework.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.ConfigurationParser;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
 
 /**
  * Test cases associated to {@link ConfigurationParser}.

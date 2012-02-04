@@ -34,7 +34,8 @@ import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessage
  * 
  * @author lpellegr
  */
-public class WsEventNotificationListener extends CompoundEventNotificationListener {
+public class WsEventNotificationListener extends
+        CompoundEventNotificationListener {
 
     private static final long serialVersionUID = 1L;
 

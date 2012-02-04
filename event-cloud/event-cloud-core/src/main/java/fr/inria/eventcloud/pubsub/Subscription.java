@@ -243,7 +243,8 @@ public class Subscription implements Rdfable, Serializable {
         for (int i = 0; i < subSubscriptionsId.size(); i++) {
             Subsubscription s =
                     Subsubscription.parseFrom(
-                            datastore, SubscriptionId.parseSubscriptionId(basicInfo.get(
+                            datastore,
+                            SubscriptionId.parseSubscriptionId(basicInfo.get(
                                     SUBSCRIPTION_ID_PROPERTY)
                                     .getLiteralLexicalForm()),
                             SubscriptionId.parseSubscriptionId(subSubscriptionsId.get(i)));

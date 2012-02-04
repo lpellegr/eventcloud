@@ -32,7 +32,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 public interface TransactionalDatasetGraph {
 
     void add(Node g, Node s, Node p, Node o);
-    
+
     void add(Quadruple quadruple);
 
     void add(Collection<Quadruple> quadruples);
