@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

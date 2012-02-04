@@ -16,9 +16,6 @@
  **/
 package fr.inria.eventcloud.api;
 
-import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Quadruple;
-
 /**
  * A Class implements the {@link Rdfable} interface to indicate that the content
  * of the class can be serialized into RDF data.

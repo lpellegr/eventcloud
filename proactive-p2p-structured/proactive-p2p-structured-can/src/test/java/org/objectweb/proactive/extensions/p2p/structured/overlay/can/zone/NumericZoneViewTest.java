@@ -21,8 +21,6 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.NumericZoneView;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;

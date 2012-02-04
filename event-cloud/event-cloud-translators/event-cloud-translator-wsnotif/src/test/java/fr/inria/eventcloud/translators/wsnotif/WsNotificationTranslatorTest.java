@@ -63,7 +63,8 @@ public class WsNotificationTranslatorTest {
     @Test
     public void testTranslation() {
         // creates an event from a notification example
-        CompoundEvent initialEvent = new CompoundEvent(read("/notification-01.trig"));
+        CompoundEvent initialEvent =
+                new CompoundEvent(read("/notification-01.trig"));
 
         log.info("Initial quadruples are:");
         logInfo(initialEvent);

@@ -20,8 +20,6 @@ import java.util.UUID;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
-import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.GenericResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetNeighborTableOperation;

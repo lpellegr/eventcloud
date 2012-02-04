@@ -361,8 +361,8 @@ public final class PublishSubscribeUtils {
                     + subscriptionIdUrl);
         }
 
-        return SubscriptionId.parseSubscriptionId(subscriptionIdUrl.getURI().substring(
-                subscriptionIdUrl.getURI().lastIndexOf(':') + 1));
+        return SubscriptionId.parseSubscriptionId(subscriptionIdUrl.getURI()
+                .substring(subscriptionIdUrl.getURI().lastIndexOf(':') + 1));
     }
 
     /**

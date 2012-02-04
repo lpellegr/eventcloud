@@ -72,12 +72,12 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
     /**
      * {@inheritDoc}
      */
-//    @Override
-//    public void unsubscribe(SubscriptionId id) {
-//        if (this.subscribeWs != null) {
-//            this.subscribeWs.unsubscribe(id);
-//        }
-//    }
+    // @Override
+    // public void unsubscribe(SubscriptionId id) {
+    // if (this.subscribeWs != null) {
+    // this.subscribeWs.unsubscribe(id);
+    // }
+    // }
 
     /**
      * {@inheritDoc}

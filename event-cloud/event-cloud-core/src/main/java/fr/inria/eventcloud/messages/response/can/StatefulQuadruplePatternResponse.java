@@ -26,8 +26,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
-import fr.inria.eventcloud.messages.request.can.StatefulRequestAction;
 import fr.inria.eventcloud.messages.request.can.StatefulQuadruplePatternRequest;
+import fr.inria.eventcloud.messages.request.can.StatefulRequestAction;
 import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
 
 /**
