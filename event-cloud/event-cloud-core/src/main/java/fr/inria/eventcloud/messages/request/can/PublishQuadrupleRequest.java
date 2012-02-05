@@ -29,6 +29,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
+import com.hp.hpl.jena.sparql.algebra.optimize.Optimize;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
@@ -116,6 +117,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         // local datastore
         txnGraph = datastore.begin(AccessMode.READ_ONLY);
 
+        Optimize.noOptimizer();
         QueryIterator it =
                 Algebra.exec(
                         createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
@@ -150,6 +152,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         } finally {
             it.close();
             txnGraph.close();
+            Optimize.setFactory(Optimize.stdOptimizationFactory);
         }
     }
 
