@@ -50,8 +50,14 @@ public class ContainsQuadrupleRequest extends QuadrupleRequest {
 
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
-        result = txnGraph.contains(super.getQuadruple());
-        txnGraph.close();
+
+        try {
+            result = txnGraph.contains(super.getQuadruple());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         return new BooleanForwardResponse(this, result);
     }

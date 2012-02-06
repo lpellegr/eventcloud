@@ -206,13 +206,19 @@ public class Subsubscription implements Rdfable {
 
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        for (Quadruple quad : txnGraph.find(
-                Node.ANY,
-                PublishSubscribeUtils.createSubSubscriptionIdUrl(subSubscriptionId),
-                Node.ANY, Node.ANY)) {
-            properties.put(quad.getPredicate().toString(), quad.getObject());
+
+        try {
+            for (Quadruple quad : txnGraph.find(
+                    Node.ANY,
+                    PublishSubscribeUtils.createSubSubscriptionIdUrl(subSubscriptionId),
+                    Node.ANY, Node.ANY)) {
+                properties.put(quad.getPredicate().toString(), quad.getObject());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
         }
-        txnGraph.close();
 
         return new Subsubscription(
                 subscriptionId,

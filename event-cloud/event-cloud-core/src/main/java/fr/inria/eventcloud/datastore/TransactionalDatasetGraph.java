@@ -55,7 +55,7 @@ public interface TransactionalDatasetGraph {
 
     void commit();
 
-    void close();
+    void end();
 
     Dataset toDataset();
 

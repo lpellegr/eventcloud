@@ -72,15 +72,25 @@ public class SparqlColander implements Closeable {
                                                 List<Quadruple> quadruples) {
         this.cleanAndFill(this.datastore, quadruples);
 
-        boolean result;
+        boolean result = false;
+
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        QueryExecution queryExecution =
-                QueryExecutionFactory.create(
-                        sparqlAskQuery, txnGraph.toDataset());
-        result = queryExecution.execAsk();
-        queryExecution.close();
-        txnGraph.close();
+
+        QueryExecution qExec = null;
+        try {
+            qExec =
+                    QueryExecutionFactory.create(
+                            sparqlAskQuery, txnGraph.toDataset());
+            result = qExec.execAsk();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (qExec != null) {
+                qExec.close();
+            }
+            txnGraph.end();
+        }
 
         return result;
     }
@@ -101,15 +111,25 @@ public class SparqlColander implements Closeable {
                                                     List<Quadruple> quadruples) {
         this.cleanAndFill(this.datastore, quadruples);
 
-        Model result;
+        Model result = null;
+
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        QueryExecution queryExecution =
-                QueryExecutionFactory.create(
-                        sparqlConstructQuery, txnGraph.toDataset());
-        result = queryExecution.execConstruct();
-        queryExecution.close();
-        txnGraph.close();
+
+        QueryExecution qExec = null;
+        try {
+            qExec =
+                    QueryExecutionFactory.create(
+                            sparqlConstructQuery, txnGraph.toDataset());
+            result = qExec.execConstruct();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (qExec != null) {
+                qExec.close();
+            }
+            txnGraph.end();
+        }
 
         return result;
     }
@@ -130,15 +150,25 @@ public class SparqlColander implements Closeable {
                                                      List<Quadruple> quadruples) {
         this.cleanAndFill(this.datastore, quadruples);
 
-        ResultSet result;
+        ResultSet result = null;
+
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        QueryExecution queryExecution =
-                QueryExecutionFactory.create(
-                        sparqlSelectQuery, txnGraph.toDataset());
-        result = new ResultSetWrapper(queryExecution.execSelect());
-        queryExecution.close();
-        txnGraph.close();
+
+        QueryExecution qExec = null;
+        try {
+            qExec =
+                    QueryExecutionFactory.create(
+                            sparqlSelectQuery, txnGraph.toDataset());
+            result = new ResultSetWrapper(qExec.execSelect());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (qExec != null) {
+                qExec.close();
+            }
+            txnGraph.end();
+        }
 
         return result;
     }
@@ -146,12 +176,18 @@ public class SparqlColander implements Closeable {
     private void cleanAndFill(TransactionalTdbDatastore datastore,
                               List<Quadruple> quadruples) {
         TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
-        txnGraph.delete(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
-        for (Quadruple quad : quadruples) {
-            txnGraph.add(quad);
+
+        try {
+            txnGraph.delete(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
+            for (Quadruple quad : quadruples) {
+                txnGraph.add(quad);
+            }
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
         }
-        txnGraph.commit();
-        txnGraph.close();
     }
 
     /**

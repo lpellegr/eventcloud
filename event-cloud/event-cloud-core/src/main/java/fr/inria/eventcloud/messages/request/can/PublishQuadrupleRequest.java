@@ -104,26 +104,33 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
 
         TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
 
-        // the quadruple is stored by using its timestamped graph value
-        txnGraph.add(
-                quadrupleMatching.createMetaGraphNode(),
-                quadrupleMatching.getSubject(),
-                quadrupleMatching.getPredicate(), quadrupleMatching.getObject());
-        txnGraph.commit();
-        txnGraph.close();
+        try {
+            // the quadruple is stored by using its timestamped graph value
+            txnGraph.add(
+                    quadrupleMatching.createMetaGraphNode(),
+                    quadrupleMatching.getSubject(),
+                    quadrupleMatching.getPredicate(),
+                    quadrupleMatching.getObject());
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         // finds the sub subscriptions which are stored locally and that are
         // matching the quadruple which have been just inserted into the
         // local datastore
         txnGraph = datastore.begin(AccessMode.READ_ONLY);
 
-        Optimize.noOptimizer();
-        QueryIterator it =
-                Algebra.exec(
-                        createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
-                        txnGraph.toDataset());
-
+        QueryIterator it = null;
         try {
+            Optimize.noOptimizer();
+            it =
+                    Algebra.exec(
+                            createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
+                            txnGraph.toDataset());
+
             while (it.hasNext()) {
                 final Binding binding = it.nextBinding();
 
@@ -150,8 +157,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            it.close();
-            txnGraph.close();
+            if (it != null) {
+                it.close();
+            }
+            txnGraph.end();
             Optimize.setFactory(Optimize.stdOptimizationFactory);
         }
     }

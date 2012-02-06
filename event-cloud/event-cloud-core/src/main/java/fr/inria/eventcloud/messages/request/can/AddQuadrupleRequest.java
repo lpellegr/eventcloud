@@ -50,11 +50,16 @@ public class AddQuadrupleRequest extends QuadrupleRequest {
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.WRITE);
-        txnGraph.add(quad);
-        txnGraph.commit();
-        txnGraph.close();
 
-        logger.info("Quadruple {} has been added on {}", quad, overlay);
+        try {
+            txnGraph.add(quad);
+            txnGraph.commit();
+            logger.info("Quadruple {} has been added on {}", quad, overlay);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
     }
 
 }

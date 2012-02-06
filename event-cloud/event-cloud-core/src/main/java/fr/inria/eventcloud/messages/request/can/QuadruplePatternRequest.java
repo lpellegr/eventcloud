@@ -66,12 +66,18 @@ public class QuadruplePatternRequest extends
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 QuadruplePattern quadruplePattern) {
-        Collection<Quadruple> result;
+        Collection<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
-        result = Collection.from(txnGraph.find(quadruplePattern));
-        txnGraph.close();
+
+        try {
+            result = Collection.from(txnGraph.find(quadruplePattern));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         return result;
     }

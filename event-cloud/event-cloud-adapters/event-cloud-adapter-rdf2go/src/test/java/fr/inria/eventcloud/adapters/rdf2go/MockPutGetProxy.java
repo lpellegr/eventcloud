@@ -62,11 +62,17 @@ public class MockPutGetProxy implements PutGetApi {
     public boolean add(Quadruple quad) {
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.WRITE);
-        txnGraph.add(quad);
-        txnGraph.commit();
-        txnGraph.close();
 
-        return true;
+        try {
+            txnGraph.add(quad);
+            txnGraph.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            txnGraph.end();
+        }
     }
 
     /**
@@ -76,13 +82,18 @@ public class MockPutGetProxy implements PutGetApi {
     public boolean add(Collection<Quadruple> quads) {
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.WRITE);
-        for (Quadruple quad : quads) {
-            txnGraph.add(quad);
+        try {
+            for (Quadruple quad : quads) {
+                txnGraph.add(quad);
+            }
+            txnGraph.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            txnGraph.end();
         }
-        txnGraph.commit();
-        txnGraph.close();
-
-        return true;
     }
 
     /**
@@ -113,9 +124,14 @@ public class MockPutGetProxy implements PutGetApi {
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.READ_ONLY);
-        result = txnGraph.contains(quad);
-        txnGraph.commit();
-        txnGraph.close();
+
+        try {
+            result = txnGraph.contains(quad);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         return result;
     }
@@ -127,11 +143,16 @@ public class MockPutGetProxy implements PutGetApi {
     public boolean delete(Quadruple quad) {
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.WRITE);
-        txnGraph.delete(quad);
-        txnGraph.commit();
-        txnGraph.close();
-
-        return true;
+        try {
+            txnGraph.delete(quad);
+            txnGraph.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            txnGraph.end();
+        }
     }
 
     /**
@@ -150,17 +171,28 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
-        Collection<Quadruple> result;
+        Collection<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.READ_ONLY);
-        result = Collection.from(txnGraph.find(quadPattern));
-        txnGraph.close();
+
+        try {
+            result = Collection.from(txnGraph.find(quadPattern));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         txnGraph = this.datastore.begin(AccessMode.WRITE);
-        txnGraph.delete(quadPattern);
-        txnGraph.commit();
-        txnGraph.close();
+        try {
+            txnGraph.delete(quadPattern);
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         return result;
     }
@@ -170,12 +202,18 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public Collection<Quadruple> find(QuadruplePattern quadPattern) {
-        Collection<Quadruple> result;
+        Collection<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.READ_ONLY);
-        result = Collection.from(txnGraph.find(quadPattern));
-        txnGraph.close();
+
+        try {
+            result = Collection.from(txnGraph.find(quadPattern));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         return result;
     }
@@ -199,12 +237,21 @@ public class MockPutGetProxy implements PutGetApi {
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.READ_ONLY);
-        QueryExecution queryExecution =
-                QueryExecutionFactory.create(
-                        sparqlAskQuery, txnGraph.toDataset());
-        result = queryExecution.execAsk();
-        queryExecution.close();
-        txnGraph.close();
+
+        QueryExecution qExec = null;
+        try {
+            qExec =
+                    QueryExecutionFactory.create(
+                            sparqlAskQuery, txnGraph.toDataset());
+            result = qExec.execAsk();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (qExec != null) {
+                qExec.close();
+            }
+            txnGraph.end();
+        }
 
         return new SparqlAskResponse(0, 0, 0, 0, result);
     }
@@ -218,12 +265,21 @@ public class MockPutGetProxy implements PutGetApi {
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.READ_ONLY);
-        QueryExecution queryExecution =
-                QueryExecutionFactory.create(
-                        sparqlConstructQuery, txnGraph.toDataset());
-        result = new ModelWrapper(queryExecution.execConstruct());
-        queryExecution.close();
-        txnGraph.close();
+
+        QueryExecution qExec = null;
+        try {
+            qExec =
+                    QueryExecutionFactory.create(
+                            sparqlConstructQuery, txnGraph.toDataset());
+            result = new ModelWrapper(qExec.execConstruct());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (qExec != null) {
+                qExec.close();
+            }
+            txnGraph.end();
+        }
 
         return new SparqlConstructResponse(0, 0, 0, 0, result);
     }
@@ -245,12 +301,22 @@ public class MockPutGetProxy implements PutGetApi {
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.READ_ONLY);
-        QueryExecution queryExecution =
-                QueryExecutionFactory.create(
-                        sparqlSelectQuery, txnGraph.toDataset());
-        result = new ResultSetWrapper(queryExecution.execSelect());
-        queryExecution.close();
-        txnGraph.close();
+
+        QueryExecution qExec = null;
+        try {
+            QueryExecution queryExecution =
+                    QueryExecutionFactory.create(
+                            sparqlSelectQuery, txnGraph.toDataset());
+            result = new ResultSetWrapper(queryExecution.execSelect());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (qExec != null) {
+                qExec.close();
+            }
+            txnGraph.end();
+        }
 
         return new SparqlSelectResponse(0, 0, 0, 0, result);
     }

@@ -166,42 +166,60 @@ public class TransactionalTdbDatastore extends Datastore {
         }
 
         TransactionalDatasetGraph txnGraph = this.begin(AccessMode.READ_ONLY);
-        for (Quadruple quad : txnGraph.find(QuadruplePattern.ANY)) {
-            graph = SemanticElement.parseElement(quad.getGraph().toString());
-            subject =
-                    SemanticElement.parseElement(quad.getSubject().toString());
-            predicate =
-                    SemanticElement.parseElement(quad.getPredicate().toString());
-            object = SemanticElement.parseElement(quad.getObject().toString());
+        try {
+            for (Quadruple quad : txnGraph.find(QuadruplePattern.ANY)) {
+                graph =
+                        SemanticElement.parseElement(quad.getGraph().toString());
+                subject =
+                        SemanticElement.parseElement(quad.getSubject()
+                                .toString());
+                predicate =
+                        SemanticElement.parseElement(quad.getPredicate()
+                                .toString());
+                object =
+                        SemanticElement.parseElement(quad.getObject()
+                                .toString());
 
-            if (graph.compareTo(zone.getLowerBound((byte) 0).getValue()) >= 0
-                    && graph.compareTo(zone.getUpperBound((byte) 0).getValue()) < 0
-                    && subject.compareTo(zone.getLowerBound((byte) 1)
-                            .getValue()) >= 0
-                    && subject.compareTo(zone.getUpperBound((byte) 1)
-                            .getValue()) < 0
-                    && predicate.compareTo(zone.getLowerBound((byte) 2)
-                            .getValue()) >= 0
-                    && predicate.compareTo(zone.getUpperBound((byte) 2)
-                            .getValue()) < 0
-                    && object.compareTo(zone.getLowerBound((byte) 3).getValue()) >= 0
-                    && object.compareTo(zone.getUpperBound((byte) 3).getValue()) < 0) {
-                result.add(quad);
+                if (graph.compareTo(zone.getLowerBound((byte) 0).getValue()) >= 0
+                        && graph.compareTo(zone.getUpperBound((byte) 0)
+                                .getValue()) < 0
+                        && subject.compareTo(zone.getLowerBound((byte) 1)
+                                .getValue()) >= 0
+                        && subject.compareTo(zone.getUpperBound((byte) 1)
+                                .getValue()) < 0
+                        && predicate.compareTo(zone.getLowerBound((byte) 2)
+                                .getValue()) >= 0
+                        && predicate.compareTo(zone.getUpperBound((byte) 2)
+                                .getValue()) < 0
+                        && object.compareTo(zone.getLowerBound((byte) 3)
+                                .getValue()) >= 0
+                        && object.compareTo(zone.getUpperBound((byte) 3)
+                                .getValue()) < 0) {
+                    result.add(quad);
 
-                if (remove) {
-                    quadruplesToRemove.add(quad);
+                    if (remove) {
+                        quadruplesToRemove.add(quad);
+                    }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
         }
-        txnGraph.close();
 
         if (remove) {
             txnGraph = this.begin(AccessMode.WRITE);
-            for (Quadruple q : quadruplesToRemove) {
-                txnGraph.delete(q);
+            try {
+                for (Quadruple q : quadruplesToRemove) {
+                    txnGraph.delete(q);
+                }
+                txnGraph.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                txnGraph.end();
             }
-            txnGraph.commit();
-            txnGraph.close();
         }
 
         return result;
@@ -214,9 +232,13 @@ public class TransactionalTdbDatastore extends Datastore {
     @SuppressWarnings("unchecked")
     public void affectDataReceived(Object dataReceived) {
         TransactionalDatasetGraph txnGraph = this.begin(AccessMode.WRITE);
-        txnGraph.add((Collection<Quadruple>) dataReceived);
-        txnGraph.commit();
-        txnGraph.close();
+
+        try {
+            txnGraph.add((Collection<Quadruple>) dataReceived);
+            txnGraph.commit();
+        } finally {
+            txnGraph.end();
+        }
     }
 
     /**
@@ -227,8 +249,14 @@ public class TransactionalTdbDatastore extends Datastore {
         Collection<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph = this.begin(AccessMode.READ_ONLY);
-        result = Collection.from(txnGraph.find(QuadruplePattern.ANY));
-        txnGraph.close();
+
+        try {
+            result = Collection.from(txnGraph.find(QuadruplePattern.ANY));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         return result;
     }
