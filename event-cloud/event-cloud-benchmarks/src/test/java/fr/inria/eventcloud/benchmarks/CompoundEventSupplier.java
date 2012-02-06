@@ -18,8 +18,6 @@ package fr.inria.eventcloud.benchmarks;
 
 import java.util.UUID;
 
-import org.objectweb.proactive.core.util.ProActiveRandom;
-
 import com.google.common.base.Supplier;
 import com.hp.hpl.jena.graph.Node;
 
@@ -37,42 +35,18 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
  */
 public class CompoundEventSupplier implements Supplier<CompoundEvent> {
 
-    private final int minSize;
-
-    private final int maxSize;
-
-    // maxSize - minSize
-    private final int delta;
+    private final int size;
 
     /**
-     * Constructs an Event supplier that builds events composed of the specified
-     * number of quadruples.
+     * Constructs a compound event supplier that builds compound events composed
+     * of the specified number of quadruples.
      * 
      * @param size
-     *            the number of quadruples contained by each event which are
-     *            generated.
+     *            the number of quadruples contained by each compound event
+     *            which is generated.
      */
     public CompoundEventSupplier(int size) {
-        this(size, size);
-    }
-
-    /**
-     * Constructs an Event supplier that builds events composed of a number
-     * quadruples which is between {@code minSize} (inclusive) and
-     * {@code maxSize} (exclusive).
-     * 
-     * @param minSize
-     *            the minimum number of quadruples contained by an event which
-     *            is generated.
-     * 
-     * @param maxSize
-     *            the maximum number of quadruples contained by an event which
-     *            is generated.
-     */
-    public CompoundEventSupplier(int minSize, int maxSize) {
-        this.minSize = minSize;
-        this.maxSize = maxSize;
-        this.delta = this.maxSize - this.minSize;
+        this.size = size;
     }
 
     /**
@@ -85,8 +59,7 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
                 Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                         + UUID.randomUUID().toString());
 
-        for (int i = 0; i < this.minSize + (this.delta > 0
-                ? ProActiveRandom.nextInt(this.delta) : 0); i++) {
+        for (int i = 0; i < this.size; i++) {
             quadruples.add(QuadrupleGenerator.random(graph));
         }
 
