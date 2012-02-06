@@ -77,24 +77,36 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
 
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        // finds the matching quadruple meta information
-        QuadrupleIterator result =
-                txnGraph.find(
-                        PublishSubscribeUtils.createQuadrupleHashUrl(this.hash),
-                        Node.ANY, Node.ANY, Node.ANY);
 
-        if (!result.hasNext()) {
-            log.error(
-                    "Peer {} is expected to have a matching quadruple meta information for hash {}",
-                    overlay, this.hash);
+        Quadruple metaQuad = null;
+        try {
+            // finds the matching quadruple meta information
+            QuadrupleIterator result =
+                    txnGraph.find(
+                            PublishSubscribeUtils.createQuadrupleHashUrl(this.hash),
+                            Node.ANY, Node.ANY, Node.ANY);
+
+            if (!result.hasNext()) {
+                log.error(
+                        "Peer {} is expected to have a matching quadruple meta information for hash {}",
+                        overlay, this.hash);
+            }
+
+            metaQuad = result.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
         }
 
-        Quadruple metaQuad = result.next();
-        txnGraph.close();
-
         txnGraph = datastore.begin(AccessMode.WRITE);
-        txnGraph.delete(metaQuad);
-        txnGraph.close();
+        try {
+            txnGraph.delete(metaQuad);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         Pair<Quadruple, SubscriptionId> extractedMetaInfo =
                 PublishSubscribeUtils.extractMetaInformation(metaQuad);

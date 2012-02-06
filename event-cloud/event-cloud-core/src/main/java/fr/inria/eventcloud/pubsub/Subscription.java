@@ -174,19 +174,27 @@ public class Subscription implements Rdfable, Serializable {
 
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        for (Quadruple quad : txnGraph.find(
-                Node.ANY, Node.createURI(SUBSCRIPTION_NS + id.toString()),
-                Node.ANY, Node.ANY)) {
-            if (quad.getPredicate().equals(
-                    SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
-                subSubscriptionsId.add(quad.getObject().getLiteralLexicalForm());
-            } else if (quad.getPredicate().equals(SUBSCRIPTION_STUB_NODE)) {
-                stubs.add(quad.getObject().getLiteralLexicalForm());
-            } else {
-                basicInfo.put(quad.getPredicate().toString(), quad.getObject());
+
+        try {
+            for (Quadruple quad : txnGraph.find(
+                    Node.ANY, Node.createURI(SUBSCRIPTION_NS + id.toString()),
+                    Node.ANY, Node.ANY)) {
+                if (quad.getPredicate().equals(
+                        SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
+                    subSubscriptionsId.add(quad.getObject()
+                            .getLiteralLexicalForm());
+                } else if (quad.getPredicate().equals(SUBSCRIPTION_STUB_NODE)) {
+                    stubs.add(quad.getObject().getLiteralLexicalForm());
+                } else {
+                    basicInfo.put(
+                            quad.getPredicate().toString(), quad.getObject());
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
         }
-        txnGraph.close();
 
         SubscriptionId parentId = null;
         if (basicInfo.get(SUBSCRIPTION_PARENT_ID_PROPERTY) != null) {

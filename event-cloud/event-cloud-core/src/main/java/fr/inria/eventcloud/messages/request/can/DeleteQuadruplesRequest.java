@@ -61,18 +61,31 @@ public class DeleteQuadruplesRequest extends
     public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                                 AnycastRequest request,
                                                                 QuadruplePattern quadruplePattern) {
-        Collection<Quadruple> result;
+        Collection<Quadruple> result = null;
 
+        TransactionalTdbDatastore datastore =
+                (TransactionalTdbDatastore) overlay.getDatastore();
         TransactionalDatasetGraph txnGraph =
-                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
-        result = Collection.from(txnGraph.find(quadruplePattern));
-        txnGraph.close();
+                datastore.begin(AccessMode.READ_ONLY);
+        try {
+            result = Collection.from(txnGraph.find(quadruplePattern));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.WRITE);
-        txnGraph.delete(quadruplePattern);
-        txnGraph.commit();
-        txnGraph.close();
+
+        try {
+            txnGraph.delete(quadruplePattern);
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         return result;
     }

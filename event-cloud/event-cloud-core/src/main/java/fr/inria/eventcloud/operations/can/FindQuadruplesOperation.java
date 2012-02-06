@@ -52,8 +52,14 @@ public final class FindQuadruplesOperation implements SynchronousOperation {
 
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
-        result = Collection.from(txnGraph.find(this.quadruplePattern));
-        txnGraph.close();
+
+        try {
+            result = Collection.from(txnGraph.find(this.quadruplePattern));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         return new FindQuadruplesResponseOperation(result);
     }

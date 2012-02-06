@@ -148,9 +148,15 @@ public class SemanticCanOverlay extends CanOverlay {
     public void storeSubscription(Subscription subscription) {
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) super.datastore).begin(AccessMode.WRITE);
-        txnGraph.add(subscription.toQuadruples());
-        txnGraph.commit();
-        txnGraph.close();
+
+        try {
+            txnGraph.add(subscription.toQuadruples());
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
     }
 
     /**

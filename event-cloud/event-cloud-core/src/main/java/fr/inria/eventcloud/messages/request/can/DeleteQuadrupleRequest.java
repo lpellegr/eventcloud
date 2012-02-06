@@ -51,11 +51,16 @@ public class DeleteQuadrupleRequest extends QuadrupleRequest {
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.WRITE);
-        txnGraph.delete(quad);
-        txnGraph.commit();
-        txnGraph.close();
 
-        logger.info("Quadruple {} has been removed from {}", quad, overlay);
+        try {
+            txnGraph.delete(quad);
+            txnGraph.commit();
+            logger.info("Quadruple {} has been removed from {}", quad, overlay);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
     }
 
 }

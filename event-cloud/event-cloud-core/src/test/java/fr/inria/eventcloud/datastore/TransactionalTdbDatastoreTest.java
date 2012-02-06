@@ -61,9 +61,9 @@ public final class TransactionalTdbDatastoreTest {
             for (int i = 0; i < SEQUENTIAL_ADD_OPERATIONS; i++) {
                 txnGraph.add(QuadrupleGenerator.random());
             }
-        } finally {
             txnGraph.commit();
-            txnGraph.close();
+        } finally {
+            txnGraph.end();
         }
 
         this.assertNbQuadruples(datastore, SEQUENTIAL_ADD_OPERATIONS);
@@ -84,9 +84,9 @@ public final class TransactionalTdbDatastoreTest {
                             datastore.begin(AccessMode.WRITE);
                     try {
                         txnGraph.add(QuadrupleGenerator.random());
-                    } finally {
                         txnGraph.commit();
-                        txnGraph.close();
+                    } finally {
+                        txnGraph.end();
                         doneSignal.countDown();
                     }
                 }
@@ -121,15 +121,27 @@ public final class TransactionalTdbDatastoreTest {
                         if (ProActiveRandom.nextInt(2) == 0) {
                             TransactionalDatasetGraph txnGraph = null;
                             txnGraph = datastore.begin(AccessMode.WRITE);
-                            txnGraph.add(QuadrupleGenerator.random());
-                            txnGraph.commit();
-                            txnGraph.close();
-                            nbQuadruplesAdded.incrementAndGet();
+
+                            try {
+                                txnGraph.add(QuadrupleGenerator.random());
+                                txnGraph.commit();
+                                nbQuadruplesAdded.incrementAndGet();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                txnGraph.end();
+                            }
                         } else {
                             TransactionalDatasetGraph txnGraph =
                                     datastore.begin(AccessMode.READ_ONLY);
-                            txnGraph.find(QuadruplePattern.ANY);
-                            txnGraph.close();
+
+                            try {
+                                txnGraph.find(QuadruplePattern.ANY);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                txnGraph.end();
+                            }
                         }
                     } finally {
                         doneSignal.countDown();
@@ -156,9 +168,15 @@ public final class TransactionalTdbDatastoreTest {
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.WRITE);
-        txnGraph.delete(QuadruplePattern.ANY);
-        txnGraph.commit();
-        txnGraph.close();
+
+        try {
+            txnGraph.delete(QuadruplePattern.ANY);
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         this.assertNbQuadruples(datastore, 0);
     }
@@ -167,9 +185,15 @@ public final class TransactionalTdbDatastoreTest {
                                     int expectedNbQuadruples) {
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        Assert.assertEquals(expectedNbQuadruples, txnGraph.find(
-                QuadruplePattern.ANY).count());
-        txnGraph.close();
+
+        try {
+            Assert.assertEquals(expectedNbQuadruples, txnGraph.find(
+                    QuadruplePattern.ANY).count());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
     }
 
     @After

@@ -169,12 +169,14 @@ public final class PublishSubscribeUtils {
 
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        QueryExecution queryExecution =
-                QueryExecutionFactory.create(
-                        query.toString(), txnGraph.toDataset());
-        ResultSet result = queryExecution.execSelect();
 
+        QueryExecution qExec = null;
         try {
+            qExec =
+                    QueryExecutionFactory.create(
+                            query.toString(), txnGraph.toDataset());
+            ResultSet result = qExec.execSelect();
+
             while (result.hasNext()) {
                 Binding binding = result.nextBinding();
 
@@ -190,8 +192,10 @@ public final class PublishSubscribeUtils {
                 ids.add(subscriptionId);
             }
         } finally {
-            queryExecution.close();
-            txnGraph.close();
+            if (qExec != null) {
+                qExec.close();
+            }
+            txnGraph.end();
         }
 
         return ids;
@@ -318,30 +322,43 @@ public final class PublishSubscribeUtils {
         Node subscriptionIdUrl =
                 PublishSubscribeUtils.createSubscriptionIdUrl(subscriptionId);
 
-        TransactionalDatasetGraph tnxGraph =
+        TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
-        Collection<Quadruple> subscriptionQuadruples =
-                Collection.from(tnxGraph.find(
-                        PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
-                        subscriptionIdUrl,
-                        PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
-                        Node.ANY));
-        tnxGraph.close();
 
-        tnxGraph = datastore.begin(AccessMode.WRITE);
-        for (Quadruple quad : subscriptionQuadruples) {
-            // removes the quadruples about the sub subscriptions associated to
-            // the
-            // subscription
-            tnxGraph.delete(
-                    Node.ANY, createSubSubscriptionIdUrl(quad.getObject()
-                            .getLiteralLexicalForm()), Node.ANY, Node.ANY);
+        Collection<Quadruple> subscriptionQuadruples = null;
+        try {
+            subscriptionQuadruples =
+                    Collection.from(txnGraph.find(
+                            PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
+                            subscriptionIdUrl,
+                            PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
+                            Node.ANY));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
         }
 
-        // removes the quadruples about the subscription
-        tnxGraph.delete(Node.ANY, subscriptionIdUrl, Node.ANY, Node.ANY);
-        tnxGraph.commit();
-        tnxGraph.close();
+        txnGraph = datastore.begin(AccessMode.WRITE);
+
+        try {
+            for (Quadruple quad : subscriptionQuadruples) {
+                // removes the quadruples about the sub subscriptions associated
+                // to the subscription
+                txnGraph.delete(
+                        Node.ANY, createSubSubscriptionIdUrl(quad.getObject()
+                                .getLiteralLexicalForm()), Node.ANY, Node.ANY);
+            }
+
+            // removes the quadruples about the subscription
+            txnGraph.delete(Node.ANY, subscriptionIdUrl, Node.ANY, Node.ANY);
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
     }
 
     /**
@@ -627,9 +644,15 @@ public final class PublishSubscribeUtils {
                                     XSDDatatype.XSDlong));
 
             txnGraph = datastore.begin(AccessMode.WRITE);
-            txnGraph.add(metaQuad);
-            txnGraph.commit();
-            txnGraph.close();
+
+            try {
+                txnGraph.add(metaQuad);
+                txnGraph.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                txnGraph.end();
+            }
         }
 
         // a subscription with more that one sub subscription (that matches the

@@ -100,26 +100,31 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         // to retrieve a solution each time a call to next is performed.
         List<Quadruple> quadruplesMatching = new ArrayList<Quadruple>();
 
-        TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
-
         QuadruplePattern qp =
                 firstSubsubscription.getAtomicQuery().getQuadruplePattern();
 
-        QuadrupleIterator it =
-                txnGraph.find(
-                        Node.ANY, qp.getSubject(), qp.getPredicate(),
-                        qp.getObject());
-        while (it.hasNext()) {
-            Quadruple q = it.next();
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
 
-            if (qp.getGraph() == Node.ANY
-                    || q.getGraph().getURI().startsWith(qp.getGraph().getURI())) {
-                quadruplesMatching.add(q);
+        try {
+            QuadrupleIterator it =
+                    txnGraph.find(
+                            Node.ANY, qp.getSubject(), qp.getPredicate(),
+                            qp.getObject());
+            while (it.hasNext()) {
+                Quadruple q = it.next();
+
+                if (qp.getGraph() == Node.ANY
+                        || q.getGraph().getURI().startsWith(
+                                qp.getGraph().getURI())) {
+                    quadruplesMatching.add(q);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
         }
-
-        txnGraph.close();
 
         for (Quadruple quadrupleMatching : quadruplesMatching) {
             if (log.isDebugEnabled()

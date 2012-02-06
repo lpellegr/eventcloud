@@ -55,9 +55,15 @@ public class SubscriptionTest {
         datastore.open();
 
         TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
-        txnGraph.add(quads);
-        txnGraph.commit();
-        txnGraph.close();
+
+        try {
+            txnGraph.add(quads);
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
 
         Subscription deserializedSubscription =
                 Subscription.parseFrom(datastore, subscription.getId());
