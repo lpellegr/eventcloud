@@ -137,7 +137,6 @@ public class EventCloudUsageTest implements Serializable {
         Subscription subscription =
                 new Subscription(
                         "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }");
-        SubscriptionId id = subscription.getId();
 
         subscribeProxy.subscribe(
                 subscription, new BindingNotificationListener() {
@@ -153,10 +152,9 @@ public class EventCloudUsageTest implements Serializable {
                         log.info("Solution received:\n{}", solution);
                     }
                 });
-        log.info("Subscription with id {} has been registered", id);
-
-        // waits a little to make sure the subscription has been indexed
-        Thread.sleep(500);
+        log.info(
+                "Subscription with id {} has been registered",
+                subscription.getId());
 
         // Finally, we can simulate an event source by creating a PublishProxy
         PublishProxy publishProxy = proxyFactory.createPublishProxy();
@@ -254,61 +252,27 @@ public class EventCloudUsageTest implements Serializable {
         // e.printStackTrace();
         // }
 
-        // subscribeProxy.unsubscribe(id);
-        //
-        // publishProxy.publish(new Quadruple(
-        // Node.createURI("https://plus.google.com/"),
-        // Node.createURI("https://plus.google.com/4879854879797418743/"),
-        // Node.createURI("http://xmlns.com/foaf/0.1/name"),
-        // Node.createLiteral("Firstname Lastname")));
-        //
-        // // just to test that no notification is delivered
-        //
-        // try {
-        // Thread.sleep(7000);
-        // } catch (InterruptedException e) {
-        // e.printStackTrace();
-        // }
+        // Unsubscribes. Once this step is done no notification related to the
+        // subscription must be received.
+        subscribeProxy.unsubscribe(subscription.getId());
 
-        // System.err.println(">>> UNSUBSCRIBE REQUEST ASSUMED TO BE EXECUTED!");
-        //
-        // try {
-        // deployer.getRandomSemanticPeer(eventCloudId).send(
-        // new StatelessQuadruplePatternRequest(QuadruplePattern.ANY) {
-        //
-        // private static final long serialVersionUID = 1L;
-        //
-        // @Override
-        // public void onPeerValidatingKeyConstraints(CanOverlay overlay,
-        // QuadruplePattern quadruplePattern) {
-        // System.err.println("$B$B$ Peer " + overlay
-        // + " contains:");
-        // for (Quadruple quad : ((SynchronizedJenaDatasetGraph)
-        // overlay.getDatastore()).find(QuadruplePattern.ANY)) {
-        // log.debug(quad.toString());
-        // }
-        // }
-        // });
-        // } catch (DispatchException e) {
-        // e.printStackTrace();
-        // }
-        //
-        // try {
-        // Thread.sleep(15000);
-        // } catch (InterruptedException e) {
-        // e.printStackTrace();
-        // }
+        int currentNbNotifications = bindingsReceived.size();
 
-        // TODO make it work
-        // try {
-        // putGetProxy.add(
-        // new FileInputStream(
-        // new File(
-        // "/user/lpellegr/home/Desktop/infobox_property_definitions_en.nq")),
-        // SerializationFormat.NQuads);
-        // } catch (FileNotFoundException e) {
-        // e.printStackTrace();
-        // }
+        // one new quadruple that matches the subscription is published
+        publishProxy.publish(new Quadruple(
+                Node.createURI("https://plus.google.com/"),
+                Node.createURI("https://plus.google.com/4879854879797418743/"),
+                Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                Node.createLiteral("Firstname Lastname")));
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // no new notification should be received
+        Assert.assertTrue(currentNbNotifications == bindingsReceived.size());
     }
 
     @Test

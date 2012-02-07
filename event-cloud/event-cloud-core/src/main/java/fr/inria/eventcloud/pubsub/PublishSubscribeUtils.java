@@ -96,14 +96,14 @@ public final class PublishSubscribeUtils {
 
     /**
      * Creates a matching quadruple meta information. This is a quadruple that
-     * indicates that a subscription identified by its {@code subscriptionIdUrl}
+     * indicates that a subscription identified by its {@code subscriptionIdUri}
      * is matched for its {@code subSubscriptionId} with the
      * {@code quadrupleMatching} value.
      * 
      * @param quadrupleMatching
      *            the quadruple matching the subscription.
-     * @param subscriptionIdUrl
-     *            the url identifying the subscription which is matched.
+     * @param subscriptionIdUri
+     *            an URI identifying the subscription which is matched.
      * @param subSubscriptionId
      *            the subSubscription which is really matched.
      * 
@@ -111,7 +111,7 @@ public final class PublishSubscribeUtils {
      *         information that identify the subscription which is matched.
      */
     public static final Quadruple createMetaQuadruple(Quadruple quadrupleMatching,
-                                                      Node subscriptionIdUrl,
+                                                      Node subscriptionIdUri,
                                                       Node subSubscriptionId) {
         // generates the object value which is the concatenation of
         // subSubscriptionId and quadrupleMatching
@@ -135,7 +135,7 @@ public final class PublishSubscribeUtils {
         }
 
         return new Quadruple(
-                createQuadrupleHashUrl(quadrupleMatching), subscriptionIdUrl,
+                createQuadrupleHashUri(quadrupleMatching), subscriptionIdUri,
                 PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
                 Node.createLiteral(new String(baos.toByteArray())));
     }
@@ -155,15 +155,18 @@ public final class PublishSubscribeUtils {
         query.append("SELECT ?subscriptionId WHERE {\n    GRAPH ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
         query.append(" {\n        ");
-        query.append("?subscriptionIdUrl ");
+        query.append("?subscriptionIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
         query.append(" ");
         query.append(NodeFmtLib.str(originalSubscriptionId.toJenaNode()));
-        query.append(" .\n        ?subscriptionIdUrl ");
+        query.append(" .\n        ?subscriptionIdUri ");
         // query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE));
-        // query.append(" ?subSubscriptionId .\n        ?subscriptionIdUrl ");
+        // query.append(" ?subSubscriptionId .\n        ?subscriptionIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
         query.append(" ?subscriptionId .\n    }\n}");
+
+        System.err.println("PublishSubscribeUtils.findSubscriptionIds() QUERY=\n"
+                + query.toString());
 
         List<SubscriptionId> ids = new ArrayList<SubscriptionId>();
 
@@ -234,77 +237,77 @@ public final class PublishSubscribeUtils {
     }
 
     /**
-     * Creates a quadruple hash URL by using the specified {@code quad}.
+     * Creates a quadruple hash URI by using the specified {@code quad}.
      * 
      * @param quad
      *            the quadruple to use.
      * 
-     * @return the quadruple hash URL as a Jena {@link Node_URI}.
+     * @return the quadruple hash URI as a Jena {@link Node_URI}.
      */
-    public static final Node createQuadrupleHashUrl(Quadruple quad) {
-        return createQuadrupleHashUrl(quad.hashValue());
+    public static final Node createQuadrupleHashUri(Quadruple quad) {
+        return createQuadrupleHashUri(quad.hashValue());
     }
 
     /**
-     * Creates the quadruple hash URL by using the specified {@code quadHash}
+     * Creates the quadruple hash URI by using the specified {@code quadHash}
      * which is assumed to be the hash value associated to a {@link Quadruple}.
      * 
      * @param quadHash
      *            the hash value to use.
      * 
-     * @return a quadruple hash URL as a Jena {@link Node_URI}.
+     * @return a quadruple hash URI as a Jena {@link Node_URI}.
      */
-    public static final Node createQuadrupleHashUrl(LongLong quadHash) {
+    public static final Node createQuadrupleHashUri(LongLong quadHash) {
         return Node.createURI(PublishSubscribeConstants.QUADRUPLE_NS.concat(quadHash.toString()));
     }
 
     /**
-     * Creates a subscription id URL from the specified {@code id}.
+     * Creates a subscription id URI from the specified {@code id}.
      * 
      * @param id
      *            the subscription identifier to use.
      * 
-     * @return the subscription id URL as a Jena {@link Node_URI}.
+     * @return the subscription id URI as a Jena {@link Node_URI}.
      */
-    public static final Node createSubscriptionIdUrl(SubscriptionId id) {
-        return createSubscriptionIdUrl(id.toString());
+    public static final Node createSubscriptionIdUri(SubscriptionId id) {
+        return createSubscriptionIdUri(id.toString());
     }
 
     /**
-     * Creates a sub subscription id URL from the specified
+     * Creates a sub subscription id URI from the specified
      * {@code subscriptionId} which is assumed to be a {@link SubscriptionId}.
      * 
      * @param subSubscriptionId
      *            the subscription identifier to use.
      * 
-     * @return the sub subscription id URL as a Jena {@link Node_URI}.
+     * @return the sub subscription id URI as a Jena {@link Node_URI}.
      */
-    public static final Node createSubSubscriptionIdUrl(String subSubscriptionId) {
+    public static final Node createSubSubscriptionIdUri(String subSubscriptionId) {
         return Node.createURI(SUBSUBSCRIPTION_NS + subSubscriptionId);
     }
 
     /**
-     * Creates a sub subscription id URL from the specified {@code id}.
+     * Creates a sub subscription id URI from the specified {@code id}.
      * 
      * @param subSubscriptionId
      *            the sub subscription identifier to use.
      * 
-     * @return the sub subscription id URL as a Jena {@link Node_URI}.
+     * @return the sub subscription id URI as a Jena {@link Node_URI}.
      */
-    public static final Node createSubSubscriptionIdUrl(SubscriptionId subSubscriptionId) {
-        return createSubSubscriptionIdUrl(subSubscriptionId.toString());
+    public static final Node createSubSubscriptionIdUri(SubscriptionId subSubscriptionId) {
+        return createSubSubscriptionIdUri(subSubscriptionId.toString());
     }
 
     /**
-     * Creates a subscription id URL from the specified {@code subscriptionId}
+     * Creates a subscription id URI from the specified {@code subscriptionId}
      * which is assumed to be a {@link SubscriptionId}.
      * 
      * @param subscriptionId
      *            the subscription identifier to use.
      * 
-     * @return the subscription id URL as a Jena {@link Node_URI}.
+     * @return the subscription id URI as a Jena {@link Node_URI}.
      */
-    public static final Node createSubscriptionIdUrl(String subscriptionId) {
+    public static final Node createSubscriptionIdUri(String subscriptionId) {
         return Node.createURI(SUBSCRIPTION_NS + subscriptionId);
     }
 
@@ -319,8 +322,8 @@ public final class PublishSubscribeUtils {
      */
     public static final void deleteSubscription(TransactionalTdbDatastore datastore,
                                                 SubscriptionId subscriptionId) {
-        Node subscriptionIdUrl =
-                PublishSubscribeUtils.createSubscriptionIdUrl(subscriptionId);
+        Node subscriptionIdUri =
+                PublishSubscribeUtils.createSubscriptionIdUri(subscriptionId);
 
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
@@ -330,7 +333,7 @@ public final class PublishSubscribeUtils {
             subscriptionQuadruples =
                     Collection.from(txnGraph.find(
                             PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
-                            subscriptionIdUrl,
+                            subscriptionIdUri,
                             PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
                             Node.ANY));
 
@@ -347,12 +350,12 @@ public final class PublishSubscribeUtils {
                 // removes the quadruples about the sub subscriptions associated
                 // to the subscription
                 txnGraph.delete(
-                        Node.ANY, createSubSubscriptionIdUrl(quad.getObject()
+                        Node.ANY, createSubSubscriptionIdUri(quad.getObject()
                                 .getLiteralLexicalForm()), Node.ANY, Node.ANY);
             }
 
             // removes the quadruples about the subscription
-            txnGraph.delete(Node.ANY, subscriptionIdUrl, Node.ANY, Node.ANY);
+            txnGraph.delete(Node.ANY, subscriptionIdUri, Node.ANY, Node.ANY);
             txnGraph.commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -363,23 +366,36 @@ public final class PublishSubscribeUtils {
 
     /**
      * Extracts the {@link SubscriptionId} from the specified
-     * {@code subscriptionIdUrl}.
+     * {@code subscriptionIdUri}.
      * 
-     * @param subscriptionIdUrl
-     *            the subscription id url to use.
+     * @param subscriptionIdUri
+     *            the subscription id uri to use.
      * 
      * @return the {@link SubscriptionId} which has been extracted from the
-     *         specified {@code subscriptionIdUrl}.
+     *         specified {@code subscriptionIdUri}.
      */
-    public static final SubscriptionId extractSubscriptionId(Node subscriptionIdUrl) {
-        if (!subscriptionIdUrl.isURI()
-                || !subscriptionIdUrl.getURI().startsWith(SUBSCRIPTION_NS)) {
-            throw new IllegalArgumentException("Not a subscriptionIdUrl: "
-                    + subscriptionIdUrl);
+    public static final SubscriptionId extractSubscriptionId(Node subscriptionIdUri) {
+        if (!subscriptionIdUri.isURI()
+                || !subscriptionIdUri.getURI().startsWith(SUBSCRIPTION_NS)) {
+            throw new IllegalArgumentException(
+                    "The specified subscription id URI is not valid: "
+                            + subscriptionIdUri);
         }
 
-        return SubscriptionId.parseSubscriptionId(subscriptionIdUrl.getURI()
-                .substring(subscriptionIdUrl.getURI().lastIndexOf(':') + 1));
+        return SubscriptionId.parseSubscriptionId(subscriptionIdUri.getURI()
+                .substring(subscriptionIdUri.getURI().lastIndexOf(':') + 1));
+    }
+
+    public static final String extractSubscriptionId(String subscriptionIdUri) {
+        int index = subscriptionIdUri.lastIndexOf(':');
+
+        if (index == -1) {
+            throw new IllegalArgumentException(
+                    "The specified subscription id URI is not valid: "
+                            + subscriptionIdUri);
+        }
+
+        return subscriptionIdUri.substring(index + 1);
     }
 
     /**
@@ -627,7 +643,6 @@ public final class PublishSubscribeUtils {
         TransactionalTdbDatastore datastore =
                 (TransactionalTdbDatastore) overlay.getDatastore();
 
-        TransactionalDatasetGraph txnGraph;
         if (subscription.getType() == NotificationListenerType.BINDING) {
             // stores a quadruple that contains the information about the
             // subscription that is matched and the quadruple that matches the
@@ -638,12 +653,13 @@ public final class PublishSubscribeUtils {
             Quadruple metaQuad =
                     PublishSubscribeUtils.createMetaQuadruple(
                             quadrupleMatching,
-                            PublishSubscribeUtils.createSubscriptionIdUrl(subscription.getId()),
+                            PublishSubscribeUtils.createSubscriptionIdUri(subscription.getId()),
                             Node.createLiteral(
                                     subscription.getId().toString(),
                                     XSDDatatype.XSDlong));
 
-            txnGraph = datastore.begin(AccessMode.WRITE);
+            TransactionalDatasetGraph txnGraph =
+                    datastore.begin(AccessMode.WRITE);
 
             try {
                 txnGraph.add(metaQuad);

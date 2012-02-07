@@ -83,7 +83,7 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
             // finds the matching quadruple meta information
             QuadrupleIterator result =
                     txnGraph.find(
-                            PublishSubscribeUtils.createQuadrupleHashUrl(this.hash),
+                            PublishSubscribeUtils.createQuadrupleHashUri(this.hash),
                             Node.ANY, Node.ANY, Node.ANY);
 
             if (!result.hasNext()) {

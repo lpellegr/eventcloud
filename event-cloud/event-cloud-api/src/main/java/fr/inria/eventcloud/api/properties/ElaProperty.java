@@ -18,7 +18,7 @@ package fr.inria.eventcloud.api.properties;
 
 import java.io.Serializable;
 
-import fr.inria.eventcloud.api.Rdfable;
+import fr.inria.eventcloud.api.Quadruplable;
 
 /**
  * ElaProperty stands for Event Level Agreement Property. It is used to store a
@@ -26,7 +26,7 @@ import fr.inria.eventcloud.api.Rdfable;
  * 
  * @author lpellegr
  */
-public abstract class ElaProperty implements Serializable, Rdfable {
+public abstract class ElaProperty implements Serializable, Quadruplable {
 
     private static final long serialVersionUID = 1L;
 

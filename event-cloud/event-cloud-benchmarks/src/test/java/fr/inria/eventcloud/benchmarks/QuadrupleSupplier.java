@@ -34,7 +34,7 @@ public class QuadrupleSupplier implements Supplier<Quadruple> {
      */
     @Override
     public Quadruple get() {
-        return QuadrupleGenerator.random();
+        return QuadrupleGenerator.randomWithoutLiteral();
     }
 
 }

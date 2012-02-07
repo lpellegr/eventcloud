@@ -57,6 +57,7 @@ import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Solution;
 import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.pubsub.Subsubscription;
 import fr.inria.eventcloud.utils.LongLong;
 
 /**
@@ -300,15 +301,26 @@ public class SubscribeProxyImpl extends ProxyCache implements
                             + id);
         }
 
+        // once the subscription id is removed from the list of the
+        // subscriptions which are matched, the notifications which are received
+        // for this subscription are ignored
         Subscription subscription = this.subscriptions.remove(id);
         this.listeners.remove(id);
         this.eventIdsReceived.values().remove(id);
 
-        try {
-            super.proxy.selectTracker().getRandomPeer().send(
-                    new UnsubscribeRequest(subscription));
-        } catch (DispatchException e) {
-            e.printStackTrace();
+        // updates the network to stop sending notifications
+        for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
+            try {
+                super.proxy.selectTracker()
+                        .getRandomPeer()
+                        .send(
+                                new UnsubscribeRequest(
+                                        subscription.getOriginalId(),
+                                        subSubscription.getAtomicQuery(),
+                                        subscription.getType() == NotificationListenerType.BINDING));
+            } catch (DispatchException e) {
+                e.printStackTrace();
+            }
         }
     }
 
