@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
  * This class is used to route and to handle an unsubscribe request.
@@ -35,11 +35,17 @@ public class UnsubscribeRequest extends StatelessQuadruplePatternRequest {
 
     private final SerializedValue<SubscriptionId> originalSubscriptionId;
 
-    public UnsubscribeRequest(Subscription subscription) {
-        super(subscription.getSubSubscriptions()[0].getAtomicQuery()
-                .getQuadruplePattern());
+    // indicates whether the original subscription was using a bindings
+    // notification listener or not
+    private final boolean useBindingNotificationListener;
+
+    public UnsubscribeRequest(SubscriptionId originalSubscriptionId,
+            AtomicQuery atomicQuery, boolean useBindingNotificationListener) {
+        super(atomicQuery.getQuadruplePattern());
+
         this.originalSubscriptionId =
-                SerializedValue.create(subscription.getId());
+                SerializedValue.create(originalSubscriptionId);
+        this.useBindingNotificationListener = useBindingNotificationListener;
     }
 
     /**
@@ -48,7 +54,9 @@ public class UnsubscribeRequest extends StatelessQuadruplePatternRequest {
     @Override
     public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                QuadruplePattern quadruplePattern) {
-        ((SemanticCanOverlay) overlay).deleteSubscription(this.originalSubscriptionId.getValue());
+        ((SemanticCanOverlay) overlay).deleteSubscriptions(
+                this.originalSubscriptionId.getValue(),
+                this.useBindingNotificationListener);
     }
 
 }

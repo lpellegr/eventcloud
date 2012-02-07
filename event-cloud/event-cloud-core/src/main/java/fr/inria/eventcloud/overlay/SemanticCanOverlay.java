@@ -16,21 +16,30 @@
  **/
 package fr.inria.eventcloud.overlay;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.openjena.riot.out.NodeFmtLib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.update.UpdateAction;
+import com.hp.hpl.jena.update.UpdateFactory;
 
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -132,7 +141,7 @@ public class SemanticCanOverlay extends CanOverlay {
             return this.peerStubsCache.get(peerUrl);
         } catch (ExecutionException e) {
             log.error(
-                    "Error while creating stub from the cache for url: {}",
+                    "Error while retrieving stub from the cache for url: {}",
                     peerUrl, e);
             return null;
         }
@@ -160,25 +169,89 @@ public class SemanticCanOverlay extends CanOverlay {
     }
 
     /**
-     * Deletes all the subscription quadruples associated to the specified
-     * {@code originalSubscriptionId} from the local persistent datastore.
+     * Deletes from the local datastore all the quadruples associated to the
+     * subscriptions which are related to the subscription identified by
+     * {@code originalSubscriptionId}.
      * 
      * @param originalSubscriptionId
      *            the original subscription id (the subscription identifier
      *            associated to the first subscription which has not been
      *            rewritten) to use.
+     * 
+     * @param useBindingNotificationListener
+     *            Indicated whether the original subscription id uses a
+     *            {@link BindingNotificationListener} or not.
      */
-    public synchronized void deleteSubscription(SubscriptionId originalSubscriptionId) {
-        this.subscriptionsCache.invalidate(originalSubscriptionId);
+    public void deleteSubscriptions(SubscriptionId originalSubscriptionId,
+                                    boolean useBindingNotificationListener) {
+        Node osidNode =
+                PublishSubscribeUtils.createSubscriptionIdUri(originalSubscriptionId);
 
-        TransactionalTdbDatastore datastore =
-                (TransactionalTdbDatastore) super.datastore;
-        List<SubscriptionId> subscriptionIds =
-                PublishSubscribeUtils.findSubscriptionIds(
-                        datastore, originalSubscriptionId);
+        StringBuilder deleteSubsubscriptionsQuery = new StringBuilder();
+        deleteSubsubscriptionsQuery.append("DELETE WHERE { GRAPH ");
+        deleteSubsubscriptionsQuery.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
+        deleteSubsubscriptionsQuery.append(" { ?subscriptionIdUri ");
+        deleteSubsubscriptionsQuery.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
+        deleteSubsubscriptionsQuery.append(' ');
+        deleteSubsubscriptionsQuery.append(NodeFmtLib.str(osidNode));
+        deleteSubsubscriptionsQuery.append(" . ?subscriptionIdUri ");
+        deleteSubsubscriptionsQuery.append(' ');
+        deleteSubsubscriptionsQuery.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE));
+        deleteSubsubscriptionsQuery.append(" ?subSubscriptionIdUri . ?subSubscriptionIdUri ?p ?o }}");
 
-        for (SubscriptionId id : subscriptionIds) {
-            PublishSubscribeUtils.deleteSubscription(datastore, id);
+        synchronized (this.subscriptionsCache) {
+            TransactionalTdbDatastore datastore =
+                    (TransactionalTdbDatastore) super.datastore;
+
+            TransactionalDatasetGraph txnGraph =
+                    datastore.begin(AccessMode.WRITE);
+            try {
+                // deletes potential intermediate results if the original
+                // subscription uses a binding notification listener
+                if (useBindingNotificationListener) {
+                    txnGraph.delete(new QuadruplePattern(
+                            Node.ANY,
+                            osidNode,
+                            PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
+                            Node.ANY));
+                }
+
+                // retrieves the uri of subscriptions which have the specified
+                // original id
+                List<Node> subscriptionsIdUris = new ArrayList<Node>();
+
+                QuadrupleIterator result =
+                        txnGraph.find(new QuadruplePattern(
+                                PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
+                                Node.ANY,
+                                PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE,
+                                osidNode));
+                while (result.hasNext()) {
+                    subscriptionsIdUris.add(result.next().getSubject());
+                }
+
+                // deletes quadruples related to sub subscriptions indexed with
+                // the subscription
+                UpdateAction.execute(
+                        UpdateFactory.create(deleteSubsubscriptionsQuery.toString()),
+                        txnGraph.toDataset());
+
+                // deletes quadruples related to the subscription
+
+                for (Node node : subscriptionsIdUris) {
+                    txnGraph.delete(new QuadruplePattern(
+                            PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
+                            node, Node.ANY, Node.ANY));
+                }
+
+                txnGraph.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                txnGraph.end();
+            }
+
+            this.subscriptionsCache.invalidate(originalSubscriptionId);
         }
     }
 

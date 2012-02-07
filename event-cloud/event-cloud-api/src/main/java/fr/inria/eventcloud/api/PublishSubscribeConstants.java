@@ -190,7 +190,7 @@ public final class PublishSubscribeConstants {
      */
 
     public static final String SUBSCRIPTION_VARIABLE_VALUE = SUBSCRIPTION_NS
-            + "variable";
+            + "var";
 
     public static final String QUADRUPLE_MATCHES_SUBSCRIPTION_VALUE =
             SUBSCRIPTION_NS + "matches";

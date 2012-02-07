@@ -112,11 +112,11 @@ public class PublishSubscribeBenchmarkTest {
         // scenarios
         return Arrays.asList(new Object[][] {
                 {
-                        1, 1, 1, 100, new QuadrupleSupplier(),
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
                         SignalNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
-                        1, 1, 1, 100, new QuadrupleSupplier(),
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
                         BindingNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {

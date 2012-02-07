@@ -17,12 +17,12 @@
 package fr.inria.eventcloud.api;
 
 /**
- * A Class implements the {@link Rdfable} interface to indicate that the content
- * of the class can be serialized into RDF data.
+ * This class can be implemented by an another to indicate that its content can
+ * be serialized into a collection of {@link Quadruple}s.
  * 
  * @author lpellegr
  */
-public interface Rdfable {
+public interface Quadruplable {
 
     /**
      * Serializes the object that defines this method as a set of quadruples.

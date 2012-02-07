@@ -24,7 +24,6 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ID_
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_INDEXATION_DATETIME_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_PROPERTY;
@@ -60,7 +59,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.Rdfable;
+import fr.inria.eventcloud.api.Quadruplable;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -80,7 +79,7 @@ import fr.inria.eventcloud.utils.LongLong;
  * 
  * @author lpellegr
  */
-public class Subscription implements Rdfable, Serializable {
+public class Subscription implements Quadruplable, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -168,7 +167,7 @@ public class Subscription implements Rdfable, Serializable {
         // contains the data about the subscription itself
         Map<String, Node> basicInfo = new HashMap<String, Node>();
         // contains the identifier of the sub-subscriptions
-        List<String> subSubscriptionsId = new ArrayList<String>();
+        List<Node> subSubscriptionIds = new ArrayList<Node>();
         // contains the stub urls associated to the subscription
         List<String> stubs = new ArrayList<String>();
 
@@ -177,12 +176,12 @@ public class Subscription implements Rdfable, Serializable {
 
         try {
             for (Quadruple quad : txnGraph.find(
-                    Node.ANY, Node.createURI(SUBSCRIPTION_NS + id.toString()),
+                    Node.ANY,
+                    PublishSubscribeUtils.createSubscriptionIdUri(id),
                     Node.ANY, Node.ANY)) {
                 if (quad.getPredicate().equals(
                         SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
-                    subSubscriptionsId.add(quad.getObject()
-                            .getLiteralLexicalForm());
+                    subSubscriptionIds.add(quad.getObject());
                 } else if (quad.getPredicate().equals(SUBSCRIPTION_STUB_NODE)) {
                     stubs.add(quad.getObject().getLiteralLexicalForm());
                 } else {
@@ -207,9 +206,9 @@ public class Subscription implements Rdfable, Serializable {
         SubscriptionId originalId = null;
         if (basicInfo.get(SUBSCRIPTION_ORIGINAL_ID_PROPERTY) != null) {
             originalId =
-                    SubscriptionId.parseSubscriptionId(basicInfo.get(
+                    SubscriptionId.parseSubscriptionId(PublishSubscribeUtils.extractSubscriptionId(basicInfo.get(
                             SUBSCRIPTION_ORIGINAL_ID_PROPERTY)
-                            .getLiteralLexicalForm());
+                            .getURI()));
         }
 
         Subscription subscription =
@@ -246,16 +245,16 @@ public class Subscription implements Rdfable, Serializable {
 
         // recreates the sub-subscriptions
         subscription.subSubscriptions =
-                new Subsubscription[subSubscriptionsId.size()];
+                new Subsubscription[subSubscriptionIds.size()];
 
-        for (int i = 0; i < subSubscriptionsId.size(); i++) {
+        for (Node subSubscriptionIdNode : subSubscriptionIds) {
             Subsubscription s =
                     Subsubscription.parseFrom(
                             datastore,
                             SubscriptionId.parseSubscriptionId(basicInfo.get(
                                     SUBSCRIPTION_ID_PROPERTY)
                                     .getLiteralLexicalForm()),
-                            SubscriptionId.parseSubscriptionId(subSubscriptionsId.get(i)));
+                            subSubscriptionIdNode);
             subscription.subSubscriptions[s.getIndex()] = s;
         }
 
@@ -384,10 +383,8 @@ public class Subscription implements Rdfable, Serializable {
     public Collection<Quadruple> toQuadruples() {
         Collection<Quadruple> quads = new Collection<Quadruple>();
         Node subscriptionURI =
-                PublishSubscribeUtils.createSubscriptionIdUrl(this.id);
+                PublishSubscribeUtils.createSubscriptionIdUri(this.id);
 
-        // the output is something which is similar to what is described at
-        // http://code.google.com/p/event-cloud/wiki/PublishSubscribeRdfFormat
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI, SUBSCRIPTION_ID_NODE,
                 Node.createLiteral(this.id.toString()), false, false));
@@ -401,10 +398,11 @@ public class Subscription implements Rdfable, Serializable {
 
         if (this.originalId != null) {
             quads.add(new Quadruple(
-                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    SUBSCRIPTION_NS_NODE,
+                    subscriptionURI,
                     SUBSCRIPTION_ORIGINAL_ID_NODE,
-                    Node.createLiteral(this.originalId.toString()), false,
-                    false));
+                    PublishSubscribeUtils.createSubscriptionIdUri(this.originalId),
+                    false, false));
         }
 
         quads.add(new Quadruple(
@@ -455,9 +453,11 @@ public class Subscription implements Rdfable, Serializable {
 
         for (Subsubscription ssubscription : this.getSubSubscriptions()) {
             quads.add(new Quadruple(
-                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    SUBSCRIPTION_NS_NODE,
+                    subscriptionURI,
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
-                    Node.createLiteral(ssubscription.getId().toString()),
+                    // Node.createLiteral(ssubscription.getId().toString()),
+                    PublishSubscribeUtils.createSubSubscriptionIdUri(ssubscription.getId()),
                     false, false));
             quads.addAll(ssubscription.toQuadruples());
         }
@@ -509,6 +509,17 @@ public class Subscription implements Rdfable, Serializable {
             this.quadrupleHash = quadrupleHashValue;
         }
 
+    }
+
+    public static void main(String[] args) {
+        SubscriptionId id = new SubscriptionId();
+        Subscription subscription =
+                new Subscription(
+                        id, null, id, System.currentTimeMillis(),
+                        "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o }}",
+                        "http://dummy.com", NotificationListenerType.BINDING);
+
+        System.out.println(subscription.toQuadruples());
     }
 
 }

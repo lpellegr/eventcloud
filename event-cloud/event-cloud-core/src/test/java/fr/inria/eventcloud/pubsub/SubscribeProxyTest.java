@@ -56,7 +56,8 @@ import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
- * Class used to test a {@link SubscribeProxy}.
+ * Tests cases for operations in {@link SubscribeProxy} and {@link PublishProxy}
+ * .
  * 
  * @author lpellegr
  */

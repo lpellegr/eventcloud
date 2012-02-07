@@ -38,7 +38,7 @@ import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.Rdfable;
+import fr.inria.eventcloud.api.Quadruplable;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
@@ -53,7 +53,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
  * 
  * @author lpellegr
  */
-public class Subsubscription implements Rdfable {
+public class Subsubscription implements Quadruplable {
 
     private final SubscriptionId parentId;
 
@@ -192,14 +192,14 @@ public class Subsubscription implements Rdfable {
      * @param subscriptionId
      *            the subscriptionId which is the parent id for the
      *            {@code subSubscriptionId}
-     * @param subSubscriptionId
-     *            the identifier of the sub subscription.
+     * @param subSubscriptionIdNode
+     *            the identifier of the sub subscription as a Node.
      * 
      * @return the sub subscription which has been parsed.
      */
     public static final Subsubscription parseFrom(TransactionalTdbDatastore datastore,
                                                   SubscriptionId subscriptionId,
-                                                  SubscriptionId subSubscriptionId) {
+                                                  Node subSubscriptionIdNode) {
         // contains the properties and their associated values that are read
         // from the datastore for the given subSubscriptionId
         Map<String, Node> properties = new HashMap<String, Node>();
@@ -209,9 +209,7 @@ public class Subsubscription implements Rdfable {
 
         try {
             for (Quadruple quad : txnGraph.find(
-                    Node.ANY,
-                    PublishSubscribeUtils.createSubSubscriptionIdUrl(subSubscriptionId),
-                    Node.ANY, Node.ANY)) {
+                    Node.ANY, subSubscriptionIdNode, Node.ANY, Node.ANY)) {
                 properties.put(quad.getPredicate().toString(), quad.getObject());
             }
         } catch (Exception e) {
@@ -222,7 +220,7 @@ public class Subsubscription implements Rdfable {
 
         return new Subsubscription(
                 subscriptionId,
-                subSubscriptionId,
+                SubscriptionId.parseSubscriptionId(PublishSubscribeUtils.extractSubscriptionId(subSubscriptionIdNode.getURI())),
                 (Integer) properties.get(SUBSUBSCRIPTION_INDEX_PROPERTY)
                         .getLiteralValue(),
                 // when they are serialized, variables are serialized as
