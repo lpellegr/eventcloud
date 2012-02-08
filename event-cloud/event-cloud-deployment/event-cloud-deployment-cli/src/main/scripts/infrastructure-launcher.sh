@@ -15,6 +15,7 @@ EVENTCLOUDS_INSTANCE_FILE=$INSTANCES_DIR/eventclouds
 EVENTCLOUDS_REGISTRY_PORT=1100
 EVENTCLOUDS_PORTS_LOWER_BOUND=1101
 PROXIES_PORTS_LOWER_BOUND=8900
+WS_EVENTCLOUDS_MANAGEMENT_PORT=1199
 
 # Infrastructure scale
 NB_EVENTCLOUDS=1
@@ -47,12 +48,15 @@ function main() {
 
     # deploy the eventclouds registry
     deploy_eventclouds_registry
+
+    # deploy eventclouds management web service
+    deploy_ws_management_proxy
     
     # deploy the event clouds
-    deploy_eventclouds
+    #deploy_eventclouds
     
     # deploy the ws proxies
-    deploy_ws_proxies
+    #deploy_ws_proxies
 }
 
 function deploy_eventclouds_registry() {
@@ -87,6 +91,20 @@ function deploy_eventclouds() {
 	echo $(cut -d " " -f 3 $EVENTCLOUD_INSTANCE_FILE)
     done;
     echo
+}
+
+function deploy_ws_management_proxy() {
+   WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE=$INSTANCES_DIR/ws-eventclouds-management
+
+    . $BUNDLE_HOME/scripts/ws-eventclouds-management-launcher.sh $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE \
+        $(expr $WS_EVENTCLOUDS_MANAGEMENT_PORT + 1) $WS_EVENTCLOUDS_MANAGEMENT_PORT \
+        --registry-url $EVENTCLOUDS_REGISTRY_URL --port-lower-bound $PROXIES_PORTS_LOWER_BOUND \
+        -p $WS_EVENTCLOUDS_MANAGEMENT_PORT &> $OUTPUTS_DIR/ws-eventclouds-management.output &
+        
+    wait_file_creation $INSTANCES_DIR $(basename $INSTANCES_DIR/ws-eventclouds-management)
+    
+    echo "Eventclouds management web service deployed at:"
+    echo $(cat $INSTANCES_DIR/ws-eventclouds-management)
 }
 
 function deploy_ws_proxies() {
@@ -177,13 +195,14 @@ function undeploy() {
     rm -rf $BUNDLE_HOME/repositories
 
     kill_process $REGISTRY_INSTANCE_FILE
+    kill_process $INSTANCES_DIR/ws-eventclouds-management
   
     for ((i=1; i<=$NB_EVENTCLOUDS; i++));
     do
-	kill_process $(eventcloud_instance_file $i)
-	kill_process $(ws_instance_file ws-subscribe-proxy $i)
-	kill_process $(ws_instance_file ws-publish-proxy $i)
-	kill_process $(ws_instance_file ws-putget-proxy $i)
+        kill_process $(eventcloud_instance_file $i)
+        kill_process $(ws_instance_file ws-subscribe-proxy $i)
+        kill_process $(ws_instance_file ws-publish-proxy $i)
+        kill_process $(ws_instance_file ws-putget-proxy $i)
     done;
 
     rm -rf $INSTANCES_DIR
