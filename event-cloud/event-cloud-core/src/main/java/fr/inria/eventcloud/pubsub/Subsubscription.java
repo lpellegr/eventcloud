@@ -244,6 +244,7 @@ public class Subsubscription implements Quadruplable {
 
     private static final Node replaceVariableTypedLiteralByVarNode(Node node) {
         if (node.isLiteral()
+                && node.getLiteralDatatype() != null
                 && node.getLiteralDatatype().equals(
                         VariableDatatype.getInstance())) {
             return (Node) node.getLiteralValue();
