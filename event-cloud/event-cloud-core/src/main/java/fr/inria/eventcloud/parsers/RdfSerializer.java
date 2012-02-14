@@ -24,6 +24,7 @@ import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import fr.inria.eventcloud.api.Collection;
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
@@ -80,9 +81,11 @@ public class RdfSerializer {
     private static DatasetGraph quadruplesToDatasetGraph(Collection<Quadruple> quads) {
         DatasetGraph dsg = DatasetGraphFactory.createMem();
         for (Quadruple q : quads) {
+            if (q.getPredicate()!=PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE){
             dsg.add(
                     q.getGraph(), q.getSubject(), q.getPredicate(),
                     q.getObject());
+            }
         }
 
         return dsg;
