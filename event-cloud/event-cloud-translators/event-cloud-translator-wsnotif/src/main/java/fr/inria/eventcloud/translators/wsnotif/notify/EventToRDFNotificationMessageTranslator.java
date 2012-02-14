@@ -17,29 +17,12 @@
 package fr.inria.eventcloud.translators.wsnotif.notify;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-//import java.util.Collection;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
-
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.parsers.RdfSerializer;
-import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslatorConstants;
 
 /**
  * Translator for {@link CompoundEvent events} to
@@ -54,7 +37,7 @@ public class EventToRDFNotificationMessageTranslator {
      * with RDF payload .
      * 
      * @param event
-     *            the event to be translated.
+     *            the Compound Event to be translated.
      * @return the notification message corresponding to the specified event.
      */
     public NotificationMessageHolderType translate(CompoundEvent event) {
