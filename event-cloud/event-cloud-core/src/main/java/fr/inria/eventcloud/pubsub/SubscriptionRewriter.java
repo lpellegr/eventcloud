@@ -187,7 +187,7 @@ public final class SubscriptionRewriter {
                     return new OpGraph(quad.getGraph(), subOp);
                 }
 
-                return opGraph;
+                return new OpGraph(opGraph.getNode(), subOp);
             }
         };
     }
