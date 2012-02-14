@@ -14,8 +14,20 @@ import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
 
+/**
+ * Translator for {@link NotificationMessageHolderType notification messages}
+ * with the RDF message payload to{@link CompoundEvent events}
+ * 
+ * @author ialshaba
+ */
 public class RDFNotificationMessageToEventTranslator {
-
+    /**
+     * Translates a message to the corresponding CompoundEvent
+     * 
+     * @param notificationMessage
+     *            The message to be translated
+     * @return the Compound Event
+     */
     public CompoundEvent translate(NotificationMessageHolderType notificationMessage) {
 
         Message message = notificationMessage.getMessage();
