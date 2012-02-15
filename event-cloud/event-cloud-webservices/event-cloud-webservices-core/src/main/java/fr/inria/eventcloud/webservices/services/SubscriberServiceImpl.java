@@ -57,8 +57,10 @@ public class SubscriberServiceImpl implements NotificationConsumer {
     @Override
     public void notify(Notify notify) {
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
+            //TODO change to the translator to RDF 
             CompoundEvent event =
-                    this.translator.translateNotificationMessageToEvent(notificationMessage);
+                    this.translator.translateRDFNotificationMessageToEvent(notificationMessage);
+            //this.translator.translateNotificationMessageToEvent(notificationMessage);
 
             if (event != null) {
                 this.eventsReceived.add(event);
