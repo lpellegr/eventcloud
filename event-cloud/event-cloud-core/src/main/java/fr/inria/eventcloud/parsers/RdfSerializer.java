@@ -36,12 +36,13 @@ import fr.inria.eventcloud.api.Quadruple;
 public class RdfSerializer {
 
     /**
-     * Write the quadruples into an output stream according to a TriG event format
+     * Write the quadruples into an output stream according to a TriG event
+     * format
      * 
      * @param out
-     *          the output stream where the event is written
+     *            the output stream where the event is written
      * @param quads
-     *          the collection of quadruples to be written
+     *            the collection of quadruples to be written
      */
     public static void triGWriter(OutputStream out, Collection<Quadruple> quads) {
 
@@ -51,19 +52,20 @@ public class RdfSerializer {
         // RiotReader.createParserQuads(tokenizer, Lang.TRIG, null,
         // sink).parse() ;
         // sink.flush() ;
-        
+
         TriGWriter.write(
                 out, DatasetFactory.create(quadruplesToDatasetGraph(quads)));
-        
 
     }
-    
+
     /**
-     * Write the quadruples into an output stream according to the NQuads event format
-     * @param out 
-     *          the output stream where the event is written 
+     * Write the quadruples into an output stream according to the NQuads event
+     * format
+     * 
+     * @param out
+     *            the output stream where the event is written
      * @param quads
-     *          the collection of quadruples to be written  
+     *            the collection of quadruples to be written
      */
     public static void nQuadsWriter(OutputStream out,
                                     Collection<Quadruple> quads) {
@@ -73,18 +75,20 @@ public class RdfSerializer {
     }
 
     /**
-     * A private method to convert a collection of quadruples into the corresponding data set graph
-     * to be used in the event format writers 
-     * @param quads the collection of the quadruples 
-     * @return the corresponding data set graph 
+     * A private method to convert a collection of quadruples into the
+     * corresponding data set graph to be used in the event format writers
+     * 
+     * @param quads
+     *            the collection of the quadruples
+     * @return the corresponding data set graph
      */
     private static DatasetGraph quadruplesToDatasetGraph(Collection<Quadruple> quads) {
         DatasetGraph dsg = DatasetGraphFactory.createMem();
         for (Quadruple q : quads) {
-            if (q.getPredicate()!=PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE){
-            dsg.add(
-                    q.getGraph(), q.getSubject(), q.getPredicate(),
-                    q.getObject());
+            if (q.getPredicate() != PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE) {
+                dsg.add(
+                        q.getGraph(), q.getSubject(), q.getPredicate(),
+                        q.getObject());
             }
         }
 
