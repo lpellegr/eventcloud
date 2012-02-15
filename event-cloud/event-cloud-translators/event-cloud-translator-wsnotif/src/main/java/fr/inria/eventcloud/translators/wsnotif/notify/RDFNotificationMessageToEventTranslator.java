@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import fr.inria.eventcloud.api.Collection;
@@ -22,7 +24,8 @@ import fr.inria.eventcloud.utils.Callback;
  */
 public class RDFNotificationMessageToEventTranslator {
     /**
-     * Translates a message to the corresponding CompoundEvent
+     * Translates a message which is in XML escaped characters to the
+     * corresponding CompoundEvent
      * 
      * @param notificationMessage
      *            The message to be translated
@@ -32,7 +35,11 @@ public class RDFNotificationMessageToEventTranslator {
 
         Message message = notificationMessage.getMessage();
         ByteArrayOutputStream baos = (ByteArrayOutputStream) message.getAny();
-        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+        // TODO UnEscaping XML tags before translation !
+        String messageAsString = baos.toString();
+        InputStream is =
+                new ByteArrayInputStream(StringEscapeUtils.unescapeXml(
+                        messageAsString).getBytes());
         final List<Quadruple> quads = new ArrayList<Quadruple>();
         RdfParser.parse(
                 is, SerializationFormat.TriG, new Callback<Quadruple>() {

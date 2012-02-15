@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.translators.wsnotif.notify;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import fr.inria.eventcloud.api.Collection;
@@ -34,7 +36,7 @@ import fr.inria.eventcloud.parsers.RdfSerializer;
 public class EventToRDFNotificationMessageTranslator {
     /**
      * Translates the specified event to its corresponding notification message
-     * with RDF payload .
+     * with RDF payload with XML escaped characters.
      * 
      * @param event
      *            the Compound Event to be translated.
@@ -44,16 +46,18 @@ public class EventToRDFNotificationMessageTranslator {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Collection<Quadruple> quads = event.getQuadruples();
         RdfSerializer.triGWriter(out, quads);
-        /*System.out.println("**************  Message");
+        Message message = new Message();
+
+        // TODO escape XML caracters before sending Message
+        byte[] buf = StringEscapeUtils.escapeXml(out.toString()).getBytes();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            out.writeTo(System.out);
+            baos.write(buf);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        System.out.println("**************  Message");*/
-        Message message = new Message();
-        message.setAny(out);
+        message.setAny(baos);
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
         notificationMessage.setMessage(message);
