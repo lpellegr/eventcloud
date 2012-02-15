@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package fr.inria.eventcloud.parsers;
+package fr.inria.eventcloud.utils.trigwriter;
 
 import java.io.OutputStream;
 import java.util.Iterator;
