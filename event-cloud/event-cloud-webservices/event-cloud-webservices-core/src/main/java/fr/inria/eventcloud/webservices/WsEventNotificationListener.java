@@ -28,6 +28,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
+import fr.inria.eventcloud.translators.wsnotif.notify.EventToRDFNotificationMessageTranslator;
 
 /**
  * An {@link CompoundEventNotificationListener}
@@ -44,9 +45,11 @@ public class WsEventNotificationListener extends
 
     private static final String NOTIFY_METHOD_NAME = "Notify";
 
-    private static EventToNotificationMessageTranslator translator =
+  //TODO replace WSN translator with RDF translator 
+    /*private static EventToNotificationMessageTranslator translator =
             new EventToNotificationMessageTranslator();
-
+*/    private static EventToRDFNotificationMessageTranslator translator =
+            new EventToRDFNotificationMessageTranslator();
     private String subscriberWsUrl;
 
     private transient Client wsClient;

@@ -54,8 +54,10 @@ public class PublishServiceImpl extends
         }
 
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
+            //TODO Change Translator to RDF 
             CompoundEvent event =
-                    this.translator.translateNotificationMessageToEvent(notificationMessage);
+                    this.translator.translateRDFNotificationMessageToEvent(notificationMessage);
+            //this.translator.translateNotificationMessageToEvent(notificationMessage);
             if (event != null) {
                 log.info(
                         "Translated event to insert to the eventcloud is:\n{}",
