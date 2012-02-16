@@ -30,10 +30,9 @@ import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
+import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.petalslink.wsn.service.wsnproducer.NotificationProducer;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;

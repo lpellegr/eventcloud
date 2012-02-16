@@ -20,16 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.jws.WebService;
-import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
-import org.oasis_open.docs.wsrf.rp_2.GetResourcePropertyResponse;
-
-import com.petalslink.wsn.service.wsnproducer.NotificationProducer;
+import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Subscription;
@@ -64,14 +61,6 @@ public class SubscribeServiceImpl extends
      */
     @Override
     public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage currentMessage) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GetResourcePropertyResponse getResourceProperty(QName qname) {
         return null;
     }
 
