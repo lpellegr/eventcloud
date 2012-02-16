@@ -1,10 +1,26 @@
-<http://streams.play-project.eu/3553014223316411743377565649191697> 
-{
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/SubscriptionReference/Address> "http://localhost:9111/PrefetEndpoint" . 
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Topic> "http://eventcloud.inria.fr/replace/me/with/a/correct/namespace/fireman_event:cardiacRythmFiremanTopic" . 
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/ProducerReference/Address> "http://localhost:9112/FiremanEndpoint" . 
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/ProducerReference/Metadata/$0$http://www.petalslink.org/notification/emissionDate> "2011-02-07T12:24:13.671+01:00" .
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$fireman$0$http://www.soceda.org/crisis/v1/shared-data/name> "Captain Zebulon" .
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$fireman$0$http://www.w3.org/2005/08/addressing/EndpointReference$0$http://www.w3.org/2005/08/addressing/Address> "http://localhost:9112/FiremanEndpoint" .
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$/value> "90" .
-}
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix swp: <http://www.w3.org/2004/03/trix/swp-1/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix ex: <http://www.example.org/vocabulary#> .
+@prefix w1: <http://www.example.org/w1#> .
+@prefix w2: <http://www.example.org/w2#> .
+@prefix : <http://www.example.org/exampleDocument#> .
+
+:G1 { :Monica ex:name "Monica Murphy" .      
+      :Monica ex:homepage <http://www.monicamurphy.org> .
+      :Monica ex:email <mailto:monica@monicamurphy.org> .
+      :Monica ex:hasSkill ex:Management }
+
+:G2 { :Monica rdf:type ex:Person .
+      :Monica ex:hasSkill ex:Programming }
+
+:G3 { :G1 swp:assertedBy w1:w1 .
+      w1:w1 swp:authority :Chris .
+      w1:w1 dc:date "2003-10-02"^^xsd:date .   
+      :G2 swp:quotedBy w2:w2 .
+      :G3 swp:assertedBy w2:w2 .
+      w2:w2 dc:date "2003-09-03"^^xsd:date .
+      w2:w2 swp:authority :Chris .
+      :Chris rdf:type ex:Person .  
+      :Chris ex:email <mailto:chris@bizer.de> }
