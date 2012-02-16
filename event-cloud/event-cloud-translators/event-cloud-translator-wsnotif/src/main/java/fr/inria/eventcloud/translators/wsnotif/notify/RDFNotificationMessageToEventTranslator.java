@@ -2,6 +2,7 @@ package fr.inria.eventcloud.translators.wsnotif.notify;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
+import org.w3c.dom.Element;
+
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -34,7 +37,13 @@ public class RDFNotificationMessageToEventTranslator {
     public CompoundEvent translate(NotificationMessageHolderType notificationMessage) {
 
         Message message = notificationMessage.getMessage();
-        ByteArrayOutputStream baos = (ByteArrayOutputStream) message.getAny();
+        Element any = (Element) message.getAny();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            baos.write(any.getTextContent().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // TODO UnEscaping XML tags before translation !
         String messageAsString = baos.toString();
         InputStream is =
