@@ -28,7 +28,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.objectweb.proactive</groupId>
-			<artifactId>proactive-programming</artifactId>
+			<artifactId>proactive-programming-bundle</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.proactive</groupId>
