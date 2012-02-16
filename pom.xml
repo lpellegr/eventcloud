@@ -46,8 +46,8 @@
 			<url>https://repository.apache.org/content/repositories/snapshots</url>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots-proactive-141</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-141</url>
+			<id>sonatype-snapshots-proactive-164</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-164</url>
 		</repository>
 		<repository>
 			<id>play-private.release</id>
