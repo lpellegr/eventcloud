@@ -18,38 +18,18 @@ package fr.inria.eventcloud.translators.wsnotif;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import junit.framework.Assert;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
-import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
-import org.openjena.atlas.lib.Sink;
-import org.openjena.riot.RiotReader;
-import org.openjena.riot.lang.LangRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-
-import com.hp.hpl.jena.sparql.core.Quad;
 
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -129,31 +109,6 @@ public class WsNotificationRdfTranslatorTest {
 
     }
 
-    private static String asString(Element elt) {
-        TransformerFactory transfac = TransformerFactory.newInstance();
-        Transformer trans = null;
-        try {
-            trans = transfac.newTransformer();
-        } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
-        }
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        trans.setOutputProperty(OutputKeys.INDENT, "yes");
-        trans.setOutputProperty(
-                "{http://xml.apache.org/xslt}indent-amount", "4");
-
-        StringWriter sw = new StringWriter();
-        StreamResult result = new StreamResult(sw);
-        DOMSource source = new DOMSource(elt);
-        try {
-            trans.transform(source, result);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
-
-        return sw.toString();
-    }
-
     private static void logInfo(CompoundEvent event) {
         for (Quadruple quad : event) {
             log.info(quad.toString());
@@ -164,7 +119,8 @@ public class WsNotificationRdfTranslatorTest {
         InputStream is = null;
 
         if (file != null) {
-            is = WsNotificationRdfTranslatorTest.class.getResourceAsStream(file);
+            is =
+                    WsNotificationRdfTranslatorTest.class.getResourceAsStream(file);
         }
 
         return is;
@@ -175,8 +131,7 @@ public class WsNotificationRdfTranslatorTest {
         final Collection<Quadruple> quadruples = new Collection<Quadruple>();
 
         RdfParser.parse(
-                inputStreamFrom(file), SerializationFormat.TriG,
-                new Callback<Quadruple>() {
+                inputStreamFrom(file), format, new Callback<Quadruple>() {
                     public void execute(Quadruple quad) {
                         quadruples.add(quad);
                     }

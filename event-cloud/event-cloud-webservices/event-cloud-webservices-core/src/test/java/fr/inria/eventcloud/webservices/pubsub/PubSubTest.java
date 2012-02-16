@@ -41,7 +41,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
-import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
+import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
@@ -123,12 +123,12 @@ public class PubSubTest {
         // Creates the notify request
         Notify notifyRequest = new Notify();
         Collection<CompoundEvent> events = new Collection<CompoundEvent>();
-        events.add(new CompoundEvent(read("/notification-01.trig")));
-        EventToNotificationMessageTranslator translator =
-                new EventToNotificationMessageTranslator();
+        events.add(new CompoundEvent(read(
+                "/notification-01.trig", SerializationFormat.TriG)));
+        WsNotificationTranslator translator = new WsNotificationTranslator();
         for (CompoundEvent event : events) {
             notifyRequest.getNotificationMessage().add(
-                    translator.translate(event));
+                    translator.translateEventToRDFNotificationMessage(event));
         }
         publishClient.invoke("Notify", notifyRequest);
 
@@ -140,16 +140,16 @@ public class PubSubTest {
         deployer.undeploy();
     }
 
-    private static Collection<Quadruple> read(String file) {
+    private static Collection<Quadruple> read(String file,
+                                              SerializationFormat format) {
         final Collection<Quadruple> quadruples = new Collection<Quadruple>();
 
         RdfParser.parse(
-                inputStreamFrom(file), SerializationFormat.TriG,
-                new Callback<Quadruple>() {
-                    @Override
-                    public void execute(Quadruple quadruple) {
-                        quadruples.add(quadruple);
+                inputStreamFrom(file), format, new Callback<Quadruple>() {
+                    public void execute(Quadruple quad) {
+                        quadruples.add(quad);
                     }
+
                 });
 
         return quadruples;
