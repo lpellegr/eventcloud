@@ -18,9 +18,17 @@ package fr.inria.eventcloud.translators.wsnotif.notify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -34,6 +42,21 @@ import fr.inria.eventcloud.parsers.RdfSerializer;
  * @author ialshaba
  */
 public class EventToRDFNotificationMessageTranslator {
+
+    // used to have the possibility to create DOM elements
+    private static Document document;
+
+    static {
+        DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = null;
+        try {
+            docBuilder = dbfac.newDocumentBuilder();
+            document = docBuilder.newDocument();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Translates the specified event to its corresponding notification message
      * with RDF payload with XML escaped characters.
@@ -57,7 +80,12 @@ public class EventToRDFNotificationMessageTranslator {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        message.setAny(baos);
+        Element any =
+                document.createElementNS(
+                        "http://eventprocessing", "NativeMessage");
+        any.setAttribute("syntax", "application/trig");
+        any.setTextContent(baos.toString());
+        message.setAny(any);
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
         notificationMessage.setMessage(message);
