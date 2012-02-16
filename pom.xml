@@ -46,8 +46,8 @@
 			<url>https://repository.apache.org/content/repositories/snapshots</url>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots-proactive-384</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-384</url>
+			<id>sonatype-snapshots-proactive-141</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-141</url>
 		</repository>
 		<!-- For dependencies in event-cloud-translator-wsnotif and event-cloud-webservices -->
 		<repository>
@@ -123,8 +123,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
-				<artifactId>proactive-programming</artifactId>
-				<version>5.1.0-custom</version>
+				<artifactId>proactive-programming-bundle</artifactId>
+				<version>5.2.0-ws-update</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -243,6 +243,17 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<fork>true</fork>
+					<meminitial>128m</meminitial>
+					<maxmem>512m</maxmem>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<properties>
