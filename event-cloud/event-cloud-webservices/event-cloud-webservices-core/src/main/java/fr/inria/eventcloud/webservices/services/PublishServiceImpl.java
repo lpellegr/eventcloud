@@ -21,6 +21,7 @@ import javax.jws.WebService;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
+import org.w3c.dom.Element;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
@@ -54,15 +55,34 @@ public class PublishServiceImpl extends
         }
 
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
-            //TODO Change Translator to RDF 
-            CompoundEvent event =
-                    this.translator.translateRDFNotificationMessageToEvent(notificationMessage);
-            //this.translator.translateNotificationMessageToEvent(notificationMessage);
-            if (event != null) {
+            // TODO replace by a constant
+            String msgTypeNamespace =
+                    "http://www.event-processing.org/wsn/msgtype";
+
+            // root element inside wsnt:Message
+            Element e = (Element) notificationMessage.getMessage().getAny();
+
+            CompoundEvent compoundEvent;
+
+            // checks which translator to use according to content type (this is
+            // supposed to ease the transition because all sources are not yet
+            // publishing semantic payloads)
+            if (e.getNamespaceURI().equals(msgTypeNamespace)
+                    && e.getNodeName().equals("nativeMessage")
+                    && e.getAttributeNS(msgTypeNamespace, "syntax") != null) {
+                // message content is a native semantic payload
+                compoundEvent =
+                        this.translator.translateRDFNotificationMessageToEvent(notificationMessage);
+            } else {
+                compoundEvent =
+                        this.translator.translateNotificationMessageToEvent(notificationMessage);
+            }
+
+            if (compoundEvent != null) {
                 log.info(
                         "Translated event to insert to the eventcloud is:\n{}",
-                        event);
-                super.proxy.publish(event);
+                        compoundEvent);
+                super.proxy.publish(compoundEvent);
             } else {
                 log.error(
                         "Notification message discarded due to translation error:\n{}",
