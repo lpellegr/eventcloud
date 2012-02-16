@@ -82,8 +82,8 @@ public class EventToRDFNotificationMessageTranslator {
         }
         Element any =
                 document.createElementNS(
-                        "http://eventprocessing", "NativeMessage");
-        any.setAttribute("syntax", "application/trig");
+                        "http://www.event-processing.org/wsn/msgtype", "mt");
+        any.setAttribute("syntax", "application/x-trig");
         any.setTextContent(baos.toString());
         message.setAny(any);
         NotificationMessageHolderType notificationMessage =

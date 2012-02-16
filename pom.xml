@@ -49,6 +49,26 @@
 			<id>sonatype-snapshots-proactive-141</id>
 			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-141</url>
 		</repository>
+		<repository>
+			<id>play-private.release</id>
+			<url>http://maven.petalslink.com/private-play-release</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>play-private.snapshot</id>
+			<url>http://maven.petalslink.com/private-play-snapshot</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
 
 	<developers>
