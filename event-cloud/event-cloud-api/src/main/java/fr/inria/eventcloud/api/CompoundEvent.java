@@ -212,11 +212,28 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
-        for (Quadruple quad : this.quadruples) {
-            buf.append(quad.toString());
-            buf.append("\n");
+
+        Iterator<Quadruple> it = this.quadruples.iterator();
+
+        for (int i = 0; i < this.quadruples.size(); i++) {
+            buf.append(it.next().toString());
+            if (i < this.quadruples.size() - 1) {
+                buf.append("\n");
+            }
         }
+
         return buf.toString();
+    }
+
+    /**
+     * Returns the size of this compound event (i.e. the number of quadruples
+     * contained by this compound event).
+     * 
+     * @return the size of this compound event (i.e. the number of quadruples
+     *         contained by this compound event).
+     */
+    public int size() {
+        return this.quadruples.size();
     }
 
     /**
