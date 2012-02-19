@@ -27,10 +27,6 @@
 			<outputDirectory>lib</outputDirectory>
 			<directoryMode>0644</directoryMode>
 			<fileMode>0644</fileMode>
-			<excludes>
-				<exclude>org.ow2.proactive:scheduling-common-core</exclude>
-				<exclude>org.ow2.proactive:scheduling-scheduler-core</exclude>
-			</excludes>
 		</dependencySet>
 	</dependencySets>
 
@@ -39,6 +35,10 @@
 			<directory>src/main/resources</directory>
 			<directoryMode>0744</directoryMode>
 			<outputDirectory>resources</outputDirectory>
+			<fileMode>0744</fileMode>
+			<includes>
+				<include>**/*</include>
+			</includes>
 		</fileSet>
 		<fileSet>
 			<directory>src/main/scripts</directory>
