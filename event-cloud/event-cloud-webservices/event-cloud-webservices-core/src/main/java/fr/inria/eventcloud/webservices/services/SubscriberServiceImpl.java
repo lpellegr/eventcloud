@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.TranslationException;
+import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 
 /**
  * Defines a publish web service as defined by the WS-Notification
@@ -57,14 +58,16 @@ public class SubscriberServiceImpl implements NotificationConsumer {
     @Override
     public void notify(Notify notify) {
         for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
-            //TODO change to the translator to RDF 
-            CompoundEvent event =
-                    this.translator.translateRDFNotificationMessageToEvent(notificationMessage);
-            //this.translator.translateNotificationMessageToEvent(notificationMessage);
+            try {
+                CompoundEvent event =
+                        this.translator.translate(notificationMessage);
 
-            if (event != null) {
                 this.eventsReceived.add(event);
+
                 log.info("New compound event received:\n{}", event);
+            } catch (TranslationException e) {
+                log.error("Translation failed:\n {}", e.getMessage());
+                throw new IllegalArgumentException(e);
             }
         }
     }

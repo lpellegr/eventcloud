@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
-import fr.inria.eventcloud.translators.wsnotif.notify.EventToNotificationMessageTranslator;
-import fr.inria.eventcloud.translators.wsnotif.notify.EventToRDFNotificationMessageTranslator;
+import fr.inria.eventcloud.translators.wsn.TranslationException;
+import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
 
 /**
  * An {@link CompoundEventNotificationListener}
@@ -45,11 +45,8 @@ public class WsEventNotificationListener extends
 
     private static final String NOTIFY_METHOD_NAME = "Notify";
 
-  //TODO replace WSN translator with RDF translator 
-    /*private static EventToNotificationMessageTranslator translator =
-            new EventToNotificationMessageTranslator();
-*/    private static EventToRDFNotificationMessageTranslator translator =
-            new EventToRDFNotificationMessageTranslator();
+    private static SemanticCompoundEventTranslator translator =
+            new SemanticCompoundEventTranslator();
     private String subscriberWsUrl;
 
     private transient Client wsClient;
@@ -75,17 +72,21 @@ public class WsEventNotificationListener extends
         }
 
         Notify notify = new Notify();
-        NotificationMessageHolderType notificationMessage =
-                translator.translate(solution);
-        notify.getNotificationMessage().add(notificationMessage);
+        NotificationMessageHolderType notificationMessage;
+        try {
+            notificationMessage = translator.translate(solution);
+            notify.getNotificationMessage().add(notificationMessage);
+        } catch (TranslationException e1) {
+            e1.printStackTrace();
+        }
+
         try {
             this.wsClient.invoke(NOTIFY_METHOD_NAME, new Object[] {notify});
             log.info(
                     "Web service {} invoked to notify for:\n {}",
                     this.subscriberWsUrl, solution);
         } catch (Exception e) {
-            log.error(
-                    "Error during the invocation of the Notify Web service ", e);
+            log.error("Error during the invocation of the Notify web method", e);
         }
     }
 
