@@ -41,7 +41,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
-import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
@@ -128,7 +128,7 @@ public class PubSubTest {
         WsNotificationTranslator translator = new WsNotificationTranslator();
         for (CompoundEvent event : events) {
             notifyRequest.getNotificationMessage().add(
-                    translator.translateEventToRDFNotificationMessage(event));
+                    translator.translateSemanticCompoundEvent(event));
         }
         publishClient.invoke("Notify", notifyRequest);
 

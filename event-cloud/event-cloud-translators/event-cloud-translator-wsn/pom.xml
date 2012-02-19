@@ -5,26 +5,20 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
+		<artifactId>event-cloud-translators</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
-		<artifactId>event-cloud-webservices</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>event-cloud-webservices-api</artifactId>
+	<artifactId>event-cloud-translator-wsn</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-
-	<name>event-cloud-webservices-api</name>
+	<name>event-cloud-translator-wsn</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-api</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-translator-wsn</artifactId>
+			<artifactId>event-cloud-core</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -33,21 +27,13 @@
 			<version>2.5.2</version>
 		</dependency>
 		<dependency>
+			<groupId>eu.play-project</groupId>
+			<artifactId>play-commons-eventformat</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>-Xmx2048m</argLine>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>

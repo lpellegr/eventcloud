@@ -17,7 +17,7 @@
 package fr.inria.eventcloud.webservices.services;
 
 import fr.inria.eventcloud.proxies.Proxy;
-import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 
 /**
  * Extends {@link EventCloudProxyService} by providing an instance of

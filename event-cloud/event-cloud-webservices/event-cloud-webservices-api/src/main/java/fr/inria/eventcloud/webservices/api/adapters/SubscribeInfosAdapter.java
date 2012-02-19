@@ -36,7 +36,7 @@ import com.hp.hpl.jena.sparql.algebra.TransformBase;
 import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 
-import fr.inria.eventcloud.translators.wsnotif.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 
@@ -129,7 +129,7 @@ public class SubscribeInfosAdapter extends
                         (String) ReflectionUtils.getFieldValue(address, "uri");
                 if (subscriberUrl != null) {
                     String sparqlQuery =
-                            this.translator.translateSubscribeToSparqlQuery(subscribe);
+                            this.translator.translateTopicSubscription(subscribe);
                     if (sparqlQuery != null) {
                         return new SubscribeInfos(sparqlQuery, subscriberUrl);
                     } else {

@@ -23,9 +23,11 @@ import org.openjena.riot.RiotWriter;
 import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
+
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.utils.trigwriter.TriGWriter;
 
 /**
  * Defines an RDF serializer which knows how to serialize different format such

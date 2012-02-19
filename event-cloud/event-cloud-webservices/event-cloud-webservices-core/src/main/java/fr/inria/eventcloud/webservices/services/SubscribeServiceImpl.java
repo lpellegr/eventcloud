@@ -16,23 +16,40 @@
  **/
 package fr.inria.eventcloud.webservices.services;
 
+import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.jws.WebService;
+import javax.xml.namespace.QName;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
+import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
+import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 import fr.inria.eventcloud.webservices.WsEventNotificationListener;
 
@@ -51,6 +68,9 @@ public class SubscribeServiceImpl extends
 
     private final Map<SubscriptionId, String> subscribers;
 
+    private static final Logger log =
+            LoggerFactory.getLogger(SubscribeServiceImpl.class);
+
     public SubscribeServiceImpl(String registryUrl, String eventCloudIdUrl) {
         super(registryUrl, eventCloudIdUrl);
         this.subscribers = new HashMap<SubscriptionId, String>();
@@ -61,7 +81,7 @@ public class SubscribeServiceImpl extends
      */
     @Override
     public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage currentMessage) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -73,25 +93,25 @@ public class SubscribeServiceImpl extends
             return null;
         }
 
-        String sparqlQuery =
-                super.translator.translateSubscribeToSparqlQuery(subscribe);
+        logSubscribe(subscribe);
 
-        log.info("Translated SPARQL query is {}", sparqlQuery);
+        W3CEndpointReference consumerReference =
+                subscribe.getConsumerReference();
 
-        if (sparqlQuery != null) {
-            W3CEndpointReference consumerReference =
-                    subscribe.getConsumerReference();
+        if (consumerReference != null) {
+            Object address =
+                    ReflectionUtils.getFieldValue(consumerReference, "address");
 
-            if (consumerReference != null) {
-                Object address =
-                        ReflectionUtils.getFieldValue(
-                                consumerReference, "address");
-                if (address != null) {
-                    String subscriberUrl =
-                            (String) ReflectionUtils.getFieldValue(
-                                    address, "uri");
-                    if (subscriberUrl != null) {
-                        log.info("Subscriber URL is {}", subscriberUrl);
+            if (address != null) {
+                String subscriberUrl =
+                        (String) ReflectionUtils.getFieldValue(address, "uri");
+
+                if (subscriberUrl != null) {
+                    try {
+                        String sparqlQuery =
+                                super.translator.translate(subscribe);
+
+                        log.info("Subscriber endpoint is {}", subscriberUrl);
 
                         Subscription subscription =
                                 new Subscription(sparqlQuery);
@@ -102,23 +122,28 @@ public class SubscribeServiceImpl extends
                         super.proxy.subscribe(
                                 subscription, new WsEventNotificationListener(
                                         subscriberUrl));
-                    } else {
-                        log.warn("Subscribe notification received but no subscriber address is specified: the subscriber will receive no notification");
-                    }
 
-                    log.info("New subscribe notification handled");
+                        log.info("Translation output:\n{}", sparqlQuery);
+                    } catch (TranslationException e) {
+                        log.error("Translation error:");
+                        logAndThrowIllegalArgumentException(e.getMessage());
+                    }
                 } else {
-                    log.error("Consumer address cannot be extracted from subscribe notification");
+                    logAndThrowIllegalArgumentException("Subscribe message received but no subscriber address is specified: the subscriber cannot receive any notification");
                 }
             } else {
-                log.error("Subscribe notification does not contain consumer reference");
+                logAndThrowIllegalArgumentException("Consumer address cannot be extracted from subscribe message");
             }
-
         } else {
-            log.error("SPARQL query cannot be extracted from subscribe notification");
+            logAndThrowIllegalArgumentException("Subscribe message does not contain consumer reference");
         }
 
         return new SubscribeResponse();
+    }
+
+    private static final void logAndThrowIllegalArgumentException(String msg) {
+        log.error(msg);
+        throw new IllegalArgumentException(msg);
     }
 
     /**
@@ -130,6 +155,166 @@ public class SubscribeServiceImpl extends
                 super.registryUrl,
                 EventCloudId.parseEventCloudIdUrl(super.eventcloudIdUrl))
                 .createSubscribeProxy();
+    }
+
+    private static void logSubscribe(Subscribe subscribe) {
+        if (log.isInfoEnabled()) {
+            log.info("-- Subscribe message to process (start) ------");
+
+            logW3CEndpointReference(
+                    subscribe.getConsumerReference(), "consumer");
+
+            List<Object> any = subscribe.getAny();
+            if (any != null) {
+                log.info("any values are:");
+                for (Object obj : any) {
+                    log.info("  {} (class {})", obj, obj.getClass().getName());
+                }
+            } else {
+                log.info("any is null");
+            }
+
+            FilterType filterType = subscribe.getFilter();
+
+            if (filterType != null) {
+                any = filterType.getAny();
+                if (any != null) {
+                    log.info("filter type any values are:");
+                    for (Object obj : any) {
+                        if (obj != null) {
+                            if (obj instanceof TopicExpressionType) {
+                                TopicExpressionType topicType =
+                                        (TopicExpressionType) obj;
+                                List<Object> topicContent =
+                                        topicType.getContent();
+                                if (topicContent != null) {
+                                    log.info(
+                                            "filter type topicContent(dialect={}) :",
+                                            topicType.getDialect());
+                                    for (Object obj2 : topicContent) {
+                                        log.info(
+                                                "  {} (class {})", obj2,
+                                                obj2.getClass().getName());
+                                    }
+
+                                    logAttributes(
+                                            "filter type topicAttribute",
+                                            topicType, "otherAttributes");
+                                } else {
+                                    log.info("filter type topicContent is null");
+                                }
+                            } else {
+                                log.info("  {} (class {})", obj, obj.getClass()
+                                        .getName());
+                            }
+                        } else {
+                            log.info("filter type topicType is null");
+                        }
+                    }
+                } else {
+                    log.info("filter type any is null");
+                }
+            } else {
+                log.info("filter type is null");
+            }
+
+            log.info("-- Subscribe message to process (end) ------");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void logW3CEndpointReference(W3CEndpointReference ref,
+                                                String type) {
+        if (ref != null) {
+            Object address = ReflectionUtils.getFieldValue(ref, "address");
+            if (address != null) {
+                log.info(
+                        "type={}, address={}", type,
+                        ReflectionUtils.getFieldValue(address, "uri"));
+                logAttributes(
+                        type + " Address Attributes", address, "attributes");
+            } else {
+                log.info("type={}, address is null", type);
+            }
+
+            // referenceParameters
+
+            Object metadata = ReflectionUtils.getFieldValue(ref, "metadata");
+            if (metadata != null) {
+                Object metadataElts =
+                        ReflectionUtils.getFieldValue(metadata, "elements");
+
+                if (metadataElts != null) {
+                    log.info("type={}, metadata=", type);
+                    for (Element elt : (List<Element>) metadataElts) {
+                        log.info("  {} ", asString(elt));
+                    }
+                } else {
+                    log.info("type={}, metadata elements is null", type);
+                }
+
+                logAttributes(
+                        type + " metadata Elements Attributes", metadata,
+                        "attributes");
+            } else {
+                log.info("type={}, metadata is null", type);
+            }
+
+            logAttributes(type + " Attributes", ref, "attributes");
+
+            Object elements = ReflectionUtils.getFieldValue(ref, "elements");
+            if (elements != null) {
+                log.info("type={}, elements=", type);
+                for (Element elt : (List<Element>) elements) {
+                    log.info("  {} ", asString(elt));
+                }
+            } else {
+                log.info("type={}, elements is null", type);
+            }
+        } else {
+            log.info("type={} is null", type);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void logAttributes(String type, Object obj, String fieldName) {
+        Map<QName, String> attributes =
+                (Map<QName, String>) ReflectionUtils.getFieldValue(
+                        obj, fieldName);
+
+        if (attributes != null) {
+            for (Entry<QName, String> entry : attributes.entrySet()) {
+                log.info("type={}, attributes=<{}, {}>", new Object[] {
+                        type, entry.getKey(), entry.getValue()});
+            }
+        } else {
+            log.info("type={}, attributes is null", type);
+        }
+    }
+
+    private static String asString(Element elt) {
+        TransformerFactory transfac = TransformerFactory.newInstance();
+        Transformer trans = null;
+        try {
+            trans = transfac.newTransformer();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        }
+        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        trans.setOutputProperty(OutputKeys.INDENT, "yes");
+        trans.setOutputProperty(
+                "{http://xml.apache.org/xslt}indent-amount", "4");
+
+        StringWriter sw = new StringWriter();
+        StreamResult result = new StreamResult(sw);
+        DOMSource source = new DOMSource(elt);
+        try {
+            trans.transform(source, result);
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+
+        return sw.toString();
     }
 
 }

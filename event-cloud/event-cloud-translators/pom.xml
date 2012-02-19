@@ -17,7 +17,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>event-cloud-translator-wsnotif</module>
+		<module>event-cloud-translator-wsn</module>
 	</modules>
 
 </project>
