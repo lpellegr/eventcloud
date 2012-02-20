@@ -59,7 +59,8 @@ public class EventCloudProperties {
      */
     public static final PropertyString EVENT_CLOUD_ID_PREFIX =
             new PropertyString(
-                    "eventcloud.id.prefix", "http://streams.play-project.eu/");
+                    "eventcloud.id.prefix",
+                    "http://events.event-processing.org/ids/");
 
     /**
      * Defines the namespace which is used to prefix some of the URI declared
