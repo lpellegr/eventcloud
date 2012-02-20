@@ -26,9 +26,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
+import org.openjena.riot.WebContent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import eu.play_project.play_commons.eventformat.Namespace;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -83,15 +85,21 @@ public class SemanticCompoundEventTranslator extends
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         Element any =
                 document.createElementNS(
-                        "http://www.event-processing.org/wsn/msgtype", "mt");
-        any.setAttribute("syntax", "application/x-trig");
+                        Namespace.WSN_MSG_TYPE.getUri(),
+                        Namespace.WSN_MSG_TYPE.getPrefix() + ":nativeMessage");
         any.setTextContent(baos.toString());
+        any.setAttributeNS(
+                Namespace.WSN_MSG_TYPE.getUri(),
+                Namespace.WSN_MSG_TYPE.getPrefix() + ":" + "syntax",
+                WebContent.contentTypeTriGAlt);
         message.setAny(any);
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
         notificationMessage.setMessage(message);
+
         return notificationMessage;
     }
 

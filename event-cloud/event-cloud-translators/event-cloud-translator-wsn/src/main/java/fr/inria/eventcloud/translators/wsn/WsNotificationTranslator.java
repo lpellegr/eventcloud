@@ -59,9 +59,11 @@ public class WsNotificationTranslator {
                 // (this is supposed to ease the transition because all sources
                 // are not yet publishing semantic payloads)
                 if (e.getNamespaceURI().equals(Namespace.WSN_MSG_TYPE.getUri())
-                        && e.getNodeName().equals("nativeMessage")
+                        && e.getNodeName().equals(
+                                Namespace.WSN_MSG_TYPE.getPrefix()
+                                        + ":nativeMessage")
                         && e.getAttributeNS(
-                                Namespace.WSN_MSG_TYPE.getPrefix(), "syntax") != null) {
+                                Namespace.WSN_MSG_TYPE.getUri(), "syntax") != null) {
                     // message content is a native semantic payload
                     result = this.translateSemanticNotification(notification);
                 } else {

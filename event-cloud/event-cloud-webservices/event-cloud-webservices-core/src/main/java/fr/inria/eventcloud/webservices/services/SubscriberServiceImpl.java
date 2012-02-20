@@ -62,7 +62,10 @@ public class SubscriberServiceImpl implements NotificationConsumer {
                 CompoundEvent event =
                         this.translator.translate(notificationMessage);
 
-                this.eventsReceived.add(event);
+                synchronized (this.eventsReceived) {
+                    this.eventsReceived.notifyAll();
+                    this.eventsReceived.add(event);
+                }
 
                 log.info("New compound event received:\n{}", event);
             } catch (TranslationException e) {
