@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.openjena.atlas.io.IndentedWriter;
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
@@ -49,16 +47,8 @@ public class TriGWriter {
     public static final int GRAPH_INDENT = 4;
 
     public static void write(OutputStream out, Dataset dataset) {
-        Map<String, String> map = EventFormatHelpers.getNsPrefixMap();
-        Iterator<Entry<String, String>> it = map.entrySet().iterator();
-        StringBuffer sb = new StringBuffer();
-        while (it.hasNext()) {
-            Entry<String, String> pairs = it.next();
-            sb.append("@prefix " + pairs.getKey() + ": <" + pairs.getValue()
-                    + "> .\n");
-        }
         try {
-            out.write(sb.toString().getBytes());
+            out.write(EventFormatHelpers.getNsPrefixAbbreviate().getBytes());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
