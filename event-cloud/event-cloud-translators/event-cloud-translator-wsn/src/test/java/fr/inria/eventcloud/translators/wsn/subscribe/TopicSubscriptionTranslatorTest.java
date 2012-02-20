@@ -51,7 +51,8 @@ public class TopicSubscriptionTranslatorTest {
     public void testTopicTranslationToSparql() throws TranslationException {
         Subscribe subscribeMessage =
                 WsNotificationMessageBuilder.createSubscribeMessage(
-                        "http://example.org/subscribers/s12", this.topic);
+                        "http://example.org/subscribers/s12",
+                        "http://example.org/namespace", "ns", this.topic);
 
         String sparqlQuery = this.translator.translate(subscribeMessage);
 

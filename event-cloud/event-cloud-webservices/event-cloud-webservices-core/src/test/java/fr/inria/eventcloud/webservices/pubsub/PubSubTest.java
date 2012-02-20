@@ -18,17 +18,11 @@ package fr.inria.eventcloud.webservices.pubsub;
 
 import java.io.InputStream;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
-import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
-
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 import org.junit.Test;
-import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
-import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 import org.slf4j.Logger;
@@ -41,7 +35,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
@@ -50,8 +44,8 @@ import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
  * Class used to test a subscribe proxy component and a publish proxy component
  * by using web services.
  * 
- * @author lpellegr
  * @author bsauvan
+ * @author lpellegr
  */
 public class PubSubTest {
 
@@ -65,7 +59,7 @@ public class PubSubTest {
         return factory.create();
     }
 
-    @Test(timeout = 90000)
+    @Test(timeout = 180000)
     public void testPublishSubscribeWsProxies() throws Exception {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
@@ -95,47 +89,36 @@ public class PubSubTest {
         Client publishClient =
                 createWsClient(NotificationConsumer.class, publishWsUrl);
 
+        String topicNamespace = "http://example.org/namespace/";
+        String topicNsPrefix = "ns";
+        String topicExpression = "TaxiUc";
+
         // Creates the subscribe request
-        Subscribe subscribeRequest = new Subscribe();
-        FilterType filterType = new FilterType();
-        TopicExpressionType topicExpressionType = new TopicExpressionType();
-        topicExpressionType.getContent().add(
-                "fireman_event:cardiacRythmFiremanTopic");
+        Subscribe subscribeRequest =
+                WsNotificationMessageBuilder.createSubscribeMessage(
+                        subscriberWsUrl, topicNamespace, topicNsPrefix,
+                        topicExpression);
 
-        JAXBElement<TopicExpressionType> jaxbElement =
-                new JAXBElement<TopicExpressionType>(
-                        new QName(
-                                "http://docs.oasis-open.org/wsn/b-2",
-                                "TopicExpression"), TopicExpressionType.class,
-                        topicExpressionType);
-        filterType.getAny().add(jaxbElement);
-        subscribeRequest.setFilter(filterType);
-
-        W3CEndpointReferenceBuilder endPointReferenceBuilder =
-                new W3CEndpointReferenceBuilder();
-        endPointReferenceBuilder.address(subscriberWsUrl);
-        subscribeRequest.setConsumerReference(endPointReferenceBuilder.build());
-
-        // Subscribes for any events with topic
-        // fireman_event:cardiacRythmFiremanTopic
+        // Subscribes for any events with topic TaxiUc
         subscribeClient.invoke("Subscribe", subscribeRequest);
 
         // Creates the notify request
-        Notify notifyRequest = new Notify();
-        Collection<CompoundEvent> events = new Collection<CompoundEvent>();
-        events.add(new CompoundEvent(read(
-                "/notification-01.trig", SerializationFormat.TriG)));
-        WsNotificationTranslator translator = new WsNotificationTranslator();
-        for (CompoundEvent event : events) {
-            notifyRequest.getNotificationMessage().add(
-                    translator.translateSemanticCompoundEvent(event));
-        }
+        Notify notifyRequest =
+                WsNotificationMessageBuilder.createNotifyMessage(
+                        topicNamespace, topicNsPrefix, topicExpression,
+                        new CompoundEvent(read(
+                                "/notification-01.trig",
+                                SerializationFormat.TriG)));
+
         publishClient.invoke("Notify", notifyRequest);
 
-        while (subscriberService.eventsReceived.size() == 0) {
-            log.info("Waiting for the reception of compound events");
-            Thread.sleep(500);
+        synchronized (subscriberService.eventsReceived) {
+            while (subscriberService.eventsReceived.size() != 1) {
+                subscriberService.eventsReceived.wait();
+            }
         }
+        
+        log.info("Compound event received!");
 
         deployer.undeploy();
     }

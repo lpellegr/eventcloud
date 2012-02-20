@@ -1,4 +1,4 @@
-<http://streams.play-project.eu/3553014223316411743377565649191697> 
+<http://events.event-processing.org/ids/3553014223316411743377565649191697> 
 {
     <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/SubscriptionReference/Address> "http://localhost:9111/PrefetEndpoint" . 
     <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Topic> "fireman_event:cardiacRythmFiremanTopic" . 
