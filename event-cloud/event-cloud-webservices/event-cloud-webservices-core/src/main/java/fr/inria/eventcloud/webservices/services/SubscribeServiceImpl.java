@@ -141,11 +141,6 @@ public class SubscribeServiceImpl extends
         return new SubscribeResponse();
     }
 
-    private static final void logAndThrowIllegalArgumentException(String msg) {
-        log.error(msg);
-        throw new IllegalArgumentException(msg);
-    }
-
     /**
      * {@inheritDoc}
      */

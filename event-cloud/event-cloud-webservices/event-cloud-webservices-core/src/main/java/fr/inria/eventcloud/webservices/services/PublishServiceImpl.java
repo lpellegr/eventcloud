@@ -77,24 +77,27 @@ public class PublishServiceImpl extends
             return;
         }
 
-        for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
-            try {
-                logNotificationMessageHolderType(notificationMessage);
+        if (notify.getNotificationMessage().size() > 0) {
+            for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
+                try {
+                    logNotificationMessageHolderType(notificationMessage);
 
-                CompoundEvent compoundEvent =
-                        super.translator.translate(notificationMessage);
+                    CompoundEvent compoundEvent =
+                            super.translator.translate(notificationMessage);
 
-                log.info("Translation output:\n{}", compoundEvent);
+                    log.info("Translation output:\n{}", compoundEvent);
 
-                super.proxy.publish(compoundEvent);
-            } catch (TranslationException e) {
-                log.error("Translation error:");
-                log.error(e.getMessage());
-                throw new IllegalArgumentException(e);
+                    super.proxy.publish(compoundEvent);
+                } catch (TranslationException e) {
+                    log.error("Translation error:");
+                    logAndThrowIllegalArgumentException(e.getMessage());
+                }
             }
-        }
 
-        log.info("New notification message handled");
+            log.info("New notification message handled");
+        } else {
+            logAndThrowIllegalArgumentException("Notify message received does not contain any notification message");
+        }
     }
 
     /**
