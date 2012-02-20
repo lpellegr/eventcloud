@@ -18,16 +18,19 @@
 
 package fr.inria.eventcloud.utils.trigwriter;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.openjena.atlas.io.IndentedWriter;
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 
+import eu.play_project.play_commons.eventformat.EventFormatHelpers;
+
+//import eu.play_project.play_commons.eventformat.EventFormatHelpers;
 public class TriGWriter {
     /*public static void main(String ... argv) throws FileNotFoundException
     {
@@ -44,7 +47,12 @@ public class TriGWriter {
     public static final int GRAPH_INDENT = 4;
 
     public static void write(OutputStream out, Dataset dataset) {
-
+        try {
+            out.write(EventFormatHelpers.getNsPrefixAbbreviate().getBytes());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         write(out, dataset.asDatasetGraph(), dataset.getDefaultModel()
                 .getNsPrefixMap());
 
@@ -56,8 +64,6 @@ public class TriGWriter {
         Iterator<Node> graphNames = dsg.listGraphNodes();
 
         writeGraph(iOut, null, dsg.getDefaultGraph(), prefixMap);
-        iOut.println("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .");
-        iOut.println("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .");
         for (; graphNames.hasNext();) {
             iOut.println();
             Node gn = graphNames.next();
