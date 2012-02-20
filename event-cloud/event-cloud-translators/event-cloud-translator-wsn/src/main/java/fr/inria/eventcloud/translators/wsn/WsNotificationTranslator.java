@@ -48,25 +48,35 @@ public class WsNotificationTranslator {
      */
     public CompoundEvent translate(NotificationMessageHolderType notification)
             throws TranslationException {
-        // root element inside wsnt:Message
-        Element e = (Element) notification.getMessage().getAny();
+        if (notification.getMessage() != null) {
+            if (notification.getMessage().getAny() != null) {
+                // root element inside wsnt:Message
+                Element e = (Element) notification.getMessage().getAny();
 
-        CompoundEvent result;
+                CompoundEvent result;
 
-        // checks which translator to use according to content type (this is
-        // supposed to ease the transition because all sources are not yet
-        // publishing semantic payloads)
-        if (e.getNamespaceURI().equals(Namespace.WSN_MSG_TYPE.getUri())
-                && e.getNodeName().equals("nativeMessage")
-                && e.getAttributeNS(
-                        Namespace.WSN_MSG_TYPE.getPrefix(), "syntax") != null) {
-            // message content is a native semantic payload
-            result = this.translateSemanticNotification(notification);
+                // checks which translator to use according to content type
+                // (this is supposed to ease the transition because all sources
+                // are not yet publishing semantic payloads)
+                if (e.getNamespaceURI().equals(Namespace.WSN_MSG_TYPE.getUri())
+                        && e.getNodeName().equals("nativeMessage")
+                        && e.getAttributeNS(
+                                Namespace.WSN_MSG_TYPE.getPrefix(), "syntax") != null) {
+                    // message content is a native semantic payload
+                    result = this.translateSemanticNotification(notification);
+                } else {
+                    result = this.translateNotification(notification);
+                }
+
+                return result;
+            } else {
+                throw new TranslationException(
+                        "No any object set in the notification message");
+            }
         } else {
-            result = this.translateNotification(notification);
+            throw new TranslationException(
+                    "No message object set in the notification message");
         }
-
-        return result;
     }
 
     /**

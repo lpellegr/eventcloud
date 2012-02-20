@@ -40,4 +40,9 @@ public abstract class EventCloudTranslatableProxyService<T extends Proxy>
         this.translator = new WsNotificationTranslator();
     }
 
+    protected static final void logAndThrowIllegalArgumentException(String msg) {
+        log.error(msg);
+        throw new IllegalArgumentException(msg);
+    }
+
 }
