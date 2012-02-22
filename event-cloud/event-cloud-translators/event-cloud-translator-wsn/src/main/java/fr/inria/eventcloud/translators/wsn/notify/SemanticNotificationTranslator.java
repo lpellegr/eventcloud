@@ -16,6 +16,7 @@ import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.api.Skolemizator;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
@@ -61,9 +62,10 @@ public class SemanticNotificationTranslator extends
                         quads.add(quad);
                     }
 
-                });
+                }, false);
 
-        return new CompoundEvent(new Collection<Quadruple>(quads));
+        return new CompoundEvent(
+                Skolemizator.skolemize(new Collection<Quadruple>(quads)));
     }
 
 }

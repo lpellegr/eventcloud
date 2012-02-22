@@ -34,7 +34,6 @@ import eu.play_project.play_commons.eventformat.EventFormatHelpers;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.Skolemizator;
 import fr.inria.eventcloud.parsers.RdfSerializer;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
@@ -74,7 +73,6 @@ public class SemanticCompoundEventTranslator extends
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        event = Skolemizator.skolemize(event);
         Collection<Quadruple> quads = event.getQuadruples();
         RdfSerializer.triGWriter(out, quads);
         Message message = new Message();
