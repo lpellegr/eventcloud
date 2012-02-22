@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
+
 import org.openjena.atlas.io.IndentedWriter;
+
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Dataset;
@@ -30,29 +32,17 @@ import com.hp.hpl.jena.sparql.core.DatasetGraph;
 
 import eu.play_project.play_commons.eventformat.EventFormatHelpers;
 
-//import eu.play_project.play_commons.eventformat.EventFormatHelpers;
 public class TriGWriter {
-    /*public static void main(String ... argv) throws FileNotFoundException
-    {
-        DatasetGraph dsg = DatasetGraphFactory.createMem() ; 
-        
-        Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(TW2.class.getResourceAsStream("/D.trig")) ;
-        
-        Sink<Quad> sink = new SinkQuadsToDataset(dsg) ;
-        RiotReader.createParserQuads(tokenizer,  Lang.TRIG, null, sink).parse() ;
-        sink.flush() ;
-        write(System.out, DatasetFactory.create(dsg)) ;
-    }
-    */
+
     public static final int GRAPH_INDENT = 4;
 
     public static void write(OutputStream out, Dataset dataset) {
         try {
             out.write(EventFormatHelpers.getNsPrefixAbbreviate().getBytes());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
         write(out, dataset.asDatasetGraph(), dataset.getDefaultModel()
                 .getNsPrefixMap());
 
@@ -86,7 +76,18 @@ public class TriGWriter {
         out.decIndent(GRAPH_INDENT);
         out.ensureStartOfLine();
         out.println("}");
-
     }
+
+    // public static void main(String... argv) throws FileNotFoundException {
+    // DatasetGraph dsg = DatasetGraphFactory.createMem();
+    //
+    // Tokenizer tokenizer =
+    // TokenizerFactory.makeTokenizerUTF8(TW2.class.getResourceAsStream("/D.trig"));
+    //
+    // Sink<Quad> sink = new SinkQuadsToDataset(dsg);
+    // RiotReader.createParserQuads(tokenizer, Lang.TRIG, null, sink).parse();
+    // sink.flush();
+    // write(System.out, DatasetFactory.create(dsg));
+    // }
 
 }
