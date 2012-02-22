@@ -17,4 +17,6 @@ e:ava-13 {
         :endTime "2011-12-06T18:33:36.681"^^xsd:dateTime ;
         :source <http://sources.event-processing.org/ids/%NAME%#source> ;
         :stream <http://streams.event-processing.org/ids/%TOPIC_NAME%#stream> ;
+        # example for geolocation (longitude, latitude)
+        :location [ geo:lat "53.27194"^^xsd:double ; geo:long "-9.04889"^^xsd:double ] .
 }

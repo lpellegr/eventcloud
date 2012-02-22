@@ -38,12 +38,41 @@ public class RdfParser {
      */
     public static final void parse(InputStream in, SerializationFormat format,
                                    final Callback<Quadruple> action) {
+        parse(in, format, action, true);
+    }
+
+    /**
+     * Parses the given input stream by using the specified
+     * {@link SerializationFormat}. Each time a {@link Quadruple} is read, the
+     * specified {@link Callback} is applied to this {@link Quadruple}.
+     * 
+     * @param in
+     *            the input stream where the data are consumed.
+     * 
+     * @param format
+     *            the format which is expected when the data are read from the
+     *            input stream.
+     * 
+     * @param action
+     *            the callback action to perform each time a quadruple is
+     *            parsed.
+     * 
+     * @param checkQuadrupleSyntax
+     *            indicates whether the syntax of each quadruple which is
+     *            reconstructed has to be checked (e.g. to throw an exception if
+     *            a Blank Node is detected because this kind of component is not
+     *            supported).
+     */
+    public static final void parse(InputStream in, SerializationFormat format,
+                                   final Callback<Quadruple> action,
+                                   final boolean checkQuadrupleSyntax) {
         Sink<Quad> sink = new Sink<Quad>() {
             @Override
             public void send(final Quad quad) {
                 action.execute(new Quadruple(
                         quad.getGraph(), quad.getSubject(),
-                        quad.getPredicate(), quad.getObject()));
+                        quad.getPredicate(), quad.getObject(),
+                        checkQuadrupleSyntax, false));
             }
 
             @Override
