@@ -36,6 +36,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 import fr.inria.eventcloud.utils.Callback;
 
@@ -56,7 +57,7 @@ public class SemanticNotificationTranslatorTest {
     }
 
     @Test
-    public void testTranslation() throws Exception {
+    public void testTranslation() throws TranslationException {
         CompoundEvent initialEvent =
                 new CompoundEvent(read(
                         "/example.trig", SerializationFormat.TriG));
@@ -109,6 +110,32 @@ public class SemanticNotificationTranslatorTest {
 
     }
 
+    @Test
+    public void testTranslationWithBlankNodes() throws TranslationException {
+        CompoundEvent event =
+                new CompoundEvent(read(
+                        "/example-blanknodes.trig", SerializationFormat.TriG));
+
+        CompoundEvent translatedEvent =
+                this.translator.translateSemanticNotification(this.translator.translateSemanticCompoundEvent(event));
+
+        Assert.assertFalse(containsBlankNodes(translatedEvent.getQuadruples()));
+
+        Assert.assertEquals(
+                translatedEvent,
+                this.translator.translateSemanticNotification(this.translator.translateSemanticCompoundEvent(translatedEvent)));
+    }
+
+    private static boolean containsBlankNodes(Collection<Quadruple> quadruples) {
+        for (Quadruple q : quadruples) {
+            if (q.getSubject().isBlank() || q.getObject().isBlank()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static void logInfo(CompoundEvent event) {
         for (Quadruple quad : event) {
             log.info(quad.toString());
@@ -136,7 +163,7 @@ public class SemanticNotificationTranslatorTest {
                         quadruples.add(quad);
                     }
 
-                });
+                }, false);
 
         return quadruples;
     }
