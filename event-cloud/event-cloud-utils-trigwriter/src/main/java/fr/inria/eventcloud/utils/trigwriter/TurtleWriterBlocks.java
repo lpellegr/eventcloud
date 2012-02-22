@@ -44,7 +44,7 @@ public class TurtleWriterBlocks {
     static void write(IndentedWriter out, Graph graph,
                       Map<String, String> prefixMap) {
         // Lists
-        TurtleWriter2.writePrefixes(out, prefixMap);
+        // TurtleWriter2.writePrefixes(out, prefixMap);
         writeTriples(
                 out, graph, graph.find(Node.ANY, Node.ANY, Node.ANY), prefixMap);
     }
