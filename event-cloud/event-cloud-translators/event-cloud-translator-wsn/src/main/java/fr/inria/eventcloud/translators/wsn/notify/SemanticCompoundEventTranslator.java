@@ -30,7 +30,7 @@ import org.openjena.riot.WebContent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import eu.play_project.play_commons.eventformat.Namespace;
+import eu.play_project.play_commons.eventformat.EventFormatHelpers;
 import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -90,12 +90,15 @@ public class SemanticCompoundEventTranslator extends
 
         Element any =
                 document.createElementNS(
-                        Namespace.WSN_MSG_TYPE.getUri(),
-                        Namespace.WSN_MSG_TYPE.getPrefix() + ":nativeMessage");
+                        EventFormatHelpers.WSN_MSG_ELEMENT.getNamespaceURI(),
+                        EventFormatHelpers.WSN_MSG_ELEMENT.getPrefix()
+                                + ":"
+                                + EventFormatHelpers.WSN_MSG_ELEMENT.getLocalPart());
         any.setTextContent(baos.toString());
         any.setAttributeNS(
-                Namespace.WSN_MSG_TYPE.getUri(),
-                Namespace.WSN_MSG_TYPE.getPrefix() + ":" + "syntax",
+                EventFormatHelpers.WSN_MSG_ELEMENT.getNamespaceURI(),
+                EventFormatHelpers.WSN_MSG_ELEMENT.getPrefix() + ":"
+                        + EventFormatHelpers.WSN_MSG_SYNTAX_ATTRIBUTE,
                 WebContent.contentTypeTriGAlt);
         message.setAny(any);
         NotificationMessageHolderType notificationMessage =
@@ -104,5 +107,5 @@ public class SemanticCompoundEventTranslator extends
 
         return notificationMessage;
     }
-    
+
 }
