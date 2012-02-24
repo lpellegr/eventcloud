@@ -69,13 +69,13 @@ public class PubSubTest {
         // Web services which are deployed
         String subscribeWsUrl =
                 WebServiceDeployer.deploySubscribeWebService(
-                        deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
-                        "subscribe", 8889);
+                        deployer.getEventCloudsRegistryUrl(),
+                        ecId.getStreamUrl(), "subscribe", 8889);
 
         String publishWsUrl =
                 WebServiceDeployer.deployPublishWebService(
-                        deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
-                        "publish", 8890);
+                        deployer.getEventCloudsRegistryUrl(),
+                        ecId.getStreamUrl(), "publish", 8890);
 
         SubscriberServiceImpl subscriberService = new SubscriberServiceImpl();
         String subscriberWsUrl =
@@ -117,7 +117,7 @@ public class PubSubTest {
                 subscriberService.eventsReceived.wait();
             }
         }
-        
+
         log.info("Compound event received!");
 
         deployer.undeploy();

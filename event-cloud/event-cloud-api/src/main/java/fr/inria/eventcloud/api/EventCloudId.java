@@ -16,90 +16,76 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.utils.Base64LongLong;
-import fr.inria.eventcloud.utils.UniqueId;
 
 /**
- * Uniquely identify an Event Cloud.
+ * This class defines an identifier (also named stream identifier) that can be
+ * used to uniquely identify an eventcloud among an organization.
  * 
  * @author lpellegr
  */
-public class EventCloudId extends UniqueId {
+public class EventCloudId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private final String streamUrl;
+
     /**
-     * Creates a unique eventcloud id .
+     * Creates a new event cloud identifier with randomly generated stream URL.
      */
     public EventCloudId() {
-        super();
-    }
-
-    private EventCloudId(UUID uuid) {
-        super(uuid);
+        this(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                + UUID.randomUUID().toString());
     }
 
     /**
-     * Constructs an URL from the current event cloud identifier. The prefix
-     * used to create the URL is defined by
-     * {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
+     * Creates a new event cloud identifier from the specified {@code streamUrl}
+     * . This URL is assumed to identify a unique eventcloud among an
+     * organization.
      * 
-     * @return an URL from the current Event Cloud identifier.
+     * @param streamUrl
+     *            the unique URL that identifies an eventcloud among an
+     *            organization.
      */
-    public String toUrl() {
-        return EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue().concat(
-                super.toString());
+    public EventCloudId(String streamUrl) {
+        this.streamUrl = streamUrl;
     }
 
     /**
-     * Returns {@code true} if the specified {@code eventcloudIdUrl} is a valid,
-     * {@code false} otherwise.
+     * Returns an URL representation for this identifier.
      * 
-     * @param eventcloudIdUrl
-     *            the url to check.
-     * 
-     * @return {@code true} if the specified {@code eventcloudIdUrl} is a valid,
-     *         {@code false} otherwise.
+     * @return an URL representation for this identifier.
      */
-    public static boolean isEventCloudIdUrl(String eventcloudIdUrl) {
-        if (eventcloudIdUrl.startsWith(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())
-                && eventcloudIdUrl.substring(
-                        EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                                .length()).length() == 22) {
-            return true;
-        }
-
-        return false;
+    public String getStreamUrl() {
+        return this.streamUrl;
     }
 
     /**
-     * Parses a {@link EventCloudId} from the specified URL. The URL is supposed
-     * to start with the prefix
-     * {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
-     * 
-     * @param eventcloudIdUrl
-     *            the URL to parse.
-     * 
-     * @return a event cloud identifier which identifies uniquely an event
-     *         cloud.
-     * 
-     * @throws IllegalArgumentException
-     *             if the specified URL does no start with the prefix
-     *             {@link EventCloudProperties#EVENT_CLOUD_ID_PREFIX}.
+     * {@inheritDoc}
      */
-    public static EventCloudId parseEventCloudIdUrl(String eventcloudIdUrl) {
-        if (!eventcloudIdUrl.startsWith(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())) {
-            throw new IllegalArgumentException("URI must start with "
-                    + EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                    + " but was:" + eventcloudIdUrl);
-        }
+    @Override
+    public int hashCode() {
+        return this.streamUrl.hashCode();
+    }
 
-        return new EventCloudId(
-                Base64LongLong.decodeUUID(eventcloudIdUrl.substring(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                        .length())));
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof EventCloudId
+                && this.streamUrl.equals(((EventCloudId) obj).streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return this.streamUrl;
     }
 
 }

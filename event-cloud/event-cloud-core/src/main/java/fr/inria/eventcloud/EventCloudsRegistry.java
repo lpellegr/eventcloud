@@ -24,52 +24,70 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
- * The EventCloudRegistry is in charge of storing all the information related to
- * the Event-Clouds which are runnings for an organization or a group.
+ * An eventclouds registry is in charge of maintaining the list of eventclouds
+ * which are running for an organization or a group. In addition, for each
+ * eventcloud which is managed, the registry also have to store the entry points
+ * associated to an eventcloud.
  * <p>
- * <strong>As a first prototype the registry is centralized and stores the
- * information in memory.</strong>
- * <p>
- * TODO: the registry has to be distributed and the data that are saved have to
- * be persisted.
+ * <strong>This first prototype is centralized and stores the information in
+ * memory.</strong>
  * 
  * @author lpellegr
  */
 public class EventCloudsRegistry {
 
-    private Map<EventCloudId, Collection<SemanticTracker>> eventClouds;
+    private Map<EventCloudId, Collection<SemanticTracker>> eventclouds;
 
     /**
      * Empty constructor commanded by ProActive to expose this object as an
      * active object.
      */
     public EventCloudsRegistry() {
-        this.eventClouds =
+        this.eventclouds =
                 new HashMap<EventCloudId, Collection<SemanticTracker>>();
     }
 
     /**
      * Registers the given {@link EventCloud} into the registry.
      * 
-     * @param eventCloud
-     *            the EventCloud to register into the registry.
+     * @param eventcloud
+     *            the eventcloud to register into the registry.
+     * 
+     * @return {@code true} if the registration has succeed or {@code false} if
+     *         the eventcloud is already registered into the registry.
      */
-    public void register(EventCloud eventCloud) {
-        if (this.eventClouds.containsKey(eventCloud.getId())) {
-            throw new IllegalArgumentException("Event with id '"
-                    + eventCloud.getId() + "' already registered");
+    public boolean register(EventCloud eventcloud) {
+        if (this.eventclouds.containsKey(eventcloud.getId())) {
+            return false;
         } else {
-            this.eventClouds.put(eventCloud.getId(), eventCloud.getTrackers());
+            return this.eventclouds.put(
+                    eventcloud.getId(), eventcloud.getTrackers()) == null;
         }
     }
 
     /**
-     * Returns the list of the Event Clouds that are managed by the registry.
+     * Returns a list that contains the identifier of the eventclouds which are
+     * managed by the registry.
      * 
-     * @return the list of the Event Clouds that are managed by the registry.
+     * @return a list that contains the identifier of the eventclouds which are
+     *         managed by the registry.
      */
     public Collection<EventCloudId> listEventClouds() {
-        return new Collection<EventCloudId>(this.eventClouds.keySet());
+        return new Collection<EventCloudId>(this.eventclouds.keySet());
+    }
+
+    /**
+     * Returns a boolean which indicates if the eventcloud identified by the
+     * specified {@code eventcloudId} is already managed by the registry.
+     * 
+     * @param id
+     *            the eventcloud identifier to check for.
+     * 
+     * @return {@code true} if the eventcloud identifier is already managed,
+     *         {@code false} otherwise.
+     */
+    public boolean contains(EventCloudId id) {
+        return this.eventclouds.containsKey(id);
     }
 
     /**
@@ -79,11 +97,11 @@ public class EventCloudsRegistry {
      * @param id
      *            the Event Cloud identifier to look for.
      * 
-     * @return the trackers associated to the specified {@link EventCloudId} if
-     *         it is registered in the registry or {@code null}.
+     * @return the trackers associated to the eventcloud identified by the
+     *         specified {@link EventCloudId} or {@code null}.
      */
     public Collection<SemanticTracker> findTrackers(EventCloudId id) {
-        return this.eventClouds.get(id);
+        return this.eventclouds.get(id);
     }
 
 }

@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.core.util.ProActiveRandom;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -69,14 +68,21 @@ public class JunitEventCloudInfrastructureDeployer {
     public EventCloudId createEventCloud(int nbTrackers, int nbPeers) {
         this.initializeEventCloudsRegistry();
 
-        EventCloud ec =
+        EventCloud eventcloud =
                 EventCloud.create(
-                        PAActiveObject.getUrl(this.eventCloudsRegistry),
+                        this.eventCloudsRegistryUrl,
                         new JunitEventCloudDeployer(this.datastoreType),
                         new Collection<UnalterableElaProperty>(), nbTrackers,
                         nbPeers);
-        this.eventClouds.put(ec.getId(), ec);
-        return ec.getId();
+
+        this.eventClouds.put(eventcloud.getId(), eventcloud);
+
+        if (!this.eventCloudsRegistry.register(eventcloud)) {
+            throw new IllegalStateException(
+                    "Eventcloud registration failed: it is already registered");
+        }
+
+        return eventcloud.getId();
     }
 
     private synchronized void initializeEventCloudsRegistry() {
@@ -98,9 +104,7 @@ public class JunitEventCloudInfrastructureDeployer {
             return null;
         }
 
-        int nbTrackers = ec.getTrackers().size();
-
-        return ec.getTrackers().toArray(new SemanticTracker[nbTrackers])[ProActiveRandom.nextInt(nbTrackers)];
+        return ec.selectTracker();
     }
 
     public SemanticPeer getRandomSemanticPeer(EventCloudId id) {
@@ -122,13 +126,9 @@ public class JunitEventCloudInfrastructureDeployer {
         while (it.hasNext()) {
             EventCloudId ecId = it.next();
             this.eventClouds.get(ecId).getEventCloudDeployer().undeploy();
-            it.remove();
         }
 
         PAActiveObject.terminateActiveObject(this.eventCloudsRegistry, false);
-
-        this.eventCloudsRegistry = null;
-        this.eventCloudsRegistryUrl = null;
     }
 
     public void undeploy(EventCloudId eventCloudId) {

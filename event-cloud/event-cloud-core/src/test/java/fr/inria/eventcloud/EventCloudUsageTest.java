@@ -57,7 +57,7 @@ public class EventCloudUsageTest implements Serializable {
     private static final Collection<Binding> bindingsReceived =
             new Collection<Binding>();
 
-    @Test(timeout = 60000)
+    @Test(timeout = 180000)
     public void testEventCloudInstantiationAndUsage()
             throws InterruptedException {
         // Creates and deploy an EventCloudsRegistry locally

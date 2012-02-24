@@ -106,8 +106,7 @@ public class PublishServiceImpl extends
     @Override
     public PublishProxy createProxy() {
         return ProxyFactory.getInstance(
-                super.registryUrl,
-                EventCloudId.parseEventCloudIdUrl(super.eventcloudIdUrl))
+                super.registryUrl, new EventCloudId(super.streamUrl))
                 .createPublishProxy();
     }
 

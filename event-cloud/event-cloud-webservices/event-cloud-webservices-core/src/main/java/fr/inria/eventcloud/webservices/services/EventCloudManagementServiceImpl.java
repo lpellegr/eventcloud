@@ -54,10 +54,11 @@ public class EventCloudManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String createEventCloud() {
+    public boolean createEventCloud(String streamUrl) {
         return EventCloud.create(
-                this.registryUrl, new EventCloudDeployer(),
-                new Collection<UnalterableElaProperty>(), 1, 1).getId().toUrl();
+                this.registryUrl, new EventCloudId(streamUrl),
+                new EventCloudDeployer(),
+                new Collection<UnalterableElaProperty>(), 1, 1).register();
     }
 
     /**
@@ -82,15 +83,13 @@ public class EventCloudManagementServiceImpl implements
             List<String> result = new ArrayList<String>(ecIds.size());
 
             for (EventCloudId ecId : ecIds) {
-                result.add(ecId.toUrl());
+                result.add(ecId.getStreamUrl());
             }
 
             return result;
         } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
             throw new IllegalStateException(e);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new IllegalStateException(e);
         }
     }
@@ -99,11 +98,9 @@ public class EventCloudManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String createPublishProxy(String eventcloudIdUrl) {
-        checkEventcloudIdUrl(eventcloudIdUrl);
-
+    public String createPublishProxy(String streamUrl) {
         return WebServiceDeployer.deployPublishWebService(
-                this.registryUrl, eventcloudIdUrl,
+                this.registryUrl, streamUrl,
                 "proactive/services/EventCloud_publish-webservices",
                 this.portLowerBound++);
     }
@@ -112,11 +109,9 @@ public class EventCloudManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String createSubscribeProxy(String eventcloudIdUrl) {
-        checkEventcloudIdUrl(eventcloudIdUrl);
-
+    public String createSubscribeProxy(String streamUrl) {
         return WebServiceDeployer.deploySubscribeWebService(
-                this.registryUrl, eventcloudIdUrl,
+                this.registryUrl, streamUrl,
                 "proactive/services/EventCloud_subscribe-webservices",
                 this.portLowerBound++);
     }
@@ -125,20 +120,11 @@ public class EventCloudManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String createPutGetProxy(String eventcloudIdUrl) {
-        checkEventcloudIdUrl(eventcloudIdUrl);
-
+    public String createPutGetProxy(String streamUrl) {
         return WebServiceDeployer.deployPutGetWebService(
-                this.registryUrl, eventcloudIdUrl,
+                this.registryUrl, streamUrl,
                 "proactive/services/EventCloud_putget-webservices",
                 this.portLowerBound++);
-    }
-
-    private static void checkEventcloudIdUrl(String eventcloudIdUrl) {
-        if (!EventCloudId.isEventCloudIdUrl(eventcloudIdUrl)) {
-            throw new IllegalArgumentException(
-                    "The specified eventcloudIdUrl is not valid");
-        }
     }
 
 }
