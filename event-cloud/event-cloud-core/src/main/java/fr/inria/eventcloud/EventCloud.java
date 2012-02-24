@@ -61,10 +61,11 @@ public final class EventCloud implements EventCloudApi, Serializable {
 
     private final List<SemanticTracker> trackers;
 
-    private EventCloud(String registryUrl, EventCloudDeployer deployer,
+    private EventCloud(String registryUrl, EventCloudId eventcloudId,
+            EventCloudDeployer deployer,
             Collection<UnalterableElaProperty> elaProperties, int nbTrackers,
             int nbPeers) {
-        this.id = new EventCloudId();
+        this.id = eventcloudId;
         this.creationTime = System.currentTimeMillis();
         this.elaProperties = elaProperties;
         this.deployer = deployer;
@@ -88,36 +89,48 @@ public final class EventCloud implements EventCloudApi, Serializable {
                                     EventCloudDeployer deployer,
                                     Collection<UnalterableElaProperty> elaProperties,
                                     int nbTrackers, int nbPeers) {
-        EventCloud eventCloud =
-                new EventCloud(
-                        registryUrl, deployer, elaProperties, nbTrackers,
-                        nbPeers);
+        return create(
+                registryUrl, new EventCloudId(), deployer, elaProperties,
+                nbTrackers, nbPeers);
+    }
 
-        eventCloud.register();
-
-        return eventCloud;
+    public static EventCloud create(String registryUrl,
+                                    EventCloudId eventcloudId,
+                                    EventCloudDeployer deployer,
+                                    Collection<UnalterableElaProperty> elaProperties,
+                                    int nbTrackers, int nbPeers) {
+        return new EventCloud(
+                registryUrl, eventcloudId, deployer, elaProperties, nbTrackers,
+                nbPeers);
     }
 
     /**
-     * Registers the properties to the {@link EventCloudsRegistry}.
+     * Registers the eventcloud to the {@link EventCloudsRegistry} associated to
+     * the eventcloud.
+     * 
+     * @return {@code true} if the operation succeed, {@code false} if the
+     *         operation fails or if the eventcloud is already registered.
      */
-    private void register() {
+    public boolean register() {
         EventCloudsRegistry registry = null;
         try {
             registry =
                     PAActiveObject.lookupActive(
                             EventCloudsRegistry.class, this.registryUrl);
 
-            registry.register(this);
-
-            log.info(
-                    "Eventcloud '{}' registered into registry '{}'", this.id,
-                    this.registryUrl);
+            if (registry.register(this)) {
+                log.info(
+                        "Eventcloud '{}' registered into registry '{}'",
+                        this.id.getStreamUrl(), this.registryUrl);
+                return true;
+            }
         } catch (ActiveObjectCreationException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
     /**

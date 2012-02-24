@@ -216,17 +216,18 @@ public class WebServiceDeployer {
     }
 
     public static String deploySubscribeWebService(String registryUrl,
-                                                   String eventCloudIdUrl,
+                                                   String streamUrl,
                                                    String urlSuffix, int port) {
-        return deployWebService(new SubscribeServiceImpl(
-                registryUrl, eventCloudIdUrl), urlSuffix, port);
+        return deployWebService(
+                new SubscribeServiceImpl(registryUrl, streamUrl), urlSuffix,
+                port);
     }
 
     public static String deployPutGetWebService(String registryUrl,
-                                                String eventCloudIdUrl,
+                                                String streamUrl,
                                                 String urlSuffix, int port) {
-        return deployWebService(new PutGetServiceImpl(
-                registryUrl, eventCloudIdUrl), urlSuffix, port);
+        return deployWebService(
+                new PutGetServiceImpl(registryUrl, streamUrl), urlSuffix, port);
     }
 
     public static String deploySubscriberWebService(String urlSuffix, int port) {

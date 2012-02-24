@@ -51,24 +51,26 @@ public class EventCloudCache implements EventCloudApi, Serializable {
 
     private List<SemanticTracker> trackers;
 
-    public EventCloudCache(Collection<SemanticTracker> eventCloudTrackers,
-            EventCloudId eventCloudId) {
+    public EventCloudCache(String registryUrl, EventCloudId eventcloudId) {
+        this.id = eventcloudId;
 
-    }
-
-    public EventCloudCache(String registryUrl, EventCloudId eventCloudId) {
-        // TODO: throw an exception if the registry identified by registryUrl
-        // does not contain the specified EventCloudId
-        this.id = eventCloudId;
-        this.trackers = new ArrayList<SemanticTracker>();
         try {
-            this.trackers.addAll(PAActiveObject.lookupActive(
-                    EventCloudsRegistry.class, registryUrl).findTrackers(
-                    eventCloudId));
+            Collection<SemanticTracker> trackersReceived =
+                    PAActiveObject.lookupActive(
+                            EventCloudsRegistry.class, registryUrl)
+                            .findTrackers(eventcloudId);
+            if (trackersReceived == null) {
+                throw new IllegalArgumentException(
+                        "Registry does not manage an eventcloud identified by: "
+                                + eventcloudId);
+            } else {
+                this.trackers = new ArrayList<SemanticTracker>();
+                this.trackers.addAll(trackersReceived);
+            }
         } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
     }
 

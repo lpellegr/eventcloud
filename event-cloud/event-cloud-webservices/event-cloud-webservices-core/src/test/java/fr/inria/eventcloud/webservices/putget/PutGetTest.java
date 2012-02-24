@@ -72,8 +72,8 @@ public class PutGetTest {
 
         String putGetWsUrl =
                 WebServiceDeployer.deployPutGetWebService(
-                        deployer.getEventCloudsRegistryUrl(), ecId.toUrl(),
-                        "putget", 8889);
+                        deployer.getEventCloudsRegistryUrl(),
+                        ecId.getStreamUrl(), "putget", 8889);
 
         Component putGetComponent = this.createPutGetComponent(putGetWsUrl);
 

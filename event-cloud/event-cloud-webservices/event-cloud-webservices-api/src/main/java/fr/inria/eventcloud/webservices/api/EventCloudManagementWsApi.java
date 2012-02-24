@@ -24,7 +24,7 @@ import javax.jws.WebService;
 
 /**
  * Defines the operations which are exposed as a web service for managing
- * eventclouds.
+ * eventclouds and their associated proxies.
  * 
  * @author lpellegr
  */
@@ -32,14 +32,19 @@ import javax.jws.WebService;
 public interface EventCloudManagementWsApi {
 
     /**
-     * Creates and deploys an eventcloud. Once it is running, an URL identifying
-     * the eventcloud which has been created is returned.
+     * Creates and deploys a new eventcloud for the specified {@code streamUrl}.
      * 
-     * @return an URL identifying the eventcloud which has been created and
-     *         deployed.
+     * @param streamUrl
+     *            an URL which identifies an eventcloud among an organization.
+     * 
+     * @return a boolean which indicates whether an eventcloud has been created
+     *         for the specified {@code streamUrl} or not. In the former case,
+     *         when the return value is {@code false}, this means that an
+     *         eventcloud is already running for the specified {@code streamUrl}
+     *         .
      */
     @WebMethod
-    String createEventCloud();
+    boolean createEventCloud(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
      * Returns the endpoint URL associated to the eventclouds registry which
@@ -52,10 +57,10 @@ public interface EventCloudManagementWsApi {
     String getRegistryEndpointUrl();
 
     /**
-     * Returns the identifiers (as URLs) of the eventclouds which are managed by
-     * the eventclouds registry used by this webservice.
+     * Returns a list that contains the URLs of the streams/eventclouds which
+     * are managed by the eventclouds registry used by this webservice.
      * 
-     * @return the identifiers (as URLs) of the eventclouds which are managed by
+     * @return a list that contains the URLs of the streams which are managed by
      *         the eventclouds registry used by this webservice.
      */
     @WebMethod
@@ -63,44 +68,47 @@ public interface EventCloudManagementWsApi {
 
     /**
      * Creates, deploys and exposes as a web service a publish proxy for the
-     * eventcloud identified by the specified {@code eventcloudId}. When the
-     * call succeeds, the endpoint URL to the publish web service is returned.
+     * eventcloud identified by the specified {@code streamUrl}. When the call
+     * succeeds, the endpoint URL to the publish web service is returned.
      * 
-     * @param eventcloudIdUrl
-     *            an URL identifying an eventcloud which is running and for
-     *            which a publish proxy will be created and deployed.
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
      * 
-     * @return the endpoint URL to the publish web service which is deployed.
+     * @return the endpoint URL to the publish web service which is deployed or
+     *         {@code null} if there was no existing eventcloud for the
+     *         specified {@code streamUrl}.
      */
     @WebMethod
-    String createPublishProxy(@WebParam(name = "eventcloudIdUrl") String eventcloudIdUrl);
+    String createPublishProxy(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
      * Creates, deploys and exposes as a web service a subscribe proxy for the
      * eventcloud identified by the specified {@code eventcloudId}. When the
      * call succeeds, the endpoint URL to the subscribe web service is returned.
      * 
-     * @param eventcloudIdUrl
-     *            an URL identifying an eventcloud which is running and for
-     *            which a subscribe proxy will be created and deployed.
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
      * 
-     * @return the endpoint URL to the subscribe web service which is deployed.
+     * @return the endpoint URL to the publish web service which is deployed or
+     *         {@code null} if there was no existing eventcloud for the
+     *         specified {@code streamUrl}.
      */
     @WebMethod
-    String createSubscribeProxy(@WebParam(name = "eventcloudIdUrl") String eventcloudIdUrl);
+    String createSubscribeProxy(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
      * Creates, deploys and exposes as a web service a putget proxy for the
      * eventcloud identified by the specified {@code eventcloudId}. When the
      * call succeeds, the endpoint URL to the putget web service is returned.
      * 
-     * @param eventcloudIdUrl
-     *            an URL identifying an eventcloud which is running and for
-     *            which a putget proxy will be created and deployed.
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
      * 
-     * @return the endpoint URL to the putget web service which is deployed.
+     * @return the endpoint URL to the publish web service which is deployed or
+     *         {@code null} if there was no existing eventcloud for the
+     *         specified {@code streamUrl}.
      */
     @WebMethod
-    String createPutGetProxy(@WebParam(name = "eventcloudIdUrl") String eventcloudIdUrl);
+    String createPutGetProxy(@WebParam(name = "streamUrl") String streamUrl);
 
 }

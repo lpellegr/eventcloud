@@ -41,13 +41,13 @@ public abstract class EventCloudProxyService<T extends Proxy> {
 
     protected final String registryUrl;
 
-    protected final String eventcloudIdUrl;
+    protected final String streamUrl;
 
     protected T proxy;
 
-    public EventCloudProxyService(String registryUrl, String eventcloudIdUrl) {
+    public EventCloudProxyService(String registryUrl, String streamUrl) {
         this.registryUrl = registryUrl;
-        this.eventcloudIdUrl = eventcloudIdUrl;
+        this.streamUrl = streamUrl;
     }
 
     @PostConstruct

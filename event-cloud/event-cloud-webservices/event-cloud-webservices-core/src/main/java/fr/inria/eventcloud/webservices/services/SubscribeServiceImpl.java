@@ -147,8 +147,7 @@ public class SubscribeServiceImpl extends
     @Override
     public SubscribeProxy createProxy() {
         return ProxyFactory.getInstance(
-                super.registryUrl,
-                EventCloudId.parseEventCloudIdUrl(super.eventcloudIdUrl))
+                super.registryUrl, new EventCloudId(super.streamUrl))
                 .createSubscribeProxy();
     }
 
