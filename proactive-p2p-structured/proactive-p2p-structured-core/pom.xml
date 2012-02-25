@@ -64,6 +64,10 @@
 				<artifactId>proactive-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>proactive-generate-stubs</id>
+						<goals>
+							<goal>stubs</goal>
+						</goals>
 						<configuration>
 							<includes>
 								<include>org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation</include>
@@ -76,8 +80,11 @@
 								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.PeerComponentImpl</include>
 							</includes>
 						</configuration>
+					</execution>
+					<execution>
+						<id>proactive-generate-meta-objects</id>
 						<goals>
-							<goal>stubs</goal>
+							<goal>gcm</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -133,6 +140,25 @@
 									</pluginExecutionFilter>
 									<action>
 										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.objectweb.proactive
+										</groupId>
+										<artifactId>
+											proactive-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.2.0,)
+										</versionRange>
+										<goals>
+											<goal>gcm</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
