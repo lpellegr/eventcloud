@@ -78,6 +78,7 @@
 				<artifactId>proactive-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>proactive-generate-stubs</id>
 						<goals>
 							<goal>stubs</goal>
 						</goals>
@@ -96,6 +97,12 @@
 								<include>fr.inria.eventcloud.proxies.PutGetProxyImpl</include>
 							</includes>
 						</configuration>
+					</execution>
+					<execution>
+						<id>proactive-generate-meta-objects</id>
+						<goals>
+							<goal>gcm</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -140,6 +147,25 @@
 									</pluginExecutionFilter>
 									<action>
 										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.objectweb.proactive
+										</groupId>
+										<artifactId>
+											proactive-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.2.0,)
+										</versionRange>
+										<goals>
+											<goal>gcm</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
