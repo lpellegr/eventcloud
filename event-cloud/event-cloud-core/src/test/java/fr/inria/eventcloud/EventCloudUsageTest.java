@@ -17,6 +17,8 @@
 package fr.inria.eventcloud;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,7 +29,6 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -54,8 +55,8 @@ public class EventCloudUsageTest implements Serializable {
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudUsageTest.class);
 
-    private static final Collection<Binding> bindingsReceived =
-            new Collection<Binding>();
+    private static final List<Binding> bindingsReceived =
+            new ArrayList<Binding>();
 
     @Test(timeout = 180000)
     public void testEventCloudInstantiationAndUsage()
@@ -103,7 +104,7 @@ public class EventCloudUsageTest implements Serializable {
         // quadruples (historical data) by using a quadruple pattern.
         // Hereafter, any quadruple which has any value as graph, subject,
         // predicate and object value is returned
-        Collection<Quadruple> result = putGetProxy.find(QuadruplePattern.ANY);
+        List<Quadruple> result = putGetProxy.find(QuadruplePattern.ANY);
         log.info("Quadruples contained by the Event-Cloud {}", eventCloudId);
         for (Quadruple quad : result) {
             log.info(quad.toString());

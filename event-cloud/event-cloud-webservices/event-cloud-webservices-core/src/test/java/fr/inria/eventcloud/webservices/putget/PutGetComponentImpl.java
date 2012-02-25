@@ -16,12 +16,14 @@
  **/
 package fr.inria.eventcloud.webservices.putget;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
@@ -109,7 +111,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> deleteQuadruplePattern(QuadruplePattern quadPattern) {
+    public List<Quadruple> deleteQuadruplePattern(QuadruplePattern quadPattern) {
         if (this.putgetWs != null) {
             return this.putgetWs.deleteQuadruplePattern(quadPattern);
         } else {
@@ -121,7 +123,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> findQuadruplePattern(QuadruplePattern quadPattern) {
+    public List<Quadruple> findQuadruplePattern(QuadruplePattern quadPattern) {
         if (this.putgetWs != null) {
             return this.putgetWs.findQuadruplePattern(quadPattern);
         } else {

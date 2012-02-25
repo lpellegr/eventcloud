@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.webservices.api.adapters;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -23,7 +25,6 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 
@@ -34,7 +35,7 @@ import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
  */
 public class EventCollectionAdapter extends
         XmlAdapter<Notify, Collection<CompoundEvent>> {
-    
+
     private WsNotificationTranslator translator;
 
     public EventCollectionAdapter() {
@@ -69,12 +70,13 @@ public class EventCollectionAdapter extends
      * 
      * @param notify
      *            the notify object to be converted.
+     * 
      * @return the collection of events represented by the specified notify
      *         object.
      */
     @Override
     public Collection<CompoundEvent> unmarshal(Notify notify) throws Exception {
-        Collection<CompoundEvent> events = new Collection<CompoundEvent>();
+        List<CompoundEvent> events = new ArrayList<CompoundEvent>();
         List<NotificationMessageHolderType> notificationMessages =
                 notify.getNotificationMessage();
 

@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.parsers;
 
 import java.io.OutputStream;
+import java.util.List;
 
 import org.openjena.riot.RiotWriter;
 
@@ -24,7 +25,6 @@ import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.utils.trigwriter.TriGWriter;
@@ -46,7 +46,7 @@ public class RdfSerializer {
      * @param quads
      *            the collection of quadruples to be written
      */
-    public static void triGWriter(OutputStream out, Collection<Quadruple> quads) {
+    public static void triGWriter(OutputStream out, List<Quadruple> quads) {
 
         // Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(new
         // FileInputStream("D.trig")) ;
@@ -70,7 +70,7 @@ public class RdfSerializer {
      *            the collection of quadruples to be written
      */
     public static void nQuadsWriter(OutputStream out,
-                                    Collection<Quadruple> quads) {
+                                    List<Quadruple> quads) {
 
         RiotWriter.writeNQuads(out, quadruplesToDatasetGraph(quads));
 
@@ -84,7 +84,7 @@ public class RdfSerializer {
      *            the collection of the quadruples
      * @return the corresponding data set graph
      */
-    private static DatasetGraph quadruplesToDatasetGraph(Collection<Quadruple> quads) {
+    private static DatasetGraph quadruplesToDatasetGraph(List<Quadruple> quads) {
         DatasetGraph dsg = DatasetGraphFactory.createMem();
         for (Quadruple q : quads) {
             if (q.getPredicate() != PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE) {

@@ -16,12 +16,13 @@
  **/
 package fr.inria.eventcloud.webservices.api.adapters;
 
+import java.util.Collection;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ByteToObjectConverter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**

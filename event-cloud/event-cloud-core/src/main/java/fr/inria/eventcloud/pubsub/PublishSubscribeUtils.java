@@ -64,7 +64,6 @@ import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
 import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -328,10 +327,10 @@ public final class PublishSubscribeUtils {
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
 
-        Collection<Quadruple> subscriptionQuadruples = null;
+        List<Quadruple> subscriptionQuadruples = null;
         try {
             subscriptionQuadruples =
-                    Collection.from(txnGraph.find(
+                    Lists.newArrayList(txnGraph.find(
                             PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
                             subscriptionIdUri,
                             PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,

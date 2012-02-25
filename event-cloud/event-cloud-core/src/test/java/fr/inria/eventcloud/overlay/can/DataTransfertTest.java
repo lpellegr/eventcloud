@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
@@ -33,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
@@ -139,17 +140,17 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
         log.debug("first peer manages {}", firstPeer);
         log.debug("second peer manages {}", secondPeer);
 
-        Collection<Quadruple> firstPeerResult =
+        List<Quadruple> firstPeerResult =
                 findQuadruplesOperation(firstPeer, QuadruplePattern.ANY);
-        Collection<Quadruple> secondPeerResult =
+        List<Quadruple> secondPeerResult =
                 findQuadruplesOperation(secondPeer, QuadruplePattern.ANY);
 
         Assert.assertEquals(1, firstPeerResult.size());
         Assert.assertEquals(1, secondPeerResult.size());
     }
 
-    private static Collection<Quadruple> findQuadruplesOperation(SemanticPeer peer,
-                                                                 QuadruplePattern quadruplePattern) {
+    private static List<Quadruple> findQuadruplesOperation(SemanticPeer peer,
+                                                           QuadruplePattern quadruplePattern) {
         return ((FindQuadruplesResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new FindQuadruplesOperation(
                 quadruplePattern)))).getQuadruples();
     }

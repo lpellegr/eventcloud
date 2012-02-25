@@ -16,7 +16,9 @@
  **/
 package fr.inria.eventcloud.webservices.services;
 
-import fr.inria.eventcloud.api.Collection;
+import java.util.Collection;
+import java.util.List;
+
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -87,7 +89,7 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetProxy>
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> deleteQuadruplePattern(QuadruplePattern quadPattern) {
+    public List<Quadruple> deleteQuadruplePattern(QuadruplePattern quadPattern) {
         return super.proxy.delete(quadPattern);
     }
 
@@ -95,7 +97,7 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetProxy>
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> findQuadruplePattern(QuadruplePattern quadPattern) {
+    public List<Quadruple> findQuadruplePattern(QuadruplePattern quadPattern) {
         return super.proxy.find(quadPattern);
     }
 

@@ -18,6 +18,7 @@ package fr.inria.eventcloud.translators.wsn.notify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,7 +32,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import eu.play_project.play_commons.eventformat.EventFormatHelpers;
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.parsers.RdfSerializer;
@@ -73,7 +73,7 @@ public class SemanticCompoundEventTranslator extends
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Collection<Quadruple> quads = event.getQuadruples();
+        List<Quadruple> quads = event.getQuadruples();
         RdfSerializer.triGWriter(out, quads);
         Message message = new Message();
 

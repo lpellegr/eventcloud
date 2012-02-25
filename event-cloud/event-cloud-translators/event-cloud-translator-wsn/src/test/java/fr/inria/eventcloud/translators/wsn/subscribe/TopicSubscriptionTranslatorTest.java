@@ -1,7 +1,7 @@
 package fr.inria.eventcloud.translators.wsn.subscribe;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
-import fr.inria.eventcloud.translators.wsn.subscribe.TopicSubscriptionTranslator;
 
 /**
  * Test cases associated to {@link TopicSubscriptionTranslator}.
@@ -42,7 +41,7 @@ public class TopicSubscriptionTranslatorTest {
     }
 
     @Parameters
-    public static Collection<Object[]> data() {
+    public static List<Object[]> data() {
         Object[][] data = new Object[][] { {"ex:topicName"}, {"topicName"}};
         return Arrays.asList(data);
     }

@@ -18,6 +18,8 @@ package fr.inria.eventcloud.translators.wsn;
 
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -40,11 +42,8 @@ import org.w3c.dom.Element;
 
 import com.hp.hpl.jena.sparql.core.Quad;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 
 /**
  * Tests cases associated to {@link WsNotificationTranslator}.
@@ -144,8 +143,8 @@ public class WsNotificationTranslatorTest {
         return is;
     }
 
-    private static Collection<Quadruple> read(String file) {
-        final Collection<Quadruple> quadruples = new Collection<Quadruple>();
+    private static List<Quadruple> read(String file) {
+        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
         Sink<Quad> sink = new Sink<Quad>() {
             @Override

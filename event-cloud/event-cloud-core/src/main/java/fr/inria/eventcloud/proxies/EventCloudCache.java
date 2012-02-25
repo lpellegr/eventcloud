@@ -18,16 +18,14 @@ package fr.inria.eventcloud.proxies;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.core.util.ProActiveRandom;
 
+import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudApi;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
@@ -35,9 +33,9 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
- * An EventCloudCache is used to keep in cache the information that are exposed
- * by the {@link EventCloudApi}. This is done to reduce the number of calls to
- * the {@link EventCloudsRegistry}.
+ * This class is used to keep in cache the information associated to an
+ * {@link EventCloud} in order to reduce the number of calls to an
+ * {@link EventCloudsRegistry}.
  * 
  * @author lpellegr
  * 
@@ -47,26 +45,21 @@ public class EventCloudCache implements EventCloudApi, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private EventCloudId id;
+    private final EventCloudsRegistry registry;
 
-    private List<SemanticTracker> trackers;
+    private EventCloud delegate;
+
+    /*
+     * TODO: add a thread that updates periodically the trackers.
+     */
 
     public EventCloudCache(String registryUrl, EventCloudId eventcloudId) {
-        this.id = eventcloudId;
-
         try {
-            Collection<SemanticTracker> trackersReceived =
+            this.registry =
                     PAActiveObject.lookupActive(
-                            EventCloudsRegistry.class, registryUrl)
-                            .findTrackers(eventcloudId);
-            if (trackersReceived == null) {
-                throw new IllegalArgumentException(
-                        "Registry does not manage an eventcloud identified by: "
-                                + eventcloudId);
-            } else {
-                this.trackers = new ArrayList<SemanticTracker>();
-                this.trackers.addAll(trackersReceived);
-            }
+                            EventCloudsRegistry.class, registryUrl);
+
+            this.delegate = this.registry.find(eventcloudId);
         } catch (ActiveObjectCreationException e) {
             throw new IllegalStateException(e);
         } catch (IOException e) {
@@ -74,30 +67,12 @@ public class EventCloudCache implements EventCloudApi, Serializable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public EventCloudId getId() {
-        return this.id;
+        return this.delegate.getId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public long getCreationTime() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<UnalterableElaProperty> getElaProperties() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.delegate.getCreationTime();
     }
 
     /**
@@ -105,42 +80,27 @@ public class EventCloudCache implements EventCloudApi, Serializable {
      */
     @Override
     public EventCloudDeployer getEventCloudDeployer() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.delegate.getEventCloudDeployer();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+    public List<UnalterableElaProperty> getElaProperties() {
+        return this.delegate.getElaProperties();
+    }
+
     public String getRegistryUrl() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.delegate.getRegistryUrl();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<String> getTrackerUrls() {
-        // TODO Auto-generated method stub
-        return null;
+    public List<String> getTrackerUrls() {
+        return this.delegate.getTrackerUrls();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<SemanticTracker> getTrackers() {
-        return new Collection<SemanticTracker>(this.trackers);
+    public List<SemanticTracker> getTrackers() {
+        return this.delegate.getTrackers();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public SemanticTracker selectTracker() {
-        return this.trackers.get(ProActiveRandom.nextInt(this.trackers.size()));
+        return this.delegate.selectTracker();
     }
 
 }

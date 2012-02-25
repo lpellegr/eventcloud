@@ -26,7 +26,7 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Test;
-import fr.inria.eventcloud.api.Collection;
+
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.utils.Callback;
@@ -59,7 +59,7 @@ public class RdfParserTest {
         tearDown();
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
         // BufferedOutputStream bOut = new BufferedOutputStream(out)
-        RdfSerializer.nQuadsWriter(outS, new Collection<Quadruple>(quads));
+        RdfSerializer.nQuadsWriter(outS, new ArrayList<Quadruple>(quads));
         ByteArrayInputStream ins = new ByteArrayInputStream(outS.toByteArray());
         RdfParser.parse(
                 ins, SerializationFormat.NQuads, new Callback<Quadruple>() {
@@ -96,7 +96,7 @@ public class RdfParserTest {
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
         // BufferedOutputStream bOut = new BufferedOutputStream(out)
 
-        RdfSerializer.triGWriter(outS, new Collection<Quadruple>(quads));
+        RdfSerializer.triGWriter(outS, new ArrayList<Quadruple>(quads));
         try {
             outS.writeTo(System.out);
         } catch (IOException e) {
@@ -134,11 +134,10 @@ public class RdfParserTest {
 
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
 
-        RdfSerializer.triGWriter(outS, new Collection<Quadruple>(quads));
+        RdfSerializer.triGWriter(outS, quads);
         try {
             outS.writeTo(System.out);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         ByteArrayInputStream ins = new ByteArrayInputStream(outS.toByteArray());

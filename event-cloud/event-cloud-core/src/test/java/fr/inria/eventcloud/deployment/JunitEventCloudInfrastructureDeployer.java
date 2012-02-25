@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.deployment;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -25,7 +26,6 @@ import org.objectweb.proactive.api.PAActiveObject;
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.overlay.SemanticPeer;
@@ -72,7 +72,7 @@ public class JunitEventCloudInfrastructureDeployer {
                 EventCloud.create(
                         this.eventCloudsRegistryUrl,
                         new JunitEventCloudDeployer(this.datastoreType),
-                        new Collection<UnalterableElaProperty>(), nbTrackers,
+                        new ArrayList<UnalterableElaProperty>(), nbTrackers,
                         nbPeers);
 
         this.eventClouds.put(eventcloud.getId(), eventcloud);

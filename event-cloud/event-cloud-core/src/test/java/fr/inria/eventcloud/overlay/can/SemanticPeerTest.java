@@ -16,7 +16,9 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -31,7 +33,6 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
@@ -65,7 +66,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             super.getRandomSemanticPeer().add(quadruple);
         }
 
-        Collection<Quadruple> quadruplesFound =
+        List<Quadruple> quadruplesFound =
                 super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
 
         for (Quadruple quad : quadruplesFound) {
@@ -83,10 +84,9 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             quadruples.add(QuadrupleGenerator.random());
         }
 
-        super.getRandomSemanticPeer()
-                .add(new Collection<Quadruple>(quadruples));
+        super.getRandomSemanticPeer().add(quadruples);
 
-        Collection<Quadruple> quadruplesFound =
+        List<Quadruple> quadruplesFound =
                 super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
 
         for (Quadruple quad : quadruplesFound) {
@@ -124,7 +124,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         }
 
         super.getRandomSemanticPeer().delete(
-                new Collection<Quadruple>(quadruples));
+                new ArrayList<Quadruple>(quadruples));
 
         Assert.assertEquals(0, super.getRandomSemanticPeer().find(
                 QuadruplePattern.ANY).size());
@@ -147,12 +147,12 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             super.getRandomSemanticPeer().add(quadruple);
         }
 
-        Collection<Quadruple> quadruplesRemoved =
+        List<Quadruple> quadruplesRemoved =
                 super.getRandomSemanticPeer().delete(
                         new QuadruplePattern(
                                 graphValue, Node.ANY, Node.ANY, Node.ANY));
 
-        Collection<Quadruple> quadruplesFound =
+        List<Quadruple> quadruplesFound =
                 super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
 
         Assert.assertEquals(80, quadruplesFound.size());

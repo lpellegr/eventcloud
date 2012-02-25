@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.api;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -34,12 +36,12 @@ public class CompoundEventTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testInstanciationWithEmptyCollection() {
-        new CompoundEvent(new Collection<Quadruple>());
+        new CompoundEvent(new ArrayList<Quadruple>());
     }
 
     @Test
     public void testInstanciation() {
-        Collection<Quadruple> quads = new Collection<Quadruple>();
+        List<Quadruple> quads = new ArrayList<Quadruple>();
         for (int i = 0; i < 10; i++) {
             quads.add(QuadrupleGenerator.random());
         }

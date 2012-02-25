@@ -16,7 +16,10 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -70,9 +73,9 @@ public class Skolemizator {
      * @return a collection of quadruples where Blank Nodes have been replaced
      *         by IRIs.
      */
-    public static Collection<Quadruple> skolemize(Collection<Quadruple> quads) {
+    public static List<Quadruple> skolemize(Collection<Quadruple> quads) {
 
-        Collection<Quadruple> result = new Collection<Quadruple>();
+        List<Quadruple> result = new ArrayList<Quadruple>();
 
         Map<Node, Node> assignedSkolems = new HashMap<Node, Node>();
 

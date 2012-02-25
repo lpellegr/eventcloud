@@ -16,9 +16,10 @@
  **/
 package fr.inria.eventcloud.operations.can;
 
+import java.util.List;
+
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
@@ -30,13 +31,13 @@ public final class FindQuadruplesResponseOperation implements ResponseOperation 
 
     private static final long serialVersionUID = 1L;
 
-    private final Collection<Quadruple> quadruples;
+    private final List<Quadruple> quadruples;
 
-    public FindQuadruplesResponseOperation(Collection<Quadruple> quadruples) {
+    public FindQuadruplesResponseOperation(List<Quadruple> quadruples) {
         this.quadruples = quadruples;
     }
 
-    public Collection<Quadruple> getQuadruples() {
+    public List<Quadruple> getQuadruples() {
         return this.quadruples;
     }
 

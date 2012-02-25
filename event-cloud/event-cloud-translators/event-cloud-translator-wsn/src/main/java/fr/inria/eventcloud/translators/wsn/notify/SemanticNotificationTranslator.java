@@ -12,7 +12,6 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import org.w3c.dom.Element;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -64,8 +63,7 @@ public class SemanticNotificationTranslator extends
 
                 }, false);
 
-        return new CompoundEvent(
-                Skolemizator.skolemize(new Collection<Quadruple>(quads)));
+        return new CompoundEvent(Skolemizator.skolemize(quads));
     }
 
 }

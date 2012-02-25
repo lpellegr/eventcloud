@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.webservices.pubsub;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
@@ -28,7 +30,6 @@ import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
@@ -123,9 +124,8 @@ public class PubSubTest {
         deployer.undeploy();
     }
 
-    private static Collection<Quadruple> read(String file,
-                                              SerializationFormat format) {
-        final Collection<Quadruple> quadruples = new Collection<Quadruple>();
+    private static List<Quadruple> read(String file, SerializationFormat format) {
+        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
         RdfParser.parse(
                 inputStreamFrom(file), format, new Callback<Quadruple>() {

@@ -16,7 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
@@ -40,12 +40,12 @@ public class LeaveOperation implements SynchronousOperation {
 
     private final Zone peerLeavingZone;
 
-    private final Collection<NeighborEntry> newNeighborsToSet;
+    private final Set<NeighborEntry> newNeighborsToSet;
 
     private final Object data;
 
     public LeaveOperation(UUID peerLeavingId, Zone peerLeavingZone,
-            Collection<NeighborEntry> newNeighborsToSet, Object data) {
+            Set<NeighborEntry> newNeighborsToSet, Object data) {
         this.peerLeavingId = peerLeavingId;
         this.peerLeavingZone = peerLeavingZone;
         this.newNeighborsToSet = newNeighborsToSet;
@@ -60,7 +60,7 @@ public class LeaveOperation implements SynchronousOperation {
         return this.peerLeavingZone;
     }
 
-    public Collection<NeighborEntry> getNewNeighborsToSet() {
+    public Set<NeighborEntry> getNewNeighborsToSet() {
         return this.newNeighborsToSet;
     }
 

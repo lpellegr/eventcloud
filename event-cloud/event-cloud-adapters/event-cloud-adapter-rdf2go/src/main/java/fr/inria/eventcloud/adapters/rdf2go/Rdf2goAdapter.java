@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.adapters.rdf2go;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,7 +37,6 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
@@ -80,8 +80,8 @@ public abstract class Rdf2goAdapter<T> {
                 TypeConversion.toJenaNode(quadPattern.getObject()));
     }
 
-    protected static final ClosableIterator<Statement> toClosableIterator(Collection<Quadruple> collection) {
-        final Collection<Statement> stmts = new Collection<Statement>();
+    protected static final ClosableIterator<Statement> toClosableIterator(List<Quadruple> collection) {
+        final List<Statement> stmts = new ArrayList<Statement>();
         for (Quadruple quad : collection) {
             stmts.add(new StatementImpl(
                     (URI) TypeConversion.toRDF2Go(quad.getGraph()),
@@ -95,7 +95,7 @@ public abstract class Rdf2goAdapter<T> {
 
     public static final ClosableIterable<Statement> toClosableIterable(ModelWrapper model) {
         StmtIterator stmts = model.listStatements();
-        final Collection<Statement> list = new Collection<Statement>();
+        final List<Statement> list = new ArrayList<Statement>();
 
         while (stmts.hasNext()) {
             com.hp.hpl.jena.rdf.model.Statement stmt = stmts.next();
@@ -116,7 +116,7 @@ public abstract class Rdf2goAdapter<T> {
 
             @Override
             public ClosableIterator<QueryRow> iterator() {
-                Collection<QueryRow> rows = new Collection<QueryRow>();
+                List<QueryRow> rows = new ArrayList<QueryRow>();
 
                 while (resultSet.hasNext()) {
                     QuerySolution solution = resultSet.next();
@@ -139,7 +139,7 @@ public abstract class Rdf2goAdapter<T> {
         };
     }
 
-    private static final <T> ClosableIterable<T> generateClosableIterable(final Collection<T> statements) {
+    private static final <T> ClosableIterable<T> generateClosableIterable(final List<T> statements) {
         return new ClosableIterable<T>() {
             private static final long serialVersionUID = 1L;
 
@@ -149,7 +149,7 @@ public abstract class Rdf2goAdapter<T> {
         };
     }
 
-    private static <T> ClosableIterator<T> generateClosableIterator(final Collection<T> rows) {
+    private static <T> ClosableIterator<T> generateClosableIterator(final List<T> rows) {
         return new ClosableIterator<T>() {
             private Iterator<T> iterator = rows.iterator();
 

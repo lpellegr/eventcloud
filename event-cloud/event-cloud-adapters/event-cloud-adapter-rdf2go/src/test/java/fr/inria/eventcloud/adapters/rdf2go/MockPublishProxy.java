@@ -17,8 +17,8 @@
 package fr.inria.eventcloud.adapters.rdf2go;
 
 import java.io.InputStream;
+import java.util.Collection;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;

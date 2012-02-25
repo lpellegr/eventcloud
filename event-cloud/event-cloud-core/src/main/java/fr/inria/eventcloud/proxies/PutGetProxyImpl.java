@@ -17,8 +17,9 @@
 package fr.inria.eventcloud.proxies;
 
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -117,7 +118,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
+    public List<Quadruple> delete(QuadruplePattern quadPattern) {
         return super.selectPeer().delete(quadPattern);
     }
 
@@ -141,7 +142,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> find(QuadruplePattern quadPattern) {
+    public List<Quadruple> find(QuadruplePattern quadPattern) {
         return super.selectPeer().find(quadPattern);
     }
 

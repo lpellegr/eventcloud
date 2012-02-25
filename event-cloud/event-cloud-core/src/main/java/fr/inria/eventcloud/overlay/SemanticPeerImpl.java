@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.overlay;
 
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,7 +35,6 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -217,7 +218,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
+    public List<Quadruple> delete(QuadruplePattern quadPattern) {
         try {
             QuadruplePatternResponse response =
                     (QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new DeleteQuadruplesRequest(
@@ -277,7 +278,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> find(QuadruplePattern quadPattern) {
+    public List<Quadruple> find(QuadruplePattern quadPattern) {
         try {
             return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
                     quadPattern.getGraph(), quadPattern.getSubject(),

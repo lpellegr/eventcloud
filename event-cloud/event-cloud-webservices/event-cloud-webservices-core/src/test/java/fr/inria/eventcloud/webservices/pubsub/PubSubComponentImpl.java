@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.webservices.pubsub;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -23,7 +26,6 @@ import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
@@ -93,7 +95,7 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
      * {@inheritDoc}
      */
     @Override
-    public void notify(Collection<CompoundEvent> events) {
+    public void notify(List<CompoundEvent> events) {
         this.hasReceivedEvent = true;
         for (CompoundEvent event : events) {
             log.info("New compound event received: {}", event.toString());

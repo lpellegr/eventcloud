@@ -16,7 +16,8 @@
  **/
 package fr.inria.eventcloud;
 
-import fr.inria.eventcloud.api.Collection;
+import java.util.List;
+
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
@@ -52,7 +53,7 @@ public interface EventCloudApi {
      * @return the list of ELA properties that have been set when the
      *         Event-Cloud has been created.
      */
-    public Collection<UnalterableElaProperty> getElaProperties();
+    public List<UnalterableElaProperty> getElaProperties();
 
     /**
      * Returns the deployer that is used for the deployment of the trackers and
@@ -75,7 +76,7 @@ public interface EventCloudApi {
      * 
      * @return the URL to the trackers that are binded to the Event-Cloud.
      */
-    public Collection<String> getTrackerUrls();
+    public List<String> getTrackerUrls();
 
     /**
      * Returns a collection of tracker active objects that are binded to the
@@ -84,7 +85,7 @@ public interface EventCloudApi {
      * @return a collection of tracker active objects that are binded to the
      *         Event-Cloud.
      */
-    public Collection<SemanticTracker> getTrackers();
+    public List<SemanticTracker> getTrackers();
 
     /**
      * Returns a tracker which is selected among the collection of trackers

@@ -16,7 +16,9 @@
  **/
 package fr.inria.eventcloud.api.properties;
 
-import fr.inria.eventcloud.api.Collection;
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
@@ -50,7 +52,7 @@ public final class AlterableElaProperty extends ElaProperty {
      *            the collection of quadruples containing the information about
      *            the modifiable ELA property.
      */
-    public AlterableElaProperty(Collection<Quadruple> quads) {
+    public AlterableElaProperty(List<Quadruple> quads) {
         super();
         // TODO implement the translation but for that we have to define the
         // event-cloud namespace
@@ -70,8 +72,8 @@ public final class AlterableElaProperty extends ElaProperty {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> toQuadruples() {
-        Collection<Quadruple> quads = new Collection<Quadruple>();
+    public List<Quadruple> toQuadruples() {
+        List<Quadruple> quads = new ArrayList<Quadruple>();
         // TODO: implement translation to quadruples
         // quads.add(new Quadruple("eventCloud", "hasAlterableElaProperty",
         // "UUID", graph));

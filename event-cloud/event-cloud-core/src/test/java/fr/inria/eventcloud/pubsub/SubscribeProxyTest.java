@@ -37,7 +37,6 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
@@ -66,10 +65,9 @@ public class SubscribeProxyTest {
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxyTest.class);
 
-    private static Collection<CompoundEvent> events =
-            new Collection<CompoundEvent>();
+    private static List<CompoundEvent> events = new ArrayList<CompoundEvent>();
 
-    private static Collection<Binding> bindings = new Collection<Binding>();
+    private static List<Binding> bindings = new ArrayList<Binding>();
 
     private static MutableInteger signals = new MutableInteger();
 
@@ -120,8 +118,7 @@ public class SubscribeProxyTest {
             threadPool.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    Collection<Quadruple> quadruples =
-                            new Collection<Quadruple>();
+                    List<Quadruple> quadruples = new ArrayList<Quadruple>();
                     Node graphValue =
                             Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                                     + "/" + UUID.randomUUID().toString());
@@ -283,7 +280,7 @@ public class SubscribeProxyTest {
         this.subscribeProxy.subscribe(
                 subscription, new CustomSignalNotificationListener());
 
-        Collection<Quadruple> quads = new Collection<Quadruple>();
+        List<Quadruple> quads = new ArrayList<Quadruple>();
         for (int i = 0; i < 4; i++) {
             quads.add(QuadrupleGenerator.random(eventId));
         }
@@ -320,7 +317,7 @@ public class SubscribeProxyTest {
         this.subscribeProxy.subscribe(
                 subscription, new CustomCompoundEventNotificationListener());
 
-        Collection<Quadruple> quads = new Collection<Quadruple>();
+        List<Quadruple> quads = new ArrayList<Quadruple>();
         for (int i = 0; i < 4; i++) {
             quads.add(QuadrupleGenerator.random(eventId));
         }
@@ -377,7 +374,7 @@ public class SubscribeProxyTest {
 
         Node subject = Node.createURI("urn:city:Nice");
 
-        Collection<Quadruple> quads;
+        List<Quadruple> quads;
 
         DateTime datetime = new DateTime();
 
@@ -385,7 +382,7 @@ public class SubscribeProxyTest {
             Node graphId =
                     Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                             + Integer.toString(i));
-            quads = new Collection<Quadruple>();
+            quads = new ArrayList<Quadruple>(2);
             quads.add(new Quadruple(
                     graphId, subject, Node.createURI("urn:weather:avgtemp"),
                     Node.createLiteral(

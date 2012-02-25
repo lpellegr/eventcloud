@@ -16,9 +16,12 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -34,7 +37,6 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -228,9 +230,8 @@ public class SubscribeProxyImpl extends ProxyCache implements
 
         int expectedNumberOfQuadruples = -1;
 
-        Collection<Quadruple> quadsReceived = new Collection<Quadruple>();
-        Collection<LongLong> quadHashesReceived =
-                new Collection<LongLong>(new HashSet<LongLong>());
+        List<Quadruple> quadsReceived = new ArrayList<Quadruple>();
+        Set<LongLong> quadHashesReceived = new HashSet<LongLong>();
 
         QuadruplePattern reconstructPattern =
                 new QuadruplePattern(eventId, Node.ANY, Node.ANY, Node.ANY);
@@ -249,7 +250,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
                             id, eventId, quadsReceived.size(),
                             expectedNumberOfQuadruples});
 
-            Collection<Quadruple> quads;
+            List<Quadruple> quads;
             try {
                 quads =
                         ((ReconstructCompoundEventResponse) PAFuture.getFutureValue(super.proxy.selectTracker()
@@ -260,7 +261,7 @@ public class SubscribeProxyImpl extends ProxyCache implements
                                                 quadHashesReceived)))).getResult();
             } catch (DispatchException e) {
                 log.error(e.getMessage(), e);
-                quads = new Collection<Quadruple>();
+                quads = new ArrayList<Quadruple>();
             }
 
             for (Quadruple quad : quads) {

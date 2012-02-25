@@ -16,13 +16,14 @@
  **/
 package fr.inria.eventcloud.deployment.cli.commands;
 
+import java.util.ArrayList;
+
 import org.objectweb.proactive.api.PAActiveObject;
 
 import com.beust.jcommander.Parameter;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
@@ -57,7 +58,7 @@ public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
                 EventCloud.create(
                         PAActiveObject.getUrl(registry),
                         new EventCloudDeployer(),
-                        new Collection<UnalterableElaProperty>(),
+                        new ArrayList<UnalterableElaProperty>(),
                         this.nbTrackers, this.nbPeers);
 
         registry.register(eventCloud);
