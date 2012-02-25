@@ -82,6 +82,7 @@ public class SemanticCanOverlay extends CanOverlay {
                         .maximumSize(
                                 EventCloudProperties.PEER_STUBS_CACHE_MAXIMUM_SIZE.getValue())
                         .build(new CacheLoader<String, SemanticPeer>() {
+                            @Override
                             public SemanticPeer load(String peerUrl)
                                     throws Exception {
                                 return PAActiveObject.lookupActive(
@@ -95,9 +96,10 @@ public class SemanticCanOverlay extends CanOverlay {
                         .maximumSize(
                                 EventCloudProperties.SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE.getValue())
                         .build(new CacheLoader<SubscriptionId, Subscription>() {
+                            @Override
                             public Subscription load(SubscriptionId key) {
                                 return Subscription.parseFrom(
-                                        (TransactionalTdbDatastore) datastore,
+                                        (TransactionalTdbDatastore) SemanticCanOverlay.this.datastore,
                                         key);
                             }
                         });

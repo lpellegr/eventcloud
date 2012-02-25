@@ -100,7 +100,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
                 try {
                     List<CompoundEvent> events = new ArrayList<CompoundEvent>();
                     events.add(event);
-                    subscribers.get(id).invoke(
+                    SubscribeWsProxyImpl.this.subscribers.get(id).invoke(
                             NOTIFY_METHOD_NAME, new Object[] {events});
                 } catch (Exception e) {
                     e.printStackTrace();

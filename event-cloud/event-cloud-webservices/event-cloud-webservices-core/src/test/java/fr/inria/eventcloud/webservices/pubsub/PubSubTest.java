@@ -129,6 +129,7 @@ public class PubSubTest {
 
         RdfParser.parse(
                 inputStreamFrom(file), format, new Callback<Quadruple>() {
+                    @Override
                     public void execute(Quadruple quad) {
                         quadruples.add(quad);
                     }

@@ -48,6 +48,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
         super();
     }
 
+    @Override
     protected void doHandle(StructuredOverlay overlay, AnycastResponse response) {
         // the number of outbound hop count is equal to the number
         // of inbound hop count because the message follows the same
@@ -61,6 +62,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
         }
     }
 
+    @Override
     public void makeDecision(StructuredOverlay overlay, AnycastResponse response) {
         // TODO: Check if it is correct for the merge operation
         ResponseEntry entry = overlay.getResponseEntry(response.getId());
@@ -109,6 +111,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void doRoute(StructuredOverlay overlay, AnycastResponse response) {
         AnycastRoutingEntry entry =
                 response.getAnycastRoutingList().removeLast();

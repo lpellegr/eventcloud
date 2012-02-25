@@ -191,6 +191,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
         }
     }
 
+    @Override
     public void bindFc(String clientItfName, Object serverItf)
             throws NoSuchInterfaceException, IllegalBindingException,
             IllegalLifeCycleException {
@@ -201,10 +202,12 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
         }
     }
 
+    @Override
     public String[] listFc() {
         return new String[] {PUTGET_WEBSERVICES_NAME};
     }
 
+    @Override
     public Object lookupFc(String clientItfName)
             throws NoSuchInterfaceException {
         if (PUTGET_WEBSERVICES_NAME.equals(clientItfName)) {
@@ -214,6 +217,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
         }
     }
 
+    @Override
     public void unbindFc(String clientItfName) throws NoSuchInterfaceException,
             IllegalBindingException, IllegalLifeCycleException {
         if (PUTGET_WEBSERVICES_NAME.equals(clientItfName)) {

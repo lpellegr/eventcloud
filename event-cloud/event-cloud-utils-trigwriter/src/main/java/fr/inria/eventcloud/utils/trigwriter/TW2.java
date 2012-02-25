@@ -55,10 +55,12 @@ public class TW2 {
         for (; iter.hasNext();) {
             Triple t = iter.next();
             Node obj = t.getObject();
-            if (!obj.isBlank())
+            if (!obj.isBlank()) {
                 continue;
-            if (rejects != null && rejects.contains(obj))
+            }
+            if (rejects != null && rejects.contains(obj)) {
                 continue;
+            }
             // No point checking bNodesObj1.
             Node n = connectedOnce(graph, obj);
             if (n != null) {
@@ -93,11 +95,13 @@ public class TW2 {
     static Node connectedOnce(Graph graph, Node obj) {
         ExtendedIterator<Triple> iter = graph.find(Node.ANY, Node.ANY, obj);
         try {
-            if (!iter.hasNext())
+            if (!iter.hasNext()) {
                 return null;
+            }
             iter.next();
-            if (!iter.hasNext())
+            if (!iter.hasNext()) {
                 return obj;
+            }
             return null;
         } finally {
             iter.close();
@@ -113,8 +117,9 @@ public class TW2 {
     static void accTriplesOfSubject(Collection<Triple> acc, Graph graph,
                                     Node subj) {
         ExtendedIterator<Triple> iter = graph.find(subj, Node.ANY, Node.ANY);
-        for (; iter.hasNext();)
+        for (; iter.hasNext();) {
             acc.add(iter.next());
+        }
         iter.close();
     }
 }

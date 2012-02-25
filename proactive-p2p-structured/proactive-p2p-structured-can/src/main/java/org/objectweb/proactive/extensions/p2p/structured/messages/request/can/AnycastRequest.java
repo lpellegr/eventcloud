@@ -62,6 +62,7 @@ public abstract class AnycastRequest extends Request<StringCoordinate> {
         return ((AnycastConstraintsValidator<StringCoordinate>) super.constraintsValidator).validatesKeyConstraints(zone);
     }
 
+    @Override
     public String toString() {
         StringBuffer buf = new StringBuffer("AnycastQueryMessage ID=");
         buf.append(this.getId());

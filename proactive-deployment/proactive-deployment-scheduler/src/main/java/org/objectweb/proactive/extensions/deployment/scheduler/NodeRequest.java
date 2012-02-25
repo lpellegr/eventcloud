@@ -68,14 +68,14 @@ public class NodeRequest {
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Received registration of node provider task for node request #"
-                        + nodeRequestID);
+                        + this.nodeRequestID);
             }
         } else {
             task.terminate();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Received registration of node provider task for node request #"
-                        + nodeRequestID
+                        + this.nodeRequestID
                         + " but required number of nodes has already been reached");
             }
         }
@@ -102,8 +102,8 @@ public class NodeRequest {
 
         if (logger.isDebugEnabled()) {
             logger.debug(this.tasks.size()
-                    + " node provider tasks for node request #" + nodeRequestID
-                    + " have been released");
+                    + " node provider tasks for node request #"
+                    + this.nodeRequestID + " have been released");
         }
 
         this.tasks.clear();

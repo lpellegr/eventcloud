@@ -58,6 +58,7 @@ public class JoinIntroduceOperation implements SynchronousOperation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public JoinIntroduceResponseOperation handle(StructuredOverlay overlay) {
         return ((CanOverlay) overlay).handleJoinIntroduceMessage(this);
     }

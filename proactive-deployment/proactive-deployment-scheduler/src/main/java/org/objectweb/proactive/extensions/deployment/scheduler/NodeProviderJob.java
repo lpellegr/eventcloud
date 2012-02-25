@@ -79,6 +79,7 @@ public class NodeProviderJob {
         fileSystemServers = new HashMap<String, FileSystemServerDeployer>();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
             public void run() {
                 stopAllFileSystemServers();
             }
@@ -156,6 +157,7 @@ public class NodeProviderJob {
             List<String> userJars = new ArrayList<String>();
 
             File[] folders = currentFile.listFiles(new FileFilter() {
+                @Override
                 public boolean accept(File pathname) {
                     return pathname.isDirectory();
                 }
@@ -172,6 +174,7 @@ public class NodeProviderJob {
             }
 
             File[] jarFiles = currentFile.listFiles(new FilenameFilter() {
+                @Override
                 public boolean accept(File dir, String name) {
                     return name.endsWith(".jar");
                 }
@@ -231,7 +234,7 @@ public class NodeProviderJob {
                     + this.jobID.value() + " because job is unknown", uje);
         } catch (PermissionException pe) {
             logger.error("No permission to kill the node provider job #"
-                    + jobID.value(), pe);
+                    + this.jobID.value(), pe);
         }
     }
 

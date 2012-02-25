@@ -69,8 +69,7 @@ public class RdfSerializer {
      * @param quads
      *            the collection of quadruples to be written
      */
-    public static void nQuadsWriter(OutputStream out,
-                                    List<Quadruple> quads) {
+    public static void nQuadsWriter(OutputStream out, List<Quadruple> quads) {
 
         RiotWriter.writeNQuads(out, quadruplesToDatasetGraph(quads));
 

@@ -88,7 +88,7 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
                     }
 
                     UniqueID nodeRequestId =
-                            schedulerNodeProvider.deployNodes(
+                            this.schedulerNodeProvider.deployNodes(
                                     this.schedulerUrl, this.credentialsPath,
                                     nodeSourceEntry.getNbNodes(),
                                     this.libsPath, this.jvmArguments,

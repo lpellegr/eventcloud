@@ -208,7 +208,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
                             P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
                     try {
                         Thread.sleep(P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
-                        landmarkPeer = getRandomPeer();
+                        landmarkPeer = this.getRandomPeer();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

@@ -358,7 +358,7 @@ public class Quadruple implements Event {
         final int prime = 31;
         int result = 1;
 
-        result = prime * result + Arrays.hashCode(nodes);
+        result = prime * result + Arrays.hashCode(this.nodes);
 
         for (Object metaInfo : this.metaInformations.values()) {
             result = prime * result + metaInfo.hashCode();
@@ -471,7 +471,7 @@ public class Quadruple implements Event {
         this.nodes[0] =
                 this.extractAndSetMetaInformation(tokenizer.next().asNode());
 
-        for (int i = 1; i < nodes.length; i++) {
+        for (int i = 1; i < this.nodes.length; i++) {
             this.nodes[i] = tokenizer.next().asNode();
         }
 
@@ -623,10 +623,12 @@ public class Quadruple implements Event {
             this.value = value;
         }
 
+        @Override
         public short convert() {
-            return value;
+            return this.value;
         }
 
+        @Override
         public MetaInformationType convert(short val) {
             return map.get(val);
         }

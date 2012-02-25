@@ -192,6 +192,7 @@ public interface Peer extends Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString();
 
 }

@@ -110,6 +110,7 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         return this.hasReceivedEvent;
     }
 
+    @Override
     public void bindFc(String clientItfName, Object serverItf)
             throws NoSuchInterfaceException, IllegalBindingException,
             IllegalLifeCycleException {
@@ -122,11 +123,13 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         }
     }
 
+    @Override
     public String[] listFc() {
         return new String[] {
                 SUBSCRIBE_WEBSERVICES_NAME, PUBLISH_WEBSERVICES_NAME};
     }
 
+    @Override
     public Object lookupFc(String clientItfName)
             throws NoSuchInterfaceException {
         if (SUBSCRIBE_WEBSERVICES_NAME.equals(clientItfName)) {
@@ -138,6 +141,7 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
         }
     }
 
+    @Override
     public void unbindFc(String clientItfName) throws NoSuchInterfaceException,
             IllegalBindingException, IllegalLifeCycleException {
         if (SUBSCRIBE_WEBSERVICES_NAME.equals(clientItfName)) {

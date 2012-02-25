@@ -58,7 +58,7 @@ public abstract class QuadrupleRequest extends ForwardRequest {
             protected void onDestinationReached(StructuredOverlay overlay,
                                                 ForwardRequest msg) {
                 QuadrupleRequest.this.onDestinationReached(
-                        overlay, getQuadruple());
+                        overlay, QuadrupleRequest.this.getQuadruple());
             };
         };
     }

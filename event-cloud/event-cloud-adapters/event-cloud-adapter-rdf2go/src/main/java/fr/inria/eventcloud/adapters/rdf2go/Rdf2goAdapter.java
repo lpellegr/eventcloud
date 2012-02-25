@@ -143,8 +143,9 @@ public abstract class Rdf2goAdapter<T> {
         return new ClosableIterable<T>() {
             private static final long serialVersionUID = 1L;
 
+            @Override
             public ClosableIterator<T> iterator() {
-                return (ClosableIterator<T>) generateClosableIterator(statements);
+                return generateClosableIterator(statements);
             }
         };
     }
@@ -153,18 +154,22 @@ public abstract class Rdf2goAdapter<T> {
         return new ClosableIterator<T>() {
             private Iterator<T> iterator = rows.iterator();
 
+            @Override
             public void close() {
                 // cannot really close
             }
 
+            @Override
             public boolean hasNext() {
                 return this.iterator.hasNext();
             }
 
+            @Override
             public T next() {
                 return this.iterator.next();
             }
 
+            @Override
             public void remove() {
                 this.iterator.remove();
             }

@@ -40,6 +40,7 @@ public class GetIdAndZoneOperation implements SynchronousOperation {
      * @param overlay
      *            the overlay which handles the message.
      */
+    @Override
     public GetIdAndZoneResponseOperation handle(StructuredOverlay overlay) {
         return new GetIdAndZoneResponseOperation(
                 overlay.getId(), ((CanOverlay) overlay).getZone());

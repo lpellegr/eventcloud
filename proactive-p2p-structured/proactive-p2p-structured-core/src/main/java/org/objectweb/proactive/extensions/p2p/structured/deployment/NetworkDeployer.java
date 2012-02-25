@@ -160,9 +160,11 @@ public abstract class NetworkDeployer extends
 
         for (int i = 0; i < nbPeers; i++) {
             threadsPool.execute(new Runnable() {
+                @Override
                 public void run() {
                     try {
-                        getRandomTracker().inject(createPeer());
+                        NetworkDeployer.this.getRandomTracker().inject(
+                                NetworkDeployer.this.createPeer());
                     } catch (NetworkAlreadyJoinedException e) {
                         e.printStackTrace();
                     } finally {

@@ -130,7 +130,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
             this.threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    add(quad);
+                    SemanticPeerImpl.this.add(quad);
                     doneSignal.countDown();
                 }
             });
@@ -153,7 +153,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
             public void execute(Quadruple quad) {
-                add(quad);
+                SemanticPeerImpl.this.add(quad);
             }
         });
 
@@ -199,7 +199,7 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
             this.threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    delete(quad);
+                    SemanticPeerImpl.this.delete(quad);
                     doneSignal.countDown();
                 }
             });

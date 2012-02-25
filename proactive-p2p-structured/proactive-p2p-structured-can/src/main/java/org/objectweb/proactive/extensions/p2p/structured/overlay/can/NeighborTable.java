@@ -309,6 +309,7 @@ public class NeighborTable implements Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
 

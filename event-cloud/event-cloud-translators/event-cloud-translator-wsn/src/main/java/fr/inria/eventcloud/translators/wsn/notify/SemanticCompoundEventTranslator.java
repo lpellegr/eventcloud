@@ -70,6 +70,7 @@ public class SemanticCompoundEventTranslator extends
      *            the Compound Event to be translated.
      * @return the notification message corresponding to the specified event.
      */
+    @Override
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

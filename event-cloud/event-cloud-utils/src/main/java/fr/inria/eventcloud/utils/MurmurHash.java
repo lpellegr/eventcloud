@@ -84,13 +84,13 @@ public final class MurmurHash {
 
         if (left != 0) {
             if (left >= 3) {
-                h ^= (int) data.get(offset + length - 3) << 16;
+                h ^= data.get(offset + length - 3) << 16;
             }
             if (left >= 2) {
-                h ^= (int) data.get(offset + length - 2) << 8;
+                h ^= data.get(offset + length - 2) << 8;
             }
             if (left >= 1) {
-                h ^= (int) data.get(offset + length - 1);
+                h ^= data.get(offset + length - 1);
             }
 
             h *= m;
@@ -217,7 +217,7 @@ public final class MurmurHash {
             case 2:
                 h64 ^= (long) data.get(offset + length - rem + 1) << 8;
             case 1:
-                h64 ^= (long) data.get(offset + length - rem);
+                h64 ^= data.get(offset + length - rem);
                 h64 *= m64;
         }
 
@@ -366,7 +366,7 @@ public final class MurmurHash {
             case 2:
                 k1 ^= ((long) key.get(offset + 1)) << 8;
             case 1:
-                k1 ^= ((long) key.get(offset));
+                k1 ^= key.get(offset);
                 k1 *= c1;
                 k1 = rotl64(k1, 31);
                 k1 *= c2;

@@ -154,12 +154,12 @@ public class SemanticNotificationTranslatorTest {
         return is;
     }
 
-    private static List<Quadruple> read(String file,
-                                              SerializationFormat format) {
+    private static List<Quadruple> read(String file, SerializationFormat format) {
         final List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
         RdfParser.parse(
                 inputStreamFrom(file), format, new Callback<Quadruple>() {
+                    @Override
                     public void execute(Quadruple quad) {
                         quadruples.add(quad);
                     }
@@ -177,11 +177,12 @@ public class SemanticNotificationTranslatorTest {
             f = new BufferedInputStream(new FileInputStream(filePath));
             f.read(buffer);
         } finally {
-            if (f != null)
+            if (f != null) {
                 try {
                     f.close();
                 } catch (IOException ignored) {
                 }
+            }
         }
         return new String(buffer);
     }

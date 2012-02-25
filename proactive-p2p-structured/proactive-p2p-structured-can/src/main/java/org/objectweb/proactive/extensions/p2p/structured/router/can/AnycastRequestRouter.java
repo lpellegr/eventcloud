@@ -72,6 +72,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
     /**
      * {@inheritDoc}
      */
+    @Override
     public void makeDecision(StructuredOverlay overlay, AnycastRequest request) {
         CanOverlay canOverlay = ((CanOverlay) overlay);
         CanRequestResponseManager messagingManager =
@@ -112,6 +113,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
      * <code>overlay</code> validates the constraints. The next step is to
      * propagate the request to the neighbors which validates the constraints.
      */
+    @Override
     protected void doHandle(final StructuredOverlay overlay,
                             final AnycastRequest request) {
         CanOverlay canOverlay = ((CanOverlay) overlay);
@@ -128,7 +130,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
             response.route(overlay);
         } else {
             NeighborTable neighborsToSendTo =
-                    getNeighborsToSendTo(overlay, request);
+                    this.getNeighborsToSendTo(overlay, request);
 
             // neighborsToSendTo equals 0 means that we don't have to route the
             // query anymore: we are on a leaf and the response must be
@@ -219,6 +221,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
      * @param request
      *            the message to route.
      */
+    @Override
     protected void doRoute(StructuredOverlay overlay, AnycastRequest request) {
         CanOverlay overlayCAN = ((CanOverlay) overlay);
 

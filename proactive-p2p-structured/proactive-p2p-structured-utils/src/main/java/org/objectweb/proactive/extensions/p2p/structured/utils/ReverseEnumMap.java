@@ -33,12 +33,12 @@ public class ReverseEnumMap<V extends Enum<V> & EnumConverter<V>> {
 
     public ReverseEnumMap(Class<V> valueType) {
         for (V v : valueType.getEnumConstants()) {
-            map.put(v.convert(), v);
+            this.map.put(v.convert(), v);
         }
     }
 
     public V get(short num) {
-        return map.get(num);
+        return this.map.get(num);
     }
 
 }

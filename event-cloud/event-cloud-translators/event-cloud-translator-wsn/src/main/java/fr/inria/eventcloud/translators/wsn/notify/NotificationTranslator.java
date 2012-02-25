@@ -131,6 +131,7 @@ public class NotificationTranslator extends
      * 
      * @return the event corresponding to the specified notification message.
      */
+    @Override
     public CompoundEvent translate(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
         List<Quadruple> quads = new ArrayList<Quadruple>();
@@ -197,7 +198,8 @@ public class NotificationTranslator extends
                 List<Element> producerMetadataElements =
                         (List<Element>) ReflectionUtils.getFieldValue(
                                 metadata, "elements");
-                producerMetadataNodes = parseElements(producerMetadataElements);
+                producerMetadataNodes =
+                        this.parseElements(producerMetadataElements);
 
                 // creates the event identifier by trying to retrieve it from
                 // the metadata part. If it is not available, a random
@@ -228,7 +230,7 @@ public class NotificationTranslator extends
 
         Message message = notificationMessage.getMessage();
         if (message != null) {
-            messageNodes = parseElement((Element) message.getAny(), false);
+            messageNodes = this.parseElement((Element) message.getAny(), false);
             if (messageNodes == null) {
                 throw new TranslationException("messageNodes is null");
             }
@@ -288,10 +290,10 @@ public class NotificationTranslator extends
 
         if (elements != null) {
             for (Element element : elements) {
-                Map<Node, Node> result = parseElement(element, true);
-                if (result != null)
+                Map<Node, Node> result = this.parseElement(element, true);
+                if (result != null) {
                     elementNodes.putAll(result);
-                else {
+                } else {
                     return null;
                 }
             }

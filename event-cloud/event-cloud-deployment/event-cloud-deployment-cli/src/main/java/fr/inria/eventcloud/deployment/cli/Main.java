@@ -79,8 +79,9 @@ public class Main {
             while (resources.hasMoreElements()) {
                 String filePath = resources.nextElement().getFile();
                 // WINDOWS HACK
-                if (filePath.indexOf("%20") > 0)
+                if (filePath.indexOf("%20") > 0) {
                     filePath = filePath.replaceAll("%20", " ");
+                }
                 if (filePath != null) {
                     if ((filePath.indexOf('!') > 0)
                             && (filePath.indexOf(".jar") > 0)) {
@@ -88,8 +89,9 @@ public class Main {
                                 filePath.substring(0, filePath.indexOf('!'))
                                         .substring(filePath.indexOf(':') + 1);
                         // WINDOWS HACK
-                        if (jarPath.indexOf(':') >= 0)
+                        if (jarPath.indexOf(':') >= 0) {
                             jarPath = jarPath.substring(1);
+                        }
                         classes.addAll(getFromJARFile(jarPath, path));
                     } else {
                         classes.addAll(getFromDirectory(

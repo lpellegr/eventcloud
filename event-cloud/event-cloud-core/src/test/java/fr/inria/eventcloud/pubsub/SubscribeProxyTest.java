@@ -87,11 +87,12 @@ public class SubscribeProxyTest {
     @Before
     public void setUp() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
-        this.eventCloudId = deployer.createEventCloud(5);
+        this.eventCloudId = this.deployer.createEventCloud(5);
 
         this.proxyFactory =
                 ProxyFactory.getInstance(
-                        deployer.getEventCloudsRegistryUrl(), this.eventCloudId);
+                        this.deployer.getEventCloudsRegistryUrl(),
+                        this.eventCloudId);
 
         this.subscribeProxy = this.proxyFactory.createSubscribeProxy();
         this.publishProxy = this.proxyFactory.createPublishProxy();
@@ -201,7 +202,7 @@ public class SubscribeProxyTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user1@company.com"));
         q1.setPublicationTime(publicationTime);
-        publishProxy.publish(q1);
+        this.publishProxy.publish(q1);
 
         Quadruple q2 =
                 new Quadruple(
@@ -210,7 +211,7 @@ public class SubscribeProxyTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User1"));
         q2.setPublicationTime(publicationTime);
-        publishProxy.publish(q2);
+        this.publishProxy.publish(q2);
 
         // this quadruple shows chronicle context property because it is
         // delivered by reconsuming the first quadruple which was published
@@ -221,7 +222,7 @@ public class SubscribeProxyTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user1.new.email@company.com"));
         q3.setPublicationTime(publicationTime);
-        publishProxy.publish(q3);
+        this.publishProxy.publish(q3);
 
         publicationTime = System.currentTimeMillis();
 
@@ -232,7 +233,7 @@ public class SubscribeProxyTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user2@company.com"));
         q4.setPublicationTime(publicationTime);
-        publishProxy.publish(q4);
+        this.publishProxy.publish(q4);
 
         Quadruple q5 =
                 new Quadruple(
@@ -241,7 +242,7 @@ public class SubscribeProxyTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 3"));
         q5.setPublicationTime();
-        publishProxy.publish(q5);
+        this.publishProxy.publish(q5);
 
         Quadruple q6 =
                 new Quadruple(
@@ -250,7 +251,7 @@ public class SubscribeProxyTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 2"));
         q6.setPublicationTime(publicationTime);
-        publishProxy.publish(q6);
+        this.publishProxy.publish(q6);
 
         // 3 notifications are expected
         synchronized (bindings) {

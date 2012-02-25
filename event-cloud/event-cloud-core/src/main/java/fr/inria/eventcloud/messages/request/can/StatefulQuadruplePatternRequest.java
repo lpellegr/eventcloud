@@ -90,6 +90,7 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
                             request.getId(),
                             messagingManager.getThreadPool().submit(
                                     new Callable<StatefulRequestAction<T>>() {
+                                        @Override
                                         public StatefulRequestAction<T> call() {
                                             long start =
                                                     System.currentTimeMillis();
@@ -109,6 +110,7 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
         };
     }
 
+    @Override
     public SerializedValue<QuadruplePattern> getQuadruplePattern() {
         return this.quadruplePattern;
     }

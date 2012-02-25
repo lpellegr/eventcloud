@@ -67,10 +67,12 @@ public class EventCloudCache implements EventCloudApi, Serializable {
         }
     }
 
+    @Override
     public EventCloudId getId() {
         return this.delegate.getId();
     }
 
+    @Override
     public long getCreationTime() {
         return this.delegate.getCreationTime();
     }
@@ -83,22 +85,27 @@ public class EventCloudCache implements EventCloudApi, Serializable {
         return this.delegate.getEventCloudDeployer();
     }
 
+    @Override
     public List<UnalterableElaProperty> getElaProperties() {
         return this.delegate.getElaProperties();
     }
 
+    @Override
     public String getRegistryUrl() {
         return this.delegate.getRegistryUrl();
     }
 
+    @Override
     public List<String> getTrackerUrls() {
         return this.delegate.getTrackerUrls();
     }
 
+    @Override
     public List<SemanticTracker> getTrackers() {
         return this.delegate.getTrackers();
     }
 
+    @Override
     public SemanticTracker selectTracker() {
         return this.delegate.selectTracker();
     }

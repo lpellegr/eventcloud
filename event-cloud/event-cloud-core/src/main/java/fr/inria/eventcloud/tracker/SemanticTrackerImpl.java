@@ -40,6 +40,7 @@ public class SemanticTrackerImpl extends TrackerComponentImpl implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public SemanticPeer getRandomSemanticPeer() {
         return (SemanticPeer) super.getRandomPeer();
     }

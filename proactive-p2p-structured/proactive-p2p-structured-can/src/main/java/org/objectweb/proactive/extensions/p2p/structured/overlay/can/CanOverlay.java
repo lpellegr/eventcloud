@@ -344,6 +344,7 @@ public class CanOverlay extends StructuredOverlay {
         return this.zone;
     }
 
+    @Override
     public String dump() {
         StringBuilder buf = new StringBuilder();
         buf.append("Peer with id ");
@@ -361,7 +362,7 @@ public class CanOverlay extends StructuredOverlay {
                     buf.append(", id is ");
                     buf.append(neighbor.getId());
                     buf.append(", abuts in dim "
-                            + neighbor.getZone().neighbors(zone)
+                            + neighbor.getZone().neighbors(this.zone)
                             + " and is in dim=" + dim + ", dir=" + direction);
                     buf.append("\n");
                 }
@@ -536,13 +537,14 @@ public class CanOverlay extends StructuredOverlay {
                 new Runnable() {
                     @Override
                     public void run() {
-                        update();
+                        CanOverlay.this.update();
                     }
                 }, P2PStructuredProperties.CAN_REFRESH_TASK_START.getValue(),
                 P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.getValue(),
                 TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public boolean create() {
         this.zone = new Zone();
         return true;
@@ -560,6 +562,7 @@ public class CanOverlay extends StructuredOverlay {
      *         when the peer receiving the operation is already handling a
      *         join/leave operation or when the landmarkPeer is not activated.
      */
+    @Override
     public boolean join(Peer landmarkPeer) {
         JoinIntroduceResponseOperation response = null;
         try {
@@ -610,6 +613,7 @@ public class CanOverlay extends StructuredOverlay {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean leave() {
         if (this.neighborTable.size() == 0) {
             return true;
@@ -618,7 +622,7 @@ public class CanOverlay extends StructuredOverlay {
         synchronized (this) {
             if (this.peerLeavingId.get() != null
                     || this.peerJoiningId.get() != null) {
-                retryLeave();
+                this.retryLeave();
                 return false;
             } else {
                 this.peerLeavingId.set(super.id);
@@ -629,7 +633,7 @@ public class CanOverlay extends StructuredOverlay {
                 this.neighborTable.getMergeableNeighbor(this.zone);
 
         if (suitableNeighbor == null) {
-            retryLeave();
+            this.retryLeave();
             return false;
         } else {
             HomogenousPair<Byte> neighborDimDir =
@@ -764,6 +768,7 @@ public class CanOverlay extends StructuredOverlay {
         this.zone = zone;
     }
 
+    @Override
     public OverlayType getType() {
         return OverlayType.CAN;
     }
@@ -787,6 +792,7 @@ public class CanOverlay extends StructuredOverlay {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         if (this.zone == null) {
             return super.id.toString();

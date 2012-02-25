@@ -43,7 +43,7 @@ public class NumericZoneViewTest {
     public void setUp() {
         this.a = CoordinateFactory.createDoubleCoordinate(0.0);
         this.b = CoordinateFactory.createDoubleCoordinate(1.0);
-        this.view = new NumericZoneView(a, b);
+        this.view = new NumericZoneView(this.a, this.b);
     }
 
     @Test

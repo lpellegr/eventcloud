@@ -53,6 +53,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init(EventCloudCache proxy) {
         if (this.proxy == null) {
             this.proxy = proxy;
@@ -83,7 +84,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
             public void execute(Quadruple quad) {
-                add(quad);
+                PutGetProxyImpl.this.add(quad);
             }
         });
 

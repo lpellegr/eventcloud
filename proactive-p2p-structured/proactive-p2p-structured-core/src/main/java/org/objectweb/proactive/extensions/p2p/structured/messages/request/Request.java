@@ -98,6 +98,7 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getDispatchTimestamp() {
         return this.dispatchTimestamp;
     }

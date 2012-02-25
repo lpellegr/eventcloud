@@ -54,6 +54,7 @@ public class PeerComponentImpl extends PeerImpl implements Peer,
     /**
      * {@inheritDoc}
      */
+    @Override
     public void initComponentActivity(Body body) {
         super.initActivity(body);
     }
@@ -61,6 +62,7 @@ public class PeerComponentImpl extends PeerImpl implements Peer,
     /**
      * {@inheritDoc}
      */
+    @Override
     public void endComponentActivity(Body body) {
         super.endActivity(body);
     }

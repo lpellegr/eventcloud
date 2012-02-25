@@ -56,10 +56,12 @@ public final class DefaultAnycastConstraintsValidator extends
         super(checkNotNull(key));
     }
 
+    @Override
     public final boolean validatesKeyConstraints(StructuredOverlay overlay) {
         return this.validatesKeyConstraints(((CanOverlay) overlay).getZone());
     }
 
+    @Override
     public final boolean validatesKeyConstraints(Zone zone) {
         for (byte i = 0; i < super.key.getValue().size(); i++) {
             // if coordinate is null we skip the test

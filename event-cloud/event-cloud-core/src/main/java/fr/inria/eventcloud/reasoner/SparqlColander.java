@@ -75,7 +75,7 @@ public class SparqlColander implements Closeable {
         boolean result = false;
 
         TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
+                this.datastore.begin(AccessMode.READ_ONLY);
 
         QueryExecution qExec = null;
         try {
@@ -114,7 +114,7 @@ public class SparqlColander implements Closeable {
         Model result = null;
 
         TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
+                this.datastore.begin(AccessMode.READ_ONLY);
 
         QueryExecution qExec = null;
         try {
@@ -153,7 +153,7 @@ public class SparqlColander implements Closeable {
         ResultSet result = null;
 
         TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
+                this.datastore.begin(AccessMode.READ_ONLY);
 
         QueryExecution qExec = null;
         try {

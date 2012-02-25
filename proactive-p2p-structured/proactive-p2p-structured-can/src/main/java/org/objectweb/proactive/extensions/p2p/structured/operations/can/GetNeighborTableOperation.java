@@ -39,6 +39,7 @@ public class GetNeighborTableOperation implements SynchronousOperation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public GenericResponseOperation<NeighborTable> handle(StructuredOverlay overlay) {
         return new GenericResponseOperation<NeighborTable>(
                 ((CanOverlay) overlay).getNeighborTable());

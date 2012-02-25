@@ -61,6 +61,7 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
         }
     }
 
+    @Override
     protected void doHandle(StructuredOverlay overlay, T response) {
         logger.debug(
                 "The peer {} contains the key to reach {}", overlay,
@@ -69,6 +70,7 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
         overlay.getRequestResponseManager().pushFinalResponse(response);
     }
 
+    @Override
     protected void doRoute(StructuredOverlay overlay, T response) {
         CanOverlay overlayCAN = ((CanOverlay) overlay);
 

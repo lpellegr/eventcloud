@@ -19,7 +19,11 @@
 package fr.inria.eventcloud.utils.trigwriter;
 
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.openjena.atlas.io.IndentedWriter;
 import org.openjena.atlas.iterator.PeekIterator;
@@ -74,10 +78,11 @@ public class TurtleWriterBlocks {
                     continue;
                 }
 
-                if (subject == null)
+                if (subject == null) {
                     subject = t.getSubject();
-                else if (!subject.equals(t.getSubject()))
+                } else if (!subject.equals(t.getSubject())) {
                     break;
+                }
                 cluster.add(t);
                 stream.next();
             }
@@ -85,8 +90,9 @@ public class TurtleWriterBlocks {
                 TurtleWriter2.writeCluster(
                         out, graph, subject, cluster, nestedObjects, prefixMap);
                 subject = null;
-            } else
+            } else {
                 break;
+            }
         }
         triples.close();
     }

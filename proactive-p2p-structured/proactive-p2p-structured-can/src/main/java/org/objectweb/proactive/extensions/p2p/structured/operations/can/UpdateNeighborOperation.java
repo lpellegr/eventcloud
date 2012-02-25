@@ -67,6 +67,7 @@ public class UpdateNeighborOperation implements SynchronousOperation {
      * @param overlay
      *            the overlay which handles the message.
      */
+    @Override
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         ((CanOverlay) overlay).getNeighborTable().get(
                 this.dimension, this.direction).replace(

@@ -52,8 +52,10 @@ public class LookupRequest extends ForwardRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Router<ForwardRequest, StringCoordinate> getRouter() {
         return new UnicastRequestRouter<ForwardRequest>() {
+            @Override
             protected void onDestinationReached(StructuredOverlay overlay,
                                                 ForwardRequest msg) {
                 ((LookupRequest) msg).setRemotePeerReached(overlay.getStub());
