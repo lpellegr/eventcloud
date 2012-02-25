@@ -16,15 +16,17 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.util.List;
+
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
+import com.google.common.collect.Lists;
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
@@ -39,7 +41,7 @@ import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
  * @author lpellegr
  */
 public class QuadruplePatternRequest extends
-        StatefulQuadruplePatternRequest<Collection<Quadruple>> {
+        StatefulQuadruplePatternRequest<List<Quadruple>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -63,16 +65,16 @@ public class QuadruplePatternRequest extends
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                                                AnycastRequest request,
-                                                                QuadruplePattern quadruplePattern) {
-        Collection<Quadruple> result = null;
+    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
+                                                          AnycastRequest request,
+                                                          QuadruplePattern quadruplePattern) {
+        List<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
 
         try {
-            result = Collection.from(txnGraph.find(quadruplePattern));
+            result = Lists.newArrayList(txnGraph.find(quadruplePattern));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

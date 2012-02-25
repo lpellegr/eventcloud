@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.api;
 
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
 
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
@@ -116,7 +118,7 @@ public interface PutGetApi {
      * @return the quadruples which have been removed from the Event-Cloud
      *         according to the quadruple pattern.
      */
-    public Collection<Quadruple> delete(QuadruplePattern quadPattern);
+    public List<Quadruple> delete(QuadruplePattern quadPattern);
 
     /**
      * Returns the number of quadruples that match the specified
@@ -149,7 +151,7 @@ public interface PutGetApi {
      * @return the quadruples that match the quadruple pattern that has been
      *         specified.
      */
-    public Collection<Quadruple> find(QuadruplePattern quadPattern);
+    public List<Quadruple> find(QuadruplePattern quadPattern);
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query. This SPARQL query

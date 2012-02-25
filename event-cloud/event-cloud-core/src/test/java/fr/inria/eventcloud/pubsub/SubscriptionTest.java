@@ -16,11 +16,12 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
+import java.util.List;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
@@ -48,7 +49,7 @@ public class SubscriptionTest {
                         sparqlQuery, "rmi://oops:1099",
                         NotificationListenerType.UNKNOWN);
 
-        Collection<Quadruple> quads = subscription.toQuadruples();
+        List<Quadruple> quads = subscription.toQuadruples();
 
         TransactionalTdbDatastore datastore =
                 new TransactionalTdbDatastoreMem();
@@ -68,7 +69,7 @@ public class SubscriptionTest {
         Subscription deserializedSubscription =
                 Subscription.parseFrom(datastore, subscription.getId());
 
-        Collection<Quadruple> newQuads =
+        List<Quadruple> newQuads =
                 deserializedSubscription.toQuadruples();
 
         for (Quadruple quad : newQuads) {

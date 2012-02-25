@@ -16,12 +16,13 @@
  **/
 package fr.inria.eventcloud.benchmarks;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.common.base.Supplier;
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
@@ -54,7 +55,7 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
      */
     @Override
     public CompoundEvent get() {
-        Collection<Quadruple> quadruples = new Collection<Quadruple>();
+        List<Quadruple> quadruples = new ArrayList<Quadruple>();
         Node graph =
                 Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                         + UUID.randomUUID().toString());

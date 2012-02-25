@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.util.List;
+
 /**
  * This class can be implemented by an another to indicate that its content can
  * be serialized into a collection of {@link Quadruple}s.
@@ -29,6 +31,6 @@ public interface Quadruplable {
      * 
      * @return a set of quadruples.
      */
-    public Collection<Quadruple> toQuadruples();
+    public List<Quadruple> toQuadruples();
 
 }

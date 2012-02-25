@@ -18,13 +18,14 @@ package fr.inria.eventcloud.pubsub;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
@@ -45,7 +46,7 @@ public final class Solution implements Serializable {
 
     private int receivedSubSolutions;
 
-    private Collection<Binding> bindings;
+    private List<Binding> bindings;
 
     /**
      * Constructs a new Solution from the specified number of sub-solutions
@@ -59,9 +60,9 @@ public final class Solution implements Serializable {
     public Solution(int expectedSubSolutions, Binding binding) {
         this.expectedSubSolutions = expectedSubSolutions;
         if (binding == null) {
-            this.bindings = new Collection<Binding>();
+            this.bindings = Lists.newArrayList();
         } else {
-            this.bindings = new Collection<Binding>(binding);
+            this.bindings = Lists.newArrayList(binding);
         }
         this.receivedSubSolutions = 1;
     }
@@ -126,7 +127,7 @@ public final class Solution implements Serializable {
      * 
      * @return the sub-solutions that have been received.
      */
-    public Collection<Binding> getSubSolutions() {
+    public List<Binding> getSubSolutions() {
         return this.bindings;
     }
 

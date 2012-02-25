@@ -56,14 +56,14 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
-import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruplable;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.factories.ProxyFactory;
@@ -175,10 +175,15 @@ public class Subscription implements Quadruplable, Serializable {
                 datastore.begin(AccessMode.READ_ONLY);
 
         try {
-            for (Quadruple quad : txnGraph.find(
-                    Node.ANY,
-                    PublishSubscribeUtils.createSubscriptionIdUri(id),
-                    Node.ANY, Node.ANY)) {
+            QuadrupleIterator it =
+                    txnGraph.find(
+                            Node.ANY,
+                            PublishSubscribeUtils.createSubscriptionIdUri(id),
+                            Node.ANY, Node.ANY);
+
+            while (it.hasNext()) {
+                Quadruple quad = it.next();
+
                 if (quad.getPredicate().equals(
                         SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
                     subSubscriptionIds.add(quad.getObject());
@@ -380,8 +385,9 @@ public class Subscription implements Quadruplable, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> toQuadruples() {
-        Collection<Quadruple> quads = new Collection<Quadruple>();
+    public List<Quadruple> toQuadruples() {
+        List<Quadruple> quads = new ArrayList<Quadruple>();
+
         Node subscriptionURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.id);
 

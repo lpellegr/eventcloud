@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.webservices.putget;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.etsi.uri.gcm.util.GCM;
 import org.junit.Assert;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -99,7 +99,7 @@ public class PutGetTest {
                 Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011/"),
                 Node.createLiteral("26", XSDDatatype.XSDint)));
 
-        Collection<Quadruple> result =
+        List<Quadruple> result =
                 putGetWs.findQuadruplePattern(QuadruplePattern.ANY);
         log.info("Quadruples contained by the Event-Cloud {}", ecId);
         for (Quadruple quad : result) {

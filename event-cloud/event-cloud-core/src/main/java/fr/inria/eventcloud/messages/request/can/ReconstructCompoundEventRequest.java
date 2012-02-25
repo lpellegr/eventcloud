@@ -16,6 +16,10 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -25,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
@@ -56,7 +59,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
 
     // the hash values associated to the quadruples which have been already
     // received by the seeker
-    private SerializedValue<Collection<LongLong>> hashValuesReceived;
+    private SerializedValue<Set<LongLong>> hashValuesReceived;
 
     // the meta graph URI used to lookup the quadruples
     private SerializedValue<String> metaGraphValue;
@@ -74,7 +77,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
      *            already received.
      */
     public ReconstructCompoundEventRequest(QuadruplePattern quadruplePattern,
-            Collection<LongLong> hashValuesReceived) {
+            Set<LongLong> hashValuesReceived) {
         super(quadruplePattern);
 
         this.hashValuesReceived = SerializedValue.create(hashValuesReceived);
@@ -96,11 +99,11 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                                                AnycastRequest request,
-                                                                QuadruplePattern quadruplePattern) {
-        Collection<LongLong> hashValues = this.hashValuesReceived.getValue();
-        Collection<Quadruple> result = new Collection<Quadruple>();
+    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
+                                                          AnycastRequest request,
+                                                          QuadruplePattern quadruplePattern) {
+        Set<LongLong> hashValues = this.hashValuesReceived.getValue();
+        List<Quadruple> result = new ArrayList<Quadruple>();
 
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
@@ -114,7 +117,9 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
                             Node.createURI(this.metaGraphValue.getValue()),
                             Node.ANY, Node.ANY, Node.ANY);
 
-            for (Quadruple quadruple : iterator) {
+            while (iterator.hasNext()) {
+                Quadruple quadruple = iterator.next();
+
                 if (quadruple.getPublicationTime() != -1
                         && !hashValues.contains(quadruple.hashValue())) {
                     result.add(quadruple);

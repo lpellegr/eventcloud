@@ -17,9 +17,10 @@
 package fr.inria.eventcloud;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -36,15 +37,14 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class EventCloudsRegistry {
 
-    private Map<EventCloudId, Collection<SemanticTracker>> eventclouds;
+    private Map<EventCloudId, EventCloud> eventclouds;
 
     /**
      * Empty constructor commanded by ProActive to expose this object as an
      * active object.
      */
     public EventCloudsRegistry() {
-        this.eventclouds =
-                new HashMap<EventCloudId, Collection<SemanticTracker>>();
+        this.eventclouds = new HashMap<EventCloudId, EventCloud>();
     }
 
     /**
@@ -60,8 +60,7 @@ public class EventCloudsRegistry {
         if (this.eventclouds.containsKey(eventcloud.getId())) {
             return false;
         } else {
-            return this.eventclouds.put(
-                    eventcloud.getId(), eventcloud.getTrackers()) == null;
+            return this.eventclouds.put(eventcloud.getId(), eventcloud) == null;
         }
     }
 
@@ -72,8 +71,8 @@ public class EventCloudsRegistry {
      * @return a list that contains the identifier of the eventclouds which are
      *         managed by the registry.
      */
-    public Collection<EventCloudId> listEventClouds() {
-        return new Collection<EventCloudId>(this.eventclouds.keySet());
+    public Set<EventCloudId> listEventClouds() {
+        return this.eventclouds.keySet();
     }
 
     /**
@@ -91,6 +90,20 @@ public class EventCloudsRegistry {
     }
 
     /**
+     * Returns the {@link EventCloud} object associated to the specified
+     * {@code id} if it is managed by the registry.
+     * 
+     * @param id
+     *            the eventcloud identifier to look for.
+     * 
+     * @return the {@link EventCloud} object associated to the specified
+     *         {@code id} if it is managed by the registry or {@code null}.
+     */
+    public EventCloud find(EventCloudId id) {
+        return this.eventclouds.get(id);
+    }
+
+    /**
      * Returns the trackers associated to the specified {@link EventCloudId} if
      * it is registered in the registry or {@code null}.
      * 
@@ -100,8 +113,8 @@ public class EventCloudsRegistry {
      * @return the trackers associated to the eventcloud identified by the
      *         specified {@link EventCloudId} or {@code null}.
      */
-    public Collection<SemanticTracker> findTrackers(EventCloudId id) {
-        return this.eventclouds.get(id);
+    public List<SemanticTracker> findTrackers(EventCloudId id) {
+        return this.eventclouds.get(id).getTrackers();
     }
 
 }

@@ -20,9 +20,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
@@ -212,7 +212,7 @@ public class SparqlResultSerializerTest {
     }
 
     @Parameterized.Parameters
-    public static Collection<Boolean[]> parameters() {
+    public static List<Boolean[]> parameters() {
         Boolean[][] data = new Boolean[][] { {false}, {true}};
         return Arrays.asList(data);
     }

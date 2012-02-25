@@ -30,17 +30,19 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Collection;
-import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruplable;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.VariableDatatype;
@@ -107,8 +109,8 @@ public class Subsubscription implements Quadruplable {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> toQuadruples() {
-        Collection<Quadruple> quads = new Collection<Quadruple>();
+    public List<Quadruple> toQuadruples() {
+        List<Quadruple> quads = new ArrayList<Quadruple>();
         Node subSubscriptionURI =
                 Node.createURI(SUBSUBSCRIPTION_NS + this.id.toString());
 
@@ -208,8 +210,12 @@ public class Subsubscription implements Quadruplable {
                 datastore.begin(AccessMode.READ_ONLY);
 
         try {
-            for (Quadruple quad : txnGraph.find(
-                    Node.ANY, subSubscriptionIdNode, Node.ANY, Node.ANY)) {
+            QuadrupleIterator it =
+                    txnGraph.find(
+                            Node.ANY, subSubscriptionIdNode, Node.ANY, Node.ANY);
+
+            while (it.hasNext()) {
+                Quadruple quad = it.next();
                 properties.put(quad.getPredicate().toString(), quad.getObject());
             }
         } catch (Exception e) {

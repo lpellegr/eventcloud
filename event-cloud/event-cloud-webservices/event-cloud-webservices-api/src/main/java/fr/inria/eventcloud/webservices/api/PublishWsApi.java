@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.webservices.api;
 
+import java.util.Collection;
+
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -23,7 +25,6 @@ import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.webservices.api.adapters.EventCollectionAdapter;
 

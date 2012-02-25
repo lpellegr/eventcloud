@@ -17,10 +17,10 @@
 package fr.inria.eventcloud.proxies;
 
 import java.io.InputStream;
+import java.util.Collection;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;

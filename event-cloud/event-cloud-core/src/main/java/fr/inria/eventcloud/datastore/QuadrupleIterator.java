@@ -29,8 +29,7 @@ import fr.inria.eventcloud.api.Quadruple;
  * 
  * @author lpellegr
  */
-public class QuadrupleIterator implements Iterator<Quadruple>,
-        Iterable<Quadruple> {
+public class QuadrupleIterator implements Iterator<Quadruple> {
 
     private final Iterator<Quad> it;
 
@@ -85,14 +84,6 @@ public class QuadrupleIterator implements Iterator<Quadruple>,
             result++;
         }
         return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<Quadruple> iterator() {
-        return this;
     }
 
 }

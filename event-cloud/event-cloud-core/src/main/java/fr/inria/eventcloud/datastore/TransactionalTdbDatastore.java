@@ -18,6 +18,8 @@ package fr.inria.eventcloud.datastore;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
@@ -25,12 +27,12 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.tdb.StoreConnection;
 import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.tdb.transaction.TDBTransactionException;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
@@ -143,7 +145,7 @@ public class TransactionalTdbDatastore extends Datastore {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> retrieveDataIn(Object interval) {
+    public List<Quadruple> retrieveDataIn(Object interval) {
         return this.retrieveDataIn(interval, false);
     }
 
@@ -151,23 +153,27 @@ public class TransactionalTdbDatastore extends Datastore {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> removeDataIn(Object interval) {
+    public List<Quadruple> removeDataIn(Object interval) {
         return this.retrieveDataIn(interval, true);
     }
 
-    private Collection<Quadruple> retrieveDataIn(Object interval, boolean remove) {
+    private List<Quadruple> retrieveDataIn(Object interval, boolean remove) {
         Zone zone = (Zone) interval;
         String graph, subject, predicate, object;
 
-        Collection<Quadruple> result = new Collection<Quadruple>();
-        Collection<Quadruple> quadruplesToRemove = null;
+        List<Quadruple> result = new ArrayList<Quadruple>();
+        List<Quadruple> quadruplesToRemove = null;
         if (remove) {
-            quadruplesToRemove = new Collection<Quadruple>();
+            quadruplesToRemove = new ArrayList<Quadruple>();
         }
 
         TransactionalDatasetGraph txnGraph = this.begin(AccessMode.READ_ONLY);
         try {
-            for (Quadruple quad : txnGraph.find(QuadruplePattern.ANY)) {
+            QuadrupleIterator it = txnGraph.find(QuadruplePattern.ANY);
+
+            while (it.hasNext()) {
+                Quadruple quad = it.next();
+
                 graph =
                         SemanticElement.parseElement(quad.getGraph().toString());
                 subject =
@@ -234,7 +240,7 @@ public class TransactionalTdbDatastore extends Datastore {
         TransactionalDatasetGraph txnGraph = this.begin(AccessMode.WRITE);
 
         try {
-            txnGraph.add((Collection<Quadruple>) dataReceived);
+            txnGraph.add((List<Quadruple>) dataReceived);
             txnGraph.commit();
         } finally {
             txnGraph.end();
@@ -245,13 +251,13 @@ public class TransactionalTdbDatastore extends Datastore {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> retrieveAllData() {
-        Collection<Quadruple> result = null;
+    public List<Quadruple> retrieveAllData() {
+        List<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph = this.begin(AccessMode.READ_ONLY);
 
         try {
-            result = Collection.from(txnGraph.find(QuadruplePattern.ANY));
+            result = Lists.newArrayList(txnGraph.find(QuadruplePattern.ANY));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

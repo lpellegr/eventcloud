@@ -52,7 +52,6 @@ import org.xml.sax.SAXException;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.UriGenerator;
@@ -277,7 +276,7 @@ public class NotificationTranslator extends
                         entry.getValue(), false, true));
             }
 
-            return new CompoundEvent(new Collection<Quadruple>(quads));
+            return new CompoundEvent(quads);
         } else {
             throw new TranslationException(
                     "Cannot construct compound event because no subject can be extracted from the notification message");

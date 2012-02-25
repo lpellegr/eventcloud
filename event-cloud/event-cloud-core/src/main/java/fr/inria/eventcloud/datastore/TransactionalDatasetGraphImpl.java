@@ -16,11 +16,12 @@
  **/
 package fr.inria.eventcloud.datastore;
 
+import java.util.List;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.tdb.transaction.DatasetGraphTxn;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 
@@ -63,7 +64,7 @@ public final class TransactionalDatasetGraphImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void add(Collection<Quadruple> quadruples) {
+    public void add(List<Quadruple> quadruples) {
         for (Quadruple q : quadruples) {
             this.add(q);
         }
@@ -93,7 +94,7 @@ public final class TransactionalDatasetGraphImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void delete(Collection<Quadruple> quadruples) {
+    public void delete(List<Quadruple> quadruples) {
         for (Quadruple q : quadruples) {
             this.delete(q);
         }

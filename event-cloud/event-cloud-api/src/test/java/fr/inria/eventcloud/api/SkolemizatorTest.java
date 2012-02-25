@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -46,13 +49,13 @@ public class SkolemizatorTest {
                         Node.createURI("http://example.org/properties/p1"), b2,
                         false, false);
 
-        Collection<Quadruple> skolemizedQuadruples =
-                Skolemizator.skolemize(new Collection<Quadruple>(q1, q2));
+        List<Quadruple> skolemizedQuadruples =
+                Skolemizator.skolemize(Arrays.asList(q1, q2));
 
         Assert.assertFalse(containsBlankNodes(skolemizedQuadruples));
     }
 
-    private static boolean containsBlankNodes(Collection<Quadruple> quadruples) {
+    private static boolean containsBlankNodes(List<Quadruple> quadruples) {
         for (Quadruple q : quadruples) {
             if (q.getSubject().isBlank() || q.getObject().isBlank()) {
                 return true;

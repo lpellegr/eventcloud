@@ -16,13 +16,14 @@
  **/
 package fr.inria.eventcloud.webservices.proxies;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -97,8 +98,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
             @Override
             public void onNotification(SubscriptionId id, CompoundEvent event) {
                 try {
-                    Collection<CompoundEvent> events =
-                            new Collection<CompoundEvent>();
+                    List<CompoundEvent> events = new ArrayList<CompoundEvent>();
                     events.add(event);
                     subscribers.get(id).invoke(
                             NOTIFY_METHOD_NAME, new Object[] {events});

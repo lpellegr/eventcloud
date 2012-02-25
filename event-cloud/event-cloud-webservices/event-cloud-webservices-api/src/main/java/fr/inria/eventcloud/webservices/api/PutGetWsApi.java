@@ -16,12 +16,14 @@
  **/
 package fr.inria.eventcloud.webservices.api;
 
+import java.util.Collection;
+import java.util.List;
+
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
@@ -122,7 +124,7 @@ public interface PutGetWsApi {
      */
     @WebMethod
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
-    public Collection<Quadruple> deleteQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
+    public List<Quadruple> deleteQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
      * Finds all the quadruples that match the specified quadruple pattern.
@@ -135,7 +137,7 @@ public interface PutGetWsApi {
      */
     @WebMethod
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
-    public Collection<Quadruple> findQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
+    public List<Quadruple> findQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query. This SPARQL query

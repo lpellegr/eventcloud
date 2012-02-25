@@ -28,7 +28,6 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
@@ -41,7 +40,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * 
  * @author lpellegr
  */
-public final class EventCloud implements EventCloudApi, Serializable {
+public class EventCloud implements EventCloudApi, Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(EventCloud.class);
 
@@ -51,19 +50,19 @@ public final class EventCloud implements EventCloudApi, Serializable {
 
     private final long creationTime;
 
-    private final Collection<UnalterableElaProperty> elaProperties;
+    private final List<UnalterableElaProperty> elaProperties;
 
     private final EventCloudDeployer deployer;
 
     private final String registryUrl;
 
-    private final List<String> trackerUrls;
+    private List<String> trackerUrls;
 
-    private final List<SemanticTracker> trackers;
+    private List<SemanticTracker> trackers;
 
     private EventCloud(String registryUrl, EventCloudId eventcloudId,
             EventCloudDeployer deployer,
-            Collection<UnalterableElaProperty> elaProperties, int nbTrackers,
+            List<UnalterableElaProperty> elaProperties, int nbTrackers,
             int nbPeers) {
         this.id = eventcloudId;
         this.creationTime = System.currentTimeMillis();
@@ -87,7 +86,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
 
     public static EventCloud create(String registryUrl,
                                     EventCloudDeployer deployer,
-                                    Collection<UnalterableElaProperty> elaProperties,
+                                    List<UnalterableElaProperty> elaProperties,
                                     int nbTrackers, int nbPeers) {
         return create(
                 registryUrl, new EventCloudId(), deployer, elaProperties,
@@ -97,7 +96,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
     public static EventCloud create(String registryUrl,
                                     EventCloudId eventcloudId,
                                     EventCloudDeployer deployer,
-                                    Collection<UnalterableElaProperty> elaProperties,
+                                    List<UnalterableElaProperty> elaProperties,
                                     int nbTrackers, int nbPeers) {
         return new EventCloud(
                 registryUrl, eventcloudId, deployer, elaProperties, nbTrackers,
@@ -153,7 +152,7 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public Collection<UnalterableElaProperty> getElaProperties() {
+    public List<UnalterableElaProperty> getElaProperties() {
         return this.elaProperties;
     }
 
@@ -177,16 +176,16 @@ public final class EventCloud implements EventCloudApi, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public Collection<String> getTrackerUrls() {
-        return new Collection<String>(this.trackerUrls);
+    public List<String> getTrackerUrls() {
+        return this.trackerUrls;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Collection<SemanticTracker> getTrackers() {
-        return new Collection<SemanticTracker>(this.trackers);
+    public List<SemanticTracker> getTrackers() {
+        return this.trackers;
     }
 
     /**

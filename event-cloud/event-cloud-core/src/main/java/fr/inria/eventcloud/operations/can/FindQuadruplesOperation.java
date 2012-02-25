@@ -16,11 +16,14 @@
  **/
 package fr.inria.eventcloud.operations.can;
 
+import java.util.List;
+
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
-import fr.inria.eventcloud.api.Collection;
+import com.google.common.collect.Lists;
+
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
@@ -48,13 +51,13 @@ public final class FindQuadruplesOperation implements SynchronousOperation {
      */
     @Override
     public ResponseOperation handle(StructuredOverlay overlay) {
-        Collection<Quadruple> result = null;
+        List<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
 
         try {
-            result = Collection.from(txnGraph.find(this.quadruplePattern));
+            result = Lists.newArrayList(txnGraph.find(this.quadruplePattern));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

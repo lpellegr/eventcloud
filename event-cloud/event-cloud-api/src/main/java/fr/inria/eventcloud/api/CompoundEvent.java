@@ -16,8 +16,14 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
+import com.google.common.collect.Iterators;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -32,13 +38,8 @@ import com.hp.hpl.jena.graph.Triple;
  * <p>
  * Also, it is assumed that a compound event is not alterable. Hence, if you try
  * to update the content of a compound event by calling {@link #getQuadruples()}
- * followed by {@link Collection#add(Object)}, then any call to the methods
- * {@link #getGraph()} and {@link #getTriples()} may return a wrong value. This
- * is also true if you construct a compound event with a collection of
- * quadruples that do not share the same graph value. Indeed, no type checking
- * is performed for performance reasons. If necessary, you can use
- * {@link #isValid(CompoundEvent)} to check whether a compound event is valid or
- * not.
+ * or {@link #getTriples()} followed by {@link Collection#add(Object)}, you will
+ * get an {@link UnsupportedOperationException}.
  * 
  * @author lpellegr
  */
@@ -46,9 +47,9 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
 
     private static final long serialVersionUID = 1L;
 
-    private final Collection<Quadruple> quadruples;
+    private final List<Quadruple> quadruples;
 
-    private transient Collection<Triple> triples;
+    private transient List<Triple> triples;
 
     private transient Node graph;
 
@@ -59,7 +60,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      *            the quadruples to put into the Event.
      */
     public CompoundEvent(Quadruple... quads) {
-        this(new Collection<Quadruple>(quads));
+        this(Arrays.asList(quads));
     }
 
     /**
@@ -68,7 +69,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * @param quads
      *            the quadruples to put into the Event.
      */
-    public CompoundEvent(Collection<Quadruple> quads) {
+    public CompoundEvent(List<Quadruple> quads) {
         this(quads, true);
     }
 
@@ -83,14 +84,12 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * @param addMetaInformation
      *            indicates whether meta information should be added or not.
      */
-    public CompoundEvent(Collection<Quadruple> quadruples,
-            boolean addMetaInformation) {
+    public CompoundEvent(List<Quadruple> quadruples, boolean addMetaInformation) {
         if (quadruples.size() == 0) {
-            throw new IllegalArgumentException(
-                    "The quads collection cannot be empty");
+            throw new IllegalArgumentException("Quadruples list is empty");
         }
 
-        this.quadruples = Collection.withShallowCopy(quadruples);
+        this.quadruples = quadruples;
 
         if (addMetaInformation) {
             this.addMetaInformation();
@@ -106,9 +105,9 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * @param triples
      *            the triples to put into the Event.
      */
-    public CompoundEvent(Node graph, Collection<Triple> triples) {
+    public CompoundEvent(Node graph, List<Triple> triples) {
         this.triples = triples;
-        this.quadruples = new Collection<Quadruple>();
+        this.quadruples = new ArrayList<Quadruple>(triples.size());
         for (Triple triple : triples) {
             this.quadruples.add(new Quadruple(graph, triple));
         }
@@ -127,12 +126,13 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
     }
 
     /**
-     * Returns the collection of quadruples that belong to the compound event.
+     * Returns an unmodifiable list of quadruples that belong to the compound
+     * event.
      * 
-     * @return the collection of quadruples that belong to the compound event.
+     * @return the list of quadruples that belong to the compound event.
      */
-    public Collection<Quadruple> getQuadruples() {
-        return new Collection<Quadruple>(this.quadruples);
+    public List<Quadruple> getQuadruples() {
+        return Collections.unmodifiableList(this.quadruples);
     }
 
     /**
@@ -151,15 +151,15 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
     }
 
     /**
-     * Returns the collection of triples that belong to the compound event. This
-     * method is a convenient method for backward compatibility with the linked
-     * data tools.
+     * Returns an unmodifiable list of triples that belong to the compound
+     * event. This method is a convenient method for backward compatibility with
+     * the linked data tools.
      * 
-     * @return the collection of triples that belong to the compound event.
+     * @return the list of triples that belong to the compound event.
      */
-    public synchronized Collection<Triple> getTriples() {
+    public synchronized List<Triple> getTriples() {
         if (this.triples == null) {
-            this.triples = new Collection<Triple>();
+            this.triples = new ArrayList<Triple>();
             for (Quadruple quad : this.quadruples) {
                 this.triples.add(new Triple(
                         quad.getSubject(), quad.getPredicate(),
@@ -203,7 +203,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      */
     @Override
     public Iterator<Quadruple> iterator() {
-        return this.quadruples.iterator();
+        return Iterators.unmodifiableIterator(this.quadruples.iterator());
     }
 
     /**
@@ -247,8 +247,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * @return {@code true} if the event is valid, {@code false} otherwise.
      */
     public static final boolean isValid(CompoundEvent e) {
-        Collection<Quadruple> quads = e.getQuadruples();
-        Iterator<Quadruple> it = quads.iterator();
+        Iterator<Quadruple> it = e.getQuadruples().iterator();
 
         Node ref = it.next().getGraph();
         while (it.hasNext()) {

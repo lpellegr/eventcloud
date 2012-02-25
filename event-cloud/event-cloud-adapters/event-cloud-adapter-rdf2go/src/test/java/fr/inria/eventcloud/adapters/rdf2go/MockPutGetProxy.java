@@ -17,11 +17,14 @@
 package fr.inria.eventcloud.adapters.rdf2go;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -101,7 +104,7 @@ public class MockPutGetProxy implements PutGetApi {
      */
     @Override
     public boolean add(InputStream in, SerializationFormat format) {
-        final Collection<Quadruple> quadruples = new Collection<Quadruple>();
+        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
@@ -170,14 +173,14 @@ public class MockPutGetProxy implements PutGetApi {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> delete(QuadruplePattern quadPattern) {
-        Collection<Quadruple> result = null;
+    public List<Quadruple> delete(QuadruplePattern quadPattern) {
+        List<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.READ_ONLY);
 
         try {
-            result = Collection.from(txnGraph.find(quadPattern));
+            result = Lists.newArrayList(txnGraph.find(quadPattern));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -201,14 +204,14 @@ public class MockPutGetProxy implements PutGetApi {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> find(QuadruplePattern quadPattern) {
-        Collection<Quadruple> result = null;
+    public List<Quadruple> find(QuadruplePattern quadPattern) {
+        List<Quadruple> result = null;
 
         TransactionalDatasetGraph txnGraph =
                 this.datastore.begin(AccessMode.READ_ONLY);
 
         try {
-            result = Collection.from(txnGraph.find(quadPattern));
+            result = Lists.newArrayList(txnGraph.find(quadPattern));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

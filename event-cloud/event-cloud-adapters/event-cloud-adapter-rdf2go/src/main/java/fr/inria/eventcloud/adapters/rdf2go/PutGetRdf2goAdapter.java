@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.adapters.rdf2go;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ontoware.aifbcommons.collection.ClosableIterable;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
@@ -27,7 +29,6 @@ import org.ontoware.rdf2go.model.node.Node;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -64,7 +65,7 @@ public final class PutGetRdf2goAdapter extends Rdf2goAdapter<PutGetApi> {
     }
 
     public boolean add(java.util.Iterator<? extends Statement> statements) {
-        Collection<Quadruple> collection = new Collection<Quadruple>();
+        List<Quadruple> collection = new ArrayList<Quadruple>();
         while (statements.hasNext()) {
             collection.add(toQuadruple(statements.next()));
         }
@@ -101,7 +102,7 @@ public final class PutGetRdf2goAdapter extends Rdf2goAdapter<PutGetApi> {
     }
 
     public boolean delete(java.util.Iterator<? extends Statement> statements) {
-        Collection<Quadruple> collection = new Collection<Quadruple>();
+        List<Quadruple> collection = new ArrayList<Quadruple>();
         while (statements.hasNext()) {
             collection.add(toQuadruple(statements.next()));
         }

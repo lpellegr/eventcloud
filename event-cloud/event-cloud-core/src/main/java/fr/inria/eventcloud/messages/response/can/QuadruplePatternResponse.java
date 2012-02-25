@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.messages.request.can.StatefulQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.StatelessQuadruplePatternRequest;
@@ -32,12 +31,12 @@ import fr.inria.eventcloud.messages.request.can.StatelessQuadruplePatternRequest
  * @author lpellegr
  */
 public class QuadruplePatternResponse extends
-        StatefulQuadruplePatternResponse<Collection<Quadruple>> {
+        StatefulQuadruplePatternResponse<List<Quadruple>> {
 
     private static final long serialVersionUID = 1L;
 
     public QuadruplePatternResponse(
-            StatefulQuadruplePatternRequest<Collection<Quadruple>> request) {
+            StatefulQuadruplePatternRequest<List<Quadruple>> request) {
         super(request);
     }
 
@@ -45,14 +44,14 @@ public class QuadruplePatternResponse extends
      * {@inheritDoc}
      */
     @Override
-    public Collection<Quadruple> mergeSubResults(List<SerializedValue<Collection<Quadruple>>> subResults) {
+    public List<Quadruple> mergeSubResults(List<SerializedValue<List<Quadruple>>> subResults) {
         List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
-        for (SerializedValue<Collection<Quadruple>> subResult : subResults) {
+        for (SerializedValue<List<Quadruple>> subResult : subResults) {
             quadruples.addAll(subResult.getValue());
         }
 
-        return new Collection<Quadruple>(quadruples);
+        return new ArrayList<Quadruple>(quadruples);
     }
 
 }

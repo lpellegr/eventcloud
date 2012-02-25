@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -31,7 +33,6 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -61,7 +62,7 @@ public class SemanticNotificationTranslatorTest {
         CompoundEvent initialEvent =
                 new CompoundEvent(read(
                         "/example.trig", SerializationFormat.TriG));
-        // final Collection<Quadruple> quads = new Collection<Quadruple>();
+        // final List<Quadruple> quads = new List<Quadruple>();
         /*InputStream is =RdfParser.class.getResourceAsStream("/example.trig");
         // System.out.println("le fichier Trig : \n"+convertStreamToString(is));
         System.out.println("******************************* \t ********************\t**************************");
@@ -126,7 +127,7 @@ public class SemanticNotificationTranslatorTest {
                 this.translator.translateSemanticNotification(this.translator.translateSemanticCompoundEvent(translatedEvent)));
     }
 
-    private static boolean containsBlankNodes(Collection<Quadruple> quadruples) {
+    private static boolean containsBlankNodes(List<Quadruple> quadruples) {
         for (Quadruple q : quadruples) {
             if (q.getSubject().isBlank() || q.getObject().isBlank()) {
                 return true;
@@ -153,9 +154,9 @@ public class SemanticNotificationTranslatorTest {
         return is;
     }
 
-    private static Collection<Quadruple> read(String file,
+    private static List<Quadruple> read(String file,
                                               SerializationFormat format) {
-        final Collection<Quadruple> quadruples = new Collection<Quadruple>();
+        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
         RdfParser.parse(
                 inputStreamFrom(file), format, new Callback<Quadruple>() {

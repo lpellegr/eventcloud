@@ -84,7 +84,6 @@
 						<configuration>
 							<includes>
 								<include>java.util.List</include>
-								<include>fr.inria.eventcloud.api.Collection</include>
 								<include>fr.inria.eventcloud.api.Event</include>
 								<include>fr.inria.eventcloud.api.Quadruple</include>
 								<include>fr.inria.eventcloud.api.QuadruplePattern</include>

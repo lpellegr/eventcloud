@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.api;
 
 import java.io.InputStream;
+import java.util.Collection;
 
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 

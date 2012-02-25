@@ -19,13 +19,13 @@ package fr.inria.eventcloud.webservices.services;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
@@ -58,7 +58,7 @@ public class EventCloudManagementServiceImpl implements
         return EventCloud.create(
                 this.registryUrl, new EventCloudId(streamUrl),
                 new EventCloudDeployer(),
-                new Collection<UnalterableElaProperty>(), 1, 1).register();
+                new ArrayList<UnalterableElaProperty>(), 1, 1).register();
     }
 
     /**
@@ -79,7 +79,7 @@ public class EventCloudManagementServiceImpl implements
                     PAActiveObject.lookupActive(
                             EventCloudsRegistry.class, this.registryUrl);
 
-            Collection<EventCloudId> ecIds = registry.listEventClouds();
+            Set<EventCloudId> ecIds = registry.listEventClouds();
             List<String> result = new ArrayList<String>(ecIds.size());
 
             for (EventCloudId ecId : ecIds) {

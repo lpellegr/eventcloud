@@ -16,11 +16,12 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
+import java.util.ArrayList;
+
 import com.beust.jcommander.Parameter;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.Collection;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 
@@ -60,7 +61,7 @@ public final class EventCloudLauncher extends Launcher {
         EventCloud eventCloud =
                 EventCloud.create(
                         this.registryUrl, new EventCloudDeployer(),
-                        new Collection<UnalterableElaProperty>(),
+                        new ArrayList<UnalterableElaProperty>(),
                         this.nbTrackers, this.nbPeers);
 
         StringBuilder result = new StringBuilder();
