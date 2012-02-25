@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011 INRIA.
+ * Copyright (c) 2011-2012 INRIA.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ public class PutGetTest {
                 Node.createURI("http://france.meteofrance.com/france/meteo?PREVISIONS_PORTLET.path=previsionsville/060880")));
 
         Node expectedNodeResult =
-                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011/");
+                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011-2012/");
         putGetWs.addQuadruple(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"), expectedNodeResult,
@@ -96,7 +96,7 @@ public class PutGetTest {
         putGetWs.addQuadruple(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"),
-                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011/"),
+                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011-2012/"),
                 Node.createLiteral("26", XSDDatatype.XSDint)));
 
         List<Quadruple> result =
