@@ -105,6 +105,7 @@ public class AnycastLookupRequestTest extends
         @Override
         public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
             return new AnycastRequestRouter<AnycastLookupRequest>() {
+                @Override
                 public void onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                            AnycastRequest request) {
                     ((AnycastLookupRequest) request).add(overlay.getZone());

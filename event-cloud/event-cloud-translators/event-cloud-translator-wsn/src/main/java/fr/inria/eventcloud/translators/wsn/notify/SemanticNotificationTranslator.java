@@ -38,6 +38,7 @@ public class SemanticNotificationTranslator extends
      * 
      * @return the Compound Event
      */
+    @Override
     public CompoundEvent translate(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
 
@@ -57,6 +58,7 @@ public class SemanticNotificationTranslator extends
         final List<Quadruple> quads = new ArrayList<Quadruple>();
         RdfParser.parse(
                 is, SerializationFormat.TriG, new Callback<Quadruple>() {
+                    @Override
                     public void execute(Quadruple quad) {
                         quads.add(quad);
                     }

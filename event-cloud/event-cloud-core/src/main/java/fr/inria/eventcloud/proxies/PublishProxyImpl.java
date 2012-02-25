@@ -49,6 +49,7 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init(EventCloudCache proxy) {
         if (this.proxy == null) {
             this.proxy = proxy;
@@ -107,7 +108,7 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy {
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
             public void execute(Quadruple quad) {
-                publish(quad);
+                PublishProxyImpl.this.publish(quad);
             }
         });
     }

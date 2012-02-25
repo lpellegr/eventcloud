@@ -39,7 +39,7 @@ public class StringElementTest {
         String min = StringElement.reversedUnicodeToString(al);
         StringElement emin = new StringElement(min);
 
-        LinkedList<Integer> al2 = alpha2();
+        LinkedList<Integer> al2 = this.alpha2();
         String max = StringElement.reversedUnicodeToString(al2);
 
         logger.info("Second String " + max + " " + al2);

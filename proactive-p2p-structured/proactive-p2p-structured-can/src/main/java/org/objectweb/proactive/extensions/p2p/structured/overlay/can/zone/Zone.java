@@ -203,6 +203,7 @@ public class Zone implements Serializable {
         return this.unicodeView.getUpperBound(dimension);
     }
 
+    @Override
     public String toString() {
         return this.unicodeView.toString();
     }

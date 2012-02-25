@@ -56,7 +56,7 @@ public class RdfParserTest {
         // parser = RiotReader. in, null, sink);
 
         Assert.assertEquals(15, counter);
-        tearDown();
+        this.tearDown();
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
         // BufferedOutputStream bOut = new BufferedOutputStream(out)
         RdfSerializer.nQuadsWriter(outS, new ArrayList<Quadruple>(quads));
@@ -92,7 +92,7 @@ public class RdfParserTest {
                 });
 
         Assert.assertEquals(15, counter);
-        tearDown();
+        this.tearDown();
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
         // BufferedOutputStream bOut = new BufferedOutputStream(out)
 
@@ -130,7 +130,7 @@ public class RdfParserTest {
                 });
 
         Assert.assertEquals(15, counter);
-        tearDown();
+        this.tearDown();
 
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
 

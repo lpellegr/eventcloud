@@ -44,13 +44,13 @@ public class PublishSubscribeUtilsTest {
                         "SELECT ?g WHERE { GRAPH ?g { <http://www.inria.fr> <http://www.inria.fr> <http://www.inria.fr> }}"};
 
         for (String subscription : subscriptions) {
-            testParameterizedRemoveResultVarsExceptGraphVar(subscription);
+            this.testParameterizedRemoveResultVarsExceptGraphVar(subscription);
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testRemoveResultVarsExceptGraphVarWithoutGraphVar() {
-        testParameterizedRemoveResultVarsExceptGraphVar("SELECT ?s ?p ?o WHERE { GRAPH <http://www.inria.fr> { ?s ?p ?o }}");
+        this.testParameterizedRemoveResultVarsExceptGraphVar("SELECT ?s ?p ?o WHERE { GRAPH <http://www.inria.fr> { ?s ?p ?o }}");
     }
 
     private void testParameterizedRemoveResultVarsExceptGraphVar(String subscription) {

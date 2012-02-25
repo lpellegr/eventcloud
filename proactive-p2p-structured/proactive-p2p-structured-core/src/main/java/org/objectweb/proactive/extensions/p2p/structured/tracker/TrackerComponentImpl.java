@@ -41,6 +41,7 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker,
     /**
      * {@inheritDoc}
      */
+    @Override
     public void initComponentActivity(Body body) {
         // /!\ do not call super.initActivity(body)
         // in this method or reset the stub variable
@@ -53,6 +54,7 @@ public class TrackerComponentImpl extends TrackerImpl implements Tracker,
     /**
      * {@inheritDoc}
      */
+    @Override
     public void endComponentActivity(Body body) {
         super.endActivity(body);
     }

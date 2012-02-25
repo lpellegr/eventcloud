@@ -79,6 +79,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean init(Peer stub,
                         SerializableProvider<? extends StructuredOverlay> overlay) {
         if (this.overlay == null) {
@@ -92,6 +93,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void initActivity(Body body) {
         body.setImmediateService("receiveImmediateService", false);
 
@@ -117,6 +119,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void endActivity(Body body) {
         // TODO: enable the leave operation when it works!
 
@@ -137,6 +140,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public UUID getId() {
         return this.overlay.id;
     }
@@ -144,6 +148,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public OverlayType getType() {
         return this.overlay.getType();
     }
@@ -159,6 +164,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean create() throws NetworkAlreadyJoinedException {
         if (this.overlay.activated.compareAndSet(false, true)) {
             return this.overlay.create();
@@ -170,6 +176,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean join(Peer landmarkPeer) throws NetworkAlreadyJoinedException {
         if (this.overlay.activated.compareAndSet(false, true)) {
             if (!this.overlay.join(landmarkPeer)) {
@@ -190,6 +197,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean leave() throws NetworkNotJoinedException {
         if (this.overlay.activated.compareAndSet(true, false)) {
             return this.overlay.leave();
@@ -201,6 +209,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResponseOperation receive(SynchronousOperation operation) {
         return operation.handle(this.overlay);
     }
@@ -208,6 +217,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void receive(AsynchronousOperation operation) {
         operation.handle(this.overlay);
     }
@@ -215,6 +225,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResponseOperation receiveImmediateService(SynchronousOperation operation) {
         return operation.handle(this.overlay);
     }
@@ -222,6 +233,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void receiveImmediateService(AsynchronousOperation operation) {
         operation.handle(this.overlay);
     }
@@ -229,6 +241,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void route(RequestResponseMessage<?> msg) {
         msg.route(this.overlay);
     }
@@ -236,6 +249,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Response<?> send(Request<?> request) throws DispatchException {
         return this.overlay.messagingManager.dispatch(request);
     }
@@ -243,6 +257,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String dump() {
         return this.overlay.dump();
     }

@@ -115,11 +115,12 @@ public class RemoveNeighborOperation implements SynchronousOperation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         NeighborTable table = ((CanOverlay) overlay).getNeighborTable();
         boolean result;
 
-        if (dimension == -1 && direction == -1) {
+        if (this.dimension == -1 && this.direction == -1) {
             result = table.remove(this.peerIdentifier) != null;
         } else {
             result =

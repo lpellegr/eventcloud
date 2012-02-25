@@ -38,8 +38,8 @@ public abstract class Datastore implements Closeable, PeerDataHandler {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override
             public void run() {
-                if (initialized) {
-                    close();
+                if (Datastore.this.initialized) {
+                    Datastore.this.close();
                 }
             }
         }));
@@ -64,6 +64,7 @@ public abstract class Datastore implements Closeable, PeerDataHandler {
      * to call this method whereas the datastore is not initialized, then an
      * {@link IllegalStateException} exception is thrown.
      */
+    @Override
     public synchronized void close() {
         if (!this.initialized) {
             throw new IllegalStateException(

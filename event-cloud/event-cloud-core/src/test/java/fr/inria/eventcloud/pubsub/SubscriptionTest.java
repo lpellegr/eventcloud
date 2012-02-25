@@ -69,8 +69,7 @@ public class SubscriptionTest {
         Subscription deserializedSubscription =
                 Subscription.parseFrom(datastore, subscription.getId());
 
-        List<Quadruple> newQuads =
-                deserializedSubscription.toQuadruples();
+        List<Quadruple> newQuads = deserializedSubscription.toQuadruples();
 
         for (Quadruple quad : newQuads) {
             Assert.assertTrue(quads.contains(quad));

@@ -71,7 +71,8 @@ public abstract class StatelessQuadruplePatternRequest extends AnycastRequest {
             public void onPeerValidatingKeyConstraints(final CanOverlay overlay,
                                                        final AnycastRequest request) {
                 StatelessQuadruplePatternRequest.this.onPeerValidatingKeyConstraints(
-                        overlay, quadruplePattern.getValue());
+                        overlay,
+                        StatelessQuadruplePatternRequest.this.quadruplePattern.getValue());
             }
         };
     }

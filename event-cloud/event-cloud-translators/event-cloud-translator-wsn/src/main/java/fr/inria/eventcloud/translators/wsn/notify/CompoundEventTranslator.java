@@ -75,6 +75,7 @@ public class CompoundEventTranslator extends
      *            the event to be translated.
      * @return the notification message corresponding to the specified event.
      */
+    @Override
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
         String subscriptionAddress = null;
@@ -173,7 +174,7 @@ public class CompoundEventTranslator extends
     }
 
     private Element getMetadataElement(Quadruple quad) {
-        return createElement(quad);
+        return this.createElement(quad);
     }
 
     private static Element createElementFrom(String namespace, String localName) {

@@ -188,8 +188,9 @@ public class TurtleWriter2 {
                                Map<String, String> prefixMap) {
         for (; subjects.hasNext();) {
             Node subj = subjects.next();
-            if (nestedObjects.contains(subj))
+            if (nestedObjects.contains(subj)) {
                 continue;
+            }
 
             Collection<Triple> cluster = TW2.triplesOfSubject(graph, subj);
             writeCluster(out, graph, subj, cluster, nestedObjects, prefixMap);
@@ -204,14 +205,16 @@ public class TurtleWriter2 {
                              Map<String, String> prefixMap) {
         // int OFFSET = out.getIndent() ;
 
-        if (cluster.isEmpty())
+        if (cluster.isEmpty()) {
             return;
+        }
         writeNode(out, subject, prefixMap);
 
-        if (out.getCol() > LONG_SUBJECT)
+        if (out.getCol() > LONG_SUBJECT) {
             println(out);
-        else
+        } else {
             gap(out);
+        }
         out.incIndent(INDENT_PREDICATE);
         out.pad();
         writePredicateObjectList(out, graph, cluster, nestedObjects, prefixMap);
@@ -239,9 +242,9 @@ public class TurtleWriter2 {
         // Find the colject pad column.
 
         for (Triple triple : cluster) {
-            if (first)
+            if (first) {
                 first = false;
-            else {
+            } else {
                 print(out, " ;");
                 println(out);
             }
@@ -250,28 +253,31 @@ public class TurtleWriter2 {
             int colPredicateStart = out.getCol();
 
             if (!prefixMap.containsValue(rdfNS)
-                    && triple.getPredicate().getURI().equals(iriType))
+                    && triple.getPredicate().getURI().equals(iriType)) {
                 // I prefer rdf:type when available.
                 print(out, "a");
-            else
+            } else {
                 writeNode(out, triple.getPredicate(), prefixMap);
+            }
             int colPredicateFinish = out.getCol();
             int wPredicate = (colPredicateFinish - colPredicateStart);
 
             // Needs to be relative?
-            if (wPredicate > LONG_PREDICATE)
+            if (wPredicate > LONG_PREDICATE) {
                 out.println();
-            else
+            } else {
                 gap(out);
+            }
 
             // Secondary one should be less
             out.incIndent(INDENT_OBJECT);
             out.pad();
             Node obj = triple.getObject();
-            if (nestedObjects.contains(obj))
+            if (nestedObjects.contains(obj)) {
                 nestedObject(out, graph, obj, nestedObjects, prefixMap);
-            else
+            } else {
                 writeNode(out, triple.getObject(), prefixMap);
+            }
             out.decIndent(INDENT_OBJECT);
         }
     }
@@ -338,8 +344,9 @@ public class TurtleWriter2 {
             if (uriStr.startsWith(prefix)) {
                 String ln = uriStr.substring(prefix.length());
                 if (strSafeFor(ln, '/') && strSafeFor(ln, '#')
-                        && strSafeFor(ln, ':'))
+                        && strSafeFor(ln, ':')) {
                     return e.getKey() + ":" + ln;
+                }
             }
         }
         return null;

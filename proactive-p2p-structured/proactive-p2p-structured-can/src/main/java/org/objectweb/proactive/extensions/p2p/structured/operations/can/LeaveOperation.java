@@ -71,6 +71,7 @@ public class LeaveOperation implements SynchronousOperation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         return ((CanOverlay) overlay).processLeave(this);
     }

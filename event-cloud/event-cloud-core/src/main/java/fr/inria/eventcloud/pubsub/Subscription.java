@@ -89,6 +89,7 @@ public class Subscription implements Quadruplable, Serializable {
                     .maximumSize(
                             EventCloudProperties.SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE.getValue())
                     .build(new CacheLoader<String, SubscribeProxy>() {
+                        @Override
                         public SubscribeProxy load(String subscriberUrl)
                                 throws Exception {
                             return ProxyFactory.lookupSubscribeProxy(subscriberUrl);
@@ -493,11 +494,12 @@ public class Subscription implements Quadruplable, Serializable {
      */
     @Override
     public String toString() {
-        return "Subscription [originalId=" + originalId + ", parentId="
-                + parentId + ", id=" + id + ", creationTime=" + creationTime
-                + ", indexationTime=" + indexationTime + ", subscriberUrl="
-                + subscriberUrl + ", sparqlQuery=" + sparqlQuery + ", stubs="
-                + stubs + ", type=" + type + "]";
+        return "Subscription [originalId=" + this.originalId + ", parentId="
+                + this.parentId + ", id=" + this.id + ", creationTime="
+                + this.creationTime + ", indexationTime=" + this.indexationTime
+                + ", subscriberUrl=" + this.subscriberUrl + ", sparqlQuery="
+                + this.sparqlQuery + ", stubs=" + this.stubs + ", type="
+                + this.type + "]";
     }
 
     public static final class Stub implements Serializable {

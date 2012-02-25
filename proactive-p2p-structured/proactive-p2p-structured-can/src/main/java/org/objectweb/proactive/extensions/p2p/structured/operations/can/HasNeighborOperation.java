@@ -44,6 +44,7 @@ public class HasNeighborOperation implements SynchronousOperation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         return new BooleanResponseOperation(
                 ((CanOverlay) overlay).hasNeighbor(this.uuid));

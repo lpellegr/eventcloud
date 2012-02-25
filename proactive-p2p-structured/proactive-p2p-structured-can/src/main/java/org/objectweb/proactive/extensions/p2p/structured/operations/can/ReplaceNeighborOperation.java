@@ -46,6 +46,7 @@ public class ReplaceNeighborOperation implements SynchronousOperation {
         this.entry = entry;
     }
 
+    @Override
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         NeighborTable table = ((CanOverlay) overlay).getNeighborTable();
 

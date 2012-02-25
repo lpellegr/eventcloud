@@ -89,88 +89,106 @@ public class GCMVirtualNodeImpl implements GCMVirtualNode, Serializable {
         this.newNodeIndex = 0;
     }
 
+    @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
+    @Override
     public boolean isGreedy() {
         return false;
     }
 
+    @Override
     public boolean isReady() {
         return true;
     }
 
+    @Override
     public void waitReady() {
     }
 
+    @Override
     public void waitReady(long arg0) throws ProActiveTimeoutException {
     }
 
+    @Override
     public long getNbRequiredNodes() {
-        return nodes.size();
+        return this.nodes.size();
     }
 
+    @Override
     public long getNbCurrentNodes() {
-        return nodes.size();
+        return this.nodes.size();
     }
 
+    @Override
     public List<Node> getCurrentNodes() {
-        return nodes;
+        return this.nodes;
     }
 
+    @Override
     public List<Node> getNewNodes() {
         return new ArrayList<Node>(0);
     }
 
+    @Override
     public Node getANode() {
-        return getANode(0);
+        return this.getANode(0);
     }
 
+    @Override
     public Node getANode(int timeout) {
-        if (nodes.size() > newNodeIndex) {
-            Node node = nodes.get(newNodeIndex);
-            newNodeIndex++;
+        if (this.nodes.size() > this.newNodeIndex) {
+            Node node = this.nodes.get(this.newNodeIndex);
+            this.newNodeIndex++;
             return node;
         }
         return null;
     }
 
+    @Override
     public void subscribeNodeAttachment(Object arg0, String arg1, boolean arg2)
             throws ProActiveException {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    @Override
     public void unsubscribeNodeAttachment(Object arg0, String arg1)
             throws ProActiveException {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    @Override
     public void subscribeIsReady(Object arg0, String arg1)
             throws ProActiveException {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    @Override
     public void unsubscribeIsReady(Object arg0, String arg1)
             throws ProActiveException {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    @Override
     public Topology getCurrentTopology() {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    @Override
     public void updateTopology(Topology arg0) {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    @Override
     public UniqueID getUniqueID() {
-        return uniqueID;
+        return this.uniqueID;
     }
 }

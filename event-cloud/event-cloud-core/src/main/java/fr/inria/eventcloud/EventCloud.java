@@ -78,7 +78,7 @@ public class EventCloud implements EventCloudApi, Serializable {
     private void initializeNetwork(int nbTrackers, int nbPeers) {
         this.deployer.deploy(nbTrackers, nbPeers);
 
-        for (Tracker tracker : deployer.getTrackers()) {
+        for (Tracker tracker : this.deployer.getTrackers()) {
             this.trackers.add((SemanticTracker) tracker);
             this.trackerUrls.add(PAActiveObject.getUrl(tracker));
         }

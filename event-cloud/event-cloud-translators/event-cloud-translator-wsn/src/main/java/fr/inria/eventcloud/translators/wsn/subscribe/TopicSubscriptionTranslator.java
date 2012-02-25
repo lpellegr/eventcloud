@@ -49,6 +49,7 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
      * 
      * @return a SPARQL query corresponding to the topic-based subscription.
      */
+    @Override
     @SuppressWarnings("unchecked")
     public String translate(Subscribe subscription) throws TranslationException {
         FilterType filterType = subscription.getFilter();

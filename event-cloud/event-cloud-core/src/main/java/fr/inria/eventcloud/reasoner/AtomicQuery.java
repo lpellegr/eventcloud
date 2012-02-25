@@ -79,7 +79,7 @@ public final class AtomicQuery {
     }
 
     public int getVarIndex(String varName) {
-        Integer result = vars.get(varName);
+        Integer result = this.vars.get(varName);
         if (result == null) {
             return -1;
         }
@@ -88,7 +88,7 @@ public final class AtomicQuery {
     }
 
     public boolean hasVariable(String varName) {
-        return getVarIndex(varName) != -1;
+        return this.getVarIndex(varName) != -1;
     }
 
     public ParentQueryForm getParentQueryForm() {

@@ -33,9 +33,9 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
+import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
-import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

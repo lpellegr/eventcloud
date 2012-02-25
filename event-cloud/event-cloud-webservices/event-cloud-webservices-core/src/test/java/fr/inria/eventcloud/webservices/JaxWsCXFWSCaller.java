@@ -47,45 +47,47 @@ public class JaxWsCXFWSCaller implements PAWSCaller {
     public JaxWsCXFWSCaller() {
     }
 
+    @Override
     public void setup(Class<?> serviceClass, String wsUrl) {
         JaxWsClientFactoryBean factory = new JaxWsClientFactoryBean();
         factory.setServiceClass(serviceClass);
         factory.setAddress(wsUrl);
-        client = factory.create();
+        this.client = factory.create();
 
-        operationNames = new HashMap<String, String>();
+        this.operationNames = new HashMap<String, String>();
         Method[] methods = serviceClass.getMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(WebMethod.class)) {
                 WebMethod webMethodAnnotation =
                         method.getAnnotation(WebMethod.class);
                 if (!webMethodAnnotation.operationName().equals("")) {
-                    operationNames.put(
+                    this.operationNames.put(
                             method.getName(),
                             webMethodAnnotation.operationName());
                     continue;
                 }
             }
-            operationNames.put(method.getName(), method.getName());
+            this.operationNames.put(method.getName(), method.getName());
         }
     }
 
+    @Override
     public Object callWS(String methodName, Object[] args, Class<?> returnType) {
-        if (client != null) {
+        if (this.client != null) {
             try {
                 Object[] results =
-                        client.invoke(operationNames.get(methodName), args);
+                        this.client.invoke(
+                                this.operationNames.get(methodName), args);
                 if (returnType == null) {
                     return null;
                 } else {
                     return results[0];
                 }
             } catch (Exception e) {
-                log.error(
-                        "[JaxWsCXFWSCaller] Failed to invoke web service: "
-                                + client.getEndpoint()
-                                        .getEndpointInfo()
-                                        .getAddress(), e);
+                log.error("[JaxWsCXFWSCaller] Failed to invoke web service: "
+                        + this.client.getEndpoint()
+                                .getEndpointInfo()
+                                .getAddress(), e);
             }
         } else {
             log.error("[JaxWsCXFWSCaller] Cannot invoke web service since the set up has not been done");

@@ -53,7 +53,7 @@ public abstract class EventCloudProxyService<T extends Proxy> {
     @PostConstruct
     public void init() {
         this.proxy = this.createProxy();
-        log.info("{} proxy deployed", proxy.getClass().getName());
+        log.info("{} proxy deployed", this.proxy.getClass().getName());
     }
 
     public abstract T createProxy();

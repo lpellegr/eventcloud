@@ -79,8 +79,9 @@ public class SchedulerNodeProvider {
         this.nodeProviderJobs = new HashMap<UniqueID, NodeProviderJob>();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
             public void run() {
-                releaseAllNodes();
+                SchedulerNodeProvider.this.releaseAllNodes();
             }
         });
     }

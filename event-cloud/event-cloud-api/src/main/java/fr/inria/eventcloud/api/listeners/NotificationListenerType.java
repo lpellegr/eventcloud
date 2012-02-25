@@ -41,10 +41,12 @@ public enum NotificationListenerType
         this.value = value;
     }
 
+    @Override
     public short convert() {
-        return value;
+        return this.value;
     }
 
+    @Override
     public NotificationListenerType convert(short val) {
         return map.get(val);
     }

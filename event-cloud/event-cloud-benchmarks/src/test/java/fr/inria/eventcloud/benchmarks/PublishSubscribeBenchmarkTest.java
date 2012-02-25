@@ -165,21 +165,23 @@ public class PublishSubscribeBenchmarkTest {
                     createNotificationListener(this.notificationListenerType));
         }
 
-        receiveExpectedEventsStopwatch.start();
+        this.receiveExpectedEventsStopwatch.start();
 
         boolean running = true;
         while (running) {
-            for (int i = 0; i < nbPublishers; i++) {
+            for (int i = 0; i < this.nbPublishers; i++) {
                 final PublishProxy publishProxy = publishProxies.get(i);
 
-                if (nbEventsPublished.getValue() <= expectedNbEvents) {
-                    threadPool.submit(new Runnable() {
+                if (this.nbEventsPublished.getValue() <= this.expectedNbEvents) {
+                    this.threadPool.submit(new Runnable() {
                         @Override
                         public void run() {
-                            publish(publishProxy, supplier);
+                            PublishSubscribeBenchmarkTest.this.publish(
+                                    publishProxy,
+                                    PublishSubscribeBenchmarkTest.this.supplier);
                         }
                     });
-                    nbEventsPublished.add(1);
+                    this.nbEventsPublished.add(1);
                 } else {
                     running = false;
                     break;
@@ -189,7 +191,7 @@ public class PublishSubscribeBenchmarkTest {
 
         // waits to receive at least the number of expected events
         synchronized (nbEventsReceivedBySubscriber) {
-            while (!allEventsReceived()) {
+            while (!this.allEventsReceived()) {
                 try {
                     nbEventsReceivedBySubscriber.wait();
                 } catch (InterruptedException e) {
@@ -198,16 +200,16 @@ public class PublishSubscribeBenchmarkTest {
             }
         }
 
-        receiveExpectedEventsStopwatch.stop();
+        this.receiveExpectedEventsStopwatch.stop();
 
         log.info(
                 "It takes {} to receive {} events (~{} per second) with {} peer(s), {} publisher(s) and {} subscriber(s) using {}",
                 new Object[] {
-                        receiveExpectedEventsStopwatch,
+                        this.receiveExpectedEventsStopwatch,
                         this.expectedNbEvents,
-                        ((this.expectedNbEvents * 10e2) / receiveExpectedEventsStopwatch.elapsedMillis()),
+                        ((this.expectedNbEvents * 10e2) / this.receiveExpectedEventsStopwatch.elapsedMillis()),
                         this.nbPeers, this.nbPublishers, this.nbSubscribers,
-                        notificationListenerType.getSimpleName()});
+                        this.notificationListenerType.getSimpleName()});
 
         // System.err.println("DUMP:\n"
         // + deployer.getRandomSemanticPeer(ecId).dump());

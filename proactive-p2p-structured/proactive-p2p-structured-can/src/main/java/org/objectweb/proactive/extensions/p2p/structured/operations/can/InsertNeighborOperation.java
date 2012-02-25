@@ -90,6 +90,7 @@ public class InsertNeighborOperation implements SynchronousOperation {
     /**
      * {@inheritDoc}
      */
+    @Override
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         ((CanOverlay) overlay).getNeighborTable().get(
                 this.dimension, this.direction).put(

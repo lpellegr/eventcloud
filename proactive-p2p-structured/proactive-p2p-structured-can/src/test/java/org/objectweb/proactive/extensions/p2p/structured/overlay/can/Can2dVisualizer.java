@@ -114,22 +114,23 @@ public class Can2dVisualizer extends JFrame {
         this.joinButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mode = Mode.JOIN;
-                joinButton.setBackground(new ColorUIResource(127, 238, 38));
+                Can2dVisualizer.this.mode = Mode.JOIN;
+                Can2dVisualizer.this.joinButton.setBackground(new ColorUIResource(
+                        127, 238, 38));
             }
         });
         this.leaveButton = new JButton("Leave");
         this.leaveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mode = Mode.LEAVE;
+                Can2dVisualizer.this.mode = Mode.LEAVE;
             }
         });
         this.neighborsModeButton = new JButton("Neighbors Mode");
         this.neighborsModeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mode = Mode.SHOW_NEIGHBORS;
+                Can2dVisualizer.this.mode = Mode.SHOW_NEIGHBORS;
             }
         });
 
@@ -163,12 +164,14 @@ public class Can2dVisualizer extends JFrame {
             super.setPreferredSize(new Dimension(width, height));
 
             this.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(MouseEvent e) {
                     PeerEntry entry =
-                            cache.findBy(e.getX(), CANVAS_HEIGHT - e.getY());
+                            Can2dVisualizer.this.cache.findBy(
+                                    e.getX(), CANVAS_HEIGHT - e.getY());
 
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        if (mode == Mode.JOIN) {
+                        if (Can2dVisualizer.this.mode == Mode.JOIN) {
                             Peer newPeer =
                                     PeerFactory.newActivePeer(SerializableProvider.create(CanOverlay.class));
                             try {
@@ -177,18 +180,18 @@ public class Can2dVisualizer extends JFrame {
                                 ex.printStackTrace();
                             }
 
-                            cache.addEntry(newPeer);
-                            cache.invalidate();
-                        } else if (mode == Mode.LEAVE) {
+                            Can2dVisualizer.this.cache.addEntry(newPeer);
+                            Can2dVisualizer.this.cache.invalidate();
+                        } else if (Can2dVisualizer.this.mode == Mode.LEAVE) {
                             try {
                                 entry.getStub().leave();
                             } catch (NetworkNotJoinedException e1) {
                                 e1.printStackTrace();
                             }
 
-                            cache.removeEntry(entry.getId());
-                            cache.invalidate();
-                        } else if (mode == Mode.SHOW_NEIGHBORS) {
+                            Can2dVisualizer.this.cache.removeEntry(entry.getId());
+                            Can2dVisualizer.this.cache.invalidate();
+                        } else if (Can2dVisualizer.this.mode == Mode.SHOW_NEIGHBORS) {
                             Canvas.this.zoneClicked = entry.getZone();
                         }
 
@@ -199,7 +202,7 @@ public class Can2dVisualizer extends JFrame {
                                 + entry.getZone().getNumericView() + " <-> "
                                 + entry.getZone());
                     } else if (e.getButton() == MouseEvent.BUTTON3) {
-                        for (PeerEntry peerEntry : cache) {
+                        for (PeerEntry peerEntry : Can2dVisualizer.this.cache) {
                             peerEntry.setZoneColor(getRandomColor());
                         }
                         Canvas.this.repaint();
@@ -240,6 +243,7 @@ public class Can2dVisualizer extends JFrame {
             return (int) Math.round(CANVAS_WIDTH * v);
         }
 
+        @Override
         public void paintComponent(Graphics g) {
             final Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(
@@ -247,7 +251,7 @@ public class Can2dVisualizer extends JFrame {
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
             int height, xMin, xMax, yMin, yMax;
-            for (PeerEntry entry : cache) {
+            for (PeerEntry entry : Can2dVisualizer.this.cache) {
                 Zone zone = entry.getZone();
                 xMin = this.getXmin(zone);
                 xMax = this.getXmax(zone);
@@ -281,8 +285,8 @@ public class Can2dVisualizer extends JFrame {
 
                 for (int i = 0; i < 2; i++) {
                     for (int j = 0; j < 2; j++) {
-                        for (Zone zone : cache.findBy(this.zoneClicked)
-                                .getNeighbors()) {
+                        for (Zone zone : Can2dVisualizer.this.cache.findBy(
+                                this.zoneClicked).getNeighbors()) {
                             xMin = this.getXmin(zone);
                             xMax = this.getXmax(zone);
                             yMin = this.getYmin(zone);
@@ -434,7 +438,7 @@ public class Can2dVisualizer extends JFrame {
                 for (byte dir = 0; dir < 2; dir++) {
                     table = CanOperations.getNeighborTable(peerStub);
                     for (NeighborEntry entry : table.get(dim, dir).values()) {
-                        neighbors.add((Zone) entry.getZone());
+                        neighbors.add(entry.getZone());
                     }
                 }
             }
@@ -462,6 +466,7 @@ public class Can2dVisualizer extends JFrame {
         }
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new Can2dVisualizer(peers).setVisible(true);
             }

@@ -52,6 +52,7 @@ public class DoubleElement extends Element<Double> {
      * 
      * @return the value associated to this element.
      */
+    @Override
     public Double getValue() {
         return this.value;
     }

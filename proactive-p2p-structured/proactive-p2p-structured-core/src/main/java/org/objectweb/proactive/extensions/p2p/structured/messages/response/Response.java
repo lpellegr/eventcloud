@@ -72,6 +72,7 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
      * 
      * @return the timestamp associated the dispatch of the initial query.
      */
+    @Override
     public long getDispatchTimestamp() {
         return this.dispatchTimestamp;
     }

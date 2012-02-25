@@ -58,10 +58,11 @@ public class NodeProviderTask extends JavaExecutable {
 
     private UniqueID nodeRequestID;
 
+    @Override
     public Serializable execute(TaskResult... arg0) throws Throwable {
         if (logger.isDebugEnabled()) {
             logger.debug("Node provider task for node request #"
-                    + nodeRequestID + " has started");
+                    + this.nodeRequestID + " has started");
         }
 
         NodeProviderTaskHolder taskHolder =
@@ -76,7 +77,7 @@ public class NodeProviderTask extends JavaExecutable {
 
         if (logger.isDebugEnabled()) {
             logger.debug("Node provider task for node request #"
-                    + nodeRequestID + " has terminated");
+                    + this.nodeRequestID + " has terminated");
         }
 
         return null;
@@ -123,7 +124,7 @@ public class NodeProviderTask extends JavaExecutable {
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Node provider task for node request #"
-                        + nodeRequestID + " has registered to registry");
+                        + this.nodeRequestID + " has registered to registry");
             }
         }
 
@@ -132,7 +133,7 @@ public class NodeProviderTask extends JavaExecutable {
                 return PAActiveObject.getNode();
             } catch (NodeException ne) {
                 logger.error("Unable to get Node for node request #"
-                        + nodeRequestID + ": " + ne.getMessage(), ne);
+                        + this.nodeRequestID + ": " + ne.getMessage(), ne);
 
                 return null;
             }

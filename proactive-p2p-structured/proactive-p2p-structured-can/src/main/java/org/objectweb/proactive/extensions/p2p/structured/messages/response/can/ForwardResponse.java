@@ -58,6 +58,7 @@ public class ForwardResponse extends Response<StringCoordinate> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public UnicastResponseRouter<ForwardResponse> getRouter() {
         return new UnicastResponseRouter<ForwardResponse>();
     }
