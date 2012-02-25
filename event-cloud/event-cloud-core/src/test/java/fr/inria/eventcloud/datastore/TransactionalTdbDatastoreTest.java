@@ -26,7 +26,7 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -118,7 +118,7 @@ public final class TransactionalTdbDatastoreTest {
             executor.execute(new Runnable() {
                 public void run() {
                     try {
-                        if (ProActiveRandom.nextInt(2) == 0) {
+                        if (RandomUtils.nextInt(2) == 0) {
                             TransactionalDatasetGraph txnGraph = null;
                             txnGraph = datastore.begin(AccessMode.WRITE);
 

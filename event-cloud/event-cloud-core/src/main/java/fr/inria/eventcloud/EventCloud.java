@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,7 +194,7 @@ public class EventCloud implements EventCloudApi, Serializable {
     @Override
     public SemanticTracker selectTracker() {
         // TODO use a metric (e.g. according to the load) to select a tracker
-        return this.trackers.get(ProActiveRandom.nextInt(this.trackers.size()));
+        return this.trackers.get(RandomUtils.nextInt(this.trackers.size()));
     }
 
 }

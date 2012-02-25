@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedRuntimeException;
@@ -52,6 +51,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,7 +200,7 @@ public class CanOverlay extends StructuredOverlay {
 
         // TODO: choose a metric to evaluate the nearest peer
         NeighborEntry entry =
-                neighbors.get(ProActiveRandom.nextInt(neighbors.size()));
+                neighbors.get(RandomUtils.nextInt(neighbors.size()));
         if (log.isDebugEnabled()) {
             if (this.zone.neighbors(entry.getZone()) == -1) {
                 log.error("Neighbor chosen to route the message is "
@@ -314,7 +314,7 @@ public class CanOverlay extends StructuredOverlay {
      * @return a random dimension number.
      */
     public static byte getRandomDimension() {
-        return (byte) ProActiveRandom.nextInt(P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue());
+        return (byte) RandomUtils.nextInt(P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue());
     }
 
     /**
@@ -323,7 +323,7 @@ public class CanOverlay extends StructuredOverlay {
      * @return a random direction number.
      */
     public static byte getRandomDirection() {
-        return (byte) ProActiveRandom.nextInt(2);
+        return (byte) RandomUtils.nextInt(2);
     }
 
     /**
@@ -671,7 +671,7 @@ public class CanOverlay extends StructuredOverlay {
 
     private void retryLeave() {
         int timeout =
-                ProActiveRandom.nextInt(P2PStructuredProperties.CAN_LEAVE_RETRY_MAX.getValue()
+                RandomUtils.nextInt(P2PStructuredProperties.CAN_LEAVE_RETRY_MAX.getValue()
                         - P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue())
                         + P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue();
 

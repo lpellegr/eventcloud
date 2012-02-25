@@ -23,11 +23,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Observable;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -264,7 +264,7 @@ public abstract class NetworkDeployer extends
      * @return a tracker randomly selected from the network.
      */
     public Tracker getRandomTracker() {
-        return this.trackers[ProActiveRandom.nextInt(this.trackers.length)];
+        return this.trackers[RandomUtils.nextInt(this.trackers.length)];
     }
 
     /**
