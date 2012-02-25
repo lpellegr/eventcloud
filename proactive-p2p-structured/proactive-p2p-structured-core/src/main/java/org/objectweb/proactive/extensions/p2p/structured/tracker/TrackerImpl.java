@@ -35,6 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -347,7 +348,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
      */
     @Override
     public Peer getRandomPeer() {
-        return this.peers.get(ProActiveRandom.nextInt(this.peers.size()));
+        return this.peers.get(RandomUtils.nextInt(this.peers.size()));
     }
 
     /**

@@ -42,7 +42,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.ColorUIResource;
 
-import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanActiveObjectsNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
@@ -54,6 +53,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 
 /**
  * This class is used to draw a canvas that shows a Content-Addressable Network
@@ -96,9 +96,9 @@ public class Can2dVisualizer extends JFrame {
     }
 
     private static Color getRandomColor() {
-        int r = ProActiveRandom.nextInt(256);
-        int v = ProActiveRandom.nextInt(256);
-        int b = ProActiveRandom.nextInt(256);
+        int r = RandomUtils.nextInt(256);
+        int v = RandomUtils.nextInt(256);
+        int b = RandomUtils.nextInt(256);
 
         if (r + v + b < 420) {
             return getRandomColor();

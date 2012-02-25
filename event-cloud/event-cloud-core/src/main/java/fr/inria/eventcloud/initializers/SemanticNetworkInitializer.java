@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.initializers;
 
-import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 
 /**
  * Defines and store many informations which are commons to all network
@@ -37,7 +37,7 @@ public abstract class SemanticNetworkInitializer<T> {
     public abstract void tearDownNetwork();
 
     public T getRandomTracker() {
-        return this.trackers[ProActiveRandom.nextInt(this.trackers.length)];
+        return this.trackers[RandomUtils.nextInt(this.trackers.length)];
     }
 
     public T[] getTrackers() {

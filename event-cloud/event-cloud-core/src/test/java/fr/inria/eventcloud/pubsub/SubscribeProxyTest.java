@@ -29,7 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.core.util.MutableInteger;
-import org.objectweb.proactive.core.util.ProActiveRandom;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +122,7 @@ public class SubscribeProxyTest {
                     Node graphValue =
                             Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
                                     + "/" + UUID.randomUUID().toString());
-                    for (int j = 0; j < 1 + ProActiveRandom.nextInt(30); j++) {
+                    for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
                         quadruples.add(QuadrupleGenerator.random(graphValue));
                     }
 
@@ -132,7 +132,7 @@ public class SubscribeProxyTest {
 
                     publishProxy.publish(new CompoundEvent(quadruples));
                 }
-                // }, 0, 50 + ProActiveRandom.nextInt((i + 1) * 500),
+                // }, 0, 50 + RandomUtils.nextInt((i + 1) * 500),
             }, 0, (i + 1) * 500, TimeUnit.MILLISECONDS);
         }
 
@@ -386,7 +386,7 @@ public class SubscribeProxyTest {
             quads.add(new Quadruple(
                     graphId, subject, Node.createURI("urn:weather:avgtemp"),
                     Node.createLiteral(
-                            Integer.toString(ProActiveRandom.nextInt(30)),
+                            Integer.toString(RandomUtils.nextInt(30)),
                             XSDDatatype.XSDint)));
             quads.add(new Quadruple(
                     graphId, subject, Node.createURI("urn:weather:datetime"),
