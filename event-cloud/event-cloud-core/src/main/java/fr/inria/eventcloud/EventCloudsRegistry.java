@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -72,7 +74,10 @@ public class EventCloudsRegistry {
      *         managed by the registry.
      */
     public Set<EventCloudId> listEventClouds() {
-        return this.eventclouds.keySet();
+        // returns an immutable copy because this.eventclouds.keySet() sends
+        // back a non-serializable set
+        return ImmutableSet.copyOf(this.eventclouds.keySet());
+
     }
 
     /**
