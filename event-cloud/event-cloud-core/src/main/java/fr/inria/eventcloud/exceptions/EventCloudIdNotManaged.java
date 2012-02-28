@@ -31,8 +31,10 @@ public class EventCloudIdNotManaged extends Exception {
         super();
     }
 
-    public EventCloudIdNotManaged(String eventcloudsRegistryUrl) {
-        super("Eventcloud identifier not managed by eventclouds registry "
+    public EventCloudIdNotManaged(String eventcloudId,
+            String eventcloudsRegistryUrl) {
+        super("Eventcloud identifier " + eventcloudId
+                + " not managed by eventclouds registry "
                 + eventcloudsRegistryUrl);
     }
 
