@@ -29,6 +29,7 @@ import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -53,13 +54,18 @@ public class EventCloudCache implements EventCloudApi, Serializable {
      * TODO: add a thread that updates periodically the trackers.
      */
 
-    public EventCloudCache(String registryUrl, EventCloudId eventcloudId) {
+    public EventCloudCache(String registryUrl, EventCloudId eventcloudId)
+            throws EventCloudIdNotManaged {
         try {
             this.registry =
                     PAActiveObject.lookupActive(
                             EventCloudsRegistry.class, registryUrl);
 
             this.delegate = this.registry.find(eventcloudId);
+
+            if (this.delegate == null) {
+                throw new EventCloudIdNotManaged(registryUrl);
+            }
         } catch (ActiveObjectCreationException e) {
             throw new IllegalStateException(e);
         } catch (IOException e) {
@@ -67,11 +73,17 @@ public class EventCloudCache implements EventCloudApi, Serializable {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public EventCloudId getId() {
         return this.delegate.getId();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getCreationTime() {
         return this.delegate.getCreationTime();
@@ -85,26 +97,41 @@ public class EventCloudCache implements EventCloudApi, Serializable {
         return this.delegate.getEventCloudDeployer();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<UnalterableElaProperty> getElaProperties() {
         return this.delegate.getElaProperties();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getRegistryUrl() {
         return this.delegate.getRegistryUrl();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> getTrackerUrls() {
         return this.delegate.getTrackerUrls();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<SemanticTracker> getTrackers() {
         return this.delegate.getTrackers();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SemanticTracker selectTracker() {
         return this.delegate.selectTracker();

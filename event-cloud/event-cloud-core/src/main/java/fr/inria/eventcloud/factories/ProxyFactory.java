@@ -43,6 +43,7 @@ import com.google.common.collect.MapMaker;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
@@ -108,8 +109,12 @@ public class ProxyFactory implements Serializable {
      *            the Event-Cloud registry url.
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
+     * 
+     * @throws EventCloudIdNotManaged
+     *             if the specified registry does not managed the given id.
      */
-    protected ProxyFactory(String registryUrl, EventCloudId id) {
+    protected ProxyFactory(String registryUrl, EventCloudId id)
+            throws EventCloudIdNotManaged {
         this.eventCloudProxy = new EventCloudCache(registryUrl, id);
     }
 
@@ -217,8 +222,12 @@ public class ProxyFactory implements Serializable {
      * 
      * @return an instance of a ProxyFactory that is specialized to create
      *         proxies for the given {@link EventCloudId}.
+     * 
+     * @throws EventCloudIdNotManaged
+     *             if the specified registry does not managed the given id.
      */
-    public static ProxyFactory getInstance(String registryUrl, EventCloudId id) {
+    public static ProxyFactory getInstance(String registryUrl, EventCloudId id)
+            throws EventCloudIdNotManaged {
         ProxyFactory newFactory = new ProxyFactory(registryUrl, id);
 
         ProxyFactory oldFactory = proxies.putIfAbsent(id, newFactory);

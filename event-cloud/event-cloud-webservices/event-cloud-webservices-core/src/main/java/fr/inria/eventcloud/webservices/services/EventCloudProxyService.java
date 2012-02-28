@@ -21,6 +21,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -52,10 +53,14 @@ public abstract class EventCloudProxyService<T extends Proxy> {
 
     @PostConstruct
     public void init() {
-        this.proxy = this.createProxy();
-        log.info("{} proxy deployed", this.proxy.getClass().getName());
+        try {
+            this.proxy = this.createProxy();
+            log.info("{} proxy deployed", this.proxy.getClass().getName());
+        } catch (EventCloudIdNotManaged e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    public abstract T createProxy();
+    public abstract T createProxy() throws EventCloudIdNotManaged;
 
 }

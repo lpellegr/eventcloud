@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.webservices.factories;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
 
@@ -46,12 +47,17 @@ public final class WsProxyFactory extends ProxyFactory {
      *            the Event-Cloud registry url.
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
+     * 
+     * @throws EventCloudIdNotManaged
+     *             if the specified registry does not managed the given id.
      */
-    private WsProxyFactory(String registryUrl, EventCloudId id) {
+    private WsProxyFactory(String registryUrl, EventCloudId id)
+            throws EventCloudIdNotManaged {
         super(registryUrl, id);
     }
 
-    public static ProxyFactory getInstance(String registryUrl, EventCloudId id) {
+    public static ProxyFactory getInstance(String registryUrl, EventCloudId id)
+            throws EventCloudIdNotManaged {
         ProxyFactory newFactory = new WsProxyFactory(registryUrl, id);
 
         ProxyFactory oldFactory = proxies.putIfAbsent(id, newFactory);
