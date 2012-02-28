@@ -64,7 +64,8 @@ public class EventCloudCache implements EventCloudApi, Serializable {
             this.delegate = this.registry.find(eventcloudId);
 
             if (this.delegate == null) {
-                throw new EventCloudIdNotManaged(registryUrl);
+                throw new EventCloudIdNotManaged(
+                        eventcloudId.toString(), registryUrl);
             }
         } catch (ActiveObjectCreationException e) {
             throw new IllegalStateException(e);

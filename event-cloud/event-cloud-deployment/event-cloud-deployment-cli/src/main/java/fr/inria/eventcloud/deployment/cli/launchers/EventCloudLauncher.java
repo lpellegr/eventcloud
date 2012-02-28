@@ -64,6 +64,13 @@ public final class EventCloudLauncher extends Launcher {
                         new ArrayList<UnalterableElaProperty>(),
                         this.nbTrackers, this.nbPeers);
 
+        if (!eventCloud.register()) {
+            throw new IllegalStateException("Eventcloud with id "
+                    + eventCloud.getId()
+                    + " is already registered into the eventclouds registry "
+                    + this.registryUrl);
+        }
+
         StringBuilder result = new StringBuilder();
         result.append(this.nbTrackers);
         result.append(" ");
