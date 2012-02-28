@@ -50,6 +50,7 @@ import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -85,7 +86,7 @@ public class SubscribeProxyTest {
     private PublishProxy publishProxy;
 
     @Before
-    public void setUp() {
+    public void setUp() throws EventCloudIdNotManaged {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
         this.eventCloudId = this.deployer.createEventCloud(5);
 

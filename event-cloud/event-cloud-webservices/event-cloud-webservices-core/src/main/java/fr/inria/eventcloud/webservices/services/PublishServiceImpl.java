@@ -43,6 +43,7 @@ import org.w3c.dom.Element;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
@@ -104,7 +105,7 @@ public class PublishServiceImpl extends
      * {@inheritDoc}
      */
     @Override
-    public PublishProxy createProxy() {
+    public PublishProxy createProxy() throws EventCloudIdNotManaged {
         return ProxyFactory.getInstance(
                 super.registryUrl, new EventCloudId(super.streamUrl))
                 .createPublishProxy();

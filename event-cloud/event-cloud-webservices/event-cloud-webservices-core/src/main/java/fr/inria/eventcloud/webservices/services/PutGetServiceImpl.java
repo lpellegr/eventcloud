@@ -27,6 +27,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
@@ -145,7 +146,7 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetProxy>
      * {@inheritDoc}
      */
     @Override
-    public PutGetProxy createProxy() {
+    public PutGetProxy createProxy() throws EventCloudIdNotManaged {
         return ProxyFactory.getInstance(
                 super.registryUrl, new EventCloudId(super.streamUrl))
                 .createPutGetProxy();

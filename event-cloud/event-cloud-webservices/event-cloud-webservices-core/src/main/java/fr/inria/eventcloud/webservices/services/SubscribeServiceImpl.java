@@ -47,6 +47,7 @@ import org.w3c.dom.Element;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
@@ -145,7 +146,7 @@ public class SubscribeServiceImpl extends
      * {@inheritDoc}
      */
     @Override
-    public SubscribeProxy createProxy() {
+    public SubscribeProxy createProxy() throws EventCloudIdNotManaged {
         return ProxyFactory.getInstance(
                 super.registryUrl, new EventCloudId(super.streamUrl))
                 .createSubscribeProxy();

@@ -49,6 +49,7 @@ import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.deployment.DatastoreType;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -126,7 +127,7 @@ public class PublishSubscribeBenchmarkTest {
     }
 
     @Test(timeout = 1800000)
-    public void execute() {
+    public void execute() throws EventCloudIdNotManaged {
         log.info(
                 "Benchmark with {} peer(s), {} publisher(s) and {} subscriber(s) using {}",
                 new Object[] {
