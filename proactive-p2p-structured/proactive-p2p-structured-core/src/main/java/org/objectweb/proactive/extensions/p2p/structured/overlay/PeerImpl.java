@@ -50,8 +50,8 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public class PeerImpl implements Peer, ComponentInitActive, ComponentEndActive,
-        Serializable {
+public class PeerImpl implements Peer, PeerAttributeController,
+        ComponentInitActive, ComponentEndActive, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -73,7 +73,6 @@ public class PeerImpl implements Peer, ComponentInitActive, ComponentEndActive,
         body.setImmediateService("receiveImmediateService", false);
 
         // these methods do not change the state of the peer
-        body.setImmediateService("init", false);
         body.setImmediateService("equals", false);
         body.setImmediateService("getId", false);
         body.setImmediateService("hashCode", false);
@@ -112,14 +111,10 @@ public class PeerImpl implements Peer, ComponentInitActive, ComponentEndActive,
      * {@inheritDoc}
      */
     @Override
-    public boolean init(Peer stub,
-                        SerializableProvider<? extends StructuredOverlay> overlay) {
-        if (this.overlay == null) {
-            this.overlay = overlay.get();
-            this.overlay.stub = stub;
-        }
-
-        return true;
+    public void setAttributes(Peer stub,
+                              SerializableProvider<? extends StructuredOverlay> overlayProvider) {
+        this.overlay = overlayProvider.get();
+        this.overlay.stub = stub;
     }
 
     /**

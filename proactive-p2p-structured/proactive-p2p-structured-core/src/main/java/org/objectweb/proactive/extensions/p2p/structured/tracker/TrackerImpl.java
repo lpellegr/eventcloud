@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public class TrackerImpl implements Tracker, ComponentInitActive,
-        ComponentEndActive {
+public class TrackerImpl implements Tracker, TrackerAttributeController,
+        ComponentInitActive, ComponentEndActive {
 
     private static final long serialVersionUID = 1L;
 
@@ -86,8 +86,6 @@ public class TrackerImpl implements Tracker, ComponentInitActive,
      */
     @Override
     public void initComponentActivity(Body body) {
-        body.setImmediateService("init", false);
-
         this.id = UUID.randomUUID();
 
         this.probabilityToStorePeer =
@@ -131,11 +129,9 @@ public class TrackerImpl implements Tracker, ComponentInitActive,
      * {@inheritDoc}
      */
     @Override
-    public void init(Tracker stub, String networkName) {
-        if (this.stub == null) {
-            this.stub = stub;
-            this.networkName = networkName;
-        }
+    public void setAttributes(Tracker stub, String networkName) {
+        this.stub = stub;
+        this.networkName = networkName;
     }
 
     /**

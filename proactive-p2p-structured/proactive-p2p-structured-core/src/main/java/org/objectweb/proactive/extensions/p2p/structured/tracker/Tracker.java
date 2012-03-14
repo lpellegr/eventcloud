@@ -49,19 +49,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 public interface Tracker extends Serializable {
 
     /**
-     * The init method is a convenient method for components which is used to
-     * initialize a {@link Tracker}. Once this method is called and the stub
-     * value is set, the next calls perform no action.
-     * 
-     * @param stub
-     *            the tracker remote reference.
-     * 
-     * @param networkName
-     *            the network name to use.
-     */
-    public void init(Tracker stub, String networkName);
-
-    /**
      * Drives the current tracker to join the specified {@code landmarkTracker}.
      * 
      * @param landmarkTracker

@@ -36,9 +36,13 @@ import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
@@ -54,6 +58,9 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * @author bsauvan
  */
 public final class SemanticFactory {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(SemanticFactory.class);
 
     private static Factory factory;
 
@@ -171,10 +178,18 @@ public final class SemanticFactory {
                     (Component) factory.newComponent(
                             EventCloudProperties.SEMANTIC_TRACKER_ADL.getValue(),
                             context);
+
             SemanticTracker stub =
                     (SemanticTracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
-            stub.init(stub, networkName);
+            ((TrackerAttributeController) GCM.getAttributeController(tracker)).setAttributes(
+                    stub, networkName);
+
             GCM.getGCMLifeCycleController(tracker).startFc();
+
+            logger.info(
+                    "SemanticTracker {} associated to network named '{}' has been created",
+                    stub.getId(), networkName);
+
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();
@@ -282,10 +297,16 @@ public final class SemanticFactory {
                     (Component) factory.newComponent(
                             EventCloudProperties.SEMANTIC_PEER_ADL.getValue(),
                             context);
+
             SemanticPeer stub =
                     (SemanticPeer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+            ((PeerAttributeController) GCM.getAttributeController(peer)).setAttributes(
+                    stub, overlayProvider);
+
             GCM.getGCMLifeCycleController(peer).startFc();
-            stub.init(stub, overlayProvider);
+
+            logger.info("SemanticPeer {} has been created", stub.getId());
+
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();

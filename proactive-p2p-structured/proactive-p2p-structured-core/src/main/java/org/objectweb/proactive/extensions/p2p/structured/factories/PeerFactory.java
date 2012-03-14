@@ -33,10 +33,13 @@ import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides some static methods in order to ease the creation of peer
@@ -46,6 +49,9 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
  * @author bsauvan
  */
 public final class PeerFactory {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(PeerFactory.class);
 
     private static Factory factory;
 
@@ -151,8 +157,12 @@ public final class PeerFactory {
 
             Peer stub =
                     (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
-            stub.init(stub, overlayProvider);
+            ((PeerAttributeController) GCM.getAttributeController(peer)).setAttributes(
+                    stub, overlayProvider);
+
             GCM.getGCMLifeCycleController(peer).startFc();
+
+            logger.info("Peer {} has been created", stub.getId());
 
             return stub;
         } catch (ADLException e) {

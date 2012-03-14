@@ -6,5 +6,7 @@
 
 	<content class="org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl"/>
 
+	<attributes signature="org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController"/>
+
 	<virtual-node name="TrackerVN"/>
 </definition>
