@@ -4,7 +4,7 @@
 <definition name="org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker">
 	<interface role="server" name="tracker-services" signature="org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker"/>
 
-	<content class="org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerComponentImpl"/>
+	<content class="org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl"/>
 
 	<virtual-node name="TrackerVN"/>
 </definition>

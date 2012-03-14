@@ -27,8 +27,7 @@ import java.util.concurrent.Future;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodParameterizedCanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
@@ -42,12 +41,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
  * 
  * @author lpellegr
  */
-public class JoinOperationTest extends
-        JunitByMethodParameterizedCanNetworkDeployer {
-
-    public JoinOperationTest(NetworkDeployer deployer) {
-        super(deployer);
-    }
+public class JoinOperationTest extends JunitByMethodCanNetworkDeployer {
 
     @Test
     public void testNeighborsAfterJoinOperationWithTwoPeers() {
@@ -103,7 +97,7 @@ public class JoinOperationTest extends
     @Test
     public void testConcurrentJoin() {
         final Peer landmarkPeer =
-                PeerFactory.newActivePeer(SerializableProvider.create(CanOverlay.class));
+                PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class));
         try {
             landmarkPeer.create();
         } catch (StructuredP2PException e) {
@@ -114,7 +108,7 @@ public class JoinOperationTest extends
 
         List<Peer> peers = new ArrayList<Peer>(nbPeersToJoin);
         for (int i = 0; i < nbPeersToJoin; i++) {
-            peers.add(PeerFactory.newActivePeer(SerializableProvider.create(CanOverlay.class)));
+            peers.add(PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class)));
         }
 
         ExecutorService threadPool =

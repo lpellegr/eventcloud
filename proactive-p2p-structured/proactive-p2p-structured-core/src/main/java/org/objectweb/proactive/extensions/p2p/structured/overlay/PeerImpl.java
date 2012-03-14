@@ -20,9 +20,9 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.EndActive;
-import org.objectweb.proactive.InitActive;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.core.component.body.ComponentEndActive;
+import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
@@ -45,11 +45,13 @@ import org.slf4j.LoggerFactory;
  * and test).
  * <p>
  * Warning, this class must not be instantiate directly. In order to create a
- * new active peer you have to use the {@link PeerFactory}.
+ * new peer component you have to use the {@link PeerFactory}.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
-public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
+public class PeerImpl implements Peer, ComponentInitActive, ComponentEndActive,
+        Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,46 +60,20 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
     protected transient StructuredOverlay overlay;
 
     /**
-     * The no-argument constructor as commanded by ProActive.
+     * No-arg constructor for ProActive.
      */
     public PeerImpl() {
     }
 
     /**
-     * Constructs a new peer using the specified overlay. Warning, you must use
-     * {@link PeerFactory} to instantiate a new active peer.
-     * 
-     * @param overlayProvider
-     *            the provider to use for creating the {@link StructuredOverlay}
-     *            embedded by the peer.
-     */
-    public PeerImpl(
-            SerializableProvider<? extends StructuredOverlay> overlayProvider) {
-        this.overlay = overlayProvider.get();
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
-    public boolean init(Peer stub,
-                        SerializableProvider<? extends StructuredOverlay> overlay) {
-        if (this.overlay == null) {
-            this.overlay = overlay.get();
-            this.overlay.stub = stub;
-        }
-
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initActivity(Body body) {
+    public void initComponentActivity(Body body) {
         body.setImmediateService("receiveImmediateService", false);
 
         // these methods do not change the state of the peer
+        body.setImmediateService("init", false);
         body.setImmediateService("equals", false);
         body.setImmediateService("getId", false);
         body.setImmediateService("hashCode", false);
@@ -107,11 +83,6 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
         body.setImmediateService("send", false);
         body.setImmediateService("route", false);
 
-        // tests if overlay is null for component instantiation use-case
-        if (this.overlay != null) {
-            this.overlay.stub = (Peer) PAActiveObject.getStubOnThis();
-        }
-
         // receive cannot be handled as immediate service
         PAActiveObject.removeImmediateService("receive");
     }
@@ -120,7 +91,7 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public void endActivity(Body body) {
+    public void endComponentActivity(Body body) {
         // TODO: enable the leave operation when it works!
 
         // if (this.overlay.activated.get()) {
@@ -135,6 +106,20 @@ public class PeerImpl implements Peer, InitActive, EndActive, Serializable {
                 && this.overlay.datastore.isInitialized()) {
             this.overlay.datastore.close();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean init(Peer stub,
+                        SerializableProvider<? extends StructuredOverlay> overlay) {
+        if (this.overlay == null) {
+            this.overlay = overlay.get();
+            this.overlay.stub = stub;
+        }
+
+        return true;
     }
 
     /**

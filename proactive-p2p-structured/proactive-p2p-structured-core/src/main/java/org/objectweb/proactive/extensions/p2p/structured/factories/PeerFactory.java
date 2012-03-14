@@ -27,25 +27,23 @@ import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
-import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
 /**
- * Provides some static methods in order to ease the creation of peer objects.
+ * Provides some static methods in order to ease the creation of peer
+ * components.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public final class PeerFactory {
 
@@ -61,45 +59,6 @@ public final class PeerFactory {
     }
 
     private PeerFactory() {
-
-    }
-
-    /**
-     * Creates a new peer active object on the local JVM by using the specified
-     * overlay abstraction.
-     * 
-     * @param overlayProvider
-     *            the overlay provider to use.
-     * 
-     * @return the new active object created.
-     */
-    public static <T extends StructuredOverlay> Peer newActivePeer(SerializableProvider<T> overlayProvider) {
-        return PeerFactory.newActivePeer(overlayProvider, null);
-    }
-
-    /**
-     * Creates a new peer active object on the specified {@code node} by using
-     * the given {@code overlay} abstraction.
-     * 
-     * @param overlayProvider
-     *            the overlay provider to use.
-     * @param node
-     *            the node used by the peer.
-     * 
-     * @return the new active object created.
-     */
-    public static <T extends StructuredOverlay> Peer newActivePeer(SerializableProvider<T> overlayProvider,
-                                                                   Node node) {
-        try {
-            return PAActiveObject.newActive(
-                    PeerImpl.class, new Object[] {overlayProvider}, node);
-        } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
-        } catch (NodeException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     /**
@@ -112,8 +71,8 @@ public final class PeerFactory {
      * @return the reference on the {@link Peer} interface of the new component
      *         created.
      */
-    public static <T extends StructuredOverlay> Peer newComponentPeer(SerializableProvider<T> overlayProvider) {
-        return PeerFactory.createComponentPeer(
+    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider) {
+        return PeerFactory.createPeer(
                 overlayProvider, new HashMap<String, Object>());
     }
 
@@ -129,15 +88,15 @@ public final class PeerFactory {
      * @return the reference on the {@link Peer} interface of the new component
      *         created.
      */
-    public static <T extends StructuredOverlay> Peer newComponentPeer(SerializableProvider<T> overlayProvider,
-                                                                      Node node) {
+    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
+                                                             Node node) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (node != null) {
             List<Node> nodeList = new ArrayList<Node>(1);
             nodeList.add(node);
             context.put(ADLNodeProvider.NODES_ID, nodeList);
         }
-        return PeerFactory.createComponentPeer(overlayProvider, context);
+        return PeerFactory.createPeer(overlayProvider, context);
     }
 
     /**
@@ -152,13 +111,13 @@ public final class PeerFactory {
      * @return the reference on the {@link Peer} interface of the new component
      *         created.
      */
-    public static <T extends StructuredOverlay> Peer newComponentPeer(SerializableProvider<T> overlayProvider,
-                                                                      GCMVirtualNode vn) {
+    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
+                                                             GCMVirtualNode vn) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (vn != null) {
             context.put(vn.getName(), vn);
         }
-        return PeerFactory.createComponentPeer(overlayProvider, context);
+        return PeerFactory.createPeer(overlayProvider, context);
     }
 
     /**
@@ -173,17 +132,17 @@ public final class PeerFactory {
      * @return the reference on the {@link Peer} interface of the new component
      *         created.
      */
-    public static <T extends StructuredOverlay> Peer newComponentPeer(SerializableProvider<T> overlayProvider,
-                                                                      GCMApplication gcma) {
+    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
+                                                             GCMApplication gcma) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (gcma != null) {
             context.put("deployment-descriptor", gcma);
         }
-        return PeerFactory.createComponentPeer(overlayProvider, context);
+        return PeerFactory.createPeer(overlayProvider, context);
     }
 
-    private static <T extends StructuredOverlay> Peer createComponentPeer(SerializableProvider<T> overlayProvider,
-                                                                          Map<String, Object> context) {
+    private static <T extends StructuredOverlay> Peer createPeer(SerializableProvider<T> overlayProvider,
+                                                                 Map<String, Object> context) {
         try {
             Component peer =
                     (Component) factory.newComponent(
@@ -192,9 +151,8 @@ public final class PeerFactory {
 
             Peer stub =
                     (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
-
-            GCM.getGCMLifeCycleController(peer).startFc();
             stub.init(stub, overlayProvider);
+            GCM.getGCMLifeCycleController(peer).startFc();
 
             return stub;
         } catch (ADLException e) {

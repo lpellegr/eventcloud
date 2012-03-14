@@ -22,8 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.UUID;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodParameterizedCanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -35,12 +34,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  * 
  * @author lpellegr
  */
-public class LeaveOperationTest extends
-        JunitByMethodParameterizedCanNetworkDeployer {
-
-    public LeaveOperationTest(NetworkDeployer deployer) {
-        super(deployer);
-    }
+public class LeaveOperationTest extends JunitByMethodCanNetworkDeployer {
 
     @Test
     public void testCanMerge() {

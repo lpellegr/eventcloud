@@ -130,25 +130,27 @@ public abstract class NetworkDeployer extends
     private void injectPeers(int nbPeers) {
         this.notifyInjectingPeers();
 
-        if (nbPeers > INJECTION_THRESHOLD) {
-            log.debug(
-                    "Creates and injects {} peers on the network in parallel",
-                    nbPeers);
-            this.injectPeersInParallel(nbPeers);
-        } else {
-            log.debug(
-                    "Creates and use sequential injection for the {} peer(s) to insert on the network",
-                    nbPeers);
-            Peer peerCreated;
-            for (int i = 0; i < nbPeers; i++) {
-                peerCreated = this.createPeer();
-                try {
-                    this.getRandomTracker().inject(peerCreated);
-                } catch (NetworkAlreadyJoinedException e) {
-                    e.printStackTrace();
-                }
+        // TODO Uncomment when components are able to be instantiated in
+        // parallel
+        // if (nbPeers > INJECTION_THRESHOLD) {
+        // log.debug(
+        // "Creates and injects {} peers on the network in parallel",
+        // nbPeers);
+        // this.injectPeersInParallel(nbPeers);
+        // } else {
+        log.debug(
+                "Creates and use sequential injection for the {} peer(s) to insert on the network",
+                nbPeers);
+        Peer peerCreated;
+        for (int i = 0; i < nbPeers; i++) {
+            peerCreated = this.createPeer();
+            try {
+                this.getRandomTracker().inject(peerCreated);
+            } catch (NetworkAlreadyJoinedException e) {
+                e.printStackTrace();
             }
         }
+        // }
 
         this.notifyPeersInjected();
     }

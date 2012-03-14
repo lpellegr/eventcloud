@@ -25,9 +25,11 @@ import java.util.concurrent.Executors;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.core.component.body.ComponentEndActive;
+import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerComponentImpl;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -71,7 +73,8 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
-public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer {
+public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
+        ComponentInitActive, ComponentEndActive {
 
     private static final long serialVersionUID = 1L;
 
@@ -90,11 +93,38 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
      * {@inheritDoc}
      */
     @Override
+    public void initComponentActivity(Body body) {
+        body.setImmediateService("add", false);
+        body.setImmediateService("contains", false);
+        body.setImmediateService("delete", false);
+        body.setImmediateService("find", false);
+        body.setImmediateService("executeSparqlAsk", false);
+        body.setImmediateService("executeSparqlConstruct", false);
+        body.setImmediateService("executeSparqlDescribe", false);
+        body.setImmediateService("executeSparqlSelect", false);
+
+        super.initComponentActivity(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void endComponentActivity(Body body) {
+        this.threadPool.shutdown();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean init(Peer stub,
                         SerializableProvider<? extends StructuredOverlay> overlayProvider) {
         super.init(stub, overlayProvider);
+
         this.threadPool =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
+
         return true;
     }
 
@@ -340,33 +370,6 @@ public class SemanticPeerImpl extends PeerComponentImpl implements SemanticPeer 
     @Override
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(sparqlSelect);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initComponentActivity(Body body) {
-        body.setImmediateService("add", false);
-        body.setImmediateService("contains", false);
-        body.setImmediateService("delete", false);
-        body.setImmediateService("find", false);
-        body.setImmediateService("executeSparqlAsk", false);
-        body.setImmediateService("executeSparqlConstruct", false);
-        body.setImmediateService("executeSparqlDescribe", false);
-        body.setImmediateService("executeSparqlSelect", false);
-
-        super.initComponentActivity(body);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void endComponentActivity(Body body) {
-        this.threadPool.shutdown();
-
-        super.endComponentActivity(body);
     }
 
 }

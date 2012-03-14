@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.tracker;
 
-import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerComponentImpl;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
@@ -28,8 +28,7 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  * @author lpellegr
  * @author bsauvan
  */
-public class SemanticTrackerImpl extends TrackerComponentImpl implements
-        SemanticTracker {
+public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker {
 
     private static final long serialVersionUID = 1L;
 

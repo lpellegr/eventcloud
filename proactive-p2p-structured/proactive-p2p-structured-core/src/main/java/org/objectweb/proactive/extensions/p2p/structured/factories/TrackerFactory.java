@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.adl.ADLException;
@@ -28,16 +27,12 @@ import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
-import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
-import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
@@ -45,9 +40,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * {@link TrackerFactory} provides some static methods in order to ease the
- * creation of tracker active objects.
+ * creation of tracker components.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public class TrackerFactory {
 
@@ -66,83 +62,6 @@ public class TrackerFactory {
     }
 
     private TrackerFactory() {
-
-    }
-
-    /**
-     * Creates a new active tracker on the local JVM and associates it to the
-     * network named "default".
-     * 
-     * @return the new active tracker created.
-     */
-    public static Tracker newActiveTracker() {
-        return TrackerFactory.newActiveTracker("default", null);
-    }
-
-    /**
-     * Creates a new active tracker on the local JVM and associates it to the
-     * specified {@code networkName}.
-     * 
-     * @param networkName
-     *            the network name managed by the tracker.
-     * 
-     * @return the new active tracker created.
-     */
-    public static Tracker newActiveTracker(String networkName) {
-        return TrackerFactory.newActiveTracker(networkName, null);
-    }
-
-    /**
-     * Creates a new tracker active object on the specified {@code node} and
-     * associates it to the given {@code networkName}.
-     * 
-     * @param networkName
-     *            the network name managed by the tracker.
-     * @param node
-     *            the node to use for deployment.
-     * 
-     * @return the new tracker active object created.
-     */
-    public static Tracker newActiveTracker(String networkName, Node node) {
-        try {
-            Tracker tracker =
-                    PAActiveObject.newActive(
-                            TrackerImpl.class, new Object[] {networkName}, node);
-
-            logger.info(
-                    "Tracker {} associated to network named '{}' has been created",
-                    tracker.getId(), networkName);
-
-            return tracker;
-        } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
-        } catch (NodeException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    /**
-     * Creates the specified {@code number} of active trackers in parallel. Each
-     * tracker manages the same network, namely {@code networkName}.
-     * 
-     * @param number
-     *            the number of trackers to create.
-     * 
-     * @param networkName
-     *            the name of the network each tracker belongs to.
-     * 
-     * @return the trackers created.
-     */
-    public static Tracker[] newActiveTrackerInParallel(int number,
-                                                       final String networkName) {
-        return Executor.execute(Tracker.class, new Callable<Tracker>() {
-            @Override
-            public Tracker call() throws Exception {
-                return TrackerFactory.newActiveTracker(networkName);
-            }
-        }, number);
     }
 
     /**
@@ -152,8 +71,8 @@ public class TrackerFactory {
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker() {
-        return TrackerFactory.newComponentTracker(
+    public static Tracker newTracker() {
+        return TrackerFactory.newTracker(
                 "default", new HashMap<String, Object>());
     }
 
@@ -167,8 +86,8 @@ public class TrackerFactory {
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(String networkName) {
-        return TrackerFactory.newComponentTracker(
+    public static Tracker newTracker(String networkName) {
+        return TrackerFactory.newTracker(
                 networkName, new HashMap<String, Object>());
     }
 
@@ -184,14 +103,14 @@ public class TrackerFactory {
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(String networkName, Node node) {
+    public static Tracker newTracker(String networkName, Node node) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (node != null) {
             List<Node> nodeList = new ArrayList<Node>(1);
             nodeList.add(node);
             context.put(ADLNodeProvider.NODES_ID, nodeList);
         }
-        return TrackerFactory.newComponentTracker(networkName, context);
+        return TrackerFactory.newTracker(networkName, context);
     }
 
     /**
@@ -206,13 +125,12 @@ public class TrackerFactory {
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(String networkName,
-                                              GCMVirtualNode vn) {
+    public static Tracker newTracker(String networkName, GCMVirtualNode vn) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (vn != null) {
             context.put(vn.getName(), vn);
         }
-        return TrackerFactory.newComponentTracker(networkName, context);
+        return TrackerFactory.newTracker(networkName, context);
     }
 
     /**
@@ -228,17 +146,16 @@ public class TrackerFactory {
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
-    public static Tracker newComponentTracker(String networkName,
-                                              GCMApplication gcma) {
+    public static Tracker newTracker(String networkName, GCMApplication gcma) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (gcma != null) {
             context.put("deployment-descriptor", gcma);
         }
-        return TrackerFactory.newComponentTracker(networkName, context);
+        return TrackerFactory.newTracker(networkName, context);
     }
 
-    private static Tracker newComponentTracker(String networkName,
-                                               Map<String, Object> context) {
+    private static Tracker newTracker(String networkName,
+                                      Map<String, Object> context) {
         try {
             Component tracker =
                     (Component) factory.newComponent(
@@ -250,7 +167,7 @@ public class TrackerFactory {
             GCM.getGCMLifeCycleController(tracker).startFc();
 
             logger.info(
-                    "ComponentTracker {} associated to network named '{}' has been created",
+                    "Tracker {} associated to network named '{}' has been created",
                     stub.getId(), networkName);
 
             return stub;

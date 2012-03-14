@@ -16,15 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
-import java.util.List;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 /**
  * All the tests contained by a test case that extends this class are executed
- * two times. The first time by using a {@link CanActiveObjectsNetworkDeployer}
- * and the second time by using a {@link CanComponentsNetworkDeployer}.
+ * by using a {@link CanNetworkDeployer}.
  * <p>
  * This class does not provide any setup method that automatically deploy the
  * network. This means that the calls to
@@ -43,25 +37,11 @@ import org.junit.runners.Parameterized;
  * 
  * @author lpellegr
  */
-@RunWith(Parameterized.class)
-public class JunitByMethodParameterizedCanNetworkDeployer extends
+public class JunitByMethodCanNetworkDeployer extends
         JunitByMethodNetworkDeployer {
 
-    public JunitByMethodParameterizedCanNetworkDeployer(NetworkDeployer deployer) {
-        super(deployer);
-    }
-
-    /**
-     * Defines the parameters that are injected at runtime to the class
-     * constructor that extends this class. Each item from the list which is
-     * returned triggers the instantiation of a new Junit test case.
-     * 
-     * @return the parameters that are injected at runtime to the class
-     *         constructor that extends this class.
-     */
-    @Parameterized.Parameters
-    public static List<NetworkDeployer[]> deployers() {
-        return JunitParameterizedCanNetworkDeployer.getDeployersToParameterize();
+    public JunitByMethodCanNetworkDeployer() {
+        super(new CanNetworkDeployer(new TestingDeploymentConfiguration()));
     }
 
 }

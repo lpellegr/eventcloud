@@ -30,7 +30,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
- * Tests associated to {@link TrackerImpl} and {@link TrackerComponentImpl}.
+ * Tests associated to {@link TrackerImpl}.
  * 
  * @author lpellegr
  */
@@ -40,12 +40,12 @@ public class TrackerTest implements Serializable {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddOnNetworkWithWrongOverlayType() {
-        Tracker tracker = TrackerFactory.newActiveTracker();
+        Tracker tracker = TrackerFactory.newTracker();
 
         Peer peerWithMockOverlay =
-                PeerFactory.newActivePeer(SerializableProvider.create(MockOverlay.class));
+                PeerFactory.newPeer(SerializableProvider.create(MockOverlay.class));
         Peer peerWithAnonymousMockOverlay =
-                PeerFactory.newActivePeer(SerializableProvider.create(CanMockOverlay.class));
+                PeerFactory.newPeer(SerializableProvider.create(CanMockOverlay.class));
 
         try {
             tracker.inject(peerWithMockOverlay);
@@ -58,42 +58,11 @@ public class TrackerTest implements Serializable {
     @Test
     public void testJoin() {
         Peer peer =
-                PeerFactory.newActivePeer(SerializableProvider.create(MockOverlay.class));
+                PeerFactory.newPeer(SerializableProvider.create(MockOverlay.class));
 
-        Tracker tracker1 = TrackerFactory.newActiveTracker();
-        Tracker tracker2 = TrackerFactory.newActiveTracker();
-        Tracker tracker3 = TrackerFactory.newActiveTracker();
-
-        tracker3.join(tracker2);
-        tracker1.join(tracker2);
-
-        try {
-            tracker1.inject(peer);
-        } catch (NetworkAlreadyJoinedException e) {
-            e.printStackTrace();
-        }
-
-        Assert.assertEquals(
-                "After join, the trackers does not share the same peer references",
-                peer.getId(), tracker1.getRandomPeer().getId());
-
-        Assert.assertEquals(
-                "After join, the trackers does not share the same peer references",
-                peer.getId(), tracker2.getRandomPeer().getId());
-
-        Assert.assertEquals(
-                "After join, the trackers does not share the same peer references",
-                peer.getId(), tracker3.getRandomPeer().getId());
-    }
-
-    @Test
-    public void testJoinWithComponents() {
-        Peer peer =
-                PeerFactory.newComponentPeer(SerializableProvider.create(MockOverlay.class));
-
-        Tracker tracker1 = TrackerFactory.newComponentTracker();
-        Tracker tracker2 = TrackerFactory.newComponentTracker();
-        Tracker tracker3 = TrackerFactory.newComponentTracker();
+        Tracker tracker1 = TrackerFactory.newTracker();
+        Tracker tracker2 = TrackerFactory.newTracker();
+        Tracker tracker3 = TrackerFactory.newTracker();
 
         tracker3.join(tracker2);
         tracker1.join(tracker2);
@@ -119,7 +88,7 @@ public class TrackerTest implements Serializable {
 
     @Test
     public void testRegister() {
-        Tracker tracker = TrackerFactory.newActiveTracker();
+        Tracker tracker = TrackerFactory.newTracker();
         String bindingName = tracker.register();
 
         Assert.assertTrue(

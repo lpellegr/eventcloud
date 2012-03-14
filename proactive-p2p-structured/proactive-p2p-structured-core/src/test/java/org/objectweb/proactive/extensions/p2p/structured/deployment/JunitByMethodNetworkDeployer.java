@@ -21,10 +21,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 /**
- * All the tests contained by a test case that extends this class are executed
- * two times. The first time by using a {@link CanActiveObjectsNetworkDeployer}
- * and the second time by using a {@link CanComponentsNetworkDeployer}.
- * <p>
  * This class does not provide any setup method that automatically deploy the
  * network. This means that the calls to
  * {@link JunitByMethodNetworkDeployer#deploy(int)} and has to be performed
@@ -42,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  * 
  * @author lpellegr
  */
-public class JunitByMethodNetworkDeployer {
+public abstract class JunitByMethodNetworkDeployer {
 
     private final NetworkDeployer deployer;
 

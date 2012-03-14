@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.CanActiveObjectsNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.CanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
@@ -173,7 +173,7 @@ public class Can2dVisualizer extends JFrame {
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         if (Can2dVisualizer.this.mode == Mode.JOIN) {
                             Peer newPeer =
-                                    PeerFactory.newActivePeer(SerializableProvider.create(CanOverlay.class));
+                                    PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class));
                             try {
                                 newPeer.join(entry.getStub());
                             } catch (NetworkAlreadyJoinedException ex) {
@@ -455,8 +455,7 @@ public class Can2dVisualizer extends JFrame {
         P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
 
-        CanActiveObjectsNetworkDeployer deployer =
-                new CanActiveObjectsNetworkDeployer();
+        CanNetworkDeployer deployer = new CanNetworkDeployer();
 
         deployer.deploy(20);
 

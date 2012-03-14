@@ -4,7 +4,7 @@
 <definition name="org.objectweb.proactive.extensions.p2p.structured.overlay.Peer">
 	<interface role="server" name="peer-services" signature="org.objectweb.proactive.extensions.p2p.structured.overlay.Peer"/>
 
-	<content class="org.objectweb.proactive.extensions.p2p.structured.overlay.PeerComponentImpl"/>
+	<content class="org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl"/>
 
 	<virtual-node name="PeerVN"/>
 </definition>

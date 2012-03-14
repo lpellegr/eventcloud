@@ -20,19 +20,17 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassParameterizedCanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 
 /**
  * Test cases for {@link NeighborTable}.
  * 
  * @author lpellegr
  */
-public class NeighborTableTest extends
-        JunitByClassParameterizedCanNetworkDeployer {
+public class NeighborTableTest extends JunitByClassCanNetworkDeployer {
 
-    public NeighborTableTest(NetworkDeployer deployer) {
-        super(deployer, 2);
+    public NeighborTableTest() {
+        super(2);
     }
 
     @Test

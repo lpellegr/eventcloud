@@ -22,11 +22,12 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.EndActive;
-import org.objectweb.proactive.InitActive;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAGroup;
 import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.core.component.Fractive;
+import org.objectweb.proactive.core.component.body.ComponentEndActive;
+import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.mop.ClassNotReifiableException;
 import org.objectweb.proactive.core.util.ProActiveRandom;
@@ -40,11 +41,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Concrete implementation of {@link Tracker} for active objects.
+ * Concrete implementation of {@link Tracker} for components.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
-public class TrackerImpl implements Tracker, InitActive, EndActive {
+public class TrackerImpl implements Tracker, ComponentInitActive,
+        ComponentEndActive {
 
     private static final long serialVersionUID = 1L;
 
@@ -54,7 +57,7 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
 
     private transient String bindingNameSuffix;
 
-    private final UUID id;
+    private UUID id;
 
     private String networkName;
 
@@ -73,9 +76,18 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
     protected OverlayType type;
 
     /**
-     * Constructor.
+     * No-arg constructor for ProActive.
      */
     public TrackerImpl() {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initComponentActivity(Body body) {
+        body.setImmediateService("init", false);
+
         this.id = UUID.randomUUID();
 
         this.probabilityToStorePeer =
@@ -97,52 +109,10 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
     }
 
     /**
-     * Constructs a new tracker with the specified
-     * {@code probabilityToStorePeer}.
-     * 
-     * @param probabilityToStorePeer
-     *            the probability to store a peer reference.
-     */
-    public TrackerImpl(double probabilityToStorePeer) {
-        this();
-        this.probabilityToStorePeer = probabilityToStorePeer;
-    }
-
-    /**
-     * Constructor.
-     * 
-     * @param networkName
-     *            the name of the network to which the tracker is associated.
-     */
-    public TrackerImpl(String networkName) {
-        this();
-        this.networkName = networkName;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
-    public void init(Tracker stub, String networkName) {
-        if (this.stub == null) {
-            this.stub = stub;
-            this.networkName = networkName;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initActivity(Body body) {
-        this.stub = (Tracker) PAActiveObject.getStubOnThis();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void endActivity(Body body) {
+    public void endComponentActivity(Body body) {
         if (this.bindingName != null) {
             try {
                 PAActiveObject.unregister(this.bindingName);
@@ -155,6 +125,17 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
 
         this.typedGroupView = null;
         this.untypedGroupView = null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void init(Tracker stub, String networkName) {
+        if (this.stub == null) {
+            this.stub = stub;
+            this.networkName = networkName;
+        }
     }
 
     /**
@@ -286,8 +267,9 @@ public class TrackerImpl implements Tracker, InitActive, EndActive {
     public String register() {
         try {
             this.bindingName =
-                    PAActiveObject.registerByName(
-                            this.stub, this.getBindingNameSuffix());
+                    Fractive.registerByName(
+                            Fractive.getComponentRepresentativeOnThis(),
+                            this.getBindingNameSuffix());
         } catch (ProActiveException pe) {
             pe.printStackTrace();
         }

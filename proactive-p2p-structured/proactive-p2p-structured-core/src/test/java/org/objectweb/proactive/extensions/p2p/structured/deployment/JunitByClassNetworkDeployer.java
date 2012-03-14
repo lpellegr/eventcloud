@@ -22,10 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 /**
- * All the tests contained by a test case that extends this class are run two
- * times. The first time by using a {@link CanActiveObjectsNetworkDeployer} and
- * the second time by using a {@link CanComponentsNetworkDeployer}. This class
- * differs from {@link JunitByMethodNetworkDeployer} by offering an
+ * This class differs from {@link JunitByMethodNetworkDeployer} by offering an
  * implementation of a setup and teardown method that is executed automatically
  * before and after each test. In the setup method, a network is deployed
  * according to the number of trackers and peers which have been specified into

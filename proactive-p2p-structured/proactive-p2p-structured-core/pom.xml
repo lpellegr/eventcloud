@@ -74,10 +74,8 @@
 								<include>org.objectweb.proactive.core.group.Group</include>
 								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker</include>
 								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl</include>
-								<include>org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerComponentImpl</include>
 								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.Peer</include>
 								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl</include>
-								<include>org.objectweb.proactive.extensions.p2p.structured.overlay.PeerComponentImpl</include>
 							</includes>
 						</configuration>
 					</execution>

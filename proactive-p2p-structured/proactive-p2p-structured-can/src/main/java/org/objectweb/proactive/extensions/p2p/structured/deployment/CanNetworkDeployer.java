@@ -29,11 +29,15 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  * 
  * @author lpellegr
  */
-public final class CanComponentsNetworkDeployer extends NetworkDeployer {
+public final class CanNetworkDeployer extends NetworkDeployer {
 
     private static final long serialVersionUID = 1L;
 
-    public CanComponentsNetworkDeployer(DeploymentConfiguration mode) {
+    public CanNetworkDeployer() {
+        super();
+    }
+
+    public CanNetworkDeployer(DeploymentConfiguration mode) {
         super(mode);
     }
 
@@ -43,7 +47,7 @@ public final class CanComponentsNetworkDeployer extends NetworkDeployer {
     @Override
     protected synchronized Peer createPeer() {
         // TODO use the node provider parameter
-        return PeerFactory.newComponentPeer(SerializableProvider.create(CanOverlay.class));
+        return PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class));
     }
 
     /**
@@ -52,7 +56,7 @@ public final class CanComponentsNetworkDeployer extends NetworkDeployer {
     @Override
     protected synchronized Tracker createTracker(String networkName) {
         // TODO use the node provider parameter
-        return TrackerFactory.newComponentTracker(networkName);
+        return TrackerFactory.newTracker(networkName);
     }
 
 }

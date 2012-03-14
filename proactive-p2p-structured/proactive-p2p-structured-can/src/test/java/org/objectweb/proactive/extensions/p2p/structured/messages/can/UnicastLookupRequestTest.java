@@ -20,8 +20,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassParameterizedCanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
@@ -32,11 +31,10 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public class UnicastLookupRequestTest extends
-        JunitByClassParameterizedCanNetworkDeployer {
+public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
-    public UnicastLookupRequestTest(NetworkDeployer deployer) {
-        super(deployer, 15);
+    public UnicastLookupRequestTest() {
+        super(15);
     }
 
     @Test

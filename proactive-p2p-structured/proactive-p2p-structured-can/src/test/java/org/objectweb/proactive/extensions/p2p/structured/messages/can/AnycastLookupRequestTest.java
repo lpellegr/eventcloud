@@ -23,8 +23,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassParameterizedCanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
@@ -44,11 +43,10 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
  * 
  * @author lpellegr
  */
-public class AnycastLookupRequestTest extends
-        JunitByClassParameterizedCanNetworkDeployer {
+public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
-    public AnycastLookupRequestTest(NetworkDeployer deployer) {
-        super(deployer, 1, 10);
+    public AnycastLookupRequestTest() {
+        super(1, 10);
     }
 
     @Test
