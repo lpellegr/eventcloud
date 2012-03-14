@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<assembly>
+	<id>bundle</id>
+	<formats>
+		<format>tar.gz</format>
+		<!-- <format>tar.bz2</format> -->
+		<!-- <format>zip</format> -->
+	</formats>
+
+	<dependencySets>
+		<dependencySet>
+			<scope>runtime</scope>
+			<useProjectArtifact>true</useProjectArtifact>
+			<useTransitiveDependencies>true</useTransitiveDependencies>
+			<outputDirectory>lib</outputDirectory>
+			<directoryMode>0644</directoryMode>
+			<fileMode>0644</fileMode>
+			<excludes>
+				<exclude>org.ow2.proactive:scheduling-common-core</exclude>
+				<exclude>org.ow2.proactive:scheduling-scheduler-core</exclude>
+			</excludes>
+		</dependencySet>
+		<dependencySet>
+			<scope>provided</scope>
+			<useProjectArtifact>true</useProjectArtifact>
+			<useTransitiveDependencies>true</useTransitiveDependencies>
+			<outputDirectory>lib</outputDirectory>
+			<directoryMode>0644</directoryMode>
+			<fileMode>0644</fileMode>
+		</dependencySet>
+	</dependencySets>
+
+	<fileSets>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<directoryMode>0744</directoryMode>
+			<outputDirectory>resources</outputDirectory>
+			<fileMode>0744</fileMode>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/scripts</directory>
+			<directoryMode>0744</directoryMode>
+			<outputDirectory>scripts</outputDirectory>
+			<fileMode>0755</fileMode>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly>
