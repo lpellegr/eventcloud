@@ -68,7 +68,8 @@ public class NodeProviderTask extends JavaExecutable {
         NodeProviderTaskHolder taskHolder =
                 PAActiveObject.newActive(
                         NodeProviderTaskHolder.class, new Object[] {
-                                this.registryURL, this.nodeRequestID});
+                                this.registryURL, this.nodeRequestID},
+                        PAActiveObject.getNode());
         taskHolder.notifyRegistry();
 
         while (!taskHolder.hasTerminated()) {
