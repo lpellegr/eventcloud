@@ -25,14 +25,9 @@ import java.util.concurrent.Executors;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.component.body.ComponentEndActive;
-import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 
 import com.hp.hpl.jena.rdf.model.StmtIterator;
@@ -73,8 +68,7 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
-public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
-        ComponentInitActive, ComponentEndActive {
+public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
 
     private static final long serialVersionUID = 1L;
 
@@ -104,6 +98,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         body.setImmediateService("executeSparqlSelect", false);
 
         super.initComponentActivity(body);
+
+        this.threadPool =
+                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
     }
 
     /**
@@ -111,21 +108,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public void endComponentActivity(Body body) {
+        super.endComponentActivity(body);
+
         this.threadPool.shutdown();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean init(Peer stub,
-                        SerializableProvider<? extends StructuredOverlay> overlayProvider) {
-        super.init(stub, overlayProvider);
-
-        this.threadPool =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
-
-        return true;
     }
 
     /*

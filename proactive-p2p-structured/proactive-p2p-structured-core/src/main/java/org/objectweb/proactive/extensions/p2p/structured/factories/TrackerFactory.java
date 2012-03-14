@@ -33,6 +33,7 @@ import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
@@ -163,7 +164,9 @@ public class TrackerFactory {
                             context);
             Tracker stub =
                     (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
-            stub.init(stub, networkName);
+            ((TrackerAttributeController) GCM.getAttributeController(tracker)).setAttributes(
+                    stub, networkName);
+
             GCM.getGCMLifeCycleController(tracker).startFc();
 
             logger.info(

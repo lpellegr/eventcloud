@@ -28,7 +28,6 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
  * A peer contains all operations which are common to peer-to-peer protocols.
@@ -36,21 +35,6 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
  * @author lpellegr
  */
 public interface Peer extends Serializable {
-
-    /**
-     * The init method is a convenient method for components which is used to
-     * initialize the {@link StructuredOverlay}. Once this method is called and
-     * the values are set, the next calls perform no action.
-     * 
-     * @param stub
-     *            the remote peer reference to set.
-     * 
-     * @param provider
-     *            the builder to use for creating the {@link StructuredOverlay}
-     *            embedded by the peer.
-     */
-    public boolean init(Peer stub,
-                        SerializableProvider<? extends StructuredOverlay> provider);
 
     /**
      * Returns the unique identifier associated to this peer.
