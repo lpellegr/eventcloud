@@ -16,24 +16,45 @@
  **/
 package fr.inria.eventcloud;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import org.objectweb.proactive.Body;
+import org.objectweb.proactive.core.component.body.ComponentInitActive;
+
+import com.google.common.collect.ImmutableSet;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
- * An eventclouds registry is in charge of maintaining the list of eventclouds
- * which are running for an organization or a group. In addition, for each
- * eventcloud which is managed, the registry also have to store the entry points
- * associated to an eventcloud.
- * <p>
- * <strong>This first prototype is centralized and stores the information in
- * memory.</strong>
+ * EventCloudsRegistryImpl is a concrete implementation of
+ * {@link EventCloudsRegistry}. This class has to be instantiated as a
+ * ProActive/GCM component.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
-public interface EventCloudsRegistry {
+public class EventCloudsRegistryImpl implements EventCloudsRegistry,
+        ComponentInitActive {
+
+    private Map<EventCloudId, EventCloud> eventclouds;
+
+    /**
+     * No-arg constructor for ProActive.
+     */
+    public EventCloudsRegistryImpl() {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initComponentActivity(Body body) {
+        this.eventclouds = new HashMap<EventCloudId, EventCloud>();
+    }
 
     /**
      * Registers the given {@link EventCloud} into the registry.
@@ -44,7 +65,13 @@ public interface EventCloudsRegistry {
      * @return {@code true} if the registration has succeed or {@code false} if
      *         the eventcloud is already registered into the registry.
      */
-    public boolean register(EventCloud eventcloud);
+    public boolean register(EventCloud eventcloud) {
+        if (this.eventclouds.containsKey(eventcloud.getId())) {
+            return false;
+        } else {
+            return this.eventclouds.put(eventcloud.getId(), eventcloud) == null;
+        }
+    }
 
     /**
      * Returns a list that contains the identifier of the eventclouds which are
@@ -53,7 +80,12 @@ public interface EventCloudsRegistry {
      * @return a list that contains the identifier of the eventclouds which are
      *         managed by the registry.
      */
-    public Set<EventCloudId> listEventClouds();
+    public Set<EventCloudId> listEventClouds() {
+        // returns an immutable copy because this.eventclouds.keySet() sends
+        // back a non-serializable set
+        return ImmutableSet.copyOf(this.eventclouds.keySet());
+
+    }
 
     /**
      * Returns a boolean which indicates if the eventcloud identified by the
@@ -65,7 +97,9 @@ public interface EventCloudsRegistry {
      * @return {@code true} if the eventcloud identifier is already managed,
      *         {@code false} otherwise.
      */
-    public boolean contains(EventCloudId id);
+    public boolean contains(EventCloudId id) {
+        return this.eventclouds.containsKey(id);
+    }
 
     /**
      * Returns the {@link EventCloud} object associated to the specified
@@ -77,7 +111,9 @@ public interface EventCloudsRegistry {
      * @return the {@link EventCloud} object associated to the specified
      *         {@code id} if it is managed by the registry or {@code null}.
      */
-    public EventCloud find(EventCloudId id);
+    public EventCloud find(EventCloudId id) {
+        return this.eventclouds.get(id);
+    }
 
     /**
      * Returns the trackers associated to the specified {@link EventCloudId} if
@@ -89,6 +125,8 @@ public interface EventCloudsRegistry {
      * @return the trackers associated to the eventcloud identified by the
      *         specified {@link EventCloudId} or {@code null}.
      */
-    public List<SemanticTracker> findTrackers(EventCloudId id);
+    public List<SemanticTracker> findTrackers(EventCloudId id) {
+        return this.eventclouds.get(id).getTrackers();
+    }
 
 }
