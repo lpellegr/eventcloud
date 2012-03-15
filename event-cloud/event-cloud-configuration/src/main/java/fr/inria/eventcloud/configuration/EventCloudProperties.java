@@ -156,6 +156,16 @@ public class EventCloudProperties {
             new PropertyInteger(
                     "eventcloud.subscribe.proxies.cache.maximum.size", 1000);
 
+    public static final PropertyString EVENTCLOUDS_REGISTRY_ADL =
+            new PropertyString(
+                    "eventclouds.registry.adl",
+                    "fr.inria.eventcloud.EventCloudsRegistry");
+
+    public static final PropertyString EVENTCLOUDS_REGISTRY_SERVICES_ITF =
+            new PropertyString(
+                    "eventclouds.registry.services.itf",
+                    "eventclouds-registry-services");
+
     public static final PropertyString SEMANTIC_PEER_ADL = new PropertyString(
             "semantic.peer.adl", "fr.inria.eventcloud.overlay.SemanticPeer");
 
@@ -165,14 +175,14 @@ public class EventCloudProperties {
                     "fr.inria.eventcloud.tracker.SemanticTracker");
 
     public static final PropertyString PUBLISH_PROXY_ADL = new PropertyString(
-            "pub.proxy.adl", "fr.inria.eventcloud.proxies.PublishProxy");
+            "publish.proxy.adl", "fr.inria.eventcloud.proxies.PublishProxy");
 
     public static final PropertyString PUBLISH_PROXY_SERVICES_ITF =
             new PropertyString("publish.services.itf", "publish-services");
 
     public static final PropertyString SUBSCRIBE_PROXY_ADL =
             new PropertyString(
-                    "sub.proxy.adl",
+                    "subscribe.proxy.adl",
                     "fr.inria.eventcloud.proxies.SubscribeProxy");
 
     public static final PropertyString SUBSCRIBE_PROXY_SERVICES_ITF =

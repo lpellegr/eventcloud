@@ -74,7 +74,6 @@ public final class SemanticFactory {
     }
 
     private SemanticFactory() {
-
     }
 
     /**

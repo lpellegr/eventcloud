@@ -16,11 +16,28 @@
  **/
 package fr.inria.eventcloud;
 
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.etsi.uri.gcm.util.GCM;
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.Factory;
+import org.objectweb.fractal.api.Component;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalLifeCycleException;
+import org.objectweb.proactive.core.component.adl.FactoryFactory;
+import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
+import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
-import org.objectweb.proactive.core.node.NodeException;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
  * This class is used to create and to deploy an {@link EventCloudsRegistry} as
@@ -30,33 +47,78 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
  */
 public class EventCloudsRegistryFactory {
 
-    private EventCloudsRegistryFactory() {
+    private static final Logger log;
 
+    protected static Factory factory;
+
+    static {
+        log = LoggerFactory.getLogger(EventCloudsRegistryFactory.class);
+
+        CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
+        try {
+            factory = FactoryFactory.getFactory();
+        } catch (ADLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private EventCloudsRegistryFactory() {
     }
 
     public static EventCloudsRegistry newEventCloudsRegistry() {
-        return newEventCloudsRegistry((Node) null);
+        return EventCloudsRegistryFactory.createEventCloudsRegistry(new HashMap<String, Object>());
     }
 
     public static EventCloudsRegistry newEventCloudsRegistry(Node node) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (node != null) {
+            List<Node> nodeList = new ArrayList<Node>(1);
+            nodeList.add(node);
+            context.put(ADLNodeProvider.NODES_ID, nodeList);
+        }
+        return EventCloudsRegistryFactory.createEventCloudsRegistry(context);
+    }
+
+    public static EventCloudsRegistry newEventCloudsRegistry(GCMVirtualNode vn) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (vn != null) {
+            context.put(vn.getName(), vn);
+        }
+        return EventCloudsRegistryFactory.createEventCloudsRegistry(context);
+    }
+
+    public static EventCloudsRegistry newEventCloudsRegistry(GCMApplication gcma) {
+        Map<String, Object> context = new HashMap<String, Object>();
+        if (gcma != null) {
+            context.put("deployment-descriptor", gcma);
+        }
+        return EventCloudsRegistryFactory.createEventCloudsRegistry(context);
+    }
+
+    private static EventCloudsRegistry createEventCloudsRegistry(Map<String, Object> context) {
         try {
-            return PAActiveObject.newActive(
-                    EventCloudsRegistry.class, new Object[0], node);
-        } catch (ActiveObjectCreationException e) {
+            Component registry =
+                    (Component) factory.newComponent(
+                            EventCloudProperties.EVENTCLOUDS_REGISTRY_ADL.getValue(),
+                            context);
+
+            EventCloudsRegistry stub =
+                    (EventCloudsRegistry) registry.getFcInterface(EventCloudProperties.EVENTCLOUDS_REGISTRY_SERVICES_ITF.getValue());
+
+            GCM.getGCMLifeCycleController(registry).startFc();
+
+            log.info("EventCloudsRegistry has been created");
+
+            return stub;
+        } catch (ADLException e) {
             e.printStackTrace();
-        } catch (NodeException e) {
+        } catch (NoSuchInterfaceException e) {
+            e.printStackTrace();
+        } catch (IllegalLifeCycleException e) {
             e.printStackTrace();
         }
 
         return null;
-    }
-
-    public static EventCloudsRegistry newEventCloudsRegistry(GCMVirtualNode vn) {
-        if (vn != null) {
-            return newEventCloudsRegistry(vn.getANode());
-        } else {
-            return newEventCloudsRegistry((Node) null);
-        }
     }
 
 }
