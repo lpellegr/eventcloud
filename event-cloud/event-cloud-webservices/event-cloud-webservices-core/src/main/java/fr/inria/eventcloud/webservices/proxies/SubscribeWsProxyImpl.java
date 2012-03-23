@@ -64,10 +64,10 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void init(EventCloudCache proxy, String componentUri,
-                     AlterableElaProperty[] properties) {
+    public void setAttributes(EventCloudCache proxy, String componentUri,
+                              AlterableElaProperty[] properties) {
         if (this.proxy == null) {
-            super.init(proxy, componentUri, properties);
+            super.setAttributes(proxy, componentUri, properties);
             this.subscribers = new HashMap<SubscriptionId, Client>();
         }
     }

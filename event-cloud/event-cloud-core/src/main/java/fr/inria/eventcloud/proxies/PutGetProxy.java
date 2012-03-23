@@ -28,14 +28,4 @@ import fr.inria.eventcloud.api.PutGetApi;
  */
 public interface PutGetProxy extends Proxy, PutGetApi {
 
-    /**
-     * The init method is a convenient method for components which is used to
-     * initialize the {@link EventCloudCache}. Once this method is called and
-     * the value is set, the next calls perform no action.
-     * 
-     * @param proxy
-     *            the event cloud proxy instance to set to the put/get proxy.
-     */
-    public void init(EventCloudCache proxy);
-
 }

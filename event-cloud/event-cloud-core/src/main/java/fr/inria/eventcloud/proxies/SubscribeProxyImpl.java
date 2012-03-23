@@ -76,7 +76,8 @@ import fr.inria.eventcloud.utils.LongLong;
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
+public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
+        SubscribeProxyAttributeController {
 
     private static final long serialVersionUID = 1L;
 
@@ -131,8 +132,8 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
     // TODO: add support for ELA properties. At least for the maximum number of
     // requests per seconds (by using a queue and a scheduled Timer?).
     @Override
-    public void init(EventCloudCache proxy, String componentUri,
-                     AlterableElaProperty[] properties) {
+    public void setAttributes(EventCloudCache proxy, String componentUri,
+                              AlterableElaProperty[] properties) {
         if (this.proxy == null) {
             this.proxy = proxy;
             this.componentUri = componentUri;

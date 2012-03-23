@@ -115,8 +115,10 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @Override
     public void setAttributes(Peer stub,
                               SerializableProvider<? extends StructuredOverlay> overlayProvider) {
-        this.overlay = overlayProvider.get();
-        this.overlay.stub = stub;
+        if (this.overlay == null) {
+            this.overlay = overlayProvider.get();
+            this.overlay.stub = stub;
+        }
     }
 
     /**

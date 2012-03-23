@@ -16,15 +16,21 @@
  **/
 package fr.inria.eventcloud.proxies;
 
-import fr.inria.eventcloud.api.PublishApi;
+import org.objectweb.fractal.api.control.AttributeController;
 
 /**
- * A PublishProxy is a proxy that implements the {@link PublishApi}. It has to
- * be used by a user who wants to execute publish operations on an Event Cloud.
+ * {@link AttributeController} for {@link PutGetProxy} components.
  * 
- * @author lpellegr
  * @author bsauvan
  */
-public interface PublishProxy extends Proxy, PublishApi {
+public interface PutGetProxyAttributeController extends AttributeController {
+
+    /**
+     * Sets the attributes of the put/get proxy.
+     * 
+     * @param proxy
+     *            the event cloud proxy instance to set to the put/get proxy.
+     */
+    public void setAttributes(EventCloudCache proxy);
 
 }

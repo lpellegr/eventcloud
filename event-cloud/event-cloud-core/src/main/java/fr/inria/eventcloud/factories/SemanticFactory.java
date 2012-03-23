@@ -177,9 +177,9 @@ public final class SemanticFactory {
                     (Component) factory.newComponent(
                             EventCloudProperties.SEMANTIC_TRACKER_ADL.getValue(),
                             context);
-
             SemanticTracker stub =
                     (SemanticTracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
+
             ((TrackerAttributeController) GCM.getAttributeController(tracker)).setAttributes(
                     stub, networkName);
 
@@ -296,9 +296,9 @@ public final class SemanticFactory {
                     (Component) factory.newComponent(
                             EventCloudProperties.SEMANTIC_PEER_ADL.getValue(),
                             context);
-
             SemanticPeer stub =
                     (SemanticPeer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+
             ((PeerAttributeController) GCM.getAttributeController(peer)).setAttributes(
                     stub, overlayProvider);
 

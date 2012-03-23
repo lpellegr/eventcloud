@@ -132,8 +132,10 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      */
     @Override
     public void setAttributes(Tracker stub, String networkName) {
-        this.stub = stub;
-        this.networkName = networkName;
+        if (this.stub == null) {
+            this.stub = stub;
+            this.networkName = networkName;
+        }
     }
 
     /**

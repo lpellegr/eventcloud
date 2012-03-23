@@ -6,7 +6,7 @@
 
 	<content class="fr.inria.eventcloud.proxies.PublishProxyImpl"/>
 
-	<controller desc="primitive"/>
+	<attributes signature="fr.inria.eventcloud.proxies.PublishProxyAttributeController"/>
 
 	<virtual-node name="ProxyVN"/>
 </definition>
