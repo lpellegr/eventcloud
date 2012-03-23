@@ -27,11 +27,11 @@ import org.objectweb.proactive.api.PAGroup;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
-import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.mop.ClassNotReifiableException;
 import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
+import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public class TrackerImpl implements Tracker, TrackerAttributeController,
-        ComponentInitActive, ComponentEndActive {
+public class TrackerImpl extends AbstractComponent implements Tracker,
+        TrackerAttributeController, ComponentEndActive {
 
     private static final long serialVersionUID = 1L;
 
@@ -86,6 +86,8 @@ public class TrackerImpl implements Tracker, TrackerAttributeController,
      */
     @Override
     public void initComponentActivity(Body body) {
+        super.initComponentActivity(body);
+
         this.id = UUID.randomUUID();
 
         this.probabilityToStorePeer =

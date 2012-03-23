@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.core.component.body.ComponentInitActive;
+import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -37,8 +37,8 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * @author lpellegr
  * @author bsauvan
  */
-public class EventCloudsRegistryImpl implements EventCloudsRegistry,
-        ComponentInitActive {
+public class EventCloudsRegistryImpl extends AbstractComponent implements
+        EventCloudsRegistry {
 
     private Map<EventCloudId, EventCloud> eventclouds;
 
@@ -53,6 +53,9 @@ public class EventCloudsRegistryImpl implements EventCloudsRegistry,
      */
     @Override
     public void initComponentActivity(Body body) {
+        this.p2pConfigurationProperty = "eventcloud.configuration";
+        super.initComponentActivity(body);
+
         this.eventclouds = new HashMap<EventCloudId, EventCloud>();
     }
 

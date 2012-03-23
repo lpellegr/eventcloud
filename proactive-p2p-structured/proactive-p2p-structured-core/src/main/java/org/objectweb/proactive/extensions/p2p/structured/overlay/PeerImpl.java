@@ -22,7 +22,7 @@ import java.util.UUID;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
-import org.objectweb.proactive.core.component.body.ComponentInitActive;
+import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
@@ -50,8 +50,8 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public class PeerImpl implements Peer, PeerAttributeController,
-        ComponentInitActive, ComponentEndActive, Serializable {
+public class PeerImpl extends AbstractComponent implements Peer,
+        PeerAttributeController, ComponentEndActive, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -70,6 +70,8 @@ public class PeerImpl implements Peer, PeerAttributeController,
      */
     @Override
     public void initComponentActivity(Body body) {
+        super.initComponentActivity(body);
+
         body.setImmediateService("receiveImmediateService", false);
 
         // these methods do not change the state of the peer
