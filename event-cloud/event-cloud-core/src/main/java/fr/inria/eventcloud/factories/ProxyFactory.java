@@ -46,8 +46,11 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.PublishProxyAttributeController;
 import fr.inria.eventcloud.proxies.PutGetProxy;
+import fr.inria.eventcloud.proxies.PutGetProxyAttributeController;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxyAttributeController;
 
 /**
  * ProxyFactory is used to create a new instance of a proxy (e.g.
@@ -130,8 +133,11 @@ public class ProxyFactory implements Serializable {
                             publishProxyAdl, new HashMap<String, Object>());
             PublishProxy stub =
                     (PublishProxy) pubProxy.getFcInterface(EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
+
+            ((PublishProxyAttributeController) GCM.getAttributeController(pubProxy)).setAttributes(this.eventCloudProxy);
+
             GCM.getGCMLifeCycleController(pubProxy).startFc();
-            stub.init(this.eventCloudProxy);
+
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();
@@ -168,8 +174,10 @@ public class ProxyFactory implements Serializable {
                             + UUID.randomUUID().toString());
             log.info("SubscribeProxy bound to {}", componentUri);
 
+            ((SubscribeProxyAttributeController) GCM.getAttributeController(subProxy)).setAttributes(
+                    this.eventCloudProxy, componentUri, properties);
+
             GCM.getGCMLifeCycleController(subProxy).startFc();
-            stub.init(this.eventCloudProxy, componentUri, properties);
 
             return stub;
         } catch (ADLException e) {
@@ -197,8 +205,11 @@ public class ProxyFactory implements Serializable {
                             putgetProxyAdl, new HashMap<String, Object>());
             PutGetProxy stub =
                     (PutGetProxy) putgetProxy.getFcInterface(EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
+
+            ((PutGetProxyAttributeController) GCM.getAttributeController(putgetProxy)).setAttributes(this.eventCloudProxy);
+
             GCM.getGCMLifeCycleController(putgetProxy).startFc();
-            stub.init(this.eventCloudProxy);
+
             return stub;
         } catch (ADLException e) {
             e.printStackTrace();

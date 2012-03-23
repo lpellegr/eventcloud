@@ -164,6 +164,7 @@ public class TrackerFactory {
                             context);
             Tracker stub =
                     (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
+
             ((TrackerAttributeController) GCM.getAttributeController(tracker)).setAttributes(
                     stub, networkName);
 

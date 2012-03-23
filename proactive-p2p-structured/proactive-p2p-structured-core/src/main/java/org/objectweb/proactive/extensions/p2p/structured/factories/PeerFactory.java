@@ -154,9 +154,9 @@ public final class PeerFactory {
                     (Component) factory.newComponent(
                             P2PStructuredProperties.PEER_ADL.getValue(),
                             context);
-
             Peer stub =
                     (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+
             ((PeerAttributeController) GCM.getAttributeController(peer)).setAttributes(
                     stub, overlayProvider);
 

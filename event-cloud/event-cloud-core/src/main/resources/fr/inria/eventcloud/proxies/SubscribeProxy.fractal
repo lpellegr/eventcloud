@@ -6,7 +6,7 @@
 
 	<content class="fr.inria.eventcloud.proxies.SubscribeProxyImpl"/>
 
-	<controller desc="primitive"/>
+	<attributes signature="fr.inria.eventcloud.proxies.SubscribeProxyAttributeController"/>
 
 	<virtual-node name="ProxyVN"/>
 </definition>

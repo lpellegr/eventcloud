@@ -41,7 +41,8 @@ import fr.inria.eventcloud.utils.Callback;
  * 
  * @see ProxyFactory
  */
-public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
+public class PutGetProxyImpl extends ProxyCache implements PutGetProxy,
+        PutGetProxyAttributeController {
 
     /**
      * Empty constructor required by ProActive.
@@ -54,7 +55,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy {
      * {@inheritDoc}
      */
     @Override
-    public void init(EventCloudCache proxy) {
+    public void setAttributes(EventCloudCache proxy) {
         if (this.proxy == null) {
             this.proxy = proxy;
         }
