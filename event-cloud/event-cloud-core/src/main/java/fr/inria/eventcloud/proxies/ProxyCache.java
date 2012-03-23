@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
+
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -24,15 +26,11 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  * 
  * @author lpellegr
  */
-public abstract class ProxyCache {
+public abstract class ProxyCache extends AbstractComponent {
 
     protected EventCloudCache proxy;
 
     protected ProxyCache() {
-    }
-
-    protected ProxyCache(EventCloudCache proxy) {
-        this.proxy = proxy;
     }
 
     protected SemanticPeer selectPeer() {

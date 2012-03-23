@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +76,7 @@ import fr.inria.eventcloud.utils.LongLong;
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends ProxyCache implements
-        ComponentInitActive, SubscribeProxy {
+public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy {
 
     private static final long serialVersionUID = 1L;
 
@@ -111,6 +109,20 @@ public class SubscribeProxyImpl extends ProxyCache implements
      */
     public SubscribeProxyImpl() {
         super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initComponentActivity(Body body) {
+        super.initComponentActivity(body);
+
+        // FIXME: to avoid some deadlock with components the method
+        // setImmediateServices has to be handled in immediate services. This
+        // configuration should be done in the ProActive source code.
+        body.setImmediateService("setImmediateServices", false);
+        body.setImmediateService("receive", false);
     }
 
     /**
@@ -439,18 +451,6 @@ public class SubscribeProxyImpl extends ProxyCache implements
      */
     public String getComponentUri() {
         return this.componentUri;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initComponentActivity(Body body) {
-        // FIXME: to avoid some deadlock with components the method
-        // setImmediateServices has to be handled in immediate services. This
-        // configuration should be done in the ProActive source code.
-        body.setImmediateService("setImmediateServices", false);
-        body.setImmediateService("receive", false);
     }
 
 }
