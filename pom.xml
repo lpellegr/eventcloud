@@ -47,7 +47,7 @@
 		</repository>
 		<repository>
 			<id>sonatype-snapshots-proactive-829</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-829</url>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-882</url>
 		</repository>
 		<repository>
 			<id>play-private.release</id>
@@ -129,7 +129,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.0.0</version>
+				<version>1.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -139,7 +139,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming-bundle</artifactId>
-				<version>5.2.0-ws-update-2</version>
+				<version>5.2.0-ws-update-3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
