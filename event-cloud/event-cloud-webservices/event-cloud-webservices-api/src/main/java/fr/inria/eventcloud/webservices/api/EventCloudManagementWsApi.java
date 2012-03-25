@@ -111,4 +111,43 @@ public interface EventCloudManagementWsApi {
     @WebMethod
     String createPutGetProxy(@WebParam(name = "streamUrl") String streamUrl);
 
+    /**
+     * Returns the endpoint URLs for the publish proxies which have been created
+     * for the specified {@code streamUrl}.
+     * 
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
+     * 
+     * @return the endpoint URLs for the publish proxies which have been created
+     *         for the specified {@code streamUrl}.
+     */
+    @WebMethod
+    List<String> getPublishProxyEndpointUrls(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Returns the endpoint URLs for the subscribe proxies which have been
+     * created for the specified {@code streamUrl}.
+     * 
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
+     * 
+     * @return the endpoint URLs for the subscribe proxies which have been
+     *         created for the specified {@code streamUrl}.
+     */
+    @WebMethod
+    List<String> getSubscribeProxyEndpointUrls(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Returns the endpoint URLs for the putget proxies which have been created
+     * for the specified {@code streamUrl}.
+     * 
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
+     * 
+     * @return the endpoint URLs for the putget proxies which have been created
+     *         for the specified {@code streamUrl}.
+     */
+    @WebMethod
+    List<String> getPutgetProxyEndpointUrls(@WebParam(name = "streamUrl") String streamUrl);
+
 }

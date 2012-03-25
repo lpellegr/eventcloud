@@ -24,6 +24,10 @@ import java.util.Set;
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
+
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
@@ -44,10 +48,23 @@ public class EventCloudManagementServiceImpl implements
 
     private int portLowerBound;
 
+    // streamUrl -> one or several subscribe proxy endpoints
+    private ListMultimap<String, String> subscribeProxyEndpoints;
+
+    // streamUrl -> one or several subscribe proxy endpoints
+    private ListMultimap<String, String> publishProxyEndpoints;
+
+    // streamUrl -> one or several subscribe proxy endpoints
+    private ListMultimap<String, String> putgetProxyEndpoints;
+
     public EventCloudManagementServiceImpl(String registryUrl,
             int portLowerBound) {
         this.registryUrl = registryUrl;
         this.portLowerBound = portLowerBound;
+        
+        this.subscribeProxyEndpoints = ArrayListMultimap.create();
+        this.publishProxyEndpoints = ArrayListMultimap.create();
+        this.putgetProxyEndpoints = ArrayListMultimap.create();
     }
 
     /**
@@ -99,10 +116,17 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public String createPublishProxy(String streamUrl) {
-        return WebServiceDeployer.deployPublishWebService(
-                this.registryUrl, streamUrl,
-                "proactive/services/EventCloud_publish-webservices",
-                this.portLowerBound++);
+        // TODO: check that streamUrl exists
+
+        String endpoint =
+                WebServiceDeployer.deployPublishWebService(
+                        this.registryUrl, streamUrl,
+                        "proactive/services/EventCloud_publish-webservices",
+                        this.portLowerBound++);
+
+        this.publishProxyEndpoints.put(streamUrl, endpoint);
+
+        return endpoint;
     }
 
     /**
@@ -110,10 +134,17 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public String createSubscribeProxy(String streamUrl) {
-        return WebServiceDeployer.deploySubscribeWebService(
-                this.registryUrl, streamUrl,
-                "proactive/services/EventCloud_subscribe-webservices",
-                this.portLowerBound++);
+        // TODO: check that streamUrl exists
+
+        String endpoint =
+                WebServiceDeployer.deploySubscribeWebService(
+                        this.registryUrl, streamUrl,
+                        "proactive/services/EventCloud_subscribe-webservices",
+                        this.portLowerBound++);
+
+        this.subscribeProxyEndpoints.put(streamUrl, endpoint);
+
+        return endpoint;
     }
 
     /**
@@ -121,10 +152,41 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public String createPutGetProxy(String streamUrl) {
-        return WebServiceDeployer.deployPutGetWebService(
-                this.registryUrl, streamUrl,
-                "proactive/services/EventCloud_putget-webservices",
-                this.portLowerBound++);
+        // TODO: check that streamUrl exists
+
+        String endpoint =
+                WebServiceDeployer.deployPutGetWebService(
+                        this.registryUrl, streamUrl,
+                        "proactive/services/EventCloud_putget-webservices",
+                        this.portLowerBound++);
+
+        this.putgetProxyEndpoints.put(streamUrl, endpoint);
+
+        return endpoint;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> getSubscribeProxyEndpointUrls(String streamUrl) {
+        return this.subscribeProxyEndpoints.get(streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> getPublishProxyEndpointUrls(String streamUrl) {
+        return this.publishProxyEndpoints.get(streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> getPutgetProxyEndpointUrls(String streamUrl) {
+        return this.putgetProxyEndpoints.get(streamUrl);
     }
 
 }
