@@ -207,7 +207,7 @@ public class EventCloudProperties {
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
         // allows ISO 8859-1 characters
         P2PStructuredProperties.CAN_LOWER_BOUND.setValue("\u0000");
-        P2PStructuredProperties.CAN_UPPER_BOUND.setValue("\uffff");
+        P2PStructuredProperties.CAN_UPPER_BOUND.setValue("\u0256");
     }
 
     public static final File getRepositoryPath() {
