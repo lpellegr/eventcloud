@@ -14,14 +14,6 @@
   <name>event-cloud-adapters</name>
   <packaging>pom</packaging>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
   <modules>
     <module>event-cloud-adapter-rdf2go</module>
   </modules>
