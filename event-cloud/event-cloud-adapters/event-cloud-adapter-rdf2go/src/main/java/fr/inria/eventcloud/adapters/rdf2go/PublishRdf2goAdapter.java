@@ -42,7 +42,7 @@ public class PublishRdf2goAdapter extends Rdf2goAdapter<PublishApi> {
      * @param delegate
      *            the object to adapt.
      */
-    protected PublishRdf2goAdapter(PublishApi delegate) {
+    public PublishRdf2goAdapter(PublishApi delegate) {
         super(delegate);
     }
 
