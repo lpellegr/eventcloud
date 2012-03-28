@@ -97,7 +97,6 @@ function deploy_ws_management_proxy() {
    WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE=$INSTANCES_DIR/ws-eventclouds-management
 
     . $BUNDLE_HOME/scripts/ws-eventclouds-management-launcher.sh $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE \
-        $(expr $WS_EVENTCLOUDS_MANAGEMENT_PORT + 1) $WS_EVENTCLOUDS_MANAGEMENT_PORT \
         --registry-url $EVENTCLOUDS_REGISTRY_URL --port-lower-bound $PROXIES_PORTS_LOWER_BOUND \
         -p $WS_EVENTCLOUDS_MANAGEMENT_PORT &> $OUTPUTS_DIR/ws-eventclouds-management.output &
         
