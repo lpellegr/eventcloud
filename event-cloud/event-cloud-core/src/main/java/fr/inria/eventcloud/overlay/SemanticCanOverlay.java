@@ -85,6 +85,7 @@ public class SemanticCanOverlay extends CanOverlay {
                             @Override
                             public SemanticPeer load(String peerUrl)
                                     throws Exception {
+                                // TODO: use Fractive?
                                 return PAActiveObject.lookupActive(
                                         SemanticPeer.class, peerUrl);
                             }

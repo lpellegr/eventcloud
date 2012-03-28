@@ -21,15 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimaps;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
@@ -61,7 +58,7 @@ public class EventCloudManagementServiceImpl implements
             int portLowerBound) {
         this.registryUrl = registryUrl;
         this.portLowerBound = portLowerBound;
-        
+
         this.subscribeProxyEndpoints = ArrayListMultimap.create();
         this.publishProxyEndpoints = ArrayListMultimap.create();
         this.putgetProxyEndpoints = ArrayListMultimap.create();
@@ -93,8 +90,7 @@ public class EventCloudManagementServiceImpl implements
     public List<String> getEventCloudIds() {
         try {
             EventCloudsRegistry registry =
-                    PAActiveObject.lookupActive(
-                            EventCloudsRegistry.class, this.registryUrl);
+                    EventCloudsRegistryImpl.lookup(this.registryUrl);
 
             Set<EventCloudId> ecIds = registry.listEventClouds();
             List<String> result = new ArrayList<String>(ecIds.size());
@@ -104,8 +100,6 @@ public class EventCloudManagementServiceImpl implements
             }
 
             return result;
-        } catch (ActiveObjectCreationException e) {
-            throw new IllegalStateException(e);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

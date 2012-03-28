@@ -19,6 +19,8 @@ package fr.inria.eventcloud;
 import java.util.List;
 import java.util.Set;
 
+import org.objectweb.proactive.core.ProActiveException;
+
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -34,6 +36,19 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * @author lpellegr
  */
 public interface EventCloudsRegistry {
+
+    /**
+     * Registers the registry with the specified {@code bindingName}.
+     * 
+     * @param bindingName
+     *            the binding name to use.
+     * 
+     * @return the URL where the object is bound.
+     * 
+     * @throws ProActiveException
+     *             if a problem occurs while the registry is registered.
+     */
+    public String register(String bindingName) throws ProActiveException;
 
     /**
      * Registers the given {@link EventCloud} into the registry.

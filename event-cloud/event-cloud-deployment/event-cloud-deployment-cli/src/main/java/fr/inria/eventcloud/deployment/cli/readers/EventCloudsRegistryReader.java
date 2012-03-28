@@ -19,8 +19,6 @@ package fr.inria.eventcloud.deployment.cli.readers;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.ProActiveException;
 
 import com.beust.jcommander.JCommander;
@@ -30,6 +28,7 @@ import com.beust.jcommander.ParameterException;
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryFactory;
+import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 import fr.inria.eventcloud.deployment.cli.commands.CreateEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
@@ -64,12 +63,7 @@ public class EventCloudsRegistryReader {
         EventCloudsRegistry registry = null;
         if (this.registryUrl != null) {
             try {
-                registry =
-                        PAActiveObject.lookupActive(
-                                EventCloudsRegistry.class, this.registryUrl);
-            } catch (ActiveObjectCreationException e) {
-                e.printStackTrace();
-                System.exit(1);
+                registry = EventCloudsRegistryImpl.lookup(this.registryUrl);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -78,8 +72,7 @@ public class EventCloudsRegistryReader {
             registry = EventCloudsRegistryFactory.newEventCloudsRegistry();
 
             try {
-                System.out.println(PAActiveObject.registerByName(
-                        registry, "eventclouds-registry"));
+                System.out.println(registry.register("eventclouds-registry"));
             } catch (ProActiveException e) {
                 e.printStackTrace();
             }
