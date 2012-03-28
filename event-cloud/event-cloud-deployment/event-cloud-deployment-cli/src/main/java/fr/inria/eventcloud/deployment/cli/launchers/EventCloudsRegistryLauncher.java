@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.ProActiveException;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -44,11 +43,10 @@ public final class EventCloudsRegistryLauncher extends Launcher {
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
 
         try {
-            return PAActiveObject.registerByName(
-                    registry, "eventclouds-registry");
+            return registry.register("eventclouds-registry");
         } catch (ProActiveException e) {
             e.printStackTrace();
-            return e.getMessage();
+            return null;
         }
     }
 

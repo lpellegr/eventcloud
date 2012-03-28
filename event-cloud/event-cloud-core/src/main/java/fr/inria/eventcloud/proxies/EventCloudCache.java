@@ -20,12 +20,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
-import org.objectweb.proactive.ActiveObjectCreationException;
-import org.objectweb.proactive.api.PAActiveObject;
-
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudApi;
 import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
@@ -58,8 +56,7 @@ public class EventCloudCache implements EventCloudApi, Serializable {
             throws EventCloudIdNotManaged {
         try {
             this.registry =
-                    PAActiveObject.lookupActive(
-                            EventCloudsRegistry.class, registryUrl);
+                    EventCloudsRegistryImpl.lookup(registryUrl);
 
             this.delegate = this.registry.find(eventcloudId);
 
@@ -67,8 +64,6 @@ public class EventCloudCache implements EventCloudApi, Serializable {
                 throw new EventCloudIdNotManaged(
                         eventcloudId.toString(), registryUrl);
             }
-        } catch (ActiveObjectCreationException e) {
-            throw new IllegalStateException(e);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

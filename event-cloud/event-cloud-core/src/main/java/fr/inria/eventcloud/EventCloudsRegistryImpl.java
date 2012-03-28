@@ -16,17 +16,21 @@
  **/
 package fr.inria.eventcloud;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 
 import com.google.common.collect.ImmutableSet;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
@@ -57,6 +61,15 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
         super.initComponentActivity(body);
 
         this.eventclouds = new HashMap<EventCloudId, EventCloud>();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String register(String bindingName) throws ProActiveException {
+        return Fractive.registerByName(
+                Fractive.getComponentRepresentativeOnThis(), bindingName);
     }
 
     /**
@@ -132,4 +145,11 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
         return this.eventclouds.get(id).getTrackers();
     }
 
+    public static EventCloudsRegistry lookup(String componentUri)
+            throws IOException {
+        return (EventCloudsRegistry) AbstractComponent.lookupFcInterface(
+                componentUri,
+                EventCloudProperties.EVENTCLOUDS_REGISTRY_SERVICES_ITF.getValue());
+    }
+    
 }

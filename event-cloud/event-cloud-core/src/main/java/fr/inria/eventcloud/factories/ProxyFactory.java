@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.naming.NamingException;
-
 import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Factory;
@@ -34,6 +32,7 @@ import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
+import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -252,38 +251,23 @@ public class ProxyFactory implements Serializable {
 
     public static SubscribeProxy lookupSubscribeProxy(String componentUri)
             throws IOException {
-        return (SubscribeProxy) lookupFcInterface(
+        return (SubscribeProxy) AbstractComponent.lookupFcInterface(
                 componentUri,
                 EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
     }
 
     public static PublishProxy lookupPublishProxy(String componentUri)
             throws IOException {
-        return (PublishProxy) lookupFcInterface(
+        return (PublishProxy) AbstractComponent.lookupFcInterface(
                 componentUri,
                 EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
     }
 
     public static PutGetProxy lookupPutGetProxy(String componentUri)
             throws IOException {
-        return (PutGetProxy) lookupFcInterface(
+        return (PutGetProxy) AbstractComponent.lookupFcInterface(
                 componentUri,
                 EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
-    }
-
-    private static Object lookupFcInterface(String componentUri,
-                                            String interfaceName)
-            throws IOException {
-        try {
-            return Fractive.lookup(componentUri).getFcInterface(interfaceName);
-        } catch (NoSuchInterfaceException e) {
-            // it is not necessary to rethrown this exception because when it
-            // occurs this means there is an issue in the code
-            log.error("Please check the interface name:" + interfaceName, e);
-            return null;
-        } catch (NamingException e) {
-            throw new IOException(e);
-        }
     }
 
 }

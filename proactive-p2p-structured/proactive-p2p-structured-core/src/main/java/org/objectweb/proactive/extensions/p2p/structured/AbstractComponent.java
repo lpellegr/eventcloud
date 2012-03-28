@@ -21,10 +21,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.naming.NamingException;
+
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.dataspaces.api.DataSpacesFileObject;
 import org.objectweb.proactive.extensions.dataspaces.api.PADataSpaces;
@@ -46,7 +50,7 @@ public abstract class AbstractComponent implements ComponentInitActive {
 
     private static final String INPUT_SPACE_PREFIX = "INPUT_SPACE";
 
-    private static Logger logger =
+    private static Logger log =
             LoggerFactory.getLogger(AbstractComponent.class);
 
     protected String log4jConfigurationProperty =
@@ -63,6 +67,21 @@ public abstract class AbstractComponent implements ComponentInitActive {
         loadLog4jConfigurationFromIS();
 
         loadP2PConfigurationFromIS();
+    }
+
+    public static Object lookupFcInterface(String componentUri,
+                                           String interfaceName)
+            throws IOException {
+        try {
+            return Fractive.lookup(componentUri).getFcInterface(interfaceName);
+        } catch (NoSuchInterfaceException e) {
+            // it is not necessary to rethrown this exception because when it
+            // occurs this means there is an issue in the code
+            log.error("Please check the interface name:" + interfaceName, e);
+            return null;
+        } catch (NamingException e) {
+            throw new IOException(e);
+        }
     }
 
     private void loadLog4jConfigurationFromIS() {
@@ -83,7 +102,7 @@ public abstract class AbstractComponent implements ComponentInitActive {
                 configurator.doConfigure(is, LogManager.getLoggerRepository());
                 is.close();
 
-                logger.debug("Log4J configuration successfully loaded from input space");
+                log.debug("Log4J configuration successfully loaded from input space");
             }
         } catch (SpaceNotFoundException snfe) {
             snfe.printStackTrace();
@@ -126,7 +145,7 @@ public abstract class AbstractComponent implements ComponentInitActive {
                             this.p2pConfigurationProperty,
                             p2pConfigurationFile.getCanonicalPath());
 
-                    logger.debug("P2P configuration successfully loaded from input space");
+                    log.debug("P2P configuration successfully loaded from input space");
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 } finally {

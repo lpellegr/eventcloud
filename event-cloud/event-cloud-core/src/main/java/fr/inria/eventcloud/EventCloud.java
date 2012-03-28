@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -113,9 +112,7 @@ public class EventCloud implements EventCloudApi, Serializable {
     public boolean register() {
         EventCloudsRegistry registry = null;
         try {
-            registry =
-                    PAActiveObject.lookupActive(
-                            EventCloudsRegistry.class, this.registryUrl);
+            registry = EventCloudsRegistryImpl.lookup(this.registryUrl);
 
             if (registry.register(this)) {
                 log.info(
@@ -123,8 +120,6 @@ public class EventCloud implements EventCloudApi, Serializable {
                         this.id.getStreamUrl(), this.registryUrl);
                 return true;
             }
-        } catch (ActiveObjectCreationException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
