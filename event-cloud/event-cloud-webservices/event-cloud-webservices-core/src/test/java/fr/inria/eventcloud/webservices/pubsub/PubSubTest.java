@@ -65,7 +65,9 @@ public class PubSubTest {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
-        EventCloudId ecId = deployer.createEventCloud(10);
+        EventCloudId ecId =
+                deployer.createEventCloud(new EventCloudId(
+                        "http://streams.event-processing.org/ids/TaxiUc"), 10);
 
         // Web services which are deployed
         String subscribeWsUrl =
@@ -90,9 +92,13 @@ public class PubSubTest {
         Client publishClient =
                 createWsClient(NotificationConsumer.class, publishWsUrl);
 
-        String topicNamespace = "http://example.org/namespace/";
-        String topicNsPrefix = "ns";
-        String topicExpression = "TaxiUc";
+        int lastIndexOfSlash = ecId.getStreamUrl().lastIndexOf('/');
+
+        String topicExpression =
+                ecId.getStreamUrl().substring(lastIndexOfSlash + 1);
+        String topicNamespace =
+                ecId.getStreamUrl().substring(0, lastIndexOfSlash);
+        String topicNsPrefix = "s";
 
         // Creates the subscribe request
         Subscribe subscribeRequest =

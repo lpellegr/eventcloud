@@ -61,16 +61,26 @@ public class JunitEventCloudInfrastructureDeployer {
         this.datastoreType = type;
     }
 
+    public EventCloudId createEventCloud(EventCloudId eventCloudId, int nbPeers) {
+        return this.createEventCloud(eventCloudId, 1, nbPeers);
+    }
+
     public EventCloudId createEventCloud(int nbPeers) {
         return this.createEventCloud(1, nbPeers);
     }
 
     public EventCloudId createEventCloud(int nbTrackers, int nbPeers) {
+        return this.createEventCloud(new EventCloudId(), nbTrackers, nbPeers);
+    }
+
+    public EventCloudId createEventCloud(EventCloudId eventCloudId,
+                                         int nbTrackers, int nbPeers) {
+
         this.initializeEventCloudsRegistry();
 
         EventCloud eventcloud =
                 EventCloud.create(
-                        this.eventCloudsRegistryUrl,
+                        this.eventCloudsRegistryUrl, eventCloudId,
                         new JunitEventCloudDeployer(this.datastoreType),
                         new ArrayList<UnalterableElaProperty>(), nbTrackers,
                         nbPeers);
