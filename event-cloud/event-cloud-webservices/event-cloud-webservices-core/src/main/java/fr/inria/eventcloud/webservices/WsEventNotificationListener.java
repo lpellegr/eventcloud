@@ -16,9 +16,10 @@
  **/
 package fr.inria.eventcloud.webservices;
 
+import javax.xml.namespace.QName;
+
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
-import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
-import fr.inria.eventcloud.translators.wsn.TranslationException;
+import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
 import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
 
 /**
@@ -47,16 +48,32 @@ public class WsEventNotificationListener extends
 
     private static SemanticCompoundEventTranslator translator =
             new SemanticCompoundEventTranslator();
-    private String subscriberWsUrl;
+
+    private final QName streamQName;
+
+    private final String subscriberWsUrl;
 
     private transient Client wsClient;
 
     /**
      * Creates an {@link CompoundEventNotificationListener} with the specified
      * subscriber URL to invoke the Web service to notify.
+     * 
+     * @param streamUrl
+     *            the stream URL.
+     * 
+     * @param subscriberWsUrl
+     *            the subscriber URL.
      */
-    public WsEventNotificationListener(String subscriberWsUrl) {
+    public WsEventNotificationListener(String streamUrl, String subscriberWsUrl) {
         this.subscriberWsUrl = subscriberWsUrl;
+
+        int index = streamUrl.lastIndexOf('/');
+
+        this.streamQName =
+                new QName(
+                        streamUrl.substring(0, index),
+                        streamUrl.substring(index + 1), "s");
     }
 
     /**
@@ -71,14 +88,11 @@ public class WsEventNotificationListener extends
             this.wsClient = clientFactory.create();
         }
 
-        Notify notify = new Notify();
-        NotificationMessageHolderType notificationMessage;
-        try {
-            notificationMessage = translator.translate(solution);
-            notify.getNotificationMessage().add(notificationMessage);
-        } catch (TranslationException e1) {
-            e1.printStackTrace();
-        }
+        Notify notify =
+                WsNotificationMessageBuilder.createNotifyMessage(
+                        translator, this.streamQName.getNamespaceURI(),
+                        this.streamQName.getPrefix(),
+                        this.streamQName.getLocalPart(), solution);
 
         try {
             this.wsClient.invoke(NOTIFY_METHOD_NAME, new Object[] {notify});

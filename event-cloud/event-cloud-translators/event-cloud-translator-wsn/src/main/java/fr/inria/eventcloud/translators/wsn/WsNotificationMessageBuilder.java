@@ -11,6 +11,7 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 
 import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
 
 /**
  * This class provides static methods to create some basic WS-Notification
@@ -61,7 +62,8 @@ public class WsNotificationMessageBuilder {
 
     /**
      * Creates a notify message from the specified topic information and
-     * {@link CompoundEvent}s.
+     * {@link CompoundEvent}s. <strong>This method creates a new
+     * {@link SemanticCompoundEventTranslator} each time it is invoked</strong>.
      * 
      * @param topicNamespace
      *            namespace associated to the topic the subscriber subscribes
@@ -72,6 +74,7 @@ public class WsNotificationMessageBuilder {
      *            local part associated to the topic.
      * @param compoundEvents
      *            the compound events to serialize inside the message.
+     * 
      * @return a notify message with the specified topic information and
      *         {@link CompoundEvent}s.
      */
@@ -79,14 +82,41 @@ public class WsNotificationMessageBuilder {
                                              String topicNsPrefix,
                                              String topicLocalPart,
                                              CompoundEvent... compoundEvents) {
-        Notify result = new Notify();
+        return createNotifyMessage(
+                new SemanticCompoundEventTranslator(), topicNamespace,
+                topicNsPrefix, topicLocalPart, compoundEvents);
+    }
 
-        WsNotificationTranslator translator = new WsNotificationTranslator();
+    /**
+     * Creates a notify message from the specified topic information and
+     * {@link CompoundEvent}s by using the given {@code translator}.
+     * 
+     * @param translator
+     *            the translator used to translate compound events.
+     * @param topicNamespace
+     *            namespace associated to the topic the subscriber subscribes
+     *            to.
+     * @param topicNsPrefix
+     *            prefix associated to topic namespace.
+     * @param topicLocalPart
+     *            local part associated to the topic.
+     * @param compoundEvents
+     *            the compound events to serialize inside the message.
+     * 
+     * @return a notify message with the specified topic information and
+     *         {@link CompoundEvent}s.
+     */
+    public static Notify createNotifyMessage(SemanticCompoundEventTranslator translator,
+                                             String topicNamespace,
+                                             String topicNsPrefix,
+                                             String topicLocalPart,
+                                             CompoundEvent... compoundEvents) {
+        Notify result = new Notify();
 
         for (CompoundEvent event : compoundEvents) {
             try {
                 NotificationMessageHolderType message =
-                        translator.translateSemanticCompoundEvent(event);
+                        translator.translate(event);
                 message.setTopic(createTopicExpressionType(
                         topicNamespace, topicNsPrefix, topicLocalPart));
                 result.getNotificationMessage().add(message);

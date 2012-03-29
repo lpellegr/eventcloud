@@ -122,7 +122,7 @@ public class SubscribeServiceImpl extends
 
                         super.proxy.subscribe(
                                 subscription, new WsEventNotificationListener(
-                                        subscriberUrl));
+                                        super.streamUrl, subscriberUrl));
 
                         log.info("Translation output:\n{}", sparqlQuery);
                     } catch (TranslationException e) {
