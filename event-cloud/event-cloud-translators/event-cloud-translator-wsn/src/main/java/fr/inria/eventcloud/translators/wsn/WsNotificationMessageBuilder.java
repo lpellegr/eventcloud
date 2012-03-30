@@ -1,3 +1,19 @@
+/**
+ * Copyright (c) 2011-2012 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
 package fr.inria.eventcloud.translators.wsn;
 
 import javax.xml.bind.JAXBElement;
@@ -20,6 +36,37 @@ import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslato
  * @author lpellegr
  */
 public class WsNotificationMessageBuilder {
+
+    /**
+     * Creates a {@link Subscribe} WS-Notification message from the specified
+     * subscriber's endpoint and topic information.
+     * 
+     * @param subscriberEndpoint
+     *            subscriber's endpoint.
+     * @param topicLocalPart
+     *            local part associated to the topic.
+     * 
+     * @return a {@link Subscribe} WS-Notification message with the specified
+     *         subscriber's endpoint and topic information.
+     */
+    public static Subscribe createSubscribeMessage(String subscriberEndpoint,
+                                                   String topicLocalPart) {
+        Subscribe subscribeRequest = new Subscribe();
+        FilterType filterType = new FilterType();
+
+        JAXBElement<TopicExpressionType> jaxbElement =
+                new JAXBElement<TopicExpressionType>(
+                        new QName(
+                                "http://docs.oasis-open.org/wsn/b-2",
+                                "TopicExpression"), TopicExpressionType.class,
+                        createTopicExpressionType(topicLocalPart));
+        filterType.getAny().add(jaxbElement);
+        subscribeRequest.setFilter(filterType);
+
+        subscribeRequest.setConsumerReference(WSNHelper.createWSA(subscriberEndpoint));
+
+        return subscribeRequest;
+    }
 
     /**
      * Creates a {@link Subscribe} WS-Notification message from the specified
@@ -128,7 +175,17 @@ public class WsNotificationMessageBuilder {
         return result;
     }
 
-    public static TopicExpressionType createTopicExpressionType(String topicNamespace,
+    private static TopicExpressionType createTopicExpressionType(String topicLocalPart) {
+        TopicExpressionType topicExpressionType = new TopicExpressionType();
+        topicExpressionType.getOtherAttributes().put(
+                new QName(topicLocalPart), topicLocalPart);
+
+        topicExpressionType.getContent().add(topicLocalPart);
+
+        return topicExpressionType;
+    }
+
+    private static TopicExpressionType createTopicExpressionType(String topicNamespace,
                                                                 String topicNsPrefix,
                                                                 String topicExpression) {
         String topic = topicNsPrefix + ":" + topicExpression;

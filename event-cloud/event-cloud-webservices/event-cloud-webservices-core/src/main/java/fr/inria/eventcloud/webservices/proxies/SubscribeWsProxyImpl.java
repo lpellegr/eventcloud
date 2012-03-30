@@ -16,24 +16,26 @@
  **/
 package fr.inria.eventcloud.webservices.proxies;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
+import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
+import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
+import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.MultipleTopicsSpecifiedFault;
+import org.oasis_open.docs.wsn.bw_2.NoCurrentMessageOnTopicFault;
+import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
+import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
+import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
 
-import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
+import fr.inria.eventcloud.webservices.WsEventNotificationListener;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
-import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
 
 /**
  * SubscribeWsProxyImpl is an extension of {@link SubscribeProxyImpl} in order
@@ -43,15 +45,15 @@ import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
  * @author bsauvan
  */
 public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
-        SubscribeWsApi {
+        SubscribeWsApi, SubscribeWsProxyAttributeController {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String NOTIFY_METHOD_NAME = "Notify";
+    protected String streamUrl;
 
-    // contains the subscriber web service clients to use in order to deliver
+    // contains the subscriber web service urls to use in order to deliver
     // the solutions
-    private Map<SubscriptionId, Client> subscribers;
+    private Map<SubscriptionId, String> subscribers;
 
     /**
      * Empty constructor required by ProActive.
@@ -68,7 +70,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
                               AlterableElaProperty[] properties) {
         if (this.proxy == null) {
             super.setAttributes(proxy, componentUri, properties);
-            this.subscribers = new HashMap<SubscriptionId, Client>();
+            this.subscribers = new HashMap<SubscriptionId, String>();
         }
     }
 
@@ -76,37 +78,34 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    public SubscriptionId subscribe(SubscribeInfos subscribeInfos) {
+    public void setStreamUrl(String streamUrl) {
+        this.streamUrl = streamUrl;
+    }
 
-        // TODO: to translate the WS-Notification subscription to a SPARQL query
-        // by using:
-        // this.translator.translateSubscribeToSparqlQuery(subscription)
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage currentMessage)
+            throws NoCurrentMessageOnTopicFault, TopicNotSupportedFault,
+            ResourceUnknownFault, MultipleTopicsSpecifiedFault,
+            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SubscriptionId subscribe(SubscribeInfos subscribeInfos) {
         Subscription subscription =
                 new Subscription(subscribeInfos.getSparqlQuery());
 
-        JaxWsClientFactoryBean clientFactory = new JaxWsClientFactoryBean();
-        clientFactory.setServiceClass(SubscriberWsApi.class);
-        clientFactory.setAddress(subscribeInfos.getSubscriberWsUrl());
-        Client client = clientFactory.create();
+        this.subscribers.put(
+                subscription.getId(), subscribeInfos.getSubscriberWsUrl());
 
-        this.subscribers.put(subscription.getId(), client);
-
-        super.subscribe(subscription, new CompoundEventNotificationListener() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void onNotification(SubscriptionId id, CompoundEvent event) {
-                try {
-                    List<CompoundEvent> events = new ArrayList<CompoundEvent>();
-                    events.add(event);
-                    SubscribeWsProxyImpl.this.subscribers.get(id).invoke(
-                            NOTIFY_METHOD_NAME, new Object[] {events});
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        this.subscribe(subscription, new WsEventNotificationListener(
+                this.streamUrl, subscribeInfos.getSubscriberWsUrl()));
 
         return subscription.getId();
     }
@@ -117,7 +116,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public void unsubscribe(SubscriptionId id) {
         super.unsubscribe(id);
-        Client client = this.subscribers.remove(id);
-        client.destroy();
+        this.subscribers.remove(id);
     }
+
 }

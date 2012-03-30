@@ -17,8 +17,21 @@
 package fr.inria.eventcloud.webservices.pubsub;
 
 import java.util.Collection;
-import java.util.List;
 
+import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
+import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
+import org.oasis_open.docs.wsn.bw_2.InvalidFilterFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidMessageContentExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidProducerPropertiesExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.NotifyMessageNotSupportedFault;
+import org.oasis_open.docs.wsn.bw_2.SubscribeCreationFailedFault;
+import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
+import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
+import org.oasis_open.docs.wsn.bw_2.UnacceptableInitialTerminationTimeFault;
+import org.oasis_open.docs.wsn.bw_2.UnrecognizedPolicyRequestFault;
+import org.oasis_open.docs.wsn.bw_2.UnsupportedPolicyRequestFault;
+import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -31,7 +44,6 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
-import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
 
 /**
  * Component used to simulate a subscriber and a publisher.
@@ -39,7 +51,7 @@ import fr.inria.eventcloud.webservices.api.SubscriberWsApi;
  * @author bsauvan
  */
 public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
-        SubscriberWsApi, PubSubStatus, BindingController {
+        PubSubStatus, BindingController {
 
     private static final Logger log =
             LoggerFactory.getLogger(PubSubComponentImpl.class);
@@ -49,21 +61,40 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
 
     public static final String PUBLISH_WEBSERVICES_NAME = "publish-webservices";
 
-    private boolean hasReceivedEvent;
+    private boolean hasSentEvents;
+
+    private boolean hasReceivedEvents;
 
     private PublishWsApi publishWs;
 
     private SubscribeWsApi subscribeWs;
 
     public PubSubComponentImpl() {
-        this.hasReceivedEvent = false;
+        this.hasSentEvents = false;
+        this.hasReceivedEvents = false;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SubscriptionId subscribe(SubscribeInfos subscribeInfos) {
+    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage currentMessage) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SubscriptionId subscribe(SubscribeInfos subscribeInfos)
+            throws UnrecognizedPolicyRequestFault,
+            SubscribeCreationFailedFault,
+            InvalidProducerPropertiesExpressionFault,
+            UnsupportedPolicyRequestFault, TopicNotSupportedFault,
+            NotifyMessageNotSupportedFault, ResourceUnknownFault,
+            UnacceptableInitialTerminationTimeFault,
+            InvalidMessageContentExpressionFault, InvalidFilterFault,
+            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
         if (this.subscribeWs != null) {
             return this.subscribeWs.subscribe(subscribeInfos);
         } else {
@@ -74,20 +105,20 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
     /**
      * {@inheritDoc}
      */
-    // @Override
-    // public void unsubscribe(SubscriptionId id) {
-    // if (this.subscribeWs != null) {
-    // this.subscribeWs.unsubscribe(id);
-    // }
-    // }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void publish(Collection<CompoundEvent> events) {
+    public void publish(Collection<CompoundEvent> compoundEvents) {
         if (this.publishWs != null) {
-            this.publishWs.publish(events);
+            if (!this.hasSentEvents) {
+                this.publishWs.publish(compoundEvents);
+                this.hasSentEvents = true;
+            } else {
+                this.hasReceivedEvents = true;
+                for (CompoundEvent compoundEvent : compoundEvents) {
+                    log.info(
+                            "New compound event received: {}",
+                            compoundEvent.toString());
+                }
+            }
         }
     }
 
@@ -95,19 +126,8 @@ public class PubSubComponentImpl implements SubscribeWsApi, PublishWsApi,
      * {@inheritDoc}
      */
     @Override
-    public void notify(List<CompoundEvent> events) {
-        this.hasReceivedEvent = true;
-        for (CompoundEvent event : events) {
-            log.info("New compound event received: {}", event.toString());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean hasReceivedEvent() {
-        return this.hasReceivedEvent;
+    public boolean hasReceivedEvents() {
+        return this.hasReceivedEvents;
     }
 
     @Override

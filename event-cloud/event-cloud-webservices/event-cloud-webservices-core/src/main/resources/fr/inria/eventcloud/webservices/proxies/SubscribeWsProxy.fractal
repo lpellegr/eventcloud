@@ -7,4 +7,6 @@
 	<content class="fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyImpl"/>
 
 	<controller desc="/org/objectweb/proactive/extensions/webservices/cxf/component/controller/cxf-component-config.xml"/>
+
+	<attributes signature="fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyAttributeController"/>
 </definition>

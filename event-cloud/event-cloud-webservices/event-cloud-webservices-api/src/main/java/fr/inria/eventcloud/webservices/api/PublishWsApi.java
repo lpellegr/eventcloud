@@ -22,11 +22,12 @@ import javax.jws.Oneway;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.webservices.api.adapters.EventCollectionAdapter;
+import fr.inria.eventcloud.webservices.api.adapters.CompoundEventCollectionAdapter;
 
 /**
  * Defines the publish operations that can be executed on an Event Cloud and can
@@ -36,11 +37,14 @@ import fr.inria.eventcloud.webservices.api.adapters.EventCollectionAdapter;
  * @author bsauvan
  */
 @WebService(serviceName = "EventCloudPublish", portName = "EventCloudPublishPort", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2", name = "EventCloudPublishPortType")
-@XmlSeeAlso({
-        org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
-        org.oasis_open.docs.wsn.b_2.ObjectFactory.class,
+@XmlSeeAlso(value = {
+        org.oasis_open.docs.wsn.br_2.ObjectFactory.class,
+        org.oasis_open.docs.wsrf.rp_2.ObjectFactory.class,
+        org.oasis_open.docs.wsrf.bf_2.ObjectFactory.class,
         org.oasis_open.docs.wsrf.r_2.ObjectFactory.class,
-        org.oasis_open.docs.wsrf.bf_2.ObjectFactory.class})
+        org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
+        org.oasis_open.docs.wsn.b_2.ObjectFactory.class})
+@SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
 public interface PublishWsApi {
 
     /**
@@ -50,7 +54,7 @@ public interface PublishWsApi {
      *            the collection of compound events to publish.
      */
     @Oneway
-    @WebMethod(operationName = "Notify", action = "http://www.petalslink.com/wsn/service/WsnConsumer/Notify")
-    public void publish(@WebParam(partName = "Notify", name = "Notify", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(EventCollectionAdapter.class) Collection<CompoundEvent> events);
+    @WebMethod(operationName = "Notify")
+    public void publish(@WebParam(partName = "Notify", name = "Notify", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(CompoundEventCollectionAdapter.class) Collection<CompoundEvent> events);
 
 }

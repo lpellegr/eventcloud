@@ -16,15 +16,10 @@
  **/
 package fr.inria.eventcloud.webservices.api.adapters;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
-import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
-import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
-import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +31,9 @@ import com.hp.hpl.jena.sparql.algebra.TransformBase;
 import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 
+import fr.inria.eventcloud.translators.wsn.TranslationException;
+import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
+import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
 import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
@@ -68,11 +66,7 @@ public class SubscribeInfosAdapter extends
      * @return the subscribe object representing the specified subscribe infos.
      */
     @Override
-    public Subscribe marshal(SubscribeInfos subscribeInfos) throws Exception {
-        Subscribe subscribe = new Subscribe();
-        FilterType filterType = new FilterType();
-        TopicExpressionType topicExpressionType = new TopicExpressionType();
-
+    public Subscribe marshal(SubscribeInfos subscribeInfos) {
         // Retrieve topic name from SPARQL query
         final StringBuilder topicName = new StringBuilder();
         OpAsQuery.asQuery(Transformer.transform(
@@ -88,22 +82,9 @@ public class SubscribeInfosAdapter extends
 
                 },
                 Algebra.compile(QueryFactory.create(subscribeInfos.getSparqlQuery()))));
-        topicExpressionType.getContent().add(topicName.toString());
-        JAXBElement<TopicExpressionType> jaxbElement =
-                new JAXBElement<TopicExpressionType>(
-                        new QName(
-                                "http://docs.oasis-open.org/wsn/b-2",
-                                "TopicExpression"), TopicExpressionType.class,
-                        topicExpressionType);
-        filterType.getAny().add(jaxbElement);
-        subscribe.setFilter(filterType);
 
-        W3CEndpointReferenceBuilder endPointReferenceBuilder =
-                new W3CEndpointReferenceBuilder();
-        endPointReferenceBuilder.address(subscribeInfos.getSubscriberWsUrl());
-        subscribe.setConsumerReference(endPointReferenceBuilder.build());
-
-        return subscribe;
+        return WsNotificationMessageBuilder.createSubscribeMessage(
+                subscribeInfos.getSubscriberWsUrl(), topicName.toString());
     }
 
     /**
@@ -117,32 +98,48 @@ public class SubscribeInfosAdapter extends
      *         object.
      */
     @Override
-    public SubscribeInfos unmarshal(Subscribe subscribe) throws Exception {
+    public SubscribeInfos unmarshal(Subscribe subscribe) {
+        WsNotificationLogUtils.logSubscribe(subscribe);
+
         W3CEndpointReference consumerReference =
                 subscribe.getConsumerReference();
 
         if (consumerReference != null) {
             Object address =
                     ReflectionUtils.getFieldValue(consumerReference, "address");
-            if (address != null) {
-                String subscriberUrl =
-                        (String) ReflectionUtils.getFieldValue(address, "uri");
-                if (subscriberUrl != null) {
-                    String sparqlQuery =
-                            this.translator.translateTopicSubscription(subscribe);
-                    if (sparqlQuery != null) {
-                        return new SubscribeInfos(sparqlQuery, subscriberUrl);
-                    } else {
-                        log.error("SPARQL query cannot be extracted from subscribe notification");
-                    }
-                }
-            }
 
-            log.error("Consumer reference cannot be extracted from subscribe notification");
+            if (address != null) {
+                String subscriberWsUrl =
+                        (String) ReflectionUtils.getFieldValue(address, "uri");
+
+                if (subscriberWsUrl != null) {
+                    try {
+                        String sparqlQuery =
+                                this.translator.translate(subscribe);
+
+                        log.info("Subscriber endpoint is {}", subscriberWsUrl);
+                        log.info("Translation output:\n{}", sparqlQuery);
+
+                        return new SubscribeInfos(sparqlQuery, subscriberWsUrl);
+                    } catch (TranslationException e) {
+                        log.error("Translation error:");
+                        this.logAndThrowIllegalArgumentException(e.getMessage());
+                    }
+                } else {
+                    this.logAndThrowIllegalArgumentException("Subscribe message received but no subscriber address is specified: the subscriber cannot receive any notification");
+                }
+            } else {
+                this.logAndThrowIllegalArgumentException("Consumer address cannot be extracted from subscribe message");
+            }
         } else {
-            log.error("Subscribe notification does not contain consumer reference");
+            this.logAndThrowIllegalArgumentException("Subscribe message does not contain consumer reference");
         }
 
         return null;
+    }
+
+    private final void logAndThrowIllegalArgumentException(String msg) {
+        log.error(msg);
+        throw new IllegalArgumentException(msg);
     }
 }
