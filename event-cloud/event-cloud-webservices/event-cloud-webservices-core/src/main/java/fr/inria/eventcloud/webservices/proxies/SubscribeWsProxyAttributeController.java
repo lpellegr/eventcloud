@@ -14,23 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.webservices.pubsub;
+package fr.inria.eventcloud.webservices.proxies;
 
-import fr.inria.eventcloud.api.CompoundEvent;
+import org.objectweb.fractal.api.control.AttributeController;
+
+import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxyAttributeController;
 
 /**
- * This interface defines a method which may be called to know if
- * {@link CompoundEvent}s have been received.
+ * {@link AttributeController} for {@link SubscribeProxy} components turned into
+ * web services.
  * 
  * @author bsauvan
  */
-public interface PubSubStatus {
+public interface SubscribeWsProxyAttributeController extends
+        SubscribeProxyAttributeController {
 
     /**
-     * Indicates whether events have been received or not.
+     * Sets the stream URL of the subscribe WS proxy.
      * 
-     * @return true if events have been received, false otherwise.
+     * @param streamUrl
+     *            the stream URL.
      */
-    public boolean hasReceivedEvents();
+    public void setStreamUrl(String streamUrl);
 
 }

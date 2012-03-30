@@ -19,11 +19,14 @@ package fr.inria.eventcloud.webservices.api;
 import java.io.Serializable;
 
 /**
+ * Class used to contain required subscription informations coming from a WS
+ * Notification Subcription.
  * 
  * @author lpellegr
  * @author bsauvan
  */
 public class SubscribeInfos implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private String sparqlQuery;
@@ -31,7 +34,6 @@ public class SubscribeInfos implements Serializable {
     private String subscriberWsUrl;
 
     public SubscribeInfos(String sparqlQuery, String subscriberWsUrl) {
-        super();
         this.sparqlQuery = sparqlQuery;
         this.subscriberWsUrl = subscriberWsUrl;
     }

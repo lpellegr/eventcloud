@@ -34,11 +34,12 @@ public class SubscriptionIdAdapter extends
     }
 
     /**
-     * Converts the specified SubscriptionId to its string representation.
+     * Converts the specified SubscriptionId to its subscribe response
+     * representation.
      * 
      * @param id
      *            the SubscriptionId to be converted.
-     * @return the string representing the specified SubscriptionId.
+     * @return the subscribe response representing the specified SubscriptionId.
      */
     @Override
     public SubscribeResponse marshal(SubscriptionId id) throws Exception {
@@ -46,15 +47,18 @@ public class SubscriptionIdAdapter extends
     }
 
     /**
-     * Converts the specified string to its corresponding SubscriptionId.
+     * Converts the specified subscribe response to its corresponding
+     * SubscriptionId.
      * 
-     * @param id
-     *            the string containing the SubscriptionId representation to be
-     *            converted.
-     * @return the SubscriptionId represented by the specified string.
+     * @param subscribeResponse
+     *            the subscribe response containing the SubscriptionId
+     *            representation to be converted.
+     * @return the SubscriptionId represented by the specified subscribe
+     *         response.
      */
     @Override
-    public SubscriptionId unmarshal(SubscribeResponse id) throws Exception {
+    public SubscriptionId unmarshal(SubscribeResponse subscribeResponse)
+            throws Exception {
         return new SubscriptionId();
     }
 
