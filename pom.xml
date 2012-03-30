@@ -46,7 +46,7 @@
 			<url>https://repository.apache.org/content/repositories/snapshots</url>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots-proactive-829</id>
+			<id>sonatype-snapshots-proactive-882</id>
 			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-882</url>
 		</repository>
 		<repository>
