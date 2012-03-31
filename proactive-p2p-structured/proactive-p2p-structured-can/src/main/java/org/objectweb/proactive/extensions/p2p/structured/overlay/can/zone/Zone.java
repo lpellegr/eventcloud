@@ -101,7 +101,7 @@ public class Zone implements Serializable {
         HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement, Double>> newNumViews =
                 this.numView.split(dimension);
 
-        return new HomogenousPair<Zone>(new Zone(
+        return HomogenousPair.createHomogenous(new Zone(
                 (UnicodeZoneView) newUnicodeViews.getFirst(),
                 (NumericZoneView) newNumViews.getFirst()), new Zone(
                 (UnicodeZoneView) newUnicodeViews.getSecond(),

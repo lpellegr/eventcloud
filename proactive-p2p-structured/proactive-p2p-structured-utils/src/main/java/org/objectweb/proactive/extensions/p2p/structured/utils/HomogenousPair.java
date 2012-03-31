@@ -17,7 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.utils;
 
 /**
- * A pair class that contains homogenous values.
+ * A pair class that contains homogeneous values.
  * 
  * @author lpellegr
  * 
@@ -28,18 +28,33 @@ public class HomogenousPair<T> extends Pair<T, T> {
 
     private static final long serialVersionUID = 1L;
 
-    public HomogenousPair(T first, T second) {
-        super(first, second);
+    private HomogenousPair(T v1, T v2) {
+        super(v1, v2);
     }
 
     public T get(int index) {
         if (index < 0 || index > 1) {
-            throw new IndexOutOfBoundsException("index " + index
+            throw new IndexOutOfBoundsException("Index " + index
                     + " is not in [0,1]");
         }
 
         return index == 0
                 ? super.first : super.second;
+    }
+
+    /**
+     * Creates a new homogeneous pair from the specified {@code first} and
+     * {@code second} values.
+     * 
+     * @param first
+     *            the first value contained by the pair.
+     * @param second
+     *            the second value contained by the pair.
+     * 
+     * @return a new pair that contains the specified values.
+     */
+    public static <T> HomogenousPair<T> createHomogenous(T first, T second) {
+        return new HomogenousPair<T>(first, second);
     }
 
 }
