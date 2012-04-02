@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.utils;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Some utility methods for unicode strings manipulation.
@@ -25,83 +26,88 @@ import java.util.LinkedList;
  */
 public class UnicodeUtil {
 
-    private static char CODE_POINTS_SEPARATOR = '.';
-
     /**
-     * Makes an unicode string printable by replacing all non printable ascii
-     * characters to their unicode representation by using the {@code \\uxxxx}
-     * notation.
+     * Makes an unicode string printable by replacing each character to their
+     * unicode representation thanks to the \\u notation.
      * 
      * @param string
      *            the unicode string to make printable.
      * 
-     * @return a printable unicode string.
+     * @return a printable unicode string where each character is replace to its
+     *         unicode representation thanks to the \\u notation.
      */
     public static String makePrintable(String string) {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < string.length(); i++) {
-            // printable ASCII characters are output
-            if (string.codePointAt(i) > 32 && string.codePointAt(i) < 127) {
-                result.append(Character.toChars(string.codePointAt(i)));
-            } else {
-                // tries to get an unicode representation
-                result.append("\\u"
-                        + Integer.toHexString(string.codePointAt(i) | 0x10000)
-                                .substring(1));
-            }
-        }
-
-        return result.toString();
+        return makePrintable(fromStringToCodePoints(string));
     }
 
-    /**
-     * Transforms a unicode string to a string containing the code points value
-     * associated to the original {@code string}. Each code point value is
-     * separated by using the default char separator which is defined as
-     * {@code .}.
-     * 
-     * @param string
-     *            the unicode string to transform.
-     * 
-     * @return a list of code points for the given {@code string}.
-     */
-    public static String asCodePoints(String string) {
-        return asCodePoints(string, CODE_POINTS_SEPARATOR);
-    }
-
-    /**
-     * Transforms a unicode string to a string containing the code points value
-     * associated to the original {@code string}. Each code point value is
-     * separated by using the specified {@code separator}.
-     * 
-     * @param string
-     *            the unicode string to transform.
-     * 
-     * @return a list of code points separated by the specified
-     *         {@code separator} character for the given {@code string}.
-     */
-    public static String asCodePoints(String string, char separator) {
+    public static String makePrintable(LinkedList<Integer> codePoints) {
         StringBuilder result = new StringBuilder();
-        LinkedList<Integer> codePoints = fromStringToUnicode(string);
 
+        int codePoint;
         for (int i = 0; i < codePoints.size(); i++) {
-            result.append(codePoints.get(i));
-            if (i < codePoints.size() - 1) {
-                result.append(separator);
+            codePoint = codePoints.get(i);
+
+            if (codePoint > 0xffff) {
+                result.append("\\u");
+                appendCodePointRepresentation(codePoint, result);
+            } else if (codePoint > 0xfff) {
+                result.append("\\u");
+                appendCodePointRepresentation(codePoint, result);
+            } else if (codePoint > 0xff) {
+                result.append("\\u0");
+                appendCodePointRepresentation(codePoint, result);
+            } else if (codePoint > 0xf) {
+                result.append("\\u00");
+                appendCodePointRepresentation(codePoint, result);
+            } else {
+                result.append("\\u000");
+                appendCodePointRepresentation(codePoint, result);
             }
         }
 
         return result.toString();
     }
 
-    private static LinkedList<Integer> fromStringToUnicode(String string) {
+    private static void appendCodePointRepresentation(int codePoint,
+                                                      StringBuilder buffer) {
+        buffer.append(Integer.toHexString(codePoint));
+    }
+
+    /**
+     * Transforms a String to its representative list of unicode code points.
+     * 
+     * @param string
+     *            the string value to transform.
+     * 
+     * @return a list of unicode code points.
+     */
+    public static LinkedList<Integer> fromStringToCodePoints(String string) {
         LinkedList<Integer> codePtArray = new LinkedList<Integer>();
+
         for (int i = 0; i < string.length(); i++) {
             int codePt = string.codePointAt(i);
             codePtArray.add(codePt);
         }
 
         return codePtArray;
+    }
+
+    /**
+     * Transforms a list of unicode code points to a String.
+     * 
+     * @param codePoints
+     *            the list to transform.
+     * 
+     * @return a String.
+     */
+    public static String fromCodePointsToString(List<Integer> codePoints) {
+        StringBuilder result = new StringBuilder(codePoints.size());
+
+        for (int codePoint : codePoints) {
+            result.append(Character.toChars(codePoint));
+        }
+
+        return result.toString();
     }
 
 }

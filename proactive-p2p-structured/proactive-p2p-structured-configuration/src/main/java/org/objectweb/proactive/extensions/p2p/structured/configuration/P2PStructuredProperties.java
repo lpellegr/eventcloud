@@ -53,11 +53,21 @@ public class P2PStructuredProperties {
     public static final PropertyByte CAN_NB_DIMENSIONS = new PropertyByte(
             "can.nb.dimensions", Byte.valueOf((byte) 3));
 
-    public static final PropertyString CAN_LOWER_BOUND = new PropertyString(
-            "can.lower.bound", "0");
+    /**
+     * This property defines the minimum lower bound associated to a CAN
+     * network. It is by default set to {@code \u0000} and <strong>should not be
+     * edited</strong>.
+     */
+    public static final PropertyCharacter CAN_LOWER_BOUND =
+            new PropertyCharacter("can.lower.bound", '\u0000');
 
-    public static final PropertyString CAN_UPPER_BOUND = new PropertyString(
-            "can.upper.bound", "{");
+    /**
+     * This property defines the maximum upper bound associated to a CAN
+     * network. It is by default set to {@code \uffff} to support all UTF-16
+     * characters}.
+     */
+    public static final PropertyCharacter CAN_UPPER_BOUND =
+            new PropertyCharacter("can.upper.bound", '\uffff');
 
     public static final PropertyInteger CAN_LEAVE_RETRY_MIN =
             new PropertyInteger("can.leave.retry.min", 2000);
@@ -72,13 +82,17 @@ public class P2PStructuredProperties {
             new PropertyInteger("can.task.refresh.interval", 500);
 
     /**
-     * Indicates which representation to use for coordinates when they are
-     * printed on the standard output. The values can be {@code alpha} for a
-     * standard String representation or {@code codepoints} in order to display
-     * the code points values.
+     * Indicates which representation to use for printing characters on the
+     * standard output. The value of this property can be set to:
+     * <ul>
+     * <li>{@code codepoints} in order to display the code points values by
+     * using the notation</li>
+     * <li>{@code decimal} to see the coordinate as a decimal value.</li>
+     * <li>{@code default} for a standard String representation</li>
+     * </ul>
      */
     public static final PropertyString CAN_COORDINATE_DISPLAY =
-            new PropertyString("can.coordinate.display", "alpha");
+            new PropertyString("can.coordinate.display", "codepoints");
 
     public static final PropertyDouble TRACKER_STORAGE_PROBABILITY =
             new PropertyDouble("tracker.storage.probability", 1.0);

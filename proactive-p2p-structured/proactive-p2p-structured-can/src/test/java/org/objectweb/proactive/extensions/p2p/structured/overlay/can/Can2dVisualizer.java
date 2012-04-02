@@ -249,6 +249,9 @@ public class Can2dVisualizer extends JFrame {
             g2d.setRenderingHint(
                     RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(
+                    RenderingHints.KEY_RENDERING,
+                    RenderingHints.VALUE_RENDER_QUALITY);
 
             int height, xMin, xMax, yMin, yMax;
             for (PeerEntry entry : Can2dVisualizer.this.cache) {
@@ -272,42 +275,45 @@ public class Can2dVisualizer extends JFrame {
                 yMin = this.getYmin(this.zoneClicked);
                 yMax = this.getYmax(this.zoneClicked);
 
-                g2d.setColor(Color.white);
-                g2d.fillOval(xMin + ((xMax - xMin) / 2) - 8, CANVAS_HEIGHT
-                        - (yMin + ((yMax - yMin) / 2)) - 8, 16, 16);
                 g2d.drawLine(xMin, CANVAS_HEIGHT - yMin, xMax, CANVAS_HEIGHT
                         - yMax);
                 g2d.drawLine(xMax, CANVAS_HEIGHT - yMin, xMin, CANVAS_HEIGHT
                         - yMax);
-                g2d.setColor(Color.black);
-                g2d.drawOval(xMin + ((xMax - xMin) / 2) - 8, CANVAS_HEIGHT
-                        - (yMin + ((yMax - yMin) / 2)) - 8, 16, 16);
+                g2d.fillOval(xMin + ((xMax - xMin) / 2) - 5, CANVAS_HEIGHT
+                        - (yMin + ((yMax - yMin) / 2)) - 5, 10, 10);
 
                 for (int i = 0; i < 2; i++) {
                     for (int j = 0; j < 2; j++) {
-                        for (Zone zone : Can2dVisualizer.this.cache.findBy(
-                                this.zoneClicked).getNeighbors()) {
-                            xMin = this.getXmin(zone);
-                            xMax = this.getXmax(zone);
-                            yMin = this.getYmin(zone);
-                            yMax = this.getYmax(zone);
 
-                            g2d.drawLine(
-                                    xMin, CANVAS_HEIGHT - yMin, xMax,
-                                    CANVAS_HEIGHT - yMax);
-                            g2d.drawLine(
-                                    xMax, CANVAS_HEIGHT - yMin, xMin,
-                                    CANVAS_HEIGHT - yMax);
+                        PeerEntry peerClicked =
+                                Can2dVisualizer.this.cache.findBy(this.zoneClicked);
+
+                        if (peerClicked != null) {
+                            for (Zone zone : peerClicked.getNeighbors()) {
+                                xMin = this.getXmin(zone);
+                                xMax = this.getXmax(zone);
+                                yMin = this.getYmin(zone);
+                                yMax = this.getYmax(zone);
+
+                                g2d.drawLine(
+                                        xMin, CANVAS_HEIGHT - yMin, xMax,
+                                        CANVAS_HEIGHT - yMax);
+                                g2d.drawLine(
+                                        xMax, CANVAS_HEIGHT - yMin, xMin,
+                                        CANVAS_HEIGHT - yMax);
+                            }
                         }
                     }
                 }
             }
+
+            g.dispose();
         }
 
         public boolean contains(double[][] intervals, double[] coordinates) {
             for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-                if ((coordinates[i] < intervals[i][0])
-                        || (coordinates[i] >= intervals[i][1])) {
+                if (coordinates[i] < intervals[i][0]
+                        || coordinates[i] >= intervals[i][1]) {
                     return false;
                 }
             }
@@ -451,18 +457,14 @@ public class Can2dVisualizer extends JFrame {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
 
         CanNetworkDeployer deployer = new CanNetworkDeployer();
-
         deployer.deploy(20);
 
-        final List<Peer> peers = new ArrayList<Peer>();
-        for (Peer peer : deployer.getRandomTracker().getPeers()) {
-            peers.add(peer);
-        }
+        final List<Peer> peers = deployer.getRandomTracker().getPeers();
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override

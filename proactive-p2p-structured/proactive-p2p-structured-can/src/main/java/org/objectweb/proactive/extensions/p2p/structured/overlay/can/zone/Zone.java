@@ -27,6 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
@@ -34,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * A zone defines a space (rectangle) which is completely logical and managed by
- * an {@link CanOverlay}. The coordinates of this rectangle are maintained in a
+ * a {@link CanOverlay}. The coordinates of this rectangle are maintained in a
  * {@link ZoneView}. By default a zone contain two views. The first one is a
  * {@link NumericZoneView} which uses respectively {@code 0.0} and {@code 1.0}
  * as the lower and upper bound. The second is an {@link UnicodeZoneView} which
@@ -78,8 +79,8 @@ public class Zone implements Serializable {
     public Zone() {
         this(
                 new UnicodeZoneView(
-                        createStringCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValue()),
-                        createStringCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValue())),
+                        createStringCoordinate(Character.toString(P2PStructuredProperties.CAN_LOWER_BOUND.getValue())),
+                        createStringCoordinate(Character.toString(P2PStructuredProperties.CAN_UPPER_BOUND.getValue()))),
                 new NumericZoneView(
                         createDoubleCoordinate(0.0),
                         createDoubleCoordinate(1.0)));
@@ -96,7 +97,7 @@ public class Zone implements Serializable {
      *         specified {@code dimension}.
      */
     public HomogenousPair<Zone> split(byte dimension) {
-        HomogenousPair<ZoneView<StringCoordinate, StringElement, String>> newUnicodeViews =
+        HomogenousPair<ZoneView<StringCoordinate, StringElement, DecimalBigInt>> newUnicodeViews =
                 this.unicodeView.split(dimension);
         HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement, Double>> newNumViews =
                 this.numView.split(dimension);
@@ -169,16 +170,16 @@ public class Zone implements Serializable {
         return this.unicodeView.contains(coordinate);
     }
 
-    public boolean overlaps(ZoneView<StringCoordinate, StringElement, String> view,
+    public boolean overlaps(ZoneView<StringCoordinate, StringElement, DecimalBigInt> view,
                             byte dimension) {
         return this.unicodeView.overlaps(view, dimension);
     }
 
-    public boolean overlaps(ZoneView<StringCoordinate, StringElement, String> view) {
+    public boolean overlaps(ZoneView<StringCoordinate, StringElement, DecimalBigInt> view) {
         return this.unicodeView.overlaps(view);
     }
 
-    public boolean abuts(ZoneView<StringCoordinate, StringElement, String> view,
+    public boolean abuts(ZoneView<StringCoordinate, StringElement, DecimalBigInt> view,
                          byte dimension, boolean direction) {
         return this.unicodeView.abuts(view, dimension, direction);
     }
@@ -203,6 +204,9 @@ public class Zone implements Serializable {
         return this.unicodeView.getUpperBound(dimension);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return this.unicodeView.toString();
