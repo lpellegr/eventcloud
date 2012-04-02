@@ -50,6 +50,9 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
         super();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void makeDecision(StructuredOverlay overlay, T request) {
         if (request.getHopCount() == 0) {

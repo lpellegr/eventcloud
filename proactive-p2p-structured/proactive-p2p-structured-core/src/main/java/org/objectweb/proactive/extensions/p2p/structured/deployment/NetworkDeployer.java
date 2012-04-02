@@ -130,8 +130,9 @@ public abstract class NetworkDeployer extends
     private void injectPeers(int nbPeers) {
         this.notifyInjectingPeers();
 
-        // TODO Uncomment when components are able to be instantiated in
+        // TODO uncomment when components will be able to be instantiated in
         // parallel
+
         // if (nbPeers > INJECTION_THRESHOLD) {
         // log.debug(
         // "Creates and injects {} peers on the network in parallel",

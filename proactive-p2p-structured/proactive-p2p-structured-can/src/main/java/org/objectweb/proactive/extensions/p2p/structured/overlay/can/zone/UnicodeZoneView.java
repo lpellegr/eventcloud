@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
@@ -26,7 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @author lpellegr
  */
 public class UnicodeZoneView extends
-        ZoneView<StringCoordinate, StringElement, String> {
+        ZoneView<StringCoordinate, StringElement, DecimalBigInt> {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,5 +35,5 @@ public class UnicodeZoneView extends
             StringCoordinate upperBound) {
         super(lowerBound, upperBound);
     }
-
+    
 }

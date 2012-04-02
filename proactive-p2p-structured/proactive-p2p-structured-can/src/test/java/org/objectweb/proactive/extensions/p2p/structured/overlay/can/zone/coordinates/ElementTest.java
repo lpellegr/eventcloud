@@ -81,7 +81,7 @@ public class ElementTest {
 
     @Test
     public void testMiddle() {
-        Assert.assertEquals(new StringElement("h\u0001"), Element.middle(
+        Assert.assertEquals(new StringElement("h\u7fff"), Element.middle(
                 this.coordinateElementB, this.coordinateElementC));
 
         Assert.assertNotSame(new StringElement("e"), Element.middle(
@@ -91,10 +91,12 @@ public class ElementTest {
     @Test
     public void testGetMiddle() {
         StringElement middleCoordinate = this.coordinateElementB;
-        for (int nbSplit = 0; nbSplit < 500; nbSplit++) {
+
+        for (int nbSplits = 0; nbSplits < 10e2; nbSplits++) {
             middleCoordinate =
                     (StringElement) Element.middle(
                             middleCoordinate, this.coordinateElementC);
+
             Assert.assertTrue(middleCoordinate.compareTo(this.coordinateElementC) < 0);
         }
     }

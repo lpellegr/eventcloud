@@ -56,11 +56,17 @@ public final class DefaultAnycastConstraintsValidator extends
         super(checkNotNull(key));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final boolean validatesKeyConstraints(StructuredOverlay overlay) {
         return this.validatesKeyConstraints(((CanOverlay) overlay).getZone());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final boolean validatesKeyConstraints(Zone zone) {
         for (byte i = 0; i < super.key.getValue().size(); i++) {
