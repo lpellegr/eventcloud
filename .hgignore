@@ -1,0 +1,8 @@
+syntax: regexp
+^(.*/)?target$
+^(.*/)?bin$
+^(.*/)?(.*)~$
+^(.*/)?[.]classpath$
+^(.*/)?[.]project$
+^(.*/)?[.]settings/(.*)$
+^(.*/)?[.]metadata/(.*)$
