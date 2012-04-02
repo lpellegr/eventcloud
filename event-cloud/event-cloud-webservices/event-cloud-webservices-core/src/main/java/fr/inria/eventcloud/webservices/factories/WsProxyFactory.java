@@ -16,17 +16,10 @@
  **/
 package fr.inria.eventcloud.webservices.factories;
 
-import org.etsi.uri.gcm.util.GCM;
-import org.objectweb.fractal.api.Interface;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
-import fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyAttributeController;
 
 /**
  * WsProxyFactory is used to create a new instance of a proxy component (e.g.
@@ -46,8 +39,6 @@ public final class WsProxyFactory extends ProxyFactory {
         putgetProxyAdl = EventCloudWsProperties.PUTGET_PROXY_ADL.getValue();
     }
 
-    private String streamUrl;
-
     /**
      * Constructs a new WsProxyFactory from the specified registryUrl and the
      * given Event Cloud id.
@@ -56,41 +47,18 @@ public final class WsProxyFactory extends ProxyFactory {
      *            the Event-Cloud registry url.
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
-     * @param streamUrl
-     *            the stream URL of the Event-Cloud to work on.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    private WsProxyFactory(String registryUrl, EventCloudId id, String streamUrl)
+    private WsProxyFactory(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         super(registryUrl, id);
-        this.streamUrl = streamUrl;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SubscribeProxy createSubscribeProxy(AlterableElaProperty... properties) {
-        try {
-            SubscribeProxy stub = super.createSubscribeProxy(properties);
-
-            ((SubscribeWsProxyAttributeController) GCM.getAttributeController(((Interface) stub).getFcItfOwner())).setStreamUrl(this.streamUrl);
-
-            return stub;
-        } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    public static ProxyFactory getInstance(String registryUrl, EventCloudId id,
-                                           String streamUrl)
+    public static ProxyFactory getInstance(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
-        ProxyFactory newFactory =
-                new WsProxyFactory(registryUrl, id, streamUrl);
+        ProxyFactory newFactory = new WsProxyFactory(registryUrl, id);
 
         ProxyFactory oldFactory = proxies.putIfAbsent(id, newFactory);
 

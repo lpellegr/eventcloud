@@ -45,11 +45,9 @@ import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
  * @author bsauvan
  */
 public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
-        SubscribeWsApi, SubscribeWsProxyAttributeController {
+        SubscribeWsApi {
 
     private static final long serialVersionUID = 1L;
-
-    protected String streamUrl;
 
     // contains the subscriber web service urls to use in order to deliver
     // the solutions
@@ -78,14 +76,6 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void setStreamUrl(String streamUrl) {
-        this.streamUrl = streamUrl;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage currentMessage)
             throws NoCurrentMessageOnTopicFault, TopicNotSupportedFault,
             ResourceUnknownFault, MultipleTopicsSpecifiedFault,
@@ -105,7 +95,8 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
                 subscription.getId(), subscribeInfos.getSubscriberWsUrl());
 
         this.subscribe(subscription, new WsEventNotificationListener(
-                this.streamUrl, subscribeInfos.getSubscriberWsUrl()));
+                this.proxy.getId().getStreamUrl(),
+                subscribeInfos.getSubscriberWsUrl()));
 
         return subscription.getId();
     }
