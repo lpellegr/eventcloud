@@ -48,8 +48,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
         this.decimalIndex = decimalIndex;
         this.radix = radix;
 
-        this.decimalIndex -= this.removeLeadingZeros();
-        this.removeTrailingZeros();
+        this.clean();
     }
 
     private static void checkRadix(DecimalBigInt thiss, DecimalBigInt that) {
@@ -214,7 +213,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
     }
 
     private void clean() {
-        this.removeLeadingZeros();
+        this.decimalIndex -= this.removeLeadingZeros();
         this.removeTrailingZeros();
     }
 
@@ -294,6 +293,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
     }
 
     public LinkedList<Integer> getDigits() {
+        this.clean();
         return this.digits;
     }
 
