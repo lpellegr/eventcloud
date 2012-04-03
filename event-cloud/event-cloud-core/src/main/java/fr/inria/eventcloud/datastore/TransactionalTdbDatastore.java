@@ -179,14 +179,14 @@ public class TransactionalTdbDatastore extends Datastore {
                 predicate = new SemanticElement(quad.getPredicate().toString());
                 object = new SemanticElement(quad.getObject().toString());
 
-                if (graph.compareTo(zone.getLowerBound((byte) 0)) >= 0
-                        && graph.compareTo(zone.getUpperBound((byte) 0)) < 0
-                        && subject.compareTo(zone.getLowerBound((byte) 1)) >= 0
-                        && subject.compareTo(zone.getUpperBound((byte) 1)) < 0
-                        && predicate.compareTo(zone.getLowerBound((byte) 2)) >= 0
-                        && predicate.compareTo(zone.getUpperBound((byte) 2)) < 0
-                        && object.compareTo(zone.getLowerBound((byte) 3)) >= 0
-                        && object.compareTo(zone.getUpperBound((byte) 3)) < 0) {
+                if (graph.compareLexicographicallyTo(zone.getLowerBound((byte) 0)) >= 0
+                        && graph.compareLexicographicallyTo(zone.getUpperBound((byte) 0)) < 0
+                        && subject.compareLexicographicallyTo(zone.getLowerBound((byte) 1)) >= 0
+                        && subject.compareLexicographicallyTo(zone.getUpperBound((byte) 1)) < 0
+                        && predicate.compareLexicographicallyTo(zone.getLowerBound((byte) 2)) >= 0
+                        && predicate.compareLexicographicallyTo(zone.getUpperBound((byte) 2)) < 0
+                        && object.compareLexicographicallyTo(zone.getLowerBound((byte) 3)) >= 0
+                        && object.compareLexicographicallyTo(zone.getUpperBound((byte) 3)) < 0) {
                     result.add(quad);
 
                     if (remove) {
