@@ -40,6 +40,7 @@ public abstract class Rdf2GoCompoundEventNotificationListener extends
     /**
      * {@inheritDoc}
      */
+    @Override
     public void onNotification(SubscriptionId id, CompoundEvent solution) {
         Model model =
                 new ModelFactoryImpl().createModel(TypeConversion.toRDF2Go(

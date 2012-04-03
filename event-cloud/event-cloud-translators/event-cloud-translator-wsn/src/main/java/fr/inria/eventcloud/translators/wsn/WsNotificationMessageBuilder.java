@@ -186,8 +186,8 @@ public class WsNotificationMessageBuilder {
     }
 
     private static TopicExpressionType createTopicExpressionType(String topicNamespace,
-                                                                String topicNsPrefix,
-                                                                String topicExpression) {
+                                                                 String topicNsPrefix,
+                                                                 String topicExpression) {
         String topic = topicNsPrefix + ":" + topicExpression;
 
         TopicExpressionType topicExpressionType = new TopicExpressionType();

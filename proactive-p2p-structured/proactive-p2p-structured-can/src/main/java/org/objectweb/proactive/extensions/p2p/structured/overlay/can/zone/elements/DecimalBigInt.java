@@ -71,8 +71,8 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
         LinkedList<Integer> result =
                 createLinkedList(Math.max(this.length(), that.length()) + 1);
 
-        addDigits(result, result.size() - 1, this.digits);
-        addDigits(result, result.size() - 1, that.digits);
+        this.addDigits(result, result.size() - 1, this.digits);
+        this.addDigits(result, result.size() - 1, that.digits);
 
         int newDecimalIndex = this.decimalIndex;
         if (result.getFirst() == 0) {
@@ -90,7 +90,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
     private void addDigits(LinkedList<Integer> result, int resultIndex,
                            LinkedList<Integer> addend) {
         for (int i = addend.size() - 1; i >= 0; i--) {
-            addDigit(result, resultIndex, addend.get(i));
+            this.addDigit(result, resultIndex, addend.get(i));
             resultIndex--;
         }
     }
@@ -103,7 +103,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
         result.set(resultIndex, sum % this.radix);
 
         if (carry > 0) {
-            addDigit(result, resultIndex - 1, carry);
+            this.addDigit(result, resultIndex - 1, carry);
         }
     }
 
@@ -136,7 +136,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
         LinkedList<Integer> result =
                 createLinkedList(this.digits.size() + that.digits.size());
 
-        multiplyDigits(result, result.size() - 1, this.digits, that.digits);
+        this.multiplyDigits(result, result.size() - 1, this.digits, that.digits);
 
         int newDecimalIndex =
                 result.size()
@@ -154,7 +154,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
                                 LinkedList<Integer> rightFactor) {
         for (int i = 0; i < leftFactor.size(); i++) {
             for (int j = 0; j < rightFactor.size(); j++) {
-                multiplyDigit(
+                this.multiplyDigit(
                         result, resultIndex - (i + j),
                         leftFactor.get(leftFactor.size() - i - 1),
                         rightFactor.get(rightFactor.size() - j - 1));
@@ -168,7 +168,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
         int prodDigit = (int) (prod % this.radix);
         int carry = (int) (prod / this.radix);
 
-        addDigits(result, resultIndex, createLinkedList(carry, prodDigit));
+        this.addDigits(result, resultIndex, createLinkedList(carry, prodDigit));
     }
 
     /**
@@ -181,7 +181,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
 
         LinkedList<Integer> result = createLinkedList(workingCopy.size());
 
-        divideDigits(result, 0, workingCopy, 0, 2);
+        this.divideDigits(result, 0, workingCopy, 0, 2);
 
         this.clean();
 
@@ -195,7 +195,7 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
 
         for (; dividentIndex < divident.size(); dividentIndex++, resultIndex++) {
             remainder =
-                    divideDigit(
+                    this.divideDigit(
                             result, resultIndex, divident.get(dividentIndex),
                             remainder, divisor);
         }
