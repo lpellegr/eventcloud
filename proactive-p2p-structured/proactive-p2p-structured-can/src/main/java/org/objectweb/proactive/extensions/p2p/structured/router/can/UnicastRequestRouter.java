@@ -88,8 +88,8 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
         // finds the dimension on which the key to reach is not contained
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction =
-                    overlayCAN.contains(dimension, request.getKey().getElement(
-                            dimension));
+                    overlayCAN.getZone().getUnicodeView().containsLexicographically(
+                            dimension, request.getKey().getElement(dimension));
 
             if (direction == -1) {
                 direction = NeighborTable.DIRECTION_INFERIOR;

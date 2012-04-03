@@ -73,7 +73,8 @@ public final class DefaultAnycastConstraintsValidator extends
             // if coordinate is null we skip the test
             if (super.key.getValue().getElement(i) != null) {
                 // the specified overlay does not contains the key
-                if (zone.contains(i, super.key.getValue().getElement(i)) != 0) {
+                if (zone.getUnicodeView().containsLexicographically(
+                        i, super.key.getValue().getElement(i)) != 0) {
                     return false;
                 }
             }

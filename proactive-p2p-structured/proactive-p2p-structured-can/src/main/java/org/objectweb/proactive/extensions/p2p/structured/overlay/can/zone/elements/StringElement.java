@@ -69,13 +69,18 @@ public class StringElement extends Element<DecimalBigInt> {
         return new StringElement(this.value.plus(elt.value).divideByTwo());
     }
 
+    /**
+     * Returns the string representation of this element.
+     * 
+     * @return the string representation of this element.
+     */
     public String getStringValue() {
         return this.stringValue;
     }
 
     /**
-     * Compares the elements by using their string value and a lexicographic
-     * order.
+     * Compares the elements by using the lexicographic order on their String
+     * representation.
      * 
      * @param e
      *            the element to compare with.
@@ -83,9 +88,35 @@ public class StringElement extends Element<DecimalBigInt> {
      * @return a negative integer, zero, or a positive integer as this object is
      *         less than, equal to, or greater than the specified object.
      */
-    public int compareToByUsingStringValue(Element<DecimalBigInt> e) {
+    public int compareLexicographicallyTo(StringElement e) {
         return this.getStringValue().compareTo(
                 ((StringElement) e).getStringValue());
+    }
+
+    /**
+     * Returns a boolean indicating if the string representation of the current
+     * element is between respectively the specified string representations of
+     * the elements <code>e1</code> and <code>e2</code>.
+     * 
+     * @param e1
+     *            the first bound.
+     * 
+     * @param e2
+     *            the second bound.
+     * 
+     * @return <code>true</code> whether <code>e1<0 and this in [e1;e2[</code>
+     *         or <code>e1 > e2 and this in [e2;e1[</code>, <code>false</code>
+     *         otherwise.
+     */
+    public boolean isLexicographicallyBetween(StringElement e1, StringElement e2) {
+        if (e1.compareLexicographicallyTo(e2) < 0) {
+            return (this.compareLexicographicallyTo(e1) >= 0)
+                    && (this.compareLexicographicallyTo(e2) < 0);
+        } else if (e1.compareTo(e2) > 0) {
+            return (this.compareLexicographicallyTo(e2) >= 0)
+                    && (this.compareLexicographicallyTo(e1) < 0);
+        }
+        return false;
     }
 
     /**

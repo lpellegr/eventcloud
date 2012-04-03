@@ -162,14 +162,6 @@ public class Zone implements Serializable {
         return this.numView;
     }
 
-    public byte contains(byte dimension, StringElement element) {
-        return this.unicodeView.contains(dimension, element);
-    }
-
-    public boolean contains(StringCoordinate coordinate) {
-        return this.unicodeView.contains(coordinate);
-    }
-
     public boolean overlaps(ZoneView<StringCoordinate, StringElement, DecimalBigInt> view,
                             byte dimension) {
         return this.unicodeView.overlaps(view, dimension);

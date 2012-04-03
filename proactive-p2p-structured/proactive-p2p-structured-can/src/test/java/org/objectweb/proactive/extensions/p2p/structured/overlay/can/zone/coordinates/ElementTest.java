@@ -20,6 +20,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
@@ -38,54 +40,68 @@ public class ElementTest {
 
     @Before
     public void setUp() throws Exception {
-        this.coordinateElementB = new StringElement("e");
-        this.coordinateElementC = new StringElement("l");
+        this.coordinateElementA = null;
+
+        // 101 <-> "e"
+        this.coordinateElementB =
+                new StringElement(DecimalBigInt.create(
+                        new int[] {101}, 0,
+                        P2PStructuredProperties.CAN_UPPER_BOUND.getValue()));
+        // 108 <-> "l"
+        this.coordinateElementC =
+                new StringElement(DecimalBigInt.create(
+                        new int[] {108}, 0,
+                        P2PStructuredProperties.CAN_UPPER_BOUND.getValue()));
     }
 
     @Test
-    public void testCompare() {
-        Assert.assertTrue(this.coordinateElementB.compareTo(this.coordinateElementC) < 0);
-        Assert.assertTrue(this.coordinateElementC.compareTo(this.coordinateElementB) > 0);
+    public void testLexicographicCompareTo() {
+        Assert.assertTrue(this.coordinateElementB.compareLexicographicallyTo(this.coordinateElementC) < 0);
+        Assert.assertTrue(this.coordinateElementC.compareLexicographicallyTo(this.coordinateElementB) > 0);
 
         this.coordinateElementA = new StringElement("e");
-        Assert.assertTrue(this.coordinateElementB.compareTo(this.coordinateElementA) == 0);
-        Assert.assertTrue(this.coordinateElementA.compareTo(this.coordinateElementB) == 0);
+        Assert.assertTrue(this.coordinateElementB.compareLexicographicallyTo(this.coordinateElementA) == 0);
+        Assert.assertTrue(this.coordinateElementA.compareLexicographicallyTo(this.coordinateElementB) == 0);
 
         this.coordinateElementA = new StringElement("a");
-        Assert.assertTrue(this.coordinateElementC.compareTo(this.coordinateElementA) > 0);
-        Assert.assertTrue(this.coordinateElementA.compareTo(this.coordinateElementC) < 0);
+        Assert.assertTrue(this.coordinateElementC.compareLexicographicallyTo(this.coordinateElementA) > 0);
+        Assert.assertTrue(this.coordinateElementA.compareLexicographicallyTo(this.coordinateElementC) < 0);
 
         this.coordinateElementA = new StringElement("l");
-        Assert.assertTrue(this.coordinateElementC.compareTo(this.coordinateElementA) == 0);
-        Assert.assertTrue(this.coordinateElementA.compareTo(this.coordinateElementC) == 0);
+        Assert.assertTrue(this.coordinateElementC.compareLexicographicallyTo(this.coordinateElementA) == 0);
+        Assert.assertTrue(this.coordinateElementA.compareLexicographicallyTo(this.coordinateElementC) == 0);
     }
 
     @Test
-    public void testIsBetween() {
+    public void testLexicographicIsBetween() {
         this.coordinateElementA = new StringElement("a");
-        Assert.assertFalse(this.coordinateElementA.isBetween(
+        Assert.assertFalse(this.coordinateElementA.isLexicographicallyBetween(
                 this.coordinateElementB, this.coordinateElementC));
 
         this.coordinateElementA = new StringElement("g");
-        Assert.assertTrue(this.coordinateElementA.isBetween(
+        Assert.assertTrue(this.coordinateElementA.isLexicographicallyBetween(
                 this.coordinateElementB, this.coordinateElementC));
 
         this.coordinateElementA = new StringElement("eff");
-        Assert.assertTrue(this.coordinateElementA.isBetween(
+        Assert.assertTrue(this.coordinateElementA.isLexicographicallyBetween(
                 this.coordinateElementB, this.coordinateElementC));
 
         this.coordinateElementA = new StringElement("lee");
-        Assert.assertFalse(this.coordinateElementA.isBetween(
+        Assert.assertFalse(this.coordinateElementA.isLexicographicallyBetween(
                 this.coordinateElementB, this.coordinateElementC));
     }
 
     @Test
     public void testMiddle() {
-        Assert.assertEquals(new StringElement("h\u7fff"), Element.middle(
-                this.coordinateElementB, this.coordinateElementC));
-
-        Assert.assertNotSame(new StringElement("e"), Element.middle(
-                this.coordinateElementB, this.coordinateElementC));
+        Assert.assertEquals(
+                new StringElement(
+                        DecimalBigInt.create(
+                                new int[] {
+                                        104,
+                                        P2PStructuredProperties.CAN_UPPER_BOUND.getValue() / 2},
+                                0,
+                                P2PStructuredProperties.CAN_UPPER_BOUND.getValue())),
+                Element.middle(this.coordinateElementB, this.coordinateElementC));
     }
 
     @Test
@@ -97,7 +113,7 @@ public class ElementTest {
                     (StringElement) Element.middle(
                             middleCoordinate, this.coordinateElementC);
 
-            Assert.assertTrue(middleCoordinate.compareTo(this.coordinateElementC) < 0);
+            Assert.assertTrue(middleCoordinate.compareLexicographicallyTo(this.coordinateElementC) < 0);
         }
     }
 

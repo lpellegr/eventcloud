@@ -81,6 +81,9 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
             newDecimalIndex++;
         }
 
+        this.clean();
+        that.clean();
+
         return new DecimalBigInt(result, newDecimalIndex, this.radix);
     }
 
@@ -140,6 +143,9 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
                         - (this.length() - this.decimalIndex + that.length()
                                 - that.decimalIndex - 2) - 1;
 
+        this.clean();
+        that.clean();
+
         return new DecimalBigInt(result, newDecimalIndex, this.radix);
     }
 
@@ -177,6 +183,8 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
 
         divideDigits(result, 0, workingCopy, 0, 2);
 
+        this.clean();
+
         return new DecimalBigInt(result, this.decimalIndex, this.radix);
     }
 
@@ -197,18 +205,17 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
 
     private int divideDigit(LinkedList<Integer> result, int resultIndex,
                             int divident, int lastRemainder, int divisor) {
-        // assert divisor < this.radix;
-        // assert lastRemainder < divisor;
-
         long ent = divident + (long) this.radix * lastRemainder;
         long quot = ent / divisor;
         long remainder = ent % divisor;
 
-        // assert quot < this.radix;
-        // assert remainder < divisor;
-
         result.set(resultIndex, (int) quot);
         return (int) remainder;
+    }
+
+    private void clean() {
+        this.removeLeadingZeros();
+        this.removeTrailingZeros();
     }
 
     public static void normalize(DecimalBigInt thiss, DecimalBigInt that) {
@@ -361,19 +368,74 @@ public class DecimalBigInt implements Comparable<DecimalBigInt>, Serializable {
         return result.toString();
     }
 
+    /**
+     * Creates a new DecimalBigInt from the specified digits. The digits are
+     * supposed to represent a whole number in base 10.
+     * 
+     * @param digits
+     *            the digits of the number represented in base 10.
+     * 
+     * @return a new DecimalBigInt from the specified digits
+     */
     public static DecimalBigInt create(int... digits) {
         return new DecimalBigInt(
                 createLinkedList(digits), digits.length - 1, 10);
     }
 
+    /**
+     * Creates a new DecimalBigInt from the specified digits and the given value
+     * for the decimal separator. The digits are supposed to represent a decimal
+     * number in base 10.
+     * 
+     * @param digits
+     *            the digits of the number represented in base 10.
+     * @param decimalIndex
+     *            the index of the decimal separator. If the decimal separator
+     *            index is {@code i}, then the comma is supposed to be between
+     *            digits at index {@code i} and {@code i+1}.
+     * 
+     * @return a new DecimalBigInt from the specified digits
+     */
     public static DecimalBigInt create(int[] digits, int decimalIndex) {
         return new DecimalBigInt(createLinkedList(digits), decimalIndex, 10);
     }
 
+    /**
+     * Creates a new DecimalBigInt from the specified digits and the given value
+     * for the decimal separator. The digits are supposed to represent a decimal
+     * number in base {@code radix}.
+     * 
+     * @param digits
+     *            the digits of the number represented in base {@code radix}.
+     * @param decimalIndex
+     *            the index of the decimal separator. If the decimal separator
+     *            index is {@code i}, then the comma is supposed to be between
+     *            digits at index {@code i} and {@code i+1}.
+     * @param radix
+     *            the radix used to represent this number.
+     * 
+     * @return a new DecimalBigInt from the specified digits
+     */
     public static DecimalBigInt create(int[] digits, int decimalIndex, int radix) {
         return new DecimalBigInt(createLinkedList(digits), decimalIndex, radix);
     }
 
+    /**
+     * Creates a new DecimalBigInt from the specified digits and the given value
+     * for the decimal separator. The digits are supposed to represent a decimal
+     * number in base {@code radix}.
+     * 
+     * @param digits
+     *            the digits of the number represented in base {@code radix}.
+     * @param decimalIndex
+     *            the index of the decimal separator. If the decimal separator
+     *            index is {@code i}, then the comma is supposed to be between
+     *            digits at index {@code i} and {@code i+1}.
+     * @param radix
+     *            the radix used to represent this number.
+     * 
+     * @return a new DecimalBigInt from the specified digits
+     */
     public static DecimalBigInt create(LinkedList<Integer> digits,
                                        int decimalIndex, int radix) {
         return new DecimalBigInt(digits, decimalIndex, radix);
