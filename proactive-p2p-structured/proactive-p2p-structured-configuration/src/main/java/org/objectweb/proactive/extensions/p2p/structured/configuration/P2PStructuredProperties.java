@@ -64,7 +64,7 @@ public class P2PStructuredProperties {
     /**
      * This property defines the maximum upper bound associated to a CAN
      * network. It is by default set to &#92;uffff to support all UTF-16
-     * characters.
+     * characters. This is an open bound (i.e. no peer will manage it).
      */
     public static final PropertyCharacter CAN_UPPER_BOUND =
             new PropertyCharacter("can.upper.bound", '\uffff');
