@@ -48,7 +48,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponse
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -120,14 +119,6 @@ public class CanOverlay extends StructuredOverlay {
         this.peerJoiningId = new AtomicReference<UUID>();
         this.peerLeavingId = new AtomicReference<UUID>();
         this.splitHistory = new LinkedList<SplitEntry>();
-    }
-
-    public byte contains(byte dimension, StringElement element) {
-        return this.zone.contains(dimension, element);
-    }
-
-    public boolean contains(StringCoordinate coordinate) {
-        return this.zone.contains(coordinate);
     }
 
     /**
@@ -236,8 +227,10 @@ public class CanOverlay extends StructuredOverlay {
         for (int i = 0; i < neighbors.size(); i++) {
             nbEltVerified = 0;
             for (byte j = 0; j < coordinate.size(); j++) {
-                if (neighbors.get(i).getZone().contains(
-                        j, coordinate.getElement(j)) == 0) {
+                if (neighbors.get(i)
+                        .getZone()
+                        .getUnicodeView()
+                        .containsLexicographically(j, coordinate.getElement(j)) == 0) {
                     nbEltVerified++;
                 }
             }
@@ -284,7 +277,8 @@ public class CanOverlay extends StructuredOverlay {
         for (NeighborEntry entry : neighbors) {
             validatesPrecedingDimensions = true;
             for (byte dim = 0; dim < dimension; dim++) {
-                if (entry.getZone().contains(dim, coordinate.getElement(dim)) != 0) {
+                if (entry.getZone().getUnicodeView().containsLexicographically(
+                        dim, coordinate.getElement(dim)) != 0) {
                     validatesPrecedingDimensions = false;
                     break;
                 }

@@ -55,7 +55,7 @@ public class P2PStructuredProperties {
 
     /**
      * This property defines the minimum lower bound associated to a CAN
-     * network. It is by default set to {@code \u0000} and <strong>should not be
+     * network. It is by default set to &#92;u0000 and <strong>should not be
      * edited</strong>.
      */
     public static final PropertyCharacter CAN_LOWER_BOUND =
@@ -63,8 +63,8 @@ public class P2PStructuredProperties {
 
     /**
      * This property defines the maximum upper bound associated to a CAN
-     * network. It is by default set to {@code \uffff} to support all UTF-16
-     * characters}.
+     * network. It is by default set to &#92;uffff to support all UTF-16
+     * characters.
      */
     public static final PropertyCharacter CAN_UPPER_BOUND =
             new PropertyCharacter("can.upper.bound", '\uffff');
