@@ -55,8 +55,7 @@ public class EventCloudCache implements EventCloudApi, Serializable {
     public EventCloudCache(String registryUrl, EventCloudId eventcloudId)
             throws EventCloudIdNotManaged {
         try {
-            this.registry =
-                    EventCloudsRegistryImpl.lookup(registryUrl);
+            this.registry = EventCloudsRegistryImpl.lookup(registryUrl);
 
             this.delegate = this.registry.find(eventcloudId);
 

@@ -81,6 +81,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * @return {@code true} if the registration has succeed or {@code false} if
      *         the eventcloud is already registered into the registry.
      */
+    @Override
     public boolean register(EventCloud eventcloud) {
         if (this.eventclouds.containsKey(eventcloud.getId())) {
             return false;
@@ -96,6 +97,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * @return a list that contains the identifier of the eventclouds which are
      *         managed by the registry.
      */
+    @Override
     public Set<EventCloudId> listEventClouds() {
         // returns an immutable copy because this.eventclouds.keySet() sends
         // back a non-serializable set
@@ -113,6 +115,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * @return {@code true} if the eventcloud identifier is already managed,
      *         {@code false} otherwise.
      */
+    @Override
     public boolean contains(EventCloudId id) {
         return this.eventclouds.containsKey(id);
     }
@@ -127,6 +130,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * @return the {@link EventCloud} object associated to the specified
      *         {@code id} if it is managed by the registry or {@code null}.
      */
+    @Override
     public EventCloud find(EventCloudId id) {
         return this.eventclouds.get(id);
     }
@@ -141,6 +145,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * @return the trackers associated to the eventcloud identified by the
      *         specified {@link EventCloudId} or {@code null}.
      */
+    @Override
     public List<SemanticTracker> findTrackers(EventCloudId id) {
         return this.eventclouds.get(id).getTrackers();
     }
@@ -151,5 +156,5 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
                 componentUri,
                 EventCloudProperties.EVENTCLOUDS_REGISTRY_SERVICES_ITF.getValue());
     }
-    
+
 }

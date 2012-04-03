@@ -27,6 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAnd
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
@@ -78,7 +79,7 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
         // we compute the value of the split which will be done on the next join
         // from the third peer in order to create data that will be transfered
         // from a peer to an another
-        HomogenousPair<ZoneView<StringCoordinate, StringElement, String>> res =
+        HomogenousPair<ZoneView<StringCoordinate, StringElement, DecimalBigInt>> res =
                 zone.split(dimensionSplit);
 
         // the next two elements will be contained by two different peers on the
@@ -87,13 +88,13 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
                 res.getFirst()
                         .getLowerBound()
                         .getElement(dimensionSplit)
-                        .getValue();
+                        .getStringValue();
 
         String elt2 =
                 res.getSecond()
                         .getLowerBound()
                         .getElement(dimensionSplit)
-                        .getValue()
+                        .getStringValue()
                         + "a";
 
         log.debug("elt1={}", UnicodeUtil.makePrintable(elt1));
@@ -105,20 +106,20 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
         Quadruple quad1 =
                 new Quadruple(node1, Node.createURI(res.getFirst()
                         .getLowerBound((byte) 1)
-                        .getValue()), Node.createURI(res.getFirst()
+                        .getStringValue()), Node.createURI(res.getFirst()
                         .getLowerBound((byte) 2)
-                        .getValue()), Node.createURI(res.getFirst()
+                        .getStringValue()), Node.createURI(res.getFirst()
                         .getLowerBound((byte) 3)
-                        .getValue()));
+                        .getStringValue()));
 
         Quadruple quad2 =
                 new Quadruple(node2, Node.createURI(res.getSecond()
                         .getLowerBound((byte) 1)
-                        .getValue()), Node.createURI(res.getSecond()
+                        .getStringValue()), Node.createURI(res.getSecond()
                         .getLowerBound((byte) 2)
-                        .getValue()), Node.createURI(res.getSecond()
+                        .getStringValue()), Node.createURI(res.getSecond()
                         .getLowerBound((byte) 3)
-                        .getValue()));
+                        .getStringValue()));
 
         log.debug("quad1={}", quad1);
         log.debug("quad2={}", quad2);

@@ -23,6 +23,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
@@ -52,7 +53,9 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     @Test
     public void lookupQueryTest() {
         AnycastLookupResponse response = null;
-        StringElement elt = new StringElement("Z");
+        StringElement elt =
+                new StringElement(
+                        Character.toString((char) ((int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue() - 1)));
 
         try {
             response =
@@ -71,7 +74,8 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
             // check that all zones retrieved validate the constraints
             for (Zone zone : response.getZonesValidatingConstraints()) {
-                Assert.assertEquals(0, zone.contains((byte) 1, elt));
+                Assert.assertEquals(0, zone.getUnicodeView()
+                        .containsLexicographically((byte) 1, elt));
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -14,22 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates;
-
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
 /**
- * A coordinate composed of {@link StringElement}s.
+ * A {@link Character} property.
  * 
  * @author lpellegr
  */
-public class StringCoordinate extends Coordinate<StringElement, DecimalBigInt> {
+public class PropertyCharacter extends Property<Character> {
 
-    private static final long serialVersionUID = 1L;
+    public PropertyCharacter(String name, Character defaultValue) {
+        super(name, defaultValue);
+    }
 
-    public StringCoordinate(StringElement... elts) {
-        super(elts);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValueAsString(String value) {
+        if (value.length() > 1) {
+            throw new IllegalArgumentException();
+        }
+
+        super.value = value.charAt(0);
     }
 
 }

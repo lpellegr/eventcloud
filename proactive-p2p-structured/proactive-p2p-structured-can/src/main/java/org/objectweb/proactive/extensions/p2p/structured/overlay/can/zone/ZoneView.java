@@ -242,7 +242,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
             lowerBoundCopy.setElement(dimension, (E) middle);
             upperBoundCopy.setElement(dimension, (E) middle);
 
-            return new HomogenousPair<ZoneView<C, E, T>>(this.createZoneView(
+            return HomogenousPair.createHomogenous(this.createZoneView(
                     this.lowerBound, (C) upperBoundCopy), this.createZoneView(
                     (C) lowerBoundCopy, this.upperBound));
         } catch (CloneNotSupportedException e) {

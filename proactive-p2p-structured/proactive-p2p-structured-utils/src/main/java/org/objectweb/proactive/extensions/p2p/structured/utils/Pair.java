@@ -37,16 +37,7 @@ public class Pair<A, B> implements Serializable {
 
     protected final B second;
 
-    /**
-     * Constructs a new pair from the specified {@code first} and {@code second}
-     * values.
-     * 
-     * @param first
-     *            the first value contained by the pair.
-     * @param second
-     *            the second value contained by the pair.
-     */
-    public Pair(A first, B second) {
+    protected Pair(A first, B second) {
         super();
         this.first = first;
         this.second = second;
@@ -68,6 +59,40 @@ public class Pair<A, B> implements Serializable {
      */
     public B getSecond() {
         return this.second;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return 31 * (31 + this.first.hashCode()) + this.second.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean equals(Object that) {
+        return that instanceof Pair
+                && this.first.equals(((Pair<A, B>) that).first)
+                && this.second.equals(((Pair<A, B>) that).second);
+    }
+
+    /**
+     * Creates a new pair from the specified {@code first} and {@code second}
+     * values.
+     * 
+     * @param first
+     *            the first value contained by the pair.
+     * @param second
+     *            the second value contained by the pair.
+     * 
+     * @return a new pair that contains the specified values.
+     */
+    public static <T1, T2> Pair<T1, T2> create(T1 first, T2 second) {
+        return new Pair<T1, T2>(first, second);
     }
 
 }
