@@ -145,7 +145,7 @@ public class DecimalBigIntTest {
 
     @Test
     public void testNormalization() {
-        for (Pair<DecimalBigInt, DecimalBigInt> pair : getConfigurationsForTestingNormalization()) {
+        for (Pair<DecimalBigInt, DecimalBigInt> pair : this.getConfigurationsForTestingNormalization()) {
             DecimalBigInt n1 = pair.getFirst();
             DecimalBigInt n2 = pair.getSecond();
 

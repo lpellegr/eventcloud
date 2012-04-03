@@ -48,7 +48,7 @@ public class StringElement extends Element<DecimalBigInt> {
 
     public StringElement(DecimalBigInt value) {
         super(value);
-        this.stringValue = createStringRepresentation(value);
+        this.stringValue = this.createStringRepresentation(value);
     }
 
     private String createStringRepresentation(DecimalBigInt value) {
@@ -89,8 +89,7 @@ public class StringElement extends Element<DecimalBigInt> {
      *         less than, equal to, or greater than the specified object.
      */
     public int compareLexicographicallyTo(StringElement e) {
-        return this.getStringValue().compareTo(
-                ((StringElement) e).getStringValue());
+        return this.getStringValue().compareTo(e.getStringValue());
     }
 
     /**
@@ -152,7 +151,7 @@ public class StringElement extends Element<DecimalBigInt> {
         // always perform the default de-serialization first
         in.defaultReadObject();
         // populates transient fields
-        this.stringValue = createStringRepresentation(super.value);
+        this.stringValue = this.createStringRepresentation(super.value);
     }
 
 }
