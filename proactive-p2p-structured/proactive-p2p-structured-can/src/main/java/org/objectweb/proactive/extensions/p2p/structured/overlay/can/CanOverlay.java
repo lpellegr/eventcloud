@@ -186,7 +186,9 @@ public class CanOverlay extends StructuredOverlay {
         }
 
         if (neighbors.size() == 0) {
-            log.error("No neighbor to route to, dump is " + this.dump());
+            log.error(
+                    "No neighbor to route to for coordinate {} on dimension {} and direction {}, dump is:\n{}",
+                    new Object[] {coordinate, dimension, direction, this.dump()});
         }
 
         // TODO: choose a metric to evaluate the nearest peer
