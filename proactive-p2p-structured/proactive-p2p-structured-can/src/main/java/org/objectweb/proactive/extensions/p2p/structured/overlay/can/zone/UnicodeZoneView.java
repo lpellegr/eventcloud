@@ -16,7 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
@@ -26,13 +28,37 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @author lpellegr
  */
 public class UnicodeZoneView extends
-        ZoneView<StringCoordinate, StringElement, String> {
+        ZoneView<StringCoordinate, StringElement, DecimalBigInt> {
 
     private static final long serialVersionUID = 1L;
 
     public UnicodeZoneView(StringCoordinate lowerBound,
             StringCoordinate upperBound) {
         super(lowerBound, upperBound);
+    }
+
+    public boolean containsLexicographically(StringCoordinate coordinate) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            if (this.containsLexicographically(dim, coordinate.getElement(dim)) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public byte containsLexicographically(byte dimension, StringElement element) {
+        if (element == null) {
+            return 0;
+        }
+
+        if (element.compareLexicographicallyTo(this.upperBound.getElement(dimension)) >= 0) {
+            return 1;
+        } else if (element.compareLexicographicallyTo(this.lowerBound.getElement(dimension)) < 0) {
+            return -1;
+        }
+
+        return 0;
     }
 
 }

@@ -45,7 +45,7 @@ public class Skolemizator {
             ".well-known/genid/";
 
     /**
-     * Replaces Blank Nodes with IRIs within the specified {@link CompoundEvent}
+     * Replaces blank nodes with IRIs within the specified {@link CompoundEvent}
      * . The transformation applied is the one described in the last <a href=
      * "https://dvcs.w3.org/hg/rdf/raw-file/default/rdf-concepts/index.html#section-skolemization"
      * >RDF 1.1 draft</a>.
@@ -61,8 +61,8 @@ public class Skolemizator {
     }
 
     /**
-     * Replaces Blank Nodes with IRIs within the specified collection of
-     * {@link Quadruple}s . The transformation applied is the one described in
+     * Replaces blank nodes with IRIs within the specified collection of
+     * {@link Quadruple}s. The transformation applied is the one described in
      * the last <a href=
      * "https://dvcs.w3.org/hg/rdf/raw-file/default/rdf-concepts/index.html#section-skolemization"
      * >RDF 1.1 draft</a>.

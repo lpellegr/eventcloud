@@ -206,7 +206,7 @@ public class NeighborTable implements Serializable {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
-                    return new HomogenousPair<Byte>(dim, direction);
+                    return HomogenousPair.createHomogenous(dim, direction);
                 }
             }
         }
@@ -253,7 +253,7 @@ public class NeighborTable implements Serializable {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].remove(peerIdentifier) != null) {
-                    return new HomogenousPair<Byte>(dim, direction);
+                    return HomogenousPair.createHomogenous(dim, direction);
                 }
             }
         }

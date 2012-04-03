@@ -1,8 +1,8 @@
-syntax: regexp
-^(.*/)?target$
-^(.*/)?bin$
-^(.*/)?(.*)~$
-^(.*/)?[.]classpath$
-^(.*/)?[.]project$
-^(.*/)?[.]settings/(.*)$
-^(.*/)?[.]metadata/(.*)$
+.DS_Store
+target
+bin
+.classpath
+.project
+.settings
+.metadata
+~

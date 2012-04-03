@@ -38,9 +38,14 @@ public class UnicastConstraintsValidator extends
         super(key);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
-        return ((CanOverlay) overlay).getZone().contains(super.key.getValue());
+        return ((CanOverlay) overlay).getZone()
+                .getUnicodeView()
+                .containsLexicographically(super.key.getValue());
     }
 
 }

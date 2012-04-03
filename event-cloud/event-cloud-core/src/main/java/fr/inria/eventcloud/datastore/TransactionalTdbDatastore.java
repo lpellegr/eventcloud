@@ -159,7 +159,7 @@ public class TransactionalTdbDatastore extends Datastore {
 
     private List<Quadruple> retrieveDataIn(Object interval, boolean remove) {
         Zone zone = (Zone) interval;
-        String graph, subject, predicate, object;
+        SemanticElement graph, subject, predicate, object;
 
         List<Quadruple> result = new ArrayList<Quadruple>();
         List<Quadruple> quadruplesToRemove = null;
@@ -174,33 +174,19 @@ public class TransactionalTdbDatastore extends Datastore {
             while (it.hasNext()) {
                 Quadruple quad = it.next();
 
-                graph =
-                        SemanticElement.parseElement(quad.getGraph().toString());
-                subject =
-                        SemanticElement.parseElement(quad.getSubject()
-                                .toString());
-                predicate =
-                        SemanticElement.parseElement(quad.getPredicate()
-                                .toString());
-                object =
-                        SemanticElement.parseElement(quad.getObject()
-                                .toString());
+                graph = new SemanticElement(quad.getGraph().toString());
+                subject = new SemanticElement(quad.getSubject().toString());
+                predicate = new SemanticElement(quad.getPredicate().toString());
+                object = new SemanticElement(quad.getObject().toString());
 
-                if (graph.compareTo(zone.getLowerBound((byte) 0).getValue()) >= 0
-                        && graph.compareTo(zone.getUpperBound((byte) 0)
-                                .getValue()) < 0
-                        && subject.compareTo(zone.getLowerBound((byte) 1)
-                                .getValue()) >= 0
-                        && subject.compareTo(zone.getUpperBound((byte) 1)
-                                .getValue()) < 0
-                        && predicate.compareTo(zone.getLowerBound((byte) 2)
-                                .getValue()) >= 0
-                        && predicate.compareTo(zone.getUpperBound((byte) 2)
-                                .getValue()) < 0
-                        && object.compareTo(zone.getLowerBound((byte) 3)
-                                .getValue()) >= 0
-                        && object.compareTo(zone.getUpperBound((byte) 3)
-                                .getValue()) < 0) {
+                if (graph.compareLexicographicallyTo(zone.getLowerBound((byte) 0)) >= 0
+                        && graph.compareLexicographicallyTo(zone.getUpperBound((byte) 0)) < 0
+                        && subject.compareLexicographicallyTo(zone.getLowerBound((byte) 1)) >= 0
+                        && subject.compareLexicographicallyTo(zone.getUpperBound((byte) 1)) < 0
+                        && predicate.compareLexicographicallyTo(zone.getLowerBound((byte) 2)) >= 0
+                        && predicate.compareLexicographicallyTo(zone.getUpperBound((byte) 2)) < 0
+                        && object.compareLexicographicallyTo(zone.getLowerBound((byte) 3)) >= 0
+                        && object.compareLexicographicallyTo(zone.getUpperBound((byte) 3)) < 0) {
                     result.add(quad);
 
                     if (remove) {

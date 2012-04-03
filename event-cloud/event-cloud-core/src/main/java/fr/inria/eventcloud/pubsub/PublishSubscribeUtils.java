@@ -228,7 +228,7 @@ public final class PublishSubscribeUtils {
 
         Node subSubscriptionId = tokenizer.next().asNode();
 
-        return new Pair<Quadruple, SubscriptionId>(
+        return Pair.create(
                 new Quadruple(tokenizer.next().asNode(), tokenizer.next()
                         .asNode(), tokenizer.next().asNode(), tokenizer.next()
                         .asNode()),

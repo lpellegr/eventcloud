@@ -82,7 +82,7 @@ public class Rdf2GoCompoundEventNotificationListenerTest {
                         }
 
                         nbCalls.increment();
-                        
+
                         solution.close();
                     }
                 };

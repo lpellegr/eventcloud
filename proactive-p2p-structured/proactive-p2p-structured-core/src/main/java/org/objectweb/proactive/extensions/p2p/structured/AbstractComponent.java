@@ -64,9 +64,9 @@ public abstract class AbstractComponent implements ComponentInitActive {
      */
     @Override
     public void initComponentActivity(Body body) {
-        loadLog4jConfigurationFromIS();
+        this.loadLog4jConfigurationFromIS();
 
-        loadP2PConfigurationFromIS();
+        this.loadP2PConfigurationFromIS();
     }
 
     public static Object lookupFcInterface(String componentUri,
