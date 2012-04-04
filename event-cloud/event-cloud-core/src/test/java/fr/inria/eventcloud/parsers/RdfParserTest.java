@@ -39,7 +39,7 @@ import fr.inria.eventcloud.utils.Callback;
  */
 public class RdfParserTest {
 
-    private static int counter = 0;
+    private int counter = 0;
 
     @Test
     public void parseNQuadsFileTest() {
@@ -49,13 +49,13 @@ public class RdfParserTest {
                 SerializationFormat.NQuads, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
-                        counter++;
+                        RdfParserTest.this.counter++;
                     }
                 });
 
         // parser = RiotReader. in, null, sink);
 
-        Assert.assertEquals(15, counter);
+        Assert.assertEquals(15, this.counter);
         this.tearDown();
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
         // BufferedOutputStream bOut = new BufferedOutputStream(out)
@@ -65,7 +65,7 @@ public class RdfParserTest {
                 ins, SerializationFormat.NQuads, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
-                        counter++;
+                        RdfParserTest.this.counter++;
                     }
                 });
 
@@ -86,12 +86,12 @@ public class RdfParserTest {
                         System.out.println("quad "+ counter+ " predicate \t " +quad.getPredicate().toString());
                         System.out.println("quad "+ counter+ " object \t " +quad.getObject().toString());
                         */
-                        counter++;
+                        RdfParserTest.this.counter++;
                         quads.add(quad);
                     }
                 });
 
-        Assert.assertEquals(15, counter);
+        Assert.assertEquals(15, this.counter);
         this.tearDown();
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
         // BufferedOutputStream bOut = new BufferedOutputStream(out)
@@ -108,12 +108,12 @@ public class RdfParserTest {
                 ins, SerializationFormat.TriG, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
-                        counter++;
+                        RdfParserTest.this.counter++;
                         quads.add(quad);
                     }
 
                 });
-        Assert.assertEquals(15, counter);
+        Assert.assertEquals(15, this.counter);
     }
 
     @Test
@@ -124,12 +124,12 @@ public class RdfParserTest {
                 SerializationFormat.NQuads, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
-                        counter++;
+                        RdfParserTest.this.counter++;
                         quads.add(quad);
                     }
                 });
 
-        Assert.assertEquals(15, counter);
+        Assert.assertEquals(15, this.counter);
         this.tearDown();
 
         ByteArrayOutputStream outS = new ByteArrayOutputStream();
@@ -146,19 +146,17 @@ public class RdfParserTest {
                 ins, SerializationFormat.TriG, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
-                        counter++;
+                        RdfParserTest.this.counter++;
                         quads.add(quad);
                     }
                 });
 
-        Assert.assertEquals(15, counter);
-
+        Assert.assertEquals(15, this.counter);
     }
 
     @After
     public void tearDown() {
-        counter = 0;
-
+        this.counter = 0;
     }
 
 }
