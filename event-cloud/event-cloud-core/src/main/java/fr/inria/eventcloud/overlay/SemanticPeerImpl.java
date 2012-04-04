@@ -46,10 +46,12 @@ import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
+import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
+import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
@@ -252,9 +254,14 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
      */
     @Override
     public long count(QuadruplePattern quadPattern) {
-        // TODO: provide an optimized version by retrieving only the number of
-        // solutions from each peer
-        return this.find(quadPattern).size();
+        try {
+            return ((CountQuadruplePatternResponse) PAFuture.getFutureValue((super.send(new CountQuadruplePatternRequest(
+                    quadPattern.getGraph(), quadPattern.getSubject(),
+                    quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
+        } catch (DispatchException e) {
+            e.printStackTrace();
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -301,7 +308,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
                     quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
         } catch (DispatchException e) {
             e.printStackTrace();
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 
