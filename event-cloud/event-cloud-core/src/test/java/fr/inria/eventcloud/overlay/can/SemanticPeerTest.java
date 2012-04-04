@@ -106,6 +106,30 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
+    public void testCountQuadruplePattern() {
+        Assert.assertEquals(0, super.getRandomSemanticPeer().count(
+                QuadruplePattern.ANY));
+
+        for (int i = 0; i < 10; i++) {
+            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+        }
+
+        Assert.assertEquals(10, super.getRandomSemanticPeer().count(
+                QuadruplePattern.ANY));
+
+        Node graph = Node.createURI("http://example.org/graph");
+        for (int i = 0; i < 5; i++) {
+            super.getRandomSemanticPeer().add(QuadrupleGenerator.random(graph));
+        }
+
+        Assert.assertEquals(5, super.getRandomSemanticPeer().count(
+                new QuadruplePattern(graph, Node.ANY, Node.ANY, Node.ANY)));
+
+        Assert.assertEquals(15, super.getRandomSemanticPeer().count(
+                QuadruplePattern.ANY));
+    }
+
+    @Test
     public void testDeleteQuadruple() {
         Quadruple quad = QuadrupleGenerator.random();
         super.getRandomSemanticPeer().add(quad);
