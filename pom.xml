@@ -46,8 +46,8 @@
 			<url>https://repository.apache.org/content/repositories/snapshots</url>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots-proactive-882</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-882</url>
+			<id>sonatype-snapshots-proactive-575</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-575</url>
 		</repository>
 		<repository>
 			<id>play-private.release</id>
@@ -139,7 +139,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming-bundle</artifactId>
-				<version>5.2.0-ws-update-3</version>
+				<version>5.2.0-ws-update-4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
