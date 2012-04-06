@@ -47,6 +47,20 @@ public interface EventCloudManagementWsApi {
     boolean createEventCloud(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
+     * Detroys the eventcloud identified by {@code streamUrl}.
+     * 
+     * @param streamUrl
+     *            an URL which identifies an eventcloud among an organization.
+     * 
+     * @return a boolean which indicates whether the eventcloud has been
+     *         destroyed or not. A return value equals to {@code false} probably
+     *         means that there was no eventcloud found with the specified
+     *         {@code streamUrl}.
+     */
+    @WebMethod
+    boolean destroyEventCloud(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
      * Returns the endpoint URL associated to the eventclouds registry which
      * knows what are the eventclouds that are manageable.
      * 
@@ -110,6 +124,42 @@ public interface EventCloudManagementWsApi {
      */
     @WebMethod
     String createPutGetProxy(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Detroys the publish proxy identified by {@code publishProxyEndpoint}.
+     * 
+     * @param publishProxyEndpoint
+     *            the endpoint of the publish proxy to destroy.
+     * 
+     * @return {@code true} if the publish proxy has been destroyed,
+     *         {@code false} otherwise.
+     */
+    @WebMethod
+    boolean destroyPublishProxy(@WebParam(name = "publishProxyEndpoint") String publishProxyEndpoint);
+
+    /**
+     * Detroys the subscribe proxy identified by {@code subscribeProxyEndpoint}.
+     * 
+     * @param subscribeProxyEndpoint
+     *            the endpoint of the subscribe proxy to destroy.
+     * 
+     * @return {@code true} if the subscribe proxy has been destroyed,
+     *         {@code false} otherwise.
+     */
+    @WebMethod
+    boolean destroySubscribeProxy(@WebParam(name = "subscribeProxyEndpoint") String subscribeProxyEndpoint);
+
+    /**
+     * Detroys the putget proxy identified by {@code putgetProxyEndpoint}.
+     * 
+     * @param publishProxyEndpoint
+     *            the endpoint of the putget proxy to destroy.
+     * 
+     * @return {@code true} if the putget proxy has been destroyed,
+     *         {@code false} otherwise.
+     */
+    @WebMethod
+    boolean destroyPutGetProxy(@WebParam(name = "publishProxyEndpoint") String putgetProxyEndpoint);
 
     /**
      * Returns the endpoint URLs for the publish proxies which have been created

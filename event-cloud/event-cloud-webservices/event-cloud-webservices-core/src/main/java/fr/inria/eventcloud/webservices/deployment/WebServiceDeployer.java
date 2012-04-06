@@ -18,6 +18,7 @@ package fr.inria.eventcloud.webservices.deployment;
 
 import java.net.UnknownHostException;
 
+import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
@@ -200,7 +201,7 @@ public class WebServiceDeployer {
         }
     }
 
-    public static String deployEventCloudManagementWebService(String registryUrl,
+    public static Server deployEventCloudManagementWebService(String registryUrl,
                                                               int portLowerBound,
                                                               String urlSuffix,
                                                               int webServicePort) {
@@ -208,14 +209,14 @@ public class WebServiceDeployer {
                 registryUrl, portLowerBound), urlSuffix, webServicePort);
     }
 
-    public static String deployPublishWebService(String registryUrl,
+    public static Server deployPublishWebService(String registryUrl,
                                                  String eventCloudIdUrl,
                                                  String urlSuffix, int port) {
         return deployWebService(new PublishServiceImpl(
                 registryUrl, eventCloudIdUrl), urlSuffix, port);
     }
 
-    public static String deploySubscribeWebService(String registryUrl,
+    public static Server deploySubscribeWebService(String registryUrl,
                                                    String streamUrl,
                                                    String urlSuffix, int port) {
         return deployWebService(
@@ -223,18 +224,18 @@ public class WebServiceDeployer {
                 port);
     }
 
-    public static String deployPutGetWebService(String registryUrl,
+    public static Server deployPutGetWebService(String registryUrl,
                                                 String streamUrl,
                                                 String urlSuffix, int port) {
         return deployWebService(
                 new PutGetServiceImpl(registryUrl, streamUrl), urlSuffix, port);
     }
 
-    public static String deploySubscriberWebService(String urlSuffix, int port) {
+    public static Server deploySubscriberWebService(String urlSuffix, int port) {
         return deployWebService(new SubscriberServiceImpl(), urlSuffix, port);
     }
 
-    public static String deployWebService(Object service, String addressSuffix,
+    public static Server deployWebService(Object service, String addressSuffix,
                                           int port) {
         StringBuilder address = new StringBuilder("http://");
         try {
@@ -262,8 +263,7 @@ public class WebServiceDeployer {
         svrFactory.getOutInterceptors().add(out);
         svrFactory.getOutFaultInterceptors().add(out);
 
-        svrFactory.create();
-        return svrFactory.getAddress();
+        return svrFactory.create();
     }
 
 }

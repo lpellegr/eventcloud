@@ -73,17 +73,23 @@ public class PubSubTest {
         String subscribeWsUrl =
                 WebServiceDeployer.deploySubscribeWebService(
                         deployer.getEventCloudsRegistryUrl(),
-                        ecId.getStreamUrl(), "subscribe", 8889);
+                        ecId.getStreamUrl(), "subscribe", 8889)
+                        .getEndpoint()
+                        .toString();
 
         String publishWsUrl =
                 WebServiceDeployer.deployPublishWebService(
                         deployer.getEventCloudsRegistryUrl(),
-                        ecId.getStreamUrl(), "publish", 8890);
+                        ecId.getStreamUrl(), "publish", 8890)
+                        .getEndpoint()
+                        .toString();
 
         SubscriberServiceImpl subscriberService = new SubscriberServiceImpl();
         String subscriberWsUrl =
                 WebServiceDeployer.deployWebService(
-                        subscriberService, "subscriber", 8891);
+                        subscriberService, "subscriber", 8891)
+                        .getEndpoint()
+                        .toString();
 
         // Clients associated to Web services
         Client subscribeClient =

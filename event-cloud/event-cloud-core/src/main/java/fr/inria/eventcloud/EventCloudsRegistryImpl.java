@@ -73,13 +73,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     }
 
     /**
-     * Registers the given {@link EventCloud} into the registry.
-     * 
-     * @param eventcloud
-     *            the eventcloud to register into the registry.
-     * 
-     * @return {@code true} if the registration has succeed or {@code false} if
-     *         the eventcloud is already registered into the registry.
+     * {@inheritDoc}
      */
     @Override
     public boolean register(EventCloud eventcloud) {
@@ -91,11 +85,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     }
 
     /**
-     * Returns a list that contains the identifier of the eventclouds which are
-     * managed by the registry.
-     * 
-     * @return a list that contains the identifier of the eventclouds which are
-     *         managed by the registry.
+     * {@inheritDoc}
      */
     @Override
     public Set<EventCloudId> listEventClouds() {
@@ -106,14 +96,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     }
 
     /**
-     * Returns a boolean which indicates if the eventcloud identified by the
-     * specified {@code eventcloudId} is already managed by the registry.
-     * 
-     * @param id
-     *            the eventcloud identifier to check for.
-     * 
-     * @return {@code true} if the eventcloud identifier is already managed,
-     *         {@code false} otherwise.
+     * {@inheritDoc}
      */
     @Override
     public boolean contains(EventCloudId id) {
@@ -121,14 +104,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     }
 
     /**
-     * Returns the {@link EventCloud} object associated to the specified
-     * {@code id} if it is managed by the registry.
-     * 
-     * @param id
-     *            the eventcloud identifier to look for.
-     * 
-     * @return the {@link EventCloud} object associated to the specified
-     *         {@code id} if it is managed by the registry or {@code null}.
+     * {@inheritDoc}
      */
     @Override
     public EventCloud find(EventCloudId id) {
@@ -136,20 +112,40 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     }
 
     /**
-     * Returns the trackers associated to the specified {@link EventCloudId} if
-     * it is registered in the registry or {@code null}.
-     * 
-     * @param id
-     *            the Event Cloud identifier to look for.
-     * 
-     * @return the trackers associated to the eventcloud identified by the
-     *         specified {@link EventCloudId} or {@code null}.
+     * {@inheritDoc}
      */
     @Override
     public List<SemanticTracker> findTrackers(EventCloudId id) {
         return this.eventclouds.get(id).getTrackers();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean undeploy(EventCloudId id) {
+        EventCloud eventcloud = this.eventclouds.remove(id);
+
+        if (eventcloud != null) {
+            eventcloud.getEventCloudDeployer().undeploy();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Lookups a ProActive stub representation for the specified
+     * {@code componentUri}.
+     * 
+     * @param componentUri
+     *            the URL of the component.
+     * 
+     * @return a ProActive stub representation of an EventCloudsRegistry .
+     * 
+     * @throws IOException
+     *             if an error occurs during the construction of the stub.
+     */
     public static EventCloudsRegistry lookup(String componentUri)
             throws IOException {
         return (EventCloudsRegistry) AbstractComponent.lookupFcInterface(

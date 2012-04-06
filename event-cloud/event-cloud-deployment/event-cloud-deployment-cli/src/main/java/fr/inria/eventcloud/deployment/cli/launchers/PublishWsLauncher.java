@@ -39,7 +39,9 @@ public final class PublishWsLauncher extends WsProxyLauncher {
     public String run() {
         return WebServiceDeployer.deployPublishWebService(
                 super.registryUrl, super.eventCloudIdUrl,
-                "proactive/services/EventCloud_publish-webservices", super.port);
+                "proactive/services/EventCloud_publish-webservices", super.port)
+                .getDestination()
+                .toString();
     }
 
 }
