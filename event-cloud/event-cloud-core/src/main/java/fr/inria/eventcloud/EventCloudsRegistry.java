@@ -106,4 +106,16 @@ public interface EventCloudsRegistry {
      */
     public List<SemanticTracker> findTrackers(EventCloudId id);
 
+    /**
+     * Undeploys the eventcloud identified with the specified {@code id}.
+     * 
+     * @param id
+     *            the Event Cloud identifier to look for.
+     * 
+     * @return {@code true} if the eventcloud has been undeployed, {@code false}
+     *         if the specified {@code id} does not correspond to any eventcloud
+     *         running.
+     */
+    boolean undeploy(EventCloudId id);
+
 }

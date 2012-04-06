@@ -18,8 +18,12 @@ package fr.inria.eventcloud.webservices.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import org.apache.cxf.endpoint.Server;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -45,14 +49,22 @@ public class EventCloudManagementServiceImpl implements
 
     private int portLowerBound;
 
-    // streamUrl -> one or several subscribe proxy endpoints
-    private ListMultimap<String, String> subscribeProxyEndpoints;
+    // streamUrl -> one or several subscribe proxy
+    private final ListMultimap<String, String> subscribeProxyEndpoints;
 
-    // streamUrl -> one or several subscribe proxy endpoints
-    private ListMultimap<String, String> publishProxyEndpoints;
+    // streamUrl -> one or several publish proxy
+    private final ListMultimap<String, String> publishProxyEndpoints;
 
-    // streamUrl -> one or several subscribe proxy endpoints
-    private ListMultimap<String, String> putgetProxyEndpoints;
+    // streamUrl -> one or several putget proxy
+    private final ListMultimap<String, String> putgetProxyEndpoints;
+
+    // proxyEndpoint -> one proxy server instance
+    private final Map<String, Server> proxyInstances;
+
+    // proxyEndpoint -> streamUrl
+    private final Map<String, String> proxyStreamUrlMapping;
+
+    private EventCloudsRegistry registry;
 
     public EventCloudManagementServiceImpl(String registryUrl,
             int portLowerBound) {
@@ -62,6 +74,9 @@ public class EventCloudManagementServiceImpl implements
         this.subscribeProxyEndpoints = ArrayListMultimap.create();
         this.publishProxyEndpoints = ArrayListMultimap.create();
         this.putgetProxyEndpoints = ArrayListMultimap.create();
+
+        this.proxyInstances = new HashMap<String, Server>();
+        this.proxyStreamUrlMapping = new HashMap<String, String>();
     }
 
     /**
@@ -79,6 +94,37 @@ public class EventCloudManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
+    public boolean destroyEventCloud(String streamUrl) {
+        if (this.getEventCloudsRegistry().contains(new EventCloudId(streamUrl))) {
+            boolean result = true;
+
+            result &= destroyProxies(streamUrl, this.publishProxyEndpoints);
+            result &= destroyProxies(streamUrl, this.putgetProxyEndpoints);
+            result &= destroyProxies(streamUrl, this.subscribeProxyEndpoints);
+
+            return result
+                    && this.getEventCloudsRegistry().undeploy(
+                            new EventCloudId(streamUrl));
+        }
+
+        return false;
+    }
+
+    private boolean destroyProxies(String streamUrl,
+                                   ListMultimap<String, String> proxyMultimap) {
+        boolean result = true;
+
+        for (String proxyEndpoint : proxyMultimap.get(streamUrl)) {
+            result &= this.destroyProxy(proxyEndpoint, proxyMultimap);
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getRegistryEndpointUrl() {
         return this.registryUrl;
     }
@@ -88,21 +134,15 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public List<String> getEventCloudIds() {
-        try {
-            EventCloudsRegistry registry =
-                    EventCloudsRegistryImpl.lookup(this.registryUrl);
+        Set<EventCloudId> ecIds =
+                this.getEventCloudsRegistry().listEventClouds();
+        List<String> result = new ArrayList<String>(ecIds.size());
 
-            Set<EventCloudId> ecIds = registry.listEventClouds();
-            List<String> result = new ArrayList<String>(ecIds.size());
-
-            for (EventCloudId ecId : ecIds) {
-                result.add(ecId.getStreamUrl());
-            }
-
-            return result;
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+        for (EventCloudId ecId : ecIds) {
+            result.add(ecId.getStreamUrl());
         }
+
+        return result;
     }
 
     /**
@@ -112,15 +152,19 @@ public class EventCloudManagementServiceImpl implements
     public String createPublishProxy(String streamUrl) {
         // TODO: check that streamUrl exists
 
-        String endpoint =
+        Server service =
                 WebServiceDeployer.deployPublishWebService(
                         this.registryUrl, streamUrl,
                         "proactive/services/EventCloud_publish-webservices",
                         this.portLowerBound++);
 
-        this.publishProxyEndpoints.put(streamUrl, endpoint);
+        this.publishProxyEndpoints.put(streamUrl, service.getEndpoint()
+                .toString());
+        this.proxyInstances.put(service.getEndpoint().toString(), service);
+        this.proxyStreamUrlMapping.put(
+                service.getEndpoint().toString(), streamUrl);
 
-        return endpoint;
+        return service.getEndpoint().toString();
     }
 
     /**
@@ -130,15 +174,19 @@ public class EventCloudManagementServiceImpl implements
     public String createSubscribeProxy(String streamUrl) {
         // TODO: check that streamUrl exists
 
-        String endpoint =
+        Server service =
                 WebServiceDeployer.deploySubscribeWebService(
                         this.registryUrl, streamUrl,
                         "proactive/services/EventCloud_subscribe-webservices",
                         this.portLowerBound++);
 
-        this.subscribeProxyEndpoints.put(streamUrl, endpoint);
+        this.subscribeProxyEndpoints.put(streamUrl, service.getEndpoint()
+                .toString());
+        this.proxyInstances.put(service.getEndpoint().toString(), service);
+        this.proxyStreamUrlMapping.put(
+                service.getEndpoint().toString(), streamUrl);
 
-        return endpoint;
+        return service.getEndpoint().toString();
     }
 
     /**
@@ -148,15 +196,19 @@ public class EventCloudManagementServiceImpl implements
     public String createPutGetProxy(String streamUrl) {
         // TODO: check that streamUrl exists
 
-        String endpoint =
+        Server service =
                 WebServiceDeployer.deployPutGetWebService(
                         this.registryUrl, streamUrl,
                         "proactive/services/EventCloud_putget-webservices",
                         this.portLowerBound++);
 
-        this.putgetProxyEndpoints.put(streamUrl, endpoint);
+        this.putgetProxyEndpoints.put(streamUrl, service.getEndpoint()
+                .toString());
+        this.proxyInstances.put(service.getEndpoint().toString(), service);
+        this.proxyStreamUrlMapping.put(
+                service.getEndpoint().toString(), streamUrl);
 
-        return endpoint;
+        return service.getEndpoint().toString();
     }
 
     /**
@@ -181,6 +233,59 @@ public class EventCloudManagementServiceImpl implements
     @Override
     public List<String> getPutgetProxyEndpointUrls(String streamUrl) {
         return this.putgetProxyEndpoints.get(streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean destroyPublishProxy(String publishProxyEndpoint) {
+        return this.destroyProxy(
+                publishProxyEndpoint, this.publishProxyEndpoints);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean destroySubscribeProxy(String subscribeProxyEndpoint) {
+        return this.destroyProxy(
+                subscribeProxyEndpoint, this.subscribeProxyEndpoints);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean destroyPutGetProxy(String putgetProxyEndpoint) {
+        return this.destroyProxy(putgetProxyEndpoint, this.putgetProxyEndpoints);
+    }
+
+    private boolean destroyProxy(String proxyEndpoint,
+                                 ListMultimap<String, String> proxyMultimap) {
+        String streamUrl = this.proxyStreamUrlMapping.remove(proxyEndpoint);
+
+        if (streamUrl != null) {
+            proxyMultimap.remove(streamUrl, proxyEndpoint);
+            this.proxyInstances.remove(proxyEndpoint).destroy();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private synchronized EventCloudsRegistry getEventCloudsRegistry() {
+        if (this.registry == null) {
+            try {
+                this.registry =
+                        EventCloudsRegistryImpl.lookup(this.registryUrl);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        return this.registry;
     }
 
 }
