@@ -201,6 +201,23 @@ public class WebServiceDeployer {
         }
     }
 
+    /**
+     * Deploys a new {@link EventCloudManagementServiceImpl}.
+     * 
+     * @param registryUrl
+     *            the registry to connect to in order to retrieve information
+     *            about eventclouds running.
+     * @param portLowerBound
+     *            the port lower used to deploy proxies which are created
+     *            through the service.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            service deployed.
+     * @param webServicePort
+     *            the port used to deploy the web service.
+     * 
+     * @return a new {@link EventCloudManagementServiceImpl}.
+     */
     public static Server deployEventCloudManagementWebService(String registryUrl,
                                                               int portLowerBound,
                                                               String urlSuffix,
