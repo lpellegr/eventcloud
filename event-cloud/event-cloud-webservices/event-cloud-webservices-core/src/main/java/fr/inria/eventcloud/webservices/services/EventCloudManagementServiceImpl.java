@@ -18,7 +18,6 @@ package fr.inria.eventcloud.webservices.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +25,10 @@ import java.util.Set;
 import org.apache.cxf.endpoint.Server;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -47,7 +49,7 @@ public class EventCloudManagementServiceImpl implements
 
     private final String registryUrl;
 
-    private int portLowerBound;
+    private final int portLowerBound;
 
     // streamUrl -> one or several subscribe proxy
     private final ListMultimap<String, String> subscribeProxyEndpoints;
@@ -59,10 +61,10 @@ public class EventCloudManagementServiceImpl implements
     private final ListMultimap<String, String> putgetProxyEndpoints;
 
     // proxyEndpoint -> one proxy server instance
-    private final Map<String, Server> proxyInstances;
+    private final Map<String, ServiceInformation> proxyInstances;
 
-    // proxyEndpoint -> streamUrl
-    private final Map<String, String> proxyStreamUrlMapping;
+    // port numbers which are already assigned
+    private final Set<Integer> assignedPorts;
 
     private EventCloudsRegistry registry;
 
@@ -75,8 +77,8 @@ public class EventCloudManagementServiceImpl implements
         this.publishProxyEndpoints = ArrayListMultimap.create();
         this.putgetProxyEndpoints = ArrayListMultimap.create();
 
-        this.proxyInstances = new HashMap<String, Server>();
-        this.proxyStreamUrlMapping = new HashMap<String, String>();
+        this.proxyInstances = Maps.newHashMap();
+        this.assignedPorts = Sets.newHashSet();
     }
 
     /**
@@ -111,11 +113,11 @@ public class EventCloudManagementServiceImpl implements
     }
 
     private boolean destroyProxies(String streamUrl,
-                                   ListMultimap<String, String> proxyMultimap) {
+                                   ListMultimap<String, String> proxyEndpoints) {
         boolean result = true;
 
-        for (String proxyEndpoint : proxyMultimap.get(streamUrl)) {
-            result &= this.destroyProxy(proxyEndpoint, proxyMultimap);
+        for (String proxyEndpoint : ImmutableList.copyOf(proxyEndpoints.get(streamUrl))) {
+            result &= this.destroyProxy(proxyEndpoint, proxyEndpoints);
         }
 
         return result;
@@ -151,20 +153,16 @@ public class EventCloudManagementServiceImpl implements
     @Override
     public String createPublishProxy(String streamUrl) {
         // TODO: check that streamUrl exists
+        int port = this.lockUnassignedPort();
 
         Server service =
                 WebServiceDeployer.deployPublishWebService(
                         this.registryUrl, streamUrl,
                         "proactive/services/EventCloud_publish-webservices",
-                        this.portLowerBound++);
+                        port);
 
-        this.publishProxyEndpoints.put(streamUrl, service.getEndpoint()
-                .toString());
-        this.proxyInstances.put(service.getEndpoint().toString(), service);
-        this.proxyStreamUrlMapping.put(
-                service.getEndpoint().toString(), streamUrl);
-
-        return service.getEndpoint().toString();
+        return this.storeAndReturnProxyAddress(
+                service, port, streamUrl, this.publishProxyEndpoints);
     }
 
     /**
@@ -173,20 +171,16 @@ public class EventCloudManagementServiceImpl implements
     @Override
     public String createSubscribeProxy(String streamUrl) {
         // TODO: check that streamUrl exists
+        int port = this.lockUnassignedPort();
 
         Server service =
                 WebServiceDeployer.deploySubscribeWebService(
                         this.registryUrl, streamUrl,
                         "proactive/services/EventCloud_subscribe-webservices",
-                        this.portLowerBound++);
+                        port);
 
-        this.subscribeProxyEndpoints.put(streamUrl, service.getEndpoint()
-                .toString());
-        this.proxyInstances.put(service.getEndpoint().toString(), service);
-        this.proxyStreamUrlMapping.put(
-                service.getEndpoint().toString(), streamUrl);
-
-        return service.getEndpoint().toString();
+        return this.storeAndReturnProxyAddress(
+                service, port, streamUrl, this.subscribeProxyEndpoints);
     }
 
     /**
@@ -195,20 +189,30 @@ public class EventCloudManagementServiceImpl implements
     @Override
     public String createPutGetProxy(String streamUrl) {
         // TODO: check that streamUrl exists
+        int port = this.lockUnassignedPort();
 
         Server service =
                 WebServiceDeployer.deployPutGetWebService(
                         this.registryUrl, streamUrl,
                         "proactive/services/EventCloud_putget-webservices",
-                        this.portLowerBound++);
+                        port);
 
-        this.putgetProxyEndpoints.put(streamUrl, service.getEndpoint()
-                .toString());
-        this.proxyInstances.put(service.getEndpoint().toString(), service);
-        this.proxyStreamUrlMapping.put(
-                service.getEndpoint().toString(), streamUrl);
+        return this.storeAndReturnProxyAddress(
+                service, port, streamUrl, this.putgetProxyEndpoints);
+    }
 
-        return service.getEndpoint().toString();
+    private String storeAndReturnProxyAddress(Server service,
+                                              int port,
+                                              String streamUrl,
+                                              ListMultimap<String, String> proxyEndpoints) {
+        String serviceAddress =
+                service.getEndpoint().getEndpointInfo().getAddress();
+
+        proxyEndpoints.put(streamUrl, serviceAddress);
+        this.proxyInstances.put(serviceAddress, new ServiceInformation(
+                service, streamUrl, port));
+
+        return serviceAddress;
     }
 
     /**
@@ -262,17 +266,32 @@ public class EventCloudManagementServiceImpl implements
     }
 
     private boolean destroyProxy(String proxyEndpoint,
-                                 ListMultimap<String, String> proxyMultimap) {
-        String streamUrl = this.proxyStreamUrlMapping.remove(proxyEndpoint);
+                                 ListMultimap<String, String> proxyEndpointsMultimap) {
+        ServiceInformation info = this.proxyInstances.remove(proxyEndpoint);
 
-        if (streamUrl != null) {
-            proxyMultimap.remove(streamUrl, proxyEndpoint);
-            this.proxyInstances.remove(proxyEndpoint).destroy();
+        if (info != null) {
+            proxyEndpointsMultimap.remove(info.streamUrl, proxyEndpoint);
+            info.service.destroy();
+            this.assignedPorts.remove(info.port);
 
             return true;
         }
 
         return false;
+    }
+
+    private int lockUnassignedPort() {
+        int port = this.portLowerBound;
+
+        synchronized (this.assignedPorts) {
+            while (true) {
+                if (!this.assignedPorts.contains(port)) {
+                    this.assignedPorts.add(port);
+                    return port;
+                }
+                port++;
+            }
+        }
     }
 
     private synchronized EventCloudsRegistry getEventCloudsRegistry() {
@@ -286,6 +305,22 @@ public class EventCloudManagementServiceImpl implements
         }
 
         return this.registry;
+    }
+
+    private static class ServiceInformation {
+
+        public final Server service;
+
+        public final String streamUrl;
+
+        public final int port;
+
+        public ServiceInformation(Server service, String streamUrl, int port) {
+            this.service = service;
+            this.streamUrl = streamUrl;
+            this.port = port;
+        }
+
     }
 
 }
