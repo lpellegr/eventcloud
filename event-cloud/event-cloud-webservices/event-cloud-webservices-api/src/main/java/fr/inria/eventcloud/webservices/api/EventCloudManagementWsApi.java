@@ -152,7 +152,7 @@ public interface EventCloudManagementWsApi {
     /**
      * Detroys the putget proxy identified by {@code putgetProxyEndpoint}.
      * 
-     * @param publishProxyEndpoint
+     * @param putgetProxyEndpoint
      *            the endpoint of the putget proxy to destroy.
      * 
      * @return {@code true} if the putget proxy has been destroyed,
