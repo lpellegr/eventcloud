@@ -17,8 +17,10 @@
 package fr.inria.eventcloud.translators.wsn.subscribe;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
@@ -64,13 +66,33 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
                     String topicName =
                             ((String) content.get(0)).trim().replaceAll(
                                     "\n", "");
+
+                    String topicPrefix =
+                            org.apache.xml.utils.QName.getPrefixPart(topicName);
+
+                    String topicNamespace = null;
+
+                    for (Entry<QName, String> entry : topicExpressionType.getOtherAttributes()
+                            .entrySet()) {
+                        if (entry.getKey().getLocalPart().equals(topicPrefix)) {
+                            topicNamespace = entry.getValue();
+                            break;
+                        }
+                    }
+
+                    if (topicNamespace == null) {
+                        throw new TranslationException(
+                                "No namespace declared for prefix '"
+                                        + topicPrefix
+                                        + "' associated to topic " + topicName);
+                    }
+
                     topicName =
                             org.apache.xml.utils.QName.getLocalPart(topicName);
 
                     return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <"
                             + Namespace.TYPES.getUri() + "stream> <"
-                            + Namespace.STREAMS.getUri() + topicName
-                            + "#stream> . } }";
+                            + topicNamespace + topicName + "#stream> . } }";
                 } else {
                     throw new TranslationException(
                             "No topic content set in the subscribe message");
