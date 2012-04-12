@@ -43,37 +43,6 @@ public class WsNotificationMessageBuilder {
      * 
      * @param subscriberEndpoint
      *            subscriber's endpoint.
-     * @param topicLocalPart
-     *            local part associated to the topic.
-     * 
-     * @return a {@link Subscribe} WS-Notification message with the specified
-     *         subscriber's endpoint and topic information.
-     */
-    public static Subscribe createSubscribeMessage(String subscriberEndpoint,
-                                                   String topicLocalPart) {
-        Subscribe subscribeRequest = new Subscribe();
-        FilterType filterType = new FilterType();
-
-        JAXBElement<TopicExpressionType> jaxbElement =
-                new JAXBElement<TopicExpressionType>(
-                        new QName(
-                                "http://docs.oasis-open.org/wsn/b-2",
-                                "TopicExpression"), TopicExpressionType.class,
-                        createTopicExpressionType(topicLocalPart));
-        filterType.getAny().add(jaxbElement);
-        subscribeRequest.setFilter(filterType);
-
-        subscribeRequest.setConsumerReference(WSNHelper.createWSA(subscriberEndpoint));
-
-        return subscribeRequest;
-    }
-
-    /**
-     * Creates a {@link Subscribe} WS-Notification message from the specified
-     * subscriber's endpoint and topic information.
-     * 
-     * @param subscriberEndpoint
-     *            subscriber's endpoint.
      * @param topicNamespace
      *            namespace associated to the topic the subscriber subscribes
      *            to.
@@ -173,16 +142,6 @@ public class WsNotificationMessageBuilder {
         }
 
         return result;
-    }
-
-    private static TopicExpressionType createTopicExpressionType(String topicLocalPart) {
-        TopicExpressionType topicExpressionType = new TopicExpressionType();
-        topicExpressionType.getOtherAttributes().put(
-                new QName(topicLocalPart), topicLocalPart);
-
-        topicExpressionType.getContent().add(topicLocalPart);
-
-        return topicExpressionType;
     }
 
     private static TopicExpressionType createTopicExpressionType(String topicNamespace,
