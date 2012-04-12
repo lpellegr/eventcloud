@@ -146,15 +146,14 @@ public class WsNotificationMessageBuilder {
 
     private static TopicExpressionType createTopicExpressionType(String topicNamespace,
                                                                  String topicNsPrefix,
-                                                                 String topicExpression) {
-        String topic = topicNsPrefix + ":" + topicExpression;
-
+                                                                 String topicLocalPart) {
         TopicExpressionType topicExpressionType = new TopicExpressionType();
         topicExpressionType.getOtherAttributes().put(
-                new QName(topicNamespace, topicExpression, topicNsPrefix),
-                topic);
+                new QName(topicNamespace, topicLocalPart, topicNsPrefix),
+                topicNamespace);
 
-        topicExpressionType.getContent().add(topic);
+        topicExpressionType.getContent().add(
+                topicNsPrefix + ":" + topicLocalPart);
 
         return topicExpressionType;
     }

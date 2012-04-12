@@ -1,18 +1,17 @@
 package fr.inria.eventcloud.translators.wsn.subscribe;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.play_project.play_commons.eventformat.Stream;
+import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
 
@@ -21,7 +20,6 @@ import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
  * 
  * @author lpellegr
  */
-@RunWith(value = Parameterized.class)
 public class TopicSubscriptionTranslatorTest {
 
     private static Logger log =
@@ -29,10 +27,12 @@ public class TopicSubscriptionTranslatorTest {
 
     private TopicSubscriptionTranslator translator;
 
-    private String topic;
+    private static final String topicNamespace =
+            "http://example.org/topic/namespace/";
 
-    public TopicSubscriptionTranslatorTest(String topic) {
-        this.topic = topic;
+    @BeforeClass
+    public static void initContext() {
+        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
     }
 
     @Before
@@ -40,23 +40,36 @@ public class TopicSubscriptionTranslatorTest {
         this.translator = new TopicSubscriptionTranslator();
     }
 
-    @Parameters
-    public static List<Object[]> data() {
-        Object[][] data = new Object[][] { {"ex:topicName"}, {"topicName"}};
-        return Arrays.asList(data);
+    @Test
+    public void testTopicTranslation() throws TranslationException {
+        testTopicTranslationToSparql(topicNamespace, "t", "myTopic");
+        testTopicTranslationToSparql(topicNamespace, "t", "topicName:myTopic");
     }
 
-    @Test
-    public void testTopicTranslationToSparql() throws TranslationException {
+    private void testTopicTranslationToSparql(String topicNamespace,
+                                              String topicNsPrefix,
+                                              String topicLocalPart)
+            throws TranslationException {
         Subscribe subscribeMessage =
                 WsNotificationMessageBuilder.createSubscribeMessage(
-                        "http://example.org/subscribers/s12",
-                        "http://example.org/namespace", "ns", this.topic);
+                        "http://example.org/subscriber/s1", topicNamespace,
+                        topicNsPrefix, topicLocalPart);
 
         String sparqlQuery = this.translator.translate(subscribeMessage);
 
         Assert.assertNotNull(sparqlQuery);
 
+        QuadruplePattern quadruplePattern =
+                new SparqlReasoner().parseSparql(sparqlQuery)
+                        .get(0)
+                        .getQuadruplePattern()
+                        .getValue();
+
+        Assert.assertEquals(topicNamespace + topicLocalPart
+                + Stream.STREAM_ID_SUFFIX, quadruplePattern.getObject()
+                .getURI());
+
         log.info("Translation output:\n" + sparqlQuery);
     }
+
 }

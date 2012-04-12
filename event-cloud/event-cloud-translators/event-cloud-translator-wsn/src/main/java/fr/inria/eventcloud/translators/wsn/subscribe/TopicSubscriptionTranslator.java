@@ -27,6 +27,7 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 
 import eu.play_project.play_commons.eventformat.Namespace;
+import eu.play_project.play_commons.eventformat.Stream;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
 
@@ -63,18 +64,24 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
 
                 List<Object> content = topicExpressionType.getContent();
                 if (content.size() > 0) {
-                    String topicName =
+                    String topic =
                             ((String) content.get(0)).trim().replaceAll(
                                     "\n", "");
 
-                    String topicPrefix =
-                            org.apache.xml.utils.QName.getPrefixPart(topicName);
-
+                    String topicLocalPart =
+                            org.apache.xml.utils.QName.getLocalPart(topic);
                     String topicNamespace = null;
 
                     for (Entry<QName, String> entry : topicExpressionType.getOtherAttributes()
                             .entrySet()) {
-                        if (entry.getKey().getLocalPart().equals(topicPrefix)) {
+                        // TODO: compare by using prefix declaration and not
+                        // local parts. It is possible to have two local part
+                        // values that are the same but each one is using a
+                        // different prefix. In such a case, the namespace
+                        // extracted may be wrong
+                        if (entry.getKey()
+                                .getLocalPart()
+                                .equals(topicLocalPart)) {
                             topicNamespace = entry.getValue();
                             break;
                         }
@@ -83,16 +90,14 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
                     if (topicNamespace == null) {
                         throw new TranslationException(
                                 "No namespace declared for prefix '"
-                                        + topicPrefix
-                                        + "' associated to topic " + topicName);
+                                        + org.apache.xml.utils.QName.getPrefixPart(topic)
+                                        + "' associated to topic " + topic);
                     }
-
-                    topicName =
-                            org.apache.xml.utils.QName.getLocalPart(topicName);
 
                     return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <"
                             + Namespace.TYPES.getUri() + "stream> <"
-                            + topicNamespace + topicName + "#stream> . } }";
+                            + topicNamespace + topicLocalPart
+                            + Stream.STREAM_ID_SUFFIX + "> . } }";
                 } else {
                     throw new TranslationException(
                             "No topic content set in the subscribe message");
