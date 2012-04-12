@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
@@ -37,6 +34,7 @@ import org.w3c.dom.Text;
 
 import com.hp.hpl.jena.graph.Node;
 
+import eu.play_project.play_commons.eventformat.xml.DocumentBuilder;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -54,19 +52,8 @@ import fr.inria.eventcloud.translators.wsn.WsNotificationTranslatorConstants;
 public class CompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
-    // used to have the possibility to create DOM elements
-    private static Document document;
-
-    static {
-        DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = null;
-        try {
-            docBuilder = dbfac.newDocumentBuilder();
-            document = docBuilder.newDocument();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        }
-    }
+    // used only to have the possibility to create DOM elements
+    private static Document DOCUMENT = DocumentBuilder.createDocument();
 
     /**
      * Translates the specified event to its corresponding notification message.
@@ -159,13 +146,13 @@ public class CompoundEventTranslator extends
 
     private Element createMetadataElement(QName qname, String value) {
         Element metadataElt =
-                document.createElementNS(
+                DOCUMENT.createElementNS(
                         WsNotificationTranslatorConstants.PRODUCER_METADATA_NAMESPACE,
                         "Metadata");
         Element childElt =
-                document.createElementNS(
+                DOCUMENT.createElementNS(
                         qname.getNamespaceURI(), qname.getLocalPart());
-        Text textNode = document.createTextNode(value);
+        Text textNode = DOCUMENT.createTextNode(value);
 
         metadataElt.appendChild(childElt);
         childElt.appendChild(textNode);
@@ -179,9 +166,9 @@ public class CompoundEventTranslator extends
 
     private static Element createElementFrom(String namespace, String localName) {
         if (namespace.isEmpty()) {
-            return document.createElement(localName);
+            return DOCUMENT.createElement(localName);
         } else {
-            return document.createElementNS(namespace, localName);
+            return DOCUMENT.createElementNS(namespace, localName);
         }
     }
 
@@ -266,14 +253,14 @@ public class CompoundEventTranslator extends
                     // here we assume we have only one element that matches
                     Element elt =
                             namespace.isEmpty()
-                                    ? document.createElement(localName)
-                                    : document.createElementNS(
+                                    ? DOCUMENT.createElement(localName)
+                                    : DOCUMENT.createElementNS(
                                             namespace, localName);
                     lastElt.appendChild(elt);
                     lastElt = elt;
 
                     if (i == elements.length - 1) {
-                        lastElt.appendChild(document.createTextNode(quadruple.getObject()
+                        lastElt.appendChild(DOCUMENT.createTextNode(quadruple.getObject()
                                 .getLiteralLexicalForm()
                                 .replaceAll(
                                         WsNotificationTranslatorConstants.SHARP_ESCAPE,
@@ -326,13 +313,13 @@ public class CompoundEventTranslator extends
 
             Element elt =
                     namespace.isEmpty()
-                            ? document.createElement(localName)
-                            : document.createElementNS(namespace, localName);
+                            ? DOCUMENT.createElement(localName)
+                            : DOCUMENT.createElementNS(namespace, localName);
             lastElt.appendChild(elt);
             lastElt = elt;
 
             if (i == elements.length - 1) {
-                lastElt.appendChild(document.createTextNode(quadruple.getObject()
+                lastElt.appendChild(DOCUMENT.createTextNode(quadruple.getObject()
                         .getLiteralLexicalForm()
                         .replaceAll(
                                 WsNotificationTranslatorConstants.SHARP_ESCAPE,

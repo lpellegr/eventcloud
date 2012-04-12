@@ -1,17 +1,14 @@
 package fr.inria.eventcloud.translators.wsn.notify;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
-import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import org.w3c.dom.Element;
 
+import eu.play_project.play_commons.eventformat.EventFormatHelpers;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -26,9 +23,11 @@ import fr.inria.eventcloud.utils.Callback;
  * with the RDF message payload to{@link CompoundEvent events}
  * 
  * @author ialshaba
+ * @author lpellegr
  */
 public class SemanticNotificationTranslator extends
         Translator<NotificationMessageHolderType, CompoundEvent> {
+
     /**
      * Translates a message which is in XML escaped characters to the
      * corresponding CompoundEvent
@@ -41,20 +40,12 @@ public class SemanticNotificationTranslator extends
     @Override
     public CompoundEvent translate(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
-
-        Message message = notificationMessage.getMessage();
-        Element any = (Element) message.getAny();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            baos.write(any.getTextContent().getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String messageAsString = baos.toString();
         InputStream is =
-                new ByteArrayInputStream(StringEscapeUtils.unescapeXml(
-                        messageAsString).getBytes());
+                new ByteArrayInputStream(
+                        EventFormatHelpers.unwrapFromDomNativeMessageElement(
+                                (Element) notificationMessage.getMessage()
+                                        .getAny()).getBytes());
+
         final List<Quadruple> quads = new ArrayList<Quadruple>();
         RdfParser.parse(
                 is, SerializationFormat.TriG, new Callback<Quadruple>() {
