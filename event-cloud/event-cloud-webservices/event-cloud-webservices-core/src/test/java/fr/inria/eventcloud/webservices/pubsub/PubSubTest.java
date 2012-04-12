@@ -103,17 +103,18 @@ public class PubSubTest {
 
         int lastIndexOfSlash = ecId.getStreamUrl().lastIndexOf('/');
 
-        String topicExpression =
-                ecId.getStreamUrl().substring(lastIndexOfSlash + 1);
+        // Extract topic information
         String topicNamespace =
-                ecId.getStreamUrl().substring(0, lastIndexOfSlash);
+                ecId.getStreamUrl().substring(0, lastIndexOfSlash + 1);
         String topicNsPrefix = "s";
+        String topicLocalPart =
+                ecId.getStreamUrl().substring(lastIndexOfSlash + 1);
 
         // Creates the subscribe request
         Subscribe subscribeRequest =
                 WsNotificationMessageBuilder.createSubscribeMessage(
                         subscriberWsUrl, topicNamespace, topicNsPrefix,
-                        topicExpression);
+                        topicLocalPart);
 
         // Subscribes for any events with topic TaxiUc
         subscribeClient.invoke("Subscribe", subscribeRequest);
@@ -121,7 +122,7 @@ public class PubSubTest {
         // Creates the notify request
         Notify notifyRequest =
                 WsNotificationMessageBuilder.createNotifyMessage(
-                        topicNamespace, topicNsPrefix, topicExpression,
+                        topicNamespace, topicNsPrefix, topicLocalPart,
                         new CompoundEvent(read(
                                 "/notification-01.trig",
                                 SerializationFormat.TriG)));
