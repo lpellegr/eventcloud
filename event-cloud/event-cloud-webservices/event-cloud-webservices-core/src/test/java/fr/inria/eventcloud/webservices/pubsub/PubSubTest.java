@@ -20,8 +20,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
@@ -52,12 +53,15 @@ public class PubSubTest {
 
     private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
 
-    private static <T> Client createWsClient(Class<T> serviceClass,
-                                             String serviceAddress) {
-        JaxWsClientFactoryBean factory = new JaxWsClientFactoryBean();
+    private static <T> T createWsClient(Class<T> serviceClass,
+                                        String serviceAddress) {
+        JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
+        factory.getInInterceptors().add(new LoggingInInterceptor());
+        factory.getOutInterceptors().add(new LoggingOutInterceptor());
         factory.setServiceClass(serviceClass);
         factory.setAddress(serviceAddress);
-        return factory.create();
+
+        return serviceClass.cast(factory.create());
     }
 
     @Test(timeout = 180000)
@@ -95,10 +99,10 @@ public class PubSubTest {
                         .getAddress();
 
         // Clients associated to Web services
-        Client subscribeClient =
+        NotificationProducer subscribeClient =
                 createWsClient(NotificationProducer.class, subscribeWsUrl);
 
-        Client publishClient =
+        NotificationConsumer publishClient =
                 createWsClient(NotificationConsumer.class, publishWsUrl);
 
         int lastIndexOfSlash = ecId.getStreamUrl().lastIndexOf('/');
@@ -117,7 +121,7 @@ public class PubSubTest {
                         topicLocalPart);
 
         // Subscribes for any events with topic TaxiUc
-        subscribeClient.invoke("Subscribe", subscribeRequest);
+        subscribeClient.subscribe(subscribeRequest);
 
         // Creates the notify request
         Notify notifyRequest =
@@ -127,7 +131,7 @@ public class PubSubTest {
                                 "/notification-01.trig",
                                 SerializationFormat.TriG)));
 
-        publishClient.invoke("Notify", notifyRequest);
+        publishClient.notify(notifyRequest);
 
         synchronized (subscriberService.eventsReceived) {
             while (subscriberService.eventsReceived.size() != 1) {
