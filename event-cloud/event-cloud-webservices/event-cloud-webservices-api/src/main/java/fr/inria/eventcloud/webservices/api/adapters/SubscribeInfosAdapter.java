@@ -83,8 +83,16 @@ public class SubscribeInfosAdapter extends
                 },
                 Algebra.compile(QueryFactory.create(subscribeInfos.getSparqlQuery()))));
 
+        int index = topicName.lastIndexOf("/");
+
+        // TODO: this has to be tested and potential errors should be handled
+        String topicNamespace = topicName.substring(0, index);
+        String topicLocalPart =
+                topicName.substring(index + 1, topicName.lastIndexOf("#stream"));
+
         return WsNotificationMessageBuilder.createSubscribeMessage(
-                subscribeInfos.getSubscriberWsUrl(), topicName.toString());
+                subscribeInfos.getSubscriberWsUrl(), topicNamespace, "t",
+                topicLocalPart);
     }
 
     /**
