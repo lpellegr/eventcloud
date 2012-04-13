@@ -18,8 +18,6 @@ package fr.inria.eventcloud.webservices;
 
 import javax.xml.namespace.QName;
 
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.jaxws.JaxWsClientFactoryBean;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
@@ -30,6 +28,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
 import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
+import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
 /**
  * An {@link CompoundEventNotificationListener}
@@ -44,8 +43,6 @@ public class WsEventNotificationListener extends
     private static final Logger log =
             LoggerFactory.getLogger(WsEventNotificationListener.class);
 
-    private static final String NOTIFY_METHOD_NAME = "Notify";
-
     private static SemanticCompoundEventTranslator translator =
             new SemanticCompoundEventTranslator();
 
@@ -53,7 +50,7 @@ public class WsEventNotificationListener extends
 
     private final String subscriberWsUrl;
 
-    private transient Client wsClient;
+    private transient NotificationConsumer subscriberWsClient;
 
     /**
      * Creates an {@link CompoundEventNotificationListener} with the specified
@@ -76,32 +73,32 @@ public class WsEventNotificationListener extends
                         streamUrl.substring(index + 1), "s");
     }
 
+    private synchronized NotificationConsumer getSubscriberWsClient() {
+        if (this.subscriberWsClient == null) {
+            this.subscriberWsClient =
+                    WsClientFactory.createWsClient(
+                            NotificationConsumer.class, this.subscriberWsUrl);
+        }
+
+        return this.subscriberWsClient;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void onNotification(SubscriptionId id, CompoundEvent solution) {
-        if (this.wsClient == null) {
-            JaxWsClientFactoryBean clientFactory = new JaxWsClientFactoryBean();
-            clientFactory.setServiceClass(NotificationConsumer.class);
-            clientFactory.setAddress(this.subscriberWsUrl);
-            this.wsClient = clientFactory.create();
-        }
-
         Notify notify =
                 WsNotificationMessageBuilder.createNotifyMessage(
                         translator, this.streamQName.getNamespaceURI(),
                         this.streamQName.getPrefix(),
                         this.streamQName.getLocalPart(), solution);
 
-        try {
-            this.wsClient.invoke(NOTIFY_METHOD_NAME, new Object[] {notify});
-            log.info(
-                    "Web service {} invoked to notify for:\n {}",
-                    this.subscriberWsUrl, solution);
-        } catch (Exception e) {
-            log.error("Error during the invocation of the Notify web method", e);
-        }
+        this.getSubscriberWsClient().notify(notify);
+
+        log.info(
+                "Subscriber {} notified about:\n {}", this.subscriberWsUrl,
+                solution);
     }
 
 }

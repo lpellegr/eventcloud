@@ -20,9 +20,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.cxf.interceptor.LoggingInInterceptor;
-import org.apache.cxf.interceptor.LoggingOutInterceptor;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
@@ -40,6 +37,7 @@ import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
+import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
 
 /**
@@ -52,17 +50,6 @@ import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
 public class PubSubTest {
 
     private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
-
-    private static <T> T createWsClient(Class<T> serviceClass,
-                                        String serviceAddress) {
-        JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
-        factory.getInInterceptors().add(new LoggingInInterceptor());
-        factory.getOutInterceptors().add(new LoggingOutInterceptor());
-        factory.setServiceClass(serviceClass);
-        factory.setAddress(serviceAddress);
-
-        return serviceClass.cast(factory.create());
-    }
 
     @Test(timeout = 180000)
     public void testPublishSubscribeWsProxies() throws Exception {
@@ -100,10 +87,12 @@ public class PubSubTest {
 
         // Clients associated to Web services
         NotificationProducer subscribeClient =
-                createWsClient(NotificationProducer.class, subscribeWsUrl);
+                WsClientFactory.createWsClient(
+                        NotificationProducer.class, subscribeWsUrl);
 
         NotificationConsumer publishClient =
-                createWsClient(NotificationConsumer.class, publishWsUrl);
+                WsClientFactory.createWsClient(
+                        NotificationConsumer.class, publishWsUrl);
 
         int lastIndexOfSlash = ecId.getStreamUrl().lastIndexOf('/');
 
