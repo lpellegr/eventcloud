@@ -29,36 +29,35 @@ import com.google.common.collect.Ranges;
  */
 public final class StringGenerator extends Generator {
 
-    protected static final Range<Character> ALPHABETIC_LOWERCASE_RANGE =
+    public static final Range<Character> ALPHABETIC_LOWERCASE_RANGE =
             Ranges.closed('\u0061', '\u007A');
 
-    protected static final Range<Character> ALPHABETIC_UPPERCASE_RANGE =
+    public static final Range<Character> ALPHABETIC_UPPERCASE_RANGE =
             Ranges.closed('\u0041', '\u005A');
 
-    protected static final Range<Character> NUMERIC_RANGE = Ranges.closed(
+    public static final Range<Character> NUMERIC_RANGE = Ranges.closed(
             '\u0030', '\u0039');
 
     @SuppressWarnings("unchecked")
-    protected static final Range<Character>[] BMP_RANGES =
+    public static final Range<Character>[] BMP_RANGES =
             new Range[] {Ranges.closed('\u0000', '\uFFFF')};
 
     @SuppressWarnings("unchecked")
-    protected static final Range<Character>[] ASCII_RANGES =
+    public static final Range<Character>[] ASCII_RANGES =
             new Range[] {Ranges.closed('\u0000', '\u007E')};
 
     @SuppressWarnings("unchecked")
-    protected static final Range<Character>[] PRINTABLE_ASCII_RANGES =
+    public static final Range<Character>[] PRINTABLE_ASCII_RANGES =
             new Range[] {Ranges.closed('\u0020', '\u007E')};
 
     @SuppressWarnings("unchecked")
-    protected static final Range<Character>[] ALPHABETIC_RANGES = new Range[] {
+    public static final Range<Character>[] ALPHABETIC_RANGES = new Range[] {
             ALPHABETIC_LOWERCASE_RANGE, ALPHABETIC_UPPERCASE_RANGE};
 
     @SuppressWarnings("unchecked")
-    protected static final Range<Character>[] ALPHANUMERIC_RANGES =
-            new Range[] {
-                    ALPHABETIC_LOWERCASE_RANGE, ALPHABETIC_UPPERCASE_RANGE,
-                    NUMERIC_RANGE};
+    public static final Range<Character>[] ALPHANUMERIC_RANGES = new Range[] {
+            ALPHABETIC_LOWERCASE_RANGE, ALPHABETIC_UPPERCASE_RANGE,
+            NUMERIC_RANGE};
 
     private StringGenerator() {
 
@@ -74,7 +73,7 @@ public final class StringGenerator extends Generator {
      * 
      * @return the random string.
      */
-    public static String random(int length) {
+    public static String random(long length) {
         return random(length, BMP_RANGES);
     }
 
@@ -88,7 +87,7 @@ public final class StringGenerator extends Generator {
      * 
      * @return the random string.
      */
-    public static String randomAscii(int length) {
+    public static String randomAscii(long length) {
         return random(length, ASCII_RANGES);
     }
 
@@ -160,7 +159,7 @@ public final class StringGenerator extends Generator {
      * 
      * @return the random string.
      */
-    public static String randomAlphanumeric(int length) {
+    public static String randomAlphanumeric(long length) {
         return random(length, ALPHANUMERIC_RANGES);
     }
 
@@ -174,7 +173,7 @@ public final class StringGenerator extends Generator {
      * @return the random string.
      */
     @SuppressWarnings("unchecked")
-    public static String randomNumeric(int length) {
+    public static String randomNumeric(long length) {
         return random(length, new Range[] {NUMERIC_RANGE});
     }
 
@@ -193,7 +192,7 @@ public final class StringGenerator extends Generator {
      * @throws IllegalArgumentException
      *             if {@code length} &lt; 0.
      */
-    public static String random(int length, Range<Character>... ranges) {
+    public static String random(long length, Range<Character>... ranges) {
         return random(length, Generator.RANDOM, ranges);
     }
 
@@ -208,11 +207,36 @@ public final class StringGenerator extends Generator {
      *            the prefix to append to the string which is randomly
      *            generated.
      * 
-     * @return the random URI.
+     * @return the random string.
      */
-    public static String random(int length, String prefix) {
+    public static String random(long length, String prefix) {
         StringBuilder result = new StringBuilder(prefix);
         result.append(randomAlphanumeric(length));
+
+        return result.toString();
+    }
+
+    /**
+     * Creates a random String with the specified prefix and whose length for
+     * extra characters is the number of characters specified.
+     * 
+     * @param length
+     *            the length of random string to create.
+     * 
+     * @param prefix
+     *            the prefix to append to the string which is randomly
+     *            generated.
+     * @param ranges
+     *            an array of ranges where each range specifies a continuous
+     *            interval of characters which can be used to generate the
+     *            random string.
+     * 
+     * @return the random string.
+     */
+    public static String random(long length, String prefix,
+                                Range<Character>... ranges) {
+        StringBuilder result = new StringBuilder(prefix);
+        result.append(random(length, Generator.RANDOM, ranges));
 
         return result.toString();
     }
@@ -241,7 +265,7 @@ public final class StringGenerator extends Generator {
      * @throws IllegalArgumentException
      *             if {@code length} &lt; 0.
      */
-    public static String random(int length, Random random,
+    public static String random(long length, Random random,
                                 Range<Character>... ranges) {
         if (length == 0) {
             return "";
