@@ -86,10 +86,15 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public boolean createEventCloud(String streamUrl) {
-        return EventCloud.create(
-                this.registryUrl, new EventCloudId(streamUrl),
-                new EventCloudDeployer(),
-                new ArrayList<UnalterableElaProperty>(), 1, 1).register();
+        EventCloudId eventCloudId = new EventCloudId(streamUrl);
+
+        if (!this.getEventCloudsRegistry().contains(eventCloudId)) {
+            return EventCloud.create(
+                    this.registryUrl, eventCloudId, new EventCloudDeployer(),
+                    new ArrayList<UnalterableElaProperty>(), 1, 1).register();
+        }
+
+        return false;
     }
 
     /**
@@ -97,16 +102,19 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public boolean destroyEventCloud(String streamUrl) {
-        if (this.getEventCloudsRegistry().contains(new EventCloudId(streamUrl))) {
+        EventCloudId eventCloudId = new EventCloudId(streamUrl);
+
+        if (this.getEventCloudsRegistry().contains(eventCloudId)) {
             boolean result = true;
 
-            result &= destroyProxies(streamUrl, this.publishProxyEndpoints);
-            result &= destroyProxies(streamUrl, this.putgetProxyEndpoints);
-            result &= destroyProxies(streamUrl, this.subscribeProxyEndpoints);
+            result &=
+                    this.destroyProxies(streamUrl, this.publishProxyEndpoints);
+            result &= this.destroyProxies(streamUrl, this.putgetProxyEndpoints);
+            result &=
+                    this.destroyProxies(streamUrl, this.subscribeProxyEndpoints);
 
             return result
-                    && this.getEventCloudsRegistry().undeploy(
-                            new EventCloudId(streamUrl));
+                    && this.getEventCloudsRegistry().undeploy(eventCloudId);
         }
 
         return false;
@@ -152,7 +160,13 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public String createPublishProxy(String streamUrl) {
-        // TODO: check that streamUrl exists
+        EventCloudId eventCloudId = new EventCloudId(streamUrl);
+
+        if (!this.getEventCloudsRegistry().contains(eventCloudId)) {
+            throw new IllegalArgumentException("No Event Cloud running for "
+                    + streamUrl);
+        }
+
         int port = this.lockUnassignedPort();
 
         Server service =
@@ -170,7 +184,13 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public String createSubscribeProxy(String streamUrl) {
-        // TODO: check that streamUrl exists
+        EventCloudId eventCloudId = new EventCloudId(streamUrl);
+
+        if (!this.getEventCloudsRegistry().contains(eventCloudId)) {
+            throw new IllegalArgumentException("No Event Cloud running for "
+                    + streamUrl);
+        }
+
         int port = this.lockUnassignedPort();
 
         Server service =
@@ -188,7 +208,13 @@ public class EventCloudManagementServiceImpl implements
      */
     @Override
     public String createPutGetProxy(String streamUrl) {
-        // TODO: check that streamUrl exists
+        EventCloudId eventCloudId = new EventCloudId(streamUrl);
+
+        if (!this.getEventCloudsRegistry().contains(eventCloudId)) {
+            throw new IllegalArgumentException("No Event Cloud running for "
+                    + streamUrl);
+        }
+
         int port = this.lockUnassignedPort();
 
         Server service =
