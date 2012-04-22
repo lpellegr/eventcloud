@@ -15,6 +15,7 @@
 			<outputDirectory>lib</outputDirectory>
 			<directoryMode>0644</directoryMode>
 			<fileMode>0644</fileMode>
+
 			<excludes>
 				<exclude>org.ow2.proactive:scheduling-common-core</exclude>
 				<exclude>org.ow2.proactive:scheduling-scheduler-core</exclude>
