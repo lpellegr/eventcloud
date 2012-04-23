@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
@@ -39,13 +38,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * PeerImpl is a concrete implementation of {@link Peer}. It is composed of a
- * {@link StructuredOverlay} which allows to have several implementations of
- * common operations for each peer-to-peer protocol to implement. This class
- * acts as a Facade in order to simplify interface (easier to use, understand
- * and test).
+ * {@link StructuredOverlay} which allows to have different implementations of
+ * peer-to-peer protocols.
  * <p>
- * Warning, this class must not be instantiate directly. In order to create a
- * new peer component you have to use the {@link PeerFactory}.
+ * <strong>Warning, this class must not be instantiated directly. It has a
+ * public constructor in order to be compatible with ProActive but to create a
+ * new peer component you have to use the {@link PeerFactory}.</strong>
  * 
  * @author lpellegr
  * @author bsauvan
@@ -72,20 +70,16 @@ public class PeerImpl extends AbstractComponent implements Peer,
     public void initComponentActivity(Body body) {
         super.initComponentActivity(body);
 
-        body.setImmediateService("receiveImmediateService", false);
-
         // these methods do not change the state of the peer
         body.setImmediateService("equals", false);
         body.setImmediateService("getId", false);
+        body.setImmediateService("getType", false);
         body.setImmediateService("hashCode", false);
         body.setImmediateService("toString", false);
-        body.setImmediateService("getType", false);
 
-        body.setImmediateService("send", false);
+        body.setImmediateService("receiveImmediateService", false);
         body.setImmediateService("route", false);
-
-        // receive cannot be handled as immediate service
-        PAActiveObject.removeImmediateService("receive");
+        body.setImmediateService("send", false);
     }
 
     /**
@@ -269,7 +263,8 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @Override
     public String toString() {
         if (this.overlay == null) {
-            return Integer.toString(System.identityHashCode(this));
+            // toString is performed on a stub
+            return "stub" + Integer.toString(System.identityHashCode(this));
         }
 
         return this.overlay.toString();

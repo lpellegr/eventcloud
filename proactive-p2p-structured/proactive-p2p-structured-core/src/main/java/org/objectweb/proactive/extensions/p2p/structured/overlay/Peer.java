@@ -30,7 +30,9 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 
 /**
- * A peer contains all operations which are common to peer-to-peer protocols.
+ * A peer defines all operations which are common to structured peer-to-peer
+ * protocols. This interface acts as a Facade in order to simplify the
+ * operations which are exposed (easier to use, understand and test).
  * 
  * @author lpellegr
  */

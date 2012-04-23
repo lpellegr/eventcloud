@@ -24,22 +24,22 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * A <code>Request</code> is an abstraction of a query that can be sent on a
- * structured peer-to-peer network in order to find some data by a key which is
- * an object of type <code>K</code>. In response an object of type
- * {@link Response} is returned.
+ * A {@code Request} is an abstraction of a query that can be sent on a
+ * structured peer-to-peer network in order to reach a desired set of peers
+ * (e.g. the peers where you want to retrieve some data or more generally to
+ * perform some actions) by a key which is an object of type {@code K}. In
+ * response an object of type {@link Response} is returned.
  * <p>
- * A request is performed step by step by using one-way mechanism. As a
- * consequence of it, we can't say when the response will be returned. Suppose
- * that the peer A is sending a query in order to reach the peer B managing the
- * key <code>keyToReach</code>. The first step consists in setting the
- * <code>keyToReach</code> to <code>keyToFound</code>. After that the query is
- * sent step by step until the peer managing the <code>keyToReach</code> is
- * found. When it is found, the <code>keyToReach</code> change for
- * <code>keyFromSender</code>. At this time the response is routed to the sender
- * in the opposite direction without necessarily using the same path. This last
- * point depends on the concrete type of query which can implement the desired
- * behavior.
+ * A request is routed step by step by using one-way mechanism. As a consequence
+ * of it, we can't say when the response will be returned. Suppose that the peer
+ * A is sending a query in order to reach the peer B managing the key
+ * {@code keyToReach}. The first step consists in setting the {@code keyToReach}
+ * to {@code keyToFind}. After that the query is sent step by step until the
+ * peer managing the {@code keyToReach} is found. When it is found, the
+ * {@code keyToReach} changes for {@code keyFromSender}. At this time the
+ * response is routed to the sender in the opposite direction without
+ * necessarily using the same path. This last point depends on the concrete
+ * request type that implements the desired behavior.
  * 
  * @author lpellegr
  * 
@@ -56,8 +56,7 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
     private long dispatchTimestamp = System.currentTimeMillis();
 
     /**
-     * Constructs a new query message with the specified <code>keyToReach</code>
-     * .
+     * Constructs a new query message with the specified {@codekeyToReach}.
      * 
      * @param validator
      *            the constraints validator used for routing decisions.

@@ -101,7 +101,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
 
                 // sends the message to the other neighbors which validates the
                 // constraints
-                this.doHandle(overlay, request);
+                this.handle(overlay, request);
             } else {
                 this.route(overlay, request);
             }
@@ -114,7 +114,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
      * propagate the request to the neighbors which validates the constraints.
      */
     @Override
-    protected void doHandle(final StructuredOverlay overlay,
+    protected void handle(final StructuredOverlay overlay,
                             final AnycastRequest request) {
         CanOverlay canOverlay = ((CanOverlay) overlay);
 
@@ -222,7 +222,7 @@ public abstract class AnycastRequestRouter<T extends AnycastRequest> extends
      *            the message to route.
      */
     @Override
-    protected void doRoute(StructuredOverlay overlay, AnycastRequest request) {
+    protected void route(StructuredOverlay overlay, AnycastRequest request) {
         CanOverlay overlayCAN = ((CanOverlay) overlay);
 
         byte dimension = 0;

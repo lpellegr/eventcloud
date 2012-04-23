@@ -63,12 +63,12 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
         if (request.validatesKeyConstraints(overlay)) {
             this.handle(overlay, request);
         } else {
-            this.doRoute(overlay, request);
+            this.route(overlay, request);
         }
     }
 
     @Override
-    protected void doHandle(StructuredOverlay overlay, T request) {
+    protected void handle(StructuredOverlay overlay, T request) {
         if (logger.isDebugEnabled()) {
             logger.debug("Peer " + overlay + " validates the contraints "
                     + request.getKey() + " specified by request "
@@ -79,7 +79,7 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
     }
 
     @Override
-    protected void doRoute(StructuredOverlay overlay, T request) {
+    protected void route(StructuredOverlay overlay, T request) {
         CanOverlay overlayCAN = ((CanOverlay) overlay);
 
         byte dimension = 0;

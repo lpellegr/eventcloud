@@ -57,12 +57,12 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
         if (response.validatesKeyConstraints(overlay)) {
             this.handle(overlay, response);
         } else {
-            this.doRoute(overlay, response);
+            this.route(overlay, response);
         }
     }
 
     @Override
-    protected void doHandle(StructuredOverlay overlay, T response) {
+    protected void handle(StructuredOverlay overlay, T response) {
         logger.debug(
                 "The peer {} contains the key to reach {}", overlay,
                 response.getKey());
@@ -71,7 +71,7 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
     }
 
     @Override
-    protected void doRoute(StructuredOverlay overlay, T response) {
+    protected void route(StructuredOverlay overlay, T response) {
         CanOverlay overlayCAN = ((CanOverlay) overlay);
 
         byte dimension = 0;

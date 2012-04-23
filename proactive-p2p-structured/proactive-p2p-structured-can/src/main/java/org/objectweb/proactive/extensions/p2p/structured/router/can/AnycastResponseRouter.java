@@ -49,7 +49,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
     }
 
     @Override
-    protected void doHandle(StructuredOverlay overlay, AnycastResponse response) {
+    protected void handle(StructuredOverlay overlay, AnycastResponse response) {
         // the number of outbound hop count is equal to the number
         // of inbound hop count because the message follows the same
         // path in the both cases.
@@ -93,7 +93,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
                 // the synchronization point is on a peer in the sub-tree.
                 // we call the route method in order to know where to sent back
                 // the response.
-                this.doRoute(overlay, currentResponse);
+                this.route(overlay, currentResponse);
 
                 // the response has been handled and sent back so we can remove
                 // it from the table.
@@ -112,7 +112,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
      * {@inheritDoc}
      */
     @Override
-    protected void doRoute(StructuredOverlay overlay, AnycastResponse response) {
+    protected void route(StructuredOverlay overlay, AnycastResponse response) {
         AnycastRoutingEntry entry =
                 response.getAnycastRoutingList().removeLast();
         response.incrementHopCount(1);
