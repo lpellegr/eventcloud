@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
@@ -210,7 +209,7 @@ public final class SemanticFactory {
     public static SemanticPeer newSemanticPeer() {
         return SemanticFactory.createSemanticPeer(
                 new HashMap<String, Object>(),
-                new SemanticPersistentOverlayProvider());
+                createProviderAccordingToProperty());
     }
 
     /**
@@ -225,7 +224,8 @@ public final class SemanticFactory {
      */
     public static <T extends SemanticCanOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider) {
         return SemanticFactory.createSemanticPeer(
-                new HashMap<String, Object>(), overlayProvider);
+                new HashMap<String, Object>(),
+                createProviderAccordingToProperty());
     }
 
     /**
@@ -247,7 +247,7 @@ public final class SemanticFactory {
         }
 
         return SemanticFactory.createSemanticPeer(
-                context, new SemanticPersistentOverlayProvider());
+                context, createProviderAccordingToProperty());
     }
 
     /**
@@ -267,7 +267,7 @@ public final class SemanticFactory {
         }
 
         return SemanticFactory.createSemanticPeer(
-                context, new SemanticPersistentOverlayProvider());
+                context, createProviderAccordingToProperty());
     }
 
     /**
@@ -286,7 +286,22 @@ public final class SemanticFactory {
             context.put("deployment-descriptor", gcma);
         }
         return SemanticFactory.createSemanticPeer(
-                context, new SemanticPersistentOverlayProvider());
+                context, createProviderAccordingToProperty());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static SerializableProvider<SemanticCanOverlay> createProviderAccordingToProperty() {
+        try {
+            return (SerializableProvider<SemanticCanOverlay>) Class.forName(
+                    EventCloudProperties.OVERLAY_PROVIDER_CLASS.getValue())
+                    .newInstance();
+        } catch (InstantiationException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static <T extends SemanticCanOverlay> SemanticPeer createSemanticPeer(Map<String, Object> context,

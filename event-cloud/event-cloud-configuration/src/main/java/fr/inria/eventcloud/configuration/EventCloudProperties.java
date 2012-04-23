@@ -94,6 +94,18 @@ public class EventCloudProperties {
                             + "/eventcloud/colanders/");
 
     /**
+     * Defines which overlay provider to use when a peer is created through the
+     * SemanticPeerFactory. Default value is set to
+     * {@code fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider}
+     * but it can be updated to
+     * {@code fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider}.
+     */
+    public static final PropertyString OVERLAY_PROVIDER_CLASS =
+            new PropertyString(
+                    "overlay.provider.class",
+                    "fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider");
+
+    /**
      * This property is used to have the possibility to restore a repository
      * which has been used in a previous run. When this property is set to
      * {@code true} it is assumed that the network contain only <b>one</b> peer.
