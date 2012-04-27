@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -49,6 +50,14 @@ public interface EventCloudsRegistry {
      *             if a problem occurs while the registry is registered.
      */
     public String register(String bindingName) throws ProActiveException;
+
+    /**
+     * Unregisters the registry.
+     * 
+     * @throws IOException
+     *             if a problem occurs while the registry is unregistered.
+     */
+    public void unregister() throws IOException;
 
     /**
      * Registers the given {@link EventCloud} into the registry.
