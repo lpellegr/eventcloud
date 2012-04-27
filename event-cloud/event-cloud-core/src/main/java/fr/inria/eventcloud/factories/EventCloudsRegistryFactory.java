@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud;
+package fr.inria.eventcloud.factories;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,11 +32,13 @@ import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
@@ -45,7 +47,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
  * 
  * @author lpellegr
  */
-public class EventCloudsRegistryFactory {
+public class EventCloudsRegistryFactory extends AbstractFactory {
 
     private static final Logger log;
 

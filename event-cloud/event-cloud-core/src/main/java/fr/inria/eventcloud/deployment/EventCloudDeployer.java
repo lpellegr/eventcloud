@@ -16,12 +16,6 @@
  **/
 package fr.inria.eventcloud.deployment;
 
-import org.etsi.uri.gcm.api.control.GCMLifeCycleController;
-import org.etsi.uri.gcm.util.GCM;
-import org.objectweb.fractal.api.Component;
-import org.objectweb.fractal.api.Interface;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
@@ -113,24 +107,11 @@ public class EventCloudDeployer extends NetworkDeployer {
         }
 
         for (Peer peer : super.getRandomTracker().getPeers()) {
-            this.terminateComponent(peer);
+            SemanticFactory.terminateComponent(peer);
         }
 
         for (Tracker tracker : this.getTrackers()) {
-            this.terminateComponent(tracker);
-        }
-    }
-
-    private void terminateComponent(Object component) {
-        try {
-            Component owner = ((Interface) component).getFcItfOwner();
-            GCMLifeCycleController lcc = GCM.getGCMLifeCycleController(owner);
-            lcc.stopFc();
-            lcc.terminateGCMComponent();
-        } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
-        } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            SemanticFactory.terminateComponent(tracker);
         }
     }
 

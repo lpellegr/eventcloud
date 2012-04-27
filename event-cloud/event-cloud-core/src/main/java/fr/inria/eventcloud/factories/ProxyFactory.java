@@ -34,6 +34,7 @@ import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxyAttributeController;
  * @author lpellegr
  * @author bsauvan
  */
-public class ProxyFactory implements Serializable {
+public class ProxyFactory extends AbstractFactory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
