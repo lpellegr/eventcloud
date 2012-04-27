@@ -25,6 +25,9 @@ import org.junit.Test;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
+import org.objectweb.fractal.api.Interface;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.component.webservices.JaxWsCXFWSCaller;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
@@ -78,12 +81,9 @@ public class PutGetTest {
                         .getEndpointInfo()
                         .getAddress();
 
-        Component putGetComponent = this.createPutGetComponent(putGetWsUrl);
+        PutGetWsApi putGetCaller = this.createPutGetCaller(putGetWsUrl);
 
-        PutGetWsApi putGetWs =
-                (PutGetWsApi) putGetComponent.getFcInterface("putget-services");
-
-        putGetWs.addQuadruple(new Quadruple(
+        putGetCaller.addQuadruple(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"),
                 Node.createURI("http://france.meteofrance.com/france/meteo"),
@@ -91,19 +91,19 @@ public class PutGetTest {
 
         Node expectedNodeResult =
                 Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011-2012/");
-        putGetWs.addQuadruple(new Quadruple(
+        putGetCaller.addQuadruple(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"), expectedNodeResult,
                 Node.createLiteral("29", XSDDatatype.XSDint)));
 
-        putGetWs.addQuadruple(new Quadruple(
+        putGetCaller.addQuadruple(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"),
                 Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011-2012/"),
                 Node.createLiteral("26", XSDDatatype.XSDint)));
 
         List<Quadruple> result =
-                putGetWs.findQuadruplePattern(QuadruplePattern.ANY);
+                putGetCaller.findQuadruplePattern(QuadruplePattern.ANY);
         log.info("Quadruples contained by the Event-Cloud {}", ecId);
         for (Quadruple quad : result) {
             log.info(quad.toString());
@@ -113,7 +113,7 @@ public class PutGetTest {
         String sparqlQuery =
                 "SELECT ?day WHERE { GRAPH ?g { <http://www.nice.fr> ?day ?temp FILTER (?temp > 26) } }";
         SparqlSelectResponse response =
-                putGetWs.executeSparqlSelect(sparqlQuery);
+                putGetCaller.executeSparqlSelect(sparqlQuery);
         Node resultNode =
                 response.getResult().nextSolution().get("day").asNode();
         log.info("Answer for SPARQL query {}:", sparqlQuery);
@@ -121,9 +121,10 @@ public class PutGetTest {
         Assert.assertEquals(expectedNodeResult, resultNode);
 
         deployer.undeploy();
+        this.terminatePutGetCaller(putGetCaller);
     }
 
-    private Component createPutGetComponent(String putGetWsUrl) {
+    private PutGetWsApi createPutGetCaller(String putGetWsUrl) {
         try {
             Component putGetComponent =
                     (Component) factory.newComponent(
@@ -136,12 +137,26 @@ public class PutGetTest {
 
             GCM.getGCMLifeCycleController(putGetComponent).startFc();
 
-            return putGetComponent;
+            return (PutGetWsApi) putGetComponent.getFcInterface("putget-services");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    private void terminatePutGetCaller(PutGetWsApi putGetCaller) {
+        try {
+            Component putGetComponent =
+                    ((Interface) putGetCaller).getFcItfOwner();
+            GCM.getGCMLifeCycleController(putGetComponent).stopFc();
+            GCM.getGCMLifeCycleController(putGetComponent)
+                    .terminateGCMComponent();
+        } catch (IllegalLifeCycleException e) {
+            e.printStackTrace();
+        } catch (NoSuchInterfaceException e) {
+            e.printStackTrace();
+        }
     }
 
 }
