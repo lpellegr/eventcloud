@@ -225,8 +225,7 @@ public final class SemanticFactory extends AbstractFactory {
      */
     public static <T extends SemanticCanOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider) {
         return SemanticFactory.createSemanticPeer(
-                new HashMap<String, Object>(),
-                createProviderAccordingToProperty());
+                new HashMap<String, Object>(), overlayProvider);
     }
 
     /**
