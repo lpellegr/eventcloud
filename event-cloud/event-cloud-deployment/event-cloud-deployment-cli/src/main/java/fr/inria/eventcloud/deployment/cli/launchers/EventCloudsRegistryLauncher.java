@@ -19,7 +19,7 @@ package fr.inria.eventcloud.deployment.cli.launchers;
 import org.objectweb.proactive.core.ProActiveException;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.EventCloudsRegistryFactory;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 
 /**
  * This launcher is used to deploy a new {@link EventCloudsRegistry}. Once the

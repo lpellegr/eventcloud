@@ -25,9 +25,9 @@ import org.objectweb.proactive.api.PAActiveObject;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 

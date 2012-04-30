@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public final class PeerFactory {
+public final class PeerFactory extends AbstractFactory {
 
     private static final Logger log =
             LoggerFactory.getLogger(PeerFactory.class);
