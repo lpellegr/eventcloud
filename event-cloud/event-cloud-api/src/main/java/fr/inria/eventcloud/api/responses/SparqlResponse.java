@@ -74,11 +74,12 @@ public abstract class SparqlResponse<T> implements Serializable {
     }
 
     /**
-     * Returns the time taken (in ms) to query all the peers. This value is the
-     * sum of the time taken to execute the query on each peer. Hence, if you
-     * have a dicjunctive query, it is possible to have a queryDatastoreTime
-     * greater than the query latency because a disjunction is decomposed into
-     * sub-queries and each sub-query is handled in parallel.
+     * Returns the time taken (in nanoseconds) to query all the peers. This
+     * value is the sum of the time taken to execute the query on each peer.
+     * Hence, if you have a disjunctive query, it is possible to have a
+     * {@code queryDatastoreTime} greater than the query latency because a
+     * disjunction is decomposed into sub-queries and each sub-query is handled
+     * in parallel.
      * 
      * @return the time taken to query all the peers
      */
