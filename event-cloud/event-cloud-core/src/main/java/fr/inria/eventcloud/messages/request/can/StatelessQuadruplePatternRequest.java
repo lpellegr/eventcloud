@@ -17,8 +17,7 @@
 package fr.inria.eventcloud.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
@@ -46,13 +45,28 @@ public abstract class StatelessQuadruplePatternRequest extends AnycastRequest {
     protected SerializedValue<QuadruplePattern> quadruplePattern;
 
     public StatelessQuadruplePatternRequest(QuadruplePattern quadPattern) {
+        this(
+                quadPattern,
+                new ResponseProvider<StatelessQuadruplePatternResponse, StringCoordinate>() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public StatelessQuadruplePatternResponse get() {
+                        return new StatelessQuadruplePatternResponse();
+                    }
+                });
+    }
+
+    public StatelessQuadruplePatternRequest(
+            QuadruplePattern quadPattern,
+            ResponseProvider<? extends StatelessQuadruplePatternResponse, StringCoordinate> responseProvider) {
         super(new DefaultAnycastConstraintsValidator(
-                SemanticCoordinate.create(quadPattern)));
+                SemanticCoordinate.create(quadPattern)), responseProvider);
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 
     /**
-     * Defines a behavior to execute when we are on a peer which match the
+     * Defines an action to execute when we are on a peer that matches the
      * constraints.
      * 
      * @param overlay
@@ -79,14 +93,6 @@ public abstract class StatelessQuadruplePatternRequest extends AnycastRequest {
 
     public SerializedValue<QuadruplePattern> getQuadruplePattern() {
         return this.quadruplePattern;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        return new StatelessQuadruplePatternResponse(this);
     }
 
 }

@@ -27,7 +27,7 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
  * which has execute the deploy method, an undeploy operation is automatically
  * performed. For a class that provides a setup and teardown method annotated
  * respectively with the Junit {@code @Before} and {@code @After} annotations
- * and that deploy and undeploy the network with the same parameters (i.e.
+ * and that deploys and undeploys the network with the same parameters (i.e.
  * number of trackers and peers) you can have a look to
  * {@link JunitByClassNetworkDeployer}.
  * <p>
@@ -40,8 +40,22 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 public class JunitByMethodCanNetworkDeployer extends
         JunitByMethodNetworkDeployer {
 
+    /**
+     * Creates a new Junit deployer by using an instance of
+     * {@link TestingDeploymentConfiguration} for the deployment configuration.
+     */
     public JunitByMethodCanNetworkDeployer() {
         super(new CanNetworkDeployer(new TestingDeploymentConfiguration()));
+    }
+
+    /**
+     * Creates a new Junit deployer with the specified deployment configuration.
+     * 
+     * @param configuration
+     *            the deployment configuration to use.
+     */
+    public JunitByMethodCanNetworkDeployer(DeploymentConfiguration configuration) {
+        super(new CanNetworkDeployer(configuration));
     }
 
 }

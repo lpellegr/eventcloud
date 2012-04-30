@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class PeerFactory {
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(PeerFactory.class);
 
     private static Factory factory;
@@ -162,18 +162,16 @@ public final class PeerFactory {
 
             GCM.getGCMLifeCycleController(peer).startFc();
 
-            logger.info("Peer {} has been created", stub.getId());
+            log.info("Peer {} created", stub.getId());
 
             return stub;
         } catch (ADLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
 }

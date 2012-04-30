@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
@@ -53,46 +53,59 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
     /**
      * Timestamp of the creation of the message.
      */
-    private long dispatchTimestamp = System.currentTimeMillis();
+    private long dispatchTimestamp;
+
+    private ResponseProvider<? extends Response<K>, K> responseProvider;
 
     /**
-     * Constructs a new query message with the specified {@codekeyToReach}.
+     * Constructs a new request with the specified {@code validator} and
+     * {@code responseProvider}.
      * 
      * @param validator
      *            the constraints validator used for routing decisions.
+     * @param responseProvider
+     *            the responseProvider to use when a response has to be created.
      */
-    public Request(ConstraintsValidator<K> validator) {
-        super(UUID.randomUUID(), validator);
+    public Request(ConstraintsValidator<K> validator,
+            ResponseProvider<? extends Response<K>, K> responseProvider) {
+        this(UUID.randomUUID(), validator, responseProvider,
+                System.currentTimeMillis());
     }
 
     /**
-     * Constructs a new query message with the specified {@code uuid},
-     * {@code validator} and {@code dispatchTimestamp}.
+     * Constructs a new request with the specified {@code uuid},
+     * {@code validator}, {@code responseProvider} and {@code dispatchTimestamp}
+     * .
      * 
      * @param uuid
      *            the universally unique identifier associated to the query.
      * @param validator
      *            the constraints validator used for routing decisions.
+     * @param responseProvider
+     *            the responseProvider to use when a response has to be created.
      * @param dispatchTimestamp
      *            the dispatch timestamp of the query.
      */
-    public Request(UUID uuid, ConstraintsValidator<K> validator,
+    private Request(UUID uuid, ConstraintsValidator<K> validator,
+            ResponseProvider<? extends Response<K>, K> responseProvider,
             long dispatchTimestamp) {
         super(uuid, validator);
+
         this.dispatchTimestamp = dispatchTimestamp;
+        this.responseProvider = responseProvider;
     }
 
     /**
-     * Creates an {@link Response} in accordance to the type of the current
-     * {@link Request}.
+     * Returns the response provider associated to this request. A {@code null}
+     * value indicates that this request is not supposed to return a response.
      * 
-     * @param overlay
-     *            the overlay from which the response is created.
-     * 
-     * @return an {@link Response} in accordance to the type of the current
-     *         {@link Request}.
+     * @return the response provider associated to this request. A {@code null}
+     *         value indicates that this request is not supposed to return a
+     *         response.
      */
-    public abstract Response<K> createResponse(StructuredOverlay overlay);
+    public ResponseProvider<? extends Response<K>, K> getResponseProvider() {
+        return this.responseProvider;
+    }
 
     /**
      * {@inheritDoc}

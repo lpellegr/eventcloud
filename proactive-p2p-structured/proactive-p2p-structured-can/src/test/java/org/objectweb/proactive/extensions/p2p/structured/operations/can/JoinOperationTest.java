@@ -29,7 +29,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.StructuredP2PException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -73,36 +72,28 @@ public class JoinOperationTest extends JunitByMethodCanNetworkDeployer {
     public void testJoinWithPeerWhichHasAlreadyJoined()
             throws NetworkAlreadyJoinedException {
         Peer landmarkPeer = super.createPeer();
-        try {
-            landmarkPeer.create();
-        } catch (NetworkAlreadyJoinedException e) {
-            e.printStackTrace();
-        }
+        landmarkPeer.create();
+
         Peer joiner = super.createPeer();
         joiner.join(landmarkPeer);
         joiner.join(landmarkPeer);
     }
 
     @Test
-    public void testJoinOnPeerNotActivated() {
+    public void testJoinOnPeerNotActivated()
+            throws NetworkAlreadyJoinedException {
         Peer landmarkPeer = super.createPeer();
         Peer joiner = super.createPeer();
-        try {
-            Assert.assertFalse(joiner.join(landmarkPeer));
-        } catch (NetworkAlreadyJoinedException e) {
-            e.printStackTrace();
-        }
+
+        Assert.assertFalse(joiner.join(landmarkPeer));
     }
 
     @Test
-    public void testConcurrentJoin() {
+    public void testConcurrentJoin() throws NetworkAlreadyJoinedException,
+            InterruptedException, ExecutionException {
         final Peer landmarkPeer =
                 PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class));
-        try {
-            landmarkPeer.create();
-        } catch (StructuredP2PException e) {
-            e.printStackTrace();
-        }
+        landmarkPeer.create();
 
         int nbPeersToJoin = 20;
 
@@ -138,13 +129,7 @@ public class JoinOperationTest extends JunitByMethodCanNetworkDeployer {
         }
 
         for (Future<Boolean> future : futures) {
-            try {
-                joinResult &= future.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
+            joinResult &= future.get();
         }
 
         // a concurrent join may have occurred.
@@ -153,11 +138,7 @@ public class JoinOperationTest extends JunitByMethodCanNetworkDeployer {
                 "No concurrent join has been detected whereas one is expected",
                 joinResult);
 
-        try {
-            doneSignal.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        doneSignal.await();
     }
 
 }

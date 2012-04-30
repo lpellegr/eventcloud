@@ -39,10 +39,8 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(RequestResponseManager.class);
-
-    protected StructuredOverlay overlay;
 
     private Map<UUID, ResponseEntry> repliesReceived;
 
@@ -50,46 +48,57 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
         this.repliesReceived = new ConcurrentHashMap<UUID, ResponseEntry>();
     }
 
-    public void init(StructuredOverlay overlay) {
-        if (this.overlay == null) {
-            this.overlay = overlay;
-        }
-    }
-
     /**
-     * Dispatches the request over the overlay by using message passing.
+     * Dispatches the request over the overlay by using message passing. The
+     * request is supposed to create a response which is sent back to the
+     * sender.
      * 
      * @param request
      *            the request to dispatch.
+     * @param overlay
+     *            the overlay from where the request is sent.
      * 
      * @return a response associated to the type of the request.
-     * 
-     * @see #waitForFinalResponse(UUID)
-     * @see #pullResponse(UUID)
      */
-    public Response<?> dispatch(Request<?> request) throws DispatchException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Dispatching " + request.getClass().getSimpleName()
-                    + " request " + request.getId() + " from "
-                    + this.overlay.toString());
-        }
+    public Response<?> dispatch(Request<?> request, StructuredOverlay overlay)
+            throws DispatchException {
 
-        request.route(this.overlay);
+        this.dispatchv(request, overlay);
 
         return this.pullResponse(request.getId());
     }
 
     /**
-     * Pulls the response for the specified requestId from the list of responses
-     * received. If the response has not been yet received, a synchronization
-     * point is created in order to wait the response.
+     * Dispatches the request over the overlay by using message passing. The
+     * request is supposed to create a response which is sent back to the
+     * sender.
+     * 
+     * @param request
+     *            the request to dispatch.
+     * @param overlay
+     *            the overlay from where the request is sent.
+     */
+    public void dispatchv(Request<?> request, StructuredOverlay overlay)
+            throws DispatchException {
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching " + request.getClass().getSimpleName()
+                    + " with id " + request.getId() + " from " + overlay);
+        }
+
+        request.route(overlay);
+    }
+
+    /**
+     * Pulls the response for the specified {@code requestId} from the list of
+     * responses received. If the response has not been yet received, a
+     * synchronization point is created in order to wait the response.
      * 
      * @param requestId
      *            indicates what is the id of the response to retrieve.
      * 
      * @return the response for the specified requestId.
      */
-    protected Response<?> pullResponse(UUID requestId) {
+    private Response<?> pullResponse(UUID requestId) {
         // waits for the final response
         this.waitForFinalResponse(requestId);
 
@@ -98,10 +107,7 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
         // sets the delivery time for latency computation
         response.setDeliveryTime();
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Final response received for request " + requestId
-                    + " on " + this.overlay);
-        }
+        log.debug("Final response received for request {}", requestId);
 
         return response;
     }
@@ -113,18 +119,11 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
      * @param requestId
      *            indicates for which request we are waiting a response.
      */
-    protected void waitForFinalResponse(UUID requestId) {
-        if (logger.isDebugEnabled()) {
-            StringBuffer log = new StringBuffer();
-            log.append("Waiting for ");
-            log.append(this.repliesReceived.get(requestId)
-                    .getExpectedResponsesCount());
-            log.append(" responses with id ");
-            log.append(requestId);
-            log.append(" on ");
-            log.append(this.overlay);
-            logger.debug(log.toString());
-        }
+    private void waitForFinalResponse(UUID requestId) {
+        log.debug(
+                "Waiting for {} response(s) with id {}",
+                this.repliesReceived.get(requestId).getExpectedResponsesCount(),
+                requestId);
 
         ResponseEntry entry = this.repliesReceived.get(requestId);
 
@@ -149,8 +148,7 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
      *            the response to add to the list of responses received.
      */
     public void pushFinalResponse(Response<?> response) {
-        ResponseEntry entry =
-                this.overlay.getResponseEntries().get(response.getId());
+        ResponseEntry entry = this.repliesReceived.get(response.getId());
 
         synchronized (entry) {
             entry.incrementResponsesCount(1);

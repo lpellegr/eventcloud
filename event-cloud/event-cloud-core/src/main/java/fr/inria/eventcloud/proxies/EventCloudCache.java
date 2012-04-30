@@ -51,7 +51,6 @@ public class EventCloudCache implements EventCloudApi, Serializable {
     /*
      * TODO: add a thread that updates periodically the trackers.
      */
-
     public EventCloudCache(String registryUrl, EventCloudId eventcloudId)
             throws EventCloudIdNotManaged {
         try {

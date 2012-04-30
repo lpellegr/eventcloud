@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.Collection;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -52,8 +53,9 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
      */
     @Override
     public void setAttributes(EventCloudCache proxy) {
-        if (this.proxy == null) {
-            this.proxy = proxy;
+        if (super.eventCloudCache == null) {
+            super.eventCloudCache = proxy;
+            super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
         }
     }
 
@@ -71,8 +73,7 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
         // the quadruple is routed without taking into account the publication
         // datetime
         try {
-            super.proxy.selectTracker().getRandomPeer().send(
-                    new PublishQuadrupleRequest(quad));
+            super.send(new PublishQuadrupleRequest(quad));
         } catch (DispatchException e) {
             e.printStackTrace();
         }

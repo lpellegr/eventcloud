@@ -42,8 +42,9 @@ public class TopicSubscriptionTranslatorTest {
 
     @Test
     public void testTopicTranslation() throws TranslationException {
-        testTopicTranslationToSparql(topicNamespace, "t", "myTopic");
-        testTopicTranslationToSparql(topicNamespace, "t", "topicName:myTopic");
+        this.testTopicTranslationToSparql(topicNamespace, "t", "myTopic");
+        this.testTopicTranslationToSparql(
+                topicNamespace, "t", "topicName:myTopic");
     }
 
     private void testTopicTranslationToSparql(String topicNamespace,

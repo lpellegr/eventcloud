@@ -338,7 +338,8 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
      */
     @Override
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
-        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(sparqlAskQuery);
+        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(
+                sparqlAskQuery, super.overlay);
     }
 
     /**
@@ -346,7 +347,8 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
      */
     @Override
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct) {
-        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(sparqlConstruct);
+        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(
+                sparqlConstruct, super.overlay);
     }
 
     /**
@@ -362,7 +364,8 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
      */
     @Override
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
-        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(sparqlSelect);
+        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(
+                sparqlSelect, super.overlay);
     }
 
 }

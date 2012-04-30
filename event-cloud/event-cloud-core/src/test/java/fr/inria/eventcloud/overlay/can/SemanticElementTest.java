@@ -21,7 +21,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- * Tests some methods from the {@link SemanticHelper} class.
+ * Tests some methods from the {@link SemanticElement} class.
  * 
  * @author lpellegr
  */

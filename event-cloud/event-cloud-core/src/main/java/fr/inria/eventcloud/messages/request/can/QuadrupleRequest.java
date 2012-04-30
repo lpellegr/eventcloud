@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
@@ -39,8 +41,20 @@ public abstract class QuadrupleRequest extends ForwardRequest {
 
     private SerializedValue<Quadruple> quadruple;
 
-    public QuadrupleRequest(final Quadruple quad) {
-        super(SemanticCoordinate.create(quad));
+    public QuadrupleRequest(Quadruple quad) {
+        this(quad, new ResponseProvider<ForwardResponse, StringCoordinate>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public ForwardResponse get() {
+                return new ForwardResponse();
+            }
+        });
+    }
+
+    public QuadrupleRequest(Quadruple quad,
+            ResponseProvider<ForwardResponse, StringCoordinate> responseProvider) {
+        super(SemanticCoordinate.create(quad), responseProvider);
         this.quadruple = SerializedValue.create(quad);
     }
 

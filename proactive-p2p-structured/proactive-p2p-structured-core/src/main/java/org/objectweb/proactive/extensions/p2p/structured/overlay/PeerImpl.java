@@ -228,8 +228,16 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    public void sendv(Request<?> request) throws DispatchException {
+        this.overlay.dispatchv(request);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Response<?> send(Request<?> request) throws DispatchException {
-        return this.overlay.messagingManager.dispatch(request);
+        return this.overlay.dispatch(request);
     }
 
     /**

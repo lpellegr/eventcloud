@@ -16,7 +16,9 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
@@ -28,7 +30,7 @@ import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 
 /**
  * A ContainsQuadrupleRequest is a request that is used to know if there is a
- * peer that contain the quadruple that is specified when the object is
+ * peer that contains the quadruple that is specified when the request is
  * constructed.
  * 
  * @author lpellegr
@@ -38,28 +40,33 @@ public class ContainsQuadrupleRequest extends QuadrupleRequest {
     private static final long serialVersionUID = 1L;
 
     public ContainsQuadrupleRequest(final Quadruple quad) {
-        super(quad);
-    }
+        super(quad, new ResponseProvider<ForwardResponse, StringCoordinate>() {
+            private static final long serialVersionUID = 1L;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        boolean result = false;
+            @Override
+            public ForwardResponse get() {
+                return new BooleanForwardResponse() {
+                    private static final long serialVersionUID = 1L;
 
-        TransactionalDatasetGraph txnGraph =
-                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+                    @Override
+                    public void setAttributes(Request<StringCoordinate> request,
+                                              StructuredOverlay overlay) {
+                        super.setAttributes(request, overlay);
 
-        try {
-            result = txnGraph.contains(super.getQuadruple());
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            txnGraph.end();
-        }
+                        TransactionalDatasetGraph txnGraph =
+                                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
 
-        return new BooleanForwardResponse(this, result);
+                        try {
+                            this.setResult(txnGraph.contains(quad));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            txnGraph.end();
+                        }
+                    }
+                };
+            }
+        });
     }
 
 }

@@ -16,7 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -38,7 +38,21 @@ public class LookupRequest extends ForwardRequest {
     protected Peer remotePeerReached;
 
     public LookupRequest(StringCoordinate coordinateToReach) {
-        super(coordinateToReach);
+        super(coordinateToReach,
+                new ResponseProvider<LookupResponse, StringCoordinate>() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public LookupResponse get() {
+                        return new LookupResponse();
+                    }
+                });
+    }
+
+    public LookupRequest(
+            StringCoordinate coordinateToReach,
+            ResponseProvider<? extends LookupResponse, StringCoordinate> responseProvider) {
+        super(coordinateToReach, responseProvider);
     }
 
     public Peer getRemotePeerReached() {
@@ -61,14 +75,6 @@ public class LookupRequest extends ForwardRequest {
                 ((LookupRequest) msg).setRemotePeerReached(overlay.getStub());
             };
         };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        return new LookupResponse(this, this.remotePeerReached);
     }
 
 }

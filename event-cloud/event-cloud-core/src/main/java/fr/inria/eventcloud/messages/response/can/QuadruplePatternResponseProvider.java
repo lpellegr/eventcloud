@@ -16,40 +16,25 @@
  **/
 package fr.inria.eventcloud.messages.response.can;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
-
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 /**
- * Response associated to {@link SparqlAtomicRequest}.
+ * Default {@link ResponseProvider} for {@link QuadruplePatternResponse}.
  * 
  * @author lpellegr
  */
-public class SparqlAtomicResponse extends
-        StatefulQuadruplePatternResponse<List<Quadruple>> {
+public class QuadruplePatternResponseProvider extends
+        ResponseProvider<QuadruplePatternResponse, StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
-
-    public SparqlAtomicResponse(SparqlAtomicRequest request) {
-        super(request);
-    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<Quadruple> mergeSubResults(List<SerializedValue<List<Quadruple>>> subResults) {
-        List<Quadruple> quadruples = new ArrayList<Quadruple>();
-
-        for (SerializedValue<List<Quadruple>> subResult : subResults) {
-            quadruples.addAll(subResult.getValue());
-        }
-
-        return quadruples;
+    public QuadruplePatternResponse get() {
+        return new QuadruplePatternResponse();
     }
 
 }

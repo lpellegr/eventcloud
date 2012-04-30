@@ -156,6 +156,18 @@ public interface Peer extends Serializable {
     public void route(RequestResponseMessage<?> msg);
 
     /**
+     * Sends a request over the overlay by using message passing but without any
+     * response in return.
+     * 
+     * @param request
+     *            the request to handle.
+     * 
+     * @throws DispatchException
+     *             if a problem occurs when the query is dispatched.
+     */
+    public void sendv(Request<?> request) throws DispatchException;
+
+    /**
      * Sends a request over the overlay by using message passing.
      * 
      * @param request

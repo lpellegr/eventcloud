@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -41,7 +42,7 @@ import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
-import fr.inria.eventcloud.messages.response.can.SparqlAtomicResponse;
+import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 import fr.inria.eventcloud.reasoner.SparqlColander;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 
@@ -64,12 +65,16 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     private ExecutorService threadPool;
 
-    public SemanticRequestResponseManager(TransactionalTdbDatastore datastore) {
+    public SemanticRequestResponseManager(
+            TransactionalTdbDatastore colanderDatastore) {
         super();
-        this.colander = new SparqlColander(datastore);
+
+        this.colander = new SparqlColander(colanderDatastore);
+        this.reasoner = new SparqlReasoner();
+
         this.pendingResults =
                 new ConcurrentHashMap<UUID, Future<? extends Object>>();
-        this.reasoner = new SparqlReasoner();
+
         // TODO choose the optimal size to use for the thread-pool
         this.threadPool = Executors.newFixedThreadPool(30);
     }
@@ -79,12 +84,16 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      * 
      * @param sparqlAskQuery
      *            the SPARQL ASK query to execute.
+     * @param overlay
+     *            the overlay from where the request is sent.
      * 
      * @return a response corresponding to the type of the query dispatched.
      */
-    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
-        List<SparqlAtomicResponse> responses =
-                this.dispatch(this.getReasoner().parseSparql(sparqlAskQuery));
+    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery,
+                                              StructuredOverlay overlay) {
+        List<QuadruplePatternResponse> responses =
+                this.dispatch(
+                        this.getReasoner().parseSparql(sparqlAskQuery), overlay);
 
         boolean result =
                 this.getColander().filterSparqlAsk(
@@ -102,13 +111,16 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      * 
      * @param sparqlConstructQuery
      *            the SPARQL CONSTRUCT query to execute.
+     * @param overlay
+     *            the overlay from where the request is sent.
      * 
      * @return a response corresponding to the type of the query dispatched.
      */
-    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery) {
-        List<SparqlAtomicResponse> responses =
+    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery,
+                                                          StructuredOverlay overlay) {
+        List<QuadruplePatternResponse> responses =
                 this.dispatch(this.getReasoner().parseSparql(
-                        sparqlConstructQuery));
+                        sparqlConstructQuery), overlay);
 
         Model result =
                 this.getColander().filterSparqlConstruct(
@@ -126,11 +138,17 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      * 
      * @param sparqlSelectQuery
      *            the SPARQL SELECT query to execute.
+     * @param overlay
+     *            the overlay from where the request is sent.
+     * 
      * @return a response corresponding to the type of the query dispatched.
      */
-    public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
-        List<SparqlAtomicResponse> responses =
-                this.dispatch(this.getReasoner().parseSparql(sparqlSelectQuery));
+    public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery,
+                                                    StructuredOverlay overlay) {
+        List<QuadruplePatternResponse> responses =
+                this.dispatch(
+                        this.getReasoner().parseSparql(sparqlSelectQuery),
+                        overlay);
 
         ResultSet result =
                 this.getColander().filterSparqlSelect(
@@ -143,9 +161,9 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 measurements[3], new ResultSetWrapper(result));
     }
 
-    private static List<Quadruple> extractQuadruples(List<SparqlAtomicResponse> responses) {
+    private static List<Quadruple> extractQuadruples(List<QuadruplePatternResponse> responses) {
         List<Quadruple> quadruples = new ArrayList<Quadruple>();
-        for (SparqlAtomicResponse response : responses) {
+        for (QuadruplePatternResponse response : responses) {
             quadruples.addAll(response.getResult());
         }
 
@@ -163,18 +181,18 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      *         {@code inboundHopCount}, the {@code outboundHopCount}, the
      *         {@code latency} and the {@code queryDatastoreTime}.
      */
-    private long[] aggregateMeasurements(List<SparqlAtomicResponse> responses) {
+    private long[] aggregateMeasurements(List<QuadruplePatternResponse> responses) {
         long outboundHopCount = 0;
         long latency = 0;
         long queryDatastoreTime = 0;
 
-        for (SparqlAtomicResponse response : responses) {
+        for (QuadruplePatternResponse response : responses) {
             if (response.getLatency() > latency) {
                 latency = response.getLatency();
             }
 
             outboundHopCount += response.getOutboundHopCount();
-            queryDatastoreTime += response.getStateActionTime();
+            queryDatastoreTime += response.getActionTime();
         }
 
         // inboundHopCount = outboundHopCount
@@ -182,9 +200,10 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 outboundHopCount, outboundHopCount, latency, queryDatastoreTime};
     }
 
-    public List<SparqlAtomicResponse> dispatch(List<SparqlAtomicRequest> requests) {
-        final List<SparqlAtomicResponse> replies =
-                Collections.synchronizedList(new ArrayList<SparqlAtomicResponse>(
+    private List<QuadruplePatternResponse> dispatch(final List<SparqlAtomicRequest> requests,
+                                                    final StructuredOverlay overlay) {
+        final List<QuadruplePatternResponse> replies =
+                Collections.synchronizedList(new ArrayList<QuadruplePatternResponse>(
                         requests.size()));
         final CountDownLatch doneSignal = new CountDownLatch(requests.size());
 
@@ -193,7 +212,8 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 @Override
                 public void run() {
                     try {
-                        replies.add((SparqlAtomicResponse) SemanticRequestResponseManager.super.dispatch(request));
+                        replies.add((QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
+                                request, overlay));
                     } catch (DispatchException e) {
                         e.printStackTrace();
                     } finally {

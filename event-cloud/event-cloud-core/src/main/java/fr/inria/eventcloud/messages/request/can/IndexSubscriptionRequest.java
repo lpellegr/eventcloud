@@ -43,7 +43,7 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  * is possible to have received some quadruples that match the rewritten
  * subscription. That's why an algorithm similar to the one from
  * {@link PublishQuadrupleRequest} is used to rewrite the rewritten subscription
- * for the quadruples that match the rewritten subscription.
+ * for the quadruples that match it.
  * 
  * @see PublishQuadrupleRequest
  * 

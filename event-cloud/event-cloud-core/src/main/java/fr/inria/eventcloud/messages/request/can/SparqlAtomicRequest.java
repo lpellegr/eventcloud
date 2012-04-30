@@ -19,10 +19,7 @@ package fr.inria.eventcloud.messages.request.can;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 import com.google.common.collect.Lists;
 
@@ -30,7 +27,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.messages.response.can.SparqlAtomicResponse;
+import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponseProvider;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -52,15 +49,8 @@ public class SparqlAtomicRequest extends
         // TODO offer the possibility to use a constraints validator that will
         // use the filter constraints contained by the quadruple pattern to
         // route the request
-        super(atomicQuery.getQuadruplePattern());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        return new SparqlAtomicResponse(this);
+        super(atomicQuery.getQuadruplePattern(),
+                new QuadruplePatternResponseProvider());
     }
 
     /**

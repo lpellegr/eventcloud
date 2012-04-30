@@ -19,10 +19,7 @@ package fr.inria.eventcloud.messages.request.can;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.graph.Node;
@@ -32,10 +29,11 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
+import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponseProvider;
 
 /**
- * Removes all the quadruples that match the given quadpattern.
+ * Removes all the quadruples that match the given {@code quadruplePattern} and
+ * returns the quadruples which have been removed.
  * 
  * @author lpellegr
  */
@@ -45,15 +43,11 @@ public class DeleteQuadruplesRequest extends
     private static final long serialVersionUID = 1L;
 
     public DeleteQuadruplesRequest(Node g, Node s, Node p, Node o) {
-        super(new QuadruplePattern(g, s, p, o));
+        this(new QuadruplePattern(g, s, p, o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        return new QuadruplePatternResponse(this);
+    public DeleteQuadruplesRequest(QuadruplePattern quadruplePattern) {
+        super(quadruplePattern, new QuadruplePatternResponseProvider());
     }
 
     /**

@@ -30,9 +30,8 @@ public class StatelessQuadruplePatternResponse extends AnycastResponse {
 
     private static final long serialVersionUID = 1L;
 
-    public StatelessQuadruplePatternResponse(
-            StatelessQuadruplePatternRequest request) {
-        super(request);
+    public StatelessQuadruplePatternResponse() {
+        super();
     }
 
     /**

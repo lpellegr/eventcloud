@@ -18,16 +18,18 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 /**
- * A {@code ForwardRequest} is a query message which may be used in order to
+ * A {@code ForwardRequest} is a query message that may be used in order to
  * <strong>reach</strong> a peer which manages a specified coordinate on a CAN
  * structured peer-to-peer network.
  * 
@@ -37,14 +39,29 @@ public class ForwardRequest extends Request<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
 
-    /**
+    /*
      * The zone which is managed by the sender. It is used in order to send the
      * response when the keyToReach has been reached.
      */
-    private StringCoordinate senderCoordinate;
+    private SerializedValue<StringCoordinate> senderCoordinate;
 
     public ForwardRequest(StringCoordinate coordinateToReach) {
-        super(new UnicastConstraintsValidator(coordinateToReach));
+        super(new UnicastConstraintsValidator(coordinateToReach),
+                new ResponseProvider<ForwardResponse, StringCoordinate>() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public ForwardResponse get() {
+                        return new ForwardResponse();
+                    }
+                });
+    }
+
+    public ForwardRequest(
+            StringCoordinate coordinateToReach,
+            ResponseProvider<? extends Response<StringCoordinate>, StringCoordinate> responseProvider) {
+        super(new UnicastConstraintsValidator(coordinateToReach),
+                responseProvider);
     }
 
     /**
@@ -55,7 +72,7 @@ public class ForwardRequest extends Request<StringCoordinate> {
      *         response when the keyToReach has been reached.
      */
     public StringCoordinate getSenderCoordinate() {
-        return this.senderCoordinate;
+        return this.senderCoordinate.getValue();
     }
 
     /**
@@ -73,17 +90,11 @@ public class ForwardRequest extends Request<StringCoordinate> {
     public void route(StructuredOverlay overlay) {
         if (this.senderCoordinate == null) {
             this.senderCoordinate =
-                    ((CanOverlay) overlay).getZone().getLowerBound();
+                    SerializedValue.create(((CanOverlay) overlay).getZone()
+                            .getLowerBound());
         }
-        super.route(overlay);
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        return new ForwardResponse(this);
+        super.route(overlay);
     }
 
 }

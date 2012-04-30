@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Observable;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -54,23 +56,56 @@ public abstract class NetworkDeployer extends
 
     protected final NodeProvider nodeProvider;
 
+    protected final SerializableProvider<? extends StructuredOverlay> overlayProvider;
+
     // this atomic reference is used to detect the deployer state and the
     // interleaving of some methods in multi-threaded environment.
     private AtomicReference<NetworkDeployerState> state;
 
-    public NetworkDeployer() {
-        this(new EmptyDeploymentConfiguration(), null);
+    /**
+     * Creates a network deployer with an {@link EmptyDeploymentConfiguration}
+     * and no {@link NodeProvider}.
+     * 
+     * @param overlayProvider
+     *            the overlay provider to use for creating peers.
+     */
+    public NetworkDeployer(
+            SerializableProvider<? extends StructuredOverlay> overlayProvider) {
+        this(new EmptyDeploymentConfiguration(), overlayProvider, null);
     }
 
-    public NetworkDeployer(DeploymentConfiguration configuration) {
-        this(configuration, null);
-    }
-
+    /**
+     * Creates a network deployer with the specified
+     * {@link DeploymentConfiguration} and no {@link NodeProvider}.
+     * 
+     * @param configuration
+     *            the deployment configuration to use.
+     * @param overlayProvider
+     *            the overlay provider to use for creating peers.
+     */
     public NetworkDeployer(DeploymentConfiguration configuration,
+            SerializableProvider<? extends StructuredOverlay> overlayProvider) {
+        this(configuration, overlayProvider, null);
+    }
+
+    /**
+     * Creates a network deployer with an {@link EmptyDeploymentConfiguration}
+     * and no {@link NodeProvider}.
+     * 
+     * @param configuration
+     *            the deployment configuration to use.
+     * @param nodeProvider
+     *            the node provider to use.
+     * @param overlayProvider
+     *            the overlay provider to use for creating peers.
+     */
+    public NetworkDeployer(DeploymentConfiguration configuration,
+            SerializableProvider<? extends StructuredOverlay> overlayProvider,
             NodeProvider nodeProvider) {
         this.state =
                 new AtomicReference<NetworkDeployerState>(
                         NetworkDeployerState.STANDBY);
+        this.overlayProvider = overlayProvider;
         this.nodeProvider = nodeProvider;
 
         configuration.configure();

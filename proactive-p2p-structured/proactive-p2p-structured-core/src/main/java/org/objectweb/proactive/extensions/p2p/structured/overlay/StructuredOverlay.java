@@ -20,7 +20,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +44,7 @@ public abstract class StructuredOverlay {
 
     protected Datastore datastore;
 
-    protected RequestResponseManager messagingManager;
+    protected RequestResponseManager messageManager;
 
     /**
      * Indicates whether the current peer is activated (i.e. if the peer has
@@ -59,24 +62,46 @@ public abstract class StructuredOverlay {
         this.id = UUID.randomUUID();
     }
 
-    protected StructuredOverlay(RequestResponseManager messagingManager,
+    protected StructuredOverlay(RequestResponseManager queryManager) {
+        this(queryManager, null);
+    }
+
+    protected StructuredOverlay(RequestResponseManager messageManager,
             Datastore datastore) {
         this();
         this.datastore = datastore;
+
         if (this.datastore != null) {
             this.datastore.open();
             log.debug("Datastore opened on {}", this);
         }
-        this.messagingManager = messagingManager;
-        // messagingManager maybe null if the overlay
-        // is not assumed to support request/response
-        if (this.messagingManager != null) {
-            this.messagingManager.init(this);
-        }
+
+        this.messageManager = messageManager;
     }
 
-    protected StructuredOverlay(RequestResponseManager queryManager) {
-        this(queryManager, null);
+    /**
+     * Dispatches the request over the overlay by using message passing. The
+     * request is sent asynchronously without any response expected.
+     * 
+     * @param request
+     *            the request to dispatch.
+     */
+    public void dispatchv(Request<?> request) throws DispatchException {
+        this.messageManager.dispatchv(request, this);
+    }
+
+    /**
+     * Dispatches the request over the overlay by using message passing. The
+     * request is supposed to create a response which is sent back to the
+     * sender.
+     * 
+     * @param request
+     *            the request to dispatch.
+     * 
+     * @return a response associated to the type of the request.
+     */
+    public Response<?> dispatch(Request<?> request) throws DispatchException {
+        return this.messageManager.dispatch(request, this);
     }
 
     public abstract boolean create();
@@ -132,7 +157,7 @@ public abstract class StructuredOverlay {
     }
 
     public RequestResponseManager getRequestResponseManager() {
-        return this.messagingManager;
+        return this.messageManager;
     }
 
     /**
@@ -145,11 +170,11 @@ public abstract class StructuredOverlay {
      *         {@code responseId} or {@code null} if no entry was found.
      */
     public ResponseEntry getResponseEntry(UUID responseId) {
-        return this.messagingManager.getResponsesReceived().get(responseId);
+        return this.messageManager.getResponsesReceived().get(responseId);
     }
 
     public Map<UUID, ResponseEntry> getResponseEntries() {
-        return this.messagingManager.getResponsesReceived();
+        return this.messageManager.getResponsesReceived();
     }
 
 }

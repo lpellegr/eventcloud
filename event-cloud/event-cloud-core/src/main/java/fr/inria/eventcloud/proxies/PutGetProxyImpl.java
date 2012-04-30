@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
+
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -56,8 +58,9 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy,
      */
     @Override
     public void setAttributes(EventCloudCache proxy) {
-        if (this.proxy == null) {
-            this.proxy = proxy;
+        if (super.eventCloudCache == null) {
+            super.eventCloudCache = proxy;
+            super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
         }
     }
 

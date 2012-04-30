@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.router.can;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -47,13 +46,11 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
         super();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void makeDecision(StructuredOverlay overlay, T response) {
-        if (response.getHopCount() == 0) {
-            overlay.getResponseEntries().put(
-                    response.getId(), new ResponseEntry(1));
-        }
-
         if (response.validatesKeyConstraints(overlay)) {
             this.handle(overlay, response);
         } else {
@@ -61,6 +58,9 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void handle(StructuredOverlay overlay, T response) {
         logger.debug(
@@ -70,6 +70,9 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
         overlay.getRequestResponseManager().pushFinalResponse(response);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void route(StructuredOverlay overlay, T response) {
         CanOverlay overlayCAN = ((CanOverlay) overlay);
