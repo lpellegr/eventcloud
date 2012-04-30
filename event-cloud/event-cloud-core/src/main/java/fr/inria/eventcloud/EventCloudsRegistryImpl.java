@@ -46,6 +46,8 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
 
     private Map<EventCloudId, EventCloud> eventclouds;
 
+    private String registryUrl;
+
     /**
      * No-arg constructor for ProActive.
      */
@@ -61,6 +63,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
         super.initComponentActivity(body);
 
         this.eventclouds = new HashMap<EventCloudId, EventCloud>();
+        this.registryUrl = null;
     }
 
     /**
@@ -68,8 +71,19 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      */
     @Override
     public String register(String bindingName) throws ProActiveException {
-        return Fractive.registerByName(
-                Fractive.getComponentRepresentativeOnThis(), bindingName);
+        this.registryUrl =
+                Fractive.registerByName(
+                        Fractive.getComponentRepresentativeOnThis(),
+                        bindingName);
+
+        return this.registryUrl;
+    }
+
+    @Override
+    public void unregister() throws IOException {
+        if (this.registryUrl != null) {
+            Fractive.unregister(this.registryUrl);
+        }
     }
 
     /**

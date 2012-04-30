@@ -34,6 +34,7 @@ import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -54,7 +55,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * @author lpellegr
  * @author bsauvan
  */
-public final class SemanticFactory {
+public final class SemanticFactory extends AbstractFactory {
 
     private static final Logger logger =
             LoggerFactory.getLogger(SemanticFactory.class);

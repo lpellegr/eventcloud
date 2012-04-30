@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public class TrackerFactory {
+public class TrackerFactory extends AbstractFactory {
 
     private static final Logger logger =
             LoggerFactory.getLogger(TrackerFactory.class);
@@ -171,19 +171,17 @@ public class TrackerFactory {
             GCM.getGCMLifeCycleController(tracker).startFc();
 
             logger.info(
-                    "Tracker {} associated to network named '{}' has been created",
+                    "Tracker {} associated to network named '{}' created",
                     stub.getId(), networkName);
 
             return stub;
         } catch (ADLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
 }
