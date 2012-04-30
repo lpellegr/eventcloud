@@ -17,7 +17,7 @@
 package fr.inria.eventcloud.messages.request.can;
 
 /**
- * A stateful request action is a wrapper that contain the result of the action
+ * A stateful request action is a wrapper that contains the result of the action
  * which is executed with a {@link StatefulQuadruplePatternRequest}, but also
  * some other metrics like the time to execute the action, etc.
  * 

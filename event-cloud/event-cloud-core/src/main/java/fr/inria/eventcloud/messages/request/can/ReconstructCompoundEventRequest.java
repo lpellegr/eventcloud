@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.slf4j.Logger;
@@ -35,7 +34,6 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.messages.response.can.ReconstructCompoundEventResponse;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.utils.LongLong;
 
@@ -85,14 +83,6 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
         this.metaGraphValue =
                 SerializedValue.create(quadruplePattern.createMetaGraphNode()
                         .getURI());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ReconstructCompoundEventResponse createResponse(StructuredOverlay overlay) {
-        return new ReconstructCompoundEventResponse(this);
     }
 
     /**

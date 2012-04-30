@@ -39,7 +39,7 @@ public class AddQuadrupleRequest extends QuadrupleRequest {
     private final static Logger logger =
             LoggerFactory.getLogger(AddQuadrupleRequest.class);
 
-    public AddQuadrupleRequest(final Quadruple quad) {
+    public AddQuadrupleRequest(Quadruple quad) {
         super(quad);
     }
 
@@ -54,7 +54,7 @@ public class AddQuadrupleRequest extends QuadrupleRequest {
         try {
             txnGraph.add(quad);
             txnGraph.commit();
-            logger.info("Quadruple {} has been added on {}", quad, overlay);
+            logger.info("Quadruple {} added on {}", quad, overlay);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

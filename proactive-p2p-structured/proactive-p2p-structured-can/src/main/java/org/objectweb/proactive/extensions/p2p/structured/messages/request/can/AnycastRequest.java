@@ -18,32 +18,64 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.router.Router;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
 /**
- * Message used to dispatch a query to all peers validating the specified
+ * Message used to dispatch a request to all peers validating the specified
  * constraints (i.e. the coordinates to reach).
  * 
  * @author lpellegr
  */
-public abstract class AnycastRequest extends Request<StringCoordinate> {
+public class AnycastRequest extends Request<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
 
     private AnycastRoutingList anycastRoutingList = new AnycastRoutingList();
 
+    private boolean alreadyReceived = false;
+
     /**
-     * Constructs a new message with the specified coordinates to reach.
+     * Constructs a new message with the specified {@code validator} but with no
+     * {@link ResponseProvider}. This means that this request is not supposed to
+     * sent back a response.
      * 
      * @param validator
      *            the constraints validator to use for checking the constraints.
      */
     public AnycastRequest(
             AnycastConstraintsValidator<StringCoordinate> validator) {
-        super(validator);
+        super(validator, null);
+    }
+
+    /**
+     * Constructs a new message with the specified {@code validator} and
+     * {@code responseProvider}.
+     * 
+     * @param validator
+     *            the constraints validator to use for checking the constraints.
+     * @param responseProvider
+     *            the responseProvider to use when a response has to be created.
+     */
+    public AnycastRequest(
+            AnycastConstraintsValidator<StringCoordinate> validator,
+            ResponseProvider<? extends AnycastResponse, StringCoordinate> responseProvider) {
+        super(validator, responseProvider);
+    }
+
+    public void markAsAlreadyReceived() {
+        this.alreadyReceived = true;
+    }
+
+    public boolean isAlreadyReceived() {
+        return this.alreadyReceived;
     }
 
     /**
@@ -58,10 +90,21 @@ public abstract class AnycastRequest extends Request<StringCoordinate> {
         return this.anycastRoutingList;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
+        return new AnycastRequestRouter<AnycastRequest>();
+    }
+
     public boolean validatesKeyConstraints(Zone zone) {
         return ((AnycastConstraintsValidator<StringCoordinate>) super.constraintsValidator).validatesKeyConstraints(zone);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer("AnycastQueryMessage ID=");

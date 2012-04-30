@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.response;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
@@ -35,25 +36,47 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
 
     private long deliveryTimestamp;
 
-    /**
+    /*
      * The number of peers traversed by the query message between its source and
-     * destination which have been reached.
+     * its destination
      */
     private int outboundHopCount;
 
     private int latency = -1;
 
     /**
-     * Constructs a new response with the specified <code>request</code> and
-     * <code>keyToReach</code>.
+     * Constructs a response with a {@link ConstraintsValidator} that is set to
+     * {@code null}.
+     */
+    public Response() {
+        super(null);
+    }
+
+    /**
+     * Constructs a response with the specified {@code validator}.
+     * 
+     * @param validator
+     *            the constraints validator to use.
+     */
+    public Response(ConstraintsValidator<K> validator) {
+        super(validator);
+    }
+
+    /**
+     * Sets some attributes of the current response from the specified
+     * {@code request}. It is useful to pass values from a request to a response
+     * because it is not possible to give these values to the constructor (due
+     * to {@link ResponseProvider}). When it is overridden, the parent
+     * definition must always be called in first.
      * 
      * @param request
      *            the request associated to the response.
-     * @param validator
-     *            the key used in order to route the response to it recipient.
+     * @param overlay
+     *            the overlay on which the response is created and where this
+     *            method is called.
      */
-    public Response(Request<K> request, ConstraintsValidator<K> validator) {
-        super(request.getId(), validator);
+    public void setAttributes(Request<K> request, StructuredOverlay overlay) {
+        super.uuid = request.getId();
         this.dispatchTimestamp = request.getDispatchTimestamp();
         this.outboundHopCount = request.getHopCount();
     }

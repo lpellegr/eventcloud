@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Provider;
-
 import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Factory;
@@ -37,6 +35,7 @@ import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
@@ -45,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -185,36 +183,21 @@ public final class SemanticFactory {
             GCM.getGCMLifeCycleController(tracker).startFc();
 
             logger.info(
-                    "SemanticTracker {} associated to network named '{}' has been created",
+                    "SemanticTracker {} associated to network named '{}' created",
                     stub.getId(), networkName);
 
             return stub;
         } catch (ADLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
     /**
      * Creates a new {@link SemanticPeer} component on the local machine.
-     * 
-     * @return the reference on the {@link SemanticPeer} interface of the new
-     *         component created.
-     */
-    public static SemanticPeer newSemanticPeer() {
-        return SemanticFactory.createSemanticPeer(
-                new HashMap<String, Object>(),
-                createProviderAccordingToProperty());
-    }
-
-    /**
-     * Creates a new {@link SemanticPeer} component on the local machine with
-     * the specified overlay {@link Provider}.
      * 
      * @param overlayProvider
      *            the overlay provider to use.
@@ -222,10 +205,9 @@ public final class SemanticFactory {
      * @return the reference on the {@link SemanticPeer} interface of the new
      *         component created.
      */
-    public static <T extends SemanticCanOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider) {
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider) {
         return SemanticFactory.createSemanticPeer(
-                new HashMap<String, Object>(),
-                createProviderAccordingToProperty());
+                overlayProvider, new HashMap<String, Object>());
     }
 
     /**
@@ -234,11 +216,14 @@ public final class SemanticFactory {
      * 
      * @param node
      *            the node used to deploy the peer.
+     * @param overlayProvider
+     *            the overlay provider to use.
      * 
      * @return the reference on the {@link SemanticPeer} interface of the new
      *         component created.
      */
-    public static SemanticPeer newSemanticPeer(Node node) {
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider,
+                                                                             Node node) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (node != null) {
             List<Node> nodeList = new ArrayList<Node>(1);
@@ -246,66 +231,54 @@ public final class SemanticFactory {
             context.put(ADLNodeProvider.NODES_ID, nodeList);
         }
 
-        return SemanticFactory.createSemanticPeer(
-                context, createProviderAccordingToProperty());
+        return SemanticFactory.createSemanticPeer(overlayProvider, context);
     }
 
     /**
      * Creates a new {@link SemanticPeer} component deployed on the specified
      * {@code GCM virtual node}.
      * 
+     * @param overlayProvider
+     *            the overlay provider to use.
      * @param vn
      *            the GCM virtual node used to deploy the peer.
      * 
      * @return the reference on the {@link SemanticPeer} interface of the new
      *         component created.
      */
-    public static SemanticPeer newSemanticPeer(GCMVirtualNode vn) {
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider,
+                                                                             GCMVirtualNode vn) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (vn != null) {
             context.put(vn.getName(), vn);
         }
 
-        return SemanticFactory.createSemanticPeer(
-                context, createProviderAccordingToProperty());
+        return SemanticFactory.createSemanticPeer(overlayProvider, context);
     }
 
     /**
      * Creates a new {@link SemanticPeer} component deployed on {@code node}
      * provided by the specified GCM application.
      * 
+     * @param overlayProvider
+     *            the overlay provider to use.
      * @param gcma
      *            the GCM application used to deploy the peer.
      * 
      * @return the reference on the {@link SemanticPeer} interface of the new
      *         component created.
      */
-    public static SemanticPeer newSemanticPeer(GCMApplication gcma) {
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider,
+                                                                             GCMApplication gcma) {
         Map<String, Object> context = new HashMap<String, Object>();
         if (gcma != null) {
             context.put("deployment-descriptor", gcma);
         }
-        return SemanticFactory.createSemanticPeer(
-                context, createProviderAccordingToProperty());
+        return SemanticFactory.createSemanticPeer(overlayProvider, context);
     }
 
-    @SuppressWarnings("unchecked")
-    private static SerializableProvider<SemanticCanOverlay> createProviderAccordingToProperty() {
-        try {
-            return (SerializableProvider<SemanticCanOverlay>) Class.forName(
-                    EventCloudProperties.OVERLAY_PROVIDER_CLASS.getValue())
-                    .newInstance();
-        } catch (InstantiationException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static <T extends SemanticCanOverlay> SemanticPeer createSemanticPeer(Map<String, Object> context,
-                                                                                  SerializableProvider<T> overlayProvider) {
+    private static <T extends StructuredOverlay> SemanticPeer createSemanticPeer(SerializableProvider<T> overlayProvider,
+                                                                                 Map<String, Object> context) {
         try {
             Component peer =
                     (Component) factory.newComponent(
@@ -323,27 +296,29 @@ public final class SemanticFactory {
 
             return stub;
         } catch (ADLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
     /**
      * Creates the specified {@code number} of SemanticPeer components in
      * parallel.
      * 
+     * @param overlayProvider
+     *            the overlay provider to use.
      * @param number
      *            the number of {@link SemanticPeer} components to create.
      * 
      * @return the SemanticPeer components created.
      */
-    public static SemanticPeer[] newSemanticPeersInParallel(int number) {
-        return SemanticFactory.newSemanticPeersInParallel(new Node[number]);
+    public static <T extends StructuredOverlay> SemanticPeer[] newSemanticPeersInParallel(SerializableProvider<T> overlayProvider,
+                                                                                          int number) {
+        return SemanticFactory.newSemanticPeersInParallel(
+                overlayProvider, new Node[number]);
     }
 
     /**
@@ -351,6 +326,8 @@ public final class SemanticFactory {
      * {@code nodes} specified. Each new SemanticPeer is deployed on a node from
      * the nodes array specified in parameter.
      * 
+     * @param overlayProvider
+     *            the overlay provider to use.
      * @param nodes
      *            the nodes to use for the deployment.
      * 
@@ -359,12 +336,14 @@ public final class SemanticFactory {
     /*
      * TODO better implementation of newComponentInParallel
      */
-    public static SemanticPeer[] newSemanticPeersInParallel(Node[] nodes) {
+    public static <T extends StructuredOverlay> SemanticPeer[] newSemanticPeersInParallel(SerializableProvider<T> overlayProvider,
+                                                                                          Node[] nodes) {
         checkNotNull(nodes);
 
         SemanticPeer[] peers = new SemanticPeer[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            peers[i] = SemanticFactory.newSemanticPeer(nodes[i]);
+            peers[i] =
+                    SemanticFactory.newSemanticPeer(overlayProvider, nodes[i]);
         }
         return peers;
     }

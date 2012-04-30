@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
-import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
-
 /**
  * Response associated to {@link CountQuadruplePatternResponse}.
  * 
@@ -32,18 +30,18 @@ public class CountQuadruplePatternResponse extends
 
     private static final long serialVersionUID = 1L;
 
-    public CountQuadruplePatternResponse(CountQuadruplePatternRequest request) {
-        super(request);
+    public CountQuadruplePatternResponse() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Long mergeSubResults(List<SerializedValue<Long>> subResults) {
+    public Long merge(List<SerializedValue<Long>> intermediateResults) {
         long result = 0;
 
-        for (SerializedValue<Long> subResult : subResults) {
+        for (SerializedValue<Long> subResult : intermediateResults) {
             result += subResult.getValue();
         }
 

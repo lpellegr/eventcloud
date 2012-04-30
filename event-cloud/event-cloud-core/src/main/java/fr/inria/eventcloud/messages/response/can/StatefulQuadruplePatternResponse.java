@@ -23,7 +23,6 @@ import java.util.concurrent.Future;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.messages.request.can.StatefulQuadruplePatternRequest;
@@ -36,29 +35,71 @@ import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
  * @author lpellegr
  */
 public abstract class StatefulQuadruplePatternResponse<T> extends
-        AnycastResponse {
+        StatelessQuadruplePatternResponse {
 
     private static final long serialVersionUID = 1L;
 
-    private long stateActionTime;
+    private long actionTime;
 
-    protected List<SerializedValue<T>> subResults;
+    protected List<SerializedValue<T>> intermediateResults;
 
-    public StatefulQuadruplePatternResponse(
-            StatefulQuadruplePatternRequest<T> request) {
-        super(request);
-        this.stateActionTime = 0;
-        this.subResults = new ArrayList<SerializedValue<T>>();
+    public StatefulQuadruplePatternResponse() {
+        super();
+        this.actionTime = 0;
+        this.intermediateResults = new ArrayList<SerializedValue<T>>();
     }
 
     public T getResult() {
-        return this.mergeSubResults(this.subResults);
+        return this.merge(this.intermediateResults);
     }
 
-    public abstract T mergeSubResults(List<SerializedValue<T>> subResults);
+    /**
+     * Defines how to merge the intermediate results to get one final result.
+     * The intermediate results correspond to the results return on each peer
+     * validating the constraints.
+     * 
+     * @param intermediateResults
+     *            the results return on each peer validating the constraints.
+     * 
+     * @return a final result.
+     */
+    public abstract T merge(List<SerializedValue<T>> intermediateResults);
 
-    public long getStateActionTime() {
-        return this.stateActionTime;
+    /**
+     * Returns the time (in nanoseconds) taken to execute the action on the
+     * peers which have been visited and that are matching the constraints.
+     * 
+     * @return the time (in nanoseconds) taken to execute the action on the
+     *         peers which have been visited and that are matching the
+     *         constraints.
+     */
+    public long getActionTime() {
+        return this.actionTime;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void synchronizationPointUnlocked(StructuredOverlay overlay) {
+        if (this.validatesKeyConstraints(overlay)) {
+            @SuppressWarnings("unchecked")
+            Future<StatefulRequestAction<T>> result =
+                    (Future<StatefulRequestAction<T>>) ((SemanticRequestResponseManager) overlay.getRequestResponseManager()).getPendingResults()
+                            .remove(super.getId());
+            if (result != null) {
+                try {
+                    this.intermediateResults.add(SerializedValue.create(result.get().result));
+                    this.actionTime += result.get().duration;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
+                } catch (ExecutionException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+
+        }
     }
 
     /**
@@ -66,43 +107,12 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
      */
     @Override
     @SuppressWarnings("unchecked")
-    public synchronized void addSubResult(AnycastResponse subResponse) {
-        StatefulQuadruplePatternResponse<T> response =
-                ((StatefulQuadruplePatternResponse<T>) subResponse);
-        this.subResults.addAll(response.subResults);
-        this.stateActionTime += response.stateActionTime;
-    }
+    public void mergeAttributes(AnycastResponse responseReceived) {
+        super.mergeAttributes(responseReceived);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AnycastResponseRouter<AnycastResponse> getRouter() {
-        return new AnycastResponseRouter<AnycastResponse>() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public void makeDecision(StructuredOverlay overlay,
-                                     AnycastResponse response) {
-                Future<StatefulRequestAction<T>> result =
-                        (Future<StatefulRequestAction<T>>) ((SemanticRequestResponseManager) overlay.getRequestResponseManager()).getPendingResults()
-                                .remove(response.getId());
-                if (result != null) {
-                    // ensure that the query operation has terminated
-                    // before to send back the request
-                    try {
-                        ((StatefulQuadruplePatternResponse<T>) response).subResults.add(SerializedValue.create(result.get().result));
-                        ((StatefulQuadruplePatternResponse<T>) response).stateActionTime +=
-                                result.get().duration;
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                super.makeDecision(overlay, response);
-            }
-        };
+        this.intermediateResults.addAll(((StatefulQuadruplePatternResponse<T>) responseReceived).intermediateResults);
+        this.actionTime +=
+                ((StatefulQuadruplePatternResponse<T>) responseReceived).actionTime;
     }
 
 }

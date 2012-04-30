@@ -14,22 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.messages.response.can;
+package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
-import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
+import java.util.List;
+
+import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+
+import com.google.common.collect.Lists;
 
 /**
- * Response associated to {@link ReconstructCompoundEventRequest}.
+ * Static utility methods pertaining to {@link Proxy} instances.
  * 
  * @author lpellegr
  */
-public class ReconstructCompoundEventResponse extends QuadruplePatternResponse {
+public class Proxies {
 
-    private static final long serialVersionUID = 1L;
+    public static <T extends Tracker> Proxy newProxy(T... trackers) {
+        return newProxy(Lists.newArrayList(trackers));
+    }
 
-    public ReconstructCompoundEventResponse(
-            ReconstructCompoundEventRequest request) {
-        super(request);
+    public static <T extends Tracker> Proxy newProxy(List<T> trackers) {
+        return new ProxyImpl(trackers);
     }
 
 }

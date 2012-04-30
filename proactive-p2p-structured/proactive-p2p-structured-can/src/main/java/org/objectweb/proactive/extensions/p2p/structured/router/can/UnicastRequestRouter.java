@@ -55,7 +55,7 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
      */
     @Override
     public void makeDecision(StructuredOverlay overlay, T request) {
-        if (request.getHopCount() == 0) {
+        if (request.getHopCount() == 0 && request.getResponseProvider() != null) {
             overlay.getResponseEntries().put(
                     request.getId(), new ResponseEntry(1));
         }
@@ -67,6 +67,9 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void handle(StructuredOverlay overlay, T request) {
         if (logger.isDebugEnabled()) {
@@ -74,10 +77,17 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
                     + request.getKey() + " specified by request "
                     + request.getId());
         }
+
         this.onDestinationReached(overlay, request);
-        request.createResponse(overlay).route(overlay);
+
+        if (request.getResponseProvider() != null) {
+            request.getResponseProvider().get(request, overlay).route(overlay);
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void route(StructuredOverlay overlay, T request) {
         CanOverlay overlayCAN = ((CanOverlay) overlay);
@@ -110,7 +120,7 @@ public class UnicastRequestRouter<T extends Request<StringCoordinate>> extends
                         request.getKey(), dimension, direction);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("The message is routed to a neigbour because the current peer "
+            logger.debug("Message routed to a neigbour because the current peer "
                     + "managing "
                     + overlay
                     + " does not contains the key to reach ("

@@ -14,42 +14,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.messages.response.can;
+package org.objectweb.proactive.extensions.p2p.structured.messages.response;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
- * Response associated to {@link LookupRequest}.
+ * This class is an abstraction that defines how to build a response.
  * 
  * @author lpellegr
  */
-public class LookupResponse extends ForwardResponse {
+public abstract class ResponseProvider<T extends Response<K>, K> extends
+        SerializableProvider<T> {
 
     private static final long serialVersionUID = 1L;
 
-    private Peer peerFound;
-
-    public LookupResponse() {
-        super();
-    }
-
     /**
-     * {@inheritDoc}
+     * Returns a new response whose its attributes have been initialized with a
+     * call to {@link Response#setAttributes(Request, StructuredOverlay)}.
+     * 
+     * @param request
+     *            the request that triggers the creation of the response.
+     * @param overlay
+     *            the overlay on which the response is created.
+     * 
+     * @return a response according to the request type.
      */
-    @Override
-    public void setAttributes(Request<StringCoordinate> request,
-                              StructuredOverlay overlay) {
-        super.setAttributes(request, overlay);
-
-        this.peerFound = ((LookupRequest) request).getRemotePeerReached();
-    }
-
-    public Peer getPeerFound() {
-        return this.peerFound;
+    public T get(Request<K> request, StructuredOverlay overlay) {
+        T result = this.get();
+        result.setAttributes(request, overlay);
+        return result;
     }
 
 }

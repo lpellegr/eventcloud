@@ -31,9 +31,8 @@ public class BooleanForwardResponse extends ForwardResponse {
 
     private boolean result;
 
-    public BooleanForwardResponse(ForwardRequest query, boolean result) {
-        super(query);
-        this.result = result;
+    public BooleanForwardResponse() {
+        super();
     }
 
     /**
@@ -43,6 +42,10 @@ public class BooleanForwardResponse extends ForwardResponse {
      */
     public boolean getResult() {
         return this.result;
+    }
+
+    public void setResult(boolean result) {
+        this.result = result;
     }
 
 }

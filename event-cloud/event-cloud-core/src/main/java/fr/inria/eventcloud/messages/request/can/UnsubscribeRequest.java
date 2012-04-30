@@ -21,11 +21,13 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.messages.response.can.StatelessQuadruplePatternResponse;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
- * This class is used to route and to handle an unsubscribe request.
+ * This class is used to route and to handle an unsubscribe request. It returns
+ * a {@link StatelessQuadruplePatternResponse}.
  * 
  * @author lpellegr
  */

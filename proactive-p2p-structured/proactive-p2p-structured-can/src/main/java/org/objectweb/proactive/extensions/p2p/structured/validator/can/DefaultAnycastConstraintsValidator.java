@@ -18,10 +18,12 @@ package org.objectweb.proactive.extensions.p2p.structured.validator.can;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 
 /**
@@ -42,7 +44,9 @@ public final class DefaultAnycastConstraintsValidator extends
      * constraints on any peer).
      */
     public DefaultAnycastConstraintsValidator() {
-        super(new StringCoordinate(null, null, null));
+        super(
+                new StringCoordinate(
+                        new StringElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()]));
     }
 
     /**

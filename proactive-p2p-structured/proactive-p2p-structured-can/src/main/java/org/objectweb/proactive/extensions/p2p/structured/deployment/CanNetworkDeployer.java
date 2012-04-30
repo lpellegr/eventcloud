@@ -34,11 +34,21 @@ public final class CanNetworkDeployer extends NetworkDeployer {
     private static final long serialVersionUID = 1L;
 
     public CanNetworkDeployer() {
-        super();
+        super(SerializableProvider.create(CanOverlay.class));
     }
 
-    public CanNetworkDeployer(DeploymentConfiguration mode) {
-        super(mode);
+    public CanNetworkDeployer(
+            SerializableProvider<? extends CanOverlay> overlayProvider) {
+        super(overlayProvider);
+    }
+
+    public CanNetworkDeployer(DeploymentConfiguration configuration) {
+        super(configuration, SerializableProvider.create(CanOverlay.class));
+    }
+
+    public CanNetworkDeployer(DeploymentConfiguration configuration,
+            SerializableProvider<? extends CanOverlay> overlayProvider) {
+        super(configuration, overlayProvider);
     }
 
     /**
@@ -46,8 +56,8 @@ public final class CanNetworkDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Peer createPeer() {
-        // TODO use the node provider parameter
-        return PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class));
+        // TODO add support for deployment thanks to the node provider
+        return PeerFactory.newPeer(super.overlayProvider);
     }
 
     /**
@@ -55,7 +65,7 @@ public final class CanNetworkDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Tracker createTracker(String networkName) {
-        // TODO use the node provider parameter
+        // TODO add support for deployment thanks to the node provider
         return TrackerFactory.newTracker(networkName);
     }
 

@@ -139,14 +139,12 @@ public class ProxyFactory implements Serializable {
 
             return stub;
         } catch (ADLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
     /**
@@ -180,16 +178,14 @@ public class ProxyFactory implements Serializable {
 
             return stub;
         } catch (ADLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (ProActiveException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
     /**
@@ -211,14 +207,12 @@ public class ProxyFactory implements Serializable {
 
             return stub;
         } catch (ADLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
     /**

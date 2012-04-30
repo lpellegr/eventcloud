@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.response.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -33,9 +34,21 @@ public class ForwardResponse extends Response<StringCoordinate> {
 
     private static final long serialVersionUID = 1L;
 
-    public ForwardResponse(ForwardRequest query) {
-        super(query, new UnicastConstraintsValidator(
-                query.getSenderCoordinate()));
+    public ForwardResponse() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setAttributes(Request<StringCoordinate> request,
+                              StructuredOverlay overlay) {
+        super.setAttributes(request, overlay);
+
+        super.constraintsValidator =
+                new UnicastConstraintsValidator(
+                        ((ForwardRequest) request).getSenderCoordinate());
     }
 
     /**

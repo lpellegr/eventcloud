@@ -17,24 +17,53 @@
 package fr.inria.eventcloud.proxies;
 
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
  * Any user side proxy have to implement this abstract proxy class that stores
- * an {@link EventCloudCache} which serves as a cache.
+ * an instance of {@link EventCloudCache} which serves as a cache.
  * 
  * @author lpellegr
  */
 public abstract class ProxyCache extends AbstractComponent {
 
-    protected EventCloudCache proxy;
+    protected EventCloudCache eventCloudCache;
+
+    protected Proxy proxy;
 
     protected ProxyCache() {
+        super();
     }
 
-    protected SemanticPeer selectPeer() {
-        return this.proxy.selectTracker().getRandomSemanticPeer();
+    public void sendv(Request<?> request) throws DispatchException {
+        this.proxy.sendv(request);
+    }
+
+    public void sendv(Request<?> request, Peer peer) throws DispatchException {
+        this.proxy.sendv(request, peer);
+    }
+
+    public Response<?> send(Request<?> request) throws DispatchException {
+        return this.proxy.send(request);
+    }
+
+    public Response<?> send(Request<?> request, Peer peer)
+            throws DispatchException {
+        return this.proxy.send(request, peer);
+    }
+
+    public SemanticPeer selectPeer() {
+        return (SemanticPeer) this.proxy.selectPeer();
+    }
+
+    public EventCloudCache getEventCloudCache() {
+        return this.eventCloudCache;
     }
 
 }

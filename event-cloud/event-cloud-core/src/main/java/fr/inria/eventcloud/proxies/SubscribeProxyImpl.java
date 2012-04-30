@@ -29,6 +29,7 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
-import fr.inria.eventcloud.messages.response.can.ReconstructCompoundEventResponse;
+import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -64,12 +65,6 @@ import fr.inria.eventcloud.utils.LongLong;
 /**
  * SubscribeProxyImpl is a concrete implementation of {@link SubscribeProxy}.
  * This class has to be instantiated as a ProActive/GCM component.
- * <p>
- * Currently the receive operation is handled sequentially because it is not set
- * as Immediate Service (IS). This means we don't have to synchronize the
- * data-structure that are used inside this method. However it would be nice to
- * evaluate/decide if it is interesting to put the receive operation as
- * Immediate Service (TODO).
  * 
  * @author lpellegr
  * @author bsauvan
@@ -134,8 +129,10 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
     @Override
     public void setAttributes(EventCloudCache proxy, String componentUri,
                               AlterableElaProperty[] properties) {
-        if (this.proxy == null) {
-            this.proxy = proxy;
+        if (super.eventCloudCache == null) {
+            super.eventCloudCache = proxy;
+            super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
+
             this.componentUri = componentUri;
             this.subscriptions = new HashMap<SubscriptionId, Subscription>();
             this.listeners =
@@ -189,8 +186,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         }
 
         try {
-            super.proxy.selectTracker().getRandomSemanticPeer().send(
-                    new IndexSubscriptionRequest(internalSubscription));
+            super.send(new IndexSubscriptionRequest(internalSubscription));
         } catch (DispatchException e) {
             e.printStackTrace();
         }
@@ -267,8 +263,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
             List<Quadruple> quads;
             try {
                 quads =
-                        ((ReconstructCompoundEventResponse) PAFuture.getFutureValue(super.proxy.selectTracker()
-                                .getRandomPeer()
+                        ((QuadruplePatternResponse) PAFuture.getFutureValue(super.selectPeer()
                                 .send(
                                         new ReconstructCompoundEventRequest(
                                                 reconstructPattern,
@@ -326,8 +321,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         // updates the network to stop sending notifications
         for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
             try {
-                super.proxy.selectTracker()
-                        .getRandomPeer()
+                super.selectPeer()
                         .send(
                                 new UnsubscribeRequest(
                                         subscription.getOriginalId(),

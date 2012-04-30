@@ -37,7 +37,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     /**
      * Universally unique identifier used in order to identify the message.
      */
-    protected final UUID uuid;
+    protected UUID uuid;
 
     /**
      * Constraints validator used to make the routing decision possible.
@@ -48,6 +48,17 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      * The number of hops between the source and the destination of the message.
      */
     private int hopCount = 0;
+
+    /**
+     * Constructs a new RequestResponseMessage with the specified
+     * {@code constraintsValidator}.
+     * 
+     * @param constraintsValidator
+     *            the constraints validator to use for routing the message.
+     */
+    public RequestResponseMessage(ConstraintsValidator<K> constraintsValidator) {
+        this.constraintsValidator = constraintsValidator;
+    }
 
     /**
      * Constructs a new RequestResponseMessage with the specified
@@ -63,6 +74,15 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
             ConstraintsValidator<K> constraintsValidator) {
         this.uuid = identifier;
         this.constraintsValidator = constraintsValidator;
+    }
+
+    /**
+     * Returns the constraints validator.
+     * 
+     * @return the constraints validator.
+     */
+    public ConstraintsValidator<K> getConstraintsValidator() {
+        return this.constraintsValidator;
     }
 
     /**

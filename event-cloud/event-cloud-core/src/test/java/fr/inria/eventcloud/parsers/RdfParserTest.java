@@ -18,13 +18,11 @@ package fr.inria.eventcloud.parsers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
 
-import org.junit.After;
 import org.junit.Test;
 
 import fr.inria.eventcloud.api.Quadruple;
@@ -32,7 +30,7 @@ import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.utils.Callback;
 
 /**
- * Test cases associated to {@link RdfParser} and {@link RdfSerialier}.
+ * Test cases associated to {@link RdfParser} and {@link RdfSerializer}.
  * 
  * @author lpellegr
  * @author ialshaba
@@ -44,75 +42,66 @@ public class RdfParserTest {
     @Test
     public void parseNQuadsFileTest() {
         final List<Quadruple> quads = new ArrayList<Quadruple>();
+
         RdfParser.parse(
                 RdfParser.class.getResourceAsStream("/example.nquads"),
                 SerializationFormat.NQuads, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
+                        quads.add(quad);
                         RdfParserTest.this.counter++;
                     }
                 });
 
-        // parser = RiotReader. in, null, sink);
-
         Assert.assertEquals(15, this.counter);
-        this.tearDown();
-        ByteArrayOutputStream outS = new ByteArrayOutputStream();
-        // BufferedOutputStream bOut = new BufferedOutputStream(out)
-        RdfSerializer.nQuadsWriter(outS, new ArrayList<Quadruple>(quads));
-        ByteArrayInputStream ins = new ByteArrayInputStream(outS.toByteArray());
+
+        this.counter = 0;
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        RdfSerializer.nQuadsWriter(bos, quads);
+
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
         RdfParser.parse(
-                ins, SerializationFormat.NQuads, new Callback<Quadruple>() {
+                bis, SerializationFormat.NQuads, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
                         RdfParserTest.this.counter++;
                     }
                 });
 
+        Assert.assertEquals(15, this.counter);
     }
 
     @Test
     public void parseTrigFileTest() {
         final List<Quadruple> quads = new ArrayList<Quadruple>();
-        // OutputStream out = null;
+
         RdfParser.parse(
                 RdfParser.class.getResourceAsStream("/example.trig"),
                 SerializationFormat.TriG, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
-                        /* low level test
-                        System.out.println("quad "+ counter+ " graph \t " +quad.getGraph().toString());
-                        System.out.println("quad "+ counter+ " subject \t " +quad.getSubject().toString());
-                        System.out.println("quad "+ counter+ " predicate \t " +quad.getPredicate().toString());
-                        System.out.println("quad "+ counter+ " object \t " +quad.getObject().toString());
-                        */
-                        RdfParserTest.this.counter++;
                         quads.add(quad);
+                        RdfParserTest.this.counter++;
                     }
                 });
 
         Assert.assertEquals(15, this.counter);
-        this.tearDown();
-        ByteArrayOutputStream outS = new ByteArrayOutputStream();
-        // BufferedOutputStream bOut = new BufferedOutputStream(out)
 
-        RdfSerializer.triGWriter(outS, new ArrayList<Quadruple>(quads));
-        try {
-            outS.writeTo(System.out);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        ByteArrayInputStream ins = new ByteArrayInputStream(outS.toByteArray());
+        this.counter = 0;
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        RdfSerializer.triGWriter(bos, quads);
+
+        ByteArrayInputStream ins = new ByteArrayInputStream(bos.toByteArray());
         RdfParser.parse(
                 ins, SerializationFormat.TriG, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
                         RdfParserTest.this.counter++;
-                        quads.add(quad);
                     }
-
                 });
+
         Assert.assertEquals(15, this.counter);
     }
 
@@ -130,33 +119,22 @@ public class RdfParserTest {
                 });
 
         Assert.assertEquals(15, this.counter);
-        this.tearDown();
 
-        ByteArrayOutputStream outS = new ByteArrayOutputStream();
+        this.counter = 0;
 
-        RdfSerializer.triGWriter(outS, quads);
-        try {
-            outS.writeTo(System.out);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ByteArrayInputStream ins = new ByteArrayInputStream(outS.toByteArray());
-        quads.clear();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        RdfSerializer.triGWriter(bos, quads);
+
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
         RdfParser.parse(
-                ins, SerializationFormat.TriG, new Callback<Quadruple>() {
+                bis, SerializationFormat.TriG, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
                         RdfParserTest.this.counter++;
-                        quads.add(quad);
                     }
                 });
 
         Assert.assertEquals(15, this.counter);
-    }
-
-    @After
-    public void tearDown() {
-        this.counter = 0;
     }
 
 }

@@ -54,17 +54,11 @@ public abstract class JunitByClassNetworkDeployer {
         this.nbPeers = nbPeers;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Before
     public void setUp() {
         this.deployer.deploy(this.nbTrackers, this.nbPeers);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @After
     public void tearDown() {
         this.deployer.undeploy();

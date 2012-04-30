@@ -17,8 +17,7 @@
 package fr.inria.eventcloud.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
@@ -33,7 +32,7 @@ import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 
 /**
  * Retrieves the number of quadruples that match the {@link QuadruplePattern}
- * that is specified when the object is constructed.
+ * which is specified when the object is constructed.
  * 
  * @author lpellegr
  */
@@ -42,20 +41,21 @@ public class CountQuadruplePatternRequest extends
 
     private static final long serialVersionUID = 1L;
 
-    public CountQuadruplePatternRequest(QuadruplePattern quadruplePattern) {
-        super(quadruplePattern);
-    }
-
     public CountQuadruplePatternRequest(Node g, Node s, Node p, Node o) {
-        super(new QuadruplePattern(g, s, p, o));
+        this(new QuadruplePattern(g, s, p, o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Response<StringCoordinate> createResponse(StructuredOverlay overlay) {
-        return new CountQuadruplePatternResponse(this);
+    public CountQuadruplePatternRequest(QuadruplePattern quadruplePattern) {
+        super(
+                quadruplePattern,
+                new ResponseProvider<CountQuadruplePatternResponse, StringCoordinate>() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public CountQuadruplePatternResponse get() {
+                        return new CountQuadruplePatternResponse();
+                    }
+                });
     }
 
     /**
@@ -72,7 +72,6 @@ public class CountQuadruplePatternRequest extends
             QuadrupleIterator it = txnGraph.find(quadruplePattern);
             return it.count();
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IllegalStateException(e);
         } finally {
             txnGraph.end();

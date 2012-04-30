@@ -342,24 +342,29 @@ public final class PublishSubscribeUtils {
             txnGraph.end();
         }
 
-        txnGraph = datastore.begin(AccessMode.WRITE);
+        if (subscriptionQuadruples != null) {
+            txnGraph = datastore.begin(AccessMode.WRITE);
 
-        try {
-            for (Quadruple quad : subscriptionQuadruples) {
-                // removes the quadruples about the sub subscriptions associated
-                // to the subscription
-                txnGraph.delete(
-                        Node.ANY, createSubSubscriptionIdUri(quad.getObject()
-                                .getLiteralLexicalForm()), Node.ANY, Node.ANY);
+            try {
+                for (Quadruple quad : subscriptionQuadruples) {
+                    // removes the quadruples about the sub subscriptions
+                    // associated
+                    // to the subscription
+                    txnGraph.delete(
+                            Node.ANY,
+                            createSubSubscriptionIdUri(quad.getObject()
+                                    .getLiteralLexicalForm()), Node.ANY,
+                            Node.ANY);
+                }
+
+                // removes the quadruples about the subscription
+                txnGraph.delete(Node.ANY, subscriptionIdUri, Node.ANY, Node.ANY);
+                txnGraph.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                txnGraph.end();
             }
-
-            // removes the quadruples about the subscription
-            txnGraph.delete(Node.ANY, subscriptionIdUri, Node.ANY, Node.ANY);
-            txnGraph.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            txnGraph.end();
         }
     }
 

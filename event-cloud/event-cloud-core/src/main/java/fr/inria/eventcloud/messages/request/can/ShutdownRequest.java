@@ -21,11 +21,13 @@ import java.io.IOException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.messages.response.can.StatelessQuadruplePatternResponse;
 
 /**
  * This request is used to send a shutdown message to all the peers that belong
  * to the network. This shutdown message will stop the execution of the
- * datastore and remove the repository on each peer.
+ * datastore and remove the repository on each peer. As response, a
+ * {@link StatelessQuadruplePatternResponse} is returned.
  * 
  * @author lpellegr
  */

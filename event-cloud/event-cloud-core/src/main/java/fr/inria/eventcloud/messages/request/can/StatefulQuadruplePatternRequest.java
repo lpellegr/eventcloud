@@ -16,14 +16,18 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.io.Serializable;
 import java.util.concurrent.Callable;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.messages.response.can.StatefulQuadruplePatternResponse;
 import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
 
 /**
@@ -45,8 +49,10 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
 
     private static final long serialVersionUID = 1L;
 
-    public StatefulQuadruplePatternRequest(QuadruplePattern quadPattern) {
-        super(quadPattern);
+    public StatefulQuadruplePatternRequest(
+            QuadruplePattern quadPattern,
+            ResponseProvider<? extends StatefulQuadruplePatternResponse<T>, StringCoordinate> responseProvider) {
+        super(quadPattern, responseProvider);
     }
 
     /**
@@ -60,10 +66,10 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
 
     /**
      * This methods is executed in a new thread on each peer which validates the
-     * constraints. The value that is returned is stored into a table and can be
-     * retrieved later (e.g. when the response is routed back to the peer).
+     * constraints. The value that is returned is stored into a table to be
+     * retrieved later (e.g. when the response is routed back).
      * <p>
-     * The object which is returned must be serializable.
+     * The object which is returned must be {@link Serializable}.
      */
     public abstract T onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                      AnycastRequest request,
@@ -81,31 +87,25 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
                 final SemanticRequestResponseManager messagingManager =
                         (SemanticRequestResponseManager) overlay.getRequestResponseManager();
 
-                // TODO is it necessary to check if the request has already been
-                // received. I mean does this condition is not already checked
-                // in the super method?
-                if (!messagingManager.hasReceivedRequest(request.getId())) {
-                    // query the action while the query is propagated
-                    messagingManager.getPendingResults().put(
-                            request.getId(),
-                            messagingManager.getThreadPool().submit(
-                                    new Callable<StatefulRequestAction<T>>() {
-                                        @Override
-                                        public StatefulRequestAction<T> call() {
-                                            long start =
-                                                    System.currentTimeMillis();
-                                            T actionResult =
-                                                    StatefulQuadruplePatternRequest.this.onPeerValidatingKeyConstraints(
-                                                            overlay,
-                                                            request,
-                                                            StatefulQuadruplePatternRequest.super.quadruplePattern.getValue());
-                                            return new StatefulRequestAction<T>(
-                                                    System.currentTimeMillis()
-                                                            - start,
-                                                    actionResult);
-                                        }
-                                    }));
-                }
+                messagingManager.getPendingResults().put(
+                        request.getId(),
+                        messagingManager.getThreadPool().submit(
+                                new Callable<StatefulRequestAction<T>>() {
+                                    @Override
+                                    public StatefulRequestAction<T> call() {
+                                        long start = System.nanoTime();
+
+                                        T actionResult =
+                                                StatefulQuadruplePatternRequest.this.onPeerValidatingKeyConstraints(
+                                                        overlay,
+                                                        request,
+                                                        StatefulQuadruplePatternRequest.this.quadruplePattern.getValue());
+
+                                        return new StatefulRequestAction<T>(
+                                                System.nanoTime() - start,
+                                                actionResult);
+                                    }
+                                }));
             }
         };
     }

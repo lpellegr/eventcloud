@@ -24,6 +24,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
@@ -43,10 +44,10 @@ import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.operations.can.FindQuadruplesOperation;
 import fr.inria.eventcloud.operations.can.FindQuadruplesResponseOperation;
 import fr.inria.eventcloud.overlay.SemanticPeer;
+import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 
 /**
- * Test the data transfer during a join operation for
- * {@link SemanticSpaceCANOverlay}.
+ * Test the data transfer during a join operation with a {@link CanOverlay}.
  * 
  * @author lpellegr
  */
@@ -62,7 +63,8 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
     @Test
     public void testDataTransfert() {
         SemanticPeer firstPeer = super.getRandomSemanticPeer();
-        SemanticPeer secondPeer = SemanticFactory.newSemanticPeer();
+        SemanticPeer secondPeer =
+                SemanticFactory.newSemanticPeer(new SemanticInMemoryOverlayProvider());
 
         GetIdAndZoneResponseOperation response =
                 (GetIdAndZoneResponseOperation) PAFuture.getFutureValue(firstPeer.receive(new GetIdAndZoneOperation()));

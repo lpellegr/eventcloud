@@ -66,7 +66,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public void setAttributes(EventCloudCache proxy, String componentUri,
                               AlterableElaProperty[] properties) {
-        if (this.proxy == null) {
+        if (this.eventCloudCache == null) {
             super.setAttributes(proxy, componentUri, properties);
             this.subscribers = new HashMap<SubscriptionId, String>();
         }
@@ -95,7 +95,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
                 subscription.getId(), subscribeInfos.getSubscriberWsUrl());
 
         this.subscribe(subscription, new WsEventNotificationListener(
-                this.proxy.getId().getStreamUrl(),
+                super.getEventCloudCache().getId().getStreamUrl(),
                 subscribeInfos.getSubscriberWsUrl()));
 
         return subscription.getId();
