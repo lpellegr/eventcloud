@@ -17,6 +17,8 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 
@@ -53,7 +55,8 @@ public class ResponseEntry implements Serializable {
     /**
      * The response corresponding to the last response which has been merged.
      */
-    private Response<?> response;
+    private AtomicReference<Response<?>> response =
+            new AtomicReference<Response<?>>();
 
     /**
      * The maximum number of replies expected.
@@ -63,11 +66,11 @@ public class ResponseEntry implements Serializable {
     /**
      * The current number of responses received.
      */
-    private int responsesCount = 0;
+    private AtomicInteger responsesCount = new AtomicInteger();
 
     /**
-     * Constructs a new entry with the specified
-     * <code>expectedResponsesNumber</code>.
+     * Constructs a new entry with the specified {@code expectedResponsesNumber}
+     * .
      * 
      * @param expectedResponsesCount
      *            the maximum number of responses expected.
@@ -81,8 +84,8 @@ public class ResponseEntry implements Serializable {
      * 
      * @return the current number of responses received.
      */
-    public synchronized int getResponsesCount() {
-        return this.responsesCount;
+    public int getResponsesCount() {
+        return this.responsesCount.get();
     }
 
     /**
@@ -99,22 +102,21 @@ public class ResponseEntry implements Serializable {
      * 
      * @return the current status of the entry.
      */
-    public synchronized Status getStatus() {
+    public Status getStatus() {
         return this.status;
     }
 
     /**
-     * Returns the last message merged.
+     * Returns the last response merged.
      * 
-     * @return the last message merged.
+     * @return the last response merged.
      */
-    public synchronized Response<?> getResponse() {
-        return this.response;
+    public Response<?> getResponse() {
+        return this.response.get();
     }
 
-    public synchronized void incrementResponsesCount(int increment) {
-        this.responsesCount += increment;
-        if (this.responsesCount == this.expectedResponsesCount) {
+    public void incrementResponsesCount(int increment) {
+        if (this.responsesCount.getAndAdd(increment) + increment == this.expectedResponsesCount) {
             this.status = Status.RECEIPT_COMPLETED;
         }
     }
@@ -125,8 +127,8 @@ public class ResponseEntry implements Serializable {
      * @param response
      *            the new response to associate to this entry.
      */
-    public synchronized void setResponse(Response<?> response) {
-        this.response = response;
+    public void setResponse(Response<?> response) {
+        this.response = new AtomicReference<Response<?>>(response);
     }
 
     /**
