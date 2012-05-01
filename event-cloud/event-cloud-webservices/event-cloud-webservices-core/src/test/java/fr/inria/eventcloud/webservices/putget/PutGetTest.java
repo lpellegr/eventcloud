@@ -42,6 +42,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
@@ -104,7 +105,7 @@ public class PutGetTest {
 
         List<Quadruple> result =
                 putGetCaller.findQuadruplePattern(QuadruplePattern.ANY);
-        log.info("Quadruples contained by the Event-Cloud {}", ecId);
+        log.info("Quadruples contained by the EventCloud {}", ecId);
         for (Quadruple quad : result) {
             log.info(quad.toString());
         }
@@ -137,12 +138,10 @@ public class PutGetTest {
 
             GCM.getGCMLifeCycleController(putGetComponent).startFc();
 
-            return (PutGetWsApi) putGetComponent.getFcInterface("putget-services");
+            return (PutGetWsApi) putGetComponent.getFcInterface(EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
     private void terminatePutGetCaller(PutGetWsApi putGetCaller) {

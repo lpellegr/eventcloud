@@ -77,7 +77,7 @@ public abstract class AbstractComponent implements ComponentInitActive {
         } catch (NoSuchInterfaceException e) {
             // it is not necessary to rethrown this exception because when it
             // occurs this means there is an issue in the code
-            log.error("Please check the interface name:" + interfaceName, e);
+            log.error("Please check the interface name: " + interfaceName, e);
             return null;
         } catch (NamingException e) {
             throw new IOException(e);

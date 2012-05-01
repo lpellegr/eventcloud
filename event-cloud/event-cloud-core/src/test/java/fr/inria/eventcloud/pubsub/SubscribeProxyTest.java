@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.joda.time.DateTime;
 import org.junit.After;
@@ -52,6 +53,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
@@ -102,7 +104,7 @@ public class SubscribeProxyTest {
     @Test
     public void testSubscribeWithConcurrentPublications() {
         final int NB_PRODUCERS = 10;
-        final int NB_EVENTS_TO_WAIT = 10;
+        final int NB_EVENTS_TO_WAIT = 100;
 
         final List<PublishProxy> publishProxies =
                 this.createPublishProxies(NB_PRODUCERS);
@@ -111,6 +113,7 @@ public class SubscribeProxyTest {
                 Executors.newScheduledThreadPool(NB_PRODUCERS);
 
         List<ScheduledFuture<?>> futures = new ArrayList<ScheduledFuture<?>>();
+        final AtomicInteger nbEventsPublished = new AtomicInteger();
 
         // simulates producers publishing at different rates
         for (int i = 0; i < NB_PRODUCERS; i++) {
@@ -120,28 +123,23 @@ public class SubscribeProxyTest {
             threadPool.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    List<Quadruple> quadruples = new ArrayList<Quadruple>();
-                    Node graphValue =
-                            Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                                    + "/" + UUID.randomUUID().toString());
-                    for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
-                        quadruples.add(QuadrupleGenerator.random(graphValue));
+                    if (nbEventsPublished.incrementAndGet() <= NB_EVENTS_TO_WAIT) {
+                        List<Quadruple> quadruples = new ArrayList<Quadruple>();
+                        Node graphValue =
+                                Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                                        + "/" + UUID.randomUUID().toString());
+                        for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
+                            quadruples.add(QuadrupleGenerator.random(graphValue));
+                        }
+
+                        log.debug(
+                                "Publishing an event composed of {} quadruples from thread {}",
+                                quadruples.size(), threadIndex);
+
+                        publishProxy.publish(new CompoundEvent(quadruples));
                     }
-
-                    log.debug(
-                            "Publishing an event composed of {} quadruples from thread {}",
-                            quadruples.size(), threadIndex);
-
-                    publishProxy.publish(new CompoundEvent(quadruples));
                 }
-                // }, 0, 50 + RandomUtils.nextInt((i + 1) * 500),
-            }, 0, (i + 1) * 500, TimeUnit.MILLISECONDS);
-        }
-
-        try {
-            TimeUnit.SECONDS.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            }, 0, (i + 1) * 100, TimeUnit.MILLISECONDS);
         }
 
         Subscription subscription =
@@ -478,6 +476,10 @@ public class SubscribeProxyTest {
     @After
     public void tearDown() {
         this.deployer.undeploy();
+
+        SemanticFactory.terminateComponent(this.publishProxy);
+        SemanticFactory.terminateComponent(this.subscribeProxy);
+
         signals.setValue(0);
         bindings.clear();
         events.clear();
