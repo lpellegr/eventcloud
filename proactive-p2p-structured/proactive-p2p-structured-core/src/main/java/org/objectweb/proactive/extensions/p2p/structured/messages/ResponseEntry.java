@@ -128,7 +128,7 @@ public class ResponseEntry implements Serializable {
      *            the new response to associate to this entry.
      */
     public void setResponse(Response<?> response) {
-        this.response = new AtomicReference<Response<?>>(response);
+        this.response.set(response);
     }
 
     /**
