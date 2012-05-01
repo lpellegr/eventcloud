@@ -37,14 +37,19 @@ public class AbstractFactory {
      *            the stub of the component to terminate.
      */
     public static void terminateComponent(Object stub) {
+        if (!(stub instanceof Interface)) {
+            throw new IllegalArgumentException(
+                    "The specified stub object is not a component interface");
+        }
+
         try {
             Component component = ((Interface) stub).getFcItfOwner();
             GCM.getGCMLifeCycleController(component).stopFc();
             GCM.getGCMLifeCycleController(component).terminateGCMComponent();
         } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
     }
 

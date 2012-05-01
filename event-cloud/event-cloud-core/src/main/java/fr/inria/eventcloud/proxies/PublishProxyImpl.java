@@ -73,7 +73,7 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
         // the quadruple is routed without taking into account the publication
         // datetime
         try {
-            super.send(new PublishQuadrupleRequest(quad));
+            super.sendv(new PublishQuadrupleRequest(quad));
         } catch (DispatchException e) {
             e.printStackTrace();
         }

@@ -90,7 +90,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     private static final Var subSubscriptionObjectVar = Var.alloc("ssObject");
 
     public PublishQuadrupleRequest(Quadruple quad) {
-        super(quad);
+        super(quad, null);
     }
 
     /**

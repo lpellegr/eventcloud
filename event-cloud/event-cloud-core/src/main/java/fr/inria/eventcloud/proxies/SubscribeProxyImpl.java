@@ -88,7 +88,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
     // contains the solutions that are being received
     private ConcurrentMap<NotificationId, Solution> solutions;
 
-    // TODO: this set has to be replace by a DataBag. The number of events ids
+    // TODO: this set has to be replaced by a DataBag. The number of events ids
     // received will grow quickly and after some time it is possible to get an
     // OutOfMemory exception. That's why it would be nice to have the
     // possibility to define a threshold that defines what is the maximum number
@@ -186,7 +186,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         }
 
         try {
-            super.send(new IndexSubscriptionRequest(internalSubscription));
+            super.sendv(new IndexSubscriptionRequest(internalSubscription));
         } catch (DispatchException e) {
             e.printStackTrace();
         }

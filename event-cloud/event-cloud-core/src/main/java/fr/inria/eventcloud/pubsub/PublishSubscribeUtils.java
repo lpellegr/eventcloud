@@ -561,6 +561,7 @@ public final class PublishSubscribeUtils {
                             ((SemanticCanOverlay) overlay).findPeerStub(stub.peerUrl);
 
                     if (peerStub != null) {
+                        // FIXME: issue #24
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -690,8 +691,8 @@ public final class PublishSubscribeUtils {
                 quadrupleMatching.hashValue()));
 
         try {
-            overlay.getStub().send(
-                    new IndexSubscriptionRequest(rewrittenSubscription));
+            overlay.dispatchv(new IndexSubscriptionRequest(
+                    rewrittenSubscription));
         } catch (DispatchException e) {
             e.printStackTrace();
         }

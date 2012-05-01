@@ -28,6 +28,7 @@ import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
+import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -138,7 +139,7 @@ public class JunitEventCloudInfrastructureDeployer {
             this.eventClouds.get(ecId).getEventCloudDeployer().undeploy();
         }
 
-        PAActiveObject.terminateActiveObject(this.eventCloudsRegistry, false);
+        SemanticFactory.terminateComponent(this.eventCloudsRegistry);
     }
 
     public void undeploy(EventCloudId eventCloudId) {
