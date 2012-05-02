@@ -51,6 +51,9 @@
 				<configuration>
 					<argLine>-Xmx2048m</argLine>
 					<systemPropertyVariables>
+						<java.security.policy>${project.build.testOutputDirectory}/proactive.security.policy</java.security.policy>
+						<log4j.configuration>file:${project.build.testOutputDirectory}/log4j.xml</log4j.configuration>
+						<logback.configurationFile>file:${project.build.testOutputDirectory}/logback-test.xml</logback.configurationFile>
 						<proactive.http.port>8888</proactive.http.port>
 					</systemPropertyVariables>
 				</configuration>
