@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import com.hp.hpl.jena.graph.Node;
-
-import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
  * Blank nodes do not have identifiers in the RDF abstract syntax. The blank
@@ -116,12 +116,16 @@ public class Skolemizator {
 
     private static Node createSkolemUri(Node subjectOrObject,
                                         Map<Node, Node> assignedSkolems) {
+        UUID randomId = UUID.randomUUID();
+
+        Hasher hasher = Hashing.murmur3_128().newHasher();
+        hasher.putString(subjectOrObject.toString());
+        hasher.putLong(randomId.getMostSignificantBits());
+        hasher.putLong(randomId.getLeastSignificantBits());
+
         Node skolem =
-                Node.createURI(SKOLEM_URI_SUFFIX
-                        + SKOLEM_URI_PATH_COMPONENT
-                        + MurmurHash.hash128(
-                                subjectOrObject.toString(),
-                                UUID.randomUUID().toString()).toString());
+                Node.createURI(SKOLEM_URI_SUFFIX + SKOLEM_URI_PATH_COMPONENT
+                        + hasher.hash().toString());
 
         assignedSkolems.put(subjectOrObject, skolem);
 

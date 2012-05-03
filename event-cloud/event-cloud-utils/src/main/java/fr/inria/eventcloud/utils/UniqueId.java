@@ -17,7 +17,10 @@
 package fr.inria.eventcloud.utils;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.UUID;
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Defines a unique identifier (based on a {@link UUID}) with a toString method
@@ -52,7 +55,7 @@ public class UniqueId implements Serializable {
      * @return the <code>UniqueId</code> represented by the argument.
      */
     public static final UniqueId parseUniqueId(String uniqueId) {
-        return new UniqueId(Base64LongLong.decodeUUID(uniqueId));
+        return new UniqueId(decode(uniqueId));
     }
 
     /**
@@ -77,7 +80,22 @@ public class UniqueId implements Serializable {
      */
     @Override
     public String toString() {
-        return Base64LongLong.encode(this.value);
+        return encode(this.value);
+    }
+
+    private static String encode(UUID uuid) {
+        ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.putLong(uuid.getMostSignificantBits());
+        buffer.putLong(uuid.getLeastSignificantBits());
+
+        return DatatypeConverter.printHexBinary(buffer.array());
+    }
+
+    protected static UUID decode(String uuid) {
+        ByteBuffer buffer =
+                ByteBuffer.wrap(DatatypeConverter.parseHexBinary(uuid));
+
+        return new UUID(buffer.getLong(), buffer.getLong());
     }
 
 }

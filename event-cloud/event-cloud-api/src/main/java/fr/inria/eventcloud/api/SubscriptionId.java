@@ -21,7 +21,6 @@ import java.util.UUID;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;
 
-import fr.inria.eventcloud.utils.Base64LongLong;
 import fr.inria.eventcloud.utils.UniqueId;
 
 /**
@@ -54,7 +53,7 @@ public class SubscriptionId extends UniqueId {
     }
 
     public static SubscriptionId parseSubscriptionId(String subscriptionId) {
-        return new SubscriptionId(Base64LongLong.decodeUUID(subscriptionId));
+        return new SubscriptionId(decode(subscriptionId));
     }
 
 }
