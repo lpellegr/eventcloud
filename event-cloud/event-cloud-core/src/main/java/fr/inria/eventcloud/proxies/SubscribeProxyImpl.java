@@ -35,6 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -62,7 +63,6 @@ import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Solution;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.Subsubscription;
-import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * SubscribeProxyImpl is a concrete implementation of {@link SubscribeProxy}.
@@ -244,7 +244,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         int expectedNumberOfQuadruples = -1;
 
         List<Quadruple> quadsReceived = new ArrayList<Quadruple>();
-        Set<LongLong> quadHashesReceived = new HashSet<LongLong>();
+        Set<HashCode> quadHashesReceived = new HashSet<HashCode>();
 
         QuadruplePattern reconstructPattern =
                 new QuadruplePattern(eventId, Node.ANY, Node.ANY, Node.ANY);

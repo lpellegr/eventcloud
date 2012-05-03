@@ -51,6 +51,8 @@ import javax.xml.bind.DatatypeConverter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashCodes;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -70,7 +72,6 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
-import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * A subscription is a continuous query that is registered into an Event Cloud.
@@ -246,7 +247,7 @@ public class Subscription implements Quadruplable, Serializable {
         for (String stub : stubs) {
             String[] parsedStub = stub.split(" ");
             subscription.addStub(new Stub(
-                    parsedStub[1], LongLong.parseLongLong(parsedStub[0])));
+                    parsedStub[1], fromString(parsedStub[0])));
         }
 
         // recreates the sub-subscriptions
@@ -265,6 +266,10 @@ public class Subscription implements Quadruplable, Serializable {
         }
 
         return subscription;
+    }
+
+    private static HashCode fromString(String hashCode) {
+        return HashCodes.fromBytes(DatatypeConverter.parseHexBinary(hashCode));
     }
 
     /**
@@ -510,9 +515,9 @@ public class Subscription implements Quadruplable, Serializable {
         public final String peerUrl;
 
         // hash value that identifies the quadruple to retrieve
-        public final LongLong quadrupleHash;
+        public final HashCode quadrupleHash;
 
-        public Stub(String peerUrl, LongLong quadrupleHashValue) {
+        public Stub(String peerUrl, HashCode quadrupleHashValue) {
             this.peerUrl = peerUrl;
             this.quadrupleHash = quadrupleHashValue;
         }

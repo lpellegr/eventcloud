@@ -35,13 +35,13 @@ import org.openjena.riot.tokens.TokenizerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_ANY;
 import com.hp.hpl.jena.graph.Node_Blank;
 import com.hp.hpl.jena.graph.Triple;
-
-import fr.inria.eventcloud.utils.LongLong;
-import fr.inria.eventcloud.utils.MurmurHash;
 
 /**
  * A quadruple is a 4-tuple containing respectively a graph, a subject, a
@@ -327,27 +327,24 @@ public class Quadruple implements Event {
     }
 
     /**
-     * Returns a 128 bits hash value for the current quadruple by using
-     * {@link MurmurHash} function.
+     * Returns a 128 bits hash value for the current quadruple.
      * 
-     * @return a 128 bits hash value for the current quadruple by using
-     *         {@link MurmurHash} function.
+     * @return a 128 bits hash value for the current quadruple.
      */
-    public LongLong hashValue() {
-        String[] values =
-                new String[this.nodes.length + this.metaInformations.size()];
+    public HashCode hashValue() {
+        Hasher hasher = Hashing.murmur3_128().newHasher();
 
         for (int i = 0; i < this.nodes.length; i++) {
-            values[i] = this.nodes[i].toString();
+            hasher.putString(this.nodes[i].toString());
         }
 
         Iterator<Object> iterator = this.metaInformations.values().iterator();
         for (int i = this.nodes.length; i < this.nodes.length
                 + this.metaInformations.size(); i++) {
-            values[i] = iterator.next().toString();
+            hasher.putString(iterator.next().toString());
         }
 
-        return MurmurHash.hash128(values);
+        return hasher.hash();
     }
 
     /**

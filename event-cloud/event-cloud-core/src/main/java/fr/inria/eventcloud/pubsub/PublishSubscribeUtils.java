@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
@@ -77,7 +78,6 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
-import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * Some utility methods for the publish/subscribe algorithm.
@@ -256,7 +256,7 @@ public final class PublishSubscribeUtils {
      * 
      * @return a quadruple hash URI as a Jena {@link Node_URI}.
      */
-    public static final Node createQuadrupleHashUri(LongLong quadHash) {
+    public static final Node createQuadrupleHashUri(HashCode quadHash) {
         return Node.createURI(PublishSubscribeConstants.QUADRUPLE_NS.concat(quadHash.toString()));
     }
 

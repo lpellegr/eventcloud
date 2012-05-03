@@ -26,6 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Quadruple;
@@ -35,7 +36,6 @@ import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
-import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * This request is used to retrieve all the {@link Quadruple}s that match the
@@ -57,7 +57,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
 
     // the hash values associated to the quadruples which have been already
     // received by the seeker
-    private SerializedValue<Set<LongLong>> hashValuesReceived;
+    private SerializedValue<Set<HashCode>> hashValuesReceived;
 
     // the meta graph URI used to lookup the quadruples
     private SerializedValue<String> metaGraphValue;
@@ -75,7 +75,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
      *            already received.
      */
     public ReconstructCompoundEventRequest(QuadruplePattern quadruplePattern,
-            Set<LongLong> hashValuesReceived) {
+            Set<HashCode> hashValuesReceived) {
         super(quadruplePattern);
 
         this.hashValuesReceived = SerializedValue.create(hashValuesReceived);
@@ -92,7 +92,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
     public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                           AnycastRequest request,
                                                           QuadruplePattern quadruplePattern) {
-        Set<LongLong> hashValues = this.hashValuesReceived.getValue();
+        Set<HashCode> hashValues = this.hashValuesReceived.getValue();
         List<Quadruple> result = new ArrayList<Quadruple>();
 
         TransactionalDatasetGraph txnGraph =

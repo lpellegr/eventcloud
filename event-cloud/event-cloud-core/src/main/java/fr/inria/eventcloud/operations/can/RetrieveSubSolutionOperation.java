@@ -25,6 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
@@ -39,7 +40,6 @@ import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
-import fr.inria.eventcloud.utils.LongLong;
 
 /**
  * The class RetrieveSubSolutionOperation is used to retrieve the sub-solutions
@@ -56,9 +56,9 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
 
     private final NotificationId notificationId;
 
-    private final LongLong hash;
+    private final HashCode hash;
 
-    public RetrieveSubSolutionOperation(NotificationId id, LongLong hash) {
+    public RetrieveSubSolutionOperation(NotificationId id, HashCode hash) {
         super();
         this.notificationId = id;
         this.hash = hash;
