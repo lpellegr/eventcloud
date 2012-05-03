@@ -16,25 +16,22 @@
  **/
 package fr.inria.eventcloud.factories;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 
 import org.etsi.uri.gcm.util.GCM;
-import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
+import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
-import org.objectweb.proactive.core.component.adl.FactoryFactory;
-import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
-import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
+import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.gcmdeployment.GCMApplication;
+import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,15 +65,13 @@ import fr.inria.eventcloud.proxies.SubscribeProxyAttributeController;
  * @author lpellegr
  * @author bsauvan
  */
-public class ProxyFactory extends AbstractFactory implements Serializable {
+public class ProxyFactory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private static final Logger log;
 
     protected static final ConcurrentMap<EventCloudId, ProxyFactory> proxies;
-
-    protected static Factory factory;
 
     protected static String publishProxyAdl;
 
@@ -89,13 +84,6 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
 
         // proxies may be garbage collected in response to memory demand
         proxies = new MapMaker().softValues().makeMap();
-
-        CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
-        try {
-            factory = FactoryFactory.getFactory();
-        } catch (ADLException e) {
-            e.printStackTrace();
-        }
 
         publishProxyAdl = EventCloudProperties.PUBLISH_PROXY_ADL.getValue();
         subscribeProxyAdl = EventCloudProperties.SUBSCRIBE_PROXY_ADL.getValue();
@@ -122,67 +110,171 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
     }
 
     /**
-     * Creates a new {@link PublishProxy}.
+     * Creates a new publish proxy component deployed on the local JVM.
      * 
-     * @return a new {@link PublishProxy}.
+     * @return the reference on the {@link PublishProxy} interface of the new
+     *         publish proxy component created.
      */
-    public PublishProxy createPublishProxy() {
+    public PublishProxy newPublishProxy() {
+        return this.createPublishProxy(new HashMap<String, Object>());
+    }
+
+    /**
+     * Creates a new publish proxy component deployed on the specified
+     * {@code node}.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * 
+     * @return the reference on the {@link PublishProxy} interface of the new
+     *         publish proxy component created.
+     */
+    public PublishProxy newPublishProxy(Node node) {
+        return this.createPublishProxy(ComponentUtils.createContext(node));
+    }
+
+    /**
+     * Creates a new publish proxy component deployed on the specified
+     * {@code GCM virtual node}.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link PublishProxy} interface of the new
+     *         publish proxy component created.
+     */
+    public PublishProxy newPublishProxy(GCMVirtualNode vn) {
+        return this.createPublishProxy(ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new publish proxy component deployed on a {@code node} provided
+     * by the specified GCM application.
+     * 
+     * @param gcma
+     *            the GCM application to be used for deployment.
+     * 
+     * @return the reference on the {@link PublishProxy} interface of the new
+     *         publish proxy component created.
+     */
+    public PublishProxy newPublishProxy(GCMApplication gcma) {
+        return this.createPublishProxy(ComponentUtils.createContext(gcma));
+    }
+
+    private PublishProxy createPublishProxy(Map<String, Object> context) {
         try {
-            Component pubProxy =
-                    (Component) factory.newComponent(
-                            publishProxyAdl, new HashMap<String, Object>());
-            PublishProxy stub =
-                    (PublishProxy) pubProxy.getFcInterface(EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
+            PublishProxy pubProxy =
+                    ComponentUtils.createComponentAndGetInterface(
+                            publishProxyAdl,
+                            context,
+                            EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue(),
+                            PublishProxy.class, true);
 
-            ((PublishProxyAttributeController) GCM.getAttributeController(pubProxy)).setAttributes(this.eventCloudProxy);
+            ((PublishProxyAttributeController) GCM.getAttributeController(((Interface) pubProxy).getFcItfOwner())).setAttributes(this.eventCloudProxy);
 
-            GCM.getGCMLifeCycleController(pubProxy).startFc();
-
-            return stub;
-        } catch (ADLException e) {
-            throw new IllegalStateException(e);
+            return pubProxy;
         } catch (NoSuchInterfaceException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalLifeCycleException e) {
             throw new IllegalStateException(e);
         }
     }
 
     /**
-     * Creates a new {@link SubscribeProxy} by registering the proxy to the
-     * registry in order to have the possibility to receive notification.
+     * Creates a new subscribe proxy component deployed on the local JVM and by
+     * registering the proxy to the registry in order to have the possibility to
+     * receive notification.
      * 
      * @param properties
      *            the ELA properties to set.
      * 
-     * @return a new {@link SubscribeProxy}.
+     * @return the reference on the {@link SubscribeProxy} interface of the new
+     *         subscribe proxy component created.
      */
-    public SubscribeProxy createSubscribeProxy(AlterableElaProperty... properties) {
+    public SubscribeProxy newSubscribeProxy(AlterableElaProperty... properties) {
+        return this.createSubscribeProxy(
+                new HashMap<String, Object>(), properties);
+    }
+
+    /**
+     * Creates a new subscribe proxy component deployed on the specified
+     * {@code node} and by registering the proxy to the registry in order to
+     * have the possibility to receive notification.
+     * 
+     * @param properties
+     *            the ELA properties to set.
+     * @param node
+     *            the node to be used for deployment.
+     * 
+     * @return the reference on the {@link SubscribeProxy} interface of the new
+     *         subscribe proxy component created.
+     */
+    public SubscribeProxy newSubscribeProxy(Node node,
+                                            AlterableElaProperty... properties) {
+        return this.createSubscribeProxy(
+                ComponentUtils.createContext(node), properties);
+    }
+
+    /**
+     * Creates a new subscribe proxy component deployed on the specified
+     * {@code GCM virtual node} and by registering the proxy to the registry in
+     * order to have the possibility to receive notification.
+     * 
+     * @param properties
+     *            the ELA properties to set.
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link SubscribeProxy} interface of the new
+     *         subscribe proxy component created.
+     */
+    public SubscribeProxy newSubscribeProxy(GCMVirtualNode vn,
+                                            AlterableElaProperty... properties) {
+        return this.createSubscribeProxy(
+                ComponentUtils.createContext(vn), properties);
+    }
+
+    /**
+     * Creates a new subscribe proxy component deployed on a {@code node}
+     * provided by the specified GCM application and by registering the proxy to
+     * the registry in order to have the possibility to receive notification.
+     * 
+     * @param properties
+     *            the ELA properties to set.
+     * @param gcma
+     *            the GCM application to be used for deployment.
+     * 
+     * @return the reference on the {@link SubscribeProxy} interface of the new
+     *         subscribe proxy component created.
+     */
+    public SubscribeProxy newSubscribeProxy(GCMApplication gcma,
+                                            AlterableElaProperty... properties) {
+        return this.createSubscribeProxy(
+                ComponentUtils.createContext(gcma), properties);
+    }
+
+    private SubscribeProxy createSubscribeProxy(Map<String, Object> context,
+                                                AlterableElaProperty... properties) {
         try {
-            Component subProxy =
-                    (Component) factory.newComponent(
-                            subscribeProxyAdl, new HashMap<String, Object>());
-            SubscribeProxy stub =
-                    (SubscribeProxy) subProxy.getFcInterface(EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
+            SubscribeProxy subProxy =
+                    ComponentUtils.createComponentAndGetInterface(
+                            subscribeProxyAdl,
+                            context,
+                            EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue(),
+                            SubscribeProxy.class, true);
+
+            Component subComponent = ((Interface) subProxy).getFcItfOwner();
 
             // registers the subscribe proxy to have the possibility
             // to receive notifications
             String componentUri =
-                    Fractive.registerByName(subProxy, "subscribe-proxy-"
+                    Fractive.registerByName(subComponent, "subscribe-proxy-"
                             + UUID.randomUUID().toString());
             log.info("SubscribeProxy bound to {}", componentUri);
 
-            ((SubscribeProxyAttributeController) GCM.getAttributeController(subProxy)).setAttributes(
+            ((SubscribeProxyAttributeController) GCM.getAttributeController(subComponent)).setAttributes(
                     this.eventCloudProxy, componentUri, properties);
 
-            GCM.getGCMLifeCycleController(subProxy).startFc();
-
-            return stub;
-        } catch (ADLException e) {
-            throw new IllegalStateException(e);
+            return subProxy;
         } catch (NoSuchInterfaceException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalLifeCycleException e) {
             throw new IllegalStateException(e);
         } catch (ProActiveException e) {
             throw new IllegalStateException(e);
@@ -190,28 +282,70 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
     }
 
     /**
-     * Creates a new {@link PutGetProxy}.
+     * Creates a new put/get proxy component deployed on the local JVM.
      * 
-     * @return a new {@link PutGetProxy}.
+     * @return the reference on the {@link PutGetProxy} interface of the new
+     *         put/get proxy component created.
      */
-    public PutGetProxy createPutGetProxy() {
+    public PutGetProxy newPutGetProxy() {
+        return this.createPutGetProxy(new HashMap<String, Object>());
+    }
+
+    /**
+     * Creates a new put/get proxy component deployed on the specified
+     * {@code node}.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * 
+     * @return the reference on the {@link PutGetProxy} interface of the new
+     *         put/get proxy component created.
+     */
+    public PutGetProxy newPutGetProxy(Node node) {
+        return this.createPutGetProxy(ComponentUtils.createContext(node));
+    }
+
+    /**
+     * Creates a new put/get proxy component deployed on the specified
+     * {@code GCM virtual node}.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link PutGetProxy} interface of the new
+     *         put/get proxy component created.
+     */
+    public PutGetProxy newPutGetProxy(GCMVirtualNode vn) {
+        return this.createPutGetProxy(ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new put/get proxy component deployed on a {@code node} provided
+     * by the specified GCM application.
+     * 
+     * @param gcma
+     *            the GCM application to be used for deployment.
+     * 
+     * @return the reference on the {@link PutGetProxy} interface of the new
+     *         put/get proxy component created.
+     */
+    public PutGetProxy newPutGetProxy(GCMApplication gcma) {
+        return this.createPutGetProxy(ComponentUtils.createContext(gcma));
+    }
+
+    private PutGetProxy createPutGetProxy(Map<String, Object> context) {
         try {
-            Component putgetProxy =
-                    (Component) factory.newComponent(
-                            putgetProxyAdl, new HashMap<String, Object>());
-            PutGetProxy stub =
-                    (PutGetProxy) putgetProxy.getFcInterface(EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
+            PutGetProxy putgetProxy =
+                    ComponentUtils.createComponentAndGetInterface(
+                            putgetProxyAdl,
+                            context,
+                            EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue(),
+                            PutGetProxy.class, true);
 
-            ((PutGetProxyAttributeController) GCM.getAttributeController(putgetProxy)).setAttributes(this.eventCloudProxy);
+            ((PutGetProxyAttributeController) GCM.getAttributeController(((Interface) putgetProxy).getFcItfOwner())).setAttributes(this.eventCloudProxy);
 
-            GCM.getGCMLifeCycleController(putgetProxy).startFc();
-
-            return stub;
-        } catch (ADLException e) {
-            throw new IllegalStateException(e);
+            return putgetProxy;
         } catch (NoSuchInterfaceException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalLifeCycleException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -242,27 +376,6 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
         } else {
             return oldFactory;
         }
-    }
-
-    public static SubscribeProxy lookupSubscribeProxy(String componentUri)
-            throws IOException {
-        return (SubscribeProxy) AbstractComponent.lookupFcInterface(
-                componentUri,
-                EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue());
-    }
-
-    public static PublishProxy lookupPublishProxy(String componentUri)
-            throws IOException {
-        return (PublishProxy) AbstractComponent.lookupFcInterface(
-                componentUri,
-                EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue());
-    }
-
-    public static PutGetProxy lookupPutGetProxy(String componentUri)
-            throws IOException {
-        return (PutGetProxy) AbstractComponent.lookupFcInterface(
-                componentUri,
-                EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
     }
 
 }

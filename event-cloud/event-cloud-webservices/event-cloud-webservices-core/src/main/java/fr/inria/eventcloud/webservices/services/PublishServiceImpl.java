@@ -91,7 +91,7 @@ public class PublishServiceImpl extends
     public PublishProxy createProxy() throws EventCloudIdNotManaged {
         return ProxyFactory.getInstance(
                 super.registryUrl, new EventCloudId(super.streamUrl))
-                .createPublishProxy();
+                .newPublishProxy();
     }
 
 }

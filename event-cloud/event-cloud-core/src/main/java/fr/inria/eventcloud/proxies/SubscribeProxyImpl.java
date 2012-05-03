@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,6 +120,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
         // setImmediateServices has to be handled in immediate services. This
         // configuration should be done in the ProActive source code.
         body.setImmediateService("setImmediateServices", false);
+        body.setImmediateService("setAttributes", false);
         body.setImmediateService("receive", false);
     }
 
@@ -446,6 +449,13 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
      */
     public String getComponentUri() {
         return this.componentUri;
+    }
+
+    public static SubscribeProxy lookup(String componentUri) throws IOException {
+        return ComponentUtils.lookupFcInterface(
+                componentUri,
+                EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue(),
+                SubscribeProxy.class);
     }
 
 }

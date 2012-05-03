@@ -16,15 +16,18 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.parsers.RdfParser;
@@ -113,6 +116,13 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
                 PublishProxyImpl.this.publish(quad);
             }
         });
+    }
+
+    public static PublishProxy lookup(String componentUri) throws IOException {
+        return ComponentUtils.lookupFcInterface(
+                componentUri,
+                EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue(),
+                PublishProxy.class);
     }
 
 }

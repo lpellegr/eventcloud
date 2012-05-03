@@ -26,6 +26,7 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -162,9 +163,10 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      */
     public static EventCloudsRegistry lookup(String componentUri)
             throws IOException {
-        return (EventCloudsRegistry) AbstractComponent.lookupFcInterface(
+        return ComponentUtils.lookupFcInterface(
                 componentUri,
-                EventCloudProperties.EVENTCLOUDS_REGISTRY_SERVICES_ITF.getValue());
+                EventCloudProperties.EVENTCLOUDS_REGISTRY_SERVICES_ITF.getValue(),
+                EventCloudsRegistry.class);
     }
 
 }

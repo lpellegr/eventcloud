@@ -30,6 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.core.util.MutableInteger;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,6 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
@@ -97,8 +97,8 @@ public class SubscribeProxyTest {
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.eventCloudId);
 
-        this.subscribeProxy = this.proxyFactory.createSubscribeProxy();
-        this.publishProxy = this.proxyFactory.createPublishProxy();
+        this.subscribeProxy = this.proxyFactory.newSubscribeProxy();
+        this.publishProxy = this.proxyFactory.newPublishProxy();
     }
 
     @Test
@@ -170,7 +170,7 @@ public class SubscribeProxyTest {
         List<PublishProxy> proxies = new ArrayList<PublishProxy>(nb);
 
         for (int i = 0; i < nb; i++) {
-            proxies.add(this.proxyFactory.createPublishProxy());
+            proxies.add(this.proxyFactory.newPublishProxy());
         }
 
         return proxies;
@@ -477,8 +477,8 @@ public class SubscribeProxyTest {
     public void tearDown() {
         this.deployer.undeploy();
 
-        SemanticFactory.terminateComponent(this.publishProxy);
-        SemanticFactory.terminateComponent(this.subscribeProxy);
+        ComponentUtils.terminateComponent(this.publishProxy);
+        ComponentUtils.terminateComponent(this.subscribeProxy);
 
         signals.setValue(0);
         bindings.clear();

@@ -22,16 +22,13 @@ import java.util.List;
 import org.etsi.uri.gcm.util.GCM;
 import org.junit.Assert;
 import org.junit.Test;
-import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Factory;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
-import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.component.webservices.JaxWsCXFWSCaller;
-import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +39,6 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
@@ -55,17 +51,6 @@ import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 public class PutGetTest {
 
     private static final Logger log = LoggerFactory.getLogger(PutGetTest.class);
-
-    private static Factory factory;
-
-    static {
-        CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
-        try {
-            factory = FactoryFactory.getFactory();
-        } catch (ADLException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Test(timeout = 90000)
     public void testPutGetWsProxy() throws Exception {
@@ -122,15 +107,19 @@ public class PutGetTest {
         Assert.assertEquals(expectedNodeResult, resultNode);
 
         deployer.undeploy();
-        this.terminatePutGetCaller(putGetCaller);
+        ComponentUtils.terminateComponent(putGetCaller);
     }
 
     private PutGetWsApi createPutGetCaller(String putGetWsUrl) {
+
         try {
-            Component putGetComponent =
-                    (Component) factory.newComponent(
+            PutGetWsApi putGetCaller =
+                    ComponentUtils.createComponentAndGetInterface(
                             "fr.inria.eventcloud.webservices.putget.PutGetComponent",
-                            new HashMap<String, Object>());
+                            new HashMap<String, Object>(), "putget-services",
+                            PutGetWsApi.class, false);
+            Component putGetComponent =
+                    ((Interface) putGetCaller).getFcItfOwner();
 
             GCM.getBindingController(putGetComponent).bindFc(
                     PutGetComponentImpl.PUTGET_WEBSERVICES_NAME,
@@ -138,23 +127,13 @@ public class PutGetTest {
 
             GCM.getGCMLifeCycleController(putGetComponent).startFc();
 
-            return (PutGetWsApi) putGetComponent.getFcInterface(EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue());
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private void terminatePutGetCaller(PutGetWsApi putGetCaller) {
-        try {
-            Component putGetComponent =
-                    ((Interface) putGetCaller).getFcItfOwner();
-            GCM.getGCMLifeCycleController(putGetComponent).stopFc();
-            GCM.getGCMLifeCycleController(putGetComponent)
-                    .terminateGCMComponent();
-        } catch (IllegalLifeCycleException e) {
-            e.printStackTrace();
+            return putGetCaller;
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
+        } catch (IllegalBindingException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalLifeCycleException e) {
+            throw new IllegalStateException(e);
         }
     }
 
