@@ -139,7 +139,7 @@ public class SubscribeProxyTest {
                         publishProxy.publish(new CompoundEvent(quadruples));
                     }
                 }
-            }, 0, (i + 1) * 100, TimeUnit.MILLISECONDS);
+            }, 0, (i + 1) * 200, TimeUnit.MILLISECONDS);
         }
 
         Subscription subscription =
