@@ -77,7 +77,7 @@ public class EventCloudUsageTest implements Serializable {
 
         // From the proxy factory we can create a PutGet proxy whose the
         // purpose is to work with historical semantic data
-        PutGetProxy putGetProxy = proxyFactory.createPutGetProxy();
+        PutGetProxy putGetProxy = proxyFactory.newPutGetProxy();
 
         // By using the PutGetProxy we can publish synchronously some
         // historical quadruples (although these quadruples may trigger
@@ -130,8 +130,7 @@ public class EventCloudUsageTest implements Serializable {
 
         // Then, it is possible to create a SubscribeProxy to
         // subscribe to some interest and to be notified asynchronously
-        final SubscribeProxy subscribeProxy =
-                proxyFactory.createSubscribeProxy();
+        final SubscribeProxy subscribeProxy = proxyFactory.newSubscribeProxy();
 
         // Once a subscription is created, a SubscriptionId can be retrived from
         // the subscription object to have the possibility to perform an
@@ -159,7 +158,7 @@ public class EventCloudUsageTest implements Serializable {
                 subscription.getId());
 
         // Finally, we can simulate an event source by creating a PublishProxy
-        PublishProxy publishProxy = proxyFactory.createPublishProxy();
+        PublishProxy publishProxy = proxyFactory.newPublishProxy();
 
         long publicationTime = System.currentTimeMillis();
 

@@ -16,26 +16,19 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.factories;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.etsi.uri.gcm.util.GCM;
-import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Factory;
-import org.objectweb.fractal.api.Component;
+import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalLifeCycleException;
-import org.objectweb.proactive.core.component.adl.FactoryFactory;
-import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
-import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
@@ -48,34 +41,23 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public final class PeerFactory extends AbstractFactory {
+public final class PeerFactory {
 
     private static final Logger log =
             LoggerFactory.getLogger(PeerFactory.class);
-
-    private static Factory factory;
-
-    static {
-        CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
-        try {
-            factory = FactoryFactory.getFactory();
-        } catch (ADLException e) {
-            e.printStackTrace();
-        }
-    }
 
     private PeerFactory() {
     }
 
     /**
-     * Creates a new peer component on the local JVM by using the specified
-     * overlay abstraction.
+     * Creates a new peer component deployed on the local JVM by using the
+     * specified overlay abstraction.
      * 
      * @param overlayProvider
      *            the overlay provider to use.
      * 
-     * @return the reference on the {@link Peer} interface of the new component
-     *         created.
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
      */
     public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider) {
         return PeerFactory.createPeer(
@@ -83,93 +65,77 @@ public final class PeerFactory extends AbstractFactory {
     }
 
     /**
-     * Creates a new peer component on the specified {@code node} by using the
-     * given {@code overlay} abstraction.
-     * 
-     * @param overlayProvider
-     *            the overlay provider to use.
-     * @param node
-     *            the node used by the peer.
-     * 
-     * @return the reference on the {@link Peer} interface of the new component
-     *         created.
-     */
-    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
-                                                             Node node) {
-        Map<String, Object> context = new HashMap<String, Object>();
-        if (node != null) {
-            List<Node> nodeList = new ArrayList<Node>(1);
-            nodeList.add(node);
-            context.put(ADLNodeProvider.NODES_ID, nodeList);
-        }
-        return PeerFactory.createPeer(overlayProvider, context);
-    }
-
-    /**
-     * Creates a new peer component on the specified {@code GCM virtual node} by
+     * Creates a new peer component deployed on the specified {@code node} by
      * using the given {@code overlay} abstraction.
      * 
      * @param overlayProvider
      *            the overlay provider to use.
-     * @param vn
-     *            the GCM virtual node used by the peer.
+     * @param node
+     *            the node to be used for deployment.
      * 
-     * @return the reference on the {@link Peer} interface of the new component
-     *         created.
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
      */
     public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
-                                                             GCMVirtualNode vn) {
-        Map<String, Object> context = new HashMap<String, Object>();
-        if (vn != null) {
-            context.put(vn.getName(), vn);
-        }
-        return PeerFactory.createPeer(overlayProvider, context);
+                                                             Node node) {
+        return PeerFactory.createPeer(
+                overlayProvider, ComponentUtils.createContext(node));
     }
 
     /**
-     * Creates a new peer component on {@code node} provided by the specified
-     * GCM application and by using the given {@code overlay} abstraction.
+     * Creates a new peer component deployed on the specified
+     * {@code GCM virtual node} by using the given {@code overlay} abstraction.
+     * 
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
+     */
+    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
+                                                             GCMVirtualNode vn) {
+        return PeerFactory.createPeer(
+                overlayProvider, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new peer component deployed on a {@code node} provided by the
+     * specified GCM application and by using the given {@code overlay}
+     * abstraction.
      * 
      * @param overlayProvider
      *            the overlay provider to use.
      * @param gcma
-     *            the GCM application used by the peer.
+     *            the GCM application to be used for deployment.
      * 
-     * @return the reference on the {@link Peer} interface of the new component
-     *         created.
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
      */
     public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
                                                              GCMApplication gcma) {
-        Map<String, Object> context = new HashMap<String, Object>();
-        if (gcma != null) {
-            context.put("deployment-descriptor", gcma);
-        }
-        return PeerFactory.createPeer(overlayProvider, context);
+        return PeerFactory.createPeer(
+                overlayProvider, ComponentUtils.createContext(gcma));
     }
 
     private static <T extends StructuredOverlay> Peer createPeer(SerializableProvider<T> overlayProvider,
                                                                  Map<String, Object> context) {
         try {
-            Component peer =
-                    (Component) factory.newComponent(
+            Peer peer =
+                    ComponentUtils.createComponentAndGetInterface(
                             P2PStructuredProperties.PEER_ADL.getValue(),
-                            context);
-            Peer stub =
-                    (Peer) peer.getFcInterface(P2PStructuredProperties.PEER_SERVICES_ITF.getValue());
+                            context,
+                            P2PStructuredProperties.PEER_SERVICES_ITF.getValue(),
+                            Peer.class, true);
 
-            ((PeerAttributeController) GCM.getAttributeController(peer)).setAttributes(
-                    stub, overlayProvider);
+            ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(
+                    peer, overlayProvider);
 
-            GCM.getGCMLifeCycleController(peer).startFc();
+            log.info("Peer {} created", peer.getId());
 
-            log.info("Peer {} created", stub.getId());
-
-            return stub;
-        } catch (ADLException e) {
-            throw new IllegalStateException(e);
+            return peer;
         } catch (NoSuchInterfaceException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalLifeCycleException e) {
             throw new IllegalStateException(e);
         }
     }

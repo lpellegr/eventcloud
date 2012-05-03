@@ -135,7 +135,7 @@ public class SubscribeServiceImpl extends
     public SubscribeProxy createProxy() throws EventCloudIdNotManaged {
         return ProxyFactory.getInstance(
                 super.registryUrl, new EventCloudId(super.streamUrl))
-                .createSubscribeProxy();
+                .newSubscribeProxy();
     }
 
 }

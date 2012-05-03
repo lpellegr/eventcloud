@@ -78,6 +78,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
         body.setImmediateService("toString", false);
 
         body.setImmediateService("receiveImmediateService", false);
+        body.setImmediateService("setAttributes", false);
         body.setImmediateService("route", false);
         body.setImmediateService("send", false);
     }

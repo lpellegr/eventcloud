@@ -16,11 +16,13 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -30,6 +32,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
@@ -189,6 +192,13 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy,
     @Override
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
         return super.selectPeer().executeSparqlSelect(sparqlSelectQuery);
+    }
+
+    public static PutGetProxy lookup(String componentUri) throws IOException {
+        return ComponentUtils.lookupFcInterface(
+                componentUri,
+                EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue(),
+                PutGetProxy.class);
     }
 
 }

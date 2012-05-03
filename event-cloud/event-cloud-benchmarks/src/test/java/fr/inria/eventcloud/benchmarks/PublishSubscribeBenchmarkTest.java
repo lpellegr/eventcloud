@@ -234,7 +234,7 @@ public class PublishSubscribeBenchmarkTest {
         List<PublishProxy> result = new ArrayList<PublishProxy>(nb);
 
         for (int i = 0; i < nb; i++) {
-            result.add(proxyFactory.createPublishProxy());
+            result.add(proxyFactory.newPublishProxy());
         }
 
         return result;
@@ -245,7 +245,7 @@ public class PublishSubscribeBenchmarkTest {
         List<SubscribeProxy> result = new ArrayList<SubscribeProxy>(nb);
 
         for (int i = 0; i < nb; i++) {
-            result.add(proxyFactory.createSubscribeProxy());
+            result.add(proxyFactory.newSubscribeProxy());
         }
 
         return result;

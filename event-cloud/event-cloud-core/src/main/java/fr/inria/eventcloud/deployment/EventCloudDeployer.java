@@ -23,10 +23,10 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploym
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
-import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
@@ -118,11 +118,11 @@ public class EventCloudDeployer extends NetworkDeployer {
         }
 
         for (Peer peer : super.getRandomTracker().getPeers()) {
-            AbstractFactory.terminateComponent(peer);
+            ComponentUtils.terminateComponent(peer);
         }
 
         for (Tracker tracker : this.getTrackers()) {
-            AbstractFactory.terminateComponent(tracker);
+            ComponentUtils.terminateComponent(tracker);
         }
     }
 

@@ -22,13 +22,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloud;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -139,7 +139,7 @@ public class JunitEventCloudInfrastructureDeployer {
             this.eventClouds.get(ecId).getEventCloudDeployer().undeploy();
         }
 
-        SemanticFactory.terminateComponent(this.eventCloudsRegistry);
+        ComponentUtils.terminateComponent(this.eventCloudsRegistry);
     }
 
     public void undeploy(EventCloudId eventCloudId) {

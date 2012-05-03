@@ -16,24 +16,17 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.factories;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.etsi.uri.gcm.util.GCM;
-import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Factory;
-import org.objectweb.fractal.api.Component;
+import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalLifeCycleException;
-import org.objectweb.proactive.core.component.adl.FactoryFactory;
-import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
-import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
@@ -46,40 +39,29 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public class TrackerFactory extends AbstractFactory {
+public class TrackerFactory {
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(TrackerFactory.class);
-
-    private static Factory factory;
-
-    static {
-        CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
-        try {
-            factory = FactoryFactory.getFactory();
-        } catch (ADLException e) {
-            e.printStackTrace();
-        }
-    }
 
     private TrackerFactory() {
     }
 
     /**
-     * Creates a new tracker component on the local JVM and associates it to the
-     * network name "default".
+     * Creates a new tracker component deployed on the local JVM and associates
+     * it to the network name "default".
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
     public static Tracker newTracker() {
-        return TrackerFactory.newTracker(
+        return TrackerFactory.createTracker(
                 "default", new HashMap<String, Object>());
     }
 
     /**
-     * Creates a new tracker component on the local JVM and associates it to the
-     * specified {@code networkName}.
+     * Creates a new tracker component deployed on the local JVM and associates
+     * it to the specified {@code networkName}.
      * 
      * @param networkName
      *            the name of the network the tracker manages.
@@ -88,98 +70,125 @@ public class TrackerFactory extends AbstractFactory {
      *         component created.
      */
     public static Tracker newTracker(String networkName) {
-        return TrackerFactory.newTracker(
+        return TrackerFactory.createTracker(
                 networkName, new HashMap<String, Object>());
     }
 
     /**
-     * Creates a new tracker component on the specified {@code node} and
-     * associates it to the given {@code networkName}.
+     * Creates a new tracker component deployed on the specified {@code node}
+     * and associates it to the network name "default".
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * 
+     * @return the reference on the {@link Tracker} interface of the new tracker
+     *         component created.
+     */
+    public static Tracker newTracker(Node node) {
+        return TrackerFactory.newTracker("default", node);
+    }
+
+    /**
+     * Creates a new tracker component deployed on the specified
+     * {@code GCM virtual node} and associates it to the network name "default".
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link Tracker} interface of the new tracker
+     *         component created.
+     */
+    public static Tracker newTracker(GCMVirtualNode vn) {
+        return TrackerFactory.newTracker("default", vn);
+    }
+
+    /**
+     * Creates a new tracker component deployed on a {@code node} provided by
+     * the specified GCM application and associates it to the network name
+     * "default".
+     * 
+     * @param gcma
+     *            the GCM application to be used for deployment.
+     * 
+     * @return the reference on the {@link Tracker} interface of the new tracker
+     *         component created.
+     */
+    public static Tracker newTracker(GCMApplication gcma) {
+        return TrackerFactory.newTracker("default", gcma);
+    }
+
+    /**
+     * Creates a new tracker component deployed on the specified {@code node}
+     * and associates it to the given {@code networkName}.
      * 
      * @param networkName
      *            the name of the network the tracker manages.
      * @param node
-     *            the node to use for deployment.
+     *            the node to be used for deployment.
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
     public static Tracker newTracker(String networkName, Node node) {
-        Map<String, Object> context = new HashMap<String, Object>();
-        if (node != null) {
-            List<Node> nodeList = new ArrayList<Node>(1);
-            nodeList.add(node);
-            context.put(ADLNodeProvider.NODES_ID, nodeList);
-        }
-        return TrackerFactory.newTracker(networkName, context);
+        return TrackerFactory.createTracker(
+                networkName, ComponentUtils.createContext(node));
     }
 
     /**
-     * Creates a new tracker component on the specified {@code GCM virtual node}
-     * and associates it to the given {@code networkName}.
-     * 
-     * @param networkName
-     *            the name of the network the tracker manages.
-     * @param vn
-     *            the GCM virtual node to use for deployment.
-     * 
-     * @return the reference on the {@link Tracker} interface of the new tracker
-     *         component created.
-     */
-    public static Tracker newTracker(String networkName, GCMVirtualNode vn) {
-        Map<String, Object> context = new HashMap<String, Object>();
-        if (vn != null) {
-            context.put(vn.getName(), vn);
-        }
-        return TrackerFactory.newTracker(networkName, context);
-    }
-
-    /**
-     * Creates a new tracker component by using the specified
+     * Creates a new tracker component deployed on the specified
      * {@code GCM virtual node} and associates it to the given
      * {@code networkName}.
      * 
      * @param networkName
      *            the name of the network the tracker manages.
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link Tracker} interface of the new tracker
+     *         component created.
+     */
+    public static Tracker newTracker(String networkName, GCMVirtualNode vn) {
+        return TrackerFactory.createTracker(
+                networkName, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new tracker component deployed on a {@code node} provided by
+     * the specified GCM application and associates it to the given
+     * {@code networkName}.
+     * 
+     * @param networkName
+     *            the name of the network the tracker manages.
      * @param gcma
-     *            the GCM deployment to use for deployment.
+     *            the GCM application to be used for deployment.
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
      */
     public static Tracker newTracker(String networkName, GCMApplication gcma) {
-        Map<String, Object> context = new HashMap<String, Object>();
-        if (gcma != null) {
-            context.put("deployment-descriptor", gcma);
-        }
-        return TrackerFactory.newTracker(networkName, context);
+        return TrackerFactory.createTracker(
+                networkName, ComponentUtils.createContext(gcma));
     }
 
-    private static Tracker newTracker(String networkName,
-                                      Map<String, Object> context) {
+    private static Tracker createTracker(String networkName,
+                                         Map<String, Object> context) {
         try {
-            Component tracker =
-                    (Component) factory.newComponent(
+            Tracker tracker =
+                    ComponentUtils.createComponentAndGetInterface(
                             P2PStructuredProperties.TRACKER_ADL.getValue(),
-                            context);
-            Tracker stub =
-                    (Tracker) tracker.getFcInterface(P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue());
+                            context,
+                            P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue(),
+                            Tracker.class, true);
 
-            ((TrackerAttributeController) GCM.getAttributeController(tracker)).setAttributes(
-                    stub, networkName);
+            ((TrackerAttributeController) GCM.getAttributeController(((Interface) tracker).getFcItfOwner())).setAttributes(
+                    tracker, networkName);
 
-            GCM.getGCMLifeCycleController(tracker).startFc();
-
-            logger.info(
+            log.info(
                     "Tracker {} associated to network named '{}' created",
-                    stub.getId(), networkName);
+                    tracker.getId(), networkName);
 
-            return stub;
-        } catch (ADLException e) {
-            throw new IllegalStateException(e);
+            return tracker;
         } catch (NoSuchInterfaceException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalLifeCycleException e) {
             throw new IllegalStateException(e);
         }
     }
