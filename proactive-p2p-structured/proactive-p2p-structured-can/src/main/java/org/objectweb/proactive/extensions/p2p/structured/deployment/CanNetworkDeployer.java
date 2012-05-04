@@ -20,6 +20,7 @@ import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
@@ -42,13 +43,16 @@ public final class CanNetworkDeployer extends NetworkDeployer {
         super(overlayProvider);
     }
 
-    public CanNetworkDeployer(DeploymentConfiguration configuration) {
-        super(configuration, SerializableProvider.create(CanOverlay.class));
+    public CanNetworkDeployer(DeploymentConfiguration configuration,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        super(configuration, SerializableProvider.create(CanOverlay.class),
+                injectionConstraintsProvider);
     }
 
     public CanNetworkDeployer(DeploymentConfiguration configuration,
-            SerializableProvider<? extends CanOverlay> overlayProvider) {
-        super(configuration, overlayProvider);
+            SerializableProvider<? extends CanOverlay> overlayProvider,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        super(configuration, overlayProvider, injectionConstraintsProvider);
     }
 
     /**

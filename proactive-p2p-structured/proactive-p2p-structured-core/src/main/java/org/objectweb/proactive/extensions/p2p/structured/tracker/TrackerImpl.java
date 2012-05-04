@@ -161,6 +161,21 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      */
     @Override
     public void inject(Peer remotePeer) throws NetworkAlreadyJoinedException {
+        Peer peerToJoin = null;
+
+        if (this.type != null) {
+            peerToJoin = this.getRandomPeer();
+        }
+
+        this.inject(remotePeer, peerToJoin);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void inject(Peer remotePeer, Peer landmarkPeer)
+            throws NetworkAlreadyJoinedException {
         OverlayType remotePeerType = remotePeer.getType();
 
         if (this.type == null) {
@@ -175,7 +190,6 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
                                 + " network and receives " + remotePeerType);
             }
 
-            Peer landmarkPeer = this.getRandomPeer();
             boolean joinSucceed = false;
 
             // try to join until the operation succeeds (the operation

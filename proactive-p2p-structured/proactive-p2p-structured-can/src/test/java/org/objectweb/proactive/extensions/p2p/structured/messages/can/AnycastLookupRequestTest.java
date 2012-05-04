@@ -35,6 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
@@ -56,14 +57,18 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private Proxy proxy;
 
     public AnycastLookupRequestTest() {
-        super(1, NB_PEERS, new SerializableProvider<CustomCanOverlay>() {
-            private static final long serialVersionUID = 1L;
+        super(
+                1,
+                NB_PEERS,
+                new SerializableProvider<CustomCanOverlay>() {
+                    private static final long serialVersionUID = 1L;
 
-            @Override
-            public CustomCanOverlay get() {
-                return new CustomCanOverlay();
-            }
-        });
+                    @Override
+                    public CustomCanOverlay get() {
+                        return new CustomCanOverlay();
+                    }
+                },
+                InjectionConstraintsProvider.newFractalInjectionConstraintsProvider());
     }
 
     @Override
@@ -80,8 +85,10 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                         Character.toString((char) ((int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue() - 1)));
 
         GetZonesValidatingConstraintsResponse response =
-                (GetZonesValidatingConstraintsResponse) this.proxy.send(new GetZonesValidatingConstraintsRequest(
-                        new StringCoordinate(null, elt, null)));
+                (GetZonesValidatingConstraintsResponse) this.proxy.send(
+                        new GetZonesValidatingConstraintsRequest(
+                                new StringCoordinate(null, elt, null)),
+                        super.getPeer(0));
 
         checkResponse(response);
 

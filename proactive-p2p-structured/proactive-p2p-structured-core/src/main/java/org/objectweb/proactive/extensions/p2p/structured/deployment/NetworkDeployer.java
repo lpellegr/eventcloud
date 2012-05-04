@@ -17,6 +17,8 @@
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Observable;
@@ -58,6 +61,8 @@ public abstract class NetworkDeployer extends
 
     protected final SerializableProvider<? extends StructuredOverlay> overlayProvider;
 
+    private final InjectionConstraintsProvider injectionConstraintsProvider;
+
     // this atomic reference is used to detect the deployer state and the
     // interleaving of some methods in multi-threaded environment.
     private AtomicReference<NetworkDeployerState> state;
@@ -82,10 +87,14 @@ public abstract class NetworkDeployer extends
      *            the deployment configuration to use.
      * @param overlayProvider
      *            the overlay provider to use for creating peers.
+     * @param injectionConstraintsProvider
+     *            a provider that knows how to create the constraints to use
+     *            during the creation of the network.
      */
     public NetworkDeployer(DeploymentConfiguration configuration,
-            SerializableProvider<? extends StructuredOverlay> overlayProvider) {
-        this(configuration, overlayProvider, null);
+            SerializableProvider<? extends StructuredOverlay> overlayProvider,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        this(configuration, overlayProvider, injectionConstraintsProvider, null);
     }
 
     /**
@@ -94,18 +103,23 @@ public abstract class NetworkDeployer extends
      * 
      * @param configuration
      *            the deployment configuration to use.
-     * @param nodeProvider
-     *            the node provider to use.
      * @param overlayProvider
      *            the overlay provider to use for creating peers.
+     * @param injectionConstraintsProvider
+     *            a provider that knows how to create the constraints to use
+     *            during the creation of the network.
+     * @param nodeProvider
+     *            the node provider to use.
      */
     public NetworkDeployer(DeploymentConfiguration configuration,
             SerializableProvider<? extends StructuredOverlay> overlayProvider,
+            InjectionConstraintsProvider injectionConstraintsProvider,
             NodeProvider nodeProvider) {
         this.state =
                 new AtomicReference<NetworkDeployerState>(
                         NetworkDeployerState.STANDBY);
         this.overlayProvider = overlayProvider;
+        this.injectionConstraintsProvider = injectionConstraintsProvider;
         this.nodeProvider = nodeProvider;
 
         configuration.configure();
@@ -165,7 +179,7 @@ public abstract class NetworkDeployer extends
     private void injectPeers(int nbPeers) {
         this.notifyInjectingPeers();
 
-        // TODO uncomment when components will be able to be instantiated in
+        // TODO: uncomment when components will be able to be instantiated in
         // parallel
 
         // if (nbPeers > INJECTION_THRESHOLD) {
@@ -177,11 +191,33 @@ public abstract class NetworkDeployer extends
         log.debug(
                 "Creates and use sequential injection for the {} peer(s) to insert on the network",
                 nbPeers);
-        Peer peerCreated;
+
+        List<Peer> peersInjected = new ArrayList<Peer>(nbPeers);
+        InjectionConstraints injectionConstraints = null;
+
+        if (this.injectionConstraintsProvider != null) {
+            injectionConstraints =
+                    this.injectionConstraintsProvider.get(nbPeers);
+        }
+
         for (int i = 0; i < nbPeers; i++) {
-            peerCreated = this.createPeer();
+            int peerIndexToJoin = -1;
+
+            peersInjected.add(this.createPeer());
+
+            if (injectionConstraints != null) {
+                peerIndexToJoin = injectionConstraints.findConstraint(i);
+            }
+
             try {
-                this.getRandomTracker().inject(peerCreated);
+                if (peerIndexToJoin != -1) {
+                    this.getRandomTracker().inject(
+                            peersInjected.get(i),
+                            peersInjected.get(peerIndexToJoin));
+                    peerIndexToJoin = -1;
+                } else {
+                    this.getRandomTracker().inject(peersInjected.get(i));
+                }
             } catch (NetworkAlreadyJoinedException e) {
                 e.printStackTrace();
             }

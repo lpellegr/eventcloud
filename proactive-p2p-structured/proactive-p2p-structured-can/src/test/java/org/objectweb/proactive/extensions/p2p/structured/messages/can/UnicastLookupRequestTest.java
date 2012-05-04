@@ -33,6 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
@@ -53,21 +54,25 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private StringCoordinate targetLowerBound;
 
     public UnicastLookupRequestTest() {
-        super(1, 10, new SerializableProvider<CustomCanOverlay>() {
-            private static final long serialVersionUID = 1L;
+        super(
+                1,
+                10,
+                new SerializableProvider<CustomCanOverlay>() {
+                    private static final long serialVersionUID = 1L;
 
-            @Override
-            public CustomCanOverlay get() {
-                return new CustomCanOverlay();
-            }
-        });
+                    @Override
+                    public CustomCanOverlay get() {
+                        return new CustomCanOverlay();
+                    }
+                },
+                InjectionConstraintsProvider.newFractalInjectionConstraintsProvider());
     }
 
     @Override
     public void setUp() {
         super.setUp();
 
-        this.target = super.getPeer(8);
+        this.target = super.getPeer(9);
         this.targetLowerBound =
                 CanOperations.getIdAndZoneResponseOperation(this.target)
                         .getPeerZone()

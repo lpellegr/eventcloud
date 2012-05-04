@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
@@ -38,8 +39,8 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 public class JunitByClassCanNetworkDeployer extends JunitByClassNetworkDeployer {
 
     /**
-     * Creates a Junit deployer with given number of trackers and peers but also
-     * with the specified {@link DeploymentConfiguration} and
+     * Creates a Junit deployer with the given number of trackers and peers but
+     * also with the specified {@link DeploymentConfiguration} and
      * {@code overlayProvider}.
      * 
      * @param nbTrackers
@@ -50,18 +51,23 @@ public class JunitByClassCanNetworkDeployer extends JunitByClassNetworkDeployer 
      *            the deployment configuration to use.
      * @param overlayProvider
      *            the overlay provider to use in order to create peers.
+     * @param injectionConstraintsProvider
+     *            a provider that knows how to create the constraints to use
+     *            during the creation of the network.
      */
-    public JunitByClassCanNetworkDeployer(
-
-    int nbTrackers, int nbPeers, DeploymentConfiguration configuration,
-            SerializableProvider<? extends CanOverlay> overlayProvider) {
-        super(new CanNetworkDeployer(configuration, overlayProvider),
+    public JunitByClassCanNetworkDeployer(int nbTrackers, int nbPeers,
+            DeploymentConfiguration configuration,
+            SerializableProvider<? extends CanOverlay> overlayProvider,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        super(new CanNetworkDeployer(
+                configuration, overlayProvider, injectionConstraintsProvider),
                 nbTrackers, nbPeers);
     }
 
     /**
      * Creates a Junit deployer with the given number of trackers and peers but
-     * also with the specified {@code overlayProvider}.
+     * also with the specified {@code overlayProvider} and
+     * {@code injectionConstraintsProvider}.
      * 
      * @param nbTrackers
      *            the number of trackers to instantiate.
@@ -69,12 +75,15 @@ public class JunitByClassCanNetworkDeployer extends JunitByClassNetworkDeployer 
      *            the number of peers to deploy.
      * @param overlayProvider
      *            the overlay provider to use in order to create peers.
+     * @param injectionConstraintsProvider
+     *            a provider that knows how to create the constraints to use
+     *            during the creation of the network.
      */
     public JunitByClassCanNetworkDeployer(int nbTrackers, int nbPeers,
-            SerializableProvider<? extends CanOverlay> overlayProvider) {
-        super(new CanNetworkDeployer(
-                new TestingDeploymentConfiguration(), overlayProvider),
-                nbTrackers, nbPeers);
+            SerializableProvider<? extends CanOverlay> overlayProvider,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        this(nbTrackers, nbPeers, new TestingDeploymentConfiguration(),
+                overlayProvider, injectionConstraintsProvider);
     }
 
     /**
@@ -87,10 +96,16 @@ public class JunitByClassCanNetworkDeployer extends JunitByClassNetworkDeployer 
      *            the number of peers to deploy.
      * @param configuration
      *            the deployment configuration to use.
+     * @param injectionConstraintsProvider
+     *            a provider that knows how to create the constraints to use
+     *            during the creation of the network.
      */
     public JunitByClassCanNetworkDeployer(int nbTrackers, int nbPeers,
-            DeploymentConfiguration configuration) {
-        super(new CanNetworkDeployer(configuration), nbTrackers, nbPeers);
+            DeploymentConfiguration configuration,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        super(new CanNetworkDeployer(
+                configuration, injectionConstraintsProvider), nbTrackers,
+                nbPeers);
     }
 
     /**
@@ -102,16 +117,36 @@ public class JunitByClassCanNetworkDeployer extends JunitByClassNetworkDeployer 
      *            the number of trackers to instantiate.
      * @param nbPeers
      *            the number of peers to deploy.
+     * @param injectionConstraintsProvider
+     *            a provider that knows how to create the constraints to use
+     *            during the creation of the network.
+     */
+    public JunitByClassCanNetworkDeployer(int nbTrackers, int nbPeers,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        this(nbTrackers, nbPeers, new TestingDeploymentConfiguration(),
+                injectionConstraintsProvider);
+    }
+
+    /**
+     * Creates a Junit deployer with the specified number of trackers and peers.
+     * It uses an instance of {@link TestingDeploymentConfiguration} for the
+     * deployment configuration and no {@link InjectionConstraints} is
+     * specified.
+     * 
+     * @param nbTrackers
+     *            the number of trackers to instantiate.
+     * @param nbPeers
+     *            the number of peers to deploy.
      */
     public JunitByClassCanNetworkDeployer(int nbTrackers, int nbPeers) {
-        super(new CanNetworkDeployer(new TestingDeploymentConfiguration()),
-                nbTrackers, nbPeers);
+        this(nbTrackers, nbPeers, new TestingDeploymentConfiguration(), null);
     }
 
     /**
      * Creates a Junit deployer with one tracker and the specified number of
      * peers. It uses an instance of {@link TestingDeploymentConfiguration} for
-     * the deployment configuration.
+     * the deployment configuration and no {@link InjectionConstraints} is
+     * specified.
      * 
      * @param nbPeers
      *            the number of peers to deploy.

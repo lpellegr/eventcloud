@@ -76,6 +76,27 @@ public interface Tracker extends Serializable {
     public void inject(Peer remotePeer) throws NetworkAlreadyJoinedException;
 
     /**
+     * Adds the given {@code remotePeer} on the network managed by the tracker
+     * by joining the specified {@code landmarkPeer}.
+     * 
+     * @param remotePeer
+     *            the peer to add on the network.
+     * @param landmarkPeer
+     *            the peer which is joined by the remotePeer.
+     * 
+     * @throws NetworkAlreadyJoinedException
+     *             if the specified {@code remotePeer} has already joined a
+     *             network.
+     * 
+     * @throws IllegalArgumentException
+     *             if the specified {@code remotePeer} does not manage the same
+     *             overlay type as the peers that are already maintained by the
+     *             tracker.
+     */
+    public void inject(Peer remotePeer, Peer landmarkPeer)
+            throws NetworkAlreadyJoinedException;
+
+    /**
      * Stores the specified {@code peerReference} locally and call
      * {@link #internalStorePeer(Peer)} on each Tracker that belongs to the
      * group of tracker maintained by this peer.
