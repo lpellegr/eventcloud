@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import junit.framework.Assert;
@@ -110,6 +111,17 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                         this.targetLowerBound), super.getPeer(0));
 
         Assert.assertTrue(response.getValue());
+    }
+
+    @Override
+    public void tearDown() {
+        super.tearDown();
+
+        try {
+            this.proxy.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class CustomCanOverlay extends CanOverlay {

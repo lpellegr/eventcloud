@@ -16,6 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
+import java.io.Closeable;
+
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -28,7 +30,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public interface Proxy {
+public interface Proxy extends Closeable{
 
     /**
      * Sends a request over the overlay by using message passing but without any
