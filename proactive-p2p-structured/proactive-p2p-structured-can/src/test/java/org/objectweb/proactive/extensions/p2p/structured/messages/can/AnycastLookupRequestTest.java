@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,6 +117,17 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
         for (boolean value : response.getResult()) {
             Assert.assertTrue(value);
+        }
+    }
+
+    @Override
+    public void tearDown() {
+        super.tearDown();
+
+        try {
+            this.proxy.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

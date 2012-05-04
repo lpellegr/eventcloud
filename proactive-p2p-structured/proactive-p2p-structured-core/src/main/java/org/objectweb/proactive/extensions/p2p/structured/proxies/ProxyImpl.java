@@ -16,9 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 
 /**
  * This concrete implementation maintains a list of the peer stubs which are
@@ -38,7 +39,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
  * 
  * @author lpellegr
  */
-public class ProxyImpl extends AbstractComponent implements Closeable, Proxy {
+public class ProxyImpl extends AbstractComponent implements Proxy {
 
     private List<? extends Tracker> trackers;
 
@@ -47,9 +48,13 @@ public class ProxyImpl extends AbstractComponent implements Closeable, Proxy {
     // timer that updates peer stubs periodically
     private ScheduledExecutorService updateStubsService;
 
+    private ExecutorService threadPool;
+
     protected ProxyImpl(List<? extends Tracker> trackers) {
         this.trackers = trackers;
         this.peerStubs = new ArrayList<Peer>();
+        this.threadPool =
+                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads() * 2);
     }
 
     /**
@@ -64,18 +69,27 @@ public class ProxyImpl extends AbstractComponent implements Closeable, Proxy {
      * {@inheritDoc}
      */
     @Override
-    public void sendv(Request<?> request, Peer peer) throws DispatchException {
+    public void sendv(final Request<?> request, final Peer peer)
+            throws DispatchException {
         if (request.getResponseProvider() != null) {
             throw new IllegalArgumentException(
                     "Response provider specified for a request with no answer");
         }
 
-        try {
-            peer.sendv(request);
-        } catch (ProActiveRuntimeException e) {
-            this.evictPeer(peer);
-            throw e;
-        }
+        // FIXME: issue #24
+        this.threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    peer.sendv(request);
+                } catch (ProActiveRuntimeException e) {
+                    evictPeer(peer);
+                    throw e;
+                } catch (DispatchException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
@@ -155,6 +169,8 @@ public class ProxyImpl extends AbstractComponent implements Closeable, Proxy {
         if (this.updateStubsService != null) {
             this.updateStubsService.shutdownNow();
         }
+
+        this.threadPool.shutdown();
     }
 
 }
