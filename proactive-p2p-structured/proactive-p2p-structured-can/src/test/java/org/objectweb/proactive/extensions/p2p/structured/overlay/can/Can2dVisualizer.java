@@ -44,6 +44,7 @@ import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
@@ -52,6 +53,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 
@@ -461,7 +463,16 @@ public class Can2dVisualizer extends JFrame {
         P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
 
-        CanNetworkDeployer deployer = new CanNetworkDeployer();
+        InjectionConstraintsProvider injectionConstraintsProvider = null;
+        if (args.length == 1 && args[0].equals("-fractal")) {
+            injectionConstraintsProvider =
+                    InjectionConstraintsProvider.newFractalInjectionConstraintsProvider();
+        }
+
+        CanNetworkDeployer deployer =
+                new CanNetworkDeployer(
+                        new TestingDeploymentConfiguration(),
+                        injectionConstraintsProvider);
         deployer.deploy(20);
 
         final List<Peer> peers = deployer.getRandomTracker().getPeers();
@@ -475,5 +486,4 @@ public class Can2dVisualizer extends JFrame {
 
         deployer.undeploy();
     }
-
 }

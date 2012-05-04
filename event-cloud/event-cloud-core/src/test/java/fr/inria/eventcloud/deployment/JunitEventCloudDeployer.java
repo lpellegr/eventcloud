@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.deployment;
 
 import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
@@ -39,6 +40,40 @@ public class JunitEventCloudDeployer extends EventCloudDeployer {
      */
     public JunitEventCloudDeployer() {
         this(DatastoreType.IN_MEMORY);
+    }
+
+    /**
+     * Creates a new {@link JunitEventCloudDeployer} by using a
+     * {@link SemanticInMemoryOverlayProvider} for creating peers and the
+     * specified {@code injectionConstraintsProvider}.
+     * 
+     * @param injectionConstraintsProvider
+     *            a provider that knows how to create the constraints to use
+     *            during the creation of the network.
+     */
+    public JunitEventCloudDeployer(
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        this(DatastoreType.IN_MEMORY);
+    }
+
+    /**
+     * Creates a new {@link JunitEventCloudDeployer} by using the specified
+     * datastore type (i.e. {@link SemanticInMemoryOverlayProvider} or
+     * {@link SemanticPersistentOverlayProvider}) and the specified
+     * {@code injectionConstraintsProvider} when peers are created.
+     * 
+     * @param type
+     *            the datastore type that is used to determine which kind of
+     *            overlay provider to use.
+     * @param injectionConstraintsProvider
+     *            a provider that knows how to create the constraints to use
+     *            during the creation of the network.
+     */
+    public JunitEventCloudDeployer(DatastoreType type,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        super(new TestingDeploymentConfiguration(),
+                createProviderAccordingToDatastoreType(type),
+                injectionConstraintsProvider);
     }
 
     /**

@@ -20,10 +20,12 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.InjectionConstraints;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -49,9 +51,9 @@ public class EventCloudDeployer extends NetworkDeployer {
 
     /**
      * Constructs a new eventcloud deployer with an
-     * {@link EmptyDeploymentConfiguration} and a
-     * {@link SemanticPersistentOverlayProvider} but with no
-     * {@link NodeProvider}.
+     * {@link EmptyDeploymentConfiguration}, a
+     * {@link SemanticPersistentOverlayProvider}, no
+     * {@link InjectionConstraints} and no {@link NodeProvider}.
      */
     public EventCloudDeployer() {
         this(new EmptyDeploymentConfiguration(),
@@ -60,13 +62,20 @@ public class EventCloudDeployer extends NetworkDeployer {
 
     public EventCloudDeployer(DeploymentConfiguration configuration,
             SerializableProvider<? extends SemanticCanOverlay> overlayProvider) {
-        this(configuration, overlayProvider, null);
+        this(configuration, overlayProvider, null, null);
+    }
+
+    public EventCloudDeployer(DeploymentConfiguration configuration,
+            SerializableProvider<? extends SemanticCanOverlay> overlayProvider,
+            InjectionConstraintsProvider injectionConstraintsProvider) {
+        this(configuration, overlayProvider, injectionConstraintsProvider, null);
     }
 
     public EventCloudDeployer(DeploymentConfiguration mode,
             SerializableProvider<? extends SemanticCanOverlay> overlayProvider,
+            InjectionConstraintsProvider injectionConstraintsProvider,
             NodeProvider nodeProvider) {
-        super(mode, overlayProvider, nodeProvider);
+        super(mode, overlayProvider, injectionConstraintsProvider, nodeProvider);
     }
 
     /**

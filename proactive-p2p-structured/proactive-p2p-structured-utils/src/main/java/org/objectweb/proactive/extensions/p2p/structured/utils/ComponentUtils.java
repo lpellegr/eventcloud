@@ -39,8 +39,6 @@ import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utility methods for GCM components.
@@ -49,13 +47,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ComponentUtils {
 
-    private static Logger log;
-
     private static Factory factory;
 
     static {
-        log = LoggerFactory.getLogger(ComponentUtils.class);
-
         CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
         try {
             factory = FactoryFactory.getFactory();
@@ -141,7 +135,8 @@ public class ComponentUtils {
      * @param interfaceClass
      *            class of the interface.
      * @param toStart
-     *            true if the component has to be started, false otherwise.
+     *            {@code true} if the component has to be started, {@code false}
+     *            otherwise.
      * 
      * @return a reference on the specified interface of the component created.
      */
@@ -162,14 +157,10 @@ public class ComponentUtils {
         } catch (ADLException e) {
             throw new IllegalStateException(e);
         } catch (NoSuchInterfaceException e) {
-            // it is not necessary to rethrown this exception because when it
-            // occurs this means there is an issue in the code
-            log.error("Please check the interface name: " + interfaceName, e);
+            throw new IllegalArgumentException(e);
         } catch (IllegalLifeCycleException e) {
             throw new IllegalStateException(e);
         }
-
-        return null;
     }
 
     /**
@@ -200,10 +191,7 @@ public class ComponentUtils {
             return interfaceClass.cast(Fractive.lookup(componentUri)
                     .getFcInterface(interfaceName));
         } catch (NoSuchInterfaceException e) {
-            // it is not necessary to rethrown this exception because when it
-            // occurs this means there is an issue in the code
-            log.error("Please check the interface name: " + interfaceName, e);
-            return null;
+            throw new IllegalArgumentException(e);
         } catch (NamingException e) {
             throw new IOException(e);
         }

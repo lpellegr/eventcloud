@@ -57,8 +57,8 @@ public class PubSubTest {
                 new JunitEventCloudInfrastructureDeployer();
 
         EventCloudId ecId =
-                deployer.createEventCloud(new EventCloudId(
-                        "http://streams.event-processing.org/ids/TaxiUc"), 10);
+                deployer.createEventCloud(1, 10, new EventCloudId(
+                        "http://streams.event-processing.org/ids/TaxiUc"));
 
         // Web services which are deployed
         String subscribeWsUrl =

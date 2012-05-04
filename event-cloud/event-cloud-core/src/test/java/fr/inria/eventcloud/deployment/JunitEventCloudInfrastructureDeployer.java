@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloud;
@@ -62,27 +63,31 @@ public class JunitEventCloudInfrastructureDeployer {
         this.datastoreType = type;
     }
 
-    public EventCloudId createEventCloud(EventCloudId eventCloudId, int nbPeers) {
-        return this.createEventCloud(eventCloudId, 1, nbPeers);
-    }
-
     public EventCloudId createEventCloud(int nbPeers) {
         return this.createEventCloud(1, nbPeers);
     }
 
     public EventCloudId createEventCloud(int nbTrackers, int nbPeers) {
-        return this.createEventCloud(new EventCloudId(), nbTrackers, nbPeers);
+        return this.createEventCloud(nbTrackers, nbPeers, new EventCloudId());
     }
 
-    public EventCloudId createEventCloud(EventCloudId eventCloudId,
-                                         int nbTrackers, int nbPeers) {
+    public EventCloudId createEventCloud(int nbTrackers, int nbPeers,
+                                         EventCloudId eventCloudId) {
+        return this.createEventCloud(nbTrackers, nbPeers, eventCloudId, null);
+    }
 
+    public EventCloudId createEventCloud(int nbTrackers,
+                                         int nbPeers,
+                                         EventCloudId eventCloudId,
+                                         InjectionConstraintsProvider injectionConstraintsProvider) {
         this.initializeEventCloudsRegistry();
 
         EventCloud eventcloud =
                 EventCloud.create(
                         this.eventCloudsRegistryUrl, eventCloudId,
-                        new JunitEventCloudDeployer(this.datastoreType),
+                        new JunitEventCloudDeployer(
+                                this.datastoreType,
+                                injectionConstraintsProvider),
                         new ArrayList<UnalterableElaProperty>(), nbTrackers,
                         nbPeers);
 
