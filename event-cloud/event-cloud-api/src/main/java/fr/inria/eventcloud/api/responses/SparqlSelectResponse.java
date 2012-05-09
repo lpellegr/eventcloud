@@ -1,0 +1,78 @@
+/**
+ * Copyright (c) 2011-2012 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
+package fr.inria.eventcloud.api.responses;
+
+import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
+
+/**
+ * The response returned for a Select SPARQL query form that has been executed.
+ * 
+ * @author lpellegr
+ */
+public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
+
+    private static final long serialVersionUID = 1L;
+    
+    private int nbIntermediateResults, nbSubQueries;
+    private long timeToGetResult, sizeOfIntermediateResultsInBytes;
+
+    public SparqlSelectResponse(long inboundHopCount, long outboundHopCount,
+            long latency, long queryDatastoreTime, ResultSetWrapper result) {
+        super(inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
+                result);
+    }
+
+	public int getNbIntermediateResults() {
+		return nbIntermediateResults;
+	}
+
+	public void setNbIntermediateResults(int nbIntermediateResults) {
+		this.nbIntermediateResults = nbIntermediateResults;
+	}
+
+	public long getTimeToGetResult() {
+		return timeToGetResult;
+	}
+
+	public void setTimeToGetResult(long timeToGetResult) {
+	    this.timeToGetResult = timeToGetResult;
+	}
+
+	public int getNbSubQueries() {
+		return nbSubQueries;
+	}
+
+	public void setNbSubQueries(int nbSubQueries) {
+		this.nbSubQueries = nbSubQueries;
+	}
+
+	/**
+     * 
+     * @return the size (in bytes) of all the quadruples contained in the intermediate results 
+     * for this SparqlSelectResponse
+     */
+    public long getSizeOfIntermediateResultsInBytes() {
+        return sizeOfIntermediateResultsInBytes;
+    }
+
+    public void setSizeOfIntermediateResultsInBytes(long sizeOfIntermediateResultsInBytes) {
+        this.sizeOfIntermediateResultsInBytes = sizeOfIntermediateResultsInBytes;
+    }
+    
+    
+
+}
