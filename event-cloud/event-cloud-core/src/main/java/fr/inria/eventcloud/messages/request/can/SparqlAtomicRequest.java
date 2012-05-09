@@ -45,6 +45,8 @@ public class SparqlAtomicRequest extends
 
     private static final long serialVersionUID = 1L;
 
+    private int nbResults;
+
     public SparqlAtomicRequest(AtomicQuery atomicQuery) {
         // TODO offer the possibility to use a constraints validator that will
         // use the filter constraints contained by the quadruple pattern to
@@ -66,13 +68,18 @@ public class SparqlAtomicRequest extends
 
         try {
             result = Lists.newArrayList(txnGraph.find(quadruplePattern));
+            this.nbResults = result.size();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             txnGraph.end();
         }
-
+        
         return result;
+    }
+
+    public int getNbResults() {
+        return this.nbResults;
     }
 
 }

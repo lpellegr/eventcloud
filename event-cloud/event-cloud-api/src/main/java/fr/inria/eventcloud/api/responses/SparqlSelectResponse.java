@@ -26,11 +26,53 @@ import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
 
     private static final long serialVersionUID = 1L;
+    
+    private int nbIntermediateResults, nbSubQueries;
+    private long timeToGetResult, sizeOfIntermediateResultsInBytes;
 
     public SparqlSelectResponse(long inboundHopCount, long outboundHopCount,
             long latency, long queryDatastoreTime, ResultSetWrapper result) {
         super(inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
                 result);
     }
+
+	public int getNbIntermediateResults() {
+		return nbIntermediateResults;
+	}
+
+	public void setNbIntermediateResults(int nbIntermediateResults) {
+		this.nbIntermediateResults = nbIntermediateResults;
+	}
+
+	public long getTimeToGetResult() {
+		return timeToGetResult;
+	}
+
+	public void setTimeToGetResult(long timeToGetResult) {
+	    this.timeToGetResult = timeToGetResult;
+	}
+
+	public int getNbSubQueries() {
+		return nbSubQueries;
+	}
+
+	public void setNbSubQueries(int nbSubQueries) {
+		this.nbSubQueries = nbSubQueries;
+	}
+
+	/**
+     * 
+     * @return the size (in bytes) of all the quadruples contained in the intermediate results 
+     * for this SparqlSelectResponse
+     */
+    public long getSizeOfIntermediateResultsInBytes() {
+        return sizeOfIntermediateResultsInBytes;
+    }
+
+    public void setSizeOfIntermediateResultsInBytes(long sizeOfIntermediateResultsInBytes) {
+        this.sizeOfIntermediateResultsInBytes = sizeOfIntermediateResultsInBytes;
+    }
+    
+    
 
 }

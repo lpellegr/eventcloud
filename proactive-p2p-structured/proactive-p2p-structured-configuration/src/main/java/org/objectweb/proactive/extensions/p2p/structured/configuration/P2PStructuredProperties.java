@@ -47,6 +47,9 @@ public class P2PStructuredProperties {
     public static final PropertyString TRACKER_SERVICES_ITF =
             new PropertyString("tracker.services.itf", "tracker-services");
 
+    public static final PropertyBoolean ENABLE_BENCHMARKS_INFORMATION =
+            new PropertyBoolean("enable.benchmarks.information", false);
+    
     public static final PropertyString TRACKER_VN = new PropertyString(
             "tracker.vn", "TrackerVN");
 

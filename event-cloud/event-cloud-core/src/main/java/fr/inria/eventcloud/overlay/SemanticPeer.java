@@ -28,4 +28,5 @@ import fr.inria.eventcloud.api.PutGetApi;
  */
 public interface SemanticPeer extends Peer, PutGetApi {
 
+
 }
