@@ -51,6 +51,22 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * ADL name of the tracker component.
+     */
+    public static final String TRACKER_ADL =
+            "org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker";
+
+    /**
+     * Functional interface name of the tracker component.
+     */
+    public static final String TRACKER_SERVICES_ITF = "tracker-services";
+
+    /**
+     * GCM Virtual Node name of the tracker component.
+     */
+    public static final String TRACKER_VN = "TrackerVN";
+
     private static Logger logger = LoggerFactory.getLogger(TrackerImpl.class);
 
     protected transient String bindingName;

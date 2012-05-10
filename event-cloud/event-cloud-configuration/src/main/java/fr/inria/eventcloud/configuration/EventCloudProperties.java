@@ -156,44 +156,6 @@ public class EventCloudProperties {
             new PropertyInteger(
                     "eventcloud.subscribe.proxies.cache.maximum.size", 1000);
 
-    public static final PropertyString EVENTCLOUDS_REGISTRY_ADL =
-            new PropertyString(
-                    "eventclouds.registry.adl",
-                    "fr.inria.eventcloud.EventCloudsRegistry");
-
-    public static final PropertyString EVENTCLOUDS_REGISTRY_SERVICES_ITF =
-            new PropertyString(
-                    "eventclouds.registry.services.itf",
-                    "eventclouds-registry-services");
-
-    public static final PropertyString SEMANTIC_PEER_ADL = new PropertyString(
-            "semantic.peer.adl", "fr.inria.eventcloud.overlay.SemanticPeer");
-
-    public static final PropertyString SEMANTIC_TRACKER_ADL =
-            new PropertyString(
-                    "semantic.tracker.adl",
-                    "fr.inria.eventcloud.tracker.SemanticTracker");
-
-    public static final PropertyString PUBLISH_PROXY_ADL = new PropertyString(
-            "publish.proxy.adl", "fr.inria.eventcloud.proxies.PublishProxy");
-
-    public static final PropertyString PUBLISH_PROXY_SERVICES_ITF =
-            new PropertyString("publish.services.itf", "publish-services");
-
-    public static final PropertyString SUBSCRIBE_PROXY_ADL =
-            new PropertyString(
-                    "subscribe.proxy.adl",
-                    "fr.inria.eventcloud.proxies.SubscribeProxy");
-
-    public static final PropertyString SUBSCRIBE_PROXY_SERVICES_ITF =
-            new PropertyString("subscribe.services.itf", "subscribe-services");
-
-    public static final PropertyString PUTGET_PROXY_ADL = new PropertyString(
-            "putget.proxy.adl", "fr.inria.eventcloud.proxies.PutGetProxy");
-
-    public static final PropertyString PUTGET_PROXY_SERVICES_ITF =
-            new PropertyString("putget.services.itf", "putget-services");
-
     private static final File configurationFileLoaded;
 
     static {

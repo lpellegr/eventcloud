@@ -53,6 +53,22 @@ public class PeerImpl extends AbstractComponent implements Peer,
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * ADL name of the peer component.
+     */
+    public static final String PEER_ADL =
+            "org.objectweb.proactive.extensions.p2p.structured.overlay.Peer";
+
+    /**
+     * Functional interface name of the peer component.
+     */
+    public static final String PEER_SERVICES_ITF = "peer-services";
+
+    /**
+     * GCM Virtual Node name of the peer component.
+     */
+    public static final String PEER_VN = "PeerVN";
+
     protected static Logger logger = LoggerFactory.getLogger(PeerImpl.class);
 
     protected transient StructuredOverlay overlay;

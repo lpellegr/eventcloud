@@ -27,7 +27,6 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.parsers.RdfParser;
@@ -44,6 +43,17 @@ import fr.inria.eventcloud.utils.Callback;
  */
 public class PublishProxyImpl extends ProxyCache implements PublishProxy,
         PublishProxyAttributeController {
+
+    /**
+     * ADL name of the publish proxy component.
+     */
+    public static final String PUBLISH_PROXY_ADL =
+            "fr.inria.eventcloud.proxies.PublishProxy";
+
+    /**
+     * Functional interface name of the publish proxy component.
+     */
+    public static final String PUBLISH_SERVICES_ITF = "publish-services";
 
     /**
      * Empty constructor required by ProActive.
@@ -120,9 +130,7 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
 
     public static PublishProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
-                componentUri,
-                EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue(),
-                PublishProxy.class);
+                componentUri, PUBLISH_SERVICES_ITF, PublishProxy.class);
     }
 
 }

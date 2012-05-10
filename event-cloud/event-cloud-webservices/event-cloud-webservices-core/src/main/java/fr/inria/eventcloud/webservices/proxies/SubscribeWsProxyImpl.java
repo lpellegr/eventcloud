@@ -49,6 +49,18 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * ADL name of the subscribe web service proxy component.
+     */
+    public static final String SUBSCRIBE_WEBSERVICE_PROXY_ADL =
+            "fr.inria.eventcloud.webservices.proxies.SubscribeWsProxy";
+
+    /**
+     * Functional interface name of the subscribe web service proxy component.
+     */
+    public static final String SUBSCRIBE_WEBSERVICES_ITF =
+            "subscribe-webservices";
+
     // contains the subscriber web service urls to use in order to deliver
     // the solutions
     private Map<SubscriptionId, String> subscribers;

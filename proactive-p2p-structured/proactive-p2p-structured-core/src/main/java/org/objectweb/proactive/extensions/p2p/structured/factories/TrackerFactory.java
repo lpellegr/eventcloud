@@ -23,9 +23,9 @@ import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
@@ -175,10 +175,9 @@ public class TrackerFactory {
         try {
             Tracker tracker =
                     ComponentUtils.createComponentAndGetInterface(
-                            P2PStructuredProperties.TRACKER_ADL.getValue(),
-                            context,
-                            P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue(),
-                            Tracker.class, true);
+                            TrackerImpl.TRACKER_ADL, context,
+                            TrackerImpl.TRACKER_SERVICES_ITF, Tracker.class,
+                            true);
 
             ((TrackerAttributeController) GCM.getAttributeController(((Interface) tracker).getFcItfOwner())).setAttributes(
                     tracker, networkName);

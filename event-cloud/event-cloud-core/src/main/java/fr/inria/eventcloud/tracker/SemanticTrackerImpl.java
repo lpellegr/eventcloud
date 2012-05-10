@@ -33,6 +33,12 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * ADL name of the semantic tracker component.
+     */
+    public static final String SEMANTIC_TRACKER_ADL =
+            "fr.inria.eventcloud.tracker.SemanticTracker";
+
     public SemanticTrackerImpl() {
         super();
     }

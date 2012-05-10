@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.deployment;
 
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -28,7 +27,9 @@ import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
+import fr.inria.eventcloud.overlay.SemanticPeerImpl;
 import fr.inria.eventcloud.tracker.SemanticTracker;
+import fr.inria.eventcloud.tracker.SemanticTrackerImpl;
 
 /**
  * Initializes an Event Cloud (i.e. a Content-Addressable-Network composed of
@@ -59,7 +60,7 @@ public class EventCloudDeployer extends NetworkDeployer {
             return SemanticFactory.newSemanticPeer(
                     super.descriptor.getOverlayProvider(),
                     super.descriptor.getNodeProvider().getGcmVirtualNode(
-                            P2PStructuredProperties.PEER_VN.getValue()));
+                            SemanticPeerImpl.PEER_VN));
         } else {
             return SemanticFactory.newSemanticPeer(super.descriptor.getOverlayProvider());
         }
@@ -72,9 +73,8 @@ public class EventCloudDeployer extends NetworkDeployer {
     protected synchronized Tracker createTracker(String networkName) {
         if (super.descriptor.getNodeProvider() != null) {
             return SemanticFactory.newSemanticTracker(
-                    networkName,
-                    super.descriptor.getNodeProvider().getGcmVirtualNode(
-                            P2PStructuredProperties.TRACKER_VN.getValue()));
+                    networkName, super.descriptor.getNodeProvider()
+                            .getGcmVirtualNode(SemanticTrackerImpl.TRACKER_VN));
         } else {
             return SemanticFactory.newSemanticTracker(networkName);
         }

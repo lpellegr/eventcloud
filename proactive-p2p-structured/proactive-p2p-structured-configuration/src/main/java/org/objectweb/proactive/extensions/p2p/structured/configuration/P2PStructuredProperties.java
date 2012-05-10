@@ -29,29 +29,8 @@ public class P2PStructuredProperties {
     public static final PropertyString GCM_PROVIDER = new PropertyString(
             "gcm.provider", "org.objectweb.proactive.core.component.Fractive");
 
-    public static final PropertyString PEER_ADL = new PropertyString(
-            "peer.adl",
-            "org.objectweb.proactive.extensions.p2p.structured.overlay.Peer");
-
-    public static final PropertyString PEER_SERVICES_ITF = new PropertyString(
-            "peer.services.itf", "peer-services");
-
-    public static final PropertyString PEER_VN = new PropertyString(
-            "peer.vn", "PeerVN");
-
-    public static final PropertyString TRACKER_ADL =
-            new PropertyString(
-                    "tracker.adl",
-                    "org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker");
-
-    public static final PropertyString TRACKER_SERVICES_ITF =
-            new PropertyString("tracker.services.itf", "tracker-services");
-
     public static final PropertyBoolean ENABLE_BENCHMARKS_INFORMATION =
             new PropertyBoolean("enable.benchmarks.information", false);
-    
-    public static final PropertyString TRACKER_VN = new PropertyString(
-            "tracker.vn", "TrackerVN");
 
     public static final PropertyByte CAN_NB_DIMENSIONS = new PropertyByte(
             "can.nb.dimensions", Byte.valueOf((byte) 3));
