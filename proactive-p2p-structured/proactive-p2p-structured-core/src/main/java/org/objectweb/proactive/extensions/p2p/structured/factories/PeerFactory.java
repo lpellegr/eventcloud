@@ -23,9 +23,9 @@ import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -124,10 +124,8 @@ public final class PeerFactory {
         try {
             Peer peer =
                     ComponentUtils.createComponentAndGetInterface(
-                            P2PStructuredProperties.PEER_ADL.getValue(),
-                            context,
-                            P2PStructuredProperties.PEER_SERVICES_ITF.getValue(),
-                            Peer.class, true);
+                            PeerImpl.PEER_ADL, context,
+                            PeerImpl.PEER_SERVICES_ITF, Peer.class, true);
 
             ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(
                     peer, overlayProvider);

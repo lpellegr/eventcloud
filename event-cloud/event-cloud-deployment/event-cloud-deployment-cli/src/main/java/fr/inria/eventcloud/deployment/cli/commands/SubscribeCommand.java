@@ -29,8 +29,8 @@ import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
- * This command registers a subscription into an {@link EventCloudDescription} and print on
- * the standard output the notifications that are received.
+ * This command registers a subscription into an {@link EventCloudDescription}
+ * and print on the standard output the notifications that are received.
  * 
  * @author lpellegr
  */

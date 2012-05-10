@@ -32,7 +32,6 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import com.google.common.collect.ImmutableSet;
 
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 
 /**
@@ -45,6 +44,23 @@ import fr.inria.eventcloud.deployment.EventCloudDeployer;
  */
 public class EventCloudsRegistryImpl extends AbstractComponent implements
         EventCloudsRegistry {
+
+    /**
+     * ADL name of the EventClouds registry component.
+     */
+    public static final String EVENTCLOUDS_REGISTRY_ADL =
+            "fr.inria.eventcloud.EventCloudsRegistry";
+
+    /**
+     * Functional interface name of the EventClouds registry component.
+     */
+    public static final String EVENTCLOUDS_REGISTRY_SERVICES_ITF =
+            "eventclouds-registry-services";
+
+    /**
+     * GCM Virtual Node name of the EventClouds registry component.
+     */
+    public static final String REGISTRY_VN = "RegistryVN";
 
     private Map<EventCloudId, EventCloudDeployer> eventCloudDeployers;
 
@@ -168,8 +184,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     public static EventCloudsRegistry lookup(String componentUri)
             throws IOException {
         return ComponentUtils.lookupFcInterface(
-                componentUri,
-                EventCloudProperties.EVENTCLOUDS_REGISTRY_SERVICES_ITF.getValue(),
+                componentUri, EVENTCLOUDS_REGISTRY_SERVICES_ITF,
                 EventCloudsRegistry.class);
     }
 

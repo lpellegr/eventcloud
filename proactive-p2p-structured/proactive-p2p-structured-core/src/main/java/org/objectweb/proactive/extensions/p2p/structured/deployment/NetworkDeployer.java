@@ -98,8 +98,8 @@ public abstract class NetworkDeployer extends
 
         // FIXME: the deployment configuration must be executed one each machine
         // where a component is deployed
-        if (descriptor.getDeploymentConfiguration() != null) {
-            descriptor.getDeploymentConfiguration().configure();
+        if (this.descriptor.getDeploymentConfiguration() != null) {
+            this.descriptor.getDeploymentConfiguration().configure();
         }
 
         this.notifyDeploymentStarted();

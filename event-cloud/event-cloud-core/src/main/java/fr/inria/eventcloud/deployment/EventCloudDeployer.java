@@ -17,11 +17,12 @@
 package fr.inria.eventcloud.deployment;
 
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudDescription;
@@ -66,7 +67,7 @@ public class EventCloudDeployer extends NetworkDeployer {
             return SemanticFactory.newSemanticPeer(
                     super.descriptor.getOverlayProvider(),
                     super.descriptor.getNodeProvider().getGcmVirtualNode(
-                            P2PStructuredProperties.PEER_VN.getValue()));
+                            PeerImpl.PEER_VN));
         } else {
             return SemanticFactory.newSemanticPeer(super.descriptor.getOverlayProvider());
         }
@@ -79,9 +80,8 @@ public class EventCloudDeployer extends NetworkDeployer {
     protected synchronized Tracker createTracker(String networkName) {
         if (super.descriptor.getNodeProvider() != null) {
             return SemanticFactory.newSemanticTracker(
-                    networkName,
-                    super.descriptor.getNodeProvider().getGcmVirtualNode(
-                            P2PStructuredProperties.TRACKER_VN.getValue()));
+                    networkName, super.descriptor.getNodeProvider()
+                            .getGcmVirtualNode(TrackerImpl.TRACKER_VN));
         } else {
             return SemanticFactory.newSemanticTracker(networkName);
         }

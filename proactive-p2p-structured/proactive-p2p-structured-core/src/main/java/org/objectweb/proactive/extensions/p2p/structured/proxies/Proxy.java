@@ -30,7 +30,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public interface Proxy extends Closeable{
+public interface Proxy extends Closeable {
 
     /**
      * Sends a request over the overlay by using message passing but without any

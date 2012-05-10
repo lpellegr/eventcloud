@@ -78,6 +78,17 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * ADL name of the subscribe proxy component.
+     */
+    public static final String SUBSCRIBE_PROXY_ADL =
+            "fr.inria.eventcloud.proxies.SubscribeProxy";
+
+    /**
+     * Functional interface name of the subscribe proxy component.
+     */
+    public static final String SUBSCRIBE_SERVICES_ITF = "subscribe-services";
+
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxy.class);
 
@@ -453,9 +464,7 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
 
     public static SubscribeProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
-                componentUri,
-                EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue(),
-                SubscribeProxy.class);
+                componentUri, SUBSCRIBE_SERVICES_ITF, SubscribeProxy.class);
     }
 
 }

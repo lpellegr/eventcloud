@@ -27,20 +27,22 @@ import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticPeer;
+import fr.inria.eventcloud.overlay.SemanticPeerImpl;
 import fr.inria.eventcloud.tracker.SemanticTracker;
+import fr.inria.eventcloud.tracker.SemanticTrackerImpl;
 
 /**
  * SemanticFactory must be used to create new instances of Semantic components
@@ -189,9 +191,8 @@ public final class SemanticFactory {
         try {
             SemanticTracker tracker =
                     ComponentUtils.createComponentAndGetInterface(
-                            EventCloudProperties.SEMANTIC_TRACKER_ADL.getValue(),
-                            context,
-                            P2PStructuredProperties.TRACKER_SERVICES_ITF.getValue(),
+                            SemanticTrackerImpl.SEMANTIC_TRACKER_ADL, context,
+                            TrackerImpl.TRACKER_SERVICES_ITF,
                             SemanticTracker.class, true);
 
             ((TrackerAttributeController) GCM.getAttributeController(((Interface) tracker).getFcItfOwner())).setAttributes(
@@ -281,9 +282,8 @@ public final class SemanticFactory {
         try {
             SemanticPeer peer =
                     ComponentUtils.createComponentAndGetInterface(
-                            EventCloudProperties.SEMANTIC_PEER_ADL.getValue(),
-                            context,
-                            P2PStructuredProperties.PEER_SERVICES_ITF.getValue(),
+                            SemanticPeerImpl.SEMANTIC_PEER_ADL, context,
+                            PeerImpl.PEER_SERVICES_ITF,
                             SemanticPeer.class, true);
 
             ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(

@@ -36,7 +36,9 @@ import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
-import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
+import fr.inria.eventcloud.webservices.proxies.PublishWsProxyImpl;
+import fr.inria.eventcloud.webservices.proxies.PutGetWsProxyImpl;
+import fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyImpl;
 import fr.inria.eventcloud.webservices.services.EventCloudManagementServiceImpl;
 import fr.inria.eventcloud.webservices.services.PublishServiceImpl;
 import fr.inria.eventcloud.webservices.services.PutGetServiceImpl;
@@ -63,8 +65,7 @@ public class WebServiceDeployer {
      */
     public static String exposePublishWebService(PublishProxy proxy) {
         return exposeWebService(
-                proxy,
-                EventCloudWsProperties.PUBLISH_PROXY_WEBSERVICES_ITF.getValue());
+                proxy, PublishWsProxyImpl.PUBLISH_WEBSERVICES_ITF);
     }
 
     /**
@@ -77,9 +78,7 @@ public class WebServiceDeployer {
      *            service.
      */
     public static void unexposePublishWebService(PublishProxy proxy) {
-        unexposeWebService(
-                proxy,
-                EventCloudWsProperties.PUBLISH_PROXY_WEBSERVICES_ITF.getValue());
+        unexposeWebService(proxy, PublishWsProxyImpl.PUBLISH_WEBSERVICES_ITF);
     }
 
     /**
@@ -94,8 +93,7 @@ public class WebServiceDeployer {
      */
     public static String exposeSubscribeWebService(SubscribeProxy proxy) {
         return exposeWebService(
-                proxy,
-                EventCloudWsProperties.SUBSCRIBE_PROXY_WEBSERVICES_ITF.getValue());
+                proxy, SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICES_ITF);
     }
 
     /**
@@ -109,8 +107,7 @@ public class WebServiceDeployer {
      */
     public static void unexposeSubscribeWebService(SubscribeProxy proxy) {
         unexposeWebService(
-                proxy,
-                EventCloudWsProperties.SUBSCRIBE_PROXY_WEBSERVICES_ITF.getValue());
+                proxy, SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICES_ITF);
     }
 
     /**
@@ -124,9 +121,7 @@ public class WebServiceDeployer {
      * @return the URL of the web service which has been exposed.
      */
     public static String exposePutGetWebService(PutGetProxy proxy) {
-        return exposeWebService(
-                proxy,
-                EventCloudWsProperties.PUTGET_PROXY_WEBSERVICES_ITF.getValue());
+        return exposeWebService(proxy, PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
     }
 
     /**
@@ -139,9 +134,7 @@ public class WebServiceDeployer {
      *            service.
      */
     public static void unexposePutGetWebService(PutGetProxy proxy) {
-        unexposeWebService(
-                proxy,
-                EventCloudWsProperties.PUTGET_PROXY_WEBSERVICES_ITF.getValue());
+        unexposeWebService(proxy, PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
     }
 
     /**

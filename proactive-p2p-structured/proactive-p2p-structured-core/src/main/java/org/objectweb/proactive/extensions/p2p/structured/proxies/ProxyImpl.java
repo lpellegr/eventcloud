@@ -83,7 +83,7 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
                 try {
                     peer.sendv(request);
                 } catch (ProActiveRuntimeException e) {
-                    evictPeer(peer);
+                    ProxyImpl.this.evictPeer(peer);
                     throw e;
                 } catch (DispatchException e) {
                     e.printStackTrace();
