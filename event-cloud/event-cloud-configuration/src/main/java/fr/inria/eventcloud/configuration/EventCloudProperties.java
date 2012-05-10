@@ -17,11 +17,6 @@
 package fr.inria.eventcloud.configuration;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.ConfigurationParser;
@@ -102,12 +97,6 @@ public class EventCloudProperties {
      */
     public static final PropertyBoolean REPOSITORIES_RESTORE =
             new PropertyBoolean("repositories.restore", false);
-
-    /**
-     * Defines the location of the repositories which are created by each peer.
-     */
-    public static final PropertyString REPOSITORIES_RESTORE_PATH =
-            new PropertyString("repositories.restore.path", null);
 
     /**
      * Defines whether the repositories that are instantiated must be removed
@@ -207,62 +196,41 @@ public class EventCloudProperties {
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
     }
 
-    public static final File getRepositoryPath() {
+    public static final File getRepositoryPath(String streamUrl) {
+        File repositoryPath =
+                new File(REPOSITORIES_PATH.getValue() + normalize(streamUrl));
+
+        String repositorySuffix = null;
+
         // a repository has to be restored
-        if (!REPOSITORIES_AUTO_REMOVE.getValue()
-                && EventCloudProperties.REPOSITORIES_RESTORE.getValue()) {
-            File repositoryPath;
+        if (!REPOSITORIES_AUTO_REMOVE.getValue() && repositoryPath.exists()) {
 
-            if (EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue() != null
-                    && !EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue()
-                            .isEmpty()
-                    && (repositoryPath =
-                            new File(
-                                    EventCloudProperties.REPOSITORIES_RESTORE_PATH.getValue())).exists()) {
-                return repositoryPath;
-            } else {
-                repositoryPath =
-                        new File(
-                                REPOSITORIES_PATH.getValue(), UUID.randomUUID()
-                                        .toString());
+            File[] files = repositoryPath.listFiles();
 
-                Properties props = new Properties();
-                FileInputStream fis = null;
-                FileOutputStream fos = null;
-
-                try {
-                    fis = new FileInputStream(configurationFileLoaded);
-                    fos = new FileOutputStream(configurationFileLoaded);
-
-                    props.load(fis);
-                    props.setProperty(
-                            REPOSITORIES_RESTORE_PATH.getName(),
-                            repositoryPath.toString());
-                    props.store(fos, "");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (fis != null) {
-                            fis.close();
-                        }
-                        if (fos != null) {
-                            fos.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            for (File f : files) {
+                if (f.isDirectory() && repositorySuffix == null) {
+                    repositorySuffix = f.getName();
+                } else {
+                    repositorySuffix = UUID.randomUUID().toString();
+                    break;
                 }
-
-                return repositoryPath;
             }
         } else {
             // a new repository has to be created
-            return new File(REPOSITORIES_PATH.getValue(), UUID.randomUUID()
-                    .toString());
+            repositorySuffix = UUID.randomUUID().toString();
         }
+
+        return new File(repositoryPath, repositorySuffix);
+    }
+
+    private static String normalize(String directoryName) {
+        if (directoryName.startsWith("http://")) {
+            directoryName = directoryName.substring(7);
+        } else if (directoryName.startsWith("https://")) {
+            directoryName = directoryName.substring(8);
+        }
+
+        return directoryName.replaceAll("/", "_");
     }
 
     public static final String getPreferencesFilePath() {

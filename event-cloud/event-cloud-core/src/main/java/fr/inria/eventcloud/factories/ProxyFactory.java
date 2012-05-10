@@ -384,4 +384,11 @@ public class ProxyFactory implements Serializable {
         return newFactory;
     }
 
+    /**
+     * Removes all entries from the cache.
+     */
+    public static void clear() {
+        proxies.clear();
+    }
+
 }

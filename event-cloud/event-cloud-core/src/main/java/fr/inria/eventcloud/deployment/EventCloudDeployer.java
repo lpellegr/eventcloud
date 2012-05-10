@@ -28,6 +28,7 @@ import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
+import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
@@ -48,6 +49,12 @@ public class EventCloudDeployer extends NetworkDeployer {
             EventCloudDeploymentDescriptor deploymentDescriptor) {
         super(deploymentDescriptor);
         this.eventCloudDescription = description;
+
+        // sets stream URL on persistent overlay provider
+        if (deploymentDescriptor.getOverlayProvider() instanceof SemanticPersistentOverlayProvider) {
+            ((SemanticPersistentOverlayProvider) deploymentDescriptor.getOverlayProvider()).setStreamUrl(description.getId()
+                    .getStreamUrl());
+        }
     }
 
     /**
