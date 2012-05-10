@@ -7,19 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.w3c.dom.Element;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
-import fr.inria.eventcloud.deployment.DatastoreType;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
-import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.utils.Callback;
@@ -135,16 +137,19 @@ public class BenchmarkLauncher {
             e.printStackTrace();
         }
 
+        this.deployer = new JunitEventCloudInfrastructureDeployer();
+
+        SerializableProvider<? extends SemanticCanOverlay> overlayProvider =
+                null;
         if (datastoreType.equals("persistent"))
-            this.deployer =
-                    new JunitEventCloudInfrastructureDeployer(
-                            DatastoreType.PERSISTENT);
+            overlayProvider = new SemanticPersistentOverlayProvider();
         else if (datastoreType.equals("memory"))
-            this.deployer =
-                    new JunitEventCloudInfrastructureDeployer(
-                            DatastoreType.IN_MEMORY);
-        this.eventCloudId = deployer.createEventCloud(this.nbPeers);
-        
+            overlayProvider = new SemanticInMemoryOverlayProvider();
+
+        this.eventCloudId =
+                deployer.newEventCloud(new EventCloudDeploymentDescriptor(
+                        overlayProvider), 1, this.nbPeers);
+
         this.proxyFactory =
                 ProxyFactory.getInstance(
                         deployer.getEventCloudsRegistryUrl(), this.eventCloudId);
@@ -160,8 +165,8 @@ public class BenchmarkLauncher {
 
         timeToInsertQuads = System.currentTimeMillis();
         this.putGetProxy.add(quadruples);
-        timeToInsertQuads = System.currentTimeMillis() - timeToInsertQuads;     
-        
+        timeToInsertQuads = System.currentTimeMillis() - timeToInsertQuads;
+
         for (int i = 0; i < queries.size(); i++) {
             startTime = System.currentTimeMillis();
             responses.add(this.putGetProxy.executeSparqlSelect(queries.get(i)));
@@ -170,9 +175,9 @@ public class BenchmarkLauncher {
             testTime += elapsedTime;
             reasoner = new SparqlReasoner();
             responses.get(i).setNbSubQueries(
-            reasoner.parseSparql(queries.get(i)).size());
+                    reasoner.parseSparql(queries.get(i)).size());
         }
-        
+
         XmlWriter xmlWriter =
                 new XmlWriter(
                         nbPeers, nbQuadruplesAdded, timeToInsertQuads,
@@ -200,15 +205,16 @@ public class BenchmarkLauncher {
         xmlWriter.end();
         xmlWriter.writeXmlFile("test_storage_" + datastoreType + "_peers_"
                 + nbPeers + "_quads_" + nbQuadruplesAdded + ".xml");
-               
+
         System.exit(0);
     }
-   
+
     public static void main(String[] args) throws NumberFormatException,
-            EventCloudIdNotManaged, ArrayIndexOutOfBoundsException{
-        if (args.length != 3) throw new ArrayIndexOutOfBoundsException(
-                "Enter 3 parameters : number of peers, datafile location in your filesystem (absolute path), " +
-                "m or p for in memory or persistent storage");
+            EventCloudIdNotManaged, ArrayIndexOutOfBoundsException {
+        if (args.length != 3)
+            throw new ArrayIndexOutOfBoundsException(
+                    "Enter 3 parameters : number of peers, datafile location in your filesystem (absolute path), "
+                            + "m or p for in memory or persistent storage");
         new BenchmarkLauncher(Integer.parseInt(args[0]), args[1], args[2]);
     }
 
