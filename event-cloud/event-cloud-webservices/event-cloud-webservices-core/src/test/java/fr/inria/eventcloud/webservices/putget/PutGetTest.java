@@ -57,7 +57,7 @@ public class PutGetTest {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
-        EventCloudId ecId = deployer.createEventCloud(10);
+        EventCloudId ecId = deployer.newEventCloud(1, 10);
 
         String putGetWsUrl =
                 WebServiceDeployer.deployPutGetWebService(

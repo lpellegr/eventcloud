@@ -16,13 +16,15 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
+import java.io.Serializable;
+
 /**
  * This class is used to configure a {@link NetworkDeployer} by setting some
  * properties before to deploy the network.
  * 
  * @author lpellegr
  */
-public interface DeploymentConfiguration {
+public interface DeploymentConfiguration extends Serializable {
 
     public void configure();
 

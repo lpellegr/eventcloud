@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
- * Any user side proxy have to implement this abstract proxy class that stores
+ * Any user side proxies have to implement this abstract proxy class that stores
  * an instance of {@link EventCloudCache} which serves as a cache.
  * 
  * @author lpellegr

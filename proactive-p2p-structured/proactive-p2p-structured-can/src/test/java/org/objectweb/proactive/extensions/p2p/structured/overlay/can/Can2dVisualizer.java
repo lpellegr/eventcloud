@@ -43,8 +43,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
@@ -471,8 +471,7 @@ public class Can2dVisualizer extends JFrame {
 
         CanNetworkDeployer deployer =
                 new CanNetworkDeployer(
-                        new TestingDeploymentConfiguration(),
-                        injectionConstraintsProvider);
+                        new CanDeploymentDescriptor().setInjectionConstraintsProvider(injectionConstraintsProvider));
         deployer.deploy(20);
 
         final List<Peer> peers = deployer.getRandomTracker().getPeers();

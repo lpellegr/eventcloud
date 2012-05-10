@@ -30,12 +30,13 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import fr.inria.eventcloud.EventCloud;
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
+import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsApi;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 
@@ -89,9 +90,18 @@ public class EventCloudManagementServiceImpl implements
         EventCloudId eventCloudId = new EventCloudId(streamUrl);
 
         if (!this.getEventCloudsRegistry().contains(eventCloudId)) {
-            return EventCloud.create(
-                    this.registryUrl, eventCloudId, new EventCloudDeployer(),
-                    new ArrayList<UnalterableElaProperty>(), 1, 1).register();
+            EventCloudDescription eventCloudDescription =
+                    new EventCloudDescription(eventCloudId);
+
+            EventCloudDeployer deployer =
+                    new EventCloudDeployer(
+                            eventCloudDescription,
+                            new EventCloudDeploymentDescriptor(
+                                    new SemanticPersistentOverlayProvider()));
+
+            deployer.deploy(1, 1);
+
+            return this.getEventCloudsRegistry().register(deployer);
         }
 
         return false;

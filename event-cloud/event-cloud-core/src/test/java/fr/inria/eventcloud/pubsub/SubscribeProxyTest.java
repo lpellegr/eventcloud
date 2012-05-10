@@ -90,7 +90,7 @@ public class SubscribeProxyTest {
     @Before
     public void setUp() throws EventCloudIdNotManaged {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
-        this.eventCloudId = this.deployer.createEventCloud(5);
+        this.eventCloudId = this.deployer.newEventCloud(1, 5);
 
         this.proxyFactory =
                 ProxyFactory.getInstance(
