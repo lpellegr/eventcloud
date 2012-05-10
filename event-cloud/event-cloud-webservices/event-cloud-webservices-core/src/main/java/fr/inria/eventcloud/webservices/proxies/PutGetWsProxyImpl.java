@@ -33,6 +33,17 @@ import fr.inria.eventcloud.webservices.api.PutGetWsApi;
 public class PutGetWsProxyImpl extends PutGetProxyImpl implements PutGetWsApi {
 
     /**
+     * ADL name of the put/get proxy web service component.
+     */
+    public static final String PUTGET_WEBSERVICE_PROXY_ADL =
+            "fr.inria.eventcloud.webservices.proxies.PutGetWsProxy";
+
+    /**
+     * Functional interface name of the put/get web service proxy component.
+     */
+    public static final String PUTGET_WEBSERVICES_ITF = "putget-webservices";
+
+    /**
      * Empty constructor required by ProActive.
      */
     public PutGetWsProxyImpl() {

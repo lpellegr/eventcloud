@@ -19,7 +19,9 @@ package fr.inria.eventcloud.webservices.factories;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.webservices.configuration.EventCloudWsProperties;
+import fr.inria.eventcloud.webservices.proxies.PublishWsProxyImpl;
+import fr.inria.eventcloud.webservices.proxies.PutGetWsProxyImpl;
+import fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyImpl;
 
 /**
  * WsProxyFactory is used to create a new instance of a proxy component (e.g.
@@ -33,10 +35,9 @@ public final class WsProxyFactory extends ProxyFactory {
     private static final long serialVersionUID = 1L;
 
     static {
-        publishProxyAdl = EventCloudWsProperties.PUBLISH_PROXY_ADL.getValue();
-        subscribeProxyAdl =
-                EventCloudWsProperties.SUBSCRIBE_PROXY_ADL.getValue();
-        putgetProxyAdl = EventCloudWsProperties.PUTGET_PROXY_ADL.getValue();
+        publishProxyAdl = PublishWsProxyImpl.PUBLISH_WEBSERVICE_PROXY_ADL;
+        subscribeProxyAdl = SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICE_PROXY_ADL;
+        putgetProxyAdl = PutGetWsProxyImpl.PUTGET_WEBSERVICE_PROXY_ADL;
     }
 
     /**

@@ -32,7 +32,6 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
@@ -48,6 +47,17 @@ import fr.inria.eventcloud.utils.Callback;
  */
 public class PutGetProxyImpl extends ProxyCache implements PutGetProxy,
         PutGetProxyAttributeController {
+
+    /**
+     * ADL name of the put/get proxy component.
+     */
+    public static final String PUTGET_PROXY_ADL =
+            "fr.inria.eventcloud.proxies.PutGetProxy";
+
+    /**
+     * Functional interface name of the put/get proxy component.
+     */
+    public static final String PUTGET_SERVICES_ITF = "putget-services";
 
     /**
      * Empty constructor required by ProActive.
@@ -196,9 +206,7 @@ public class PutGetProxyImpl extends ProxyCache implements PutGetProxy,
 
     public static PutGetProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
-                componentUri,
-                EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue(),
-                PutGetProxy.class);
+                componentUri, PUTGET_SERVICES_ITF, PutGetProxy.class);
     }
 
 }

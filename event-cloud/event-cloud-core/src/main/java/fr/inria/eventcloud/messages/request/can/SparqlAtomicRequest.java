@@ -74,7 +74,7 @@ public class SparqlAtomicRequest extends
         } finally {
             txnGraph.end();
         }
-        
+
         return result;
     }
 

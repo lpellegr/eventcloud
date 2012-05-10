@@ -33,6 +33,11 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  */
 public abstract class ProxyCache extends AbstractComponent {
 
+    /**
+     * GCM Virtual Node name of the proxy component.
+     */
+    public static final String PROXY_VN = "ProxyVN";
+
     protected EventCloudCache eventCloudCache;
 
     protected Proxy proxy;

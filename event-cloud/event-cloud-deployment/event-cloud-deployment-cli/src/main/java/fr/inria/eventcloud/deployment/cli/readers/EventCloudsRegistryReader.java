@@ -35,8 +35,8 @@ import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 
 /**
  * This class is used to execute some operation (e.g. to create an
- * {@link EventCloudDescription}, to list the {@link EventCloudDescription}s managed by the registry,
- * etc) from the command-line.
+ * {@link EventCloudDescription}, to list the {@link EventCloudDescription}s
+ * managed by the registry, etc) from the command-line.
  * 
  * @author lpellegr
  */

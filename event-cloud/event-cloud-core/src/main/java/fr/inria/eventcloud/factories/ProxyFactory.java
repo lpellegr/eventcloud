@@ -39,15 +39,17 @@ import com.google.common.collect.MapMaker;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PublishProxyAttributeController;
+import fr.inria.eventcloud.proxies.PublishProxyImpl;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.PutGetProxyAttributeController;
+import fr.inria.eventcloud.proxies.PutGetProxyImpl;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxyAttributeController;
+import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 
 /**
  * ProxyFactory is used to create a new instance of a proxy (e.g.
@@ -85,9 +87,9 @@ public class ProxyFactory implements Serializable {
         // proxies may be garbage collected in response to memory demand
         proxies = new MapMaker().softValues().makeMap();
 
-        publishProxyAdl = EventCloudProperties.PUBLISH_PROXY_ADL.getValue();
-        subscribeProxyAdl = EventCloudProperties.SUBSCRIBE_PROXY_ADL.getValue();
-        putgetProxyAdl = EventCloudProperties.PUTGET_PROXY_ADL.getValue();
+        publishProxyAdl = PublishProxyImpl.PUBLISH_PROXY_ADL;
+        subscribeProxyAdl = SubscribeProxyImpl.SUBSCRIBE_PROXY_ADL;
+        putgetProxyAdl = PutGetProxyImpl.PUTGET_PROXY_ADL;
     }
 
     protected EventCloudCache eventCloudProxy;
@@ -165,9 +167,8 @@ public class ProxyFactory implements Serializable {
         try {
             PublishProxy pubProxy =
                     ComponentUtils.createComponentAndGetInterface(
-                            publishProxyAdl,
-                            context,
-                            EventCloudProperties.PUBLISH_PROXY_SERVICES_ITF.getValue(),
+                            publishProxyAdl, context,
+                            PublishProxyImpl.PUBLISH_SERVICES_ITF,
                             PublishProxy.class, true);
 
             ((PublishProxyAttributeController) GCM.getAttributeController(((Interface) pubProxy).getFcItfOwner())).setAttributes(this.eventCloudProxy);
@@ -256,9 +257,8 @@ public class ProxyFactory implements Serializable {
         try {
             SubscribeProxy subProxy =
                     ComponentUtils.createComponentAndGetInterface(
-                            subscribeProxyAdl,
-                            context,
-                            EventCloudProperties.SUBSCRIBE_PROXY_SERVICES_ITF.getValue(),
+                            subscribeProxyAdl, context,
+                            SubscribeProxyImpl.SUBSCRIBE_SERVICES_ITF,
                             SubscribeProxy.class, true);
 
             Component subComponent = ((Interface) subProxy).getFcItfOwner();
@@ -337,9 +337,8 @@ public class ProxyFactory implements Serializable {
         try {
             PutGetProxy putgetProxy =
                     ComponentUtils.createComponentAndGetInterface(
-                            putgetProxyAdl,
-                            context,
-                            EventCloudProperties.PUTGET_PROXY_SERVICES_ITF.getValue(),
+                            putgetProxyAdl, context,
+                            PutGetProxyImpl.PUTGET_SERVICES_ITF,
                             PutGetProxy.class, true);
 
             ((PutGetProxyAttributeController) GCM.getAttributeController(((Interface) putgetProxy).getFcItfOwner())).setAttributes(this.eventCloudProxy);
