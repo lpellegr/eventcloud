@@ -16,21 +16,24 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
-import java.util.ArrayList;
+import java.io.IOException;
 
 import com.beust.jcommander.Parameter;
 
-import fr.inria.eventcloud.EventCloud;
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
+import fr.inria.eventcloud.EventCloudsRegistryImpl;
+import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
+import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
- * This launcher is used to create a new {@link EventCloud} and to register it
- * to the specified {@link EventCloudsRegistry} URL. If the deployment succeed,
- * an instance file is created. This instance file contains a three columns
- * value such as {@code 1 1 -932949592}. The first number indicates the number
- * of trackers deployed, the second the number of peers deployed and the last
+ * This launcher is used to create a new EventCloud and to register it to the
+ * specified {@link EventCloudsRegistry} URL. If the deployment succeed, an
+ * instance file is created. This instance file contains a three columns value
+ * such as {@code 1 1 -932949592}. The first number indicates the number of
+ * trackers deployed, the second the number of peers deployed and the last
  * information is an URL which uniquely identifies the eventcloud which is
  * running.
  * 
@@ -58,15 +61,26 @@ public final class EventCloudLauncher extends Launcher {
      */
     @Override
     protected String run() {
-        EventCloud eventCloud =
-                EventCloud.create(
-                        this.registryUrl, new EventCloudDeployer(),
-                        new ArrayList<UnalterableElaProperty>(),
-                        this.nbTrackers, this.nbPeers);
+        EventCloudDeployer deployer =
+                new EventCloudDeployer(
+                        new EventCloudDescription(new EventCloudId()),
+                        new EventCloudDeploymentDescriptor(
+                                new SemanticPersistentOverlayProvider()));
 
-        if (!eventCloud.register()) {
+        deployer.deploy(this.nbTrackers, this.nbPeers);
+
+        boolean registered = false;
+        try {
+            registered =
+                    EventCloudsRegistryImpl.lookup(this.registryUrl).register(
+                            deployer);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+        if (!registered) {
             throw new IllegalStateException("Eventcloud with id "
-                    + eventCloud.getId()
+                    + deployer.getEventCloudDescription().getId()
                     + " is already registered into the eventclouds registry "
                     + this.registryUrl);
         }
@@ -76,9 +90,10 @@ public final class EventCloudLauncher extends Launcher {
         result.append(" ");
         result.append(this.nbPeers);
         result.append(" ");
-        result.append(eventCloud.getId().getStreamUrl());
+        result.append(deployer.getEventCloudDescription()
+                .getId()
+                .getStreamUrl());
 
         return result.toString();
     }
-
 }

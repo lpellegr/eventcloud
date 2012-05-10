@@ -62,12 +62,12 @@ public class EventCloudUsageTest implements Serializable {
     @Test(timeout = 180000)
     public void testEventCloudInstantiationAndUsage()
             throws InterruptedException, EventCloudIdNotManaged {
-        // Creates and deploy an EventCloudsRegistry locally
+        // Creates and deploys an EventCloudsRegistry locally
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
-        // Creates and deploy an Event Cloud composed of 10 peers
-        EventCloudId eventCloudId = deployer.createEventCloud(10);
+        // Creates and deploys an Event Cloud composed of 1 tracker and 10 peers
+        EventCloudId eventCloudId = deployer.newEventCloud(1, 10);
 
         // Retrieves a proxy factory which is specialized to create
         // proxies for the Event Cloud which has been previously created
@@ -281,9 +281,9 @@ public class EventCloudUsageTest implements Serializable {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
-        EventCloudId ecId1 = deployer.createEventCloud(1);
+        EventCloudId ecId1 = deployer.newEventCloud(1, 1);
 
-        EventCloudId ecId2 = deployer.createEventCloud(1);
+        EventCloudId ecId2 = deployer.newEventCloud(1, 1);
 
         Assert.assertFalse(
                 "Two Event Clouds created at two different time have the same identifier",

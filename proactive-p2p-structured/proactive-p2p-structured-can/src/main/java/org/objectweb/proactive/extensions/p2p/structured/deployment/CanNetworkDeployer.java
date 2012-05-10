@@ -19,9 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 /**
@@ -34,25 +31,8 @@ public final class CanNetworkDeployer extends NetworkDeployer {
 
     private static final long serialVersionUID = 1L;
 
-    public CanNetworkDeployer() {
-        super(SerializableProvider.create(CanOverlay.class));
-    }
-
-    public CanNetworkDeployer(
-            SerializableProvider<? extends CanOverlay> overlayProvider) {
-        super(overlayProvider);
-    }
-
-    public CanNetworkDeployer(DeploymentConfiguration configuration,
-            InjectionConstraintsProvider injectionConstraintsProvider) {
-        super(configuration, SerializableProvider.create(CanOverlay.class),
-                injectionConstraintsProvider);
-    }
-
-    public CanNetworkDeployer(DeploymentConfiguration configuration,
-            SerializableProvider<? extends CanOverlay> overlayProvider,
-            InjectionConstraintsProvider injectionConstraintsProvider) {
-        super(configuration, overlayProvider, injectionConstraintsProvider);
+    public CanNetworkDeployer(DeploymentDescriptor deploymentDescriptor) {
+        super(deploymentDescriptor);
     }
 
     /**
@@ -61,7 +41,7 @@ public final class CanNetworkDeployer extends NetworkDeployer {
     @Override
     protected synchronized Peer createPeer() {
         // TODO add support for deployment thanks to the node provider
-        return PeerFactory.newPeer(super.overlayProvider);
+        return PeerFactory.newPeer(super.descriptor.getOverlayProvider());
     }
 
     /**

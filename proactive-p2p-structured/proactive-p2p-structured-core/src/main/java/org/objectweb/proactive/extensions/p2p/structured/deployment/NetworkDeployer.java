@@ -27,9 +27,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Observable;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -55,74 +52,23 @@ public abstract class NetworkDeployer extends
 
     private static final int INJECTION_THRESHOLD = 10;
 
-    private Tracker[] trackers;
-
-    protected final NodeProvider nodeProvider;
-
-    protected final SerializableProvider<? extends StructuredOverlay> overlayProvider;
-
-    private final InjectionConstraintsProvider injectionConstraintsProvider;
+    protected final DeploymentDescriptor descriptor;
 
     // this atomic reference is used to detect the deployer state and the
     // interleaving of some methods in multi-threaded environment.
     private AtomicReference<NetworkDeployerState> state;
 
-    /**
-     * Creates a network deployer with an {@link EmptyDeploymentConfiguration}
-     * and no {@link NodeProvider}.
-     * 
-     * @param overlayProvider
-     *            the overlay provider to use for creating peers.
-     */
-    public NetworkDeployer(
-            SerializableProvider<? extends StructuredOverlay> overlayProvider) {
-        this(new EmptyDeploymentConfiguration(), overlayProvider, null);
-    }
+    private List<Tracker> trackers;
 
     /**
-     * Creates a network deployer with the specified
-     * {@link DeploymentConfiguration} and no {@link NodeProvider}.
      * 
-     * @param configuration
-     *            the deployment configuration to use.
-     * @param overlayProvider
-     *            the overlay provider to use for creating peers.
-     * @param injectionConstraintsProvider
-     *            a provider that knows how to create the constraints to use
-     *            during the creation of the network.
+     * @param descriptor
      */
-    public NetworkDeployer(DeploymentConfiguration configuration,
-            SerializableProvider<? extends StructuredOverlay> overlayProvider,
-            InjectionConstraintsProvider injectionConstraintsProvider) {
-        this(configuration, overlayProvider, injectionConstraintsProvider, null);
-    }
-
-    /**
-     * Creates a network deployer with an {@link EmptyDeploymentConfiguration}
-     * and no {@link NodeProvider}.
-     * 
-     * @param configuration
-     *            the deployment configuration to use.
-     * @param overlayProvider
-     *            the overlay provider to use for creating peers.
-     * @param injectionConstraintsProvider
-     *            a provider that knows how to create the constraints to use
-     *            during the creation of the network.
-     * @param nodeProvider
-     *            the node provider to use.
-     */
-    public NetworkDeployer(DeploymentConfiguration configuration,
-            SerializableProvider<? extends StructuredOverlay> overlayProvider,
-            InjectionConstraintsProvider injectionConstraintsProvider,
-            NodeProvider nodeProvider) {
+    public NetworkDeployer(DeploymentDescriptor descriptor) {
         this.state =
                 new AtomicReference<NetworkDeployerState>(
                         NetworkDeployerState.STANDBY);
-        this.overlayProvider = overlayProvider;
-        this.injectionConstraintsProvider = injectionConstraintsProvider;
-        this.nodeProvider = nodeProvider;
-
-        configuration.configure();
+        this.descriptor = descriptor;
     }
 
     public void deploy(int nbPeers) {
@@ -150,6 +96,12 @@ public abstract class NetworkDeployer extends
             }
         }
 
+        // FIXME: the deployment configuration must be executed one each machine
+        // where a component is deployed
+        if (descriptor.getDeploymentConfiguration() != null) {
+            descriptor.getDeploymentConfiguration().configure();
+        }
+
         this.notifyDeploymentStarted();
 
         this.deployTrackers(nbTrackers);
@@ -163,13 +115,13 @@ public abstract class NetworkDeployer extends
     private void deployTrackers(int nbTrackers) {
         this.notifyDeployingTrackers();
 
-        this.trackers = new Tracker[nbTrackers];
+        this.trackers = new ArrayList<Tracker>(nbTrackers);
 
         String networkName = UUID.randomUUID().toString();
         for (int i = 0; i < nbTrackers; i++) {
-            this.trackers[i] = this.createTracker(networkName);
+            this.trackers.add(this.createTracker(networkName));
             if (i > 0) {
-                this.trackers[i].join(this.trackers[i - 1]);
+                this.trackers.get(i).join(this.trackers.get(i - 1));
             }
         }
 
@@ -195,9 +147,10 @@ public abstract class NetworkDeployer extends
         List<Peer> peersInjected = new ArrayList<Peer>(nbPeers);
         InjectionConstraints injectionConstraints = null;
 
-        if (this.injectionConstraintsProvider != null) {
+        if (this.descriptor.getInjectionConstraintsProvider() != null) {
             injectionConstraints =
-                    this.injectionConstraintsProvider.get(nbPeers);
+                    this.descriptor.getInjectionConstraintsProvider().get(
+                            nbPeers);
         }
 
         for (int i = 0; i < nbPeers; i++) {
@@ -340,7 +293,7 @@ public abstract class NetworkDeployer extends
      * @return a tracker randomly selected from the network.
      */
     public Tracker getRandomTracker() {
-        return this.trackers[RandomUtils.nextInt(this.trackers.length)];
+        return this.trackers.get(RandomUtils.nextInt(this.trackers.size()));
     }
 
     /**
@@ -348,7 +301,7 @@ public abstract class NetworkDeployer extends
      * 
      * @return the trackers created by the deployer.
      */
-    public Tracker[] getTrackers() {
+    public List<Tracker> getTrackers() {
         return this.trackers;
     }
 
@@ -359,18 +312,6 @@ public abstract class NetworkDeployer extends
      */
     public NetworkDeployerState getState() {
         return this.state.get();
-    }
-
-    /**
-     * Returns the instance of the {@link NodeProvider} that is used to deploy
-     * the active objects. Or {@code null} if no {@link NodeProvider} is used.
-     * 
-     * @return returns the instance of the {@link NodeProvider} that is used to
-     *         deploy the active objects. Or {@code null} if no
-     *         {@link NodeProvider} is used.
-     */
-    public NodeProvider getNodeProvider() {
-        return this.nodeProvider;
     }
 
     /*

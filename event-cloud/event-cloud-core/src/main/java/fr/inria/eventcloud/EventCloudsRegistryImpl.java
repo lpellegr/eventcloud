@@ -26,13 +26,14 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import com.google.common.collect.ImmutableSet;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.tracker.SemanticTracker;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
 
 /**
  * EventCloudsRegistryImpl is a concrete implementation of
@@ -45,7 +46,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
 public class EventCloudsRegistryImpl extends AbstractComponent implements
         EventCloudsRegistry {
 
-    private Map<EventCloudId, EventCloud> eventclouds;
+    private Map<EventCloudId, EventCloudDeployer> eventCloudDeployers;
 
     private String registryUrl;
 
@@ -63,7 +64,8 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
         this.p2pConfigurationProperty = "eventcloud.configuration";
         super.initComponentActivity(body);
 
-        this.eventclouds = new HashMap<EventCloudId, EventCloud>();
+        this.eventCloudDeployers =
+                new HashMap<EventCloudId, EventCloudDeployer>();
         this.registryUrl = null;
     }
 
@@ -91,11 +93,13 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    public boolean register(EventCloud eventcloud) {
-        if (this.eventclouds.containsKey(eventcloud.getId())) {
+    public boolean register(EventCloudDeployer deployer) {
+        if (this.eventCloudDeployers.containsKey(deployer.getEventCloudDescription()
+                .getId())) {
             return false;
         } else {
-            return this.eventclouds.put(eventcloud.getId(), eventcloud) == null;
+            return this.eventCloudDeployers.put(
+                    deployer.getEventCloudDescription().getId(), deployer) == null;
         }
     }
 
@@ -104,9 +108,9 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      */
     @Override
     public Set<EventCloudId> listEventClouds() {
-        // returns an immutable copy because this.eventclouds.keySet() sends
-        // back a non-serializable set
-        return ImmutableSet.copyOf(this.eventclouds.keySet());
+        // returns an immutable copy because this.eventCloudDeployers.keySet()
+        // sends back a non-serializable set
+        return ImmutableSet.copyOf(this.eventCloudDeployers.keySet());
 
     }
 
@@ -115,23 +119,23 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      */
     @Override
     public boolean contains(EventCloudId id) {
-        return this.eventclouds.containsKey(id);
+        return this.eventCloudDeployers.containsKey(id);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public EventCloud find(EventCloudId id) {
-        return this.eventclouds.get(id);
+    public EventCloudDeployer find(EventCloudId id) {
+        return this.eventCloudDeployers.get(id);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<SemanticTracker> findTrackers(EventCloudId id) {
-        return this.eventclouds.get(id).getTrackers();
+    public List<Tracker> findTrackers(EventCloudId id) {
+        return this.eventCloudDeployers.get(id).getTrackers();
     }
 
     /**
@@ -139,10 +143,10 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      */
     @Override
     public boolean undeploy(EventCloudId id) {
-        EventCloud eventcloud = this.eventclouds.remove(id);
+        EventCloudDeployer deployer = this.eventCloudDeployers.remove(id);
 
-        if (eventcloud != null) {
-            eventcloud.getEventCloudDeployer().undeploy();
+        if (deployer != null) {
+            deployer.undeploy();
             return true;
         }
 

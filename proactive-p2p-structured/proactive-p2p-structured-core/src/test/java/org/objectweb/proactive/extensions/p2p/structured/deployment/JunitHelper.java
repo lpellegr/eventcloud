@@ -17,19 +17,18 @@
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 /**
- * A {@link DeploymentConfiguration} that does nothing.
+ * Defines some utility.
  * 
  * @author lpellegr
  */
-public final class EmptyDeploymentConfiguration implements
-        DeploymentConfiguration {
+public class JunitHelper {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void configure() {
+    public static <T extends DeploymentDescriptor> T setTestingDeploymentConfiguration(T deploymentDescriptor) {
+        if (deploymentDescriptor.getDeploymentConfiguration() == null) {
+            deploymentDescriptor.setDeploymentConfiguration(new TestingDeploymentConfiguration());
+        }
 
+        return deploymentDescriptor;
     }
 
 }

@@ -16,8 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
-import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
-
 /**
  * All the tests contained by a test case that extends this class are executed
  * by using a {@link CanNetworkDeployer}.
@@ -44,39 +42,22 @@ public class JunitByMethodCanNetworkDeployer extends
 
     /**
      * Creates a new Junit deployer by using an instance of
-     * {@link TestingDeploymentConfiguration} for the deployment configuration
-     * and no {@link InjectionConstraints} is specified.
+     * {@link CanDeploymentDescriptor} for the deployment descriptor.
      */
     public JunitByMethodCanNetworkDeployer() {
-        this(new TestingDeploymentConfiguration());
+        this(new CanDeploymentDescriptor());
     }
 
     /**
      * Creates a new Junit deployer with the specified deployment configuration.
      * No {@link InjectionConstraints} for is specified.
      * 
-     * @param configuration
-     *            the deployment configuration to use.
-     */
-    public JunitByMethodCanNetworkDeployer(DeploymentConfiguration configuration) {
-        this(configuration, null);
-    }
-
-    /**
-     * Creates a new Junit deployer with the specified deployment configuration
-     * and injection constraints provider.
-     * 
-     * @param configuration
-     *            the deployment configuration to use.
-     * @param injectionConstraintsProvider
-     *            a provider that knows how to create the constraints to use
-     *            during the creation of the network.
+     * @param deploymentDescriptor
+     *            the deployment descriptor to use.
      */
     public JunitByMethodCanNetworkDeployer(
-            DeploymentConfiguration configuration,
-            InjectionConstraintsProvider injectionConstraintsProvider) {
-        super(new CanNetworkDeployer(
-                configuration, injectionConstraintsProvider));
+            CanDeploymentDescriptor deploymentDescriptor) {
+        super(new CanNetworkDeployer(deploymentDescriptor));
     }
 
 }

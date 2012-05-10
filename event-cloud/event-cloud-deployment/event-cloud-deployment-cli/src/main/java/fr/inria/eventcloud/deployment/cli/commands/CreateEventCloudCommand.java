@@ -16,20 +16,18 @@
  **/
 package fr.inria.eventcloud.deployment.cli.commands;
 
-import java.util.ArrayList;
-
-import org.objectweb.proactive.api.PAActiveObject;
-
 import com.beust.jcommander.Parameter;
 
-import fr.inria.eventcloud.EventCloud;
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
+import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
+import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
- * This command creates an {@link EventCloud} by using an
+ * This command creates an {@link EventCloudDescription} by using an
  * {@link EventCloudsRegistry}.
  * 
  * @author lpellegr
@@ -54,16 +52,17 @@ public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
     @Override
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
-        EventCloud eventCloud =
-                EventCloud.create(
-                        PAActiveObject.getUrl(registry),
-                        new EventCloudDeployer(),
-                        new ArrayList<UnalterableElaProperty>(),
-                        this.nbTrackers, this.nbPeers);
 
-        registry.register(eventCloud);
+        EventCloudDeployer deployer =
+                new EventCloudDeployer(
+                        new EventCloudDescription(new EventCloudId()),
+                        new EventCloudDeploymentDescriptor(
+                                new SemanticPersistentOverlayProvider()));
 
-        System.out.println("Event Cloud with id '" + eventCloud.getId()
+        deployer.deploy(this.nbTrackers, this.nbPeers);
+
+        System.out.println("Event Cloud with id '"
+                + deployer.getEventCloudDescription().getId()
                 + "' has been created and registered with " + this.nbPeers
                 + " peer(s) and " + this.nbTrackers + " tracker(s).");
     }

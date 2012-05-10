@@ -57,7 +57,7 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
             LoggerFactory.getLogger(DataTransfertTest.class);
 
     public DataTransfertTest() {
-        super(1);
+        super(1, 1);
     }
 
     @Test
