@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
-import fr.inria.eventcloud.EventCloud;
-import fr.inria.eventcloud.EventCloudApi;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
@@ -29,24 +29,23 @@ import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
  * This class is used to keep in cache the information associated to an
- * {@link EventCloud} in order to reduce the number of calls to an
+ * EventCloud in order to reduce the number of calls to an
  * {@link EventCloudsRegistry}.
  * 
  * @author lpellegr
  * 
  * @see ProxyFactory
  */
-public class EventCloudCache implements EventCloudApi, Serializable {
+public class EventCloudCache implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private final EventCloudsRegistry registry;
 
-    private EventCloud delegate;
+    private EventCloudDeployer deployer;
 
     /*
      * TODO: add a thread that updates periodically the trackers.
@@ -56,9 +55,9 @@ public class EventCloudCache implements EventCloudApi, Serializable {
         try {
             this.registry = EventCloudsRegistryImpl.lookup(registryUrl);
 
-            this.delegate = this.registry.find(eventcloudId);
+            this.deployer = this.registry.find(eventcloudId);
 
-            if (this.delegate == null) {
+            if (this.deployer == null) {
                 throw new EventCloudIdNotManaged(
                         eventcloudId.toString(), registryUrl);
             }
@@ -67,68 +66,20 @@ public class EventCloudCache implements EventCloudApi, Serializable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public EventCloudId getId() {
-        return this.delegate.getId();
+        return this.deployer.getEventCloudDescription().getId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public long getCreationTime() {
-        return this.delegate.getCreationTime();
+        return this.deployer.getEventCloudDescription().getCreationTime();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public EventCloudDeployer getEventCloudDeployer() {
-        return this.delegate.getEventCloudDeployer();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<UnalterableElaProperty> getElaProperties() {
-        return this.delegate.getElaProperties();
+        return this.deployer.getEventCloudDescription().getElaProperties();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getRegistryUrl() {
-        return this.delegate.getRegistryUrl();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<String> getTrackerUrls() {
-        return this.delegate.getTrackerUrls();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<SemanticTracker> getTrackers() {
-        return this.delegate.getTrackers();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SemanticTracker selectTracker() {
-        return this.delegate.selectTracker();
+    public List<Tracker> getTrackers() {
+        return this.deployer.getTrackers();
     }
 
 }

@@ -21,7 +21,7 @@ import java.io.IOException;
 import com.beust.jcommander.Parameter;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.EventCloud;
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
@@ -29,7 +29,7 @@ import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
- * This command registers a subscription into an {@link EventCloud} and print on
+ * This command registers a subscription into an {@link EventCloudDescription} and print on
  * the standard output the notifications that are received.
  * 
  * @author lpellegr

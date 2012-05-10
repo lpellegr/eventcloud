@@ -51,6 +51,8 @@ public abstract class JunitByMethodNetworkDeployer {
      */
     public JunitByMethodNetworkDeployer(NetworkDeployer deployer) {
         this.deployer = deployer;
+
+        JunitHelper.setTestingDeploymentConfiguration(deployer.descriptor);
     }
 
     @After

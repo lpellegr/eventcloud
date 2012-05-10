@@ -31,8 +31,9 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
 public class JunitByMethodEventCloudDeployer extends
         JunitByMethodNetworkDeployer {
 
-    public JunitByMethodEventCloudDeployer() {
-        super(new JunitEventCloudDeployer());
+    public JunitByMethodEventCloudDeployer(
+            EventCloudDeploymentDescriptor deploymentDescriptor) {
+        super(new JunitEventCloudDeployer(deploymentDescriptor));
     }
 
     public SemanticPeer getRandomSemanticPeer() {

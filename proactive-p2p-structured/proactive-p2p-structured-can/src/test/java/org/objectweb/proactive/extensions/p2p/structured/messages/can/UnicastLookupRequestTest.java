@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
@@ -56,17 +57,16 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     public UnicastLookupRequestTest() {
         super(
-                1,
-                10,
-                new SerializableProvider<CustomCanOverlay>() {
-                    private static final long serialVersionUID = 1L;
+                new CanDeploymentDescriptor(
+                        new SerializableProvider<CustomCanOverlay>() {
+                            private static final long serialVersionUID = 1L;
 
-                    @Override
-                    public CustomCanOverlay get() {
-                        return new CustomCanOverlay();
-                    }
-                },
-                InjectionConstraintsProvider.newFractalInjectionConstraintsProvider());
+                            @Override
+                            public CustomCanOverlay get() {
+                                return new CustomCanOverlay();
+                            }
+                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider()),
+                1, 10);
     }
 
     @Override

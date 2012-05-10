@@ -18,23 +18,16 @@ package fr.inria.eventcloud.deployment;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.EmptyDeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.InjectionConstraints;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
-import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
@@ -49,33 +42,12 @@ public class EventCloudDeployer extends NetworkDeployer {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructs a new eventcloud deployer with an
-     * {@link EmptyDeploymentConfiguration}, a
-     * {@link SemanticPersistentOverlayProvider}, no
-     * {@link InjectionConstraints} and no {@link NodeProvider}.
-     */
-    public EventCloudDeployer() {
-        this(new EmptyDeploymentConfiguration(),
-                new SemanticPersistentOverlayProvider(), null);
-    }
+    private final EventCloudDescription eventCloudDescription;
 
-    public EventCloudDeployer(DeploymentConfiguration configuration,
-            SerializableProvider<? extends SemanticCanOverlay> overlayProvider) {
-        this(configuration, overlayProvider, null, null);
-    }
-
-    public EventCloudDeployer(DeploymentConfiguration configuration,
-            SerializableProvider<? extends SemanticCanOverlay> overlayProvider,
-            InjectionConstraintsProvider injectionConstraintsProvider) {
-        this(configuration, overlayProvider, injectionConstraintsProvider, null);
-    }
-
-    public EventCloudDeployer(DeploymentConfiguration mode,
-            SerializableProvider<? extends SemanticCanOverlay> overlayProvider,
-            InjectionConstraintsProvider injectionConstraintsProvider,
-            NodeProvider nodeProvider) {
-        super(mode, overlayProvider, injectionConstraintsProvider, nodeProvider);
+    public EventCloudDeployer(EventCloudDescription description,
+            EventCloudDeploymentDescriptor deploymentDescriptor) {
+        super(deploymentDescriptor);
+        this.eventCloudDescription = description;
     }
 
     /**
@@ -83,12 +55,13 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Peer createPeer() {
-        if (this.nodeProvider != null) {
+        if (super.descriptor.getNodeProvider() != null) {
             return SemanticFactory.newSemanticPeer(
-                    this.overlayProvider,
-                    this.nodeProvider.getGcmVirtualNode(P2PStructuredProperties.PEER_VN.getValue()));
+                    super.descriptor.getOverlayProvider(),
+                    super.descriptor.getNodeProvider().getGcmVirtualNode(
+                            P2PStructuredProperties.PEER_VN.getValue()));
         } else {
-            return SemanticFactory.newSemanticPeer(this.overlayProvider);
+            return SemanticFactory.newSemanticPeer(super.descriptor.getOverlayProvider());
         }
     }
 
@@ -97,13 +70,18 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Tracker createTracker(String networkName) {
-        if (this.nodeProvider != null) {
+        if (super.descriptor.getNodeProvider() != null) {
             return SemanticFactory.newSemanticTracker(
                     networkName,
-                    this.nodeProvider.getGcmVirtualNode(P2PStructuredProperties.TRACKER_VN.getValue()));
+                    super.descriptor.getNodeProvider().getGcmVirtualNode(
+                            P2PStructuredProperties.TRACKER_VN.getValue()));
         } else {
             return SemanticFactory.newSemanticTracker(networkName);
         }
+    }
+
+    public EventCloudDescription getEventCloudDescription() {
+        return this.eventCloudDescription;
     }
 
     public SemanticPeer getRandomSemanticPeer() {

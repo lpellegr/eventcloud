@@ -16,89 +16,79 @@
  **/
 package fr.inria.eventcloud.deployment;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitHelper;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
-import fr.inria.eventcloud.EventCloud;
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
  * This class is used to instantiate an Event Cloud infrastructure (i.e. an
- * {@link EventCloudsRegistry} and one or several {@link EventCloud}s).
+ * {@link EventCloudsRegistry} and one or several EventClouds).
  * 
  * @author lpellegr
  */
 public class JunitEventCloudInfrastructureDeployer {
 
-    private final Map<EventCloudId, EventCloud> eventClouds;
-
-    private final DatastoreType datastoreType;
+    private final Map<EventCloudId, EventCloudDeployer> eventClouds;
 
     private EventCloudsRegistry eventCloudsRegistry;
 
     private String eventCloudsRegistryUrl;
 
-    /**
-     * Creates an infrastructure deployer for testing purposes. By default this
-     * deployer will create peers inside an event cloud by using an in-memory
-     * datastore.
-     */
     public JunitEventCloudInfrastructureDeployer() {
-        this(DatastoreType.IN_MEMORY);
+        this.eventClouds = new HashMap<EventCloudId, EventCloudDeployer>();
     }
 
-    public JunitEventCloudInfrastructureDeployer(DatastoreType type) {
-        this.eventClouds = new HashMap<EventCloudId, EventCloud>();
-        this.datastoreType = type;
+    public EventCloudId newEventCloud(int nbTrackers, int nbPeers) {
+        return this.newEventCloud(
+                new EventCloudDescription(),
+                new EventCloudDeploymentDescriptor(), nbTrackers, nbPeers);
     }
 
-    public EventCloudId createEventCloud(int nbPeers) {
-        return this.createEventCloud(1, nbPeers);
+    public EventCloudId newEventCloud(EventCloudDescription eventCloudDescription,
+                                      int nbTrackers, int nbPeers) {
+        return this.newEventCloud(
+                eventCloudDescription, new EventCloudDeploymentDescriptor(),
+                nbTrackers, nbPeers);
     }
 
-    public EventCloudId createEventCloud(int nbTrackers, int nbPeers) {
-        return this.createEventCloud(nbTrackers, nbPeers, new EventCloudId());
+    public EventCloudId newEventCloud(EventCloudDeploymentDescriptor deploymentDescriptor,
+                                      int nbTrackers, int nbPeers) {
+        return this.newEventCloud(
+                new EventCloudDescription(), deploymentDescriptor, nbTrackers,
+                nbPeers);
     }
 
-    public EventCloudId createEventCloud(int nbTrackers, int nbPeers,
-                                         EventCloudId eventCloudId) {
-        return this.createEventCloud(nbTrackers, nbPeers, eventCloudId, null);
-    }
-
-    public EventCloudId createEventCloud(int nbTrackers,
-                                         int nbPeers,
-                                         EventCloudId eventCloudId,
-                                         InjectionConstraintsProvider injectionConstraintsProvider) {
+    public EventCloudId newEventCloud(EventCloudDescription eventCloudDescription,
+                                      EventCloudDeploymentDescriptor deploymentDescriptor,
+                                      int nbTrackers, int nbPeers) {
         this.initializeEventCloudsRegistry();
 
-        EventCloud eventcloud =
-                EventCloud.create(
-                        this.eventCloudsRegistryUrl, eventCloudId,
-                        new JunitEventCloudDeployer(
-                                this.datastoreType,
-                                injectionConstraintsProvider),
-                        new ArrayList<UnalterableElaProperty>(), nbTrackers,
-                        nbPeers);
+        JunitHelper.setTestingDeploymentConfiguration(deploymentDescriptor);
 
-        this.eventClouds.put(eventcloud.getId(), eventcloud);
+        EventCloudDeployer deployer =
+                new EventCloudDeployer(
+                        eventCloudDescription, deploymentDescriptor);
+        deployer.deploy(nbTrackers, nbPeers);
 
-        if (!this.eventCloudsRegistry.register(eventcloud)) {
+        this.eventClouds.put(eventCloudDescription.getId(), deployer);
+
+        if (!this.eventCloudsRegistry.register(deployer)) {
             throw new IllegalStateException(
                     "Eventcloud registration failed: it is already registered");
         }
 
-        return eventcloud.getId();
+        return eventCloudDescription.getId();
     }
 
     private synchronized void initializeEventCloudsRegistry() {
@@ -110,17 +100,17 @@ public class JunitEventCloudInfrastructureDeployer {
         }
     }
 
-    public EventCloud find(EventCloudId id) {
+    public EventCloudDeployer find(EventCloudId id) {
         return this.eventClouds.get(id);
     }
 
     public SemanticTracker getRandomSemanticTracker(EventCloudId id) {
-        EventCloud ec = this.eventClouds.get(id);
-        if (ec == null) {
+        EventCloudDeployer deployer = this.eventClouds.get(id);
+        if (deployer == null) {
             return null;
         }
 
-        return ec.selectTracker();
+        return deployer.getRandomSemanticTracker();
     }
 
     public SemanticPeer getRandomSemanticPeer(EventCloudId id) {
@@ -141,7 +131,7 @@ public class JunitEventCloudInfrastructureDeployer {
 
         while (it.hasNext()) {
             EventCloudId ecId = it.next();
-            this.eventClouds.get(ecId).getEventCloudDeployer().undeploy();
+            this.eventClouds.get(ecId).undeploy();
         }
 
         ComponentUtils.terminateComponent(this.eventCloudsRegistry);
@@ -153,7 +143,7 @@ public class JunitEventCloudInfrastructureDeployer {
                     + eventCloudId);
         }
 
-        this.eventClouds.get(eventCloudId).getEventCloudDeployer().undeploy();
+        this.eventClouds.get(eventCloudId).undeploy();
         this.eventClouds.remove(eventCloudId);
     }
 

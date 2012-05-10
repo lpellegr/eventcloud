@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.objectweb.proactive.core.util.MutableInteger;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +48,13 @@ import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
-import fr.inria.eventcloud.deployment.DatastoreType;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
@@ -135,9 +139,19 @@ public class PublishSubscribeBenchmarkTest {
                         this.notificationListenerType.getSimpleName()});
 
         JunitEventCloudInfrastructureDeployer deployer =
-                new JunitEventCloudInfrastructureDeployer(this.datastoreType);
+                new JunitEventCloudInfrastructureDeployer();
 
-        EventCloudId ecId = deployer.createEventCloud(this.nbPeers);
+        SerializableProvider<? extends SemanticCanOverlay> overlayProvider;
+
+        if (this.datastoreType == DatastoreType.IN_MEMORY) {
+            overlayProvider = new SemanticInMemoryOverlayProvider();
+        } else {
+            overlayProvider = new SemanticPersistentOverlayProvider();
+        }
+
+        EventCloudId ecId =
+                deployer.newEventCloud(new EventCloudDeploymentDescriptor(
+                        overlayProvider), 1, this.nbPeers);
 
         final ProxyFactory proxyFactory =
                 ProxyFactory.getInstance(
@@ -279,6 +293,10 @@ public class PublishSubscribeBenchmarkTest {
             nbEventsReceivedBySubscriber.get(id).incrementAndGet();
             nbEventsReceivedBySubscriber.notifyAll();
         }
+    }
+
+    private static enum DatastoreType {
+        IN_MEMORY, PERSISTENT
     }
 
     private static final class CustomBindingListener extends

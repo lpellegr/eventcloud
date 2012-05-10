@@ -30,12 +30,15 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class JunitByClassEventCloudDeployer extends JunitByClassNetworkDeployer {
 
-    public JunitByClassEventCloudDeployer(int nbPeers) {
-        this(1, nbPeers);
+    public JunitByClassEventCloudDeployer(int nbTrackers, int nbPeers) {
+        this(new EventCloudDeploymentDescriptor(), nbTrackers, nbPeers);
     }
 
-    public JunitByClassEventCloudDeployer(int nbTrackers, int nbPeers) {
-        super(new JunitEventCloudDeployer(), nbTrackers, nbPeers);
+    public JunitByClassEventCloudDeployer(
+            EventCloudDeploymentDescriptor deploymentDescriptor,
+            int nbTrackers, int nbPeers) {
+        super(new JunitEventCloudDeployer(deploymentDescriptor), nbTrackers,
+                nbPeers);
     }
 
     public SemanticPeer getRandomSemanticPeer() {

@@ -29,6 +29,8 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 public final class TestingDeploymentConfiguration implements
         DeploymentConfiguration {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * {@inheritDoc}
      */

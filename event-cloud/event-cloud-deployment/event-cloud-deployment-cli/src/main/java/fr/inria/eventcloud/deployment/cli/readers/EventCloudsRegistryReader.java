@@ -25,7 +25,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
-import fr.inria.eventcloud.EventCloud;
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
@@ -35,7 +35,7 @@ import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 
 /**
  * This class is used to execute some operation (e.g. to create an
- * {@link EventCloud}, to list the {@link EventCloud}s managed by the registry,
+ * {@link EventCloudDescription}, to list the {@link EventCloudDescription}s managed by the registry,
  * etc) from the command-line.
  * 
  * @author lpellegr

@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 
 /**
@@ -30,7 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClass
 public class NeighborTableTest extends JunitByClassCanNetworkDeployer {
 
     public NeighborTableTest() {
-        super(2);
+        super(new CanDeploymentDescriptor(), 1, 2);
     }
 
     @Test
