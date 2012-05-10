@@ -33,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 public class RemoveNeighborOperationTest extends JunitByClassCanNetworkDeployer {
 
     public RemoveNeighborOperationTest() {
-        super(2);
+        super(1, 2);
     }
 
     @Test

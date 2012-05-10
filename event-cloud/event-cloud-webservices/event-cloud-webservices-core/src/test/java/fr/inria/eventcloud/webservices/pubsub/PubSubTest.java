@@ -28,6 +28,7 @@ import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
@@ -57,8 +58,10 @@ public class PubSubTest {
                 new JunitEventCloudInfrastructureDeployer();
 
         EventCloudId ecId =
-                deployer.createEventCloud(1, 10, new EventCloudId(
-                        "http://streams.event-processing.org/ids/TaxiUc"));
+                deployer.newEventCloud(
+                        new EventCloudDescription(
+                                "http://streams.event-processing.org/ids/TaxiUc"),
+                        1, 10);
 
         // Web services which are deployed
         String subscribeWsUrl =

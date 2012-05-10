@@ -16,13 +16,11 @@
  **/
 package fr.inria.eventcloud.deployment;
 
-import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitHelper;
 
-import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.EventCloudDescription;
+import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
  * This class is used to specialize an {@link EventCloudDeployer} for unit
@@ -35,67 +33,17 @@ public class JunitEventCloudDeployer extends EventCloudDeployer {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a new {@link JunitEventCloudDeployer} by using a
-     * {@link SemanticInMemoryOverlayProvider} for creating peers.
-     */
-    public JunitEventCloudDeployer() {
-        this(DatastoreType.IN_MEMORY);
-    }
-
-    /**
-     * Creates a new {@link JunitEventCloudDeployer} by using a
-     * {@link SemanticInMemoryOverlayProvider} for creating peers and the
-     * specified {@code injectionConstraintsProvider}.
+     * Creates a new {@link JunitEventCloudDeployer} by using the specified
+     * {@code DeploymentDescriptor}.
      * 
-     * @param injectionConstraintsProvider
-     *            a provider that knows how to create the constraints to use
-     *            during the creation of the network.
+     * @param deploymentDescriptor
+     *            the deployment descriptor to use.
      */
     public JunitEventCloudDeployer(
-            InjectionConstraintsProvider injectionConstraintsProvider) {
-        this(DatastoreType.IN_MEMORY);
-    }
-
-    /**
-     * Creates a new {@link JunitEventCloudDeployer} by using the specified
-     * datastore type (i.e. {@link SemanticInMemoryOverlayProvider} or
-     * {@link SemanticPersistentOverlayProvider}) and the specified
-     * {@code injectionConstraintsProvider} when peers are created.
-     * 
-     * @param type
-     *            the datastore type that is used to determine which kind of
-     *            overlay provider to use.
-     * @param injectionConstraintsProvider
-     *            a provider that knows how to create the constraints to use
-     *            during the creation of the network.
-     */
-    public JunitEventCloudDeployer(DatastoreType type,
-            InjectionConstraintsProvider injectionConstraintsProvider) {
-        super(new TestingDeploymentConfiguration(),
-                createProviderAccordingToDatastoreType(type),
-                injectionConstraintsProvider);
-    }
-
-    /**
-     * Creates a new {@link JunitEventCloudDeployer} by using the specified
-     * datastore type (i.e. {@link SemanticInMemoryOverlayProvider} or
-     * {@link SemanticPersistentOverlayProvider}) when peers are created.
-     * 
-     * @param type
-     *            the datastore type that is used to determine which kind of
-     *            overlay provider to use.
-     */
-    public JunitEventCloudDeployer(DatastoreType type) {
-        super(new TestingDeploymentConfiguration(),
-                createProviderAccordingToDatastoreType(type));
-    }
-
-    private static SerializableProvider<SemanticCanOverlay> createProviderAccordingToDatastoreType(DatastoreType type) {
-        if (type == DatastoreType.IN_MEMORY) {
-            return new SemanticInMemoryOverlayProvider();
-        } else {
-            return new SemanticPersistentOverlayProvider();
-        }
+            EventCloudDeploymentDescriptor deploymentDescriptor) {
+        super(
+                new EventCloudDescription(new EventCloudId()),
+                JunitHelper.setTestingDeploymentConfiguration(deploymentDescriptor));
     }
 
 }

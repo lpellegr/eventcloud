@@ -52,7 +52,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             LoggerFactory.getLogger(SemanticPeerTest.class);
 
     public SemanticPeerTest() {
-        super(10);
+        super(1, 10);
     }
 
     @Test

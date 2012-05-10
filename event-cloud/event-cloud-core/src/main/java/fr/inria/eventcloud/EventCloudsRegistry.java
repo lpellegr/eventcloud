@@ -21,9 +21,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.tracker.SemanticTracker;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
 
 /**
  * An eventclouds registry is in charge of maintaining the list of eventclouds
@@ -60,15 +61,15 @@ public interface EventCloudsRegistry {
     public void unregister() throws IOException;
 
     /**
-     * Registers the given {@link EventCloud} into the registry.
+     * Registers the given {@link EventCloudDeployer} into the registry.
      * 
-     * @param eventcloud
+     * @param eventCloudDeployer
      *            the eventcloud to register into the registry.
      * 
      * @return {@code true} if the registration has succeed or {@code false} if
      *         the eventcloud is already registered into the registry.
      */
-    public boolean register(EventCloud eventcloud);
+    public boolean register(EventCloudDeployer eventCloudDeployer);
 
     /**
      * Returns a list that contains the identifier of the eventclouds which are
@@ -92,16 +93,17 @@ public interface EventCloudsRegistry {
     public boolean contains(EventCloudId id);
 
     /**
-     * Returns the {@link EventCloud} object associated to the specified
-     * {@code id} if it is managed by the registry.
+     * Returns the {@link EventCloudDescription} object associated to the
+     * specified {@code id} if it is managed by the registry.
      * 
      * @param id
      *            the eventcloud identifier to look for.
      * 
-     * @return the {@link EventCloud} object associated to the specified
-     *         {@code id} if it is managed by the registry or {@code null}.
+     * @return the {@link EventCloudDescription} object associated to the
+     *         specified {@code id} if it is managed by the registry or
+     *         {@code null}.
      */
-    public EventCloud find(EventCloudId id);
+    public EventCloudDeployer find(EventCloudId id);
 
     /**
      * Returns the trackers associated to the specified {@link EventCloudId} if
@@ -113,7 +115,7 @@ public interface EventCloudsRegistry {
      * @return the trackers associated to the eventcloud identified by the
      *         specified {@link EventCloudId} or {@code null}.
      */
-    public List<SemanticTracker> findTrackers(EventCloudId id);
+    public List<Tracker> findTrackers(EventCloudId id);
 
     /**
      * Undeploys the eventcloud identified with the specified {@code id}.

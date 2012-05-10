@@ -20,6 +20,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -32,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 public class CanTest extends JunitByClassCanNetworkDeployer {
 
     public CanTest() {
-        super(10);
+        super(new CanDeploymentDescriptor(), 1, 10);
     }
 
     @Test

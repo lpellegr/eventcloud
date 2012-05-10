@@ -43,15 +43,13 @@ public abstract class JunitByClassNetworkDeployer {
 
     private final int nbPeers;
 
-    public JunitByClassNetworkDeployer(NetworkDeployer deployer, int nbPeers) {
-        this(deployer, 1, nbPeers);
-    }
-
     public JunitByClassNetworkDeployer(NetworkDeployer deployer,
             int nbTrackers, int nbPeers) {
         this.deployer = deployer;
         this.nbTrackers = nbTrackers;
         this.nbPeers = nbPeers;
+
+        JunitHelper.setTestingDeploymentConfiguration(deployer.descriptor);
     }
 
     @Before

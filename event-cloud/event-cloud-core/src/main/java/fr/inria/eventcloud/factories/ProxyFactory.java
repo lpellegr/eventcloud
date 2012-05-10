@@ -367,15 +367,21 @@ public class ProxyFactory implements Serializable {
      */
     public static ProxyFactory getInstance(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
-        ProxyFactory newFactory = new ProxyFactory(registryUrl, id);
+        ProxyFactory newFactory = proxies.get(id);
 
-        ProxyFactory oldFactory = proxies.putIfAbsent(id, newFactory);
+        if (newFactory == null) {
+            newFactory = new ProxyFactory(registryUrl, id);
 
-        if (oldFactory == null) {
-            return newFactory;
-        } else {
-            return oldFactory;
+            ProxyFactory oldFactory = proxies.putIfAbsent(id, newFactory);
+
+            if (oldFactory == null) {
+                return newFactory;
+            } else {
+                return oldFactory;
+            }
         }
+
+        return newFactory;
     }
 
 }
