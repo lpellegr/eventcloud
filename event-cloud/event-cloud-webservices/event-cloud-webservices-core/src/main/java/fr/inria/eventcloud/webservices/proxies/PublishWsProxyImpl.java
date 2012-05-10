@@ -29,6 +29,17 @@ public class PublishWsProxyImpl extends PublishProxyImpl implements
         PublishWsApi {
 
     /**
+     * ADL name of the publish web service proxy component.
+     */
+    public static final String PUBLISH_WEBSERVICE_PROXY_ADL =
+            "fr.inria.eventcloud.webservices.proxies.PublishWsProxy";
+
+    /**
+     * Functional interface name of the publish web service proxy component.
+     */
+    public static final String PUBLISH_WEBSERVICES_ITF = "publish-webservices";
+
+    /**
      * Empty constructor required by ProActive.
      */
     public PublishWsProxyImpl() {

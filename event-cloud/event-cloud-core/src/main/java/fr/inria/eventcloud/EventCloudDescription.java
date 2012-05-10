@@ -41,7 +41,7 @@ public class EventCloudDescription implements Serializable {
     public EventCloudDescription() {
         this(new EventCloudId());
     }
-    
+
     public EventCloudDescription(String streamUrl,
             UnalterableElaProperty... elaProperties) {
         this(new EventCloudId(streamUrl), elaProperties);

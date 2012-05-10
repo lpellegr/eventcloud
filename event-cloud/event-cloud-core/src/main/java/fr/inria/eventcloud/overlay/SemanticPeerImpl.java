@@ -74,6 +74,12 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * ADL name of the semantic peer component.
+     */
+    public static final String SEMANTIC_PEER_ADL =
+            "fr.inria.eventcloud.overlay.SemanticPeer";
+
     private ExecutorService threadPool;
 
     /**

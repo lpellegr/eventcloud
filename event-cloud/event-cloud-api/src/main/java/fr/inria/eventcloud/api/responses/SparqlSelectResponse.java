@@ -26,7 +26,7 @@ import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
 
     private static final long serialVersionUID = 1L;
-    
+
     private int nbIntermediateResults, nbSubQueries;
     private long timeToGetResult, sizeOfIntermediateResultsInBytes;
 
@@ -36,43 +36,42 @@ public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
                 result);
     }
 
-	public int getNbIntermediateResults() {
-		return nbIntermediateResults;
-	}
+    public int getNbIntermediateResults() {
+        return this.nbIntermediateResults;
+    }
 
-	public void setNbIntermediateResults(int nbIntermediateResults) {
-		this.nbIntermediateResults = nbIntermediateResults;
-	}
+    public void setNbIntermediateResults(int nbIntermediateResults) {
+        this.nbIntermediateResults = nbIntermediateResults;
+    }
 
-	public long getTimeToGetResult() {
-		return timeToGetResult;
-	}
+    public long getTimeToGetResult() {
+        return this.timeToGetResult;
+    }
 
-	public void setTimeToGetResult(long timeToGetResult) {
-	    this.timeToGetResult = timeToGetResult;
-	}
+    public void setTimeToGetResult(long timeToGetResult) {
+        this.timeToGetResult = timeToGetResult;
+    }
 
-	public int getNbSubQueries() {
-		return nbSubQueries;
-	}
+    public int getNbSubQueries() {
+        return this.nbSubQueries;
+    }
 
-	public void setNbSubQueries(int nbSubQueries) {
-		this.nbSubQueries = nbSubQueries;
-	}
+    public void setNbSubQueries(int nbSubQueries) {
+        this.nbSubQueries = nbSubQueries;
+    }
 
-	/**
+    /**
      * 
-     * @return the size (in bytes) of all the quadruples contained in the intermediate results 
-     * for this SparqlSelectResponse
+     * @return the size (in bytes) of all the quadruples contained in the
+     *         intermediate results for this SparqlSelectResponse
      */
     public long getSizeOfIntermediateResultsInBytes() {
-        return sizeOfIntermediateResultsInBytes;
+        return this.sizeOfIntermediateResultsInBytes;
     }
 
     public void setSizeOfIntermediateResultsInBytes(long sizeOfIntermediateResultsInBytes) {
-        this.sizeOfIntermediateResultsInBytes = sizeOfIntermediateResultsInBytes;
+        this.sizeOfIntermediateResultsInBytes =
+                sizeOfIntermediateResultsInBytes;
     }
-    
-    
 
 }

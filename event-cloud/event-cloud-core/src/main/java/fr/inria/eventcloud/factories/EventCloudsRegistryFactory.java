@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.EventCloudsRegistryImpl;
 
 /**
  * This class is used to create and to deploy an {@link EventCloudsRegistry} as
@@ -99,9 +99,9 @@ public class EventCloudsRegistryFactory {
     private static EventCloudsRegistry createEventCloudsRegistry(Map<String, Object> context) {
         EventCloudsRegistry registry =
                 ComponentUtils.createComponentAndGetInterface(
-                        EventCloudProperties.EVENTCLOUDS_REGISTRY_ADL.getValue(),
+                        EventCloudsRegistryImpl.EVENTCLOUDS_REGISTRY_ADL,
                         context,
-                        EventCloudProperties.EVENTCLOUDS_REGISTRY_SERVICES_ITF.getValue(),
+                        EventCloudsRegistryImpl.EVENTCLOUDS_REGISTRY_SERVICES_ITF,
                         EventCloudsRegistry.class, true);
 
         log.info("EventCloudsRegistry created");
