@@ -91,8 +91,8 @@ public class SubscribeInfosAdapter extends
                 topicName.substring(index + 1, topicName.lastIndexOf("#stream"));
 
         return WsNotificationMessageBuilder.createSubscribeMessage(
-                subscribeInfos.getSubscriberWsUrl(), topicNamespace, "t",
-                topicLocalPart);
+                subscribeInfos.getSubscriberWsEndpointUrl(), topicNamespace,
+                "t", topicLocalPart);
     }
 
     /**
@@ -117,18 +117,21 @@ public class SubscribeInfosAdapter extends
                     ReflectionUtils.getFieldValue(consumerReference, "address");
 
             if (address != null) {
-                String subscriberWsUrl =
+                String subscriberWsEndpointUrl =
                         (String) ReflectionUtils.getFieldValue(address, "uri");
 
-                if (subscriberWsUrl != null) {
+                if (subscriberWsEndpointUrl != null) {
                     try {
                         String sparqlQuery =
                                 this.translator.translate(subscribe);
 
-                        log.info("Subscriber endpoint is {}", subscriberWsUrl);
+                        log.info(
+                                "Subscriber endpoint URL is {}",
+                                subscriberWsEndpointUrl);
                         log.info("Translation output:\n{}", sparqlQuery);
 
-                        return new SubscribeInfos(sparqlQuery, subscriberWsUrl);
+                        return new SubscribeInfos(
+                                sparqlQuery, subscriberWsEndpointUrl);
                     } catch (TranslationException e) {
                         log.error("Translation error:");
                         this.logAndThrowIllegalArgumentException(e.getMessage());

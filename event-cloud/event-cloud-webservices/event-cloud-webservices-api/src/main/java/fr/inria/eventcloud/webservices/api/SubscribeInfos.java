@@ -31,11 +31,11 @@ public class SubscribeInfos implements Serializable {
 
     private String sparqlQuery;
 
-    private String subscriberWsUrl;
+    private String subscriberWsEndpointUrl;
 
-    public SubscribeInfos(String sparqlQuery, String subscriberWsUrl) {
+    public SubscribeInfos(String sparqlQuery, String subscriberWsEndpointUrl) {
         this.sparqlQuery = sparqlQuery;
-        this.subscriberWsUrl = subscriberWsUrl;
+        this.subscriberWsEndpointUrl = subscriberWsEndpointUrl;
     }
 
     public String getSparqlQuery() {
@@ -46,12 +46,12 @@ public class SubscribeInfos implements Serializable {
         this.sparqlQuery = sparqlQuery;
     }
 
-    public String getSubscriberWsUrl() {
-        return this.subscriberWsUrl;
+    public String getSubscriberWsEndpointUrl() {
+        return this.subscriberWsEndpointUrl;
     }
 
-    public void setSubscriberWsUrl(String subscriberWsUrl) {
-        this.subscriberWsUrl = subscriberWsUrl;
+    public void setSubscriberWsEndpointUrl(String subscriberWsEndpointUrl) {
+        this.subscriberWsEndpointUrl = subscriberWsEndpointUrl;
     }
 
 }

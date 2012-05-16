@@ -61,7 +61,8 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     public static final String SUBSCRIBE_WEBSERVICES_ITF =
             "subscribe-webservices";
 
-    // contains the subscriber web service urls to use in order to deliver
+    // contains the subscriber web service endpoint URLs to use in order to
+    // deliver
     // the solutions
     private Map<SubscriptionId, String> subscribers;
 
@@ -101,14 +102,17 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public SubscriptionId subscribe(SubscribeInfos subscribeInfos) {
         Subscription subscription =
-                new Subscription(subscribeInfos.getSparqlQuery());
+                new Subscription(
+                        subscribeInfos.getSparqlQuery(),
+                        subscribeInfos.getSubscriberWsEndpointUrl());
 
         this.subscribers.put(
-                subscription.getId(), subscribeInfos.getSubscriberWsUrl());
+                subscription.getId(),
+                subscribeInfos.getSubscriberWsEndpointUrl());
 
         this.subscribe(subscription, new WsEventNotificationListener(
                 super.getEventCloudCache().getId().getStreamUrl(),
-                subscribeInfos.getSubscriberWsUrl()));
+                subscribeInfos.getSubscriberWsEndpointUrl()));
 
         return subscription.getId();
     }
