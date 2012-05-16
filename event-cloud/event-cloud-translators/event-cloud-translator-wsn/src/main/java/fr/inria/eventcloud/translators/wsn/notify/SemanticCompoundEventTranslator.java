@@ -19,6 +19,8 @@ package fr.inria.eventcloud.translators.wsn.notify;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
+import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
+
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import org.openjena.riot.WebContent;
@@ -64,8 +66,20 @@ public class SemanticCompoundEventTranslator extends
 
         Message message = new Message();
         message.setAny(any);
+
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
+        if (event.size() > 0) {
+            String publicationSource =
+                    event.getQuadruples().get(0).getPublicationSource();
+
+            if (publicationSource != null) {
+                W3CEndpointReferenceBuilder endPointReferenceBuilder =
+                        new W3CEndpointReferenceBuilder();
+                endPointReferenceBuilder.address(publicationSource);
+                notificationMessage.setProducerReference(endPointReferenceBuilder.build());
+            }
+        }
         notificationMessage.setMessage(message);
 
         return notificationMessage;

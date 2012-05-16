@@ -45,6 +45,7 @@ import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.reasoner.SparqlColander;
+import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 /**
  * This class is a specialized version of {@link CanOverlay} for semantic data.
@@ -55,6 +56,8 @@ public class SemanticCanOverlay extends CanOverlay {
 
     private static final Logger log =
             LoggerFactory.getLogger(SemanticCanOverlay.class);
+
+    private RelationshipStrengthEngineManager socialFilter;
 
     private final LoadingCache<String, SemanticPeer> peerStubsCache;
 
@@ -75,6 +78,8 @@ public class SemanticCanOverlay extends CanOverlay {
             TransactionalTdbDatastore colanderDatastore) {
         super(new SemanticRequestResponseManager(colanderDatastore),
                 peerDatastore);
+
+        this.socialFilter = null;
 
         this.peerStubsCache =
                 CacheBuilder.newBuilder()
@@ -104,6 +109,35 @@ public class SemanticCanOverlay extends CanOverlay {
                                         key);
                             }
                         });
+    }
+
+    /**
+     * Indicates whether this overlay is connected to a social filter or not.
+     * 
+     * @return true if this overlay is connected to a social filter, false
+     *         otherwise.
+     */
+    public boolean hasSocialFilter() {
+        return this.socialFilter != null;
+    }
+
+    /**
+     * Returns the social filter if any.
+     * 
+     * @return the social filter if any, null otherwise.
+     */
+    public RelationshipStrengthEngineManager getSocialFilter() {
+        return this.socialFilter;
+    }
+
+    /**
+     * Sets the social filter.
+     * 
+     * @param socialFilter
+     *            the social filter.
+     */
+    public void setSocialFilter(RelationshipStrengthEngineManager socialFilter) {
+        this.socialFilter = socialFilter;
     }
 
     /**

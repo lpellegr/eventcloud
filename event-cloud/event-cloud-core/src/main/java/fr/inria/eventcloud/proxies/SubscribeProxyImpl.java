@@ -179,7 +179,9 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
                 new Subscription(
                         subscription.getId(), null, subscription.getId(),
                         subscription.getCreationTime(), sparqlQuery,
-                        this.componentUri, listener.getType());
+                        this.componentUri,
+                        subscription.getSubscriptionDestination(),
+                        listener.getType());
 
         NotificationListener<?> result =
                 this.listeners.put(subscription.getId(), listener);
@@ -216,7 +218,6 @@ public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
     @Override
     public final CompoundEvent reconstructCompoundEvent(Subscription subscription,
                                                         Binding binding) {
-
         if (!subscription.getGraphNode().isVariable()) {
             throw new IllegalArgumentException(
                     "The subscription graph node is not a variable");

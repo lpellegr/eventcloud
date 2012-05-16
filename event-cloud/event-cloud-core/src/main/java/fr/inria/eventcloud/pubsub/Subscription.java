@@ -18,6 +18,8 @@ package fr.inria.eventcloud.pubsub;
 
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_CREATION_DATETIME_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_CREATION_DATETIME_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_DESTINATION_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_DESTINATION_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ID_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ID_PROPERTY;
@@ -111,9 +113,11 @@ public class Subscription implements Quadruplable, Serializable {
 
     private final long indexationTime;
 
+    private final String sparqlQuery;
+
     private final String subscriberUrl;
 
-    private final String sparqlQuery;
+    private final String subscriptionDestination;
 
     private final List<Stub> stubs;
 
@@ -142,12 +146,34 @@ public class Subscription implements Quadruplable, Serializable {
             SubscriptionId id, long indexationTime, String sparqlQuery,
             String subscribeProxyUrl, NotificationListenerType listenerType) {
         this(originalId, parentId, id, System.currentTimeMillis(),
-                indexationTime, sparqlQuery, subscribeProxyUrl, listenerType);
+                indexationTime, sparqlQuery, subscribeProxyUrl, null,
+                listenerType);
+    }
+
+    /**
+     * 
+     * @param originalId
+     * @param parentId
+     * @param id
+     * @param indexationTime
+     * @param sparqlQuery
+     * @param subscribeProxyUrl
+     * @param subscriberWsEndpointUrl
+     * @param listenerType
+     */
+    public Subscription(SubscriptionId originalId, SubscriptionId parentId,
+            SubscriptionId id, long indexationTime, String sparqlQuery,
+            String subscribeProxyUrl, String subscriptionDestination,
+            NotificationListenerType listenerType) {
+        this(originalId, parentId, id, System.currentTimeMillis(),
+                indexationTime, sparqlQuery, subscribeProxyUrl,
+                subscriptionDestination, listenerType);
     }
 
     private Subscription(SubscriptionId originalId, SubscriptionId parentId,
             SubscriptionId id, long creationTime, long indexationTime,
             String sparqlQuery, String subscriberUrl,
+            String subscriptionDestination,
             NotificationListenerType listenerType) {
         this.originalId = originalId;
         this.parentId = parentId;
@@ -156,6 +182,7 @@ public class Subscription implements Quadruplable, Serializable {
         this.indexationTime = indexationTime;
         this.sparqlQuery = sparqlQuery;
         this.subscriberUrl = subscriberUrl;
+        this.subscriptionDestination = subscriptionDestination;
         this.type = listenerType;
         this.stubs = new ArrayList<Stub>();
     }
@@ -218,6 +245,13 @@ public class Subscription implements Quadruplable, Serializable {
                             .getURI()));
         }
 
+        String subscriptionDestination = null;
+        if (basicInfo.get(SUBSCRIPTION_DESTINATION_PROPERTY) != null) {
+            subscriptionDestination =
+                    basicInfo.get(SUBSCRIPTION_DESTINATION_PROPERTY)
+                            .getLiteralLexicalForm();
+        }
+
         Subscription subscription =
                 new Subscription(
                         originalId,
@@ -239,6 +273,7 @@ public class Subscription implements Quadruplable, Serializable {
                                 .getLiteralLexicalForm(),
                         basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
                                 .getLiteralLexicalForm(),
+                        subscriptionDestination,
                         NotificationListenerType.UNKNOWN.convert(((Integer) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
                                 .getLiteralValue()).shortValue()));
@@ -319,6 +354,16 @@ public class Subscription implements Quadruplable, Serializable {
      */
     public String getSubscriberUrl() {
         return this.subscriberUrl;
+    }
+
+    /**
+     * Returns the subscription destination. The destination is assumed to be an
+     * URL representing the endpoint of the subscriber.
+     * 
+     * @return the subscription destination.
+     */
+    public String getSubscriptionDestination() {
+        return this.subscriptionDestination;
     }
 
     /**
@@ -449,6 +494,14 @@ public class Subscription implements Quadruplable, Serializable {
                 SUBSCRIPTION_SUBSCRIBER_NODE,
                 Node.createLiteral(this.subscriberUrl), false, false));
 
+        if (this.subscriptionDestination != null) {
+            quads.add(new Quadruple(
+                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    SUBSCRIPTION_DESTINATION_NODE,
+                    Node.createLiteral(this.subscriptionDestination), false,
+                    false));
+        }
+
         quads.add(new Quadruple(
                 SUBSCRIPTION_NS_NODE, subscriptionURI,
                 SUBSCRIPTION_INDEXED_WITH_NODE,
@@ -502,9 +555,10 @@ public class Subscription implements Quadruplable, Serializable {
         return "Subscription [originalId=" + this.originalId + ", parentId="
                 + this.parentId + ", id=" + this.id + ", creationTime="
                 + this.creationTime + ", indexationTime=" + this.indexationTime
-                + ", subscriberUrl=" + this.subscriberUrl + ", sparqlQuery="
-                + this.sparqlQuery + ", stubs=" + this.stubs + ", type="
-                + this.type + "]";
+                + ", subscriberUrl=" + this.subscriberUrl
+                + ", subscription destination=" + this.subscriptionDestination
+                + ", sparqlQuery=" + this.sparqlQuery + ", stubs=" + this.stubs
+                + ", type=" + this.type + "]";
     }
 
     public static final class Stub implements Serializable {

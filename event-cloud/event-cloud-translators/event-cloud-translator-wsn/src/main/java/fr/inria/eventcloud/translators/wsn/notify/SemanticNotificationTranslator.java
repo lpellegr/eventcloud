@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
+
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.w3c.dom.Element;
 
@@ -17,6 +19,7 @@ import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
 import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
  * Translator for {@link NotificationMessageHolderType notification messages}
@@ -46,11 +49,33 @@ public class SemanticNotificationTranslator extends
                                 (Element) notificationMessage.getMessage()
                                         .getAny()).getBytes());
 
+        final String publicationSource;
+        W3CEndpointReference producerReference =
+                notificationMessage.getProducerReference();
+        if (producerReference != null) {
+            Object address =
+                    ReflectionUtils.getFieldValue(
+                            notificationMessage.getProducerReference(),
+                            "address");
+            if (address != null) {
+                publicationSource =
+                        ReflectionUtils.getFieldValue(address, "uri")
+                                .toString();
+            } else {
+                publicationSource = null;
+            }
+        } else {
+            publicationSource = null;
+        }
+
         final List<Quadruple> quads = new ArrayList<Quadruple>();
         RdfParser.parse(
                 is, SerializationFormat.TriG, new Callback<Quadruple>() {
                     @Override
                     public void execute(Quadruple quad) {
+                        if (publicationSource != null) {
+                            quad.setPublicationSource(publicationSource);
+                        }
                         quads.add(quad);
                     }
 

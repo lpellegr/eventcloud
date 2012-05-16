@@ -118,6 +118,7 @@ public final class SubscriptionRewriter {
                                 tc,
                                 Algebra.compile(QueryFactory.create(subscription.getSparqlQuery()))))
                         .toString(), subscription.getSubscriberUrl(),
+                subscription.getSubscriptionDestination(),
                 subscription.getType());
     }
 

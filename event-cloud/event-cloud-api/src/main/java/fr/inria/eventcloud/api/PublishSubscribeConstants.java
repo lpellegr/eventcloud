@@ -94,6 +94,9 @@ public final class PublishSubscribeConstants {
     public static final String SUBSCRIPTION_SUBSCRIBER_PROPERTY =
             SUBSCRIPTION_NS + "subscriber";
 
+    public static final String SUBSCRIPTION_DESTINATION_PROPERTY = EVENT_NS
+            + "subscriptionDestination";
+
     public static final String SUBSCRIPTION_INDEXED_WITH_PROPERTY =
             SUBSCRIPTION_NS + "indexedWith";
 
@@ -154,6 +157,9 @@ public final class PublishSubscribeConstants {
 
     public static final Node SUBSCRIPTION_SUBSCRIBER_NODE =
             Node.createURI(SUBSCRIPTION_SUBSCRIBER_PROPERTY);
+
+    public static final Node SUBSCRIPTION_DESTINATION_NODE =
+            Node.createURI(SUBSCRIPTION_DESTINATION_PROPERTY);
 
     public static final Node SUBSCRIPTION_INDEXED_WITH_NODE =
             Node.createURI(SUBSCRIPTION_INDEXED_WITH_PROPERTY);

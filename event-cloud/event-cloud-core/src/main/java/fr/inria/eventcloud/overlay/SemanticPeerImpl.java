@@ -23,6 +23,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
@@ -55,6 +57,7 @@ import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
+import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 /**
  * SemanticPeerImpl is a concrete implementation of {@link SemanticPeer}. It is
@@ -70,7 +73,8 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
-public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
+public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
+        BindingController {
 
     private static final long serialVersionUID = 1L;
 
@@ -79,6 +83,12 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
      */
     public static final String SEMANTIC_PEER_ADL =
             "fr.inria.eventcloud.overlay.SemanticPeer";
+
+    /**
+     * Functional client interface name to bind the social filter.
+     */
+    public static final String SOCIAL_FILTER_SERVICES_ITF =
+            "social-filter-services";
 
     private ExecutorService threadPool;
 
@@ -372,6 +382,52 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer {
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(
                 sparqlSelect, super.overlay);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void bindFc(String clientItfName, Object serverItf)
+            throws NoSuchInterfaceException {
+        if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
+            ((SemanticCanOverlay) this.overlay).setSocialFilter((RelationshipStrengthEngineManager) serverItf);
+        } else {
+            throw new NoSuchInterfaceException(clientItfName);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String[] listFc() {
+        return new String[] {SOCIAL_FILTER_SERVICES_ITF};
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object lookupFc(String clientItfName)
+            throws NoSuchInterfaceException {
+        if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
+            return ((SemanticCanOverlay) this.overlay).getSocialFilter();
+        } else {
+            throw new NoSuchInterfaceException(clientItfName);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unbindFc(String clientItfName) throws NoSuchInterfaceException {
+        if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
+            ((SemanticCanOverlay) this.overlay).setSocialFilter(null);
+        } else {
+            throw new NoSuchInterfaceException(clientItfName);
+        }
     }
 
 }

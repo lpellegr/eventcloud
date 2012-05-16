@@ -31,7 +31,6 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.lang.mutable.MutableObject;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.openjena.riot.out.NodeFmtLib;
 import org.openjena.riot.out.OutputLangUtils;
@@ -69,6 +68,7 @@ import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
@@ -522,16 +522,37 @@ public final class PublishSubscribeUtils {
      * Notifies the subscriber associated to the specified subscription about a
      * solution that matches his subscription.
      * 
-     * @param overlay
+     * @param semanticCanOverlay
      *            the overlay used to send requests.
      * @param subscription
      *            the subscription which is matched.
      * @param quadruple
      *            the quadruple that matches the subscription.
      */
-    private static void notifySubscriberAboutSolution(final CanOverlay overlay,
+    private static void notifySubscriberAboutSolution(final SemanticCanOverlay semanticCanOverlay,
                                                       final Subscription subscription,
                                                       final Quadruple quadruple) {
+        if (semanticCanOverlay.hasSocialFilter()) {
+            double relationshipStrength =
+                    semanticCanOverlay.getSocialFilter()
+                            .getRelationshipStrength(
+                                    quadruple.getPublicationSource(),
+                                    subscription.getSubscriptionDestination())
+                            .getStrength();
+
+            if (relationshipStrength < EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue()) {
+                log.debug("Notification for solution "
+                        + quadruple
+                        + ", coming from "
+                        + quadruple.getPublicationSource()
+                        + " and matching subscription of which the destination is "
+                        + subscription.getSubscriptionDestination()
+                        + " won't be send because the relationship strength is lower than the requiered threshold: "
+                        + relationshipStrength);
+                return;
+            }
+        }
+
         try {
             final SubscribeProxy subscriber = subscription.getSubscriberProxy();
 
@@ -541,7 +562,7 @@ public final class PublishSubscribeUtils {
             final Notification n =
                     new Notification(
                             notificationId,
-                            PAActiveObject.getUrl(overlay.getStub()),
+                            PAActiveObject.getUrl(semanticCanOverlay.getStub()),
                             createBindingSolution(subscription, quadruple));
 
             // FIXME issue #24
@@ -558,7 +579,7 @@ public final class PublishSubscribeUtils {
                 // sub-solutions to the subscriber
                 for (final Subscription.Stub stub : subscription.getStubs()) {
                     final SemanticPeer peerStub =
-                            ((SemanticCanOverlay) overlay).findPeerStub(stub.peerUrl);
+                            semanticCanOverlay.findPeerStub(stub.peerUrl);
 
                     if (peerStub != null) {
                         // FIXME: issue #24

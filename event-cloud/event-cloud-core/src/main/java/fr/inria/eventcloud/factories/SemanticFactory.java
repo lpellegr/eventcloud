@@ -18,14 +18,18 @@ package fr.inria.eventcloud.factories;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Provider;
 
 import org.etsi.uri.gcm.util.GCM;
+import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -37,10 +41,12 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.overlay.SemanticPeerImpl;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 import fr.inria.eventcloud.tracker.SemanticTrackerImpl;
+import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 /**
  * SemanticFactory must be used to create new instances of Semantic components
@@ -287,10 +293,36 @@ public final class SemanticFactory {
             ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(
                     peer, overlayProvider);
 
+            if (EventCloudProperties.SOCIAL_FILTER_URL.getValue() != null) {
+                Component peerComponent = ((Interface) peer).getFcItfOwner();
+                RelationshipStrengthEngineManager socialFilter =
+                        ComponentUtils.lookupFcInterface(
+                                EventCloudProperties.SOCIAL_FILTER_URL.getValue(),
+                                SemanticPeerImpl.SOCIAL_FILTER_SERVICES_ITF,
+                                RelationshipStrengthEngineManager.class);
+
+                GCM.getGCMLifeCycleController(peerComponent).stopFc();
+                GCM.getBindingController(peerComponent).bindFc(
+                        SemanticPeerImpl.SOCIAL_FILTER_SERVICES_ITF,
+                        socialFilter);
+                GCM.getGCMLifeCycleController(peerComponent).startFc();
+
+                log.info(
+                        "SemanticPeer {} bound to social filter {}",
+                        peer.getId(),
+                        EventCloudProperties.SOCIAL_FILTER_URL.getValue());
+            }
+
             log.info("SemanticPeer {} created", peer.getId());
 
             return peer;
         } catch (NoSuchInterfaceException e) {
+            throw new IllegalStateException(e);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalLifeCycleException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalBindingException e) {
             throw new IllegalStateException(e);
         }
     }

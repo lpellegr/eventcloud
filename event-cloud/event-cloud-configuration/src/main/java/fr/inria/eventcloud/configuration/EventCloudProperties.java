@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.ConfigurationParser;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyDouble;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyInteger;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
 
@@ -155,6 +156,19 @@ public class EventCloudProperties {
     public static final PropertyInteger SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE =
             new PropertyInteger(
                     "eventcloud.subscribe.proxies.cache.maximum.size", 1000);
+
+    /**
+     * Specifies the URL of the social filter component.
+     */
+    public static final PropertyString SOCIAL_FILTER_URL = new PropertyString(
+            "eventcloud.socialfilter.url", null);
+
+    /**
+     * Specifies the threshold for the relationship strengths provided by the
+     * social filter.
+     */
+    public static final PropertyDouble SOCIAL_FILTER_THRESHOLD =
+            new PropertyDouble("eventcloud.socialfilter.threshold", 0.5);
 
     private static final File configurationFileLoaded;
 

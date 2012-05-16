@@ -39,24 +39,35 @@ public final class Subscription implements Serializable {
 
     private final String sparqlQuery;
 
+    private final String subscriptionDestination;
+
     public Subscription(String sparqlQuery) {
+        this(sparqlQuery, null);
+    }
+
+    public Subscription(String sparqlQuery, String subscriptionDestination) {
         // TODO: check SPARQL query syntax
 
         this.id = new SubscriptionId();
         this.creationTime = System.currentTimeMillis();
         this.sparqlQuery = sparqlQuery;
+        this.subscriptionDestination = subscriptionDestination;
     }
 
     public SubscriptionId getId() {
         return this.id;
     }
 
+    public long getCreationTime() {
+        return this.creationTime;
+    }
+
     public String getSparqlQuery() {
         return this.sparqlQuery;
     }
 
-    public long getCreationTime() {
-        return this.creationTime;
+    public String getSubscriptionDestination() {
+        return this.subscriptionDestination;
     }
 
     /**

@@ -117,12 +117,21 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
     private void addMetaInformation() {
         // adds a quadruple indicating what is the number
         // of quadruples contained by the event
-        this.quadruples.add(new Quadruple(
-                this.getGraph(), this.getGraph(),
-                PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                Node.createLiteral(
-                        Integer.toString(this.quadruples.size() + 1),
-                        XSDDatatype.XSDint)));
+        Quadruple quad =
+                new Quadruple(
+                        this.getGraph(), this.getGraph(),
+                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
+                        Node.createLiteral(
+                                Integer.toString(this.quadruples.size() + 1),
+                                XSDDatatype.XSDint));
+
+        String publicationSource =
+                this.quadruples.get(0).getPublicationSource();
+        if (publicationSource != null) {
+            quad.setPublicationSource(publicationSource);
+        }
+
+        this.quadruples.add(quad);
     }
 
     /**
