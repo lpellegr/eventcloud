@@ -48,22 +48,23 @@ public class WsEventNotificationListener extends
 
     private final QName streamQName;
 
-    private final String subscriberWsUrl;
+    private final String subscriberWsEndpointUrl;
 
     private transient NotificationConsumer subscriberWsClient;
 
     /**
      * Creates an {@link CompoundEventNotificationListener} with the specified
-     * subscriber URL to invoke the Web service to notify.
+     * subscriber endpoint URL to invoke the Web service to notify.
      * 
      * @param streamUrl
      *            the stream URL.
      * 
-     * @param subscriberWsUrl
-     *            the subscriber URL.
+     * @param subscriberWsEndpointUrl
+     *            the subscriber endpoint URL.
      */
-    public WsEventNotificationListener(String streamUrl, String subscriberWsUrl) {
-        this.subscriberWsUrl = subscriberWsUrl;
+    public WsEventNotificationListener(String streamUrl,
+            String subscriberWsEndpointUrl) {
+        this.subscriberWsEndpointUrl = subscriberWsEndpointUrl;
 
         int index = streamUrl.lastIndexOf('/');
 
@@ -77,7 +78,8 @@ public class WsEventNotificationListener extends
         if (this.subscriberWsClient == null) {
             this.subscriberWsClient =
                     WsClientFactory.createWsClient(
-                            NotificationConsumer.class, this.subscriberWsUrl);
+                            NotificationConsumer.class,
+                            this.subscriberWsEndpointUrl);
         }
 
         return this.subscriberWsClient;
@@ -97,8 +99,8 @@ public class WsEventNotificationListener extends
         this.getSubscriberWsClient().notify(notify);
 
         log.info(
-                "Subscriber {} notified about:\n {}", this.subscriberWsUrl,
-                solution);
+                "Subscriber {} notified about:\n {}",
+                this.subscriberWsEndpointUrl, solution);
     }
 
 }

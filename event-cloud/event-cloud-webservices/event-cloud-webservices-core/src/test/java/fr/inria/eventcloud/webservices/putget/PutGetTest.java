@@ -59,7 +59,7 @@ public class PutGetTest {
 
         EventCloudId ecId = deployer.newEventCloud(1, 10);
 
-        String putGetWsUrl =
+        String putGetWsEndpointUrl =
                 WebServiceDeployer.deployPutGetWebService(
                         deployer.getEventCloudsRegistryUrl(),
                         ecId.getStreamUrl(), "putget", 8889)
@@ -67,7 +67,7 @@ public class PutGetTest {
                         .getEndpointInfo()
                         .getAddress();
 
-        PutGetWsApi putGetCaller = this.createPutGetCaller(putGetWsUrl);
+        PutGetWsApi putGetCaller = this.createPutGetCaller(putGetWsEndpointUrl);
 
         putGetCaller.addQuadruple(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
@@ -110,7 +110,7 @@ public class PutGetTest {
         ComponentUtils.terminateComponent(putGetCaller);
     }
 
-    private PutGetWsApi createPutGetCaller(String putGetWsUrl) {
+    private PutGetWsApi createPutGetCaller(String putGetWsEndpointUrl) {
 
         try {
             PutGetWsApi putGetCaller =
@@ -123,7 +123,8 @@ public class PutGetTest {
 
             GCM.getBindingController(putGetComponent).bindFc(
                     PutGetComponentImpl.PUTGET_WEBSERVICES_NAME,
-                    putGetWsUrl + "(" + JaxWsCXFWSCaller.class.getName() + ")");
+                    putGetWsEndpointUrl + "("
+                            + JaxWsCXFWSCaller.class.getName() + ")");
 
             GCM.getGCMLifeCycleController(putGetComponent).startFc();
 
