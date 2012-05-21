@@ -24,6 +24,7 @@ import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
+import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -142,6 +143,12 @@ public class WsNotificationMessageBuilder {
         }
 
         return result;
+    }
+
+    public static SubscribeResponse createSubscribeResponse(String subscriptionReferenceAddress) {
+        SubscribeResponse response = new SubscribeResponse();
+        response.setSubscriptionReference(WSNHelper.createWSA(subscriptionReferenceAddress));
+        return response;
     }
 
     private static TopicExpressionType createTopicExpressionType(String topicNamespace,
