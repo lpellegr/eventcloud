@@ -25,6 +25,8 @@ import javax.xml.namespace.QName;
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.play_project.play_commons.eventformat.Namespace;
 import eu.play_project.play_commons.eventformat.Stream;
@@ -42,6 +44,9 @@ import fr.inria.eventcloud.translators.wsn.Translator;
  * @author lpellegr
  */
 public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
+
+    private static Logger log =
+            LoggerFactory.getLogger(TopicSubscriptionTranslator.class);
 
     /**
      * Translates a WS-Notification {@link Subscribe} message, which is supposed
@@ -88,10 +93,16 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
                     }
 
                     if (topicNamespace == null) {
-                        throw new TranslationException(
-                                "No namespace declared for prefix '"
-                                        + org.apache.xml.utils.QName.getPrefixPart(topic)
-                                        + "' associated to topic " + topic);
+                        // FIXME: a TranslationException should be thrown but
+                        // first the #43 has to be fixed
+                        log.warn("No namespace declared for prefix '"
+                                + org.apache.xml.utils.QName.getPrefixPart(topic)
+                                + "' associated to topic "
+                                + topic
+                                + " the default topic namespace will be used 'http://streams.event-processing.org/ids/'");
+
+                        topicNamespace =
+                                "http://streams.event-processing.org/ids/";
                     }
 
                     return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <"
@@ -111,5 +122,4 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
                     "No filter set in the subscribe message");
         }
     }
-
 }
