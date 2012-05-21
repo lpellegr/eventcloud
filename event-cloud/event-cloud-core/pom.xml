@@ -60,7 +60,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.soceda</groupId>
+			<groupId>fr.insa.liris.soceda</groupId>
 			<artifactId>social-filter</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
