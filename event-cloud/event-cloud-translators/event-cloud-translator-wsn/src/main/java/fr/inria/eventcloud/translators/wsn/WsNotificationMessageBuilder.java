@@ -158,7 +158,7 @@ public class WsNotificationMessageBuilder {
         topicExpressionType.getOtherAttributes().put(
                 new QName(topicNamespace, topicLocalPart, topicNsPrefix),
                 topicNamespace);
-
+        topicExpressionType.setDialect("http://docs.oasis-open.org/wsn/t-1/TopicExpression/Concrete");
         topicExpressionType.getContent().add(
                 topicNsPrefix + ":" + topicLocalPart);
 
