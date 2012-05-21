@@ -11,7 +11,8 @@ then
 fi;
 
 WS_INSTANCE_FILE=$1
-shift 1
+WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT=$2
+shift 2
 
 java -Xms2048m -Xmx8192m \
      -server \
@@ -22,6 +23,8 @@ java -Xms2048m -Xmx8192m \
      -Dlog4j.configuration=file:$PATH_TO_RESOURCES/log4j.properties \
      -Dlogback.configurationFile=file:$PATH_TO_RESOURCES/logback.xml \
      -Dlogging.output.filename=$(basename $WS_INSTANCE_FILE) \
+     -Dproactive.communication.protocol=pnp \
+     -Dproactive.pnp.port=$WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT \
      -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.EventCloudManagementWsLaucher $@ &
 
 echo $! > $WS_INSTANCE_FILE.pid
