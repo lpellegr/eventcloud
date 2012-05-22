@@ -128,7 +128,7 @@ public class PutGetTest {
                             new HashMap<String, Object>(), "putget-services",
                             PutGetWsApi.class, false);
             Component putGetComponent =
-                    ((Interface) putGetCaller).getFcItfOwner();
+                    ((Interface) this.putGetCaller).getFcItfOwner();
 
             GCM.getBindingController(putGetComponent).bindFc(
                     PutGetComponentImpl.PUTGET_WEBSERVICES_NAME,

@@ -220,9 +220,9 @@ public class WebServiceDeployer {
     }
 
     public static ServiceInformation deployPublishWebService(String registryUrl,
-                                                              String streamUrl,
-                                                              String urlSuffix,
-                                                              int port) {
+                                                             String streamUrl,
+                                                             String urlSuffix,
+                                                             int port) {
         PublishServiceImpl publishService =
                 new PublishServiceImpl(registryUrl, streamUrl);
 
@@ -231,9 +231,9 @@ public class WebServiceDeployer {
     }
 
     public static ServiceInformation deploySubscribeWebService(String registryUrl,
-                                                                String streamUrl,
-                                                                String urlSuffix,
-                                                                int port) {
+                                                               String streamUrl,
+                                                               String urlSuffix,
+                                                               int port) {
         SubscribeServiceImpl subscribeService =
                 new SubscribeServiceImpl(registryUrl, streamUrl);
 
@@ -242,9 +242,9 @@ public class WebServiceDeployer {
     }
 
     public static ServiceInformation deployPutGetWebService(String registryUrl,
-                                                             String streamUrl,
-                                                             String urlSuffix,
-                                                             int port) {
+                                                            String streamUrl,
+                                                            String urlSuffix,
+                                                            int port) {
         PutGetServiceImpl putGetService =
                 new PutGetServiceImpl(registryUrl, streamUrl);
 

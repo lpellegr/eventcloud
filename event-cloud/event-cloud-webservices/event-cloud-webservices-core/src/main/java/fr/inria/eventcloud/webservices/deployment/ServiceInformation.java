@@ -45,19 +45,19 @@ public class ServiceInformation {
     }
 
     public EventCloudProxyService<?> getService() {
-        return service;
+        return this.service;
     }
 
     public Server getServer() {
-        return server;
+        return this.server;
     }
 
     public String getStreamUrl() {
-        return streamUrl;
+        return this.streamUrl;
     }
 
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     public void destroy() {
