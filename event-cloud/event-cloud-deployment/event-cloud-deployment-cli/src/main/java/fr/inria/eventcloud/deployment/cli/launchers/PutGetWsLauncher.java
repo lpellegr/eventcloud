@@ -40,6 +40,7 @@ public final class PutGetWsLauncher extends WsProxyLauncher {
         return WebServiceDeployer.deployPutGetWebService(
                 super.registryUrl, super.eventCloudIdUrl,
                 "proactive/services/EventCloud_putget-webservices", super.port)
+                .getServer()
                 .getEndpoint()
                 .getEndpointInfo()
                 .getAddress();

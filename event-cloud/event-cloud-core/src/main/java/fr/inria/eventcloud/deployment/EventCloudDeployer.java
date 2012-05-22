@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.deployment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
@@ -28,6 +31,7 @@ import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.overlay.SemanticPeerImpl;
+import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 import fr.inria.eventcloud.tracker.SemanticTrackerImpl;
 
@@ -45,10 +49,13 @@ public class EventCloudDeployer extends NetworkDeployer {
 
     private final EventCloudDescription eventCloudDescription;
 
+    private List<Proxy> proxies;
+
     public EventCloudDeployer(EventCloudDescription description,
             EventCloudDeploymentDescriptor deploymentDescriptor) {
         super(deploymentDescriptor);
         this.eventCloudDescription = description;
+        this.proxies = new ArrayList<Proxy>();
     }
 
     /**
@@ -80,6 +87,28 @@ public class EventCloudDeployer extends NetworkDeployer {
         }
     }
 
+    /**
+     * Registers a proxy to the list of proxies.
+     * 
+     * @param proxy
+     *            the proxy to register.
+     */
+    public synchronized void registerProxy(Proxy proxy) {
+        this.proxies.add(proxy);
+    }
+
+    /**
+     * Unregisters a proxy from the list of proxies.
+     * 
+     * @param proxy
+     *            the proxy to unregister.
+     * @return true if the proxy has been successfully unregistered, false
+     *         otherwise.
+     */
+    public synchronized boolean unregisterProxy(Proxy proxy) {
+        return this.proxies.remove(proxy);
+    }
+
     public EventCloudDescription getEventCloudDescription() {
         return this.eventCloudDescription;
     }
@@ -98,6 +127,10 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected void internalUndeploy() {
+        for (Proxy proxy : this.proxies) {
+            ComponentUtils.terminateComponent(proxy);
+        }
+
         try {
             PAFuture.waitFor(this.getRandomPeer().send(new ShutdownRequest()));
         } catch (DispatchException e) {
@@ -111,6 +144,14 @@ public class EventCloudDeployer extends NetworkDeployer {
         for (Tracker tracker : this.getTrackers()) {
             ComponentUtils.terminateComponent(tracker);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void reset() {
+        this.proxies = null;
     }
 
 }

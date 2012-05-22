@@ -97,8 +97,8 @@ public interface EventCloudManagementWsApi {
 
     /**
      * Creates, deploys and exposes as a web service a subscribe proxy for the
-     * eventcloud identified by the specified {@code eventcloudId}. When the
-     * call succeeds, the endpoint URL to the subscribe web service is returned.
+     * eventcloud identified by the specified {@code streamUrl}. When the call
+     * succeeds, the endpoint URL to the subscribe web service is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an eventcloud which is running.
@@ -112,8 +112,8 @@ public interface EventCloudManagementWsApi {
 
     /**
      * Creates, deploys and exposes as a web service a putget proxy for the
-     * eventcloud identified by the specified {@code eventcloudId}. When the
-     * call succeeds, the endpoint URL to the putget web service is returned.
+     * eventcloud identified by the specified {@code streamUrl}. When the call
+     * succeeds, the endpoint URL to the putget web service is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an eventcloud which is running.

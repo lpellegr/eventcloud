@@ -147,9 +147,8 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetProxy>
      */
     @Override
     public PutGetProxy createProxy() throws EventCloudIdNotManaged {
-        return ProxyFactory.getInstance(
-                super.registryUrl, new EventCloudId(super.streamUrl))
-                .newPutGetProxy();
+        return ProxyFactory.newPutGetProxy(super.registryUrl, new EventCloudId(
+                super.streamUrl));
     }
 
 }

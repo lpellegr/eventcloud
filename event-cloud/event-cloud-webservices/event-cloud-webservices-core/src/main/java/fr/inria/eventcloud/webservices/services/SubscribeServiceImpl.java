@@ -91,26 +91,30 @@ public class SubscribeServiceImpl extends
                     ReflectionUtils.getFieldValue(consumerReference, "address");
 
             if (address != null) {
-                String subscriberUrl =
+                String subscriberWsEndpointUrl =
                         (String) ReflectionUtils.getFieldValue(address, "uri");
 
-                if (subscriberUrl != null) {
+                if (subscriberWsEndpointUrl != null) {
                     try {
                         String sparqlQuery =
                                 super.translator.translate(subscribe);
 
-                        log.info("Subscriber endpoint is {}", subscriberUrl);
+                        log.info(
+                                "Subscriber endpoint is {}",
+                                subscriberWsEndpointUrl);
                         log.info("Translation output:\n{}", sparqlQuery);
 
                         Subscription subscription =
-                                new Subscription(sparqlQuery);
+                                new Subscription(
+                                        sparqlQuery, subscriberWsEndpointUrl);
 
                         this.subscribers.put(
-                                subscription.getId(), subscriberUrl);
+                                subscription.getId(), subscriberWsEndpointUrl);
 
                         super.proxy.subscribe(
                                 subscription, new WsEventNotificationListener(
-                                        super.streamUrl, subscriberUrl));
+                                        super.streamUrl,
+                                        subscriberWsEndpointUrl));
                     } catch (TranslationException e) {
                         log.error("Translation error:");
                         logAndThrowIllegalArgumentException(e.getMessage());
@@ -133,9 +137,8 @@ public class SubscribeServiceImpl extends
      */
     @Override
     public SubscribeProxy createProxy() throws EventCloudIdNotManaged {
-        return ProxyFactory.getInstance(
-                super.registryUrl, new EventCloudId(super.streamUrl))
-                .newSubscribeProxy();
+        return ProxyFactory.newSubscribeProxy(
+                super.registryUrl, new EventCloudId(super.streamUrl));
     }
 
 }

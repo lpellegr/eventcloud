@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.webservices.factories;
 
-import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.webservices.proxies.PublishWsProxyImpl;
 import fr.inria.eventcloud.webservices.proxies.PutGetWsProxyImpl;
@@ -38,36 +36,6 @@ public final class WsProxyFactory extends ProxyFactory {
         publishProxyAdl = PublishWsProxyImpl.PUBLISH_WEBSERVICE_PROXY_ADL;
         subscribeProxyAdl = SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICE_PROXY_ADL;
         putgetProxyAdl = PutGetWsProxyImpl.PUTGET_WEBSERVICE_PROXY_ADL;
-    }
-
-    /**
-     * Constructs a new WsProxyFactory from the specified registryUrl and the
-     * given Event Cloud id.
-     * 
-     * @param registryUrl
-     *            the Event-Cloud registry url.
-     * @param id
-     *            the identifier that identify the Event-Cloud to work on.
-     * 
-     * @throws EventCloudIdNotManaged
-     *             if the specified registry does not managed the given id.
-     */
-    private WsProxyFactory(String registryUrl, EventCloudId id)
-            throws EventCloudIdNotManaged {
-        super(registryUrl, id);
-    }
-
-    public static ProxyFactory getInstance(String registryUrl, EventCloudId id)
-            throws EventCloudIdNotManaged {
-        ProxyFactory newFactory = new WsProxyFactory(registryUrl, id);
-
-        ProxyFactory oldFactory = proxies.putIfAbsent(id, newFactory);
-
-        if (oldFactory == null) {
-            return newFactory;
-        } else {
-            return oldFactory;
-        }
     }
 
 }

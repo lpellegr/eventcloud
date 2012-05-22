@@ -81,8 +81,6 @@ public class SubscribeProxyTest {
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
-    private ProxyFactory proxyFactory;
-
     private SubscribeProxy subscribeProxy;
 
     private PublishProxy publishProxy;
@@ -92,17 +90,19 @@ public class SubscribeProxyTest {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
         this.eventCloudId = this.deployer.newEventCloud(1, 5);
 
-        this.proxyFactory =
-                ProxyFactory.getInstance(
+        this.subscribeProxy =
+                ProxyFactory.newSubscribeProxy(
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.eventCloudId);
-
-        this.subscribeProxy = this.proxyFactory.newSubscribeProxy();
-        this.publishProxy = this.proxyFactory.newPublishProxy();
+        this.publishProxy =
+                ProxyFactory.newPublishProxy(
+                        this.deployer.getEventCloudsRegistryUrl(),
+                        this.eventCloudId);
     }
 
     @Test
-    public void testSubscribeWithConcurrentPublications() {
+    public void testSubscribeWithConcurrentPublications()
+            throws EventCloudIdNotManaged {
         final int NB_PRODUCERS = 10;
         final int NB_EVENTS_TO_WAIT = 100;
 
@@ -166,11 +166,14 @@ public class SubscribeProxyTest {
         threadPool.shutdown();
     }
 
-    private List<PublishProxy> createPublishProxies(int nb) {
+    private List<PublishProxy> createPublishProxies(int nb)
+            throws EventCloudIdNotManaged {
         List<PublishProxy> proxies = new ArrayList<PublishProxy>(nb);
 
         for (int i = 0; i < nb; i++) {
-            proxies.add(this.proxyFactory.newPublishProxy());
+            proxies.add(ProxyFactory.newPublishProxy(
+                    this.deployer.getEventCloudsRegistryUrl(),
+                    this.eventCloudId));
         }
 
         return proxies;

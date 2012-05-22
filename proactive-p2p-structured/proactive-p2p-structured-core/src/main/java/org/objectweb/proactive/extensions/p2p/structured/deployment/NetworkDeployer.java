@@ -239,7 +239,7 @@ public abstract class NetworkDeployer extends
         // to be overridden if necessary
     }
 
-    private void reset() {
+    protected void reset() {
         this.trackers = null;
     }
 
