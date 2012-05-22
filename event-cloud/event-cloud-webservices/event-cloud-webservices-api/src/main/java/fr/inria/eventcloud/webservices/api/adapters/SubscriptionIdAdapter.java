@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
 
 /**
  * XML Adapter for {@link SubscriptionId} objects.
@@ -43,7 +44,8 @@ public class SubscriptionIdAdapter extends
      */
     @Override
     public SubscribeResponse marshal(SubscriptionId id) throws Exception {
-        return new SubscribeResponse();
+        // FIXME: put a correct value for the subscription reference endpoint
+        return WsNotificationMessageBuilder.createSubscribeResponse("http://eventcloud.inria.fr/notification:NotificationService@Endpoint");
     }
 
     /**

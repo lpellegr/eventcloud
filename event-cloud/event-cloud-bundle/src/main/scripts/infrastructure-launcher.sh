@@ -15,7 +15,8 @@ EVENTCLOUDS_INSTANCE_FILE=$INSTANCES_DIR/eventclouds
 EVENTCLOUDS_REGISTRY_PORT=8081
 EVENTCLOUDS_PORTS_LOWER_BOUND=1100
 PROXIES_PORTS_LOWER_BOUND=9000
-WS_EVENTCLOUDS_MANAGEMENT_PORT=8082
+WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT=8082
+WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT=8083
 
 # Infrastructure scale
 NB_EVENTCLOUDS=1
@@ -96,9 +97,10 @@ function deploy_eventclouds() {
 function deploy_ws_management_proxy() {
    WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE=$INSTANCES_DIR/ws-eventclouds-management
 
-    . $BUNDLE_HOME/scripts/ws-eventclouds-management-launcher.sh $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE \
+    . $BUNDLE_HOME/scripts/ws-eventclouds-management-launcher.sh \
+        $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE $WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT \
         --registry-url $EVENTCLOUDS_REGISTRY_URL --port-lower-bound $PROXIES_PORTS_LOWER_BOUND \
-        -p $WS_EVENTCLOUDS_MANAGEMENT_PORT &> $OUTPUTS_DIR/ws-eventclouds-management.output &
+        -p $WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT &> $OUTPUTS_DIR/ws-eventclouds-management.output &
         
     wait_file_creation $INSTANCES_DIR $(basename $INSTANCES_DIR/ws-eventclouds-management)
     
