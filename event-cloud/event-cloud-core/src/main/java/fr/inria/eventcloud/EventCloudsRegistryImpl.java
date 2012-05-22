@@ -26,6 +26,7 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
@@ -33,6 +34,7 @@ import com.google.common.collect.ImmutableSet;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
+import fr.inria.eventcloud.proxies.Proxy;
 
 /**
  * EventCloudsRegistryImpl is a concrete implementation of
@@ -151,7 +153,49 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      */
     @Override
     public List<Tracker> findTrackers(EventCloudId id) {
-        return this.eventCloudDeployers.get(id).getTrackers();
+        if (this.contains(id)) {
+            return this.eventCloudDeployers.get(id).getTrackers();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void registerProxy(EventCloudId id, Proxy proxy) {
+        if (this.contains(id)) {
+            NetworkDeployer networkDeployer = this.eventCloudDeployers.get(id);
+
+            if (networkDeployer instanceof EventCloudDeployer) {
+                ((EventCloudDeployer) networkDeployer).registerProxy(proxy);
+            } else {
+                throw new IllegalArgumentException(
+                        "Network deployer associated to this Event Cloud ID is not an instance of EventCloudDeployer");
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown Event Cloud ID");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean unregisterProxy(EventCloudId id, Proxy proxy) {
+        if (this.contains(id)) {
+            NetworkDeployer networkDeployer = this.eventCloudDeployers.get(id);
+
+            if (networkDeployer instanceof EventCloudDeployer) {
+                return ((EventCloudDeployer) networkDeployer).unregisterProxy(proxy);
+            } else {
+                throw new IllegalArgumentException(
+                        "Network deployer associated to this Event Cloud ID is not an instance of EventCloudDeployer");
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown Event Cloud ID");
+        }
     }
 
     /**

@@ -153,14 +153,14 @@ public class PublishSubscribeBenchmarkTest {
                 deployer.newEventCloud(new EventCloudDeploymentDescriptor(
                         overlayProvider), 1, this.nbPeers);
 
-        final ProxyFactory proxyFactory =
-                ProxyFactory.getInstance(
-                        deployer.getEventCloudsRegistryUrl(), ecId);
-
         final List<PublishProxy> publishProxies =
-                this.createPublishProxies(proxyFactory, this.nbPublishers);
+                this.createPublishProxies(
+                        deployer.getEventCloudsRegistryUrl(), ecId,
+                        this.nbPublishers);
         final List<SubscribeProxy> subscribeProxies =
-                this.createSubscribeProxies(proxyFactory, this.nbSubscribers);
+                this.createSubscribeProxies(
+                        deployer.getEventCloudsRegistryUrl(), ecId,
+                        this.nbSubscribers);
 
         nbEventsReceivedBySubscriber.clear();
         this.receiveExpectedEventsStopwatch.reset();
@@ -243,23 +243,25 @@ public class PublishSubscribeBenchmarkTest {
         }
     }
 
-    private List<PublishProxy> createPublishProxies(ProxyFactory proxyFactory,
-                                                    int nb) {
+    private List<PublishProxy> createPublishProxies(String registryUrl,
+                                                    EventCloudId id, int nb)
+            throws EventCloudIdNotManaged {
         List<PublishProxy> result = new ArrayList<PublishProxy>(nb);
 
         for (int i = 0; i < nb; i++) {
-            result.add(proxyFactory.newPublishProxy());
+            result.add(ProxyFactory.newPublishProxy(registryUrl, id));
         }
 
         return result;
     }
 
-    private List<SubscribeProxy> createSubscribeProxies(ProxyFactory proxyFactory,
-                                                        int nb) {
+    private List<SubscribeProxy> createSubscribeProxies(String registryUrl,
+                                                        EventCloudId id, int nb)
+            throws EventCloudIdNotManaged {
         List<SubscribeProxy> result = new ArrayList<SubscribeProxy>(nb);
 
         for (int i = 0; i < nb; i++) {
-            result.add(proxyFactory.newSubscribeProxy());
+            result.add(ProxyFactory.newSubscribeProxy(registryUrl, id));
         }
 
         return result;

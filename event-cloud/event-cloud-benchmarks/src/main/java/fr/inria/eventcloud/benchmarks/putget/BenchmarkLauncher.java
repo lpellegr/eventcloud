@@ -32,8 +32,6 @@ public class BenchmarkLauncher {
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
-    private ProxyFactory proxyFactory;
-
     private PutGetProxy putGetProxy;
 
     private final Callback<Quadruple> callback;
@@ -150,11 +148,9 @@ public class BenchmarkLauncher {
                 deployer.newEventCloud(new EventCloudDeploymentDescriptor(
                         overlayProvider), 1, this.nbPeers);
 
-        this.proxyFactory =
-                ProxyFactory.getInstance(
+        this.putGetProxy =
+                ProxyFactory.newPutGetProxy(
                         deployer.getEventCloudsRegistryUrl(), this.eventCloudId);
-
-        this.putGetProxy = this.proxyFactory.newPutGetProxy();
 
         responses = new ArrayList<SparqlSelectResponse>();
         queries = new ArrayList<String>();

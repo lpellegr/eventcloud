@@ -66,6 +66,10 @@ public class EventCloudCache implements Serializable {
         }
     }
 
+    public EventCloudsRegistry getRegistry() {
+        return this.registry;
+    }
+
     public EventCloudId getId() {
         return this.deployer.getEventCloudDescription().getId();
     }

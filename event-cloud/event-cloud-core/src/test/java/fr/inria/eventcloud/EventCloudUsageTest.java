@@ -61,7 +61,7 @@ public class EventCloudUsageTest implements Serializable {
 
     @Test(timeout = 180000)
     public void testEventCloudInstantiationAndUsage()
-            throws InterruptedException, EventCloudIdNotManaged {
+            throws EventCloudIdNotManaged {
         // Creates and deploys an EventCloudsRegistry locally
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
@@ -69,15 +69,11 @@ public class EventCloudUsageTest implements Serializable {
         // Creates and deploys an Event Cloud composed of 1 tracker and 10 peers
         EventCloudId eventCloudId = deployer.newEventCloud(1, 10);
 
-        // Retrieves a proxy factory which is specialized to create
-        // proxies for the Event Cloud which has been previously created
-        ProxyFactory proxyFactory =
-                ProxyFactory.getInstance(
-                        deployer.getEventCloudsRegistryUrl(), eventCloudId);
-
-        // From the proxy factory we can create a PutGet proxy whose the
+        // Creates a PutGet proxy whose the
         // purpose is to work with historical semantic data
-        PutGetProxy putGetProxy = proxyFactory.newPutGetProxy();
+        PutGetProxy putGetProxy =
+                ProxyFactory.newPutGetProxy(
+                        deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
         // By using the PutGetProxy we can publish synchronously some
         // historical quadruples (although these quadruples may trigger
@@ -130,7 +126,9 @@ public class EventCloudUsageTest implements Serializable {
 
         // Then, it is possible to create a SubscribeProxy to
         // subscribe to some interest and to be notified asynchronously
-        final SubscribeProxy subscribeProxy = proxyFactory.newSubscribeProxy();
+        final SubscribeProxy subscribeProxy =
+                ProxyFactory.newSubscribeProxy(
+                        deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
         // Once a subscription is created, a SubscriptionId can be retrived from
         // the subscription object to have the possibility to perform an
@@ -158,7 +156,9 @@ public class EventCloudUsageTest implements Serializable {
                 subscription.getId());
 
         // Finally, we can simulate an event source by creating a PublishProxy
-        PublishProxy publishProxy = proxyFactory.newPublishProxy();
+        PublishProxy publishProxy =
+                ProxyFactory.newPublishProxy(
+                        deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
         long publicationTime = System.currentTimeMillis();
 

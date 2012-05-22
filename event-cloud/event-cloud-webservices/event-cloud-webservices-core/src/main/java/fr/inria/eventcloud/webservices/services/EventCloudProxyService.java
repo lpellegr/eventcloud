@@ -16,11 +16,17 @@
  **/
 package fr.inria.eventcloud.webservices.services;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.EventCloudsRegistryImpl;
+import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.PublishProxy;
@@ -62,5 +68,18 @@ public abstract class EventCloudProxyService<T extends Proxy> {
     }
 
     public abstract T createProxy() throws EventCloudIdNotManaged;
+
+    public void terminateProxy() {
+        try {
+            EventCloudsRegistry registry =
+                    EventCloudsRegistryImpl.lookup(this.registryUrl);
+            registry.unregisterProxy(
+                    new EventCloudId(this.streamUrl), this.proxy);
+
+            ComponentUtils.terminateComponent(this.proxy);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
 }

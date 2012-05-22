@@ -61,7 +61,7 @@ public class WebServiceDeployer {
      *            the {@code publish-services} interface of the component owning
      *            the {@code publish-webservices} interface to be exposed as a
      *            web service.
-     * @return the URL of the web service which has been exposed.
+     * @return the endpoint URL of the web service which has been exposed.
      */
     public static String exposePublishWebService(PublishProxy proxy) {
         return exposeWebService(
@@ -89,7 +89,7 @@ public class WebServiceDeployer {
      *            the {@code subscribe-services} interface of the component
      *            owning the {@code subscribe-webservices} interface to be
      *            exposed as a web service.
-     * @return the URL of the web service which has been exposed.
+     * @return the endpoint URL of the web service which has been exposed.
      */
     public static String exposeSubscribeWebService(SubscribeProxy proxy) {
         return exposeWebService(
@@ -118,7 +118,7 @@ public class WebServiceDeployer {
      *            the {@code putget-services} interface of the component owning
      *            the {@code putget-webservices} interface to be exposed as a
      *            web service.
-     * @return the URL of the web service which has been exposed.
+     * @return the endpoint URL of the web service which has been exposed.
      */
     public static String exposePutGetWebService(PutGetProxy proxy) {
         return exposeWebService(proxy, PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
@@ -145,7 +145,7 @@ public class WebServiceDeployer {
      *            interface to be exposed as a web service.
      * @param interfaceName
      *            the name of the interface to be exposed as a web service.
-     * @return the URL of the web service which has been exposed.
+     * @return the endpoint URL of the web service which has been exposed.
      */
     private static String exposeWebService(Proxy proxy, String interfaceName) {
         try {
@@ -219,26 +219,37 @@ public class WebServiceDeployer {
                 registryUrl, portLowerBound), urlSuffix, webServicePort);
     }
 
-    public static Server deployPublishWebService(String registryUrl,
-                                                 String eventCloudIdUrl,
-                                                 String urlSuffix, int port) {
-        return deployWebService(new PublishServiceImpl(
-                registryUrl, eventCloudIdUrl), urlSuffix, port);
+    public static ServiceInformation deployPublishWebService(String registryUrl,
+                                                              String streamUrl,
+                                                              String urlSuffix,
+                                                              int port) {
+        PublishServiceImpl publishService =
+                new PublishServiceImpl(registryUrl, streamUrl);
+
+        return new ServiceInformation(publishService, deployWebService(
+                publishService, urlSuffix, port), streamUrl, port);
     }
 
-    public static Server deploySubscribeWebService(String registryUrl,
-                                                   String streamUrl,
-                                                   String urlSuffix, int port) {
-        return deployWebService(
-                new SubscribeServiceImpl(registryUrl, streamUrl), urlSuffix,
-                port);
+    public static ServiceInformation deploySubscribeWebService(String registryUrl,
+                                                                String streamUrl,
+                                                                String urlSuffix,
+                                                                int port) {
+        SubscribeServiceImpl subscribeService =
+                new SubscribeServiceImpl(registryUrl, streamUrl);
+
+        return new ServiceInformation(subscribeService, deployWebService(
+                subscribeService, urlSuffix, port), streamUrl, port);
     }
 
-    public static Server deployPutGetWebService(String registryUrl,
-                                                String streamUrl,
-                                                String urlSuffix, int port) {
-        return deployWebService(
-                new PutGetServiceImpl(registryUrl, streamUrl), urlSuffix, port);
+    public static ServiceInformation deployPutGetWebService(String registryUrl,
+                                                             String streamUrl,
+                                                             String urlSuffix,
+                                                             int port) {
+        PutGetServiceImpl putGetService =
+                new PutGetServiceImpl(registryUrl, streamUrl);
+
+        return new ServiceInformation(putGetService, deployWebService(
+                putGetService, urlSuffix, port), streamUrl, port);
     }
 
     public static Server deploySubscriberWebService(String urlSuffix, int port) {

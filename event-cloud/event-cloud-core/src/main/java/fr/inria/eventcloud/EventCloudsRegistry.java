@@ -25,6 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
+import fr.inria.eventcloud.proxies.Proxy;
 
 /**
  * An eventclouds registry is in charge of maintaining the list of eventclouds
@@ -116,6 +117,32 @@ public interface EventCloudsRegistry {
      *         specified {@link EventCloudId} or {@code null}.
      */
     public List<Tracker> findTrackers(EventCloudId id);
+
+    /**
+     * Registers a proxy to the list of proxies associated to the Event Cloud
+     * represented by the specified {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier on which the proxy is associated
+     *            to.
+     * @param proxy
+     *            the proxy to register.
+     */
+    public void registerProxy(EventCloudId id, Proxy proxy);
+
+    /**
+     * Unregisters a proxy from the list of proxies associated to the Event
+     * Cloud represented by the specified {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier on which the proxy is associated
+     *            to.
+     * @param proxy
+     *            the proxy to unregister.
+     * @return true if the proxy has been successfully unregistered, false
+     *         otherwise.
+     */
+    public boolean unregisterProxy(EventCloudId id, Proxy proxy);
 
     /**
      * Undeploys the eventcloud identified with the specified {@code id}.

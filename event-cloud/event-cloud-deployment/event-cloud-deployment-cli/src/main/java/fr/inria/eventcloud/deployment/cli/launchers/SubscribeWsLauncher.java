@@ -40,7 +40,11 @@ public final class SubscribeWsLauncher extends WsProxyLauncher {
         return WebServiceDeployer.deploySubscribeWebService(
                 super.registryUrl, super.eventCloudIdUrl,
                 "proactive/services/EventCloud_subscribe-webservices",
-                super.port).getEndpoint().getEndpointInfo().getAddress();
+                super.port)
+                .getServer()
+                .getEndpoint()
+                .getEndpointInfo()
+                .getAddress();
     }
 
 }
