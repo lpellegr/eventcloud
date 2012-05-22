@@ -113,22 +113,23 @@ public class BenchmarkLauncher {
         P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.setValue(true);
         this.nbPeers = nbPeers;
         this.fileToParse = fileName;
-        if (storage.equals("p"))
+        if (storage.equals("p")) {
             this.datastoreType = "persistent";
-        else if (storage.equals("m"))
+        } else if (storage.equals("m")) {
             this.datastoreType = "memory";
+        }
         this.callback = new Callback<Quadruple>() {
             @Override
             public void execute(Quadruple quad) {
-                quadruples.add(quad);
-                nbQuadruplesAdded++;
+                BenchmarkLauncher.this.quadruples.add(quad);
+                BenchmarkLauncher.this.nbQuadruplesAdded++;
             }
         };
 
-        quadruples = new ArrayList<Quadruple>();
+        this.quadruples = new ArrayList<Quadruple>();
         try {
             RdfParser.parse(
-                    new FileInputStream(new File(fileToParse)),
+                    new FileInputStream(new File(this.fileToParse)),
                     SerializationFormat.TriG, this.callback);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
@@ -139,78 +140,84 @@ public class BenchmarkLauncher {
 
         SerializableProvider<? extends SemanticCanOverlay> overlayProvider =
                 null;
-        if (datastoreType.equals("persistent"))
+        if (this.datastoreType.equals("persistent")) {
             overlayProvider = new SemanticPersistentOverlayProvider();
-        else if (datastoreType.equals("memory"))
+        } else if (this.datastoreType.equals("memory")) {
             overlayProvider = new SemanticInMemoryOverlayProvider();
+        }
 
         this.eventCloudId =
-                deployer.newEventCloud(new EventCloudDeploymentDescriptor(
+                this.deployer.newEventCloud(new EventCloudDeploymentDescriptor(
                         overlayProvider), 1, this.nbPeers);
 
         this.putGetProxy =
                 ProxyFactory.newPutGetProxy(
-                        deployer.getEventCloudsRegistryUrl(), this.eventCloudId);
+                        this.deployer.getEventCloudsRegistryUrl(),
+                        this.eventCloudId);
 
-        responses = new ArrayList<SparqlSelectResponse>();
-        queries = new ArrayList<String>();
-        queries.add(query1);
-        queries.add(query5);
-        queries.add(query10);
-        queries.add(query11);
+        this.responses = new ArrayList<SparqlSelectResponse>();
+        this.queries = new ArrayList<String>();
+        this.queries.add(query1);
+        this.queries.add(query5);
+        this.queries.add(query10);
+        this.queries.add(query11);
 
-        timeToInsertQuads = System.currentTimeMillis();
-        this.putGetProxy.add(quadruples);
-        timeToInsertQuads = System.currentTimeMillis() - timeToInsertQuads;
+        this.timeToInsertQuads = System.currentTimeMillis();
+        this.putGetProxy.add(this.quadruples);
+        this.timeToInsertQuads =
+                System.currentTimeMillis() - this.timeToInsertQuads;
 
-        for (int i = 0; i < queries.size(); i++) {
-            startTime = System.currentTimeMillis();
-            responses.add(this.putGetProxy.executeSparqlSelect(queries.get(i)));
-            elapsedTime = System.currentTimeMillis() - startTime;
-            responses.get(i).setTimeToGetResult(elapsedTime);
-            testTime += elapsedTime;
-            reasoner = new SparqlReasoner();
-            responses.get(i).setNbSubQueries(
-                    reasoner.parseSparql(queries.get(i)).size());
+        for (int i = 0; i < this.queries.size(); i++) {
+            this.startTime = System.currentTimeMillis();
+            this.responses.add(this.putGetProxy.executeSparqlSelect(this.queries.get(i)));
+            this.elapsedTime = System.currentTimeMillis() - this.startTime;
+            this.responses.get(i).setTimeToGetResult(this.elapsedTime);
+            this.testTime += this.elapsedTime;
+            this.reasoner = new SparqlReasoner();
+            this.responses.get(i).setNbSubQueries(
+                    this.reasoner.parseSparql(this.queries.get(i)).size());
         }
 
         XmlWriter xmlWriter =
                 new XmlWriter(
-                        nbPeers, nbQuadruplesAdded, timeToInsertQuads,
-                        testTime, datastoreType);
-        for (int j = 0; j < responses.size(); j++) {
+                        nbPeers, this.nbQuadruplesAdded,
+                        this.timeToInsertQuads, this.testTime,
+                        this.datastoreType);
+        for (int j = 0; j < this.responses.size(); j++) {
             int nbResults = 0;
-            while (responses.get(j).getResult().hasNext()) {
-                responses.get(j).getResult().next();
+            while (this.responses.get(j).getResult().hasNext()) {
+                this.responses.get(j).getResult().next();
                 nbResults++;
             }
             Element query =
-                    xmlWriter.addQuery(j + 1, responses.get(j)
-                            .getTimeToGetResult(), responses.get(j)
-                            .getQueryDatastoreTime(), responses.get(j)
+                    xmlWriter.addQuery(j + 1, this.responses.get(j)
+                            .getTimeToGetResult(), this.responses.get(j)
+                            .getQueryDatastoreTime(), this.responses.get(j)
                             .getLatency());
             xmlWriter.addElement(query, "finalResults", "" + nbResults);
             xmlWriter.addElement(query, "intermediateResults", ""
-                    + responses.get(j).getNbIntermediateResults());
+                    + this.responses.get(j).getNbIntermediateResults());
             xmlWriter.addElement(query, "intermediateResultsSizeInBytes", ""
-                    + responses.get(j).getSizeOfIntermediateResultsInBytes());
+                    + this.responses.get(j)
+                            .getSizeOfIntermediateResultsInBytes());
             xmlWriter.addElement(query, "subQueries", ""
-                    + responses.get(j).getNbSubQueries());
+                    + this.responses.get(j).getNbSubQueries());
         }
 
         xmlWriter.end();
-        xmlWriter.writeXmlFile("test_storage_" + datastoreType + "_peers_"
-                + nbPeers + "_quads_" + nbQuadruplesAdded + ".xml");
+        xmlWriter.writeXmlFile("test_storage_" + this.datastoreType + "_peers_"
+                + nbPeers + "_quads_" + this.nbQuadruplesAdded + ".xml");
 
         System.exit(0);
     }
 
     public static void main(String[] args) throws NumberFormatException,
             EventCloudIdNotManaged, ArrayIndexOutOfBoundsException {
-        if (args.length != 3)
+        if (args.length != 3) {
             throw new ArrayIndexOutOfBoundsException(
                     "Enter 3 parameters : number of peers, datafile location in your filesystem (absolute path), "
                             + "m or p for in memory or persistent storage");
+        }
         new BenchmarkLauncher(Integer.parseInt(args[0]), args[1], args[2]);
     }
 

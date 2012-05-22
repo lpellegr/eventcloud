@@ -1,86 +1,94 @@
 package fr.inria.eventcloud.benchmarks.putget;
 
-import java.io.*;
+import java.io.File;
+import java.io.StringWriter;
 
-import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-import javax.xml.parsers.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 public class XmlWriter {
-	
-	private DocumentBuilderFactory dbfac;
-	private DocumentBuilder docBuilder;
-	private Document doc;
-	private Element root;
 
-    public XmlWriter(int nbPeers, int nbQuadruples, long insertTime, long timeToReceiveFinalResult, String datastoreType) {
+    private DocumentBuilderFactory dbfac;
+    private DocumentBuilder docBuilder;
+    private Document doc;
+    private Element root;
+
+    public XmlWriter(int nbPeers, int nbQuadruples, long insertTime,
+            long timeToReceiveFinalResult, String datastoreType) {
         try {
-            dbfac = DocumentBuilderFactory.newInstance();
-            docBuilder = dbfac.newDocumentBuilder();
-            doc = docBuilder.newDocument();
-            root = doc.createElement("Test");
-            root.setAttribute("nbPeers", ""+nbPeers);
-            root.setAttribute("nbQuadruples", ""+nbQuadruples);
-            root.setAttribute("insertTimeInMillis", ""+insertTime);
-            root.setAttribute("timeToReceiveFinalResultInMillis", ""+timeToReceiveFinalResult);
-            root.setAttribute("datastoreType", datastoreType);
-            doc.appendChild(root);
+            this.dbfac = DocumentBuilderFactory.newInstance();
+            this.docBuilder = this.dbfac.newDocumentBuilder();
+            this.doc = this.docBuilder.newDocument();
+            this.root = this.doc.createElement("Test");
+            this.root.setAttribute("nbPeers", "" + nbPeers);
+            this.root.setAttribute("nbQuadruples", "" + nbQuadruples);
+            this.root.setAttribute("insertTimeInMillis", "" + insertTime);
+            this.root.setAttribute("timeToReceiveFinalResultInMillis", ""
+                    + timeToReceiveFinalResult);
+            this.root.setAttribute("datastoreType", datastoreType);
+            this.doc.appendChild(this.root);
         } catch (Exception e) {
             System.out.println(e);
         }
     }
-    
-    public Element addQuery(int queryNumber, long elapsedTime, long queryDatastoreTime, long latency)
-    {
-    	Element child = doc.createElement("Query");
-        child.setAttribute("number", ""+queryNumber);
-        child.setAttribute("elapsedTimeInMillis", ""+elapsedTime);
-        child.setAttribute("queryDatastoreTime", ""+queryDatastoreTime);
-        child.setAttribute("latency", ""+latency);
-        root.appendChild(child);
+
+    public Element addQuery(int queryNumber, long elapsedTime,
+                            long queryDatastoreTime, long latency) {
+        Element child = this.doc.createElement("Query");
+        child.setAttribute("number", "" + queryNumber);
+        child.setAttribute("elapsedTimeInMillis", "" + elapsedTime);
+        child.setAttribute("queryDatastoreTime", "" + queryDatastoreTime);
+        child.setAttribute("latency", "" + latency);
+        this.root.appendChild(child);
         return child;
     }
-    
-    public Element addElement(Element elem, String elementName, String value)
-    {
-    	Element child = doc.createElement(elementName);
+
+    public Element addElement(Element elem, String elementName, String value) {
+        Element child = this.doc.createElement(elementName);
         elem.appendChild(child);
-        Text text = doc.createTextNode(value);
+        Text text = this.doc.createTextNode(value);
         child.appendChild(text);
         return child;
     }
-    
-    public void end()
-    {
-    	try
-    	{
-    	TransformerFactory transfac = TransformerFactory.newInstance();
-    	Transformer trans = transfac.newTransformer();
-    	trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-    	trans.setOutputProperty(OutputKeys.INDENT, "yes");
-    	StringWriter sw = new StringWriter();
-    	StreamResult result = new StreamResult(sw);
-    	DOMSource source = new DOMSource(doc);
-    	trans.transform(source, result);
-    	String xmlString = sw.toString();
-    	System.out.println("\n\n" + xmlString);
-    	}
-    	catch (Exception e) {
+
+    public void end() {
+        try {
+            TransformerFactory transfac = TransformerFactory.newInstance();
+            Transformer trans = transfac.newTransformer();
+            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            StringWriter sw = new StringWriter();
+            StreamResult result = new StreamResult(sw);
+            DOMSource source = new DOMSource(this.doc);
+            trans.transform(source, result);
+            String xmlString = sw.toString();
+            System.out.println("\n\n" + xmlString);
+        } catch (Exception e) {
             System.out.println(e);
         }
-    
+
     }
-    
+
     public void writeXmlFile(String fileName) {
         try {
-            Source source = new DOMSource(doc);
+            Source source = new DOMSource(this.doc);
             File file = new File(fileName);
             Result result = new StreamResult(file);
-            Transformer xformer = TransformerFactory.newInstance().newTransformer();
+            Transformer xformer =
+                    TransformerFactory.newInstance().newTransformer();
             xformer.transform(source, result);
         } catch (TransformerConfigurationException e) {
         } catch (TransformerException e) {
