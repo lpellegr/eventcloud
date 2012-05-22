@@ -64,7 +64,7 @@ public class DatastoreRestorationTest {
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
         String registryUrl = registry.register("registry");
 
-        EventCloudDeployer deployer = createEventCloudDeployer();
+        EventCloudDeployer deployer = this.createEventCloudDeployer();
         deployer.deploy(1, 1);
         registry.register(deployer);
 
@@ -78,7 +78,7 @@ public class DatastoreRestorationTest {
         registry.undeploy(deployer.getEventCloudDescription().getId());
 
         // creates a new eventcloud with the same stream url
-        deployer = createEventCloudDeployer();
+        deployer = this.createEventCloudDeployer();
         deployer.deploy(1, 1);
         registry.register(deployer);
 

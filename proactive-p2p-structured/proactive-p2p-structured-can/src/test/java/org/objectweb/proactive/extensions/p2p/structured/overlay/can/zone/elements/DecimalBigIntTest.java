@@ -158,7 +158,6 @@ public class DecimalBigIntTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<Pair<DecimalBigInt, DecimalBigInt>> getConfigurationsForTestingNormalization() {
         return Arrays.asList(
         // A > B && A.decimalSeparatorIndex > B.decimalSeparatorIndex
