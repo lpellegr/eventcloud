@@ -289,8 +289,8 @@ public final class SemanticFactory {
             SemanticPeer peer =
                     ComponentUtils.createComponentAndGetInterface(
                             SemanticPeerImpl.SEMANTIC_PEER_ADL, context,
-                            PeerImpl.PEER_SERVICES_ITF,
-                            SemanticPeer.class, true);
+                            PeerImpl.PEER_SERVICES_ITF, SemanticPeer.class,
+                            true);
 
             ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(
                     peer, overlayProvider);
