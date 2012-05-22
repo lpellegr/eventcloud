@@ -32,9 +32,11 @@ import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
@@ -196,7 +198,7 @@ public final class SemanticFactory {
             SemanticTracker tracker =
                     ComponentUtils.createComponentAndGetInterface(
                             SemanticTrackerImpl.SEMANTIC_TRACKER_ADL, context,
-                            SemanticTrackerImpl.TRACKER_SERVICES_ITF,
+                            TrackerImpl.TRACKER_SERVICES_ITF,
                             SemanticTracker.class, true);
 
             ((TrackerAttributeController) GCM.getAttributeController(((Interface) tracker).getFcItfOwner())).setAttributes(
@@ -287,7 +289,7 @@ public final class SemanticFactory {
             SemanticPeer peer =
                     ComponentUtils.createComponentAndGetInterface(
                             SemanticPeerImpl.SEMANTIC_PEER_ADL, context,
-                            SemanticPeerImpl.PEER_SERVICES_ITF,
+                            PeerImpl.PEER_SERVICES_ITF,
                             SemanticPeer.class, true);
 
             ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(

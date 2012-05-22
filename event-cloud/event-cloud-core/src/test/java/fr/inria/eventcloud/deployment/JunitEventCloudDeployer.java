@@ -41,8 +41,23 @@ public class JunitEventCloudDeployer extends EventCloudDeployer {
      */
     public JunitEventCloudDeployer(
             EventCloudDeploymentDescriptor deploymentDescriptor) {
+        this(new EventCloudDescription(new EventCloudId()),
+                deploymentDescriptor);
+    }
+
+    /**
+     * Creates a new {@link JunitEventCloudDeployer} by using the specified
+     * {@code DeploymentDescriptor}.
+     * 
+     * @param eventCloudDescription
+     *            the eventcloud description to use.
+     * @param deploymentDescriptor
+     *            the deployment descriptor to use.
+     */
+    public JunitEventCloudDeployer(EventCloudDescription eventCloudDescription,
+            EventCloudDeploymentDescriptor deploymentDescriptor) {
         super(
-                new EventCloudDescription(new EventCloudId()),
+                eventCloudDescription,
                 JunitHelper.setTestingDeploymentConfiguration(deploymentDescriptor));
     }
 

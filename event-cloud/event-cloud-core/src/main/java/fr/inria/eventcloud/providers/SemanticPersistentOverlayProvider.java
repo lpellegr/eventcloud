@@ -20,6 +20,8 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
+import com.google.common.base.Preconditions;
+
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
@@ -36,16 +38,19 @@ public final class SemanticPersistentOverlayProvider extends
 
     private static final long serialVersionUID = 1L;
 
+    private String streamUrl;
+
     /**
      * {@inheritDoc}
      */
     @Override
     public SemanticCanOverlay get() {
         return new SemanticCanOverlay(new TransactionalTdbDatastore(
-                EventCloudProperties.getRepositoryPath().getAbsolutePath(),
+                EventCloudProperties.getRepositoryPath(this.streamUrl)
+                        .getAbsolutePath(),
                 EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
 
-        // the repositories used for colanders may be in-memory or
+        // the repository used for colanders may be in-memory or
         // persistent
                 EventCloudProperties.COLANDER_IN_MEMORY.getValue()
                         ? new TransactionalTdbDatastoreMem()
@@ -53,6 +58,13 @@ public final class SemanticPersistentOverlayProvider extends
                                 EventCloudProperties.COLANDER_REPOSITORIES_PATH.getValue()
                                         + "/" + UUID.randomUUID().toString(),
                                 true));
+    }
+
+    public void setStreamUrl(String streamUrl) {
+        Preconditions.checkState(
+                this.streamUrl == null, "Stream URL was already set");
+
+        this.streamUrl = streamUrl;
     }
 
 }

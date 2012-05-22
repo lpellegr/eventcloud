@@ -23,17 +23,18 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.overlay.SemanticPeerImpl;
+import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.tracker.SemanticTracker;
-import fr.inria.eventcloud.tracker.SemanticTrackerImpl;
 
 /**
  * Initializes an Event Cloud (i.e. a Content-Addressable-Network composed of
@@ -56,6 +57,12 @@ public class EventCloudDeployer extends NetworkDeployer {
         super(deploymentDescriptor);
         this.eventCloudDescription = description;
         this.proxies = new ArrayList<Proxy>();
+
+        // sets stream URL on persistent overlay provider
+        if (deploymentDescriptor.getOverlayProvider() instanceof SemanticPersistentOverlayProvider) {
+            ((SemanticPersistentOverlayProvider) deploymentDescriptor.getOverlayProvider()).setStreamUrl(description.getId()
+                    .getStreamUrl());
+        }
     }
 
     /**
@@ -67,7 +74,7 @@ public class EventCloudDeployer extends NetworkDeployer {
             return SemanticFactory.newSemanticPeer(
                     super.descriptor.getOverlayProvider(),
                     super.descriptor.getNodeProvider().getGcmVirtualNode(
-                            SemanticPeerImpl.PEER_VN));
+                            PeerImpl.PEER_VN));
         } else {
             return SemanticFactory.newSemanticPeer(super.descriptor.getOverlayProvider());
         }
@@ -81,7 +88,7 @@ public class EventCloudDeployer extends NetworkDeployer {
         if (super.descriptor.getNodeProvider() != null) {
             return SemanticFactory.newSemanticTracker(
                     networkName, super.descriptor.getNodeProvider()
-                            .getGcmVirtualNode(SemanticTrackerImpl.TRACKER_VN));
+                            .getGcmVirtualNode(TrackerImpl.TRACKER_VN));
         } else {
             return SemanticFactory.newSemanticTracker(networkName);
         }
