@@ -3,7 +3,7 @@
 
 <definition name="fr.inria.eventcloud.overlay.SemanticPeer" extends="org.objectweb.proactive.extensions.p2p.structured.overlay.Peer">
 	<interface role="server" name="peer-services" signature="fr.inria.eventcloud.overlay.SemanticPeer"/>
-	<interface role="client" name="social-filter-services" signature="fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager" contingency="optional"/>
+	<interface role="client" name="social-filter-services" signature="org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager" contingency="optional"/>
 
 	<content class="fr.inria.eventcloud.overlay.SemanticPeerImpl"/>
 </definition>
