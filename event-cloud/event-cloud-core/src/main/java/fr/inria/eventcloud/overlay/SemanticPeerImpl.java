@@ -31,6 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchExce
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
+import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
@@ -57,7 +58,6 @@ import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
-import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 /**
  * SemanticPeerImpl is a concrete implementation of {@link SemanticPeer}. It is

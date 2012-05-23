@@ -25,6 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.openjena.riot.out.NodeFmtLib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -45,7 +46,6 @@ import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.reasoner.SparqlColander;
-import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 /**
  * This class is a specialized version of {@link CanOverlay} for semantic data.

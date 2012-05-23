@@ -42,13 +42,13 @@ import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.overlay.SemanticPeerImpl;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 import fr.inria.eventcloud.tracker.SemanticTrackerImpl;
-import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 /**
  * SemanticFactory must be used to create new instances of Semantic components
