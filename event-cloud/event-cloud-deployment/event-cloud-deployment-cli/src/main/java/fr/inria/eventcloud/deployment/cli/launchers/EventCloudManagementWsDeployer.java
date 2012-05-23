@@ -250,12 +250,20 @@ public class EventCloudManagementWsDeployer {
         if (eventCloudManagementWsProcess != null) {
             eventCloudManagementWsProcess.destroy();
             eventCloudManagementWsProcess = null;
+
             try {
                 FileUtils.deleteDirectory(new File(libDirPath));
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+            libDirPath = null;
+
+            try {
                 FileUtils.deleteDirectory(new File(resourcesDirPath));
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
+            resourcesDirPath = null;
         }
     }
 
