@@ -193,10 +193,10 @@ public class EventCloudManagementWsDeployer {
 
         if (activateLoggers) {
             properties.add("-Dlog4j.configuration=file:" + resourcesDirPath
-                    + File.separator + "log4j.properties");
+                    + File.separator + "log4j-console.properties");
 
             properties.add("-Dlogback.configurationFile=file:"
-                    + resourcesDirPath + File.separator + "logback.xml");
+                    + resourcesDirPath + File.separator + "logback-console.xml");
         } else {
             properties.add("-Dlog4j.configuration=file:" + resourcesDirPath
                     + File.separator + "log4j-inactive.properties");
@@ -225,12 +225,12 @@ public class EventCloudManagementWsDeployer {
 
         if (activateLoggers) {
             FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
-                    + "log4j.properties"), new File(
-                    tmpResourcesDir, "log4j.properties"));
+                    + "log4j-console.properties"), new File(
+                    tmpResourcesDir, "log4j-console.properties"));
 
-            FileUtils.copyURLToFile(
-                    new URL(RESOURCES_DIR_URL + "logback.xml"), new File(
-                            tmpResourcesDir, "logback.xml"));
+            FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
+                    + "logback-console.xml"), new File(
+                    tmpResourcesDir, "logback-console.xml"));
         } else {
             FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
                     + "log4j-inactive.properties"), new File(
