@@ -188,24 +188,25 @@ public class EventCloudManagementWsDeployer {
 
         List<String> properties = new ArrayList<String>();
 
-        properties.add("-Djava.security.policy=" + libDirPath + File.separator
-                + "proactive.java.policy");
+        properties.add("-Djava.security.policy=" + resourcesDirPath
+                + File.separator + "proactive.java.policy");
 
         if (activateLoggers) {
-            properties.add("-Dlog4j.configuration=file:" + libDirPath
+            properties.add("-Dlog4j.configuration=file:" + resourcesDirPath
                     + File.separator + "log4j.properties");
 
-            properties.add("-Dlogback.configurationFile=file:" + libDirPath
-                    + File.separator + "logback.xml");
+            properties.add("-Dlogback.configurationFile=file:"
+                    + resourcesDirPath + File.separator + "logback.xml");
         } else {
-            properties.add("-Dlog4j.configuration=file:" + libDirPath
+            properties.add("-Dlog4j.configuration=file:" + resourcesDirPath
                     + File.separator + "log4j-inactive.properties");
 
-            properties.add("-Dlogback.configurationFile=file:" + libDirPath
-                    + File.separator + "logback-inactive.xml");
+            properties.add("-Dlogback.configurationFile=file:"
+                    + resourcesDirPath + File.separator
+                    + "logback-inactive.xml");
         }
 
-        properties.add("-Deventcloud.configuration=" + libDirPath
+        properties.add("-Deventcloud.configuration=" + resourcesDirPath
                 + File.separator + "eventcloud.properties");
 
         return properties;
