@@ -33,6 +33,11 @@ import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 import org.objectweb.fractal.api.Interface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngine;
+import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
+import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerAttributeController;
+import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerFactory;
+import org.soceda.socialfilter.socialnetwork.SocialNetwork;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -48,11 +53,6 @@ import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
-import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngine;
-import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
-import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerAttributeController;
-import fr.insa.liris.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerFactory;
-import fr.insa.liris.soceda.socialfilter.socialnetwork.SocialNetwork;
 
 /**
  * Class used to test a subscribe proxy component and a publish proxy component
