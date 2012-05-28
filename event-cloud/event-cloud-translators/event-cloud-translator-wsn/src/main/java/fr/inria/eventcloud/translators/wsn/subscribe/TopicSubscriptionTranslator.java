@@ -28,8 +28,8 @@ import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.play_project.play_commons.eventformat.Namespace;
-import eu.play_project.play_commons.eventformat.Stream;
+import eu.play_project.play_commons.constants.Namespace;
+import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
 
