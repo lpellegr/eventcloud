@@ -20,7 +20,7 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.w3c.dom.Element;
 
-import eu.play_project.play_commons.eventformat.EventFormatHelpers;
+import eu.play_project.play_commons.constants.Event;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.translators.wsn.notify.CompoundEventTranslator;
 import fr.inria.eventcloud.translators.wsn.notify.NotificationTranslator;
@@ -59,15 +59,13 @@ public class WsNotificationTranslator {
                 // (this is supposed to ease the transition because all sources
                 // are not yet publishing semantic payloads)
                 if (e.getNamespaceURI().equals(
-                        EventFormatHelpers.WSN_MSG_ELEMENT.getNamespaceURI())
-                        && e.getNodeName()
-                                .equals(
-                                        EventFormatHelpers.WSN_MSG_ELEMENT.getPrefix()
-                                                + ":"
-                                                + EventFormatHelpers.WSN_MSG_ELEMENT.getLocalPart())
+                        Event.WSN_MSG_ELEMENT.getNamespaceURI())
+                        && e.getNodeName().equals(
+                                Event.WSN_MSG_ELEMENT.getPrefix() + ":"
+                                        + Event.WSN_MSG_ELEMENT.getLocalPart())
                         && e.getAttributeNS(
-                                EventFormatHelpers.WSN_MSG_ELEMENT.getNamespaceURI(),
-                                EventFormatHelpers.WSN_MSG_SYNTAX_ATTRIBUTE) != null) {
+                                Event.WSN_MSG_ELEMENT.getNamespaceURI(),
+                                Event.WSN_MSG_SYNTAX_ATTRIBUTE) != null) {
                     // message content is a native semantic payload
                     result = this.translateSemanticNotification(notification);
                 } else {

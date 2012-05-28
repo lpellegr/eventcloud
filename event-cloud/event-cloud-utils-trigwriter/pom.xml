@@ -13,7 +13,6 @@
 	<version>1.0-SNAPSHOT</version>
 	<name>event-cloud-utils-trigwriter</name>
 
-
 	<dependencies>
 		<dependency>
 			<artifactId>play-commons-eventformat</artifactId>

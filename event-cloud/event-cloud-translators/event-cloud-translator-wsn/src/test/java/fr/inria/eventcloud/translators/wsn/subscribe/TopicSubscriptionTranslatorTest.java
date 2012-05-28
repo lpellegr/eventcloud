@@ -9,7 +9,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.play_project.play_commons.eventformat.Stream;
+import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
