@@ -264,9 +264,9 @@ public class WebServiceDeployer {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        address.append(":");
+        address.append(':');
         address.append(port);
-        address.append("/");
+        address.append('/');
         if (addressSuffix != null) {
             address.append(addressSuffix);
         }

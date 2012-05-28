@@ -315,23 +315,23 @@ public class NeighborTable implements Serializable {
 
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
-                buf.append("[");
+                buf.append('[');
                 int i = 0;
                 for (NeighborEntry entry : this.entries[dim][direction].values()) {
                     buf.append(entry.getZone());
                     if (i < this.entries[dim][direction].values().size() - 1) {
-                        buf.append(",");
+                        buf.append(',');
                     }
                     i++;
                 }
-                buf.append("]");
+                buf.append(']');
 
                 if (direction == 0) {
                     buf.append("<--(dim ");
                     buf.append(dim);
                     buf.append(")-->");
                 } else {
-                    buf.append("\n");
+                    buf.append('\n');
                 }
             }
         }

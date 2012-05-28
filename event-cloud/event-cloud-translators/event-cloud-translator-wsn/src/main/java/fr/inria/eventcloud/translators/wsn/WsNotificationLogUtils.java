@@ -244,27 +244,28 @@ public class WsNotificationLogUtils {
 
     private static String asString(Element elt) {
         TransformerFactory transfac = TransformerFactory.newInstance();
-        Transformer trans = null;
+
         try {
-            trans = transfac.newTransformer();
+            Transformer trans = transfac.newTransformer();
+            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            trans.setOutputProperty(
+                    "{http://xml.apache.org/xslt}indent-amount", "4");
+
+            StringWriter sw = new StringWriter();
+            StreamResult result = new StreamResult(sw);
+            DOMSource source = new DOMSource(elt);
+
+            try {
+                trans.transform(source, result);
+                return sw.toString();
+            } catch (TransformerException e) {
+                throw new IllegalStateException(e);
+            }
+
         } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        trans.setOutputProperty(OutputKeys.INDENT, "yes");
-        trans.setOutputProperty(
-                "{http://xml.apache.org/xslt}indent-amount", "4");
-
-        StringWriter sw = new StringWriter();
-        StreamResult result = new StreamResult(sw);
-        DOMSource source = new DOMSource(elt);
-        try {
-            trans.transform(source, result);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
-
-        return sw.toString();
     }
 
 }

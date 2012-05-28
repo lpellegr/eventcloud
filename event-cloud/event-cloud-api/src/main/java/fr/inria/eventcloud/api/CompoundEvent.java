@@ -227,7 +227,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
         for (int i = 0; i < this.quadruples.size(); i++) {
             buf.append(it.next().toString());
             if (i < this.quadruples.size() - 1) {
-                buf.append("\n");
+                buf.append('\n');
             }
         }
 

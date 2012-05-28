@@ -342,7 +342,7 @@ public class NotificationTranslator extends
 
             if (node.getNamespaceURI() != null) {
                 predicate.append(node.getNamespaceURI());
-                predicate.append("/");
+                predicate.append('/');
             }
             predicate.append(node.getNodeName());
 
