@@ -16,9 +16,7 @@
  **/
 package fr.inria.eventcloud.overlay;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
 
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -280,19 +279,13 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     }
 
     public int responseToBytes(Object sparqlResponse) {
-        byte[] bytes = null;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] bytes;
         try {
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(sparqlResponse);
-            oos.flush();
-            oos.close();
-            bos.close();
-            bytes = bos.toByteArray();
-        } catch (IOException ex) {
-            // TODO: Handle the exception
+            bytes = ObjectToByteConverter.convert(sparqlResponse);
+            return bytes.length;
+        } catch (IOException e) {
+            throw new IllegalStateException();
         }
-        return bytes.length;
     }
 
     /**

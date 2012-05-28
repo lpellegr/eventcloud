@@ -156,7 +156,7 @@ public final class PublishSubscribeUtils {
         query.append(" {\n        ");
         query.append("?subscriptionIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
-        query.append(" ");
+        query.append(' ');
         query.append(NodeFmtLib.str(originalSubscriptionId.toJenaNode()));
         query.append(" .\n        ?subscriptionIdUri ");
         // query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE));
@@ -566,12 +566,14 @@ public final class PublishSubscribeUtils {
                             createBindingSolution(subscription, quadruple));
 
             // FIXME issue #24
-            new Thread(new Runnable() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     subscriber.receive(n);
                 }
-            }).start();
+            });
+            thread.setName("NotifySubscriberThread");
+            thread.start();
 
             if (subscription.getType() == NotificationListenerType.BINDING) {
                 // broadcasts a message to all the stubs contained by
@@ -583,13 +585,15 @@ public final class PublishSubscribeUtils {
 
                     if (peerStub != null) {
                         // FIXME: issue #24
-                        new Thread(new Runnable() {
+                        thread = new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 peerStub.receive(new RetrieveSubSolutionOperation(
                                         notificationId, stub.quadrupleHash));
                             }
-                        }).start();
+                        });
+                        thread.setName("RetrieveSubSolutionThread");
+                        thread.start();
                     } else {
                         log.error(
                                 "Error while retrieving peer stub for url: {}",

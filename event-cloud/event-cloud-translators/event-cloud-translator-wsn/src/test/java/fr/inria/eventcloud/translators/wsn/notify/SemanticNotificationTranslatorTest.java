@@ -205,7 +205,7 @@ public class SemanticNotificationTranslatorTest {
                 BufferedReader r1 =
                         new BufferedReader(new InputStreamReader(is, "UTF-8"));
                 while ((line = r1.readLine()) != null) {
-                    sb.append(line).append("\n");
+                    sb.append(line).append('\n');
                 }
             } finally {
                 is.close();

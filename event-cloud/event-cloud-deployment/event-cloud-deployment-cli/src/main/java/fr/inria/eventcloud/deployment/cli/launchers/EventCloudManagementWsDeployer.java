@@ -131,9 +131,9 @@ public class EventCloudManagementWsDeployer {
             } catch (UnknownHostException uhe) {
                 uhe.printStackTrace();
             }
-            eventCloudManagementWebServiceEndpoint.append(":");
+            eventCloudManagementWebServiceEndpoint.append(':');
             eventCloudManagementWebServiceEndpoint.append(eventCloudWsStartPort);
-            eventCloudManagementWebServiceEndpoint.append("/");
+            eventCloudManagementWebServiceEndpoint.append('/');
             eventCloudManagementWebServiceEndpoint.append(EVENTCLOUD_MANAGEMENT_WS_NAME);
             return eventCloudManagementWebServiceEndpoint.toString();
         } else {
@@ -149,11 +149,7 @@ public class EventCloudManagementWsDeployer {
         String[] libNames = libDir.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                if (name.endsWith(".jar")) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return name.endsWith(".jar");
             }
         });
 

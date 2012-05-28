@@ -121,10 +121,10 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>>
         for (int i = 0; i < this.values.length; i++) {
             result.append(this.values[i]);
             if (i != this.values.length - 1) {
-                result.append(",");
+                result.append(',');
             }
         }
-        result.append(")");
+        result.append(')');
 
         return result.toString();
     }
