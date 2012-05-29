@@ -168,7 +168,9 @@ public class EventCloudManagementWsDeployer {
     }
 
     private static void downloadLibs() throws IOException {
-        libDirPath = System.getProperty("java.io.tmpdir") + "eventcloud-libs";
+        libDirPath =
+                System.getProperty("java.io.tmpdir") + File.separator
+                        + "eventcloud-libs";
         File tmpLibDir = new File(libDirPath);
         tmpLibDir.mkdir();
 
@@ -215,7 +217,8 @@ public class EventCloudManagementWsDeployer {
     private static void downloadResources(boolean activateLoggers)
             throws IOException {
         resourcesDirPath =
-                System.getProperty("java.io.tmpdir") + "eventcloud-resources";
+                System.getProperty("java.io.tmpdir") + File.separator
+                        + "eventcloud-resources";
         File tmpResourcesDir = new File(resourcesDirPath);
         tmpResourcesDir.mkdir();
 
