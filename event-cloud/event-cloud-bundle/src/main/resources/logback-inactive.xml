@@ -11,6 +11,6 @@
 	<logger name="fr.inria.eventcloud" level="OFF" />
 
 	<root level="OFF">
-		<appender-ref ref="FILE" />
+		<appender-ref ref="stdout" />
 	</root>
 </configuration>
