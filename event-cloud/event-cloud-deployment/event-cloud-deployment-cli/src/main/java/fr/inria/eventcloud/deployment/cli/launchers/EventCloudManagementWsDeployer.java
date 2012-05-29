@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 
@@ -56,6 +57,8 @@ public class EventCloudManagementWsDeployer {
     private static String libDirPath;
 
     private static String resourcesDirPath;
+
+    private static String repositoriesDirPath;
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -247,6 +250,16 @@ public class EventCloudManagementWsDeployer {
         FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
                 + "eventcloud.properties"), new File(
                 tmpResourcesDir, "eventcloud.properties"));
+        List<String> eventCloudProperties =
+                FileUtils.readLines(new File(resourcesDirPath + File.separator
+                        + "eventcloud.properties"));
+        for (String property : eventCloudProperties) {
+            if (property.startsWith(EventCloudProperties.REPOSITORIES_PATH.getName()
+                    + "=")) {
+                repositoriesDirPath =
+                        property.substring(property.indexOf("=") + 1);
+            }
+        }
     }
 
     public static void destroy() {
@@ -267,6 +280,13 @@ public class EventCloudManagementWsDeployer {
                 ioe.printStackTrace();
             }
             resourcesDirPath = null;
+
+            try {
+                FileUtils.deleteDirectory(new File(repositoriesDirPath));
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+            repositoriesDirPath = null;
         }
     }
 
