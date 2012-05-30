@@ -64,14 +64,14 @@ public class EventCloudManagementWsDeployer {
     }
 
     public static String deploy(int eventCloudWsStartPort,
-                                String eventCloudWsManagementUrlSuffix)
+                                String eventCloudManagementWsUrlSuffix)
             throws IOException {
         return deploy(
-                eventCloudWsStartPort, eventCloudWsManagementUrlSuffix, true);
+                eventCloudWsStartPort, eventCloudManagementWsUrlSuffix, true);
     }
 
     public static String deploy(int eventCloudWsStartPort,
-                                String eventCloudWsManagementUrlSuffix,
+                                String eventCloudManagementWsUrlSuffix,
                                 boolean activateLoggers) throws IOException {
         if (eventCloudManagementWsProcess == null) {
             List<String> cmd = new ArrayList<String>();
@@ -90,8 +90,8 @@ public class EventCloudManagementWsDeployer {
             cmd.addAll(addProperties(activateLoggers));
 
             cmd.add(EventCloudManagementWsDeployer.class.getCanonicalName());
-            cmd.add(" " + +eventCloudWsStartPort + " "
-                    + eventCloudWsManagementUrlSuffix);
+            cmd.add(Integer.toString(eventCloudWsStartPort));
+            cmd.add(eventCloudManagementWsUrlSuffix);
 
             final ProcessBuilder processBuilder =
                     new ProcessBuilder(cmd.toArray(new String[cmd.size()]));
@@ -134,7 +134,7 @@ public class EventCloudManagementWsDeployer {
             eventCloudManagementWebServiceEndpoint.append(':');
             eventCloudManagementWebServiceEndpoint.append(eventCloudWsStartPort);
             eventCloudManagementWebServiceEndpoint.append('/');
-            eventCloudManagementWebServiceEndpoint.append(eventCloudWsManagementUrlSuffix);
+            eventCloudManagementWebServiceEndpoint.append(eventCloudManagementWsUrlSuffix);
             return eventCloudManagementWebServiceEndpoint.toString();
         } else {
             throw new IllegalStateException(
