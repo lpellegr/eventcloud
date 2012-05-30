@@ -164,9 +164,6 @@ public final class PublishSubscribeUtils {
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
         query.append(" ?subscriptionId .\n    }\n}");
 
-        System.err.println("PublishSubscribeUtils.findSubscriptionIds() QUERY=\n"
-                + query.toString());
-
         List<SubscriptionId> ids = new ArrayList<SubscriptionId>();
 
         TransactionalDatasetGraph txnGraph =
@@ -540,15 +537,9 @@ public final class PublishSubscribeUtils {
                                     subscription.getSubscriptionDestination())
                             .getStrength();
 
+            logSocialFilterAnswer(subscription, quadruple, relationshipStrength);
+
             if (relationshipStrength < EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue()) {
-                log.debug("Notification for solution "
-                        + quadruple
-                        + ", coming from "
-                        + quadruple.getPublicationSource()
-                        + " and matching subscription of which the destination is "
-                        + subscription.getSubscriptionDestination()
-                        + " won't be send because the relationship strength is lower than the requiered threshold: "
-                        + relationshipStrength);
                 return;
             }
         }
@@ -611,6 +602,20 @@ public final class PublishSubscribeUtils {
             // subscription information associated to this subscriber
             // and also send a message
         }
+    }
+
+    private static void logSocialFilterAnswer(final Subscription subscription,
+                                              final Quadruple quadruple,
+                                              double relationshipStrength) {
+        log.debug(
+                "SocialFilterAnswer[source={}, destination={}, threshold={}, relationship_strengh={}, quadruple={}|{}|{}|{}]",
+                new Object[] {
+                        quadruple.getPublicationSource(),
+                        subscription.getSubscriptionDestination(),
+                        EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
+                        relationshipStrength, quadruple.getGraph(),
+                        quadruple.getSubject(), quadruple.getPredicate(),
+                        quadruple.getObject(),});
     }
 
     /**
