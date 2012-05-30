@@ -123,7 +123,7 @@ public class BindingWrapper extends SparqlResultWrapper<Binding> implements
             while (varsIt.hasNext()) {
                 Var var = varsIt.next();
                 buf.append(var);
-                buf.append("=");
+                buf.append('=');
                 buf.append(this.get(var));
                 buf.append(", ");
                 i++;
@@ -134,7 +134,7 @@ public class BindingWrapper extends SparqlResultWrapper<Binding> implements
             }
         }
 
-        buf.append(")");
+        buf.append(')');
 
         return buf.toString();
     }

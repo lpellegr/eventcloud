@@ -40,11 +40,11 @@ public class TurtleWriterFlat {
 
             triple.getSubject();
             out.pad(predCol - 1);
-            out.print(" ");
+            out.print(' ');
 
             triple.getPredicate();
             out.pad(objCol - 1);
-            out.print(" ");
+            out.print(' ');
 
             triple.getObject();
 

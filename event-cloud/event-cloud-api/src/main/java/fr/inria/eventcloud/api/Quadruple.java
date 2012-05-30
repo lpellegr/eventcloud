@@ -426,7 +426,7 @@ public class Quadruple implements Event {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("(");
+        result.append('(');
 
         for (int i = 0; i < this.nodes.length; i++) {
             result.append(this.nodes[i].toString());
@@ -434,16 +434,16 @@ public class Quadruple implements Event {
                 result.append(", ");
             }
         }
-        result.append(")");
+        result.append(')');
 
         if (this.metaInformations.size() != 0) {
-            result.append("{");
+            result.append('{');
         }
 
         int i = 0;
         for (Entry<MetaInformationType, Object> entry : this.metaInformations.entrySet()) {
             result.append(entry.getKey().getName());
-            result.append("=");
+            result.append('=');
             result.append(entry.getValue());
 
             if (i < this.metaInformations.entrySet().size() - 1) {
@@ -454,7 +454,7 @@ public class Quadruple implements Event {
         }
 
         if (this.metaInformations.size() != 0) {
-            result.append("}");
+            result.append('}');
         }
 
         return result.toString();

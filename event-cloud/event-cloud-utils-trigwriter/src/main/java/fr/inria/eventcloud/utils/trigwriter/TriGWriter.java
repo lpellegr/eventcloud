@@ -69,13 +69,13 @@ public class TriGWriter {
             TurtleWriter2.writeNode(out, name, prefixMap);
             out.print("  ");
         }
-        out.println("{");
+        out.println('{');
         out.incIndent(GRAPH_INDENT);
         TurtleWriterBlocks.write(out, graph, prefixMap);
 
         out.decIndent(GRAPH_INDENT);
         out.ensureStartOfLine();
-        out.println("}");
+        out.println('}');
     }
 
     // public static void main(String... argv) throws FileNotFoundException {

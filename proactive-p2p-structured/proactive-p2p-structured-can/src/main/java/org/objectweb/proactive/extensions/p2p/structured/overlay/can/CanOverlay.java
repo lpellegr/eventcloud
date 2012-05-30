@@ -360,7 +360,7 @@ public class CanOverlay extends StructuredOverlay {
                     buf.append(", abuts in dim "
                             + neighbor.getZone().neighbors(this.zone)
                             + " and is in dim=" + dim + ", dir=" + direction);
-                    buf.append("\n");
+                    buf.append('\n');
                 }
             }
         }
