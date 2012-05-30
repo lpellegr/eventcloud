@@ -46,12 +46,6 @@ public class EventCloudManagementWsDeployer {
     private static final String RESOURCES_DIR_URL =
             "http://eventcloud.inria.fr/binaries/resources/";
 
-    private static final String EVENTCLOUD_WS_START_PORT_PROPERTY_NAME =
-            "eventcloud.ws.start.port";
-
-    private static final String EVENTCLOUD_MANAGEMENT_WS_NAME =
-            "EventCloudManagementWs";
-
     private static Process eventCloudManagementWsProcess = null;
 
     private static String libDirPath;
@@ -69,11 +63,15 @@ public class EventCloudManagementWsDeployer {
         });
     }
 
-    public static String deploy(int eventCloudWsStartPort) throws IOException {
-        return deploy(eventCloudWsStartPort, true);
+    public static String deploy(int eventCloudWsStartPort,
+                                String eventCloudWsManagementUrlSuffix)
+            throws IOException {
+        return deploy(
+                eventCloudWsStartPort, eventCloudWsManagementUrlSuffix, true);
     }
 
     public static String deploy(int eventCloudWsStartPort,
+                                String eventCloudWsManagementUrlSuffix,
                                 boolean activateLoggers) throws IOException {
         if (eventCloudManagementWsProcess == null) {
             List<String> cmd = new ArrayList<String>();
@@ -91,10 +89,9 @@ public class EventCloudManagementWsDeployer {
 
             cmd.addAll(addProperties(activateLoggers));
 
-            cmd.add("-D" + EVENTCLOUD_WS_START_PORT_PROPERTY_NAME + "="
-                    + eventCloudWsStartPort);
-
             cmd.add(EventCloudManagementWsDeployer.class.getCanonicalName());
+            cmd.add(" " + +eventCloudWsStartPort + " "
+                    + eventCloudWsManagementUrlSuffix);
 
             final ProcessBuilder processBuilder =
                     new ProcessBuilder(cmd.toArray(new String[cmd.size()]));
@@ -137,7 +134,7 @@ public class EventCloudManagementWsDeployer {
             eventCloudManagementWebServiceEndpoint.append(':');
             eventCloudManagementWebServiceEndpoint.append(eventCloudWsStartPort);
             eventCloudManagementWebServiceEndpoint.append('/');
-            eventCloudManagementWebServiceEndpoint.append(EVENTCLOUD_MANAGEMENT_WS_NAME);
+            eventCloudManagementWebServiceEndpoint.append(eventCloudWsManagementUrlSuffix);
             return eventCloudManagementWebServiceEndpoint.toString();
         } else {
             throw new IllegalStateException(
@@ -290,15 +287,19 @@ public class EventCloudManagementWsDeployer {
         Logger log =
                 LoggerFactory.getLogger(EventCloudManagementWsDeployer.class);
 
+        if (args.length != 2) {
+            log.error("Usage: main start_port url_suffix");
+            System.exit(1);
+        }
+
         EventCloudsRegistry eventCloudsRegistry =
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
 
-        int startPort =
-                Integer.parseInt(System.getProperty(EVENTCLOUD_WS_START_PORT_PROPERTY_NAME));
+        int startPort = Integer.parseInt(args[0]);
         Server eventCloudManagementWebService =
                 WebServiceDeployer.deployEventCloudManagementWebService(
                         PAActiveObject.getUrl(eventCloudsRegistry),
-                        startPort + 1, EVENTCLOUD_MANAGEMENT_WS_NAME, startPort);
+                        startPort + 1, args[1], startPort);
 
         log.info("Event Cloud management web service deployed at "
                 + eventCloudManagementWebService.getEndpoint()
