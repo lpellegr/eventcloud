@@ -142,7 +142,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      */
     public boolean overlaps(ZoneView<C, E, T> view) {
         for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            if (this.overlaps(view, i) == false) {
+            if (!this.overlaps(view, i)) {
                 return false;
             }
         }

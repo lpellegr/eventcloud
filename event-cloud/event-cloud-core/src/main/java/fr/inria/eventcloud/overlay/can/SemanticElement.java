@@ -109,7 +109,7 @@ public class SemanticElement extends StringElement {
             // blank node
             if (value.startsWith("_:")) {
                 return value.substring(2);
-            } else if (value.startsWith("\"")) { // literal
+            } else if (value.length() > 0 && value.charAt(0) == '"') { // literal
                 return value.substring(1, value.length() - 1);
             } else {
                 return value;

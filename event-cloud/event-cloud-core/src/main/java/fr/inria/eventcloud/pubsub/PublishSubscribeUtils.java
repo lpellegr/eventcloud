@@ -156,16 +156,13 @@ public final class PublishSubscribeUtils {
         query.append(" {\n        ");
         query.append("?subscriptionIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
-        query.append(" ");
+        query.append(' ');
         query.append(NodeFmtLib.str(originalSubscriptionId.toJenaNode()));
         query.append(" .\n        ?subscriptionIdUri ");
         // query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE));
         // query.append(" ?subSubscriptionId .\n        ?subscriptionIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
         query.append(" ?subscriptionId .\n    }\n}");
-
-        System.err.println("PublishSubscribeUtils.findSubscriptionIds() QUERY=\n"
-                + query.toString());
 
         List<SubscriptionId> ids = new ArrayList<SubscriptionId>();
 
@@ -540,15 +537,9 @@ public final class PublishSubscribeUtils {
                                     subscription.getSubscriptionDestination())
                             .getStrength();
 
+            logSocialFilterAnswer(subscription, quadruple, relationshipStrength);
+
             if (relationshipStrength < EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue()) {
-                log.debug("Notification for solution "
-                        + quadruple
-                        + ", coming from "
-                        + quadruple.getPublicationSource()
-                        + " and matching subscription of which the destination is "
-                        + subscription.getSubscriptionDestination()
-                        + " won't be send because the relationship strength is lower than the requiered threshold: "
-                        + relationshipStrength);
                 return;
             }
         }
@@ -566,12 +557,14 @@ public final class PublishSubscribeUtils {
                             createBindingSolution(subscription, quadruple));
 
             // FIXME issue #24
-            new Thread(new Runnable() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     subscriber.receive(n);
                 }
-            }).start();
+            });
+            thread.setName("NotifySubscriberThread");
+            thread.start();
 
             if (subscription.getType() == NotificationListenerType.BINDING) {
                 // broadcasts a message to all the stubs contained by
@@ -583,13 +576,15 @@ public final class PublishSubscribeUtils {
 
                     if (peerStub != null) {
                         // FIXME: issue #24
-                        new Thread(new Runnable() {
+                        thread = new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 peerStub.receive(new RetrieveSubSolutionOperation(
                                         notificationId, stub.quadrupleHash));
                             }
-                        }).start();
+                        });
+                        thread.setName("RetrieveSubSolutionThread");
+                        thread.start();
                     } else {
                         log.error(
                                 "Error while retrieving peer stub for url: {}",
@@ -607,6 +602,20 @@ public final class PublishSubscribeUtils {
             // subscription information associated to this subscriber
             // and also send a message
         }
+    }
+
+    private static void logSocialFilterAnswer(final Subscription subscription,
+                                              final Quadruple quadruple,
+                                              double relationshipStrength) {
+        log.debug(
+                "SocialFilterAnswer[source={}, destination={}, threshold={}, relationship_strengh={}, quadruple={}|{}|{}|{}]",
+                new Object[] {
+                        quadruple.getPublicationSource(),
+                        subscription.getSubscriptionDestination(),
+                        EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
+                        relationshipStrength, quadruple.getGraph(),
+                        quadruple.getSubject(), quadruple.getPredicate(),
+                        quadruple.getObject(),});
     }
 
     /**

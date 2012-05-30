@@ -115,10 +115,11 @@ public class SemanticCoordinate extends StringCoordinate {
     }
 
     public static String toNTripleSyntax(String tripleElt) {
-        if (!tripleElt.startsWith("?") && !tripleElt.startsWith("\"")) {
+        if (tripleElt.length() > 0 && tripleElt.charAt(0) != '?'
+                && tripleElt.charAt(0) != '"') {
             StringBuilder triple = new StringBuilder("<");
             triple.append(tripleElt);
-            triple.append(">");
+            triple.append('>');
             return triple.toString();
         } else {
             return tripleElt;

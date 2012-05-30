@@ -165,15 +165,15 @@ public final class AtomicQuery {
      */
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder("(");
+        StringBuilder result = new StringBuilder('(');
         result.append(this.getGraph());
-        result.append(" ");
+        result.append(' ');
         result.append(this.getSubject());
-        result.append(" ");
+        result.append(' ');
         result.append(this.getPredicate());
-        result.append(" ");
+        result.append(' ');
         result.append(this.getObject());
-        result.append(")");
+        result.append(')');
         return result.toString();
     }
 

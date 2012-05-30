@@ -114,7 +114,7 @@ public class AnycastRequest extends Request<StringCoordinate> {
         for (AnycastRoutingEntry entry : this.anycastRoutingList) {
             buf.append("  - ");
             buf.append(entry.getPeerStub());
-            buf.append("\n");
+            buf.append('\n');
         }
 
         return buf.toString();
