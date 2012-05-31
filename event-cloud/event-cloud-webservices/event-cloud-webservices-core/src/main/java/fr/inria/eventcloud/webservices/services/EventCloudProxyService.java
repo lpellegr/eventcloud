@@ -28,8 +28,8 @@ import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
-import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
@@ -41,7 +41,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * @param <T>
  *            proxy type.
  */
-public abstract class EventCloudProxyService<T extends Proxy> {
+public abstract class EventCloudProxyService<T> {
 
     protected static Logger log =
             LoggerFactory.getLogger(EventCloudProxyService.class);
@@ -73,8 +73,21 @@ public abstract class EventCloudProxyService<T extends Proxy> {
         try {
             EventCloudsRegistry registry =
                     EventCloudsRegistryImpl.lookup(this.registryUrl);
-            registry.unregisterProxy(
-                    new EventCloudId(this.streamUrl), this.proxy);
+
+            EventCloudId eventCloudId = new EventCloudId(this.streamUrl);
+
+            if (this.proxy instanceof PublishProxy) {
+                registry.unregisterProxy(
+                        eventCloudId, (PublishProxy) this.proxy);
+            } else if (this.proxy instanceof PutGetProxy) {
+                registry.unregisterProxy(eventCloudId, (PutGetProxy) this.proxy);
+            } else if (this.proxy instanceof SubscribeProxy) {
+                registry.unregisterProxy(
+                        eventCloudId, (SubscribeProxy) this.proxy);
+            } else {
+                throw new IllegalArgumentException("Unknow proxy type: "
+                        + this.proxy.getClass());
+            }
 
             ComponentUtils.terminateComponent(this.proxy);
         } catch (IOException e) {

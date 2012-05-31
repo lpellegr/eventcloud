@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
-import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
@@ -91,7 +91,7 @@ public class WsEventNotificationListener extends
     @Override
     public void onNotification(SubscriptionId id, CompoundEvent solution) {
         Notify notify =
-                WsNotificationMessageBuilder.createNotifyMessage(
+                WsnHelper.createNotifyMessage(
                         translator, this.streamQName.getNamespaceURI(),
                         this.streamQName.getPrefix(),
                         this.streamQName.getLocalPart(), solution);

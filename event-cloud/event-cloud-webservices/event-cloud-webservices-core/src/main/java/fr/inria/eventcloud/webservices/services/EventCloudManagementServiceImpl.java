@@ -22,6 +22,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.namespace.QName;
+
+import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
+import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
+import org.oasis_open.docs.wsn.b_2.Subscribe;
+import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
+import org.oasis_open.docs.wsn.bw_2.InvalidFilterFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidMessageContentExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidProducerPropertiesExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.MultipleTopicsSpecifiedFault;
+import org.oasis_open.docs.wsn.bw_2.NoCurrentMessageOnTopicFault;
+import org.oasis_open.docs.wsn.bw_2.NotifyMessageNotSupportedFault;
+import org.oasis_open.docs.wsn.bw_2.SubscribeCreationFailedFault;
+import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
+import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
+import org.oasis_open.docs.wsn.bw_2.UnacceptableInitialTerminationTimeFault;
+import org.oasis_open.docs.wsn.bw_2.UnrecognizedPolicyRequestFault;
+import org.oasis_open.docs.wsn.bw_2.UnsupportedPolicyRequestFault;
+import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
@@ -35,6 +56,8 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsApi;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
@@ -46,6 +69,9 @@ import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
  */
 public class EventCloudManagementServiceImpl implements
         EventCloudManagementWsApi {
+
+    private static final String RAW_REPORT_TOPIC =
+            "http://www.petalslink.org/rawreport/1.0/RawReportTopic";
 
     private final String registryUrl;
 
@@ -342,6 +368,51 @@ public class EventCloudManagementServiceImpl implements
         }
 
         return this.registry;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage getCurrentMessageRequest)
+            throws NoCurrentMessageOnTopicFault, TopicNotSupportedFault,
+            ResourceUnknownFault, MultipleTopicsSpecifiedFault,
+            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SubscribeResponse subscribe(Subscribe subscribe)
+            throws UnrecognizedPolicyRequestFault,
+            SubscribeCreationFailedFault,
+            InvalidProducerPropertiesExpressionFault,
+            UnsupportedPolicyRequestFault, TopicNotSupportedFault,
+            NotifyMessageNotSupportedFault, ResourceUnknownFault,
+            UnacceptableInitialTerminationTimeFault,
+            InvalidMessageContentExpressionFault, InvalidFilterFault,
+            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
+
+        QName topic = WsnHelper.getTopic(subscribe);
+
+        // TODO: check this condition
+        if ((topic.getNamespaceURI() + topic.getLocalPart()).equals(RAW_REPORT_TOPIC)) {
+            Set<EventCloudId> eventCloudIds =
+                    this.getEventCloudsRegistry().listEventClouds();
+            for (EventCloudId id : eventCloudIds) {
+                for (PublishProxy proxy : this.getEventCloudsRegistry()
+                        .getPublishProxies(id)) {
+                    // TODO: parse subscribe message to extract consumer
+                    // endpoint (i.e. the endpoint of the service where
+                    // monitoring information will be send)
+                    proxy.enableInputOutputMonitoring("");
+                }
+            }
+        }
+
+        return WsnHelper.createSubscribeResponse(WsnHelper.getAddress(subscribe.getConsumerReference()));
     }
 
 }

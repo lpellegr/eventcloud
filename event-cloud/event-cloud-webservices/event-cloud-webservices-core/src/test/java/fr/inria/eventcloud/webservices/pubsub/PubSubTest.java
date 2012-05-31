@@ -47,7 +47,7 @@ import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
-import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
@@ -107,7 +107,7 @@ public class PubSubTest {
 
         // Creates the subscribe request
         Subscribe subscribeRequest =
-                WsNotificationMessageBuilder.createSubscribeMessage(
+                WsnHelper.createSubscribeMessage(
                         this.subscriberWsEndpointUrl, topicNamespace,
                         topicNsPrefix, topicLocalPart);
 
@@ -116,7 +116,7 @@ public class PubSubTest {
 
         // Creates the notify request
         Notify notifyRequest =
-                WsNotificationMessageBuilder.createNotifyMessage(
+                WsnHelper.createNotifyMessage(
                         topicNamespace, topicNsPrefix, topicLocalPart,
                         new CompoundEvent(this.read(
                                 "/notification-01.trig",
@@ -174,7 +174,7 @@ public class PubSubTest {
 
         // Creates the subscribe request
         Subscribe subscribeRequest =
-                WsNotificationMessageBuilder.createSubscribeMessage(
+                WsnHelper.createSubscribeMessage(
                         this.subscriberWsEndpointUrl, topicNamespace,
                         topicNsPrefix, topicLocalPart);
 
@@ -183,7 +183,7 @@ public class PubSubTest {
 
         // Creates the notify request emitted by source1
         Notify notifyRequest =
-                WsNotificationMessageBuilder.createNotifyMessage(
+                WsnHelper.createNotifyMessage(
                         topicNamespace, topicNsPrefix, topicLocalPart,
                         new CompoundEvent(this.read(
                                 "/notification-01.trig",
@@ -202,7 +202,7 @@ public class PubSubTest {
 
         // Creates the notify request emitted by source2
         notifyRequest =
-                WsNotificationMessageBuilder.createNotifyMessage(
+                WsnHelper.createNotifyMessage(
                         topicNamespace, topicNsPrefix, topicLocalPart,
                         new CompoundEvent(this.read(
                                 "/notification-01.trig",

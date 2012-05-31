@@ -38,7 +38,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
-import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 import fr.inria.eventcloud.webservices.WsEventNotificationListener;
 
@@ -131,7 +131,7 @@ public class SubscribeServiceImpl extends
         }
 
         // FIXME: put a correct value for the subscription reference endpoint
-        return WsNotificationMessageBuilder.createSubscribeResponse("http://eventcloud.inria.fr/notification:NotificationService@Endpoint");
+        return WsnHelper.createSubscribeResponse("http://eventcloud.inria.fr/notification:NotificationService@Endpoint");
     }
 
     /**

@@ -45,7 +45,7 @@ import fr.inria.eventcloud.utils.Callback;
  * 
  * @see ProxyFactory
  */
-public class PutGetProxyImpl extends ProxyCache implements PutGetProxy,
+public class PutGetProxyImpl extends Proxy implements PutGetProxy,
         PutGetProxyAttributeController {
 
     /**

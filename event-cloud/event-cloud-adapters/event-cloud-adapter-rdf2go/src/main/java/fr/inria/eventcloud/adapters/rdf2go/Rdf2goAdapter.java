@@ -41,7 +41,6 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
-import fr.inria.eventcloud.proxies.ProxyCache;
 
 /**
  * Stores the delegate {@link ProxyCache} and provide some convenient methods to
