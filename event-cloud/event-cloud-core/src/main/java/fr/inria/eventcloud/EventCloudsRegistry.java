@@ -25,7 +25,9 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
-import fr.inria.eventcloud.proxies.Proxy;
+import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.PutGetProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * An eventclouds registry is in charge of maintaining the list of eventclouds
@@ -119,30 +121,122 @@ public interface EventCloudsRegistry {
     public List<Tracker> findTrackers(EventCloudId id);
 
     /**
-     * Registers a proxy to the list of proxies associated to the Event Cloud
-     * represented by the specified {@link EventCloudId}.
-     * 
-     * @param id
-     *            the Event Cloud identifier on which the proxy is associated
-     *            to.
-     * @param proxy
-     *            the proxy to register.
-     */
-    public void registerProxy(EventCloudId id, Proxy proxy);
-
-    /**
-     * Unregisters a proxy from the list of proxies associated to the Event
+     * Registers a publish proxy to the list of proxies associated to the Event
      * Cloud represented by the specified {@link EventCloudId}.
      * 
      * @param id
      *            the Event Cloud identifier on which the proxy is associated
      *            to.
      * @param proxy
-     *            the proxy to unregister.
-     * @return true if the proxy has been successfully unregistered, false
-     *         otherwise.
+     *            the publish proxy to register.
      */
-    public boolean unregisterProxy(EventCloudId id, Proxy proxy);
+    public void registerProxy(EventCloudId id, PublishProxy proxy);
+
+    /**
+     * Registers a putget proxy to the list of proxies associated to the Event
+     * Cloud represented by the specified {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier on which the proxy is associated
+     *            to.
+     * @param proxy
+     *            the putget proxy to register.
+     */
+    public void registerProxy(EventCloudId id, PutGetProxy proxy);
+
+    /**
+     * Registers a subscribe proxy to the list of proxies associated to the
+     * Event Cloud represented by the specified {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier on which the proxy is associated
+     *            to.
+     * @param proxy
+     *            the subscribe proxy to register.
+     */
+    public void registerProxy(EventCloudId id, SubscribeProxy proxy);
+
+    /**
+     * Returns the publish proxies which are running for the specified
+     * {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier
+     * 
+     * @return the publish proxies which are running for the specified
+     *         {@link EventCloudId}.
+     */
+    public List<PublishProxy> getPublishProxies(EventCloudId id);
+
+    /**
+     * Returns the putget proxies which are running for the specified
+     * {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier
+     * 
+     * @return the putget proxies which are running for the specified
+     *         {@link EventCloudId}.
+     */
+    public List<PutGetProxy> getPutGetProxies(EventCloudId id);
+
+    /**
+     * Returns the subscribe proxies which are running for the specified
+     * {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier
+     * 
+     * @return the subscribe proxies which are running for the specified
+     *         {@link EventCloudId}.
+     */
+    public List<SubscribeProxy> getSubscribeProxies(EventCloudId id);
+
+    /**
+     * Unregisters a publish proxy from the list of publish proxies associated
+     * to the Event Cloud represented by the specified {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier on which the publish proxy is
+     *            associated to.
+     * @param proxy
+     *            the publish proxy to unregister.
+     * 
+     * @return {@code true} if the publish proxy has been successfully
+     *         unregistered, {@code false} otherwise.
+     */
+    public boolean unregisterProxy(EventCloudId id, PublishProxy proxy);
+
+    /**
+     * Unregisters a putget proxy from the list of putget proxies associated to
+     * the Event Cloud represented by the specified {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier on which the putget proxy is
+     *            associated to.
+     * @param proxy
+     *            the putget proxy to unregister.
+     * 
+     * @return {@code true} if the putget proxy has been successfully
+     *         unregistered, {@code false} otherwise.
+     */
+    public boolean unregisterProxy(EventCloudId id, PutGetProxy proxy);
+
+    /**
+     * Unregisters a subscribe proxy from the list of subscribe proxies
+     * associated to the Event Cloud represented by the specified
+     * {@link EventCloudId}.
+     * 
+     * @param id
+     *            the Event Cloud identifier on which the subscribe proxy is
+     *            associated to.
+     * @param proxy
+     *            the subscribe proxy to unregister.
+     * 
+     * @return {@code true} if the subscribe proxy has been successfully
+     *         unregistered, {@code false} otherwise.
+     */
+    public boolean unregisterProxy(EventCloudId id, SubscribeProxy proxy);
 
     /**
      * Undeploys the eventcloud identified with the specified {@code id}.

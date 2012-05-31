@@ -34,7 +34,9 @@ import com.google.common.collect.ImmutableSet;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
-import fr.inria.eventcloud.proxies.Proxy;
+import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.PutGetProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * EventCloudsRegistryImpl is a concrete implementation of
@@ -80,11 +82,18 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     @Override
     public void initComponentActivity(Body body) {
         this.p2pConfigurationProperty = "eventcloud.configuration";
+
         super.initComponentActivity(body);
 
         this.eventCloudDeployers =
                 new HashMap<EventCloudId, EventCloudDeployer>();
         this.registryUrl = null;
+
+        body.setImmediateService("registerProxy", false);
+        body.setImmediateService("unregisterProxy", false);
+        body.setImmediateService("getPublishProxies", false);
+        body.setImmediateService("getPutGetProxies", false);
+        body.setImmediateService("getSubscribeProxies", false);
     }
 
     /**
@@ -155,47 +164,114 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     public List<Tracker> findTrackers(EventCloudId id) {
         if (this.contains(id)) {
             return this.eventCloudDeployers.get(id).getTrackers();
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void registerProxy(EventCloudId id, Proxy proxy) {
-        if (this.contains(id)) {
-            NetworkDeployer networkDeployer = this.eventCloudDeployers.get(id);
-
-            if (networkDeployer instanceof EventCloudDeployer) {
-                ((EventCloudDeployer) networkDeployer).registerProxy(proxy);
-            } else {
-                throw new IllegalArgumentException(
-                        "Network deployer associated to this Event Cloud ID is not an instance of EventCloudDeployer");
-            }
-        } else {
-            throw new IllegalArgumentException("Unknown Event Cloud ID");
-        }
+    public void registerProxy(EventCloudId id, PublishProxy proxy) {
+        this.checkEventCloudIdAndRetrieveNetworkDeployer(id).registerProxy(
+                proxy);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean unregisterProxy(EventCloudId id, Proxy proxy) {
-        if (this.contains(id)) {
-            NetworkDeployer networkDeployer = this.eventCloudDeployers.get(id);
+    public void registerProxy(EventCloudId id, PutGetProxy proxy) {
+        this.checkEventCloudIdAndRetrieveNetworkDeployer(id).registerProxy(
+                proxy);
+    }
 
-            if (networkDeployer instanceof EventCloudDeployer) {
-                return ((EventCloudDeployer) networkDeployer).unregisterProxy(proxy);
-            } else {
-                throw new IllegalArgumentException(
-                        "Network deployer associated to this Event Cloud ID is not an instance of EventCloudDeployer");
-            }
-        } else {
-            throw new IllegalArgumentException("Unknown Event Cloud ID");
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void registerProxy(EventCloudId id, SubscribeProxy proxy) {
+        this.checkEventCloudIdAndRetrieveNetworkDeployer(id).registerProxy(
+                proxy);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<PublishProxy> getPublishProxies(EventCloudId id) {
+        this.checkEventCloudId(id);
+
+        return this.eventCloudDeployers.get(id).getPublishProxies();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<PutGetProxy> getPutGetProxies(EventCloudId id) {
+        this.checkEventCloudId(id);
+
+        return this.eventCloudDeployers.get(id).getPutGetProxies();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<SubscribeProxy> getSubscribeProxies(EventCloudId id) {
+        this.checkEventCloudId(id);
+
+        return this.eventCloudDeployers.get(id).getSubscribeProxies();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean unregisterProxy(EventCloudId id, PublishProxy proxy) {
+        return this.checkEventCloudIdAndRetrieveNetworkDeployer(id)
+                .unregisterProxy(proxy);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean unregisterProxy(EventCloudId id, PutGetProxy proxy) {
+        return this.checkEventCloudIdAndRetrieveNetworkDeployer(id)
+                .unregisterProxy(proxy);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean unregisterProxy(EventCloudId id, SubscribeProxy proxy) {
+        return this.checkEventCloudIdAndRetrieveNetworkDeployer(id)
+                .unregisterProxy(proxy);
+    }
+
+    private void checkEventCloudId(EventCloudId id) {
+        if (!this.contains(id)) {
+            throw new IllegalArgumentException(
+                    "EventCloud identifier not managed: " + id);
         }
+    }
+
+    private EventCloudDeployer checkEventCloudIdAndRetrieveNetworkDeployer(EventCloudId id) {
+        this.checkEventCloudId(id);
+
+        NetworkDeployer networkDeployer = this.eventCloudDeployers.get(id);
+
+        if (!(networkDeployer instanceof EventCloudDeployer)) {
+            throw new IllegalArgumentException(
+                    "Network deployer associated to eventcloud identifier '"
+                            + id + "' is not an instance of EventCloudDeployer");
+        }
+
+        return (EventCloudDeployer) networkDeployer;
     }
 
     /**

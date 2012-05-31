@@ -73,7 +73,7 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends ProxyCache implements SubscribeProxy,
+public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         SubscribeProxyAttributeController {
 
     private static final long serialVersionUID = 1L;
