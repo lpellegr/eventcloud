@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.deployment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.objectweb.proactive.api.PAFuture;
@@ -33,7 +34,9 @@ import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
-import fr.inria.eventcloud.proxies.Proxy;
+import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.PutGetProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
@@ -50,13 +53,23 @@ public class EventCloudDeployer extends NetworkDeployer {
 
     private final EventCloudDescription eventCloudDescription;
 
-    private List<Proxy> proxies;
+    private List<PublishProxy> publishProxies;
+
+    private List<PutGetProxy> putgetProxies;
+
+    private List<SubscribeProxy> subscribeProxies;
 
     public EventCloudDeployer(EventCloudDescription description,
             EventCloudDeploymentDescriptor deploymentDescriptor) {
         super(deploymentDescriptor);
         this.eventCloudDescription = description;
-        this.proxies = new ArrayList<Proxy>();
+
+        this.publishProxies =
+                Collections.synchronizedList(new ArrayList<PublishProxy>());
+        this.putgetProxies =
+                Collections.synchronizedList(new ArrayList<PutGetProxy>());
+        this.subscribeProxies =
+                Collections.synchronizedList(new ArrayList<SubscribeProxy>());
 
         // sets stream URL on persistent overlay provider
         if (deploymentDescriptor.getOverlayProvider() instanceof SemanticPersistentOverlayProvider) {
@@ -95,25 +108,72 @@ public class EventCloudDeployer extends NetworkDeployer {
     }
 
     /**
-     * Registers a proxy to the list of proxies.
+     * Registers a publish proxy to the list of publish proxies.
      * 
      * @param proxy
-     *            the proxy to register.
+     *            the publish proxy to register.
      */
-    public synchronized void registerProxy(Proxy proxy) {
-        this.proxies.add(proxy);
+    public void registerProxy(PublishProxy proxy) {
+        this.publishProxies.add(proxy);
     }
 
     /**
-     * Unregisters a proxy from the list of proxies.
+     * Registers a putget proxy to the list of putget proxies.
      * 
      * @param proxy
-     *            the proxy to unregister.
-     * @return true if the proxy has been successfully unregistered, false
-     *         otherwise.
+     *            the putget proxy to register.
      */
-    public synchronized boolean unregisterProxy(Proxy proxy) {
-        return this.proxies.remove(proxy);
+    public void registerProxy(PutGetProxy proxy) {
+        this.putgetProxies.add(proxy);
+    }
+
+    /**
+     * Registers a subscribe proxy to the list of subscribe proxies.
+     * 
+     * @param proxy
+     *            the subscribe proxy to register.
+     */
+    public void registerProxy(SubscribeProxy proxy) {
+        this.subscribeProxies.add(proxy);
+    }
+
+    /**
+     * Unregisters a publish proxy from the list of publish proxies.
+     * 
+     * @param proxy
+     *            the publish proxy to unregister.
+     * 
+     * @return {@code true} if the proxy has been successfully unregistered,
+     *         {@code false} otherwise.
+     */
+    public boolean unregisterProxy(PublishProxy proxy) {
+        return this.publishProxies.remove(proxy);
+    }
+
+    /**
+     * Unregisters a putget proxy from the list of putget proxies.
+     * 
+     * @param proxy
+     *            the putget proxy to unregister.
+     * 
+     * @return {@code true} if the proxy has been successfully unregistered,
+     *         {@code false} otherwise.
+     */
+    public boolean unregisterProxy(PutGetProxy proxy) {
+        return this.publishProxies.remove(proxy);
+    }
+
+    /**
+     * Unregisters a subscribe proxy from the list of subscribe proxies.
+     * 
+     * @param proxy
+     *            the subscribe proxy to unregister.
+     * 
+     * @return {@code true} if the proxy has been successfully unregistered,
+     *         {@code false} otherwise.
+     */
+    public boolean unregisterProxy(SubscribeProxy proxy) {
+        return this.publishProxies.remove(proxy);
     }
 
     public EventCloudDescription getEventCloudDescription() {
@@ -129,14 +189,26 @@ public class EventCloudDeployer extends NetworkDeployer {
         return (SemanticTracker) PAFuture.getFutureValue(super.getRandomTracker());
     }
 
+    public List<PublishProxy> getPublishProxies() {
+        return this.publishProxies;
+    }
+
+    public List<PutGetProxy> getPutGetProxies() {
+        return this.putgetProxies;
+    }
+
+    public List<SubscribeProxy> getSubscribeProxies() {
+        return this.subscribeProxies;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected void internalUndeploy() {
-        for (Proxy proxy : this.proxies) {
-            ComponentUtils.terminateComponent(proxy);
-        }
+        ComponentUtils.terminateComponents(this.publishProxies);
+        ComponentUtils.terminateComponents(this.putgetProxies);
+        ComponentUtils.terminateComponents(this.subscribeProxies);
 
         try {
             PAFuture.waitFor(this.getRandomPeer().send(new ShutdownRequest()));
@@ -144,13 +216,8 @@ public class EventCloudDeployer extends NetworkDeployer {
             e.printStackTrace();
         }
 
-        for (Peer peer : super.getRandomTracker().getPeers()) {
-            ComponentUtils.terminateComponent(peer);
-        }
-
-        for (Tracker tracker : this.getTrackers()) {
-            ComponentUtils.terminateComponent(tracker);
-        }
+        ComponentUtils.terminateComponents(super.getRandomTracker().getPeers());
+        ComponentUtils.terminateComponents(this.getTrackers());
     }
 
     /**
@@ -158,7 +225,9 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected void reset() {
-        this.proxies = null;
+        this.publishProxies = null;
+        this.putgetProxies = null;
+        this.subscribeProxies = null;
     }
 
 }

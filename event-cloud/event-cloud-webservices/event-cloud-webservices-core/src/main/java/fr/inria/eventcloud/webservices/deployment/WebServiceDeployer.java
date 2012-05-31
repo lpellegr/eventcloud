@@ -65,7 +65,7 @@ public class WebServiceDeployer {
      */
     public static String exposePublishWebService(PublishProxy proxy) {
         return exposeWebService(
-                proxy, PublishWsProxyImpl.PUBLISH_WEBSERVICES_ITF);
+                (Proxy) proxy, PublishWsProxyImpl.PUBLISH_WEBSERVICES_ITF);
     }
 
     /**
@@ -78,7 +78,8 @@ public class WebServiceDeployer {
      *            service.
      */
     public static void unexposePublishWebService(PublishProxy proxy) {
-        unexposeWebService(proxy, PublishWsProxyImpl.PUBLISH_WEBSERVICES_ITF);
+        unexposeWebService(
+                (Proxy) proxy, PublishWsProxyImpl.PUBLISH_WEBSERVICES_ITF);
     }
 
     /**
@@ -93,7 +94,7 @@ public class WebServiceDeployer {
      */
     public static String exposeSubscribeWebService(SubscribeProxy proxy) {
         return exposeWebService(
-                proxy, SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICES_ITF);
+                (Proxy) proxy, SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICES_ITF);
     }
 
     /**
@@ -107,7 +108,7 @@ public class WebServiceDeployer {
      */
     public static void unexposeSubscribeWebService(SubscribeProxy proxy) {
         unexposeWebService(
-                proxy, SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICES_ITF);
+                (Proxy) proxy, SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICES_ITF);
     }
 
     /**
@@ -121,7 +122,8 @@ public class WebServiceDeployer {
      * @return the endpoint URL of the web service which has been exposed.
      */
     public static String exposePutGetWebService(PutGetProxy proxy) {
-        return exposeWebService(proxy, PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
+        return exposeWebService(
+                (Proxy) proxy, PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
     }
 
     /**
@@ -134,7 +136,8 @@ public class WebServiceDeployer {
      *            service.
      */
     public static void unexposePutGetWebService(PutGetProxy proxy) {
-        unexposeWebService(proxy, PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
+        unexposeWebService(
+                (Proxy) proxy, PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
     }
 
     /**

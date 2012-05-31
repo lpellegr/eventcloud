@@ -16,8 +16,12 @@
  **/
 package fr.inria.eventcloud.translators.wsn;
 
+import java.util.List;
+import java.util.Map.Entry;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.apache.cxf.wsn.util.WSNHelper;
 import org.oasis_open.docs.wsn.b_2.FilterType;
@@ -29,14 +33,15 @@ import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
+import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
  * This class provides static methods to create some basic WS-Notification
- * messages.
+ * messages but also some methods to retrieve messages content.
  * 
  * @author lpellegr
  */
-public class WsNotificationMessageBuilder {
+public class WsnHelper {
 
     /**
      * Creates a {@link Subscribe} WS-Notification message from the specified
@@ -163,6 +168,94 @@ public class WsNotificationMessageBuilder {
                 topicNsPrefix + ":" + topicLocalPart);
 
         return topicExpressionType;
+    }
+
+    /**
+     * Returns the address declared in the specified
+     * {@link W3CEndpointReference}.
+     * 
+     * @param endpointReference
+     *            the endpoint reference to analyze.
+     * 
+     * @return the address declared in the specified
+     *         {@link W3CEndpointReference}.
+     */
+    public static String getAddress(W3CEndpointReference endpointReference) {
+        Object address =
+                ReflectionUtils.getFieldValue(endpointReference, "address");
+
+        if (address != null) {
+            return (String) ReflectionUtils.getFieldValue(address, "uri");
+        }
+
+        return null;
+    }
+
+    /**
+     * Extracts and returns the topic qname contained by the specified
+     * {@link Subscribe} message.
+     * 
+     * @param subscribe
+     *            the subscribe message to analyze.
+     * 
+     * @return the topic qname contained by the specified {@link Subscribe}
+     *         message.
+     */
+    public static QName getTopic(Subscribe subscribe) {
+        FilterType filterType = subscribe.getFilter();
+        if (filterType != null) {
+            List<Object> any = filterType.getAny();
+            if (any.size() > 0) {
+                @SuppressWarnings("unchecked")
+                TopicExpressionType topicExpressionType =
+                        ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
+
+                List<Object> content = topicExpressionType.getContent();
+                if (content.size() > 0) {
+                    String topic =
+                            ((String) content.get(0)).trim().replaceAll(
+                                    "\n", "");
+
+                    String topicLocalPart =
+                            org.apache.xml.utils.QName.getLocalPart(topic);
+                    // String topicPrefix =
+                    // org.apache.xml.utils.QName.getPrefixPart(topic);
+                    String topicNamespace = null;
+
+                    for (Entry<QName, String> entry : topicExpressionType.getOtherAttributes()
+                            .entrySet()) {
+                        // TODO: compare by using prefix declaration and not
+                        // local parts. It is possible to have two local part
+                        // values that are the same but each one is using a
+                        // different prefix. In such a case, the namespace
+                        // extracted may be wrong. Before to fix this problem,
+                        // issue #43 has to be resolved.
+                        if (entry.getKey()
+                                .getLocalPart()
+                                .equals(topicLocalPart)) {
+                            topicNamespace = entry.getValue();
+
+                            if (!topicNamespace.endsWith("/")) {
+                                topicNamespace = topicNamespace + "/";
+                            }
+
+                            break;
+                        }
+                    }
+
+                    return new QName(topicNamespace, topicLocalPart, "topic");
+                } else {
+                    throw new IllegalArgumentException(
+                            "No topic content set in the subscribe message");
+                }
+            } else {
+                throw new IllegalArgumentException(
+                        "No any object set in the subscribe message");
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "No filter set in the subscribe message");
+        }
     }
 
 }

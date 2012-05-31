@@ -33,8 +33,8 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
-import fr.inria.eventcloud.translators.wsn.WsNotificationMessageBuilder;
 import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 
@@ -90,7 +90,7 @@ public class SubscribeInfosAdapter extends
         String topicLocalPart =
                 topicName.substring(index + 1, topicName.lastIndexOf("#stream"));
 
-        return WsNotificationMessageBuilder.createSubscribeMessage(
+        return WsnHelper.createSubscribeMessage(
                 subscribeInfos.getSubscriberWsEndpointUrl(), topicNamespace,
                 "t", topicLocalPart);
     }
