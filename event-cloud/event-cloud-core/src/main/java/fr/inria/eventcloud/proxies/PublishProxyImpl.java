@@ -41,7 +41,7 @@ import fr.inria.eventcloud.utils.Callback;
  * 
  * @see ProxyFactory
  */
-public class PublishProxyImpl extends ProxyCache implements PublishProxy,
+public class PublishProxyImpl extends Proxy implements PublishProxy,
         PublishProxyAttributeController {
 
     /**
@@ -90,6 +90,11 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
         } catch (DispatchException e) {
             e.printStackTrace();
         }
+
+        // TODO: do it in parallel?
+        if (super.monitoringManager.isInputOutputMonitoringEnabled()) {
+            super.monitoringManager.sendInputOutputMonitoringReport(quad.getPublicationSource());
+        }
     }
 
     /**
@@ -131,6 +136,30 @@ public class PublishProxyImpl extends ProxyCache implements PublishProxy,
     public static PublishProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, PUBLISH_SERVICES_ITF, PublishProxy.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean enableInputOutputMonitoring(String consumerEndpoint) {
+        return super.monitoringManager.enableInputOutputMonitoring(consumerEndpoint);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean disableInputOutputMonitoring() {
+        return super.monitoringManager.disableInputOutputMonitoring();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isInputOutputMonitoringEnabled() {
+        return super.monitoringManager.isInputOutputMonitoringEnabled();
     }
 
 }

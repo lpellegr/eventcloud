@@ -198,12 +198,24 @@ public class ComponentUtils {
     }
 
     /**
+     * Terminates a list of components.
+     * 
+     * @param stubs
+     *            the stubs of the components to terminate.
+     */
+    public static <T> void terminateComponents(List<T> stubs) {
+        for (T stub : stubs) {
+            terminateComponent(stub);
+        }
+    }
+
+    /**
      * Terminates the component represented by the given stub.
      * 
      * @param stub
      *            the stub of the component to terminate.
      */
-    public static void terminateComponent(Object stub) {
+    public static <T> void terminateComponent(T stub) {
         try {
             Component component = ((Interface) stub).getFcItfOwner();
 

@@ -14,18 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.proxies;
-
-import fr.inria.eventcloud.api.PublishApi;
-import fr.inria.eventcloud.monitoring.ProxyMonitoringService;
+package fr.inria.eventcloud.monitoring;
 
 /**
- * A PublishProxy is a proxy that implements the {@link PublishApi}. It has to
- * be used by a user who wants to execute publish operations on an Event Cloud.
+ * Defines monitoring action methods (e.g. to send monitoring reports).
  * 
  * @author lpellegr
- * @author bsauvan
  */
-public interface PublishProxy extends ProxyMonitoringService, PublishApi {
+public interface ProxyMonitoringActions {
+
+    /**
+     * Sends a monitoring report to the specified {@code consumerEndpoint}.
+     * 
+     * @param source
+     *            the event source.
+     */
+    void sendInputOutputMonitoringReport(String source);
 
 }

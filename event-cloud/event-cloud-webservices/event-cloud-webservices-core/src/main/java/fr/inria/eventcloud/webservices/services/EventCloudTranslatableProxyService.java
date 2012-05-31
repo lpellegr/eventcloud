@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.webservices.services;
 
-import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 
 /**
@@ -29,8 +28,8 @@ import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
  * @param <T>
  *            proxy type.
  */
-public abstract class EventCloudTranslatableProxyService<T extends Proxy>
-        extends EventCloudProxyService<T> {
+public abstract class EventCloudTranslatableProxyService<T> extends
+        EventCloudProxyService<T> {
 
     protected final WsNotificationTranslator translator;
 
