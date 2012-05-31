@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.webservices.api;
 
+import javax.jws.WebService;
+
 import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 
 /**
@@ -23,6 +25,7 @@ import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
  * 
  * @author lpellegr
  */
+@WebService(serviceName = "EventCloudManagement", portName = "EventCloudManagementPort", targetNamespace = "http://webservices.eventcloud.inria.fr/", name = "EventCloudManagementPortType")
 public interface EventCloudManagementWsServiceApi extends
         EventCloudManagementWsApi, NotificationProducer {
 
