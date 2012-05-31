@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.cxf.endpoint.Server;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.slf4j.Logger;
@@ -45,6 +46,11 @@ public class EventCloudManagementWsDeployer {
 
     private static final String RESOURCES_DIR_URL =
             "http://eventcloud.inria.fr/binaries/resources/";
+
+    private static final String LOG_MANAGEMENT_WS_DEPLOYED =
+            "Event Cloud management web service deployed at ";
+
+    private static MutableBoolean servicesDeployed = new MutableBoolean(false);
 
     private static Process eventCloudManagementWsProcess = null;
 
@@ -107,6 +113,13 @@ public class EventCloudManagementWsDeployer {
                     String line = null;
                     try {
                         while ((line = reader.readLine()) != null) {
+                            if (!servicesDeployed.getValue()
+                                    && line.contains(LOG_MANAGEMENT_WS_DEPLOYED)) {
+                                servicesDeployed.setValue(true);
+                                synchronized (servicesDeployed) {
+                                    servicesDeployed.notifyAll();
+                                }
+                            }
                             System.out.println("ECManagement " + line);
                         }
                     } catch (IOException ioe) {
@@ -117,10 +130,14 @@ public class EventCloudManagementWsDeployer {
             t.setDaemon(true);
             t.start();
 
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException ie) {
-                ie.printStackTrace();
+            synchronized (servicesDeployed) {
+                while (!servicesDeployed.getValue()) {
+                    try {
+                        servicesDeployed.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
             StringBuilder eventCloudManagementWebServiceEndpoint =
@@ -215,6 +232,7 @@ public class EventCloudManagementWsDeployer {
         resourcesDirPath =
                 System.getProperty("java.io.tmpdir") + File.separator
                         + "eventcloud-resources";
+
         File tmpResourcesDir = new File(resourcesDirPath);
         tmpResourcesDir.mkdir();
 
@@ -301,7 +319,7 @@ public class EventCloudManagementWsDeployer {
                         PAActiveObject.getUrl(eventCloudsRegistry),
                         startPort + 1, args[1], startPort);
 
-        log.info("Event Cloud management web service deployed at "
+        log.info(LOG_MANAGEMENT_WS_DEPLOYED
                 + eventCloudManagementWebService.getEndpoint()
                         .getEndpointInfo()
                         .getAddress());
