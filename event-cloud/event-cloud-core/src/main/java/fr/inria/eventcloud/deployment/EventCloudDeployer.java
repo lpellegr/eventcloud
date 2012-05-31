@@ -160,7 +160,7 @@ public class EventCloudDeployer extends NetworkDeployer {
      *         {@code false} otherwise.
      */
     public boolean unregisterProxy(PutGetProxy proxy) {
-        return this.publishProxies.remove(proxy);
+        return this.putgetProxies.remove(proxy);
     }
 
     /**
@@ -173,7 +173,7 @@ public class EventCloudDeployer extends NetworkDeployer {
      *         {@code false} otherwise.
      */
     public boolean unregisterProxy(SubscribeProxy proxy) {
-        return this.publishProxies.remove(proxy);
+        return this.subscribeProxies.remove(proxy);
     }
 
     public EventCloudDescription getEventCloudDescription() {
