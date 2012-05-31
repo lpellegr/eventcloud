@@ -59,6 +59,7 @@ import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsApi;
+import fr.inria.eventcloud.webservices.api.EventCloudManagementWsServiceApi;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 
@@ -68,7 +69,7 @@ import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
  * @author lpellegr
  */
 public class EventCloudManagementServiceImpl implements
-        EventCloudManagementWsApi {
+        EventCloudManagementWsServiceApi {
 
     private static final String RAW_REPORT_TOPIC =
             "http://www.petalslink.org/rawreport/1.0/RawReportTopic";

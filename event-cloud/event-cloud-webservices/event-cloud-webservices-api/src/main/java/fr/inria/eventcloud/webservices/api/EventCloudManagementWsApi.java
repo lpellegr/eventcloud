@@ -22,8 +22,6 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
-import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
-
 /**
  * Defines the operations which are exposed as a web service for managing
  * eventclouds and their associated proxies.
@@ -31,7 +29,7 @@ import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
  * @author lpellegr
  */
 @WebService(serviceName = "EventCloudManagement", portName = "EventCloudManagementPort", targetNamespace = "http://webservices.eventcloud.inria.fr/", name = "EventCloudManagementPortType")
-public interface EventCloudManagementWsApi extends NotificationProducer {
+public interface EventCloudManagementWsApi {
 
     /**
      * Creates and deploys a new eventcloud for the specified {@code streamUrl}.
