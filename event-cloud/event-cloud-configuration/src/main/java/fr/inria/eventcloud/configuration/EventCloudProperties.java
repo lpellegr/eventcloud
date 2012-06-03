@@ -184,12 +184,15 @@ public class EventCloudProperties {
             File[] files = repositoryPath.listFiles();
 
             for (File f : files) {
-                if (f.isDirectory() && repositorySuffix == null) {
+                // use first repository available for restoration
+                if (f.isDirectory()) {
                     repositorySuffix = f.getName();
-                } else {
-                    repositorySuffix = UUID.randomUUID().toString();
                     break;
                 }
+            }
+
+            if (repositorySuffix == null) {
+                repositorySuffix = UUID.randomUUID().toString();
             }
         } else {
             // a new repository has to be created
