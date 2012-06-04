@@ -165,31 +165,43 @@ public class EventCloudProperties {
         configurationFileLoaded =
                 ConfigurationParser.load(
                         EventCloudProperties.class, "eventcloud.configuration",
-                        System.getProperty("user.home")
-                                + "/.eventcloud/eventcloud.properties");
+                        System.getProperty("user.home") + File.pathSeparator
+                                + ".eventcloud" + File.pathSeparator
+                                + "eventcloud.properties");
 
         // forces the number of dimensions in a CAN network to 4
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
     }
 
     public static final File getRepositoryPath(String streamUrl) {
+        // adds file separator at the end of the repositories path
+        if (!REPOSITORIES_PATH.getValue().endsWith("/")) {
+            REPOSITORIES_PATH.setValue(REPOSITORIES_PATH.getValue()
+                    + File.separator);
+        }
+
         File repositoryPath =
                 new File(REPOSITORIES_PATH.getValue() + normalize(streamUrl));
 
         String repositorySuffix = null;
 
         // a repository has to be restored
-        if (!REPOSITORIES_AUTO_REMOVE.getValue() && repositoryPath.exists()) {
+        if (REPOSITORIES_RESTORE.getValue()
+                && !REPOSITORIES_AUTO_REMOVE.getValue()
+                && repositoryPath.exists()) {
 
             File[] files = repositoryPath.listFiles();
 
             for (File f : files) {
-                if (f.isDirectory() && repositorySuffix == null) {
+                // use first repository available for restoration
+                if (f.isDirectory()) {
                     repositorySuffix = f.getName();
-                } else {
-                    repositorySuffix = UUID.randomUUID().toString();
                     break;
                 }
+            }
+
+            if (repositorySuffix == null) {
+                repositorySuffix = UUID.randomUUID().toString();
             }
         } else {
             // a new repository has to be created
@@ -228,6 +240,7 @@ public class EventCloudProperties {
         buffer.append(System.getProperty("user.home"));
         buffer.append(File.separator);
         buffer.append(".eventcloud");
+        buffer.append(File.separator);
 
         return buffer.toString();
     }
@@ -240,8 +253,8 @@ public class EventCloudProperties {
     public static final String getDefaultRepositoriesPath() {
         StringBuffer buffer = new StringBuffer();
         buffer.append(getPreferencesPath());
-        buffer.append(File.separator);
         buffer.append("repositories");
+        buffer.append(File.separator);
 
         return buffer.toString();
     }
