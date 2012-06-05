@@ -95,7 +95,8 @@ public class WsNotificationTranslator {
      */
     public CompoundEvent translateNotification(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
-        return new NotificationTranslator().translate(notificationMessage);
+        return NotificationTranslator.getInstance().translate(
+                notificationMessage);
     }
 
     /**
@@ -110,7 +111,8 @@ public class WsNotificationTranslator {
      */
     public CompoundEvent translateSemanticNotification(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
-        return new SemanticNotificationTranslator().translate(notificationMessage);
+        return SemanticNotificationTranslator.getInstance().translate(
+                notificationMessage);
     }
 
     /**
@@ -125,7 +127,7 @@ public class WsNotificationTranslator {
      */
     public NotificationMessageHolderType translateCompoundEvent(CompoundEvent event)
             throws TranslationException {
-        return new CompoundEventTranslator().translate(event);
+        return CompoundEventTranslator.getInstance().translate(event);
     }
 
     /**
@@ -139,7 +141,7 @@ public class WsNotificationTranslator {
      */
     public NotificationMessageHolderType translateSemanticCompoundEvent(CompoundEvent event)
             throws TranslationException {
-        return new SemanticCompoundEventTranslator().translate(event);
+        return SemanticCompoundEventTranslator.getInstance().translate(event);
     }
 
     /**
@@ -160,7 +162,7 @@ public class WsNotificationTranslator {
 
     public String translateTopicSubscription(Subscribe subscribe)
             throws TranslationException {
-        return new TopicSubscriptionTranslator().translate(subscribe);
+        return TopicSubscriptionTranslator.getInstance().translate(subscribe);
     }
 
     public String translateContentBasedSubscription(Subscribe subscribe)

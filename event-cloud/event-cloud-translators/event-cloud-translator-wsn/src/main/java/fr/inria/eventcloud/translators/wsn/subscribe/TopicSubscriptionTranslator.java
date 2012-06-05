@@ -26,7 +26,7 @@ import eu.play_project.play_commons.constants.Namespace;
 import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
-import fr.inria.eventcloud.translators.wsn.WsnHelper;
+import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * This class defines a method to translate a WS-Notification {@link Subscribe}
@@ -42,6 +42,12 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
 
     private static Logger log =
             LoggerFactory.getLogger(TopicSubscriptionTranslator.class);
+
+    private static TopicSubscriptionTranslator instance;
+
+    private TopicSubscriptionTranslator() {
+
+    }
 
     /**
      * Translates a WS-Notification {@link Subscribe} message, which is supposed
@@ -65,7 +71,7 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
 
         if (topicNamespace == null) {
             // FIXME: a TranslationException should be thrown but
-            // first the issu #43 has to be fixed
+            // first the issue #43 has to be fixed
             log.warn("No namespace declared for prefix '"
                     + topic.getPrefix()
                     + "' associated to topic "
@@ -78,6 +84,14 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
         return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <"
                 + Namespace.TYPES.getUri() + "stream> <" + topicNamespace
                 + topic.getLocalPart() + Stream.STREAM_ID_SUFFIX + "> . } }";
+    }
+
+    public static synchronized TopicSubscriptionTranslator getInstance() {
+        if (instance == null) {
+            instance = new TopicSubscriptionTranslator();
+        }
+
+        return instance;
     }
 
 }

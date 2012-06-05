@@ -132,16 +132,6 @@ public class Subscription implements Quadruplable, Serializable {
     // the var name associated to the graph value
     private transient Node graphNode;
 
-    /**
-     * 
-     * @param originalId
-     * @param parentId
-     * @param id
-     * @param indexationTime
-     * @param sparqlQuery
-     * @param subscribeProxyUrl
-     * @param listenerType
-     */
     public Subscription(SubscriptionId originalId, SubscriptionId parentId,
             SubscriptionId id, long indexationTime, String sparqlQuery,
             String subscribeProxyUrl, NotificationListenerType listenerType) {
@@ -150,17 +140,6 @@ public class Subscription implements Quadruplable, Serializable {
                 listenerType);
     }
 
-    /**
-     * 
-     * @param originalId
-     * @param parentId
-     * @param id
-     * @param indexationTime
-     * @param sparqlQuery
-     * @param subscribeProxyUrl
-     * @param subscriberWsEndpointUrl
-     * @param listenerType
-     */
     public Subscription(SubscriptionId originalId, SubscriptionId parentId,
             SubscriptionId id, long indexationTime, String sparqlQuery,
             String subscribeProxyUrl, String subscriptionDestination,

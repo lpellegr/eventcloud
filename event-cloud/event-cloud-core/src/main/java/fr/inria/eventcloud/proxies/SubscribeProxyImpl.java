@@ -212,12 +212,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
                 PAActiveObject.getBodyOnThis().getUrl(), subscription.getId());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final CompoundEvent reconstructCompoundEvent(Subscription subscription,
-                                                        Binding binding) {
+    private Node extractEventId(Subscription subscription, Binding binding) {
         if (!subscription.getGraphNode().isVariable()) {
             throw new IllegalArgumentException(
                     "The subscription graph node is not a variable");
@@ -229,7 +224,18 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
                     "The specified binding does not contain a graph value");
         }
 
-        return this.reconstructCompoundEvent(subscription.getId(), eventId);
+        return eventId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CompoundEvent reconstructCompoundEvent(Subscription subscription,
+                                                        Binding binding) {
+        return this.reconstructCompoundEvent(
+                subscription.getId(),
+                this.extractEventId(subscription, binding));
     }
 
     /**
@@ -238,19 +244,9 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
     @Override
     public final CompoundEvent reconstructCompoundEvent(SubscriptionId id,
                                                         Node eventId) {
-        if (!eventId.isURI()
-                || !eventId.getURI().startsWith(
-                        EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())) {
-            throw new IllegalArgumentException(
-                    "The event id must be an URI starting by "
-                            + EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                            + ": " + eventId);
-        }
-
-        // the reconstruction operation for an event which has been already
-        // received is cancelled
-        if (this.eventIdsReceived.containsKey(eventId)) {
-            return null;
+        if (!eventId.isURI()) {
+            throw new IllegalArgumentException("The event id must be an URI:"
+                    + eventId);
         }
 
         int expectedNumberOfQuadruples = -1;
@@ -263,12 +259,6 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
 
         // perform polling while all the quadruples have not been retrieved
         while (quadsReceived.size() != expectedNumberOfQuadruples) {
-            // the reconstruct operation is stopped if an another thread has
-            // already reconstructed the compound event before the current one
-            if (this.eventIdsReceived.containsKey(eventId)) {
-                return null;
-            }
-
             log.info(
                     "Reconstructing compound event for subscription {} and graph value {} ({}/{})",
                     new Object[] {
@@ -305,12 +295,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             }
         }
 
-        if (this.eventIdsReceived.putIfAbsent(eventId, id) != null) {
-            // an another thread has already reconstructed the same event
-            return null;
-        }
-
-        // We create an event from quadruples which comes from a previous event.
+        // we create an event from quadruples which comes from a previous event.
         // Hence we do not need to add new meta information
         return new CompoundEvent(quadsReceived, false);
     }
@@ -365,6 +350,30 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             log.error(
                     "Unknown notification listener for delivery: {}",
                     listener.getClass());
+        }
+
+        Node eventId =
+                this.extractEventId(
+                        this.subscriptions.get(id.getSubscriptionId()),
+                        solution.getSolution());
+
+        // monitoring reports have to be sent per compound event and not per
+        // event
+        if (this.eventIdsReceived.putIfAbsent(eventId, id.getSubscriptionId()) == null
+                && this.isInputOutputMonitoringEnabled()) {
+
+            String destination = this.componentUri;
+            if (listener.getSubscriberUrl() != null) {
+                destination = listener.getSubscriberUrl();
+            }
+
+            String source = Quadruple.getPublicationSource(eventId);
+            if (source == null) {
+                source = "http://0.0.0.0";
+            }
+
+            super.monitoringManager.sendInputOutputMonitoringReport(
+                    source, destination, Quadruple.getPublicationTime(eventId));
         }
 
         log.info("Notification {} has been delivered", id);
@@ -466,6 +475,30 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
     public static SubscribeProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, SUBSCRIBE_SERVICES_ITF, SubscribeProxy.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean enableInputOutputMonitoring(String consumerEndpoint) {
+        return super.monitoringManager.enableInputOutputMonitoring(consumerEndpoint);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean disableInputOutputMonitoring(String consumerEndpoint) {
+        return super.monitoringManager.disableInputOutputMonitoring(consumerEndpoint);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isInputOutputMonitoringEnabled() {
+        return super.monitoringManager.isInputOutputMonitoringEnabled();
     }
 
 }

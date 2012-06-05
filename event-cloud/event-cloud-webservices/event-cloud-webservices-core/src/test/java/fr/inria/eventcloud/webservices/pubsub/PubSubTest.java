@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.namespace.QName;
+
 import org.apache.cxf.endpoint.Server;
 import org.etsi.uri.gcm.util.GCM;
 import org.junit.After;
@@ -47,12 +49,13 @@ import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
-import fr.inria.eventcloud.translators.wsn.WsnHelper;
+import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
-import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
+import fr.inria.eventcloud.webservices.utils.WsClientFactory;
+import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * Class used to test a subscribe proxy component and a publish proxy component
@@ -108,19 +111,22 @@ public class PubSubTest {
         // Creates the subscribe request
         Subscribe subscribeRequest =
                 WsnHelper.createSubscribeMessage(
-                        this.subscriberWsEndpointUrl, topicNamespace,
-                        topicNsPrefix, topicLocalPart);
+                        this.subscriberWsEndpointUrl, new QName(
+                                topicNamespace, topicLocalPart, topicNsPrefix));
 
         // Subscribes for any events with topic TaxiUc
         this.subscribeClient.subscribe(subscribeRequest);
 
         // Creates the notify request
         Notify notifyRequest =
-                WsnHelper.createNotifyMessage(
-                        topicNamespace, topicNsPrefix, topicLocalPart,
-                        new CompoundEvent(this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, null)));
+                SemanticCompoundEventTranslator.getInstance()
+                        .translate(
+                                new CompoundEvent(this.read(
+                                        "/notification-01.trig",
+                                        SerializationFormat.TriG, null)),
+                                new QName(
+                                        topicNamespace, topicLocalPart,
+                                        topicNsPrefix));
 
         // Publishes the event
         this.publishClient.notify(notifyRequest);
@@ -175,19 +181,22 @@ public class PubSubTest {
         // Creates the subscribe request
         Subscribe subscribeRequest =
                 WsnHelper.createSubscribeMessage(
-                        this.subscriberWsEndpointUrl, topicNamespace,
-                        topicNsPrefix, topicLocalPart);
+                        this.subscriberWsEndpointUrl, new QName(
+                                topicNamespace, topicLocalPart, topicNsPrefix));
 
         // Subscribes for any events with topic TaxiUc
         this.subscribeClient.subscribe(subscribeRequest);
 
         // Creates the notify request emitted by source1
         Notify notifyRequest =
-                WsnHelper.createNotifyMessage(
-                        topicNamespace, topicNsPrefix, topicLocalPart,
-                        new CompoundEvent(this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, source1)));
+                SemanticCompoundEventTranslator.getInstance()
+                        .translate(
+                                new CompoundEvent(this.read(
+                                        "/notification-01.trig",
+                                        SerializationFormat.TriG, source1)),
+                                new QName(
+                                        topicNamespace, topicLocalPart,
+                                        topicNsPrefix));
 
         // Publishes the event
         this.publishClient.notify(notifyRequest);
@@ -202,11 +211,14 @@ public class PubSubTest {
 
         // Creates the notify request emitted by source2
         notifyRequest =
-                WsnHelper.createNotifyMessage(
-                        topicNamespace, topicNsPrefix, topicLocalPart,
-                        new CompoundEvent(this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, source2)));
+                SemanticCompoundEventTranslator.getInstance()
+                        .translate(
+                                new CompoundEvent(this.read(
+                                        "/notification-01.trig",
+                                        SerializationFormat.TriG, source2)),
+                                new QName(
+                                        topicNamespace, topicLocalPart,
+                                        topicNsPrefix));
 
         // Publishes the event
         this.publishClient.notify(notifyRequest);

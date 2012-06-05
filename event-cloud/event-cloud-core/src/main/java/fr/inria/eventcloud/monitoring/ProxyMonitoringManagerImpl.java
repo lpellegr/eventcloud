@@ -16,6 +16,35 @@
  **/
 package fr.inria.eventcloud.monitoring;
 
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.oasis_open.docs.wsn.b_2.Notify;
+import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
+import org.w3c.dom.Document;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
+import easybox.petalslink.com.esrawreport._1.EJaxbReportListType;
+import easybox.petalslink.com.esrawreport._1.EJaxbReportTimeStampType;
+import easybox.petalslink.com.esrawreport._1.EJaxbReportType;
+import easybox.petalslink.com.esrawreport._1.ObjectFactory;
+import fr.inria.eventcloud.webservices.utils.WsClientFactory;
+import fr.inria.eventcloud.webservices.utils.WsnHelper;
+
 /**
  * Concrete implementation for {@link ProxyMonitoringManager}.
  * 
@@ -24,18 +53,38 @@ package fr.inria.eventcloud.monitoring;
 public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
         ProxyMonitoringManager {
 
-    private boolean inputOutputMonitoringEnabled = false;
+    private static final QName RAW_REPORT_QNAME = new QName(
+            "http://www.petalslink.org/rawreport/1.0", "RawReportTopic", "rrt");
 
-    private String consumerEndpoint;
+    private static final QName INTERFACE_QNAME = new QName(
+            "http://www.petalslink.com/wsn/service/WsnProducer",
+            "NotificationProducer", "np");
+
+    public final LoadingCache<String, NotificationConsumer> notificationConsumerClients =
+            CacheBuilder.newBuilder().softValues().maximumSize(10).build(
+                    new CacheLoader<String, NotificationConsumer>() {
+                        @Override
+                        public NotificationConsumer load(String consumerEndpoint)
+                                throws Exception {
+                            return WsClientFactory.createWsClient(
+                                    NotificationConsumer.class,
+                                    consumerEndpoint);
+                        }
+                    });
+
+    private List<String> consumerEndpoints;
+
+    public ProxyMonitoringManagerImpl() {
+        this.consumerEndpoints = new ArrayList<String>();
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean enableInputOutputMonitoring(String consumerEndpoint) {
-        if (!this.inputOutputMonitoringEnabled) {
-            this.consumerEndpoint = consumerEndpoint;
-            this.inputOutputMonitoringEnabled = true;
+        if (!this.consumerEndpoints.contains(consumerEndpoint)) {
+            this.consumerEndpoints.add(consumerEndpoint);
             return true;
         }
 
@@ -46,9 +95,9 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
      * {@inheritDoc}
      */
     @Override
-    public boolean disableInputOutputMonitoring() {
-        if (this.inputOutputMonitoringEnabled) {
-            this.inputOutputMonitoringEnabled = false;
+    public boolean disableInputOutputMonitoring(String consumerEndpoint) {
+        if (this.consumerEndpoints.contains(consumerEndpoint)) {
+            this.consumerEndpoints.remove(consumerEndpoint);
             return true;
         }
 
@@ -60,20 +109,77 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
      */
     @Override
     public boolean isInputOutputMonitoringEnabled() {
-        return this.inputOutputMonitoringEnabled;
-    }
-
-    public String getConsumerEndpoint() {
-        return this.consumerEndpoint;
+        return this.consumerEndpoints.size() > 0;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void sendInputOutputMonitoringReport(String source) {
-        // TODO send monitoring report (put in cache the cxf client which is
-        // used to send the report)
+    public void sendInputOutputMonitoringReport(String source,
+                                                String destination,
+                                                long eventPublicationTimestamp) {
+        // TODO: do it in parallel
+        for (String consumerEndpoint : this.consumerEndpoints) {
+            try {
+                this.notificationConsumerClients.get(consumerEndpoint)
+                        .notify(
+                                createRawReport(
+                                        source, destination,
+                                        eventPublicationTimestamp));
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static Notify createRawReport(String source, String destination,
+                                          long eventPublicationTimestamp) {
+        easybox.petalslink.com.esrawreport._1.ObjectFactory factory =
+                new ObjectFactory();
+
+        EJaxbReportType reportType = factory.createEJaxbReportType();
+        reportType.setExchangeId(UUID.randomUUID().toString());
+        reportType.setTimeStamp(EJaxbReportTimeStampType.T_1);
+
+        try {
+            GregorianCalendar gc = new GregorianCalendar();
+            gc.setTimeInMillis(eventPublicationTimestamp);
+            reportType.setDateInGMT(DatatypeFactory.newInstance()
+                    .newXMLGregorianCalendar(gc));
+        } catch (DatatypeConfigurationException e) {
+            throw new IllegalStateException(e);
+        }
+        reportType.setConsumerEndpointAddress(destination);
+        reportType.setOperationName("http://com.petalslink.esstar/service/management/user/1.0/Notify");
+        reportType.setInterfaceQName(INTERFACE_QNAME);
+        reportType.setProviderEndpointAddress(source);
+        reportType.setContentLength(-1);
+        reportType.setDoesThisResponseIsAnException(false);
+        reportType.setEndpointName("");
+
+        EJaxbReportListType reportTypeList =
+                factory.createEJaxbReportListType();
+        reportTypeList.getReport().add(reportType);
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+
+        try {
+            Document doc = dbf.newDocumentBuilder().newDocument();
+
+            JAXBContext.newInstance(
+                    easybox.petalslink.com.esrawreport._1.ObjectFactory.class)
+                    .createMarshaller()
+                    .marshal(factory.createReportList(reportTypeList), doc);
+
+            return WsnHelper.createNotifyMessage(
+                    source, RAW_REPORT_QNAME, doc.getDocumentElement());
+        } catch (ParserConfigurationException e) {
+            throw new IllegalStateException(e);
+        } catch (JAXBException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
 }

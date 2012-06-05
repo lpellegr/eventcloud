@@ -1,7 +1,8 @@
 package fr.inria.eventcloud.translators.wsn.subscribe;
 
+import javax.xml.namespace.QName;
+
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
@@ -13,7 +14,7 @@ import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsnHelper;
+import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * Test cases associated to {@link TopicSubscriptionTranslator}.
@@ -25,9 +26,7 @@ public class TopicSubscriptionTranslatorTest {
     private static Logger log =
             LoggerFactory.getLogger(TopicSubscriptionTranslatorTest.class);
 
-    private TopicSubscriptionTranslator translator;
-
-    private static final String topicNamespace =
+    private static final String TOPIC_NAMESPACE =
             "http://example.org/topic/namespace/";
 
     @BeforeClass
@@ -35,28 +34,23 @@ public class TopicSubscriptionTranslatorTest {
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
     }
 
-    @Before
-    public void setUp() {
-        this.translator = new TopicSubscriptionTranslator();
-    }
-
     @Test
     public void testTopicTranslation() throws TranslationException {
-        this.testTopicTranslationToSparql(topicNamespace, "t", "myTopic");
-        this.testTopicTranslationToSparql(
-                topicNamespace, "t", "topicName:myTopic");
+        this.testTopicTranslationToSparql(new QName(
+                TOPIC_NAMESPACE, "myTopic", "t"));
+        this.testTopicTranslationToSparql(new QName(
+                TOPIC_NAMESPACE, "topicName:myTopic", "t"));
     }
 
-    private void testTopicTranslationToSparql(String topicNamespace,
-                                              String topicNsPrefix,
-                                              String topicLocalPart)
+    private void testTopicTranslationToSparql(QName topic)
             throws TranslationException {
         Subscribe subscribeMessage =
                 WsnHelper.createSubscribeMessage(
-                        "http://example.org/subscriber/s1", topicNamespace,
-                        topicNsPrefix, topicLocalPart);
+                        "http://example.org/subscriber/s1", topic);
 
-        String sparqlQuery = this.translator.translate(subscribeMessage);
+        String sparqlQuery =
+                TopicSubscriptionTranslator.getInstance().translate(
+                        subscribeMessage);
 
         Assert.assertNotNull(sparqlQuery);
 
@@ -66,7 +60,7 @@ public class TopicSubscriptionTranslatorTest {
                         .getQuadruplePattern()
                         .getValue();
 
-        Assert.assertEquals(topicNamespace + topicLocalPart
+        Assert.assertEquals(TOPIC_NAMESPACE + topic.getLocalPart()
                 + Stream.STREAM_ID_SUFFIX, quadruplePattern.getObject()
                 .getURI());
 

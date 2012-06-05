@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.translators.wsn;
+package fr.inria.eventcloud.webservices.utils;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -22,17 +22,17 @@ import java.util.Map.Entry;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.apache.cxf.wsn.util.WSNHelper;
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
+import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 
-import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
@@ -49,21 +49,14 @@ public class WsnHelper {
      * 
      * @param subscriberEndpoint
      *            subscriber's endpoint.
-     * @param topicNamespace
-     *            namespace associated to the topic the subscriber subscribes
-     *            to.
-     * @param topicNsPrefix
-     *            prefix associated to topic namespace.
-     * @param topicLocalPart
-     *            local part associated to the topic.
+     * @param topic
+     *            the qname associated to the topic to subscribe to.
      * 
      * @return a {@link Subscribe} WS-Notification message with the specified
      *         subscriber's endpoint and topic information.
      */
     public static Subscribe createSubscribeMessage(String subscriberEndpoint,
-                                                   String topicNamespace,
-                                                   String topicNsPrefix,
-                                                   String topicLocalPart) {
+                                                   QName topic) {
         Subscribe subscribeRequest = new Subscribe();
         FilterType filterType = new FilterType();
 
@@ -72,8 +65,7 @@ public class WsnHelper {
                         new QName(
                                 "http://docs.oasis-open.org/wsn/b-2",
                                 "TopicExpression"), TopicExpressionType.class,
-                        createTopicExpressionType(
-                                topicNamespace, topicNsPrefix, topicLocalPart));
+                        createTopicExpressionType(topic));
         filterType.getAny().add(jaxbElement);
         subscribeRequest.setFilter(filterType);
 
@@ -82,90 +74,41 @@ public class WsnHelper {
         return subscribeRequest;
     }
 
-    /**
-     * Creates a notify message from the specified topic information and
-     * {@link CompoundEvent}s. <strong>This method creates a new
-     * {@link SemanticCompoundEventTranslator} each time it is invoked</strong>.
-     * 
-     * @param topicNamespace
-     *            namespace associated to the topic the subscriber subscribes
-     *            to.
-     * @param topicNsPrefix
-     *            prefix associated to topic namespace.
-     * @param topicLocalPart
-     *            local part associated to the topic.
-     * @param compoundEvents
-     *            the compound events to serialize inside the message.
-     * 
-     * @return a notify message with the specified topic information and
-     *         {@link CompoundEvent}s.
-     */
-    public static Notify createNotifyMessage(String topicNamespace,
-                                             String topicNsPrefix,
-                                             String topicLocalPart,
-                                             CompoundEvent... compoundEvents) {
-        return createNotifyMessage(
-                new SemanticCompoundEventTranslator(), topicNamespace,
-                topicNsPrefix, topicLocalPart, compoundEvents);
-    }
-
-    /**
-     * Creates a notify message from the specified topic information and
-     * {@link CompoundEvent}s by using the given {@code translator}.
-     * 
-     * @param translator
-     *            the translator used to translate compound events.
-     * @param topicNamespace
-     *            namespace associated to the topic the subscriber subscribes
-     *            to.
-     * @param topicNsPrefix
-     *            prefix associated to topic namespace.
-     * @param topicLocalPart
-     *            local part associated to the topic.
-     * @param compoundEvents
-     *            the compound events to serialize inside the message.
-     * 
-     * @return a notify message with the specified topic information and
-     *         {@link CompoundEvent}s.
-     */
-    public static Notify createNotifyMessage(SemanticCompoundEventTranslator translator,
-                                             String topicNamespace,
-                                             String topicNsPrefix,
-                                             String topicLocalPart,
-                                             CompoundEvent... compoundEvents) {
-        Notify result = new Notify();
-
-        for (CompoundEvent event : compoundEvents) {
-            try {
-                NotificationMessageHolderType message =
-                        translator.translate(event);
-                message.setTopic(createTopicExpressionType(
-                        topicNamespace, topicNsPrefix, topicLocalPart));
-                result.getNotificationMessage().add(message);
-            } catch (TranslationException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return result;
-    }
-
     public static SubscribeResponse createSubscribeResponse(String subscriptionReferenceAddress) {
         SubscribeResponse response = new SubscribeResponse();
         response.setSubscriptionReference(WSNHelper.createWSA(subscriptionReferenceAddress));
         return response;
     }
 
-    private static TopicExpressionType createTopicExpressionType(String topicNamespace,
-                                                                 String topicNsPrefix,
-                                                                 String topicLocalPart) {
+    public static Notify createNotifyMessage(String consumerAddress,
+                                             QName topic, Object payload) {
+        Notify result = new Notify();
+        NotificationMessageHolderType notificationMessage =
+                new NotificationMessageHolderType();
+
+        notificationMessage.setTopic(createTopicExpressionType(topic));
+
+        W3CEndpointReferenceBuilder endPointReferenceBuilder =
+                new W3CEndpointReferenceBuilder();
+        endPointReferenceBuilder.address(consumerAddress);
+        notificationMessage.setProducerReference(endPointReferenceBuilder.build());
+
+        Message message = new Message();
+        message.setAny(payload);
+        notificationMessage.setMessage(message);
+
+        result.getNotificationMessage().add(notificationMessage);
+
+        return result;
+    }
+
+    public static TopicExpressionType createTopicExpressionType(QName topic) {
         TopicExpressionType topicExpressionType = new TopicExpressionType();
         topicExpressionType.getOtherAttributes().put(
-                new QName(topicNamespace, topicLocalPart, topicNsPrefix),
-                topicNamespace);
+                topic, topic.getNamespaceURI());
         topicExpressionType.setDialect("http://docs.oasis-open.org/wsn/t-1/TopicExpression/Concrete");
         topicExpressionType.getContent().add(
-                topicNsPrefix + ":" + topicLocalPart);
+                topic.getPrefix() + ":" + topic.getLocalPart());
 
         return topicExpressionType;
     }

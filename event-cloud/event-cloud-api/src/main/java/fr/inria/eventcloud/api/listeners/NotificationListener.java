@@ -46,4 +46,13 @@ public interface NotificationListener<T> extends Serializable {
      */
     public NotificationListenerType getType();
 
+    /**
+     * Returns the URL of the subscriber. This is not {@code null} for proxies
+     * exposed as Webservices but {@code null} for others.
+     * 
+     * @return the URL of the subscriber. This is not {@code null} for proxies
+     *         exposed as Webservices but {@code null} for others.
+     */
+    public String getSubscriberUrl();
+
 }

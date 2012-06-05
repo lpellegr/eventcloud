@@ -26,6 +26,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
+import fr.inria.eventcloud.monitoring.ProxyMonitoringService;
 import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.Subscription;
 
@@ -64,7 +65,8 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * @author lpellegr
  * @author bsauvan
  */
-public interface SubscribeProxy extends SubscribeApi, Serializable {
+public interface SubscribeProxy extends ProxyMonitoringService, SubscribeApi,
+        Serializable {
 
     /**
      * Searches the {@link Subscription} associated to the specified

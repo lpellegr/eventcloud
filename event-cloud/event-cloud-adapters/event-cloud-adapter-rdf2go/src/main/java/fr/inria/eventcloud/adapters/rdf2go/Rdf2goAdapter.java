@@ -43,8 +43,8 @@ import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 
 /**
- * Stores the delegate {@link ProxyCache} and provide some convenient methods to
- * convert some Jena objects to RDF2Go objects.
+ * Stores the delegate and provide some convenient methods to convert some Jena
+ * objects to RDF2Go objects.
  * 
  * @author lpellegr
  */

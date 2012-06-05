@@ -74,6 +74,12 @@ public class NotificationTranslator extends
     private static Logger log =
             LoggerFactory.getLogger(NotificationTranslator.class);
 
+    private static NotificationTranslator instance;
+
+    private NotificationTranslator() {
+
+    }
+
     /**
      * This method removes all white spaces between > < elements for a node
      * 
@@ -387,6 +393,14 @@ public class NotificationTranslator extends
                 }
             }
         }
+    }
+
+    public static synchronized NotificationTranslator getInstance() {
+        if (instance == null) {
+            instance = new NotificationTranslator();
+        }
+
+        return instance;
     }
 
 }

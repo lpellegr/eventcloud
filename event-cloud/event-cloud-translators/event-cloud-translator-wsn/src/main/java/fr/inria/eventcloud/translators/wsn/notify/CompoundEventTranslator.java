@@ -55,6 +55,12 @@ public class CompoundEventTranslator extends
     // used only to have the possibility to create DOM elements
     private static Document DOCUMENT = DocumentBuilder.createDocument();
 
+    private static CompoundEventTranslator instance;
+
+    private CompoundEventTranslator() {
+
+    }
+
     /**
      * Translates the specified event to its corresponding notification message.
      * 
@@ -360,6 +366,14 @@ public class CompoundEventTranslator extends
             return new String[] {
                     uri.substring(0, slashIndex), uri.substring(slashIndex + 1)};
         }
+    }
+
+    public static synchronized CompoundEventTranslator getInstance() {
+        if (instance == null) {
+            instance = new CompoundEventTranslator();
+        }
+
+        return instance;
     }
 
 }

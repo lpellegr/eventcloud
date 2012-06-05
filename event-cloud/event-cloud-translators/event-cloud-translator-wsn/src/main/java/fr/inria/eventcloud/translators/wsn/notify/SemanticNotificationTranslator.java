@@ -31,6 +31,12 @@ import fr.inria.eventcloud.utils.ReflectionUtils;
 public class SemanticNotificationTranslator extends
         Translator<NotificationMessageHolderType, CompoundEvent> {
 
+    private static SemanticNotificationTranslator instance;
+
+    private SemanticNotificationTranslator() {
+
+    }
+
     /**
      * Translates a message which is in XML escaped characters to the
      * corresponding CompoundEvent
@@ -82,6 +88,14 @@ public class SemanticNotificationTranslator extends
                 }, false);
 
         return new CompoundEvent(Skolemizator.skolemize(quads));
+    }
+
+    public static synchronized SemanticNotificationTranslator getInstance() {
+        if (instance == null) {
+            instance = new SemanticNotificationTranslator();
+        }
+
+        return instance;
     }
 
 }

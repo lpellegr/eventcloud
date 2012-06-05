@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
@@ -46,6 +47,15 @@ public abstract class Proxy extends AbstractComponent {
 
     protected Proxy() {
         super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initComponentActivity(Body body) {
+        super.initComponentActivity(body);
+
         this.monitoringManager = new ProxyMonitoringManagerImpl();
     }
 
