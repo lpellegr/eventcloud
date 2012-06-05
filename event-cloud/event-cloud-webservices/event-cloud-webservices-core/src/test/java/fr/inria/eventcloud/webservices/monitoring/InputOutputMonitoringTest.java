@@ -191,7 +191,7 @@ public class InputOutputMonitoringTest {
 
         this.eventCloudManagementWebServer =
                 WebServiceDeployer.deployEventCloudManagementWebService(
-                        this.registryUrl, 9004, "management", 9005);
+                        this.registryUrl, 22004, "management", 22005);
 
         this.eventCloudManagementClient =
                 WsClientFactory.createWsClient(
@@ -215,16 +215,16 @@ public class InputOutputMonitoringTest {
         this.monitoringService = new BasicNotificationConsumer();
         this.monitoringServer =
                 WebServiceDeployer.deployWebService(
-                        this.monitoringService, "monitoring", 9000);
+                        this.monitoringService, "monitoring", 22000);
 
         // web services which are deployed
         this.subscribeServiceInformation =
                 WebServiceDeployer.deploySubscribeWebService(
-                        this.registryUrl, STREAM_URL, "subscribe", 9001);
+                        this.registryUrl, STREAM_URL, "subscribe", 22001);
 
         this.publishServiceInformation =
                 WebServiceDeployer.deployPublishWebService(
-                        this.registryUrl, STREAM_URL, "publish", 9002);
+                        this.registryUrl, STREAM_URL, "publish", 22002);
 
         // clients associated to web services
         this.subscribeClient =
@@ -246,7 +246,7 @@ public class InputOutputMonitoringTest {
         this.subscriberService = new SubscriberServiceImpl();
         this.subscriberWsServer =
                 WebServiceDeployer.deployWebService(
-                        this.subscriberService, "subscriber", 9003);
+                        this.subscriberService, "subscriber", 22003);
         this.subscriberWsEndpointUrl =
                 this.subscriberWsServer.getEndpoint()
                         .getEndpointInfo()
