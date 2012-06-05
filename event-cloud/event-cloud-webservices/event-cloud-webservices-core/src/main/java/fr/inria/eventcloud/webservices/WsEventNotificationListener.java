@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
-import fr.inria.eventcloud.translators.wsn.WsnHelper;
+import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
-import fr.inria.eventcloud.webservices.factories.WsClientFactory;
+import fr.inria.eventcloud.webservices.utils.WsClientFactory;
 
 /**
  * An {@link CompoundEventNotificationListener}
@@ -42,9 +42,6 @@ public class WsEventNotificationListener extends
 
     private static final Logger log =
             LoggerFactory.getLogger(WsEventNotificationListener.class);
-
-    private static SemanticCompoundEventTranslator translator =
-            new SemanticCompoundEventTranslator();
 
     private final QName streamQName;
 
@@ -90,17 +87,27 @@ public class WsEventNotificationListener extends
      */
     @Override
     public void onNotification(SubscriptionId id, CompoundEvent solution) {
-        Notify notify =
-                WsnHelper.createNotifyMessage(
-                        translator, this.streamQName.getNamespaceURI(),
-                        this.streamQName.getPrefix(),
-                        this.streamQName.getLocalPart(), solution);
+        try {
+            Notify notify =
+                    SemanticCompoundEventTranslator.getInstance().translate(
+                            solution, this.streamQName);
 
-        this.getSubscriberWsClient().notify(notify);
+            this.getSubscriberWsClient().notify(notify);
 
-        log.info(
-                "Subscriber {} notified about:\n {}",
-                this.subscriberWsEndpointUrl, solution);
+            log.info(
+                    "Subscriber {} notified about:\n {}",
+                    this.subscriberWsEndpointUrl, solution);
+        } catch (TranslationException e) {
+            log.error("Error during translation", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSubscriberUrl() {
+        return this.subscriberWsEndpointUrl;
     }
 
 }

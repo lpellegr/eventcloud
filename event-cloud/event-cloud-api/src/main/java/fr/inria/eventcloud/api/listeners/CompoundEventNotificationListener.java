@@ -40,4 +40,12 @@ public abstract class CompoundEventNotificationListener implements
         return NotificationListenerType.COMPOUND_EVENT;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSubscriberUrl() {
+        return null;
+    }
+
 }

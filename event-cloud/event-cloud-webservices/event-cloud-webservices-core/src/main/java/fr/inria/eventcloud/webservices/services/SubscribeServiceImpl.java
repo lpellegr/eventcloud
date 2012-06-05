@@ -38,9 +38,8 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
-import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.utils.ReflectionUtils;
 import fr.inria.eventcloud.webservices.WsEventNotificationListener;
+import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * Defines a subscribe web service as defined by the WS-Notification
@@ -88,49 +87,41 @@ public class SubscribeServiceImpl extends
                 subscribe.getConsumerReference();
 
         if (consumerReference != null) {
-            Object address =
-                    ReflectionUtils.getFieldValue(consumerReference, "address");
+            String subscriberWsEndpointUrl =
+                    WsnHelper.getAddress(consumerReference);
 
-            if (address != null) {
-                String subscriberWsEndpointUrl =
-                        (String) ReflectionUtils.getFieldValue(address, "uri");
+            if (subscriberWsEndpointUrl != null) {
+                try {
+                    String sparqlQuery = super.translator.translate(subscribe);
 
-                if (subscriberWsEndpointUrl != null) {
-                    try {
-                        String sparqlQuery =
-                                super.translator.translate(subscribe);
+                    log.info(
+                            "Subscriber endpoint is {}",
+                            subscriberWsEndpointUrl);
+                    log.info("Translation output:\n{}", sparqlQuery);
 
-                        log.info(
-                                "Subscriber endpoint is {}",
-                                subscriberWsEndpointUrl);
-                        log.info("Translation output:\n{}", sparqlQuery);
+                    Subscription subscription =
+                            new Subscription(
+                                    sparqlQuery, subscriberWsEndpointUrl);
 
-                        Subscription subscription =
-                                new Subscription(
-                                        sparqlQuery, subscriberWsEndpointUrl);
+                    this.subscribers.put(
+                            subscription.getId(), subscriberWsEndpointUrl);
 
-                        this.subscribers.put(
-                                subscription.getId(), subscriberWsEndpointUrl);
+                    super.proxy.subscribe(
+                            subscription, new WsEventNotificationListener(
+                                    super.streamUrl, subscriberWsEndpointUrl));
 
-                        super.proxy.subscribe(
-                                subscription, new WsEventNotificationListener(
-                                        super.streamUrl,
-                                        subscriberWsEndpointUrl));
-                    } catch (TranslationException e) {
-                        log.error("Translation error:");
-                        logAndThrowIllegalArgumentException(e.getMessage());
-                    }
-                } else {
-                    logAndThrowIllegalArgumentException("Subscribe message received but no subscriber address is specified: the subscriber cannot receive any notification");
+                    WsnHelper.createSubscribeResponse(subscriberWsEndpointUrl);
+                } catch (TranslationException e) {
+                    log.error("Translation error:");
+                    logAndThrowIllegalArgumentException(e.getMessage());
                 }
             } else {
-                logAndThrowIllegalArgumentException("Consumer address cannot be extracted from subscribe message");
+                logAndThrowIllegalArgumentException("Subscribe message received but no subscriber address is specified: the subscriber cannot receive any notification");
             }
         } else {
             logAndThrowIllegalArgumentException("Subscribe message does not contain consumer reference");
         }
 
-        // FIXME: put a correct value for the subscription reference endpoint
         return WsnHelper.createSubscribeResponse("http://eventcloud.inria.fr/notification:NotificationService@Endpoint");
     }
 

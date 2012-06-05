@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.webservices.api.adapters;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.oasis_open.docs.wsn.b_2.Subscribe;
@@ -34,9 +35,8 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
 import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
-import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.utils.ReflectionUtils;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
+import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * XML Adapter for {@link SubscribeInfos} objects.
@@ -91,8 +91,8 @@ public class SubscribeInfosAdapter extends
                 topicName.substring(index + 1, topicName.lastIndexOf("#stream"));
 
         return WsnHelper.createSubscribeMessage(
-                subscribeInfos.getSubscriberWsEndpointUrl(), topicNamespace,
-                "t", topicLocalPart);
+                subscribeInfos.getSubscriberWsEndpointUrl(), new QName(
+                        topicNamespace, topicLocalPart, "t"));
     }
 
     /**
@@ -113,34 +113,26 @@ public class SubscribeInfosAdapter extends
                 subscribe.getConsumerReference();
 
         if (consumerReference != null) {
-            Object address =
-                    ReflectionUtils.getFieldValue(consumerReference, "address");
+            String subscriberWsEndpointUrl =
+                    WsnHelper.getAddress(consumerReference);
 
-            if (address != null) {
-                String subscriberWsEndpointUrl =
-                        (String) ReflectionUtils.getFieldValue(address, "uri");
+            if (subscriberWsEndpointUrl != null) {
+                try {
+                    String sparqlQuery = this.translator.translate(subscribe);
 
-                if (subscriberWsEndpointUrl != null) {
-                    try {
-                        String sparqlQuery =
-                                this.translator.translate(subscribe);
+                    log.info(
+                            "Subscriber endpoint URL is {}",
+                            subscriberWsEndpointUrl);
+                    log.info("Translation output:\n{}", sparqlQuery);
 
-                        log.info(
-                                "Subscriber endpoint URL is {}",
-                                subscriberWsEndpointUrl);
-                        log.info("Translation output:\n{}", sparqlQuery);
-
-                        return new SubscribeInfos(
-                                sparqlQuery, subscriberWsEndpointUrl);
-                    } catch (TranslationException e) {
-                        log.error("Translation error:");
-                        this.logAndThrowIllegalArgumentException(e.getMessage());
-                    }
-                } else {
-                    this.logAndThrowIllegalArgumentException("Subscribe message received but no subscriber address is specified: the subscriber cannot receive any notification");
+                    return new SubscribeInfos(
+                            sparqlQuery, subscriberWsEndpointUrl);
+                } catch (TranslationException e) {
+                    log.error("Translation error:");
+                    this.logAndThrowIllegalArgumentException(e.getMessage());
                 }
             } else {
-                this.logAndThrowIllegalArgumentException("Consumer address cannot be extracted from subscribe message");
+                this.logAndThrowIllegalArgumentException("Subscribe message received but no subscriber address is specified: the subscriber cannot receive any notification");
             }
         } else {
             this.logAndThrowIllegalArgumentException("Subscribe message does not contain consumer reference");

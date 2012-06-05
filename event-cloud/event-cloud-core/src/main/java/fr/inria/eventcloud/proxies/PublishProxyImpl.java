@@ -55,6 +55,8 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      */
     public static final String PUBLISH_SERVICES_ITF = "publish-services";
 
+    private String endpointUrl;
+
     /**
      * Empty constructor required by ProActive.
      */
@@ -81,6 +83,10 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
             quad.setPublicationTime();
         }
 
+        if (quad.getPublicationSource() == null && this.endpointUrl != null) {
+            quad.setPublicationSource(this.endpointUrl);
+        }
+
         // TODO: use an asynchronous call with no response (see issue 16)
 
         // the quadruple is routed without taking into account the publication
@@ -89,11 +95,6 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
             super.sendv(new PublishQuadrupleRequest(quad));
         } catch (DispatchException e) {
             e.printStackTrace();
-        }
-
-        // TODO: do it in parallel?
-        if (super.monitoringManager.isInputOutputMonitoringEnabled()) {
-            super.monitoringManager.sendInputOutputMonitoringReport(quad.getPublicationSource());
         }
     }
 
@@ -142,24 +143,16 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
-    public boolean enableInputOutputMonitoring(String consumerEndpoint) {
-        return super.monitoringManager.enableInputOutputMonitoring(consumerEndpoint);
+    public void setEndpointUrl(String endpointUrl) {
+        this.endpointUrl = endpointUrl;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean disableInputOutputMonitoring() {
-        return super.monitoringManager.disableInputOutputMonitoring();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isInputOutputMonitoringEnabled() {
-        return super.monitoringManager.isInputOutputMonitoringEnabled();
+    public String getEndpointUrl() {
+        return this.endpointUrl;
     }
 
 }

@@ -50,4 +50,12 @@ public abstract class SignalNotificationListener implements
         return NotificationListenerType.SIGNAL;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSubscriberUrl() {
+        return null;
+    }
+
 }

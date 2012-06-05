@@ -638,7 +638,6 @@ public final class PublishSubscribeUtils {
                                                  Quadruple quadruple) {
         Binding binding = null;
 
-        // for a signal notification listener no binding are returned
         if (subscription.getType() == NotificationListenerType.BINDING) {
             // only the solutions for the result variables from the
             // original SPARQL query have to be returned to the
@@ -648,7 +647,8 @@ public final class PublishSubscribeUtils {
                             quadruple,
                             subscription.getResultVars(),
                             subscription.getSubSubscriptions()[0].getAtomicQuery());
-        } else if (subscription.getType() == NotificationListenerType.COMPOUND_EVENT) {
+        } else if (subscription.getType() == NotificationListenerType.COMPOUND_EVENT
+                || subscription.getType() == NotificationListenerType.SIGNAL) {
             // only the graph value has to be returned to the subscriber
             binding =
                     BindingFactory.binding(

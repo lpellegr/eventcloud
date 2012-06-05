@@ -50,16 +50,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 
 /**
  * ProxyFactory is used to create a new instance of a proxy (e.g.
- * {@link SubscribeProxy}, {@link PublishProxy} or {@link PutGetProxy}). This
- * means that there is at least one instance of a proxy by user. To retrieve a
- * ProxyFactory instance you have to use the
- * {@link ProxyFactory#getInstance(String, EventCloudId)} method. It will return
- * an instance of a ProxyFactory that is specialized to create proxies for the
- * given {@link EventCloudId}. Then, internally, when you create a new proxy,
- * the factory will share the same {@link EventCloudCache} for all the proxies
- * that are created from the retrieved ProxyFactory. Indeed, a proxy only needs
- * trackers (which serves as entry points into the network) to work and these
- * trackers are supposed to stay the same over the time.
+ * {@link SubscribeProxy}, {@link PublishProxy} or {@link PutGetProxy}).
  * 
  * @author lpellegr
  * @author bsauvan
@@ -334,6 +325,7 @@ public class ProxyFactory implements Serializable {
             String componentUri =
                     Fractive.registerByName(subComponent, "subscribe-proxy-"
                             + UUID.randomUUID().toString());
+
             log.info("SubscribeProxy bound to {}", componentUri);
 
             EventCloudCache eventCloudProxy =

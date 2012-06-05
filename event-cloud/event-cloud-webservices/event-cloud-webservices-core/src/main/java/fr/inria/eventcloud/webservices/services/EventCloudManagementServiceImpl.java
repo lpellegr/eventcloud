@@ -56,12 +56,12 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
-import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.translators.wsn.WsnHelper;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsApi;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsServiceApi;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
+import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * Web service implementation for {@link EventCloudManagementWsApi}.
@@ -396,24 +396,24 @@ public class EventCloudManagementServiceImpl implements
             InvalidMessageContentExpressionFault, InvalidFilterFault,
             TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
 
+        String consumerReference =
+                WsnHelper.getAddress(subscribe.getConsumerReference());
         QName topic = WsnHelper.getTopic(subscribe);
 
-        // TODO: check this condition
         if ((topic.getNamespaceURI() + topic.getLocalPart()).equals(RAW_REPORT_TOPIC)) {
             Set<EventCloudId> eventCloudIds =
                     this.getEventCloudsRegistry().listEventClouds();
+
+            // enable input/output monitoring for all eventclouds
             for (EventCloudId id : eventCloudIds) {
-                for (PublishProxy proxy : this.getEventCloudsRegistry()
-                        .getPublishProxies(id)) {
-                    // TODO: parse subscribe message to extract consumer
-                    // endpoint (i.e. the endpoint of the service where
-                    // monitoring information will be send)
-                    proxy.enableInputOutputMonitoring("");
+                for (SubscribeProxy proxy : this.getEventCloudsRegistry()
+                        .getSubscribeProxies(id)) {
+                    proxy.enableInputOutputMonitoring(consumerReference);
                 }
             }
         }
 
-        return WsnHelper.createSubscribeResponse(WsnHelper.getAddress(subscribe.getConsumerReference()));
+        return WsnHelper.createSubscribeResponse(consumerReference);
     }
 
 }

@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.proxies;
 
 import fr.inria.eventcloud.api.PublishApi;
-import fr.inria.eventcloud.monitoring.ProxyMonitoringService;
 
 /**
  * A PublishProxy is a proxy that implements the {@link PublishApi}. It has to
@@ -26,6 +25,21 @@ import fr.inria.eventcloud.monitoring.ProxyMonitoringService;
  * @author lpellegr
  * @author bsauvan
  */
-public interface PublishProxy extends ProxyMonitoringService, PublishApi {
+public interface PublishProxy extends PublishApi {
+
+    /**
+     * Sets the endpoint URL associated to the proxy.
+     * 
+     * @param endpointUrl
+     *            the endpoint URL associated to the proxy.
+     */
+    void setEndpointUrl(String endpointUrl);
+
+    /**
+     * Returns the endpoint URL associated to the proxy.
+     * 
+     * @return the endpoint URL associated to the proxy.
+     */
+    String getEndpointUrl();
 
 }

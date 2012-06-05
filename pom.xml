@@ -129,7 +129,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.0.1</version>
+				<version>1.0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -168,6 +168,17 @@
 					<exclusion>
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf.services.wsn</groupId>
+				<artifactId>cxf-services-wsn-core</artifactId>
+				<version>2.5.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.servlet</groupId>
+						<artifactId>servlet-api</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>

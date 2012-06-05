@@ -28,7 +28,12 @@ public interface ProxyMonitoringActions {
      * 
      * @param source
      *            the event source.
+     * @param destination
+     *            the event destination.
+     * @param eventPublicationTimestamp
+     *            timestamp indicating when the event has been published.
      */
-    void sendInputOutputMonitoringReport(String source);
+    void sendInputOutputMonitoringReport(String source, String destination,
+                                         long eventPublicationTimestamp);
 
 }

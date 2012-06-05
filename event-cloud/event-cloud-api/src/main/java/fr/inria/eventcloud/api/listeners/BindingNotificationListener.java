@@ -37,4 +37,12 @@ public abstract class BindingNotificationListener implements
         return NotificationListenerType.BINDING;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSubscriberUrl() {
+        return null;
+    }
+
 }

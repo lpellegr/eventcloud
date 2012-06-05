@@ -229,8 +229,15 @@ public class WebServiceDeployer {
         PublishServiceImpl publishService =
                 new PublishServiceImpl(registryUrl, streamUrl);
 
-        return new ServiceInformation(publishService, deployWebService(
-                publishService, urlSuffix, port), streamUrl, port);
+        Server publishServer =
+                deployWebService(publishService, urlSuffix, port);
+
+        publishService.setEndpointUrl(publishServer.getEndpoint()
+                .getEndpointInfo()
+                .getAddress());
+
+        return new ServiceInformation(
+                publishService, publishServer, streamUrl, port);
     }
 
     public static ServiceInformation deploySubscribeWebService(String registryUrl,
@@ -289,5 +296,4 @@ public class WebServiceDeployer {
 
         return svrFactory.create();
     }
-
 }

@@ -25,7 +25,7 @@ package fr.inria.eventcloud.monitoring;
 public interface ProxyMonitoringService {
 
     /**
-     * Enables input output monitoring. The reports which are generated are sent
+     * Enables input/output monitoring. The reports which are generated are sent
      * to the specified {@code consumerEndpoint} which is supposed to be
      * WS-Notification compliant.
      * 
@@ -33,21 +33,25 @@ public interface ProxyMonitoringService {
      *            the consumer endpoint to contact in order to send reports.
      * 
      * @return {@code true} if the activation has succeeded, {@code false} when
-     *         the input/output monitoring is already enabled.
+     *         the input/output monitoring is already enabled for the specified
+     *         {@code consumerEndpoint}.
      */
     boolean enableInputOutputMonitoring(String consumerEndpoint);
 
     /**
-     * Disables input output monitoring on the current proxy.
+     * Disables input/output monitoring for the specified
+     * {@code consumerEndpoint}.
      * 
      * @return {@code true} when the deactivation has succeeded, {@code false}
-     *         if input/output monitoring was not enabled.
+     *         if input/output monitoring was not enabled for the specified
+     *         {@code consumerEndpoint}.
      */
-    boolean disableInputOutputMonitoring();
+    boolean disableInputOutputMonitoring(String consumerEndpoint);
 
     /**
-     * Returns {@code true} if input/output monitoring is enabled, {@code false}
-     * otherwise.
+     * Returns {@code true} if input/output monitoring is enabled (i.e. one or
+     * several consumer endpoints have been set to receive raw reports),
+     * {@code false} otherwise.
      * 
      * @return {@code true} if input/output monitoring is enabled, {@code false}
      *         otherwise.
