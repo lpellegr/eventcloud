@@ -46,19 +46,19 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
- * Tests cases associated to {@link WsNotificationTranslator}.
+ * Tests cases associated to {@link WsnTranslator}.
  * 
  * @author lpellegr
  */
-public class WsNotificationTranslatorTest {
+public class WsnTranslatorTest {
 
     private static final Logger log =
-            LoggerFactory.getLogger(WsNotificationTranslatorTest.class);
+            LoggerFactory.getLogger(WsnTranslatorTest.class);
 
-    private WsNotificationTranslator translator;
+    private WsnTranslator translator;
 
-    public WsNotificationTranslatorTest() {
-        this.translator = new WsNotificationTranslator();
+    public WsnTranslatorTest() {
+        this.translator = new WsnTranslator();
     }
 
     @Test
@@ -83,9 +83,9 @@ public class WsNotificationTranslatorTest {
             // translation
 
             Assert.assertEquals(1, message.getTopic().getContent().size());
-            Assert.assertEquals(
-                    "fireman_event:cardiacRythmFiremanTopic",
-                    message.getTopic().getContent().get(0));
+            Assert.assertEquals("cardiacRythmFiremanTopic", message.getTopic()
+                    .getContent()
+                    .get(0));
 
             event = this.translator.translateNotification(message);
 
@@ -137,7 +137,7 @@ public class WsNotificationTranslatorTest {
         InputStream is = null;
 
         if (file != null) {
-            is = WsNotificationTranslatorTest.class.getResourceAsStream(file);
+            is = WsnTranslatorTest.class.getResourceAsStream(file);
         }
 
         return is;

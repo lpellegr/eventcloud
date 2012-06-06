@@ -30,7 +30,7 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
+import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
 
 /**
  * Defines a publish web service as defined by the WS-Notification
@@ -64,7 +64,7 @@ public class PublishServiceImpl extends
         if (notify.getNotificationMessage().size() > 0) {
             for (NotificationMessageHolderType notificationMessage : notify.getNotificationMessage()) {
                 try {
-                    WsNotificationLogUtils.logNotificationMessageHolderType(notificationMessage);
+                    WsnLogUtils.logNotificationMessageHolderType(notificationMessage);
 
                     CompoundEvent compoundEvent =
                             super.translator.translate(notificationMessage);

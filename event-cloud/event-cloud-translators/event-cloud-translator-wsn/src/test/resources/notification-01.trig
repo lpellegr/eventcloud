@@ -1,10 +1,10 @@
 <http://events.event-processing.org/ids/3553014223316411743377565649191697> 
 {
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/SubscriptionReference/Address> "http://localhost:9111/PrefetEndpoint" . 
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Topic> "fireman_event:cardiacRythmFiremanTopic" . 
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/ProducerReference/Address> "http://localhost:9112/FiremanEndpoint" . 
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/ProducerReference/Metadata/$0$http://www.petalslink.org/notification/emissionDate> "2012-02-07T12:24:13.671+01:00" .
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$fireman$0$http://www.soceda.org/crisis/v1/shared-data/name> "Captain Zebulon" .
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$fireman$0$http://www.w3.org/2005/08/addressing/EndpointReference$0$http://www.w3.org/2005/08/addressing/Address> "http://localhost:9112/FiremanEndpoint" .
-    <http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$/value> "90" .
+    <http://events.event-processing.org/ids/3553014223316411743377565649191697#event> <http://docs.oasis-open.org/wsn/b-2/SubscriptionReference/Address> "http://localhost:9111/PrefetEndpoint" . 
+    <http://events.event-processing.org/ids/3553014223316411743377565649191697#event> <http://events.event-processing.org/types/stream> <http://streams.event-processing.org/ids/cardiacRythmFiremanTopic#stream> . 
+    <http://events.event-processing.org/ids/3553014223316411743377565649191697#event> <http://docs.oasis-open.org/wsn/b-2/ProducerReference/Address> "http://localhost:9112/FiremanEndpoint" . 
+    <http://events.event-processing.org/ids/3553014223316411743377565649191697#event> <http://docs.oasis-open.org/wsn/b-2/ProducerReference/Metadata/$0$http://www.petalslink.org/notification/emissionDate> "2012-02-07T12:24:13.671+01:00" .
+    <http://events.event-processing.org/ids/3553014223316411743377565649191697#event> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$fireman$0$http://www.soceda.org/crisis/v1/shared-data/name> "Captain Zebulon" .
+    <http://events.event-processing.org/ids/3553014223316411743377565649191697#event> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$fireman$0$http://www.w3.org/2005/08/addressing/EndpointReference$0$http://www.w3.org/2005/08/addressing/Address> "http://localhost:9112/FiremanEndpoint" .
+    <http://events.event-processing.org/ids/3553014223316411743377565649191697#event> <http://docs.oasis-open.org/wsn/b-2/Message$0$http://www.soceda.org/crisis/v1/deliver_iodine/Fireman/cardiacRythm$0$/value> "90" .
 }

@@ -48,10 +48,9 @@ import fr.inria.eventcloud.utils.ReflectionUtils;
  * @author lpellegr
  * @author bsauvan
  */
-public class WsNotificationLogUtils {
+public class WsnLogUtils {
 
-    private static Logger log =
-            LoggerFactory.getLogger(WsNotificationLogUtils.class);
+    private static Logger log = LoggerFactory.getLogger(WsnLogUtils.class);
 
     public static void logSubscribe(Subscribe subscribe) {
         if (log.isInfoEnabled()) {

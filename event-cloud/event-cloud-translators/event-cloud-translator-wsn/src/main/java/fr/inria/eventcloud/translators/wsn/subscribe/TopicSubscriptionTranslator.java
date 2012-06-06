@@ -22,10 +22,10 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.play_project.play_commons.constants.Namespace;
 import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
+import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
 import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
@@ -69,7 +69,7 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
 
         String topicNamespace = topic.getNamespaceURI();
 
-        if (topicNamespace == null) {
+        if ((topicNamespace == null) || (topicNamespace.equals(""))) {
             // FIXME: a TranslationException should be thrown but
             // first the issue #43 has to be fixed
             log.warn("No namespace declared for prefix '"
@@ -82,7 +82,7 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
         }
 
         return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <"
-                + Namespace.TYPES.getUri() + "stream> <" + topicNamespace
+                + WsnTranslatorConstants.TOPIC_TEXT + "> <" + topicNamespace
                 + topic.getLocalPart() + Stream.STREAM_ID_SUFFIX + "> . } }";
     }
 

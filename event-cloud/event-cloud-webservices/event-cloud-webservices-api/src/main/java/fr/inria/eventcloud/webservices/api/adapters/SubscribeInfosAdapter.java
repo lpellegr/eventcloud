@@ -33,8 +33,8 @@ import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
+import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
@@ -50,10 +50,10 @@ public class SubscribeInfosAdapter extends
     private static Logger log =
             LoggerFactory.getLogger(SubscribeInfosAdapter.class);
 
-    private WsNotificationTranslator translator;
+    private WsnTranslator translator;
 
     public SubscribeInfosAdapter() {
-        this.translator = new WsNotificationTranslator();
+        this.translator = new WsnTranslator();
     }
 
     /**
@@ -107,7 +107,7 @@ public class SubscribeInfosAdapter extends
      */
     @Override
     public SubscribeInfos unmarshal(Subscribe subscribe) {
-        WsNotificationLogUtils.logSubscribe(subscribe);
+        WsnLogUtils.logSubscribe(subscribe);
 
         W3CEndpointReference consumerReference =
                 subscribe.getConsumerReference();
