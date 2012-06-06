@@ -33,10 +33,10 @@ import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 
 import fr.inria.eventcloud.translators.wsn.TranslationException;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
 import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
-import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * XML Adapter for {@link SubscribeInfos} objects.

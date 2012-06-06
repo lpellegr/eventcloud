@@ -24,20 +24,8 @@ import org.apache.cxf.endpoint.Server;
 import org.junit.Before;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.Notify;
-import org.oasis_open.docs.wsn.bw_2.InvalidFilterFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidMessageContentExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidProducerPropertiesExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
-import org.oasis_open.docs.wsn.bw_2.NotifyMessageNotSupportedFault;
-import org.oasis_open.docs.wsn.bw_2.SubscribeCreationFailedFault;
-import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
-import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
-import org.oasis_open.docs.wsn.bw_2.UnacceptableInitialTerminationTimeFault;
-import org.oasis_open.docs.wsn.bw_2.UnrecognizedPolicyRequestFault;
-import org.oasis_open.docs.wsn.bw_2.UnsupportedPolicyRequestFault;
-import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
 import org.objectweb.proactive.core.ProActiveException;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -51,15 +39,13 @@ import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
-import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.BasicNotificationConsumer;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsServiceApi;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
 import fr.inria.eventcloud.webservices.utils.WsClientFactory;
-import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * Test cases for input/output monitoring.
@@ -116,15 +102,7 @@ public class InputOutputMonitoringTest {
     }
 
     @Test(timeout = 180000)
-    public void testInputOutputMonitoring()
-            throws UnrecognizedPolicyRequestFault,
-            SubscribeCreationFailedFault,
-            InvalidProducerPropertiesExpressionFault,
-            UnsupportedPolicyRequestFault, TopicNotSupportedFault,
-            NotifyMessageNotSupportedFault, ResourceUnknownFault,
-            UnacceptableInitialTerminationTimeFault,
-            InvalidMessageContentExpressionFault, InvalidFilterFault,
-            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
+    public void testInputOutputMonitoring() throws Exception {
 
         // sends a subscribe request to enable input/output monitoring
         this.eventCloudManagementClient.subscribe(WsnHelper.createSubscribeMessage(
@@ -142,14 +120,8 @@ public class InputOutputMonitoringTest {
                 this.subscriberWsEndpointUrl, STREAM_QNAME));
 
         // publishes a compound event through a ws publish proxy
-        try {
-            this.publishClient.notify(SemanticCompoundEventTranslator.getInstance()
-                    .translate(
-                            CompoundEventGenerator.random(STREAM_URL, 10),
-                            STREAM_QNAME));
-        } catch (TranslationException e) {
-            e.printStackTrace();
-        }
+        this.publishClient.notify(WsnHelper.createNotifyMessage(
+                STREAM_QNAME, CompoundEventGenerator.random(STREAM_URL, 10)));
 
         // publishes a compound event through a java publish proxy
         this.publishProxy.publish(CompoundEventGenerator.random(STREAM_URL, 10));

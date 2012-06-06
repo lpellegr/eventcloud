@@ -14,7 +14,7 @@ import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.webservices.utils.WsnHelper;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 
 /**
  * Test cases associated to {@link TopicSubscriptionTranslator}.

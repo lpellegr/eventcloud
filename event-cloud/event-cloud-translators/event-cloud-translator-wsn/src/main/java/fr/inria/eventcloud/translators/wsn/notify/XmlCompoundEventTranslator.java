@@ -50,15 +50,15 @@ import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
  * @author bsauvan
  * @author lpellegr
  */
-public class CompoundEventTranslator extends
+public class XmlCompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
     // used only to have the possibility to create DOM elements
     private static Document DOCUMENT = DocumentBuilder.createDocument();
 
-    private static CompoundEventTranslator instance;
+    private static XmlCompoundEventTranslator instance;
 
-    private CompoundEventTranslator() {
+    private XmlCompoundEventTranslator() {
 
     }
 
@@ -110,6 +110,13 @@ public class CompoundEventTranslator extends
 
         if (eventId == null) {
             eventId = event.getGraph().getURI();
+        }
+
+        if (eventId.endsWith(WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
+            eventId =
+                    eventId.substring(
+                            0,
+                            eventId.lastIndexOf(WsnTranslatorConstants.XML_TRANSLATION_MARKER));
         }
 
         metadatas.add(this.createMetadataElement(
@@ -364,9 +371,9 @@ public class CompoundEventTranslator extends
         }
     }
 
-    public static synchronized CompoundEventTranslator getInstance() {
+    public static synchronized XmlCompoundEventTranslator getInstance() {
         if (instance == null) {
-            instance = new CompoundEventTranslator();
+            instance = new XmlCompoundEventTranslator();
         }
 
         return instance;

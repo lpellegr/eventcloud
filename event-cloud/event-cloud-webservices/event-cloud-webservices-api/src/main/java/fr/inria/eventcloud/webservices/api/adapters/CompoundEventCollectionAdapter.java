@@ -65,7 +65,7 @@ public class CompoundEventCollectionAdapter extends
         for (CompoundEvent compoundEvent : compoundEvents) {
             try {
                 NotificationMessageHolderType notificationMessage =
-                        this.translator.translateCompoundEvent(compoundEvent);
+                        this.translator.translate(compoundEvent);
                 notify.getNotificationMessage().add(notificationMessage);
             } catch (TranslationException e) {
                 this.logAndThrowIllegalArgumentException(e.getMessage());
@@ -96,7 +96,7 @@ public class CompoundEventCollectionAdapter extends
                 WsnLogUtils.logNotificationMessageHolderType(notificationMessage);
 
                 CompoundEvent compoundEvent =
-                        this.translator.translateNotification(notificationMessage);
+                        this.translator.translate(notificationMessage);
 
                 compoundEvents.add(compoundEvent);
 

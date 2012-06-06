@@ -73,7 +73,7 @@ public class WsnTranslatorTest {
         CompoundEvent event = initialEvent;
         NotificationMessageHolderType message;
         for (int i = 0; i < 2; i++) {
-            message = this.translator.translateCompoundEvent(event);
+            message = this.translator.translateXmlCompoundEvent(event);
 
             log.info(
                     "Message payload:\n{}",
@@ -87,7 +87,7 @@ public class WsnTranslatorTest {
                     .getContent()
                     .get(0));
 
-            event = this.translator.translateNotification(message);
+            event = this.translator.translateXmlNotification(message);
 
             // TODO: add assertions about the event which is issued from the
             // translation

@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
-import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * This class defines a method to translate a WS-Notification {@link Subscribe}

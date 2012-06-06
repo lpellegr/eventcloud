@@ -18,7 +18,6 @@ package fr.inria.eventcloud.webservices;
 
 import javax.xml.namespace.QName;
 
-import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.utils.WsClientFactory;
 
 /**
@@ -88,11 +87,8 @@ public class WsEventNotificationListener extends
     @Override
     public void onNotification(SubscriptionId id, CompoundEvent solution) {
         try {
-            Notify notify =
-                    SemanticCompoundEventTranslator.getInstance().translate(
-                            solution, this.streamQName);
-
-            this.getSubscriberWsClient().notify(notify);
+            this.getSubscriberWsClient().notify(
+                    WsnHelper.createNotifyMessage(this.streamQName, solution));
 
             log.info(
                     "Subscriber {} notified about:\n {}",
