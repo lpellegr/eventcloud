@@ -16,12 +16,12 @@
  **/
 package fr.inria.eventcloud.webservices.services;
 
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 
 /**
  * Extends {@link EventCloudProxyService} by providing an instance of
- * {@link WsNotificationTranslator}. This is usefull for proxies exposed as a
- * web service which have to translate some payloads.
+ * {@link WsnTranslator}. This is usefull for proxies exposed as a web service
+ * which have to translate some payloads.
  * 
  * @author lpellegr
  * 
@@ -31,12 +31,12 @@ import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
 public abstract class EventCloudTranslatableProxyService<T> extends
         EventCloudProxyService<T> {
 
-    protected final WsNotificationTranslator translator;
+    protected final WsnTranslator translator;
 
     public EventCloudTranslatableProxyService(String registryUrl,
             String eventcloudUrl) {
         super(registryUrl, eventcloudUrl);
-        this.translator = new WsNotificationTranslator();
+        this.translator = new WsnTranslator();
     }
 
     protected static final void logAndThrowIllegalArgumentException(String msg) {

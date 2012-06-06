@@ -34,13 +34,14 @@ import org.w3c.dom.Text;
 
 import com.hp.hpl.jena.graph.Node;
 
+import eu.play_project.play_commons.constants.Stream;
 import eu.play_project.play_commons.eventformat.xml.DocumentBuilder;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslatorConstants;
+import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
 
 /**
  * Translator for {@link CompoundEvent events} to
@@ -89,19 +90,20 @@ public class CompoundEventTranslator extends
 
             String predicateValue = quad.getPredicate().getURI();
 
-            if (predicateValue.equals(WsNotificationTranslatorConstants.SUBSCRIPTION_ADDRESS_TEXT)) {
+            if (predicateValue.equals(WsnTranslatorConstants.SUBSCRIPTION_ADDRESS_TEXT)) {
                 subscriptionAddress = quad.getObject().getLiteralLexicalForm();
-            } else if (predicateValue.equals(WsNotificationTranslatorConstants.TOPIC_TEXT)) {
-                String value = quad.getObject().getLiteralLexicalForm();
+            } else if (predicateValue.equals(WsnTranslatorConstants.TOPIC_TEXT)) {
+                String value = quad.getObject().getURI();
                 int start = value.lastIndexOf("/") + 1;
-                topic = value.substring(start);
-            } else if (predicateValue.equals(WsNotificationTranslatorConstants.PRODUCER_ADDRESS_TEXT)) {
+                int end = value.lastIndexOf(Stream.STREAM_ID_SUFFIX);
+                topic = value.substring(start, end);
+            } else if (predicateValue.equals(WsnTranslatorConstants.PRODUCER_ADDRESS_TEXT)) {
                 producerAddress = quad.getObject().getLiteralLexicalForm();
-            } else if (predicateValue.startsWith(WsNotificationTranslatorConstants.PRODUCER_METADATA_TEXT)) {
+            } else if (predicateValue.startsWith(WsnTranslatorConstants.PRODUCER_METADATA_TEXT)) {
                 metadatas.add(this.getMetadataElement(quad));
-            } else if (predicateValue.startsWith(WsNotificationTranslatorConstants.MESSAGE_TEXT)) {
+            } else if (predicateValue.startsWith(WsnTranslatorConstants.MESSAGE_TEXT)) {
                 messagePayload = this.createElement(quad, messagePayload);
-            } else if (predicateValue.contains(WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+            } else if (predicateValue.contains(WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
                 eventId = quad.getObject().getLiteralLexicalForm();
             }
         }
@@ -112,7 +114,7 @@ public class CompoundEventTranslator extends
 
         metadatas.add(this.createMetadataElement(
                 new QName(
-                        WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE,
+                        WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE,
                         "id"), eventId));
 
         NotificationMessageHolderType notificationMessage =
@@ -153,7 +155,7 @@ public class CompoundEventTranslator extends
     private Element createMetadataElement(QName qname, String value) {
         Element metadataElt =
                 DOCUMENT.createElementNS(
-                        WsNotificationTranslatorConstants.PRODUCER_METADATA_NAMESPACE,
+                        WsnTranslatorConstants.PRODUCER_METADATA_NAMESPACE,
                         "Metadata");
         Element childElt =
                 DOCUMENT.createElementNS(
@@ -269,7 +271,7 @@ public class CompoundEventTranslator extends
                         lastElt.appendChild(DOCUMENT.createTextNode(quadruple.getObject()
                                 .getLiteralLexicalForm()
                                 .replaceAll(
-                                        WsNotificationTranslatorConstants.SHARP_ESCAPE,
+                                        WsnTranslatorConstants.SHARP_ESCAPE,
                                         "#")));
                     }
                 } else {
@@ -327,9 +329,7 @@ public class CompoundEventTranslator extends
             if (i == elements.length - 1) {
                 lastElt.appendChild(DOCUMENT.createTextNode(quadruple.getObject()
                         .getLiteralLexicalForm()
-                        .replaceAll(
-                                WsNotificationTranslatorConstants.SHARP_ESCAPE,
-                                "#")));
+                        .replaceAll(WsnTranslatorConstants.SHARP_ESCAPE, "#")));
             }
         }
 
@@ -338,15 +338,11 @@ public class CompoundEventTranslator extends
 
     private static String[] getXmlElements(Quadruple quadruple) {
         String[] elements =
-                quadruple.getPredicate()
-                        .getURI()
-                        .replaceAll(
-                                WsNotificationTranslatorConstants.SHARP_ESCAPE,
-                                "#")
-                        .split(
-                                Pattern.quote(WsNotificationTranslatorConstants.URI_SEPARATOR));
+                quadruple.getPredicate().getURI().replaceAll(
+                        WsnTranslatorConstants.SHARP_ESCAPE, "#").split(
+                        Pattern.quote(WsnTranslatorConstants.URI_SEPARATOR));
 
-        if (elements[0].startsWith(WsNotificationTranslatorConstants.MESSAGE_TEXT)) {
+        if (elements[0].startsWith(WsnTranslatorConstants.MESSAGE_TEXT)) {
             elements = Arrays.copyOfRange(elements, 1, elements.length);
         }
 

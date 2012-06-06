@@ -38,11 +38,11 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 import fr.inria.eventcloud.utils.Callback;
 
 /**
- * Tests cases associated to {@link WsNotificationTranslator}.
+ * Tests cases associated to {@link WsnTranslator}.
  * 
  * @author ialshaba
  */
@@ -51,10 +51,10 @@ public class SemanticNotificationTranslatorTest {
     private static final Logger log =
             LoggerFactory.getLogger(SemanticNotificationTranslatorTest.class);
 
-    private WsNotificationTranslator translator;
+    private WsnTranslator translator;
 
     public SemanticNotificationTranslatorTest() {
-        this.translator = new WsNotificationTranslator();
+        this.translator = new WsnTranslator();
     }
 
     @Test
