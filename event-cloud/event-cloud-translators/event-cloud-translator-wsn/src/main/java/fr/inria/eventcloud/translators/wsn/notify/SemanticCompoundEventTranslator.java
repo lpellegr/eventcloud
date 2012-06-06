@@ -19,12 +19,10 @@ package fr.inria.eventcloud.translators.wsn.notify;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
-import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
-import org.oasis_open.docs.wsn.b_2.Notify;
 import org.openjena.riot.WebContent;
 import org.w3c.dom.Element;
 
@@ -34,7 +32,6 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.parsers.RdfSerializer;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
-import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * Translator for {@link CompoundEvent events} to
@@ -92,19 +89,6 @@ public class SemanticCompoundEventTranslator extends
         notificationMessage.setMessage(message);
 
         return notificationMessage;
-    }
-
-    public Notify translate(CompoundEvent event, QName topic)
-            throws TranslationException {
-        Notify result = new Notify();
-
-        NotificationMessageHolderType notificationMessage =
-                this.translate(event);
-        notificationMessage.setTopic(WsnHelper.createTopicExpressionType(topic));
-
-        result.getNotificationMessage().add(notificationMessage);
-
-        return result;
     }
 
     public static synchronized SemanticCompoundEventTranslator getInstance() {

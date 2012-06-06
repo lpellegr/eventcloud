@@ -59,9 +59,9 @@ import fr.inria.eventcloud.api.generators.UriGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
 import fr.inria.eventcloud.utils.ReflectionUtils;
-import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * Translator for {@link NotificationMessageHolderType} notification messages to
@@ -70,15 +70,15 @@ import fr.inria.eventcloud.webservices.utils.WsnHelper;
  * @author bsauvan
  * @author lpellegr
  */
-public class NotificationTranslator extends
+public class XmlNotificationTranslator extends
         Translator<NotificationMessageHolderType, CompoundEvent> {
 
     private static Logger log =
-            LoggerFactory.getLogger(NotificationTranslator.class);
+            LoggerFactory.getLogger(XmlNotificationTranslator.class);
 
-    private static NotificationTranslator instance;
+    private static XmlNotificationTranslator instance;
 
-    private NotificationTranslator() {
+    private XmlNotificationTranslator() {
 
     }
 
@@ -226,6 +226,10 @@ public class NotificationTranslator extends
                             .contains(
                                     WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
                         eventId = entry.getValue().getLiteralLexicalForm();
+                        if (!eventId.endsWith(WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
+                            eventId +=
+                                    WsnTranslatorConstants.XML_TRANSLATION_MARKER;
+                        }
                         break;
                     }
                 }
@@ -237,7 +241,8 @@ public class NotificationTranslator extends
                     UriGenerator.randomPrefixed(
                             10,
                             EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())
-                            .toString();
+                            .toString()
+                            + WsnTranslatorConstants.XML_TRANSLATION_MARKER;
         }
         eventIdNode = Node.createURI(eventId);
         subjectNode = Node.createURI(eventId + "#event");
@@ -395,9 +400,9 @@ public class NotificationTranslator extends
         }
     }
 
-    public static synchronized NotificationTranslator getInstance() {
+    public static synchronized XmlNotificationTranslator getInstance() {
         if (instance == null) {
-            instance = new NotificationTranslator();
+            instance = new XmlNotificationTranslator();
         }
 
         return instance;

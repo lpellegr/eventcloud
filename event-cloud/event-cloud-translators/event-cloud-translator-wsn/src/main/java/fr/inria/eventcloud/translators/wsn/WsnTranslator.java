@@ -22,10 +22,10 @@ import org.w3c.dom.Element;
 
 import eu.play_project.play_commons.constants.Event;
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.translators.wsn.notify.CompoundEventTranslator;
-import fr.inria.eventcloud.translators.wsn.notify.NotificationTranslator;
 import fr.inria.eventcloud.translators.wsn.notify.SemanticCompoundEventTranslator;
 import fr.inria.eventcloud.translators.wsn.notify.SemanticNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.notify.XmlCompoundEventTranslator;
+import fr.inria.eventcloud.translators.wsn.notify.XmlNotificationTranslator;
 import fr.inria.eventcloud.translators.wsn.subscribe.TopicSubscriptionTranslator;
 
 /**
@@ -69,7 +69,7 @@ public class WsnTranslator {
                     // message content is a native semantic payload
                     result = this.translateSemanticNotification(notification);
                 } else {
-                    result = this.translateNotification(notification);
+                    result = this.translateXmlNotification(notification);
                 }
 
                 return result;
@@ -93,9 +93,9 @@ public class WsnTranslator {
      * @return the compound event corresponding to the specified notification
      *         message.
      */
-    public CompoundEvent translateNotification(NotificationMessageHolderType notificationMessage)
+    public CompoundEvent translateXmlNotification(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
-        return NotificationTranslator.getInstance().translate(
+        return XmlNotificationTranslator.getInstance().translate(
                 notificationMessage);
     }
 
@@ -116,6 +116,25 @@ public class WsnTranslator {
     }
 
     /**
+     * Translates the specified compound event to its corresponding notification
+     * message.
+     * 
+     * @param event
+     *            the compound event to be translated.
+     * 
+     * @return a notification message.
+     */
+    public NotificationMessageHolderType translate(CompoundEvent event)
+            throws TranslationException {
+        if (event.getGraph().getURI().endsWith(
+                WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
+            return this.translateXmlCompoundEvent(event);
+        } else {
+            return this.translateSemanticCompoundEvent(event);
+        }
+    }
+
+    /**
      * Translates the specified compound event (which derives from a
      * notification message with an arbitrary payload) to its corresponding
      * notification message.
@@ -125,9 +144,9 @@ public class WsnTranslator {
      * 
      * @return a notification message.
      */
-    public NotificationMessageHolderType translateCompoundEvent(CompoundEvent event)
+    public NotificationMessageHolderType translateXmlCompoundEvent(CompoundEvent event)
             throws TranslationException {
-        return CompoundEventTranslator.getInstance().translate(event);
+        return XmlCompoundEventTranslator.getInstance().translate(event);
     }
 
     /**

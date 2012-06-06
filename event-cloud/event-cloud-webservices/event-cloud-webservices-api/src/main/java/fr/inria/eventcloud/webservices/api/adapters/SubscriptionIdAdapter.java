@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.webservices.utils.WsnHelper;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
 
 /**
  * XML Adapter for {@link SubscriptionId} objects.

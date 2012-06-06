@@ -27,6 +27,8 @@ import eu.play_project.play_commons.constants.Namespace;
  */
 public class WsnTranslatorConstants {
 
+    public static final String XML_TRANSLATION_MARKER = "wsn-xml";
+
     /**
      * Defines the value of the separator that is used to concatenate several
      * URIs into a new one.
@@ -62,8 +64,5 @@ public class WsnTranslatorConstants {
 
     public static final String PRODUCER_METADATA_EVENT_NAMESPACE =
             "http://eventcloud.inria.fr";
-
-    public static final String DEFAULT_TOPIC_NAMESPACE =
-            "http://eventcloud.inria.fr/replace/me/with/a/correct/namespace";
 
 }
