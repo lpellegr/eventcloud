@@ -37,7 +37,7 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
+import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
 import fr.inria.eventcloud.webservices.WsEventNotificationListener;
 import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
@@ -81,7 +81,7 @@ public class SubscribeServiceImpl extends
             return null;
         }
 
-        WsNotificationLogUtils.logSubscribe(subscribe);
+        WsnLogUtils.logSubscribe(subscribe);
 
         W3CEndpointReference consumerReference =
                 subscribe.getConsumerReference();

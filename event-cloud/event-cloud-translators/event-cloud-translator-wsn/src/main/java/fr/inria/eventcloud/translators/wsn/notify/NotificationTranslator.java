@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,7 +43,6 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
-import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -52,14 +52,16 @@ import org.xml.sax.SAXException;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
+import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.UriGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslatorConstants;
+import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
 import fr.inria.eventcloud.utils.ReflectionUtils;
+import fr.inria.eventcloud.webservices.utils.WsnHelper;
 
 /**
  * Translator for {@link NotificationMessageHolderType} notification messages to
@@ -94,7 +96,7 @@ public class NotificationTranslator extends
             nodeString = nodeString.replaceAll(">\\s*<", "><");
             nodeString =
                     nodeString.replaceAll(
-                            "#", WsNotificationTranslatorConstants.SHARP_ESCAPE);
+                            "#", WsnTranslatorConstants.SHARP_ESCAPE);
             incomingNode = byteArrayToXmlNode(nodeString.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
@@ -167,17 +169,23 @@ public class NotificationTranslator extends
             }
         }
 
-        TopicExpressionType topicExpressionType =
-                notificationMessage.getTopic();
-        if (topicExpressionType != null) {
-            List<Object> topicContent = topicExpressionType.getContent();
-            if (topicContent.size() > 0) {
-                String topic = (String) topicContent.get(0);
-                subjectNode =
-                        Node.createURI(WsNotificationTranslatorConstants.DEFAULT_TOPIC_NAMESPACE
-                                + "/" + topic);
-                topicNode = Node.createLiteral(topic);
+        if (notificationMessage.getTopic() != null) {
+            QName topic = WsnHelper.getTopic(notificationMessage);
+            String topicNamespace = topic.getNamespaceURI();
+            if ((topicNamespace == null) || (topicNamespace.equals(""))) {
+                // FIXME: a TranslationException should be thrown but
+                // first the issue #43 has to be fixed
+                log.warn("No namespace declared for prefix '"
+                        + topic.getPrefix()
+                        + "' associated to topic "
+                        + topic
+                        + " the default topic namespace will be used 'http://streams.event-processing.org/ids/'");
+
+                topicNamespace = "http://streams.event-processing.org/ids/";
             }
+            topicNode =
+                    Node.createURI(topicNamespace + topic.getLocalPart()
+                            + Stream.STREAM_ID_SUFFIX);
         }
 
         W3CEndpointReference producerReference =
@@ -216,7 +224,7 @@ public class NotificationTranslator extends
                     if (entry.getKey()
                             .getURI()
                             .contains(
-                                    WsNotificationTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+                                    WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
                         eventId = entry.getValue().getLiteralLexicalForm();
                         break;
                     }
@@ -224,15 +232,15 @@ public class NotificationTranslator extends
             }
         }
 
-        if (eventId != null) {
-            eventIdNode = Node.createURI(eventId);
-        } else {
-            eventIdNode =
-                    Node.createURI(UriGenerator.randomPrefixed(
+        if (eventId == null) {
+            eventId =
+                    UriGenerator.randomPrefixed(
                             10,
                             EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())
-                            .toString());
+                            .toString();
         }
+        eventIdNode = Node.createURI(eventId);
+        subjectNode = Node.createURI(eventId + "#event");
 
         Message message = notificationMessage.getMessage();
         if (message != null) {
@@ -242,53 +250,45 @@ public class NotificationTranslator extends
             }
         }
 
-        if (subjectNode != null) {
-            if (subscriptionAddressNode != null) {
-                quads.add(new Quadruple(
-                        eventIdNode,
-                        subjectNode,
-                        WsNotificationTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
-                        subscriptionAddressNode, false, true));
-            } else {
-                log.warn("No subscription reference address set in the notification message");
-            }
-
-            if (topicNode != null) {
-                quads.add(new Quadruple(
-                        eventIdNode, subjectNode,
-                        WsNotificationTranslatorConstants.TOPIC_NODE,
-                        topicNode, false, true));
-            } else {
-                log.warn("No topic set in the notification message");
-            }
-
-            if (producerAddressNode != null) {
-                quads.add(new Quadruple(
-                        eventIdNode,
-                        subjectNode,
-                        WsNotificationTranslatorConstants.PRODUCER_ADDRESS_NODE,
-                        producerAddressNode, false, true));
-            } else {
-                log.warn("No producer reference address set in the notification message");
-            }
-
-            for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
-                quads.add(new Quadruple(
-                        eventIdNode, subjectNode, entry.getKey(),
-                        entry.getValue(), false, true));
-            }
-
-            for (Entry<Node, Node> entry : messageNodes.entrySet()) {
-                quads.add(new Quadruple(
-                        eventIdNode, subjectNode, entry.getKey(),
-                        entry.getValue(), false, true));
-            }
-
-            return new CompoundEvent(quads);
+        if (subscriptionAddressNode != null) {
+            quads.add(new Quadruple(
+                    eventIdNode, subjectNode,
+                    WsnTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
+                    subscriptionAddressNode, false, true));
         } else {
-            throw new TranslationException(
-                    "Cannot construct compound event because no subject can be extracted from the notification message");
+            log.warn("No subscription reference address set in the notification message");
         }
+
+        if (topicNode != null) {
+            quads.add(new Quadruple(
+                    eventIdNode, subjectNode,
+                    WsnTranslatorConstants.TOPIC_NODE, topicNode, false, true));
+        } else {
+            log.warn("No topic set in the notification message");
+        }
+
+        if (producerAddressNode != null) {
+            quads.add(new Quadruple(
+                    eventIdNode, subjectNode,
+                    WsnTranslatorConstants.PRODUCER_ADDRESS_NODE,
+                    producerAddressNode, false, true));
+        } else {
+            log.warn("No producer reference address set in the notification message");
+        }
+
+        for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
+            quads.add(new Quadruple(
+                    eventIdNode, subjectNode, entry.getKey(), entry.getValue(),
+                    false, true));
+        }
+
+        for (Entry<Node, Node> entry : messageNodes.entrySet()) {
+            quads.add(new Quadruple(
+                    eventIdNode, subjectNode, entry.getKey(), entry.getValue(),
+                    false, true));
+        }
+
+        return new CompoundEvent(quads);
     }
 
     private Map<Node, Node> parseElements(List<Element> elements) {
@@ -332,8 +332,8 @@ public class NotificationTranslator extends
             Node predicateNode = null;
             if (!metadata) {
                 predicateNode =
-                        Node.createURI(WsNotificationTranslatorConstants.MESSAGE_TEXT
-                                + WsNotificationTranslatorConstants.URI_SEPARATOR
+                        Node.createURI(WsnTranslatorConstants.MESSAGE_TEXT
+                                + WsnTranslatorConstants.URI_SEPARATOR
                                 + predicate.toString());
             } else {
                 predicateNode = Node.createURI(predicate.toString());
@@ -343,7 +343,7 @@ public class NotificationTranslator extends
                     literalValue, findDatatype(literalValue)));
         } else {
             if (predicate.length() > 0) {
-                predicate.append(WsNotificationTranslatorConstants.URI_SEPARATOR);
+                predicate.append(WsnTranslatorConstants.URI_SEPARATOR);
             }
 
             if (node.getNamespaceURI() != null) {

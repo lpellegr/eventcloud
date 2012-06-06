@@ -18,12 +18,14 @@ package fr.inria.eventcloud.translators.wsn;
 
 import com.hp.hpl.jena.graph.Node;
 
+import eu.play_project.play_commons.constants.Namespace;
+
 /**
  * Defines constants which are used by the WS-Notification translator.
  * 
  * @author bsauvan
  */
-public class WsNotificationTranslatorConstants {
+public class WsnTranslatorConstants {
 
     /**
      * Defines the value of the separator that is used to concatenate several
@@ -39,8 +41,7 @@ public class WsNotificationTranslatorConstants {
     public static final Node SUBSCRIPTION_ADDRESS_NODE =
             Node.createURI(SUBSCRIPTION_ADDRESS_TEXT);
 
-    public static final String TOPIC_TEXT =
-            "http://docs.oasis-open.org/wsn/b-2/Topic";
+    public static final String TOPIC_TEXT = Namespace.TYPES.getUri() + "stream";
 
     public static final Node TOPIC_NODE = Node.createURI(TOPIC_TEXT);
 

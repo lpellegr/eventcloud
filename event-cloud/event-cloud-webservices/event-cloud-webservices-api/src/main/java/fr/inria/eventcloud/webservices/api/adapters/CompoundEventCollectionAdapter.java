@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsNotificationLogUtils;
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
+import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 
 /**
  * XML Adapter for {@link Collection} of {@link CompoundEvent} objects.
@@ -43,10 +43,10 @@ public class CompoundEventCollectionAdapter extends
     private static Logger log =
             LoggerFactory.getLogger(CompoundEventCollectionAdapter.class);
 
-    private WsNotificationTranslator translator;
+    private WsnTranslator translator;
 
     public CompoundEventCollectionAdapter() {
-        this.translator = new WsNotificationTranslator();
+        this.translator = new WsnTranslator();
     }
 
     /**
@@ -93,7 +93,7 @@ public class CompoundEventCollectionAdapter extends
 
         for (NotificationMessageHolderType notificationMessage : notificationMessages) {
             try {
-                WsNotificationLogUtils.logNotificationMessageHolderType(notificationMessage);
+                WsnLogUtils.logNotificationMessageHolderType(notificationMessage);
 
                 CompoundEvent compoundEvent =
                         this.translator.translateNotification(notificationMessage);
