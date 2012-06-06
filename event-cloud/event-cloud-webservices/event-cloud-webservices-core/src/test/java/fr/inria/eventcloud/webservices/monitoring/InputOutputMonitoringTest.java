@@ -115,7 +115,7 @@ public class InputOutputMonitoringTest {
         this.initializeWsProxies();
     }
 
-    @Test
+    @Test(timeout = 180000)
     public void testInputOutputMonitoring()
             throws UnrecognizedPolicyRequestFault,
             SubscribeCreationFailedFault,
