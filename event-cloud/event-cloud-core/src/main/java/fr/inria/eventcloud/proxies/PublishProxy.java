@@ -27,19 +27,4 @@ import fr.inria.eventcloud.api.PublishApi;
  */
 public interface PublishProxy extends PublishApi {
 
-    /**
-     * Sets the endpoint URL associated to the proxy.
-     * 
-     * @param endpointUrl
-     *            the endpoint URL associated to the proxy.
-     */
-    void setEndpointUrl(String endpointUrl);
-
-    /**
-     * Returns the endpoint URL associated to the proxy.
-     * 
-     * @return the endpoint URL associated to the proxy.
-     */
-    String getEndpointUrl();
-
 }

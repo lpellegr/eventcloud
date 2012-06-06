@@ -232,10 +232,6 @@ public class WebServiceDeployer {
         Server publishServer =
                 deployWebService(publishService, urlSuffix, port);
 
-        publishService.setEndpointUrl(publishServer.getEndpoint()
-                .getEndpointInfo()
-                .getAddress());
-
         return new ServiceInformation(
                 publishService, publishServer, streamUrl, port);
     }

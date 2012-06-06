@@ -93,8 +93,4 @@ public class PublishServiceImpl extends
                 super.registryUrl, new EventCloudId(super.streamUrl));
     }
 
-    public void setEndpointUrl(String endpointUrl) {
-        super.proxy.setEndpointUrl(endpointUrl);
-    }
-
 }

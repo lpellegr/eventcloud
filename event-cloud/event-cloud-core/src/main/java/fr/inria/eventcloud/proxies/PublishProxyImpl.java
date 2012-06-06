@@ -55,8 +55,6 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      */
     public static final String PUBLISH_SERVICES_ITF = "publish-services";
 
-    private String endpointUrl;
-
     /**
      * Empty constructor required by ProActive.
      */
@@ -81,10 +79,6 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
     public void publish(Quadruple quad) {
         if (quad.getPublicationTime() == -1) {
             quad.setPublicationTime();
-        }
-
-        if (quad.getPublicationSource() == null && this.endpointUrl != null) {
-            quad.setPublicationSource(this.endpointUrl);
         }
 
         // TODO: use an asynchronous call with no response (see issue 16)
@@ -137,22 +131,6 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
     public static PublishProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, PUBLISH_SERVICES_ITF, PublishProxy.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setEndpointUrl(String endpointUrl) {
-        this.endpointUrl = endpointUrl;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getEndpointUrl() {
-        return this.endpointUrl;
     }
 
 }
