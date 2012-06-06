@@ -109,22 +109,15 @@ public class InputOutputMonitoringTest {
     private String subscriberWsEndpointUrl;
 
     @Before
-    public void setUp() throws ProActiveException, EventCloudIdNotManaged,
-            UnrecognizedPolicyRequestFault, SubscribeCreationFailedFault,
-            InvalidProducerPropertiesExpressionFault,
-            UnsupportedPolicyRequestFault, TopicNotSupportedFault,
-            NotifyMessageNotSupportedFault, ResourceUnknownFault,
-            UnacceptableInitialTerminationTimeFault,
-            InvalidMessageContentExpressionFault, InvalidFilterFault,
-            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
+    public void setUp() throws ProActiveException, EventCloudIdNotManaged {
         this.initializeEventCloudsInfrastructure();
         this.initializeJavaProxies();
         this.initializeWsProxies();
     }
 
     @Test
-    public void testInputOutputMonitoring() throws ProActiveException,
-            EventCloudIdNotManaged, UnrecognizedPolicyRequestFault,
+    public void testInputOutputMonitoring()
+            throws UnrecognizedPolicyRequestFault,
             SubscribeCreationFailedFault,
             InvalidProducerPropertiesExpressionFault,
             UnsupportedPolicyRequestFault, TopicNotSupportedFault,
@@ -210,7 +203,7 @@ public class InputOutputMonitoringTest {
                 ProxyFactory.newPublishProxy(this.registryUrl, EVENTCLOUD_ID);
     }
 
-    private void initializeWsProxies() throws EventCloudIdNotManaged {
+    private void initializeWsProxies() {
 
         this.monitoringService = new BasicNotificationConsumer();
         this.monitoringServer =
