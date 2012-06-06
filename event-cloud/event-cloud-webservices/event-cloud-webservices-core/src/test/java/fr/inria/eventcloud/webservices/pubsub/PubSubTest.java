@@ -33,6 +33,7 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 import org.objectweb.fractal.api.Interface;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngine;
@@ -227,6 +228,9 @@ public class PubSubTest {
             this.subscriberService.eventsReceived.wait(4000);
             Assert.assertTrue(this.subscriberService.eventsReceived.size() == 1);
         }
+
+        ComponentUtils.terminateComponent(socialFilter);
+        EventCloudProperties.SOCIAL_FILTER_URL.setValue(null);
     }
 
     private void initEventCloudAndProxiesAndClients() {
