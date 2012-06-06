@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsNotificationTranslator;
+import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 
 /**
  * Defines a publish web service as defined by the WS-Notification
@@ -43,12 +43,12 @@ public class SubscriberServiceImpl implements NotificationConsumer {
     private static Logger log =
             LoggerFactory.getLogger(SubscriberServiceImpl.class);
 
-    private final WsNotificationTranslator translator;
+    private final WsnTranslator translator;
 
     public final List<CompoundEvent> eventsReceived;
 
     public SubscriberServiceImpl() {
-        this.translator = new WsNotificationTranslator();
+        this.translator = new WsnTranslator();
         this.eventsReceived = new ArrayList<CompoundEvent>();
     }
 

@@ -35,7 +35,7 @@ import fr.inria.eventcloud.translators.wsn.subscribe.TopicSubscriptionTranslator
  * @author ialshaba
  * @author lpellegr
  */
-public class WsNotificationTranslator {
+public class WsnTranslator {
 
     /**
      * Translates the specified {@link NotificationMessageHolderType} message to
