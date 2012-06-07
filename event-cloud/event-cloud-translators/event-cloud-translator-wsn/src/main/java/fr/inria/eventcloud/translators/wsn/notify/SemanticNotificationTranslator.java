@@ -8,6 +8,7 @@ import java.util.List;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
+import org.openjena.riot.RiotException;
 import org.w3c.dom.Element;
 
 import eu.play_project.play_commons.eventformat.EventFormatHelpers;
@@ -75,17 +76,22 @@ public class SemanticNotificationTranslator extends
         }
 
         final List<Quadruple> quads = new ArrayList<Quadruple>();
-        RdfParser.parse(
-                is, SerializationFormat.TriG, new Callback<Quadruple>() {
-                    @Override
-                    public void execute(Quadruple quad) {
-                        if (publicationSource != null) {
-                            quad.setPublicationSource(publicationSource);
-                        }
-                        quads.add(quad);
-                    }
 
-                }, false);
+        try {
+            RdfParser.parse(
+                    is, SerializationFormat.TriG, new Callback<Quadruple>() {
+                        @Override
+                        public void execute(Quadruple quad) {
+                            if (publicationSource != null) {
+                                quad.setPublicationSource(publicationSource);
+                            }
+                            quads.add(quad);
+                        }
+
+                    }, false);
+        } catch (RiotException e) {
+            throw new TranslationException(e);
+        }
 
         return new CompoundEvent(Skolemizator.skolemize(quads));
     }
