@@ -73,14 +73,11 @@ public class PublishServiceImpl extends
 
                     super.proxy.publish(compoundEvent);
                 } catch (TranslationException e) {
-                    log.error("Translation error:");
-                    logAndThrowIllegalArgumentException(e.getMessage());
+                    log.error("Translation error", e);
                 }
             }
-
-            log.info("New notification message handled");
         } else {
-            logAndThrowIllegalArgumentException("Notify message received does not contain any notification message");
+            log.error("Notify message received does not contain any notification message");
         }
     }
 
