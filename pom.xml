@@ -15,8 +15,8 @@
 	<packaging>pom</packaging>
 
 	<name>event-cloud-parent</name>
-	<description>Parent module for event-cloud maven related modules.</description>
-	<url>https://bitbucket.org/lp/eventcloud</url>
+	<description>Parent module for eventcloud maven related modules.</description>
+	<url>https://bitbucket.org/eventcloud/eventcloud</url>
 	<inceptionYear>2010</inceptionYear>
 
 	<prerequisites>
@@ -24,9 +24,9 @@
 	</prerequisites>
 
 	<scm>
-		<connection>scm:hg:https://bitbucket.org/lp/eventcloud</connection>
-		<developerConnection>scm:hg:https://bitbucket.org/lp/eventcloud</developerConnection>
-		<url>https://bitbucket.org/lp/eventcloud</url>
+		<connection>scm:hg:https://bitbucket.org/eventcloud/eventcloud</connection>
+		<developerConnection>scm:hg:https://bitbucket.org/eventcloud/eventcloud</developerConnection>
+		<url>https://bitbucket.org/eventcloud/eventcloud</url>
 	</scm>
 
 	<ciManagement>
@@ -36,7 +36,7 @@
 
 	<issueManagement>
 		<system>Bitbucket</system>
-		<url>https://bitbucket.org/lp/eventcloud/issues/</url>
+		<url>https://bitbucket.org/eventcloud/eventcloud/issues/</url>
 	</issueManagement>
 
 	<repositories>
@@ -73,6 +73,15 @@
 
 	<developers>
 		<developer>
+			<id>abourdin</id>
+			<name>Alexandre Bourdin</name>
+			<email>alexandre.bourdin@inria.fr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
 			<id>bsauvan</id>
 			<name>Bastien Sauvan</name>
 			<email>bastien.sauvan@inria.fr</email>
@@ -82,9 +91,27 @@
 			<timezone>+1</timezone>
 		</developer>
 		<developer>
+			<id>ialshalb</id>
+			<name>Iyad Alshabani</name>
+			<email>iyad.alshabani@inria.fr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
 			<id>lpellegr</id>
 			<name>Laurent Pellegrino</name>
 			<email>laurent.pellegrino@inria.fr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>mantoine</id>
+			<name>Maeva Antoine</name>
+			<email>maeva.antoine@inria.fr</email>
 			<roles>
 				<role>Developer</role>
 			</roles>
@@ -129,7 +156,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.0.4</version>
+				<version>1.0.5</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
