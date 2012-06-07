@@ -42,6 +42,8 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PublishApi;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
@@ -55,8 +57,6 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
-import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * Functional test case to have the possibility to test the pub/sub layer in
@@ -153,11 +153,11 @@ public class PublishSubscribeBenchmarkTest {
                 deployer.newEventCloud(new EventCloudDeploymentDescriptor(
                         overlayProvider), 1, this.nbPeers);
 
-        final List<PublishProxy> publishProxies =
+        final List<PublishApi> publishProxies =
                 this.createPublishProxies(
                         deployer.getEventCloudsRegistryUrl(), ecId,
                         this.nbPublishers);
-        final List<SubscribeProxy> subscribeProxies =
+        final List<SubscribeApi> subscribeProxies =
                 this.createSubscribeProxies(
                         deployer.getEventCloudsRegistryUrl(), ecId,
                         this.nbSubscribers);
@@ -166,7 +166,7 @@ public class PublishSubscribeBenchmarkTest {
         this.receiveExpectedEventsStopwatch.reset();
 
         for (int i = 0; i < this.nbSubscribers; i++) {
-            final SubscribeProxy subscribeProxy = subscribeProxies.get(i);
+            final SubscribeApi subscribeProxy = subscribeProxies.get(i);
 
             Subscription subscription =
                     new Subscription(
@@ -185,7 +185,7 @@ public class PublishSubscribeBenchmarkTest {
         boolean running = true;
         while (running) {
             for (int i = 0; i < this.nbPublishers; i++) {
-                final PublishProxy publishProxy = publishProxies.get(i);
+                final PublishApi publishProxy = publishProxies.get(i);
 
                 if (this.nbEventsPublished.getValue() <= this.expectedNbEvents) {
                     this.threadPool.submit(new Runnable() {
@@ -232,7 +232,7 @@ public class PublishSubscribeBenchmarkTest {
         deployer.undeploy();
     }
 
-    private void publish(PublishProxy publishProxy, Supplier<?> supplier) {
+    private void publish(PublishApi publishProxy, Supplier<?> supplier) {
         if (supplier instanceof QuadrupleSupplier) {
             publishProxy.publish(((QuadrupleSupplier) supplier).get());
         } else if (supplier instanceof CompoundEventSupplier) {
@@ -243,10 +243,10 @@ public class PublishSubscribeBenchmarkTest {
         }
     }
 
-    private List<PublishProxy> createPublishProxies(String registryUrl,
-                                                    EventCloudId id, int nb)
+    private List<PublishApi> createPublishProxies(String registryUrl,
+                                                  EventCloudId id, int nb)
             throws EventCloudIdNotManaged {
-        List<PublishProxy> result = new ArrayList<PublishProxy>(nb);
+        List<PublishApi> result = new ArrayList<PublishApi>(nb);
 
         for (int i = 0; i < nb; i++) {
             result.add(ProxyFactory.newPublishProxy(registryUrl, id));
@@ -255,10 +255,10 @@ public class PublishSubscribeBenchmarkTest {
         return result;
     }
 
-    private List<SubscribeProxy> createSubscribeProxies(String registryUrl,
-                                                        EventCloudId id, int nb)
+    private List<SubscribeApi> createSubscribeProxies(String registryUrl,
+                                                      EventCloudId id, int nb)
             throws EventCloudIdNotManaged {
-        List<SubscribeProxy> result = new ArrayList<SubscribeProxy>(nb);
+        List<SubscribeApi> result = new ArrayList<SubscribeApi>(nb);
 
         for (int i = 0; i < nb; i++) {
             result.add(ProxyFactory.newSubscribeProxy(registryUrl, id));

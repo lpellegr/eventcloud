@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
@@ -42,7 +43,7 @@ import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
  */
 @WebService(serviceName = "EventCloudPublish", portName = "EventCloudPublishPort", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2", name = "EventCloudPublishPortType")
 public class PublishServiceImpl extends
-        EventCloudTranslatableProxyService<PublishProxy> implements
+        EventCloudTranslatableProxyService<PublishApi> implements
         NotificationConsumer {
 
     private static final Logger log =
@@ -88,7 +89,7 @@ public class PublishServiceImpl extends
      * {@inheritDoc}
      */
     @Override
-    public PublishProxy createProxy() throws EventCloudIdNotManaged {
+    public PublishApi createProxy() throws EventCloudIdNotManaged {
         return ProxyFactory.newPublishProxy(
                 super.registryUrl, new EventCloudId(super.streamUrl));
     }

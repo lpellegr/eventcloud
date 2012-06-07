@@ -35,6 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PublishApi;
+import fr.inria.eventcloud.api.PutGetApi;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.EventCloudCache;
@@ -83,14 +86,13 @@ public class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      * 
-     * @return the reference on the {@link PublishProxy} interface of the new
+     * @return the reference on the {@link PublishApi} interface of the new
      *         publish proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static PublishProxy newPublishProxy(String registryUrl,
-                                               EventCloudId id)
+    public static PublishApi newPublishProxy(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPublishProxy(
                 new HashMap<String, Object>(), registryUrl, id);
@@ -107,14 +109,14 @@ public class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      * 
-     * @return the reference on the {@link PublishProxy} interface of the new
+     * @return the reference on the {@link PublishApi} interface of the new
      *         publish proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static PublishProxy newPublishProxy(Node node, String registryUrl,
-                                               EventCloudId id)
+    public static PublishApi newPublishProxy(Node node, String registryUrl,
+                                             EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPublishProxy(
                 ComponentUtils.createContext(node), registryUrl, id);
@@ -131,15 +133,14 @@ public class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      * 
-     * @return the reference on the {@link PublishProxy} interface of the new
+     * @return the reference on the {@link PublishApi} interface of the new
      *         publish proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static PublishProxy newPublishProxy(GCMVirtualNode vn,
-                                               String registryUrl,
-                                               EventCloudId id)
+    public static PublishApi newPublishProxy(GCMVirtualNode vn,
+                                             String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPublishProxy(
                 ComponentUtils.createContext(vn), registryUrl, id);
@@ -156,23 +157,22 @@ public class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      * 
-     * @return the reference on the {@link PublishProxy} interface of the new
+     * @return the reference on the {@link PublishApi} interface of the new
      *         publish proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static PublishProxy newPublishProxy(GCMApplication gcma,
-                                               String registryUrl,
-                                               EventCloudId id)
+    public static PublishApi newPublishProxy(GCMApplication gcma,
+                                             String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPublishProxy(
                 ComponentUtils.createContext(gcma), registryUrl, id);
     }
 
-    private static PublishProxy createPublishProxy(Map<String, Object> context,
-                                                   String registryUrl,
-                                                   EventCloudId id)
+    private static PublishApi createPublishProxy(Map<String, Object> context,
+                                                 String registryUrl,
+                                                 EventCloudId id)
             throws EventCloudIdNotManaged {
         try {
             PublishProxy pubProxy =
@@ -205,15 +205,15 @@ public class ProxyFactory implements Serializable {
      * @param properties
      *            the ELA properties to set.
      * 
-     * @return the reference on the {@link SubscribeProxy} interface of the new
+     * @return the reference on the {@link SubscribeApi} interface of the new
      *         subscribe proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static SubscribeProxy newSubscribeProxy(String registryUrl,
-                                                   EventCloudId id,
-                                                   AlterableElaProperty... properties)
+    public static SubscribeApi newSubscribeProxy(String registryUrl,
+                                                 EventCloudId id,
+                                                 AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         return createSubscribeProxy(
                 new HashMap<String, Object>(), registryUrl, id, properties);
@@ -233,16 +233,16 @@ public class ProxyFactory implements Serializable {
      * @param properties
      *            the ELA properties to set.
      * 
-     * @return the reference on the {@link SubscribeProxy} interface of the new
+     * @return the reference on the {@link SubscribeApi} interface of the new
      *         subscribe proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static SubscribeProxy newSubscribeProxy(Node node,
-                                                   String registryUrl,
-                                                   EventCloudId id,
-                                                   AlterableElaProperty... properties)
+    public static SubscribeApi newSubscribeProxy(Node node,
+                                                 String registryUrl,
+                                                 EventCloudId id,
+                                                 AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         return createSubscribeProxy(
                 ComponentUtils.createContext(node), registryUrl, id, properties);
@@ -262,16 +262,16 @@ public class ProxyFactory implements Serializable {
      * @param properties
      *            the ELA properties to set.
      * 
-     * @return the reference on the {@link SubscribeProxy} interface of the new
+     * @return the reference on the {@link SubscribeApi} interface of the new
      *         subscribe proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static SubscribeProxy newSubscribeProxy(GCMVirtualNode vn,
-                                                   String registryUrl,
-                                                   EventCloudId id,
-                                                   AlterableElaProperty... properties)
+    public static SubscribeApi newSubscribeProxy(GCMVirtualNode vn,
+                                                 String registryUrl,
+                                                 EventCloudId id,
+                                                 AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         return createSubscribeProxy(
                 ComponentUtils.createContext(vn), registryUrl, id, properties);
@@ -291,25 +291,25 @@ public class ProxyFactory implements Serializable {
      * @param properties
      *            the ELA properties to set.
      * 
-     * @return the reference on the {@link SubscribeProxy} interface of the new
+     * @return the reference on the {@link SubscribeApi} interface of the new
      *         subscribe proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static SubscribeProxy newSubscribeProxy(GCMApplication gcma,
-                                                   String registryUrl,
-                                                   EventCloudId id,
-                                                   AlterableElaProperty... properties)
+    public static SubscribeApi newSubscribeProxy(GCMApplication gcma,
+                                                 String registryUrl,
+                                                 EventCloudId id,
+                                                 AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         return createSubscribeProxy(
                 ComponentUtils.createContext(gcma), registryUrl, id, properties);
     }
 
-    private static SubscribeProxy createSubscribeProxy(Map<String, Object> context,
-                                                       String registryUrl,
-                                                       EventCloudId id,
-                                                       AlterableElaProperty... properties)
+    private static SubscribeApi createSubscribeProxy(Map<String, Object> context,
+                                                     String registryUrl,
+                                                     EventCloudId id,
+                                                     AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         try {
             SubscribeProxy subProxy =
@@ -350,13 +350,13 @@ public class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      * 
-     * @return the reference on the {@link PutGetProxy} interface of the new
+     * @return the reference on the {@link PutGetApi} interface of the new
      *         put/get proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static PutGetProxy newPutGetProxy(String registryUrl, EventCloudId id)
+    public static PutGetApi newPutGetProxy(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPutGetProxy(new HashMap<String, Object>(), registryUrl, id);
     }
@@ -372,14 +372,14 @@ public class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      * 
-     * @return the reference on the {@link PutGetProxy} interface of the new
+     * @return the reference on the {@link PutGetApi} interface of the new
      *         put/get proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static PutGetProxy newPutGetProxy(Node node, String registryUrl,
-                                             EventCloudId id)
+    public static PutGetApi newPutGetProxy(Node node, String registryUrl,
+                                           EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPutGetProxy(
                 ComponentUtils.createContext(node), registryUrl, id);
@@ -396,14 +396,14 @@ public class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      * 
-     * @return the reference on the {@link PutGetProxy} interface of the new
+     * @return the reference on the {@link PutGetApi} interface of the new
      *         put/get proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static PutGetProxy newPutGetProxy(GCMVirtualNode vn,
-                                             String registryUrl, EventCloudId id)
+    public static PutGetApi newPutGetProxy(GCMVirtualNode vn,
+                                           String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPutGetProxy(
                 ComponentUtils.createContext(vn), registryUrl, id);
@@ -420,22 +420,22 @@ public class ProxyFactory implements Serializable {
      * @param id
      *            the identifier that identify the Event-Cloud to work on.
      * 
-     * @return the reference on the {@link PutGetProxy} interface of the new
+     * @return the reference on the {@link PutGetApi} interface of the new
      *         put/get proxy component created.
      * 
      * @throws EventCloudIdNotManaged
      *             if the specified registry does not managed the given id.
      */
-    public static PutGetProxy newPutGetProxy(GCMApplication gcma,
-                                             String registryUrl, EventCloudId id)
+    public static PutGetApi newPutGetProxy(GCMApplication gcma,
+                                           String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPutGetProxy(
                 ComponentUtils.createContext(gcma), registryUrl, id);
     }
 
-    private static PutGetProxy createPutGetProxy(Map<String, Object> context,
-                                                 String registryUrl,
-                                                 EventCloudId id)
+    private static PutGetApi createPutGetProxy(Map<String, Object> context,
+                                               String registryUrl,
+                                               EventCloudId id)
             throws EventCloudIdNotManaged {
         try {
             PutGetProxy putgetProxy =

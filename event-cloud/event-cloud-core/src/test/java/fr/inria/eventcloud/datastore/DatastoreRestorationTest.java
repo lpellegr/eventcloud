@@ -29,6 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -39,7 +40,6 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
-import fr.inria.eventcloud.proxies.PutGetProxy;
 
 /**
  * This class defines a test that checks if an eventcloud which is created two
@@ -68,7 +68,7 @@ public class DatastoreRestorationTest {
         deployer.deploy(1, 1);
         registry.register(deployer);
 
-        PutGetProxy proxy =
+        PutGetApi proxy =
                 ProxyFactory.newPutGetProxy(
                         registryUrl, deployer.getEventCloudDescription()
                                 .getId());

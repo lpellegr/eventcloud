@@ -30,8 +30,11 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PublishApi;
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
@@ -39,9 +42,6 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.proxies.PutGetProxy;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * The purpose of this test is just to show how to instantiate and to use an
@@ -71,7 +71,7 @@ public class EventCloudUsageTest implements Serializable {
 
         // Creates a PutGet proxy whose the
         // purpose is to work with historical semantic data
-        PutGetProxy putGetProxy =
+        PutGetApi putGetProxy =
                 ProxyFactory.newPutGetProxy(
                         deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
@@ -126,7 +126,7 @@ public class EventCloudUsageTest implements Serializable {
 
         // Then, it is possible to create a SubscribeProxy to
         // subscribe to some interest and to be notified asynchronously
-        final SubscribeProxy subscribeProxy =
+        final SubscribeApi subscribeProxy =
                 ProxyFactory.newSubscribeProxy(
                         deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
@@ -156,7 +156,7 @@ public class EventCloudUsageTest implements Serializable {
                 subscription.getId());
 
         // Finally, we can simulate an event source by creating a PublishProxy
-        PublishProxy publishProxy =
+        PublishApi publishProxy =
                 ProxyFactory.newPublishProxy(
                         deployer.getEventCloudsRegistryUrl(), eventCloudId);
 

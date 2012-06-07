@@ -30,6 +30,8 @@ import org.objectweb.proactive.core.ProActiveException;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PublishApi;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
@@ -37,8 +39,6 @@ import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.BasicNotificationConsumer;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsServiceApi;
@@ -72,9 +72,9 @@ public class InputOutputMonitoringTest {
 
     private EventCloudManagementWsServiceApi eventCloudManagementClient;
 
-    private PublishProxy publishProxy;
+    private PublishApi publishProxy;
 
-    private SubscribeProxy subscribeProxy;
+    private SubscribeApi subscribeProxy;
 
     private ServiceInformation subscribeServiceInformation;
 

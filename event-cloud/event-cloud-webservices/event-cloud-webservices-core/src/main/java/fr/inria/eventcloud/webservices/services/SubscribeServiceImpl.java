@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
@@ -51,7 +52,7 @@ import fr.inria.eventcloud.webservices.WsEventNotificationListener;
  */
 @WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", name = "EventCloudSubscribePortType")
 public class SubscribeServiceImpl extends
-        EventCloudTranslatableProxyService<SubscribeProxy> implements
+        EventCloudTranslatableProxyService<SubscribeApi> implements
         NotificationProducer {
 
     private final Map<SubscriptionId, String> subscribers;
@@ -129,7 +130,7 @@ public class SubscribeServiceImpl extends
      * {@inheritDoc}
      */
     @Override
-    public SubscribeProxy createProxy() throws EventCloudIdNotManaged {
+    public SubscribeApi createProxy() throws EventCloudIdNotManaged {
         return ProxyFactory.newSubscribeProxy(
                 super.registryUrl, new EventCloudId(super.streamUrl));
     }
