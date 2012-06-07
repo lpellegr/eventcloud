@@ -11,6 +11,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 import org.w3c.dom.Element;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
@@ -22,7 +23,6 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
-import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.utils.Callback;
 
@@ -32,7 +32,7 @@ public class BenchmarkLauncher {
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
-    private PutGetProxy putGetProxy;
+    private PutGetApi putGetProxy;
 
     private final Callback<Quadruple> callback;
 

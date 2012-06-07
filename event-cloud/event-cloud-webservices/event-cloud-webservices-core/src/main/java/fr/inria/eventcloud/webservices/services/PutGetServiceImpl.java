@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
@@ -39,7 +40,7 @@ import fr.inria.eventcloud.webservices.api.PutGetWsApi;
  * 
  * @author lpellegr
  */
-public class PutGetServiceImpl extends EventCloudProxyService<PutGetProxy>
+public class PutGetServiceImpl extends EventCloudProxyService<PutGetApi>
         implements PutGetWsApi {
 
     public PutGetServiceImpl(String registryUrl, String eventCloudIdUrl) {
@@ -146,7 +147,7 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetProxy>
      * {@inheritDoc}
      */
     @Override
-    public PutGetProxy createProxy() throws EventCloudIdNotManaged {
+    public PutGetApi createProxy() throws EventCloudIdNotManaged {
         return ProxyFactory.newPutGetProxy(super.registryUrl, new EventCloudId(
                 super.streamUrl));
     }

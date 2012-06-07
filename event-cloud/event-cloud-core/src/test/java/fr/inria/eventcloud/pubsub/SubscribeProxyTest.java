@@ -41,8 +41,10 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
@@ -81,9 +83,9 @@ public class SubscribeProxyTest {
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
-    private SubscribeProxy subscribeProxy;
+    private SubscribeApi subscribeProxy;
 
-    private PublishProxy publishProxy;
+    private PublishApi publishProxy;
 
     @Before
     public void setUp() throws EventCloudIdNotManaged {
@@ -106,7 +108,7 @@ public class SubscribeProxyTest {
         final int NB_PRODUCERS = 10;
         final int NB_EVENTS_TO_WAIT = 100;
 
-        final List<PublishProxy> publishProxies =
+        final List<PublishApi> publishProxies =
                 this.createPublishProxies(NB_PRODUCERS);
 
         ScheduledExecutorService threadPool =
@@ -117,7 +119,7 @@ public class SubscribeProxyTest {
 
         // simulates producers publishing at different rates
         for (int i = 0; i < NB_PRODUCERS; i++) {
-            final PublishProxy publishProxy = publishProxies.get(i);
+            final PublishApi publishProxy = publishProxies.get(i);
             final int threadIndex = i;
 
             threadPool.scheduleAtFixedRate(new Runnable() {
@@ -166,9 +168,9 @@ public class SubscribeProxyTest {
         threadPool.shutdown();
     }
 
-    private List<PublishProxy> createPublishProxies(int nb)
+    private List<PublishApi> createPublishProxies(int nb)
             throws EventCloudIdNotManaged {
-        List<PublishProxy> proxies = new ArrayList<PublishProxy>(nb);
+        List<PublishApi> proxies = new ArrayList<PublishApi>(nb);
 
         for (int i = 0; i < nb; i++) {
             proxies.add(ProxyFactory.newPublishProxy(
