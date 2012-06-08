@@ -249,6 +249,16 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
                     + eventId);
         }
 
+        // The reconstruction operation for an event (quadruple) which has been
+        // already received is cancelled. If someone subscribe without any
+        // constraint and a compound event notification listener, each quadruple
+        // or event is a solution and thus the subscribe proxy receives a
+        // notification for each quadruple even if all these quadruples are part
+        // of the same compound event.
+        if (this.eventIdsReceived.containsKey(eventId)) {
+            return null;
+        }
+
         int expectedNumberOfQuadruples = -1;
 
         List<Quadruple> quadsReceived = new ArrayList<Quadruple>();
