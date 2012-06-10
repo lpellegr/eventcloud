@@ -24,13 +24,16 @@ import java.util.List;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.tdb.StoreConnection;
+import com.hp.hpl.jena.tdb.base.block.FileMode;
 import com.hp.hpl.jena.tdb.base.file.Location;
+import com.hp.hpl.jena.tdb.sys.SystemTDB;
 import com.hp.hpl.jena.tdb.transaction.TDBTransactionException;
 
 import fr.inria.eventcloud.api.Quadruple;
@@ -49,6 +52,8 @@ public class TransactionalTdbDatastore extends Datastore {
             LoggerFactory.getLogger(TransactionalTdbDatastore.class);
 
     private final StoreConnection storeConnection;
+
+    private final Location storeLocation;
 
     private final boolean autoRemove;
 
@@ -73,15 +78,19 @@ public class TransactionalTdbDatastore extends Datastore {
         }
 
         this.storeConnection = StoreConnection.make(location);
+        this.storeLocation = location;
         this.autoRemove = autoRemove;
 
         this.registerPlugins();
     }
 
-    protected TransactionalTdbDatastore(StoreConnection storeConnection,
-            boolean autoRemove) {
-        this.storeConnection = storeConnection;
-        this.autoRemove = autoRemove;
+    /**
+     * In-memory store for testing purpose only.
+     */
+    protected TransactionalTdbDatastore() {
+        this.storeConnection = StoreConnection.createMemUncached();
+        this.storeLocation = null;
+        this.autoRemove = false;
 
         this.registerPlugins();
     }
@@ -116,7 +125,9 @@ public class TransactionalTdbDatastore extends Datastore {
         // when Location#release is called
         while (!released) {
             try {
-                StoreConnection.release(this.storeConnection.getLocation());
+                if (this.storeLocation != null) {
+                    StoreConnection.release(this.storeLocation);
+                }
                 released = true;
             } catch (TDBTransactionException e) {
                 // it is only used to detect that they are still some
@@ -130,13 +141,22 @@ public class TransactionalTdbDatastore extends Datastore {
         }
 
         if (this.autoRemove) {
+            if (SystemUtil.isWindows()
+                    && SystemTDB.fileMode() == FileMode.mapped) {
+                // FIXME: TDB uses mapped files and due to a Java bug
+                // (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4715154),
+                // the repository cannot be removed before to force garbage
+                // collection
+                System.gc();
+            }
+
             try {
-                Files.deleteDirectory(this.storeConnection.getLocation()
-                        .getDirectoryPath());
+                Files.deleteDirectory(this.storeLocation.getDirectoryPath());
             } catch (IOException e) {
-                log.error("The deletion of the repository "
-                        + this.storeConnection.getLocation().getDirectoryPath()
-                        + " has failed", e);
+                log.error(
+                        "The deletion of the repository "
+                                + this.storeLocation.getDirectoryPath()
+                                + " has failed", e);
             }
         }
     }
