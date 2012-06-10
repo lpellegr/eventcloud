@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.datastore;
 
-import com.hp.hpl.jena.tdb.StoreConnection;
-
 /**
  * A {@link TransactionalTdbDatastore} that is allocated and works in memory.
  * This is useful for testing purposes.
@@ -28,7 +26,7 @@ public final class TransactionalTdbDatastoreMem extends
         TransactionalTdbDatastore {
 
     public TransactionalTdbDatastoreMem() {
-        super(StoreConnection.createMemUncached(), false);
+        super();
     }
 
 }

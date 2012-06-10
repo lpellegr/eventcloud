@@ -54,7 +54,7 @@ public class DatastoreRestorationTest {
     public void setUp() {
         EventCloudProperties.REPOSITORIES_RESTORE.setValue(true);
         EventCloudProperties.REPOSITORIES_PATH.setValue(System.getProperty("java.io.tmpdir")
-                + File.separator + "test-restoration" + File.separator);
+                + File.separator + "eventcloud-restoration-test");
     }
 
     @Test
