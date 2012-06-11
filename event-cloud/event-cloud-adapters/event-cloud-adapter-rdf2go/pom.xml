@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>org.semweb4j</groupId>
 			<artifactId>rdf2go.api</artifactId>
-			<version>4.7.4</version>
+			<version>4.8.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -56,8 +56,8 @@
 
 		<dependency>
 			<groupId>org.semweb4j</groupId>
-			<artifactId>rdf2go.impl.jena27</artifactId>
-			<version>4.7.4</version>
+			<artifactId>rdf2go.impl.jena</artifactId>
+			<version>4.8.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.jena</groupId>
