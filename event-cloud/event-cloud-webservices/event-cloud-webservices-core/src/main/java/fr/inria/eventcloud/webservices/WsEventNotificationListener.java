@@ -27,7 +27,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.webservices.utils.WsClientFactory;
+import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
 /**
  * An {@link CompoundEventNotificationListener}

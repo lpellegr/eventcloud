@@ -49,10 +49,13 @@ public class ComponentUtils {
 
     private static Factory factory;
 
+    private static Factory nfFactory;
+
     static {
         CentralPAPropertyRepository.GCM_PROVIDER.setValue(P2PStructuredProperties.GCM_PROVIDER.getValue());
         try {
             factory = FactoryFactory.getFactory();
+            nfFactory = FactoryFactory.getNFFactory();
         } catch (ADLException e) {
             e.printStackTrace();
         }
@@ -145,6 +148,50 @@ public class ComponentUtils {
                                                        String interfaceName,
                                                        Class<T> interfaceClass,
                                                        boolean toStart) {
+        return createComponentAndGetInterface(
+                factory, componentAdl, context, interfaceName, interfaceClass,
+                toStart);
+    }
+
+    /**
+     * Creates a non functional component with the specified ADL and returns a
+     * reference on the specified interface of the non functional component
+     * created.
+     * 
+     * @param <T>
+     *            type of the interface.
+     * @param componentAdl
+     *            ADL to use to create the non functional component.
+     * @param context
+     *            optional additional information to create the non functional
+     *            component.
+     * @param interfaceName
+     *            the name of the interface to return.
+     * @param interfaceClass
+     *            class of the interface.
+     * @param toStart
+     *            {@code true} if the non functional component has to be
+     *            started, {@code false} otherwise.
+     * 
+     * @return a reference on the specified interface of the non functional
+     *         component created.
+     */
+    public static <T> T createNfComponentAndGetInterface(String componentAdl,
+                                                         Map<String, Object> context,
+                                                         String interfaceName,
+                                                         Class<T> interfaceClass,
+                                                         boolean toStart) {
+        return createComponentAndGetInterface(
+                nfFactory, componentAdl, context, interfaceName,
+                interfaceClass, toStart);
+    }
+
+    private static <T> T createComponentAndGetInterface(Factory factory,
+                                                        String componentAdl,
+                                                        Map<String, Object> context,
+                                                        String interfaceName,
+                                                        Class<T> interfaceClass,
+                                                        boolean toStart) {
         try {
             Component component =
                     (Component) factory.newComponent(componentAdl, context);

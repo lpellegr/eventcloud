@@ -17,15 +17,20 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>eu.play-project</groupId>
-			<artifactId>play-commons-constants</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
 			<artifactId>event-cloud-core</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf.services.wsn</groupId>
+			<artifactId>cxf-services-wsn-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>eu.play-project</groupId>
+			<artifactId>play-commons-constants</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

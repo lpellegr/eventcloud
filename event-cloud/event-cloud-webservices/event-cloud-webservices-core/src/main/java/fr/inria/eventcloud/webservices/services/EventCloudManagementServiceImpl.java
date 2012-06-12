@@ -24,6 +24,7 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
+import org.etsi.uri.gcm.util.GCM;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
@@ -42,6 +43,15 @@ import org.oasis_open.docs.wsn.bw_2.UnacceptableInitialTerminationTimeFault;
 import org.oasis_open.docs.wsn.bw_2.UnrecognizedPolicyRequestFault;
 import org.oasis_open.docs.wsn.bw_2.UnsupportedPolicyRequestFault;
 import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
+import org.objectweb.fractal.api.Component;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.objectweb.fractal.api.control.IllegalContentException;
+import org.objectweb.fractal.api.control.IllegalLifeCycleException;
+import org.objectweb.proactive.core.component.PAInterface;
+import org.objectweb.proactive.core.component.Utils;
+import org.objectweb.proactive.core.component.control.PAMembraneController;
+import org.objectweb.proactive.core.component.exceptions.NoSuchComponentException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -56,12 +66,16 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsApi;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsServiceApi;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
+import fr.inria.eventcloud.webservices.factories.ProxyMonitoringManagerFactory;
+import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManager;
+import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManagerImpl;
 
 /**
  * Web service implementation for {@link EventCloudManagementWsApi}.
@@ -408,12 +422,72 @@ public class EventCloudManagementServiceImpl implements
             for (EventCloudId id : eventCloudIds) {
                 for (SubscribeProxy proxy : this.getEventCloudsRegistry()
                         .getSubscribeProxies(id)) {
-                    proxy.enableInputOutputMonitoring(consumerReference);
+                    this.enableInputOutputMonitoring(proxy, consumerReference);
                 }
             }
         }
 
         return WsnHelper.createSubscribeResponse(consumerReference);
+    }
+
+    private void enableInputOutputMonitoring(Object proxyStub,
+                                             String consumerReference) {
+        try {
+            Component proxy = ((PAInterface) proxyStub).getFcItfOwner();
+            PAMembraneController membraneController =
+                    Utils.getPAMembraneController(proxy);
+            Component proxyMonitoringManager =
+                    membraneController.nfGetFcSubComponent(ProxyMonitoringManagerImpl.COMPONENT_NAME);
+            ProxyMonitoringManager stub = null;
+
+            if (proxyMonitoringManager == null) {
+                stub =
+                        this.addProxyMonitoringManager(
+                                proxy, membraneController);
+            } else {
+                stub =
+                        (ProxyMonitoringManager) proxyMonitoringManager.getFcInterface(ProxyMonitoringManagerImpl.MONITORING_SERVICES_ITF);
+            }
+
+            stub.enableInputOutputMonitoring(consumerReference);
+        } catch (NoSuchInterfaceException nsie) {
+            nsie.printStackTrace();
+        } catch (NoSuchComponentException nsce) {
+            nsce.printStackTrace();
+        } catch (IllegalContentException ice) {
+            ice.printStackTrace();
+        } catch (IllegalLifeCycleException ilce) {
+            ilce.printStackTrace();
+        } catch (IllegalBindingException ibe) {
+            ibe.printStackTrace();
+        }
+    }
+
+    private ProxyMonitoringManager addProxyMonitoringManager(Component proxy,
+                                                             PAMembraneController membraneController)
+            throws NoSuchInterfaceException, IllegalLifeCycleException,
+            IllegalContentException, IllegalBindingException,
+            NoSuchComponentException {
+        ProxyMonitoringManager stub =
+                ProxyMonitoringManagerFactory.newProxyMonitoringManager();
+        Component proxyMonitoringManager = ((PAInterface) stub).getFcItfOwner();
+
+        GCM.getNameController(proxyMonitoringManager).setFcName(
+                ProxyMonitoringManagerImpl.COMPONENT_NAME);
+
+        Utils.getPAGCMLifeCycleController(proxy).stopFc();
+        membraneController.stopMembrane();
+
+        membraneController.nfAddFcSubComponent(proxyMonitoringManager);
+        membraneController.nfBindFc(
+                Proxy.MONITORING_SERVICES_CONTROLLER_ITF,
+                ProxyMonitoringManagerImpl.COMPONENT_NAME + "."
+                        + ProxyMonitoringManagerImpl.MONITORING_SERVICES_ITF);
+
+        membraneController.startMembrane();
+        Utils.getPAGCMLifeCycleController(proxy).startFc();
+
+        return stub;
     }
 
 }

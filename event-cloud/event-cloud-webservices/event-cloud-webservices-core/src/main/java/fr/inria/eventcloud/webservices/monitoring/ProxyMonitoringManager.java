@@ -14,7 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.monitoring;
+package fr.inria.eventcloud.webservices.monitoring;
+
+import fr.inria.eventcloud.monitoring.ProxyMonitoringActions;
 
 /**
  * Defines methods for managing monitoring on proxies (e.g. enabling, disabling,

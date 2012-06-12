@@ -54,8 +54,8 @@ import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
+import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
-import fr.inria.eventcloud.webservices.utils.WsClientFactory;
 
 /**
  * Class used to test a subscribe proxy component and a publish proxy component

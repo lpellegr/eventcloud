@@ -22,10 +22,12 @@ import java.util.Map.Entry;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.apache.cxf.wsn.util.WSNHelper;
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
+import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
@@ -41,7 +43,7 @@ import fr.inria.eventcloud.utils.ReflectionUtils;
  * @author lpellegr
  * @author bsauvan
  */
-public class WsnHelper extends fr.inria.eventcloud.webservices.utils.WsnHelper {
+public class WsnHelper {
 
     private static final transient WsnTranslator translator =
             new WsnTranslator();
@@ -93,12 +95,50 @@ public class WsnHelper extends fr.inria.eventcloud.webservices.utils.WsnHelper {
     }
 
     /**
+     * Creates a notify message from the specified producer reference endpoint,
+     * topic information and payload.
+     * 
+     * @param producerReference
+     *            the producer reference endpoint of the notify message to
+     *            build.
+     * @param topic
+     *            the qname associated to the topic of the notify message to
+     *            build.
+     * @param payload
+     *            the payload to include in the notify message to build.
+     * 
+     * @return a notify message with the specified producer reference endpoint,
+     *         topic information and payload.
+     */
+    public static Notify createNotifyMessage(String producerReference,
+                                             QName topic, Object payload) {
+        Notify notify = new Notify();
+        NotificationMessageHolderType notificationMessage =
+                new NotificationMessageHolderType();
+
+        notificationMessage.setTopic(createTopicExpressionType(topic));
+
+        W3CEndpointReferenceBuilder endPointReferenceBuilder =
+                new W3CEndpointReferenceBuilder();
+        endPointReferenceBuilder.address(producerReference);
+        notificationMessage.setProducerReference(endPointReferenceBuilder.build());
+
+        Message message = new Message();
+        message.setAny(payload);
+        notificationMessage.setMessage(message);
+
+        notify.getNotificationMessage().add(notificationMessage);
+
+        return notify;
+    }
+
+    /**
      * Creates a notify message from the specified topic information and
      * {@link CompoundEvent}s by using the corresponding {@code translator}.
      * 
      * @param topic
-     *            the qname associated to the topic the subscriber subscribes
-     *            to.
+     *            the qname associated to the topic of the notify message to
+     *            build.
      * @param compoundEvents
      *            the compound events to serialize inside the message.
      * 
@@ -119,6 +159,26 @@ public class WsnHelper extends fr.inria.eventcloud.webservices.utils.WsnHelper {
         }
 
         return notify;
+    }
+
+    /**
+     * Creates a topic expression type from the specified topic information.
+     * 
+     * @param topic
+     *            the qname associated to the topic of the topic expression type
+     *            to build.
+     * 
+     * @return a topic expression type from the specified topic information.
+     */
+    public static TopicExpressionType createTopicExpressionType(QName topic) {
+        TopicExpressionType topicExpressionType = new TopicExpressionType();
+        topicExpressionType.getOtherAttributes().put(
+                topic, topic.getNamespaceURI());
+        topicExpressionType.setDialect("http://docs.oasis-open.org/wsn/t-1/TopicExpression/Concrete");
+        topicExpressionType.getContent().add(
+                topic.getPrefix() + ":" + topic.getLocalPart());
+
+        return topicExpressionType;
     }
 
     /**

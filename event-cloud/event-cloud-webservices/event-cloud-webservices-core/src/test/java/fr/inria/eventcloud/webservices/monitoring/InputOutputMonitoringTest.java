@@ -44,8 +44,8 @@ import fr.inria.eventcloud.webservices.BasicNotificationConsumer;
 import fr.inria.eventcloud.webservices.api.EventCloudManagementWsServiceApi;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
+import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
-import fr.inria.eventcloud.webservices.utils.WsClientFactory;
 
 /**
  * Test cases for input/output monitoring.

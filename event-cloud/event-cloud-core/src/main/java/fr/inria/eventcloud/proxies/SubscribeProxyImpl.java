@@ -370,7 +370,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         // monitoring reports have to be sent per compound event and not per
         // event
         if (this.eventIdsReceived.putIfAbsent(eventId, id.getSubscriptionId()) == null
-                && this.isInputOutputMonitoringEnabled()) {
+                && (super.monitoringManager != null)) {
 
             String destination = this.componentUri;
             if (listener.getSubscriberUrl() != null) {
@@ -485,30 +485,6 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
     public static SubscribeProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, SUBSCRIBE_SERVICES_ITF, SubscribeProxy.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean enableInputOutputMonitoring(String consumerEndpoint) {
-        return super.monitoringManager.enableInputOutputMonitoring(consumerEndpoint);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean disableInputOutputMonitoring(String consumerEndpoint) {
-        return super.monitoringManager.disableInputOutputMonitoring(consumerEndpoint);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isInputOutputMonitoringEnabled() {
-        return super.monitoringManager.isInputOutputMonitoringEnabled();
     }
 
 }

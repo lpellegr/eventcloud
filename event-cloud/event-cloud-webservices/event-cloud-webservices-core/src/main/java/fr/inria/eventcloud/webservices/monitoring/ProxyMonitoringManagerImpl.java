@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.monitoring;
+package fr.inria.eventcloud.webservices.monitoring;
 
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
@@ -32,6 +32,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
+import org.objectweb.proactive.Body;
+import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.w3c.dom.Document;
 
 import com.google.common.cache.CacheBuilder;
@@ -42,16 +44,35 @@ import easybox.petalslink.com.esrawreport._1.EJaxbReportListType;
 import easybox.petalslink.com.esrawreport._1.EJaxbReportTimeStampType;
 import easybox.petalslink.com.esrawreport._1.EJaxbReportType;
 import easybox.petalslink.com.esrawreport._1.ObjectFactory;
-import fr.inria.eventcloud.webservices.utils.WsClientFactory;
-import fr.inria.eventcloud.webservices.utils.WsnHelper;
+import fr.inria.eventcloud.monitoring.ProxyMonitoringActions;
+import fr.inria.eventcloud.translators.wsn.WsnHelper;
+import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
 /**
  * Concrete implementation for {@link ProxyMonitoringManager}.
  * 
  * @author lpellegr
+ * @author bsauvan
  */
 public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
-        ProxyMonitoringManager {
+        ProxyMonitoringManager, ComponentInitActive {
+
+    /**
+     * Name of the proxy monitoring manager non functional component.
+     */
+    public static final String COMPONENT_NAME = "ProxyMonitoringManager";
+
+    /**
+     * ADL name of the proxy monitoring manager non functional component.
+     */
+    public static final String PROXY_MONITORING_MANAGER_ADL =
+            "fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManager";
+
+    /**
+     * Functional interface name of the proxy monitoring manager non functional
+     * component.
+     */
+    public static final String MONITORING_SERVICES_ITF = "monitoring-services";
 
     private static final QName RAW_REPORT_QNAME = new QName(
             "http://www.petalslink.org/rawreport/1.0", "RawReportTopic", "rrt");
@@ -75,6 +96,13 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
     private List<String> consumerEndpoints;
 
     public ProxyMonitoringManagerImpl() {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initComponentActivity(Body body) {
         this.consumerEndpoints = new ArrayList<String>();
     }
 

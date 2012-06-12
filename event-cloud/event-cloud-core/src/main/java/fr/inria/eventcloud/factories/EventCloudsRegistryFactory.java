@@ -30,8 +30,8 @@ import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryImpl;
 
 /**
- * This class is used to create and to deploy an {@link EventCloudsRegistry} as
- * a component.
+ * This class is used to create and deploy an {@link EventCloudsRegistry} as a
+ * component.
  * 
  * @author lpellegr
  * @author bsauvan

@@ -16,15 +16,15 @@
  **/
 package fr.inria.eventcloud.proxies;
 
-import org.objectweb.proactive.Body;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
-import fr.inria.eventcloud.monitoring.ProxyMonitoringManager;
-import fr.inria.eventcloud.monitoring.ProxyMonitoringManagerImpl;
+import fr.inria.eventcloud.monitoring.ProxyMonitoringActions;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -32,7 +32,14 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  * 
  * @author lpellegr
  */
-public abstract class Proxy extends AbstractComponent {
+public abstract class Proxy extends AbstractComponent implements
+        BindingController {
+
+    /**
+     * Non functional interface name of the monitoring interface.
+     */
+    public static final String MONITORING_SERVICES_CONTROLLER_ITF =
+            "monitoring-services-controller";
 
     /**
      * GCM Virtual Node name of the proxy component.
@@ -43,20 +50,10 @@ public abstract class Proxy extends AbstractComponent {
 
     protected org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy proxy;
 
-    protected ProxyMonitoringManager monitoringManager;
+    protected ProxyMonitoringActions monitoringManager;
 
     protected Proxy() {
         super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initComponentActivity(Body body) {
-        super.initComponentActivity(body);
-
-        this.monitoringManager = new ProxyMonitoringManagerImpl();
     }
 
     public void sendv(Request<?> request) throws DispatchException {
@@ -82,6 +79,40 @@ public abstract class Proxy extends AbstractComponent {
 
     public EventCloudCache getEventCloudCache() {
         return this.eventCloudCache;
+    }
+
+    @Override
+    public void bindFc(String clientItfName, Object serverItf)
+            throws NoSuchInterfaceException {
+        if (clientItfName.equals(MONITORING_SERVICES_CONTROLLER_ITF)) {
+            this.monitoringManager = (ProxyMonitoringActions) serverItf;
+        } else {
+            throw new NoSuchInterfaceException(clientItfName);
+        }
+    }
+
+    @Override
+    public String[] listFc() {
+        return new String[] {MONITORING_SERVICES_CONTROLLER_ITF};
+    }
+
+    @Override
+    public Object lookupFc(String clientItfName)
+            throws NoSuchInterfaceException {
+        if (clientItfName.equals(MONITORING_SERVICES_CONTROLLER_ITF)) {
+            return this.monitoringManager;
+        } else {
+            throw new NoSuchInterfaceException(clientItfName);
+        }
+    }
+
+    @Override
+    public void unbindFc(String clientItfName) throws NoSuchInterfaceException {
+        if (clientItfName.equals(MONITORING_SERVICES_CONTROLLER_ITF)) {
+            this.monitoringManager = null;
+        } else {
+            throw new NoSuchInterfaceException(clientItfName);
+        }
     }
 
 }
