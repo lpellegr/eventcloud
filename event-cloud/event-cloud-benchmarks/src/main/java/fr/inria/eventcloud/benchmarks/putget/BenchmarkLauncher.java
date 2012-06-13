@@ -1,10 +1,14 @@
 package fr.inria.eventcloud.benchmarks.putget;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -63,16 +67,16 @@ public class BenchmarkLauncher {
                     + "PREFIX dataFromProducer1: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/> "
                     + "SELECT DISTINCT ?product ?productLabel "
                     + "WHERE { GRAPH ?g  {"
-                    + "	?product rdfs:label ?productLabel ."
+                    + " ?product rdfs:label ?productLabel ."
                     + " FILTER (dataFromProducer1:Product1 != ?product)"
-                    + "	dataFromProducer1:Product1 bsbm:productFeature ?prodFeature ."
-                    + "	?product bsbm:productFeature ?prodFeature ."
-                    + "	dataFromProducer1:Product1 bsbm:productPropertyNumeric1 ?origProperty1 ."
-                    + "	?product bsbm:productPropertyNumeric1 ?simProperty1 ."
-                    + "	FILTER (?simProperty1 < (?origProperty1 + 300) && ?simProperty1 > (?origProperty1 - 300))"
-                    + "	dataFromProducer1:Product1 bsbm:productPropertyNumeric2 ?origProperty2 ."
-                    + "	?product bsbm:productPropertyNumeric2 ?simProperty2 ."
-                    + "	FILTER (?simProperty2 < (?origProperty2 + 300) && ?simProperty2 > (?origProperty2 - 300))"
+                    + " dataFromProducer1:Product1 bsbm:productFeature ?prodFeature ."
+                    + " ?product bsbm:productFeature ?prodFeature ."
+                    + " dataFromProducer1:Product1 bsbm:productPropertyNumeric1 ?origProperty1 ."
+                    + " ?product bsbm:productPropertyNumeric1 ?simProperty1 ."
+                    + " FILTER (?simProperty1 < (?origProperty1 + 300) && ?simProperty1 > (?origProperty1 - 300))"
+                    + " dataFromProducer1:Product1 bsbm:productPropertyNumeric2 ?origProperty2 ."
+                    + " ?product bsbm:productPropertyNumeric2 ?simProperty2 ."
+                    + " FILTER (?simProperty2 < (?origProperty2 + 300) && ?simProperty2 > (?origProperty2 - 300))"
                     + "}}" + "ORDER BY ?productLabel " + "LIMIT 5";
 
     public static String query10 =
@@ -84,11 +88,11 @@ public class BenchmarkLauncher {
                     + "WHERE { GRAPH ?g  { "
                     + " ?offer bsbm:product dataFromProducer1:Product12 ."
                     + " ?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#GB> ."
-                    + "	?offer bsbm:vendor ?vendor ."
+                    + " ?offer bsbm:vendor ?vendor ."
                     + " ?offer dc:publisher ?vendor ."
-                    + "	?offer bsbm:deliveryDays ?deliveryDays ."
-                    + "	FILTER (?deliveryDays <= 6)"
-                    + "	?offer bsbm:price ?price ."
+                    + " ?offer bsbm:deliveryDays ?deliveryDays ."
+                    + " FILTER (?deliveryDays <= 6)"
+                    + " ?offer bsbm:price ?price ."
                     + " ?offer bsbm:validTo ?date "
                     + " FILTER (?date > \"2000-01-06T00:00:00\"^^xsd:dateTime)"
                     + "}}" + "ORDER BY xsd:double(str(?price)) " + "LIMIT 10";
@@ -105,7 +109,8 @@ public class BenchmarkLauncher {
     private List<SparqlSelectResponse> responses;
     private List<String> queries;
     private int nbPeers, nbQuadruplesAdded;
-    private long startTime, elapsedTime, testTime, timeToInsertQuads;
+    private long startTime, elapsedTime, testTime, timeToInsertQuads,
+            sizeOfQuadsInsertedInBytes;
     private String fileToParse, datastoreType;
 
     public BenchmarkLauncher(int nbPeers, String fileName, String storage)
@@ -118,9 +123,12 @@ public class BenchmarkLauncher {
         } else if (storage.equals("m")) {
             this.datastoreType = "memory";
         }
+        this.sizeOfQuadsInsertedInBytes = 0;
         this.callback = new Callback<Quadruple>() {
             @Override
             public void execute(Quadruple quad) {
+                BenchmarkLauncher.this.sizeOfQuadsInsertedInBytes +=
+                        BenchmarkLauncher.this.quadToBytes(quad);
                 BenchmarkLauncher.this.quadruples.add(quad);
                 BenchmarkLauncher.this.nbQuadruplesAdded++;
             }
@@ -182,7 +190,7 @@ public class BenchmarkLauncher {
                 new XmlWriter(
                         nbPeers, this.nbQuadruplesAdded,
                         this.timeToInsertQuads, this.testTime,
-                        this.datastoreType);
+                        this.datastoreType, this.sizeOfQuadsInsertedInBytes);
         for (int j = 0; j < this.responses.size(); j++) {
             int nbResults = 0;
             while (this.responses.get(j).getResult().hasNext()) {
@@ -202,13 +210,33 @@ public class BenchmarkLauncher {
                             .getSizeOfIntermediateResultsInBytes());
             xmlWriter.addElement(query, "subQueries", ""
                     + this.responses.get(j).getNbSubQueries());
+            Map<String, Integer> nbResultsForEachSubquery =
+                    this.responses.get(j).getMapSubQueryNbResults();
+            for (String subQuery : nbResultsForEachSubquery.keySet()) {
+                xmlWriter.addSubQueryResults(
+                        query, subQuery, nbResultsForEachSubquery.get(subQuery));
+            }
         }
-
         xmlWriter.end();
         xmlWriter.writeXmlFile("test_storage_" + this.datastoreType + "_peers_"
                 + nbPeers + "_quads_" + this.nbQuadruplesAdded + ".xml");
-
         System.exit(0);
+    }
+
+    public int quadToBytes(Object quad) {
+        byte[] bytes = null;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(quad);
+            oos.flush();
+            oos.close();
+            bos.close();
+            bytes = bos.toByteArray();
+        } catch (IOException ex) {
+            // TODO: Handle the exception
+        }
+        return bytes.length;
     }
 
     public static void main(String[] args) throws NumberFormatException,

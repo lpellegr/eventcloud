@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.api.responses;
 
+import java.util.Map;
+
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 
 /**
@@ -29,6 +31,7 @@ public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
 
     private int nbIntermediateResults, nbSubQueries;
     private long timeToGetResult, sizeOfIntermediateResultsInBytes;
+    private Map<String, Integer> mapSubQueryNbResults;
 
     public SparqlSelectResponse(long inboundHopCount, long outboundHopCount,
             long latency, long queryDatastoreTime, ResultSetWrapper result) {
@@ -72,6 +75,19 @@ public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
     public void setSizeOfIntermediateResultsInBytes(long sizeOfIntermediateResultsInBytes) {
         this.sizeOfIntermediateResultsInBytes =
                 sizeOfIntermediateResultsInBytes;
+    }
+
+    /**
+     * 
+     * @return gives the number of results for each subquery of the query for
+     *         this response
+     */
+    public Map<String, Integer> getMapSubQueryNbResults() {
+        return this.mapSubQueryNbResults;
+    }
+
+    public void setMapSubQueryNbResults(Map<String, Integer> mapSubQueryNbResults) {
+        this.mapSubQueryNbResults = mapSubQueryNbResults;
     }
 
 }

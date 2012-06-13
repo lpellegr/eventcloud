@@ -19,6 +19,7 @@ package fr.inria.eventcloud.messages.request.can;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.slf4j.Logger;
@@ -70,6 +71,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 .getQuadruplePattern(), null);
 
         this.subscription = SerializedValue.create(subscription);
+
     }
 
     /**
@@ -83,7 +85,12 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
         // writes the subscription into the cache and the local datastore
         final Subscription subscription = this.subscription.getValue();
-
+        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+            log.info("It took "
+                    + (System.currentTimeMillis() - subscription.getCreationTime())
+                    + "ms to receive subscription : "
+                    + subscription.getSparqlQuery());
+        }
         log.debug("Indexing subscription {} on peer {}", subscription, overlay);
 
         semanticOverlay.storeSubscription(subscription);
@@ -139,7 +146,6 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
             if (quadrupleMatching.getPublicationTime() < subscription.getIndexationTime()) {
                 continue;
             }
-
             PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
                     semanticOverlay, subscription, quadrupleMatching);
         }

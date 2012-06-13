@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -402,6 +403,13 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
                 this.reconstructCompoundEvent(
                         this.subscriptions.get(id.getSubscriptionId()),
                         solution.getSolution());
+
+        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+            for (int i = 0; i < compoundEvent.size(); i++) {
+                log.info("Reconstructed compound event containing quadruple : "
+                        + compoundEvent.getQuadruples().get(i));
+            }
+        }
 
         if (compoundEvent != null) {
             listener.onNotification(id.getSubscriptionId(), compoundEvent);
