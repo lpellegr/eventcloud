@@ -18,6 +18,7 @@ package fr.inria.eventcloud.messages.request.can;
 
 import java.util.List;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
@@ -47,12 +48,17 @@ public class SparqlAtomicRequest extends
 
     private int nbResults;
 
+    private String query;
+
     public SparqlAtomicRequest(AtomicQuery atomicQuery) {
         // TODO offer the possibility to use a constraints validator that will
         // use the filter constraints contained by the quadruple pattern to
         // route the request
         super(atomicQuery.getQuadruplePattern(),
                 new QuadruplePatternResponseProvider());
+        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+            this.setQuery(atomicQuery.toString());
+        }
     }
 
     /**
@@ -80,6 +86,14 @@ public class SparqlAtomicRequest extends
 
     public int getNbResults() {
         return this.nbResults;
+    }
+
+    public String getQuery() {
+        return this.query;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
     }
 
 }

@@ -19,7 +19,9 @@ package fr.inria.eventcloud.overlay;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -68,6 +70,8 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     private ExecutorService threadPool;
 
     private int nbIntermediateResults = 0;
+
+    private Map<String, Integer> mapSubQueryNbResults;
 
     public SemanticRequestResponseManager(
             TransactionalTdbDatastore colanderDatastore) {
@@ -164,6 +168,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                         measurements[3], new ResultSetWrapper(result));
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
             long responsesSizeInBytes = 0;
+            this.mapSubQueryNbResults = new HashMap<String, Integer>();
             for (int i = 0; i < responses.size(); i++) {
                 this.nbIntermediateResults +=
                         responses.get(i).getResult().size();
@@ -174,9 +179,16 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                                     .get(j));
                 }
             }
+            for (QuadruplePatternResponse quads : responses) {
+                this.mapSubQueryNbResults.put(
+                        quads.getInitialRequestForThisResponse(),
+                        quads.getResult().size());
+            }
             sparqlSelectResponse.setNbIntermediateResults(this.nbIntermediateResults);
             sparqlSelectResponse.setSizeOfIntermediateResultsInBytes(responsesSizeInBytes);
+            sparqlSelectResponse.setMapSubQueryNbResults(this.mapSubQueryNbResults);
             this.setNbIntermediateResults(0);
+            this.mapSubQueryNbResults = null;
         }
         return sparqlSelectResponse;
     }
@@ -233,8 +245,16 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 @Override
                 public void run() {
                     try {
-                        replies.add((QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
-                                request, overlay));
+                        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+                            QuadruplePatternResponse resp =
+                                    (QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
+                                            request, overlay);
+                            resp.setInitialRequestForThisResponse(request.getQuery());
+                            replies.add(resp);
+                        } else {
+                            replies.add((QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
+                                    request, overlay));
+                        }
                     } catch (DispatchException e) {
                         e.printStackTrace();
                     } finally {

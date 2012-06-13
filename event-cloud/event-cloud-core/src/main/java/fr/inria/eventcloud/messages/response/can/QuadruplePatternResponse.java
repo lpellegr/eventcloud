@@ -34,6 +34,8 @@ public class QuadruplePatternResponse extends
 
     private static final long serialVersionUID = 1L;
 
+    private String initialRequestForThisResponse;
+
     public QuadruplePatternResponse() {
         super();
     }
@@ -50,6 +52,16 @@ public class QuadruplePatternResponse extends
         }
 
         return result;
+    }
+
+    // used for BenchmarkLauncher
+    public String getInitialRequestForThisResponse() {
+        return this.initialRequestForThisResponse;
+    }
+
+    // used for BenchmarkLauncher
+    public void setInitialRequestForThisResponse(String initialRequestForThisResponse) {
+        this.initialRequestForThisResponse = initialRequestForThisResponse;
     }
 
 }

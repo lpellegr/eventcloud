@@ -20,9 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -43,6 +46,9 @@ import fr.inria.eventcloud.utils.Callback;
  */
 public class PublishProxyImpl extends Proxy implements PublishProxy,
         PublishProxyAttributeController {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(PublishProxyImpl.class);
 
     /**
      * ADL name of the publish proxy component.
@@ -80,7 +86,10 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
         if (quad.getPublicationTime() == -1) {
             quad.setPublicationTime();
         }
-
+        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+            log.info("About to publish quad : " + quad.getSubject() + " "
+                    + quad.getPredicate() + " " + quad.getObject());
+        }
         // TODO: use an asynchronous call with no response (see issue 16)
 
         // the quadruple is routed without taking into account the publication

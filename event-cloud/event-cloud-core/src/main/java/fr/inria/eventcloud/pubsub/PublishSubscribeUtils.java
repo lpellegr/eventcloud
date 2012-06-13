@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.mutable.MutableObject;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.openjena.riot.out.NodeFmtLib;
@@ -713,7 +714,6 @@ public final class PublishSubscribeUtils {
         // that matches the first sub-subscription.
         Subscription rewrittenSubscription =
                 SubscriptionRewriter.rewrite(subscription, quadrupleMatching);
-
         // stores the stub URL of the current peer in order to
         // have the possibility to retrieve the sub-solution later
         rewrittenSubscription.addStub(new Subscription.Stub(
@@ -721,11 +721,18 @@ public final class PublishSubscribeUtils {
                 quadrupleMatching.hashValue()));
 
         try {
+            if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+                log.info("Peer "
+                        + overlay
+                        + " is about to dispatch a rewritten subscription, creation time = "
+                        + rewrittenSubscription.getCreationTime()
+                        + " , subscription: "
+                        + rewrittenSubscription.getSparqlQuery());
+            }
             overlay.dispatchv(new IndexSubscriptionRequest(
                     rewrittenSubscription));
         } catch (DispatchException e) {
             e.printStackTrace();
         }
     }
-
 }

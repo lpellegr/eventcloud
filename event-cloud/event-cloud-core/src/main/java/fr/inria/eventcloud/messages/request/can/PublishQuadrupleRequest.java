@@ -18,6 +18,7 @@ package fr.inria.eventcloud.messages.request.can;
 
 import java.util.Arrays;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +100,12 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     @Override
     public void onDestinationReached(final StructuredOverlay overlay,
                                      final Quadruple quadrupleMatching) {
+        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+            log.info("Peer " + overlay + " is about to store quadruple "
+                    + quadrupleMatching.getSubject() + " "
+                    + quadrupleMatching.getPredicate() + " "
+                    + quadrupleMatching.getObject());
+        }
         final TransactionalTdbDatastore datastore =
                 ((TransactionalTdbDatastore) overlay.getDatastore());
 

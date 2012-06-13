@@ -27,7 +27,8 @@ public class XmlWriter {
     private Element root;
 
     public XmlWriter(int nbPeers, int nbQuadruples, long insertTime,
-            long timeToReceiveFinalResult, String datastoreType) {
+            long timeToReceiveFinalResult, String datastoreType,
+            long sizeOfQuadsInsertedInBytes) {
         try {
             this.dbfac = DocumentBuilderFactory.newInstance();
             this.docBuilder = this.dbfac.newDocumentBuilder();
@@ -39,6 +40,8 @@ public class XmlWriter {
             this.root.setAttribute("timeToReceiveFinalResultInMillis", ""
                     + timeToReceiveFinalResult);
             this.root.setAttribute("datastoreType", datastoreType);
+            this.root.setAttribute("sizeOfQuadsInsertedInBytes", ""
+                    + sizeOfQuadsInsertedInBytes);
             this.doc.appendChild(this.root);
         } catch (Exception e) {
             System.out.println(e);
@@ -61,6 +64,16 @@ public class XmlWriter {
         elem.appendChild(child);
         Text text = this.doc.createTextNode(value);
         child.appendChild(text);
+        return child;
+    }
+
+    public Element addSubQueryResults(Element elem, String subQuery,
+                                      int nbResults) {
+        Element child = this.doc.createElement("subQuery");
+        elem.appendChild(child);
+        Text text = this.doc.createTextNode(subQuery);
+        child.appendChild(text);
+        child.setAttribute("nbResults", "" + nbResults);
         return child;
     }
 
