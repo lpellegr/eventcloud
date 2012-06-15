@@ -88,7 +88,9 @@ public class WsEventNotificationListener extends
     public void onNotification(SubscriptionId id, CompoundEvent solution) {
         try {
             this.getSubscriberWsClient().notify(
-                    WsnHelper.createNotifyMessage(this.streamQName, solution));
+                    WsnHelper.createNotifyMessage(
+                            this.subscriberWsEndpointUrl, this.streamQName,
+                            solution));
 
             log.info(
                     "Subscriber {} notified about:\n {}",

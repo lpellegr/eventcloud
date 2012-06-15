@@ -134,12 +134,11 @@ public class PubSubBenchmarkBSBM {
     @Parameters
     public static List<Object[]> getParameters() {
         // scenarios
-        return Arrays.asList(new Object[][] {
-        {
+        return Arrays.asList(new Object[][] {{
                 10, 1, 1, 1, new CompoundEventSupplier(2),
                 CompoundEventNotificationListener.class,
                 DatastoreType.IN_MEMORY}});
-        }
+    }
 
     @Test(timeout = 1800000)
     public void execute() throws EventCloudIdNotManaged {
