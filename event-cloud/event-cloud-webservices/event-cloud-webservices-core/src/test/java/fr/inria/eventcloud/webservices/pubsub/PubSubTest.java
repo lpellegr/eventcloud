@@ -117,10 +117,13 @@ public class PubSubTest {
 
         // Creates the notify request
         Notify notifyRequest =
-                WsnHelper.createNotifyMessage(topic, new CompoundEvent(
-                        this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, null)));
+                WsnHelper.createNotifyMessage(
+                        this.publishServiceInformation.getServer()
+                                .getEndpoint()
+                                .toString(), topic, new CompoundEvent(
+                                this.read(
+                                        "/notification-01.trig",
+                                        SerializationFormat.TriG, null)));
 
         // Publishes the event
         this.publishClient.notify(notifyRequest);
@@ -181,10 +184,13 @@ public class PubSubTest {
 
         // Creates the notify request emitted by source1
         Notify notifyRequest =
-                WsnHelper.createNotifyMessage(topic, new CompoundEvent(
-                        this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, source1)));
+                WsnHelper.createNotifyMessage(
+                        this.publishServiceInformation.getServer()
+                                .getEndpoint()
+                                .toString(), topic, new CompoundEvent(
+                                this.read(
+                                        "/notification-01.trig",
+                                        SerializationFormat.TriG, source1)));
 
         // Publishes the event
         this.publishClient.notify(notifyRequest);
@@ -199,10 +205,13 @@ public class PubSubTest {
 
         // Creates the notify request emitted by source2
         notifyRequest =
-                WsnHelper.createNotifyMessage(topic, new CompoundEvent(
-                        this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, source2)));
+                WsnHelper.createNotifyMessage(
+                        this.publishServiceInformation.getServer()
+                                .getEndpoint()
+                                .toString(), topic, new CompoundEvent(
+                                this.read(
+                                        "/notification-01.trig",
+                                        SerializationFormat.TriG, source2)));
 
         // Publishes the event
         this.publishClient.notify(notifyRequest);

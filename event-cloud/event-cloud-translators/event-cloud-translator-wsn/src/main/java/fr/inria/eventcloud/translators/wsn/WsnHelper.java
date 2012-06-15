@@ -95,14 +95,17 @@ public class WsnHelper {
     }
 
     /**
-     * Creates a notify message from the specified producer reference endpoint,
-     * topic information and payload.
+     * Creates a notify message from the specified subscription and producer
+     * reference endpoint, topic information and payload.
      * 
-     * @param producerReference
-     *            the producer reference endpoint of the notify message to
+     * @param subscriptionReference
+     *            the subscription reference endpoint of the notify message to
      *            build.
      * @param topic
      *            the qname associated to the topic of the notify message to
+     *            build.
+     * @param producerReference
+     *            the producer reference endpoint of the notify message to
      *            build.
      * @param payload
      *            the payload to include in the notify message to build.
@@ -110,18 +113,19 @@ public class WsnHelper {
      * @return a notify message with the specified producer reference endpoint,
      *         topic information and payload.
      */
-    public static Notify createNotifyMessage(String producerReference,
-                                             QName topic, Object payload) {
+    public static Notify createNotifyMessage(String subscriptionReference,
+                                             QName topic,
+                                             String producerReference,
+                                             Object payload) {
         Notify notify = new Notify();
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
 
+        notificationMessage.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
+
         notificationMessage.setTopic(createTopicExpressionType(topic));
 
-        W3CEndpointReferenceBuilder endPointReferenceBuilder =
-                new W3CEndpointReferenceBuilder();
-        endPointReferenceBuilder.address(producerReference);
-        notificationMessage.setProducerReference(endPointReferenceBuilder.build());
+        notificationMessage.setProducerReference(createW3cEndpointReference(producerReference));
 
         Message message = new Message();
         message.setAny(payload);
@@ -136,6 +140,9 @@ public class WsnHelper {
      * Creates a notify message from the specified topic information and
      * {@link CompoundEvent}s by using the corresponding {@code translator}.
      * 
+     * @param subscriptionReference
+     *            the subscription reference endpoint of the notify message to
+     *            build.
      * @param topic
      *            the qname associated to the topic of the notify message to
      *            build.
@@ -147,18 +154,37 @@ public class WsnHelper {
      * @throws TranslationException
      *             if an error during the translation occurs.
      */
-    public static Notify createNotifyMessage(QName topic,
+    public static Notify createNotifyMessage(String subscriptionReference,
+                                             QName topic,
                                              CompoundEvent... compoundEvents)
             throws TranslationException {
         Notify notify = new Notify();
 
         for (CompoundEvent event : compoundEvents) {
             NotificationMessageHolderType message = translator.translate(event);
+            message.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
             message.setTopic(createTopicExpressionType(topic));
             notify.getNotificationMessage().add(message);
         }
 
         return notify;
+    }
+
+    /**
+     * Creates a W3C endpoint reference from the specified address.
+     * 
+     * @param address
+     *            the address of the W3C endpoint reference to build.
+     * 
+     * @return a W3C endpoint reference from the specified address.
+     */
+    public static W3CEndpointReference createW3cEndpointReference(String address) {
+        W3CEndpointReferenceBuilder endPointReferenceBuilder =
+                new W3CEndpointReferenceBuilder();
+
+        endPointReferenceBuilder.address(address);
+
+        return endPointReferenceBuilder.build();
     }
 
     /**

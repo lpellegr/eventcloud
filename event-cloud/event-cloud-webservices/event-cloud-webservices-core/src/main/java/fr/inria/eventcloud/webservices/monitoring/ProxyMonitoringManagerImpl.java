@@ -150,18 +150,18 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
         // TODO: do it in parallel
         for (String consumerEndpoint : this.consumerEndpoints) {
             try {
-                this.notificationConsumerClients.get(consumerEndpoint)
-                        .notify(
-                                createRawReport(
-                                        source, destination,
-                                        eventPublicationTimestamp));
+                this.notificationConsumerClients.get(consumerEndpoint).notify(
+                        createRawReport(
+                                consumerEndpoint, source, destination,
+                                eventPublicationTimestamp));
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private static Notify createRawReport(String source, String destination,
+    private static Notify createRawReport(String consumerEndpoint,
+                                          String source, String destination,
                                           long eventPublicationTimestamp) {
         easybox.petalslink.com.esrawreport._1.ObjectFactory factory =
                 new ObjectFactory();
@@ -202,7 +202,8 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
                     .marshal(factory.createReportList(reportTypeList), doc);
 
             return WsnHelper.createNotifyMessage(
-                    source, RAW_REPORT_QNAME, doc.getDocumentElement());
+                    consumerEndpoint, RAW_REPORT_QNAME, source,
+                    doc.getDocumentElement());
         } catch (ParserConfigurationException e) {
             throw new IllegalStateException(e);
         } catch (JAXBException e) {

@@ -121,7 +121,10 @@ public class InputOutputMonitoringTest {
 
         // publishes a compound event through a ws publish proxy
         this.publishClient.notify(WsnHelper.createNotifyMessage(
-                STREAM_QNAME, CompoundEventGenerator.random(STREAM_URL, 10)));
+                this.publishServiceInformation.getServer()
+                        .getEndpoint()
+                        .toString(), STREAM_QNAME,
+                CompoundEventGenerator.random(STREAM_URL, 10)));
 
         // publishes a compound event through a java publish proxy
         this.publishProxy.publish(CompoundEventGenerator.random(STREAM_URL, 10));
