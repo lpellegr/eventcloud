@@ -34,7 +34,7 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.objectweb.proactive.extensions.deployment.scheduler;
+package org.ow2.proactive.scheduler.job.programming;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,23 +45,44 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.UniqueID;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.util.log.ProActiveLogger;
-import org.objectweb.proactive.extensions.deployment.scheduler.NodeProviderTask.NodeProviderTaskHolder;
 import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
+import org.ow2.proactive.scheduler.job.programming.NodeProviderTask.NodeProviderTaskHolder;
 
+/**
+ * Registry for {@link SchedulerNodeProvider}.
+ * 
+ * @author The ProActive Team
+ */
 public class NodeProviderRegistry {
     private static final Logger logger =
             ProActiveLogger.getLogger(SchedulerLoggers.SCHEDULE);
 
     private final Map<UniqueID, NodeRequest> nodeRequests;
 
+    /**
+     * Constructs a new {@link NodeProviderRegistry}.
+     */
     public NodeProviderRegistry() {
         this.nodeRequests = new HashMap<UniqueID, NodeRequest>();
     }
 
+    /**
+     * Returns the URL of the registry.
+     * 
+     * @return The URL of the registry.
+     */
     public String getURL() {
         return PAActiveObject.getUrl(PAActiveObject.getStubOnThis());
     }
 
+    /**
+     * Adds a node request to the list of node requests managed by the registry.
+     * 
+     * @param nodeRequestID
+     *            ID of the node request.
+     * @param nbNodes
+     *            Number of {@link Node nodes} of the node request.
+     */
     public void addNodeRequest(UniqueID nodeRequestID, int nbNodes) {
         if (!this.nodeRequests.containsKey(nodeRequestID)) {
             this.nodeRequests.put(nodeRequestID, new NodeRequest(
@@ -74,19 +95,35 @@ public class NodeProviderRegistry {
         }
     }
 
-    public void addNodeProviderTask(NodeProviderTaskHolder task) {
+    /**
+     * Registers a {@link NodeProviderTask}.
+     * 
+     * @param task
+     *            {@link NodeProviderTask} to register.
+     */
+    public void registerNodeProviderTask(NodeProviderTaskHolder task) {
         UniqueID nodeRequestID = task.getNodeRequestID();
 
         if (this.nodeRequests.containsKey(nodeRequestID)) {
             this.nodeRequests.get(nodeRequestID).addNodeProviderTask(task);
         } else {
-            task.terminate();
+            task.release();
 
             logger.error("Node provider task tried to register to node request #"
                     + nodeRequestID + " but there is no such node request ID");
         }
     }
 
+    /**
+     * Indicates if the deployment of the node request specified by the given ID
+     * is finished or not (ie. all {@link NodeProviderTask} have registered or
+     * not).
+     * 
+     * @param nodeRequestID
+     *            ID of the node request.
+     * @return True if the deployment for the node request specified by the
+     *         given ID is finished, false otherwise.
+     */
     public boolean isDeploymentFinished(UniqueID nodeRequestID) {
         if (this.nodeRequests.containsKey(nodeRequestID)) {
             return this.nodeRequests.get(nodeRequestID).isDeploymentFinished();
@@ -97,6 +134,15 @@ public class NodeProviderRegistry {
         }
     }
 
+    /**
+     * Returns the {@link Node nodes} of the node request specified by the given
+     * ID.
+     * 
+     * @param nodeRequestID
+     *            ID of the node request.
+     * @return The {@link Node nodes} of the node request specified by the given
+     *         ID.
+     */
     public List<Node> getNodes(UniqueID nodeRequestID) {
         if (this.nodeRequests.containsKey(nodeRequestID)) {
             return this.nodeRequests.get(nodeRequestID).getNodes();
@@ -107,6 +153,13 @@ public class NodeProviderRegistry {
         }
     }
 
+    /**
+     * Releases the {@link Node nodes} of the node request specified by the
+     * given ID.
+     * 
+     * @param nodeRequestID
+     *            ID of the node request.
+     */
     public void releaseNodes(UniqueID nodeRequestID) {
         if (this.nodeRequests.containsKey(nodeRequestID)) {
             this.nodeRequests.remove(nodeRequestID).releaseNodes();

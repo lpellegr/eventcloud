@@ -34,7 +34,7 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.objectweb.proactive.extensions.deployment.scheduler;
+package org.ow2.proactive.scheduler.job.programming;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -50,6 +50,11 @@ import org.ow2.proactive.scheduler.common.task.TaskResult;
 import org.ow2.proactive.scheduler.common.task.executable.JavaExecutable;
 import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
 
+/**
+ * Task for {@link NodeProviderJob}.
+ * 
+ * @author The ProActive Team
+ */
 public class NodeProviderTask extends JavaExecutable {
     private static final Logger logger =
             ProActiveLogger.getLogger(SchedulerLoggers.SCHEDULE);
@@ -58,6 +63,9 @@ public class NodeProviderTask extends JavaExecutable {
 
     private UniqueID nodeRequestID;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Serializable execute(TaskResult... arg0) throws Throwable {
         if (logger.isDebugEnabled()) {
@@ -70,9 +78,9 @@ public class NodeProviderTask extends JavaExecutable {
                         NodeProviderTaskHolder.class, new Object[] {
                                 this.registryURL, this.nodeRequestID},
                         PAActiveObject.getNode());
-        taskHolder.notifyRegistry();
+        taskHolder.registerToRegistry();
 
-        while (!taskHolder.hasTerminated()) {
+        while (!taskHolder.isReleased()) {
             Thread.sleep(1000);
         }
 
@@ -84,44 +92,83 @@ public class NodeProviderTask extends JavaExecutable {
         return null;
     }
 
+    /**
+     * Task holder for {@link NodeProviderTask}.
+     * 
+     * @author The ProActive Team
+     */
     public static class NodeProviderTaskHolder {
         private final String registryURL;
 
         private final UniqueID nodeRequestID;
 
-        private boolean terminated;
+        private boolean isReleased;
 
+        /**
+         * Constructs a new {@link NodeProviderTaskHolder}.
+         */
         public NodeProviderTaskHolder() {
             this.registryURL = null;
             this.nodeRequestID = null;
-            this.terminated = false;
+            this.isReleased = false;
         }
 
-        public NodeProviderTaskHolder(String registryURL,
-                UniqueID nodesRequestID) {
+        /**
+         * Constructs a new {@link NodeProviderTaskHolder}.
+         * 
+         * @param registryURL
+         *            URL of the {@link NodeProviderRegistry registry} on which
+         *            to register.
+         * @param nodeRequestID
+         *            ID of the node request.
+         */
+        public NodeProviderTaskHolder(String registryURL, UniqueID nodeRequestID) {
             this.registryURL = registryURL;
-            this.nodeRequestID = nodesRequestID;
-            this.terminated = false;
+            this.nodeRequestID = nodeRequestID;
+            this.isReleased = false;
         }
 
+        /**
+         * Returns the ID of the node request.
+         * 
+         * @return The ID of the node request.
+         */
         public UniqueID getNodeRequestID() {
             return this.nodeRequestID;
         }
 
-        public boolean hasTerminated() {
-            return this.terminated;
+        /**
+         * Indicates if the task has been released or not.
+         * 
+         * @return True if the task has been released, false otherwise.
+         */
+        public boolean isReleased() {
+            return this.isReleased;
         }
 
-        public void terminate() {
-            this.terminated = true;
+        /**
+         * Releases the task.
+         */
+        public void release() {
+            this.isReleased = true;
         }
 
-        public void notifyRegistry() throws ActiveObjectCreationException,
+        /**
+         * Registers the task to the {@link NodeProviderRegistry registry}.
+         * 
+         * @throws ActiveObjectCreationException
+         *             If a problem occurs when retrieving a reference of the
+         *             {@link NodeProviderRegistry registry}.
+         * @throws IOException
+         *             If a problem occurs when retrieving a reference of the
+         *             {@link NodeProviderRegistry registry}.
+         */
+        public void registerToRegistry() throws ActiveObjectCreationException,
                 IOException {
             NodeProviderRegistry registry =
                     PAActiveObject.lookupActive(
                             NodeProviderRegistry.class, this.registryURL);
-            registry.addNodeProviderTask((NodeProviderTaskHolder) PAActiveObject.getStubOnThis());
+            registry.registerNodeProviderTask((NodeProviderTaskHolder) PAActiveObject.getStubOnThis());
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Node provider task for node request #"
@@ -129,6 +176,11 @@ public class NodeProviderTask extends JavaExecutable {
             }
         }
 
+        /**
+         * Returns the {@link Node} on which the task is running.
+         * 
+         * @return The {@link Node} on which the task is running.
+         */
         public Node getNode() {
             try {
                 return PAActiveObject.getNode();

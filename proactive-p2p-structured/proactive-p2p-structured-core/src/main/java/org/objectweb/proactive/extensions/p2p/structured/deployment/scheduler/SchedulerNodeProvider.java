@@ -47,22 +47,22 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
 
     private String credentialsPath;
 
-    private String libsPath;
+    private String dataFolder;
 
     private List<String> jvmArguments;
 
     private transient List<GcmVirtualNodeEntry> virtualNodeEntries;
 
-    private transient org.objectweb.proactive.extensions.deployment.scheduler.SchedulerNodeProvider schedulerNodeProvider;
+    private transient org.ow2.proactive.scheduler.job.programming.SchedulerNodeProvider schedulerNodeProvider;
 
     private Map<String, GCMVirtualNode> virtualNodes;
 
     public SchedulerNodeProvider(String schedulerUrl, String credentialsPath,
-            String libsPath, List<String> jvmArguments,
+            String dataFolder, List<String> jvmArguments,
             List<GcmVirtualNodeEntry> entries) {
         this.schedulerUrl = schedulerUrl;
         this.credentialsPath = credentialsPath;
-        this.libsPath = libsPath;
+        this.dataFolder = dataFolder;
         this.jvmArguments = jvmArguments;
         this.virtualNodeEntries = entries;
         this.virtualNodes = new HashMap<String, GCMVirtualNode>();
@@ -77,21 +77,21 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
     public void init() {
         try {
             this.schedulerNodeProvider =
-                    new org.objectweb.proactive.extensions.deployment.scheduler.SchedulerNodeProvider();
+                    new org.ow2.proactive.scheduler.job.programming.SchedulerNodeProvider();
 
             for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
                 for (NodeSourceEntry nodeSourceEntry : virtualNodeEntry.getNodeSourceEntries()) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Acquires " + nodeSourceEntry.getNbNodes()
+                        log.debug("Acquiring " + nodeSourceEntry.getNbNodes()
                                 + " nodes on source node "
                                 + nodeSourceEntry.getNodeSourceName());
                     }
 
                     UniqueID nodeRequestId =
-                            this.schedulerNodeProvider.deployNodes(
+                            this.schedulerNodeProvider.submitNodeRequest(
                                     this.schedulerUrl, this.credentialsPath,
                                     nodeSourceEntry.getNbNodes(),
-                                    this.libsPath, this.jvmArguments,
+                                    this.dataFolder, this.jvmArguments,
                                     nodeSourceEntry.getNodeSourceName());
                     nodeSourceEntry.nodeRequestId = nodeRequestId;
                 }
@@ -147,7 +147,8 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
                     this.virtualNodes.put(
                             virtualNodeName,
                             this.schedulerNodeProvider.getGCMVirtualNode(
-                                    virtualNodeName, nodeRequestIds));
+                                    virtualNodeName,
+                                    nodeRequestIds.toArray(new UniqueID[0])));
                 } catch (Exception e) {
                     log.error("Failed to get GCMVirtualNode " + virtualNodeName
                             + ": " + e.getMessage(), e);

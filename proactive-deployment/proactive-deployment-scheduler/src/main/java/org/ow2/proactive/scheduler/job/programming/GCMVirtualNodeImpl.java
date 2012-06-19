@@ -34,12 +34,13 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.objectweb.proactive.extensions.deployment.scheduler;
+package org.ow2.proactive.scheduler.job.programming;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectweb.proactive.annotation.PublicAPI;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.core.ProActiveTimeoutException;
@@ -51,8 +52,9 @@ import org.objectweb.proactive.gcmdeployment.Topology;
 /**
  * Basic implementation of {@link GCMVirtualNode} interface. <br>
  * This implementation is useful for creating manually {@link GCMVirtualNode}
- * from a list of {@link Node}s. This implies that the {@link GCMVirtualNode}
- * has a fixed list of {@link Node} which is the one given at its creation. <br>
+ * from a list of {@link Node nodes}. This implies that the
+ * {@link GCMVirtualNode} has a fixed list of {@link Node nodes} which is the
+ * one given at its creation. <br>
  * Thus in this implementation, the {@link GCMVirtualNode}:
  * <ul>
  * <li>is not greedy.</li>
@@ -61,7 +63,7 @@ import org.objectweb.proactive.gcmdeployment.Topology;
  * methods are called.</li>
  * <li>returns the same number when calling both methods
  * {@link #getNbRequiredNodes()} and {@link #getNbCurrentNodes()} (ie. the size
- * of the given {@link Node} list).</li>
+ * of the given {@link Node node} list).</li>
  * <li>returns an empty list when calling {@link #getNewNodes()} method.</li>
  * <li>does not support subscriptions for node attachment notifications and
  * isReady notifications.</li>
@@ -70,8 +72,8 @@ import org.objectweb.proactive.gcmdeployment.Topology;
  * @author The ProActive Team
  * @see GCMVirtualNode
  */
+@PublicAPI
 public class GCMVirtualNodeImpl implements GCMVirtualNode, Serializable {
-
     private static final long serialVersionUID = 1L;
 
     private UniqueID uniqueID;
@@ -82,6 +84,16 @@ public class GCMVirtualNodeImpl implements GCMVirtualNode, Serializable {
 
     private int newNodeIndex;
 
+    /**
+     * Constructs a new {@link GCMVirtualNodeImpl} with the specified name and
+     * containing the specified list of {@link Node nodes}.
+     * 
+     * @param name
+     *            Name of the {@link GCMVirtualNode}.
+     * @param nodes
+     *            List of the {@link Node nodes} contained in the
+     *            {@link GCMVirtualNode}.
+     */
     public GCMVirtualNodeImpl(String name, List<Node> nodes) {
         this.uniqueID = new UniqueID();
         this.name = name;
@@ -89,54 +101,87 @@ public class GCMVirtualNodeImpl implements GCMVirtualNode, Serializable {
         this.newNodeIndex = 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return this.name;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isGreedy() {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isReady() {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void waitReady() {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void waitReady(long arg0) throws ProActiveTimeoutException {
+    public void waitReady(long timeout) throws ProActiveTimeoutException {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getNbRequiredNodes() {
         return this.nodes.size();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getNbCurrentNodes() {
         return this.nodes.size();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Node> getCurrentNodes() {
         return this.nodes;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Node> getNewNodes() {
         return new ArrayList<Node>(0);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Node getANode() {
         return this.getANode(0);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Node getANode(int timeout) {
         if (this.nodes.size() > this.newNodeIndex) {
@@ -147,46 +192,68 @@ public class GCMVirtualNodeImpl implements GCMVirtualNode, Serializable {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void subscribeNodeAttachment(Object arg0, String arg1, boolean arg2)
+    public void subscribeNodeAttachment(Object client, String methodName,
+                                        boolean withHistory)
             throws ProActiveException {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void unsubscribeNodeAttachment(Object arg0, String arg1)
+    public void unsubscribeNodeAttachment(Object client, String methodName)
             throws ProActiveException {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void subscribeIsReady(Object arg0, String arg1)
+    public void subscribeIsReady(Object client, String methodName)
             throws ProActiveException {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void unsubscribeIsReady(Object arg0, String arg1)
+    public void unsubscribeIsReady(Object client, String methodName)
             throws ProActiveException {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Topology getCurrentTopology() {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void updateTopology(Topology arg0) {
+    public void updateTopology(Topology topology) {
         throw new ProActiveRuntimeException(
                 "Not available in this implementation of GCMVirtualNode");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UniqueID getUniqueID() {
         return this.uniqueID;

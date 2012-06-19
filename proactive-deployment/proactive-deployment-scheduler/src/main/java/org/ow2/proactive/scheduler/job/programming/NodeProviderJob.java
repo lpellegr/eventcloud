@@ -34,7 +34,7 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.objectweb.proactive.extensions.deployment.scheduler;
+package org.ow2.proactive.scheduler.job.programming;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -48,12 +48,16 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.UniqueID;
+import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.util.log.ProActiveLogger;
 import org.objectweb.proactive.extensions.vfsprovider.FileSystemServerDeployer;
 import org.ow2.proactive.scheduler.common.Scheduler;
+import org.ow2.proactive.scheduler.common.exception.JobCreationException;
 import org.ow2.proactive.scheduler.common.exception.NotConnectedException;
 import org.ow2.proactive.scheduler.common.exception.PermissionException;
+import org.ow2.proactive.scheduler.common.exception.SubmissionClosedException;
 import org.ow2.proactive.scheduler.common.exception.UnknownJobException;
+import org.ow2.proactive.scheduler.common.exception.UserException;
 import org.ow2.proactive.scheduler.common.job.JobId;
 import org.ow2.proactive.scheduler.common.job.TaskFlowJob;
 import org.ow2.proactive.scheduler.common.task.ForkEnvironment;
@@ -63,6 +67,11 @@ import org.ow2.proactive.scripting.InvalidScriptException;
 import org.ow2.proactive.scripting.SelectionScript;
 import org.ow2.proactive.scripting.SimpleScript;
 
+/**
+ * Job for {@link SchedulerNodeProvider}.
+ * 
+ * @author The ProActive Team
+ */
 public class NodeProviderJob {
     private static final Logger logger =
             ProActiveLogger.getLogger(SchedulerLoggers.SCHEDULE);
@@ -86,34 +95,95 @@ public class NodeProviderJob {
         });
     }
 
+    /**
+     * Constructs and submits a new {@link NodeProviderJob} for the specified
+     * node request. <br>
+     * It creates a job composed of a number of {@link NodeProviderTask tasks}
+     * equals to the specified number of {@link Node nodes}. <br>
+     * The {@link Node nodes} of the {@link NodeProviderTask tasks} are selected
+     * by using the node source specified by the given name. <br>
+     * The contents of the specified data folder is put in the input space of
+     * the {@link NodeProviderTask tasks} and the jars contained in this folder
+     * are used to enrich the classpath of the JVM of the
+     * {@link NodeProviderTask tasks} on which the specified JVM arguments are
+     * also set. <br>
+     * The job is then submitted to the specified {@link Scheduler}.
+     * 
+     * @param nodeRequestID
+     *            ID of the node request.
+     * @param scheduler
+     *            {@link Scheduler} on which the job must be submitted.
+     * @param nbNodes
+     *            Number of {@link Node nodes}.
+     * @param dataFolder
+     *            Folder containing the data.
+     * @param jvmArguments
+     *            JVM arguments.
+     * @param registryURL
+     *            URL of the {@link NodeProviderRegistry}.
+     * @param nodeSourceName
+     *            Name of the node source.
+     * @throws NodeProviderException
+     *             If any error occurs during the deployment of the job.
+     */
     public NodeProviderJob(UniqueID nodeRequestID, Scheduler scheduler,
-            int nbNodes, String userJarsLocation, List<String> jvmArguments,
-            String registryURL, String nodeSourceName) throws Exception {
-        this.nodeRequestID = nodeRequestID;
-        this.scheduler = scheduler;
-        this.jobID =
-                this.scheduler.submit(this.createJob(
-                        nbNodes, userJarsLocation, jvmArguments, registryURL,
-                        nodeSourceName));
+            int nbNodes, String dataFolder, List<String> jvmArguments,
+            String registryURL, String nodeSourceName)
+            throws NodeProviderException {
+        try {
+            this.nodeRequestID = nodeRequestID;
+            this.scheduler = scheduler;
+            this.jobID =
+                    this.scheduler.submit(this.createJob(
+                            nbNodes, dataFolder, jvmArguments, registryURL,
+                            nodeSourceName));
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Job #" + this.jobID.getReadableName()
-                    + " for node request #" + this.nodeRequestID
-                    + " has been submitted to the scheduler");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Job #" + this.jobID.getReadableName()
+                        + " for node request #" + this.nodeRequestID
+                        + " has been submitted to the scheduler");
+            }
+        } catch (IOException ioe) {
+            throw new NodeProviderException(
+                    "Cannot start ProActive dataserver for node request #"
+                            + this.nodeRequestID + ": " + ioe.getMessage(), ioe);
+        } catch (InvalidScriptException ise) {
+            throw new NodeProviderException(
+                    "Cannot create job for node request #" + this.nodeRequestID
+                            + ": " + ise.getMessage(), ise);
+        } catch (UserException ue) {
+            throw new NodeProviderException(
+                    "Cannot create job for node request #" + this.nodeRequestID
+                            + ": " + ue.getMessage(), ue);
+        } catch (NotConnectedException nce) {
+            throw new NodeProviderException(
+                    "Cannot submit job for node request #" + this.nodeRequestID
+                            + ": " + nce.getMessage(), nce);
+        } catch (PermissionException pe) {
+            throw new NodeProviderException(
+                    "Cannot submit job for node request #" + this.nodeRequestID
+                            + ": " + pe.getMessage(), pe);
+        } catch (SubmissionClosedException sce) {
+            throw new NodeProviderException(
+                    "Cannot submit job for node request #" + this.nodeRequestID
+                            + ": " + sce.getMessage(), sce);
+        } catch (JobCreationException jce) {
+            throw new NodeProviderException(
+                    "Cannot submit job for node request #" + this.nodeRequestID
+                            + ": " + jce.getMessage(), jce);
         }
     }
 
-    private TaskFlowJob createJob(int nbNodes, String userJarsLocation,
+    private TaskFlowJob createJob(int nbNodes, String dataFolder,
                                   List<String> jvmArguments,
                                   String registryURL, String nodeSourceName)
-            throws Exception {
+            throws IOException, InvalidScriptException, UserException {
         TaskFlowJob job = new TaskFlowJob();
-        String inputSpaceURL = startFileSystemServer(userJarsLocation);
-        String[] userJars =
-                this.getUserJarsList(new File(userJarsLocation)).toArray(
-                        new String[] {});
+        String inputSpaceURL = startFileSystemServer(dataFolder);
+        String[] jarNames =
+                this.getJarNames(new File(dataFolder)).toArray(new String[] {});
 
-        job.setName("NodeProviderJob");
+        job.setName("NodeProviderJob#" + this.nodeRequestID);
         job.setInputSpace(inputSpaceURL);
 
         for (int i = 0; i < nbNodes; i++) {
@@ -133,7 +203,7 @@ public class NodeProviderJob {
             ForkEnvironment forkEnvironment = new ForkEnvironment();
             forkEnvironment.setWorkingDir(".");
             forkEnvironment.setEnvScript(new SimpleScript(
-                    addClasspathScriptPath, userJars));
+                    addClasspathScriptPath, jarNames));
             if (jvmArguments != null) {
                 for (String jvmArgument : jvmArguments) {
                     forkEnvironment.addJVMArgument(jvmArgument);
@@ -152,9 +222,9 @@ public class NodeProviderJob {
         return job;
     }
 
-    private List<String> getUserJarsList(File currentFile) {
+    private List<String> getJarNames(File currentFile) {
         if (currentFile.isDirectory()) {
-            List<String> userJars = new ArrayList<String>();
+            List<String> jarNames = new ArrayList<String>();
 
             File[] folders = currentFile.listFiles(new FileFilter() {
                 @Override
@@ -163,14 +233,13 @@ public class NodeProviderJob {
                 }
             });
             for (File folder : folders) {
-                List<String> innerUserJars = this.getUserJarsList(folder);
-                for (int i = 0; i < innerUserJars.size(); i++) {
-                    innerUserJars.set(i, folder.getName()
-                            + System.getProperty("file.separator")
-                            + innerUserJars.get(i));
+                List<String> innerJarNames = this.getJarNames(folder);
+                for (int i = 0; i < innerJarNames.size(); i++) {
+                    innerJarNames.set(i, folder.getName() + File.separator
+                            + innerJarNames.get(i));
                 }
 
-                userJars.addAll(innerUserJars);
+                jarNames.addAll(innerJarNames);
             }
 
             File[] jarFiles = currentFile.listFiles(new FilenameFilter() {
@@ -180,10 +249,10 @@ public class NodeProviderJob {
                 }
             });
             for (File jarFile : jarFiles) {
-                userJars.add(jarFile.getName());
+                jarNames.add(jarFile.getName());
             }
 
-            return userJars;
+            return jarNames;
         } else {
             return new ArrayList<String>();
         }
@@ -199,19 +268,10 @@ public class NodeProviderJob {
         return new SelectionScript(script, "JavaScript");
     }
 
-    public UniqueID getNodeRequestID() {
-        return this.nodeRequestID;
-    }
-
-    public Scheduler getScheduler() {
-        return this.scheduler;
-    }
-
-    public JobId getJobID() {
-        return this.jobID;
-    }
-
-    public void killNodeProviderJob() {
+    /**
+     * Kills the {@link NodeProviderJob}.
+     */
+    public void kill() {
         try {
             try {
                 this.scheduler.killJob(this.jobID);
@@ -231,42 +291,36 @@ public class NodeProviderJob {
                     + " because connection to the scheduler has been lost", nce);
         } catch (UnknownJobException uje) {
             logger.error("Cannot kill the node provider job #"
-                    + this.jobID.value() + " because job is unknown", uje);
+                    + this.jobID.value() + " because the job is unknown", uje);
         } catch (PermissionException pe) {
             logger.error("No permission to kill the node provider job #"
                     + this.jobID.value(), pe);
         }
     }
 
-    private static String startFileSystemServer(final String userJarsLocation)
+    private static synchronized String startFileSystemServer(final String dataFolder)
             throws IOException {
-        if (fileSystemServers.containsKey(userJarsLocation)) {
-            return fileSystemServers.get(userJarsLocation).getVFSRootURL();
+        if (fileSystemServers.containsKey(dataFolder)) {
+            return fileSystemServers.get(dataFolder).getVFSRootURL();
         } else {
-            try {
-                FileSystemServerDeployer fileSystemServer =
-                        new FileSystemServerDeployer(userJarsLocation, true);
-                String url = fileSystemServer.getVFSRootURL();
-                fileSystemServers.put(userJarsLocation, fileSystemServer);
+            FileSystemServerDeployer fileSystemServer =
+                    new FileSystemServerDeployer(dataFolder, true);
+            String url = fileSystemServer.getVFSRootURL();
+            fileSystemServers.put(dataFolder, fileSystemServer);
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("ProActive dataserver successfully started. VFS URL of this provider: "
-                            + url);
-                }
-
-                return url;
-            } catch (IOException ioe) {
-                logger.error("Cannot start ProActive dataserver: "
-                        + ioe.getMessage(), ioe);
-                throw ioe;
+            if (logger.isDebugEnabled()) {
+                logger.debug("ProActive dataserver successfully started. VFS URL of this provider: "
+                        + url);
             }
+
+            return url;
         }
     }
 
-    private static void stopFileSystemServer(String userJarsLocation) {
-        if (fileSystemServers.containsKey(userJarsLocation)) {
+    private static synchronized void stopFileSystemServer(String dataFolder) {
+        if (fileSystemServers.containsKey(dataFolder)) {
             FileSystemServerDeployer fileSystemServer =
-                    fileSystemServers.get(userJarsLocation);
+                    fileSystemServers.get(dataFolder);
             try {
                 fileSystemServer.terminate();
 
@@ -285,8 +339,8 @@ public class NodeProviderJob {
     }
 
     private static void stopAllFileSystemServers() {
-        for (String userJarsLocation : fileSystemServers.keySet()) {
-            stopFileSystemServer(userJarsLocation);
+        for (String dataFolder : fileSystemServers.keySet()) {
+            stopFileSystemServer(dataFolder);
         }
     }
 }

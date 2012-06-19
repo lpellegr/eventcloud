@@ -34,7 +34,7 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.objectweb.proactive.extensions.deployment.scheduler;
+package org.ow2.proactive.scheduler.job.programming;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +43,14 @@ import org.apache.log4j.Logger;
 import org.objectweb.proactive.core.UniqueID;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.util.log.ProActiveLogger;
-import org.objectweb.proactive.extensions.deployment.scheduler.NodeProviderTask.NodeProviderTaskHolder;
 import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
+import org.ow2.proactive.scheduler.job.programming.NodeProviderTask.NodeProviderTaskHolder;
 
+/**
+ * Node request for {@link NodeProviderRegistry}.
+ * 
+ * @author The ProActive Team
+ */
 public class NodeRequest {
     private static final Logger logger =
             ProActiveLogger.getLogger(SchedulerLoggers.SCHEDULE);
@@ -56,10 +61,19 @@ public class NodeRequest {
 
     private List<NodeProviderTaskHolder> tasks;
 
-    public NodeRequest(UniqueID nodeRequestId, int nbNodes) {
-        this.nodeRequestID = nodeRequestId;
+    /**
+     * Constructs a new {@link NodeRequest}.
+     * 
+     * @param nodeRequestId
+     *            ID of the node request.
+     * @param nbNodes
+     *            Number of {@link Node nodes} of the node request.
+     */
+    public NodeRequest(UniqueID nodeRequestID, int nbNodes) {
+        this.nodeRequestID = nodeRequestID;
         this.nbNodes = nbNodes;
-        this.tasks = new ArrayList<NodeProviderTask.NodeProviderTaskHolder>();
+        this.tasks =
+                new ArrayList<NodeProviderTask.NodeProviderTaskHolder>(nbNodes);
     }
 
     public void addNodeProviderTask(NodeProviderTaskHolder task) {
@@ -71,7 +85,7 @@ public class NodeRequest {
                         + this.nodeRequestID);
             }
         } else {
-            task.terminate();
+            task.release();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Received registration of node provider task for node request #"
@@ -81,11 +95,27 @@ public class NodeRequest {
         }
     }
 
+    /**
+     * Indicates whether the deployment is finished or not.
+     * 
+     * @return True if the deployment is finished, false otherwise.
+     */
     public boolean isDeploymentFinished() {
         return this.tasks.size() == this.nbNodes;
     }
 
+    /**
+     * Returns the registered {@link Node nodes}.
+     * 
+     * @return The registered {@link Node nodes}.
+     */
     public List<Node> getNodes() {
+        if (!this.isDeploymentFinished()) {
+            logger.warn("Deployment of node request #" + this.nodeRequestID
+                    + " is not finished, only " + this.tasks.size() + " of "
+                    + this.nbNodes + " tasks are registered");
+        }
+
         List<Node> nodes = new ArrayList<Node>();
 
         for (NodeProviderTaskHolder task : this.tasks) {
@@ -95,9 +125,12 @@ public class NodeRequest {
         return nodes;
     }
 
+    /**
+     * Releases the {@link Node nodes}.
+     */
     public void releaseNodes() {
         for (NodeProviderTaskHolder task : this.tasks) {
-            task.terminate();
+            task.release();
         }
 
         if (logger.isDebugEnabled()) {
