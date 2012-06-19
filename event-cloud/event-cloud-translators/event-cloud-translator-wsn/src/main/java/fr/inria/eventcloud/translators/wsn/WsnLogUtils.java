@@ -142,7 +142,7 @@ public class WsnLogUtils {
                     log.info("topicContent is null");
                 }
             } else {
-                log.info("topicType is null");
+                log.info("topicExpressionType is null");
             }
 
             logW3CEndpointReference(msg.getProducerReference(), "producer");
