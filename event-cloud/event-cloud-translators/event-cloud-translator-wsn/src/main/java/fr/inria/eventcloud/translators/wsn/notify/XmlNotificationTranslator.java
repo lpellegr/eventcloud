@@ -165,8 +165,17 @@ public class XmlNotificationTranslator extends
                 if (subscriptionAddressUri != null) {
                     subscriptionAddressNode =
                             Node.createLiteral(subscriptionAddressUri);
+                } else {
+                    throw new TranslationException(
+                            "No subscription uri specified");
                 }
+            } else {
+                throw new TranslationException(
+                        "No subscription address specified");
             }
+        } else {
+            throw new TranslationException(
+                    "No subscription reference specified");
         }
 
         if (notificationMessage.getTopic() != null) {
@@ -186,6 +195,9 @@ public class XmlNotificationTranslator extends
             topicNode =
                     Node.createURI(topicNamespace + topic.getLocalPart()
                             + Stream.STREAM_ID_SUFFIX);
+        } else {
+            throw new TranslationException(
+                    "No topic defined in the notify message");
         }
 
         W3CEndpointReference producerReference =
@@ -200,7 +212,11 @@ public class XmlNotificationTranslator extends
                 if (producerAddressUri != null) {
                     producerAddressNode =
                             Node.createLiteral(producerAddressUri);
+                } else {
+                    throw new TranslationException("No producer uri specified");
                 }
+            } else {
+                throw new TranslationException("No producer address specified");
             }
 
             Object metadata =
@@ -234,6 +250,9 @@ public class XmlNotificationTranslator extends
                     }
                 }
             }
+        } else {
+            throw new TranslationException(
+                    "No producer reference defined in the notify message");
         }
 
         if (eventId == null) {
@@ -253,33 +272,24 @@ public class XmlNotificationTranslator extends
             if (messageNodes == null) {
                 throw new TranslationException("messageNodes is null");
             }
+        } else {
+            throw new TranslationException(
+                    "No any content specified in the notify message");
         }
 
-        if (subscriptionAddressNode != null) {
-            quads.add(new Quadruple(
-                    eventIdNode, subjectNode,
-                    WsnTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
-                    subscriptionAddressNode, false, true));
-        } else {
-            log.warn("No subscription reference address set in the notification message");
-        }
+        quads.add(new Quadruple(
+                eventIdNode, subjectNode,
+                WsnTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
+                subscriptionAddressNode, false, true));
 
-        if (topicNode != null) {
-            quads.add(new Quadruple(
-                    eventIdNode, subjectNode,
-                    WsnTranslatorConstants.TOPIC_NODE, topicNode, false, true));
-        } else {
-            log.warn("No topic set in the notification message");
-        }
+        quads.add(new Quadruple(
+                eventIdNode, subjectNode, WsnTranslatorConstants.TOPIC_NODE,
+                topicNode, false, true));
 
-        if (producerAddressNode != null) {
-            quads.add(new Quadruple(
-                    eventIdNode, subjectNode,
-                    WsnTranslatorConstants.PRODUCER_ADDRESS_NODE,
-                    producerAddressNode, false, true));
-        } else {
-            log.warn("No producer reference address set in the notification message");
-        }
+        quads.add(new Quadruple(
+                eventIdNode, subjectNode,
+                WsnTranslatorConstants.PRODUCER_ADDRESS_NODE,
+                producerAddressNode, false, true));
 
         for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
             quads.add(new Quadruple(
