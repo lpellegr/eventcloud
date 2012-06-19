@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE definition PUBLIC "-//objectweb.org//DTD Fractal ADL 2.0//EN" "classpath://org/objectweb/proactive/core/component/adl/xml/proactive.dtd">
+
+<definition name="fr.inria.eventcloud.webservices.proxies.SubscribeWsProxy" extends="fr.inria.eventcloud.proxies.SubscribeProxy">
+	<interface role="server" name="subscribe-webservices" signature="fr.inria.eventcloud.webservices.api.SubscribeWsApi"/>
+
+	<content class="fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyImpl"/>
+
+	<controller desc="/org/objectweb/proactive/extensions/webservices/cxf/component/controller/cxf-component-config.xml"/>
+</definition>
