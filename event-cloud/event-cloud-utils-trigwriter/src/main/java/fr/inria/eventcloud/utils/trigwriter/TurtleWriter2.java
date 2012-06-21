@@ -19,6 +19,7 @@
 package fr.inria.eventcloud.utils.trigwriter;
 
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,12 +29,12 @@ import java.util.Set;
 
 import org.openjena.atlas.io.IndentedWriter;
 import org.openjena.atlas.lib.Pair;
+import org.openjena.riot.out.OutputLangUtils;
 
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.sparql.util.FmtUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 public class TurtleWriter2 {
@@ -331,8 +332,11 @@ public class TurtleWriter2 {
                 return;
             }
         }
-
-        print(out, FmtUtils.stringForNode(node));
+        
+        StringWriter tmp = new StringWriter();
+        OutputLangUtils.output(tmp, node, null);
+        
+        print(out, tmp.getBuffer().toString());
     }
 
     /** Abbreviate an IRI or return null */
