@@ -74,6 +74,7 @@ public class EventCloudManagementWsDeployer {
                                 boolean activateLoggers) throws IOException {
         return deploy(
                 eventCloudWsStartPort, eventCloudManagementWsUrlSuffix, null,
+                EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
                 activateLoggers);
     }
 
@@ -82,13 +83,15 @@ public class EventCloudManagementWsDeployer {
                                 String socialFilterUrl) throws IOException {
         return deploy(
                 eventCloudWsStartPort, eventCloudManagementWsUrlSuffix,
-                socialFilterUrl, true);
+                socialFilterUrl,
+                EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(), true);
     }
 
     public static String deploy(int eventCloudWsStartPort,
                                 String eventCloudManagementWsUrlSuffix,
-                                String socialFilterUrl, boolean activateLoggers)
-            throws IOException {
+                                String socialFilterUrl,
+                                double socialFilterThreshold,
+                                boolean activateLoggers) throws IOException {
         if (eventCloudManagementWsProcess == null) {
             List<String> cmd = new ArrayList<String>();
 
@@ -110,6 +113,7 @@ public class EventCloudManagementWsDeployer {
             cmd.add(EventCloudManagementWsDeployer.class.getCanonicalName());
             cmd.add(Integer.toString(eventCloudWsStartPort));
             cmd.add(eventCloudManagementWsUrlSuffix);
+            cmd.add(Double.toString(socialFilterThreshold));
 
             if (socialFilterUrl != null && !socialFilterUrl.isEmpty()) {
                 cmd.add(socialFilterUrl);
@@ -321,13 +325,15 @@ public class EventCloudManagementWsDeployer {
         Logger log =
                 LoggerFactory.getLogger(EventCloudManagementWsDeployer.class);
 
-        if (args.length < 2 || args.length > 3) {
-            log.error("Usage: main start_port url_suffix [social_filter_url]");
+        if (args.length < 3 || args.length > 4) {
+            log.error("Usage: main start_port url_suffix social_filter_threshold [social_filter_url]");
             System.exit(1);
         }
 
-        if (args.length == 3) {
-            EventCloudProperties.SOCIAL_FILTER_URL.setValue(args[2]);
+        EventCloudProperties.SOCIAL_FILTER_THRESHOLD.setValue(Double.parseDouble(args[2]));
+
+        if (args.length == 4) {
+            EventCloudProperties.SOCIAL_FILTER_URL.setValue(args[3]);
             log.info(
                     "Property 'eventcloud.socialfilter.url' set to value '{}'",
                     args[2]);
@@ -347,4 +353,5 @@ public class EventCloudManagementWsDeployer {
                         .getEndpointInfo()
                         .getAddress());
     }
+
 }
