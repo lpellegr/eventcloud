@@ -70,11 +70,11 @@ public class EventCloudManagementWsDeployer {
     }
 
     public static String deploy(int eventCloudWsStartPort,
-                                String eventCloudManagementWsUrlSuffix)
-            throws IOException {
+                                String eventCloudManagementWsUrlSuffix,
+                                boolean activateLoggers) throws IOException {
         return deploy(
                 eventCloudWsStartPort, eventCloudManagementWsUrlSuffix, null,
-                true);
+                activateLoggers);
     }
 
     public static String deploy(int eventCloudWsStartPort,
@@ -321,7 +321,7 @@ public class EventCloudManagementWsDeployer {
         Logger log =
                 LoggerFactory.getLogger(EventCloudManagementWsDeployer.class);
 
-        if (args.length != 2 || args.length != 3) {
+        if (args.length < 2 || args.length > 3) {
             log.error("Usage: main start_port url_suffix [social_filter_url]");
             System.exit(1);
         }
