@@ -70,15 +70,17 @@ public class EventCloudManagementWsDeployer {
     }
 
     public static String deploy(int eventCloudWsStartPort,
-                                String eventCloudManagementWsUrlSuffix)
-            throws IOException {
+                                String eventCloudManagementWsUrlSuffix,
+                                String socialFilterUrl) throws IOException {
         return deploy(
-                eventCloudWsStartPort, eventCloudManagementWsUrlSuffix, true);
+                eventCloudWsStartPort, eventCloudManagementWsUrlSuffix,
+                socialFilterUrl, true);
     }
 
     public static String deploy(int eventCloudWsStartPort,
                                 String eventCloudManagementWsUrlSuffix,
-                                boolean activateLoggers) throws IOException {
+                                String socialFilterUrl, boolean activateLoggers)
+            throws IOException {
         if (eventCloudManagementWsProcess == null) {
             List<String> cmd = new ArrayList<String>();
 
@@ -93,7 +95,7 @@ public class EventCloudManagementWsDeployer {
             cmd.add("-cp");
             cmd.add(addClassPath());
 
-            cmd.addAll(addProperties(activateLoggers));
+            cmd.addAll(addProperties(socialFilterUrl, activateLoggers));
 
             cmd.add(EventCloudManagementWsDeployer.class.getCanonicalName());
             cmd.add(Integer.toString(eventCloudWsStartPort));
@@ -197,7 +199,8 @@ public class EventCloudManagementWsDeployer {
         }
     }
 
-    private static List<String> addProperties(boolean activateLoggers)
+    private static List<String> addProperties(String socialFilterUrl,
+                                              boolean activateLoggers)
             throws IOException {
         downloadResources(activateLoggers);
 
@@ -223,6 +226,10 @@ public class EventCloudManagementWsDeployer {
 
         properties.add("-Deventcloud.configuration=" + resourcesDirPath
                 + File.separator + "eventcloud.properties");
+
+        if (socialFilterUrl != null) {
+            properties.add("-Deventcloud.socialfilter.url=" + socialFilterUrl);
+        }
 
         return properties;
     }
