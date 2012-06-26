@@ -202,11 +202,13 @@ public class XmlNotificationTranslator extends
 
         W3CEndpointReference producerReference =
                 notificationMessage.getProducerReference();
+        String producerAddressUri = null;
+
         if (producerReference != null) {
             Object producerAddress =
                     ReflectionUtils.getFieldValue(producerReference, "address");
             if (producerAddress != null) {
-                String producerAddressUri =
+                producerAddressUri =
                         (String) ReflectionUtils.getFieldValue(
                                 producerAddress, "uri");
                 if (producerAddressUri != null) {
@@ -301,6 +303,12 @@ public class XmlNotificationTranslator extends
             quads.add(new Quadruple(
                     eventIdNode, subjectNode, entry.getKey(), entry.getValue(),
                     false, true));
+        }
+
+        if (producerAddressUri != null) {
+            for (Quadruple q : quads) {
+                q.setPublicationSource(producerAddressUri);
+            }
         }
 
         return new CompoundEvent(quads);
