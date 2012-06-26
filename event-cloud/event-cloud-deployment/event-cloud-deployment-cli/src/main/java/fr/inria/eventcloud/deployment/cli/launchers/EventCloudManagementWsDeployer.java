@@ -321,7 +321,7 @@ public class EventCloudManagementWsDeployer {
         Logger log =
                 LoggerFactory.getLogger(EventCloudManagementWsDeployer.class);
 
-        if (args.length != 2) {
+        if (args.length != 2 || args.length != 3) {
             log.error("Usage: main start_port url_suffix [social_filter_url]");
             System.exit(1);
         }
