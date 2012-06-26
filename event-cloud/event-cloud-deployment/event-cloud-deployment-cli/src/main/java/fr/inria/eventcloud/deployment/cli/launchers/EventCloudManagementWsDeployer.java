@@ -70,6 +70,14 @@ public class EventCloudManagementWsDeployer {
     }
 
     public static String deploy(int eventCloudWsStartPort,
+                                String eventCloudManagementWsUrlSuffix)
+            throws IOException {
+        return deploy(
+                eventCloudWsStartPort, eventCloudManagementWsUrlSuffix, null,
+                true);
+    }
+
+    public static String deploy(int eventCloudWsStartPort,
                                 String eventCloudManagementWsUrlSuffix,
                                 String socialFilterUrl) throws IOException {
         return deploy(
@@ -84,22 +92,28 @@ public class EventCloudManagementWsDeployer {
         if (eventCloudManagementWsProcess == null) {
             List<String> cmd = new ArrayList<String>();
 
+            String javaBinaryPath =
+                    System.getProperty("java.home") + File.separator + "bin"
+                            + File.separator + "java";
+
             if (System.getProperty("os.name").startsWith("Windows")) {
-                cmd.add(System.getProperty("java.home") + File.separator
-                        + "bin" + File.separator + "java.exe");
-            } else {
-                cmd.add(System.getProperty("java.home") + File.separator
-                        + "bin" + File.separator + "java");
+                javaBinaryPath = javaBinaryPath + ".exe";
             }
+
+            cmd.add(javaBinaryPath);
 
             cmd.add("-cp");
             cmd.add(addClassPath());
 
-            cmd.addAll(addProperties(socialFilterUrl, activateLoggers));
+            cmd.addAll(addProperties(activateLoggers));
 
             cmd.add(EventCloudManagementWsDeployer.class.getCanonicalName());
             cmd.add(Integer.toString(eventCloudWsStartPort));
             cmd.add(eventCloudManagementWsUrlSuffix);
+
+            if (socialFilterUrl != null && !socialFilterUrl.isEmpty()) {
+                cmd.add(socialFilterUrl);
+            }
 
             final ProcessBuilder processBuilder =
                     new ProcessBuilder(cmd.toArray(new String[cmd.size()]));
@@ -199,8 +213,7 @@ public class EventCloudManagementWsDeployer {
         }
     }
 
-    private static List<String> addProperties(String socialFilterUrl,
-                                              boolean activateLoggers)
+    private static List<String> addProperties(boolean activateLoggers)
             throws IOException {
         downloadResources(activateLoggers);
 
@@ -226,10 +239,6 @@ public class EventCloudManagementWsDeployer {
 
         properties.add("-Deventcloud.configuration=" + resourcesDirPath
                 + File.separator + "eventcloud.properties");
-
-        if (socialFilterUrl != null) {
-            properties.add("-Deventcloud.socialfilter.url=" + socialFilterUrl);
-        }
 
         return properties;
     }
@@ -313,8 +322,15 @@ public class EventCloudManagementWsDeployer {
                 LoggerFactory.getLogger(EventCloudManagementWsDeployer.class);
 
         if (args.length != 2) {
-            log.error("Usage: main start_port url_suffix");
+            log.error("Usage: main start_port url_suffix [social_filter_url]");
             System.exit(1);
+        }
+
+        if (args.length == 3) {
+            EventCloudProperties.SOCIAL_FILTER_URL.setValue(args[2]);
+            log.info(
+                    "Property 'eventcloud.socialfilter.url' set to value '{}'",
+                    args[2]);
         }
 
         EventCloudsRegistry eventCloudsRegistry =
@@ -331,5 +347,4 @@ public class EventCloudManagementWsDeployer {
                         .getEndpointInfo()
                         .getAddress());
     }
-
 }
