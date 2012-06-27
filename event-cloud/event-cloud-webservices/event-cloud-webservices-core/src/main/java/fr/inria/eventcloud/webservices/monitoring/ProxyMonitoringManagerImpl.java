@@ -21,6 +21,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -95,6 +97,8 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
 
     private List<String> consumerEndpoints;
 
+    private ExecutorService cachedThreadPool;
+
     public ProxyMonitoringManagerImpl() {
 
     }
@@ -145,19 +149,35 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
      * {@inheritDoc}
      */
     @Override
-    public void sendInputOutputMonitoringReport(String source,
-                                                String destination,
-                                                long eventPublicationTimestamp) {
-        for (String consumerEndpoint : this.consumerEndpoints) {
-            try {
-                this.notificationConsumerClients.get(consumerEndpoint).notify(
-                        createRawReport(
-                                consumerEndpoint, source, destination,
-                                eventPublicationTimestamp));
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
+    public void sendInputOutputMonitoringReport(final String source,
+                                                final String destination,
+                                                final long eventPublicationTimestamp) {
+        for (final String consumerEndpoint : this.consumerEndpoints) {
+            this.getCachedThreadPool().execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        notificationConsumerClients.get(consumerEndpoint)
+                                .notify(
+                                        createRawReport(
+                                                consumerEndpoint, source,
+                                                destination,
+                                                eventPublicationTimestamp));
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
+    }
+
+    private synchronized ExecutorService getCachedThreadPool() {
+        if (this.cachedThreadPool == null) {
+            this.cachedThreadPool = Executors.newCachedThreadPool();
+        }
+
+        return this.cachedThreadPool;
     }
 
     private static Notify createRawReport(String consumerEndpoint,
