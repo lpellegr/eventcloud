@@ -341,7 +341,7 @@ public class SubscribeProxyTest {
             }
         }
 
-        ce = events.iterator().next();
+        ce = events.get(0);
 
         // try to republish the event which has been received
         this.publishProxy.publish(ce);

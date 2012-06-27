@@ -270,6 +270,12 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
 
         // perform polling while all the quadruples have not been retrieved
         while (quadsReceived.size() != expectedNumberOfQuadruples) {
+            // the reconstruct operation is stopped if an another thread has
+            // already reconstructed the compound event before the current one
+            if (this.eventIdsReceived.containsKey(eventId)) {
+                return null;
+            }
+
             log.info(
                     "Reconstructing compound event for subscription {} and graph value {} ({}/{})",
                     new Object[] {
@@ -304,6 +310,11 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }
+
+        if (this.eventIdsReceived.putIfAbsent(eventId, id) != null) {
+            // an another thread has already reconstructed the same event
+            return null;
         }
 
         // we create an event from quadruples which comes from a previous event.
@@ -356,22 +367,21 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             this.deliver(
                     id, (CompoundEventNotificationListener) listener, solution);
         } else if (listener instanceof SignalNotificationListener) {
-            this.deliver(id, (SignalNotificationListener) listener);
+            this.deliver(id, (SignalNotificationListener) listener, solution);
         } else {
             log.error(
                     "Unknown notification listener for delivery: {}",
                     listener.getClass());
         }
 
-        Node eventId =
-                this.extractEventId(
-                        this.subscriptions.get(id.getSubscriptionId()),
-                        solution.getSolution());
+        log.info("Notification {} has been delivered", id);
+    }
 
-        // monitoring reports have to be sent per compound event and not per
-        // event
-        if (this.eventIdsReceived.putIfAbsent(eventId, id.getSubscriptionId()) == null
-                && (super.monitoringManager != null)) {
+    private void sendMonitoringReports(SubscriptionId id, Binding binding,
+                                       NotificationListener<?> listener) {
+        if (super.monitoringManager != null) {
+            Node eventId =
+                    this.extractEventId(this.subscriptions.get(id), binding);
 
             String destination = this.componentUri;
             if (listener.getSubscriberUrl() != null) {
@@ -386,14 +396,15 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             super.monitoringManager.sendInputOutputMonitoringReport(
                     source, destination, Quadruple.getPublicationTime(eventId));
         }
-
-        log.info("Notification {} has been delivered", id);
     }
 
     private final void deliver(NotificationId id,
                                BindingNotificationListener listener,
                                Solution solution) {
         listener.onNotification(id.getSubscriptionId(), solution.getSolution());
+
+        this.sendMonitoringReports(
+                id.getSubscriptionId(), solution.getSolution(), listener);
     }
 
     private final void deliver(NotificationId id,
@@ -413,12 +424,19 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
 
         if (compoundEvent != null) {
             listener.onNotification(id.getSubscriptionId(), compoundEvent);
+
+            this.sendMonitoringReports(
+                    id.getSubscriptionId(), solution.getSolution(), listener);
         }
     }
 
     private final void deliver(NotificationId id,
-                               SignalNotificationListener listener) {
+                               SignalNotificationListener listener,
+                               Solution solution) {
         listener.onNotification(id.getSubscriptionId());
+
+        this.sendMonitoringReports(
+                id.getSubscriptionId(), solution.getSolution(), listener);
     }
 
     /**

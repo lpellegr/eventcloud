@@ -96,6 +96,7 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
     private List<String> consumerEndpoints;
 
     public ProxyMonitoringManagerImpl() {
+
     }
 
     /**
@@ -147,7 +148,6 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
     public void sendInputOutputMonitoringReport(String source,
                                                 String destination,
                                                 long eventPublicationTimestamp) {
-        // TODO: do it in parallel
         for (String consumerEndpoint : this.consumerEndpoints) {
             try {
                 this.notificationConsumerClients.get(consumerEndpoint).notify(
