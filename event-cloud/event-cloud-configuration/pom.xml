@@ -21,18 +21,6 @@
 			<artifactId>proactive-p2p-structured-configuration</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.jdom</groupId>
-			<artifactId>jdom</artifactId>
-			<version>1.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 </project>
