@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.webservices;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
@@ -97,6 +98,9 @@ public class WsEventNotificationListener extends
                     this.subscriberWsEndpointUrl, solution);
         } catch (TranslationException e) {
             log.error("Error during translation", e);
+        } catch (WebServiceException e) {
+            log.error("Failed to send notification to "
+                    + this.subscriberWsEndpointUrl, e.getCause());
         }
     }
 
