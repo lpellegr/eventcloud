@@ -36,7 +36,7 @@
 
 	<issueManagement>
 		<system>Bitbucket</system>
-		<url>https://bitbucket.org/eventcloud/eventcloud/issues/</url>
+		<url>https://bitbucket.org/eventcloud/eventcloud/issues</url>
 	</issueManagement>
 
 	<repositories>
@@ -46,8 +46,8 @@
 			<url>https://repository.apache.org/content/repositories/snapshots</url>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots-proactive-604</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-604</url>
+			<id>sonatype-snapshots-proactive-381</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-381</url>
 		</repository>
 		<repository>
 			<id>play-private.release</id>
@@ -170,7 +170,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming-bundle</artifactId>
-				<version>5.2.0-update-5</version>
+				<version>5.2.0-update-6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
