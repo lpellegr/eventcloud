@@ -19,7 +19,11 @@ package fr.inria.eventcloud.deployment.cli.readers;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.objectweb.proactive.core.ProActiveException;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.LoggerContext;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -30,8 +34,9 @@ import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 import fr.inria.eventcloud.deployment.cli.commands.CreateEventCloudCommand;
+import fr.inria.eventcloud.deployment.cli.commands.DestroyEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
-import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
+import fr.inria.eventcloud.deployment.cli.commands.SubscribeEventCloudCommand;
 
 /**
  * This class is used to execute some operation (e.g. to create an
@@ -42,11 +47,22 @@ import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
  */
 public class EventCloudsRegistryReader {
 
-    @Parameter(names = {"-registry"}, description = "An eventclouds registry URL to use")
+    @Parameter(names = {"-r", "--registry-url"}, description = "Eventclouds registry URL to use", required = true)
     private String registryUrl;
 
     public static void main(String[] args) {
+        disableLogging();
+
         new EventCloudsRegistryReader().run(args);
+    }
+
+    private static void disableLogging() {
+        System.setProperty("log4j.configuration", "");
+        Logger.getRootLogger().setLevel(Level.OFF);
+
+        LoggerContext context =
+                (LoggerContext) LoggerFactory.getILoggerFactory();
+        context.reset();
     }
 
     public void run(String[] args) {
@@ -60,31 +76,30 @@ public class EventCloudsRegistryReader {
             System.exit(1);
         }
 
-        EventCloudsRegistry registry = null;
-        if (this.registryUrl != null) {
-            try {
-                registry = EventCloudsRegistryImpl.lookup(this.registryUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-        } else {
-            registry = EventCloudsRegistryFactory.newEventCloudsRegistry();
+        System.out.println("Connecting to " + this.registryUrl + "...");
 
-            try {
-                System.out.println(registry.register("eventclouds-registry"));
-            } catch (ProActiveException e) {
-                e.printStackTrace();
-            }
+        EventCloudsRegistry registry = null;
+        try {
+            registry = EventCloudsRegistryImpl.lookup(this.registryUrl);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
 
-        System.out.println("\nType 'help' to know what are the possible actions");
+        System.out.println("Type 'help' to know what are the possible actions");
 
+        @SuppressWarnings("unchecked")
         CommandLineReader<EventCloudsRegistry> reader =
                 new CommandLineReader<EventCloudsRegistry>(Arrays.asList(
                         new CreateEventCloudCommand(),
-                        new ListEventCloudsCommand()), registry);
+                        new DestroyEventCloudCommand(),
+                        new ListEventCloudsCommand(),
+                        new SubscribeEventCloudCommand()), registry);
         reader.run();
+    }
+
+    public String getRegistryUrl() {
+        return this.registryUrl;
     }
 
 }

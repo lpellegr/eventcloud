@@ -24,25 +24,29 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
+import fr.inria.eventcloud.deployment.cli.converters.EventCloudIdConverter;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
- * This command creates an {@link EventCloudDescription} by using an
- * {@link EventCloudsRegistry}.
+ * This command creates and registers an EventCloud.
  * 
  * @author lpellegr
  */
 public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
 
-    @Parameter(names = {"-nb-peers"}, description = "Number of Peers", required = true)
+    @Parameter(names = {"--stream-url"}, description = "Stream URL", converter = EventCloudIdConverter.class, required = true)
+    private EventCloudId eventcloudId;
+
+    @Parameter(names = {"--nb-peers"}, description = "Number of Peers", required = true)
     private int nbPeers = 1;
 
-    @Parameter(names = {"-nb-trackers"}, description = "Number of Trackers")
+    @Parameter(names = {"--nb-trackers"}, description = "Number of Trackers")
     private int nbTrackers = 1;
 
     public CreateEventCloudCommand() {
-        super("create-event-cloud",
-                "Creates a new event cloud and returns the binding URL",
+        super(
+                "create-eventcloud",
+                "Creates a new eventcloud for the specified stream URL and number of peers",
                 new String[] {"create"});
     }
 
@@ -52,19 +56,25 @@ public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
     @Override
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
+        if (registry.contains(this.eventcloudId)) {
+            System.out.println("EventCloud already created with stream URL '"
+                    + this.eventcloudId.getStreamUrl() + "'");
+        } else {
+            EventCloudDeployer deployer =
+                    new EventCloudDeployer(
+                            new EventCloudDescription(this.eventcloudId),
+                            new EventCloudDeploymentDescriptor(
+                                    new SemanticPersistentOverlayProvider()));
 
-        EventCloudDeployer deployer =
-                new EventCloudDeployer(
-                        new EventCloudDescription(new EventCloudId()),
-                        new EventCloudDeploymentDescriptor(
-                                new SemanticPersistentOverlayProvider()));
+            deployer.deploy(this.nbTrackers, this.nbPeers);
 
-        deployer.deploy(this.nbTrackers, this.nbPeers);
+            registry.register(deployer);
 
-        System.out.println("Event Cloud with id '"
-                + deployer.getEventCloudDescription().getId()
-                + "' has been created and registered with " + this.nbPeers
-                + " peer(s) and " + this.nbTrackers + " tracker(s).");
+            System.out.println("EventCloud with id '"
+                    + deployer.getEventCloudDescription().getId()
+                    + "' has been created and registered with " + this.nbPeers
+                    + " peer(s) and " + this.nbTrackers + " tracker(s).");
+        }
     }
 
 }

@@ -16,22 +16,28 @@
  **/
 package fr.inria.eventcloud.deployment.cli.commands;
 
+import com.beust.jcommander.Parameter;
+
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
+import fr.inria.eventcloud.deployment.cli.converters.EventCloudIdConverter;
 
 /**
- * This command lists the event clouds that are registered by an
- * {@link EventCloudsRegistry}.
+ * This command destroys an EventCloud identified by a specified stream URL.
  * 
  * @author lpellegr
  */
-public class ListEventCloudsCommand extends Command<EventCloudsRegistry> {
+public class DestroyEventCloudCommand extends Command<EventCloudsRegistry> {
 
-    public ListEventCloudsCommand() {
-        super("list-eventclouds",
-                "Lists the eventclouds maintained by the eventclouds registry",
-                new String[] {"list"});
+    @Parameter(names = {"--stream-url"}, description = "Stream URL", converter = EventCloudIdConverter.class, required = true)
+    private EventCloudId eventcloudId;
+
+    public DestroyEventCloudCommand() {
+        super(
+                "destroy-eventcloud",
+                "Destroy the eventcloud identified by the specified stream URL",
+                new String[] {"destroy"});
     }
 
     /**
@@ -40,8 +46,14 @@ public class ListEventCloudsCommand extends Command<EventCloudsRegistry> {
     @Override
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
-        for (EventCloudId id : registry.listEventClouds()) {
-            System.out.println("  * " + id);
+        if (registry.contains(this.eventcloudId)) {
+            registry.undeploy(this.eventcloudId);
+            System.out.println("EventCloud associated to stream URL '"
+                    + this.eventcloudId.getStreamUrl()
+                    + "' destroyed with success");
+        } else {
+            System.out.println("EventCloud identified by stream URL '"
+                    + this.eventcloudId.getStreamUrl() + "' does not exist");
         }
     }
 

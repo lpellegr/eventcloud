@@ -14,35 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.deployment.cli.commands;
+package fr.inria.eventcloud.deployment.cli.converters;
 
-import fr.inria.eventcloud.EventCloudsRegistry;
+import com.beust.jcommander.IStringConverter;
+
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 
 /**
- * This command lists the event clouds that are registered by an
- * {@link EventCloudsRegistry}.
+ * JCommander converter to convert a String representing a stream URL to an
+ * EventCloudId.
  * 
  * @author lpellegr
  */
-public class ListEventCloudsCommand extends Command<EventCloudsRegistry> {
-
-    public ListEventCloudsCommand() {
-        super("list-eventclouds",
-                "Lists the eventclouds maintained by the eventclouds registry",
-                new String[] {"list"});
-    }
+public class EventCloudIdConverter implements IStringConverter<EventCloudId> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void execute(CommandLineReader<EventCloudsRegistry> reader,
-                        EventCloudsRegistry registry) {
-        for (EventCloudId id : registry.listEventClouds()) {
-            System.out.println("  * " + id);
-        }
+    public EventCloudId convert(String value) {
+        return new EventCloudId(value);
     }
 
 }

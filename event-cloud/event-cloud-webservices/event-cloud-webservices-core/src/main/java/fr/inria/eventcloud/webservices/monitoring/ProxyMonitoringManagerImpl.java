@@ -158,7 +158,8 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
                 @Override
                 public void run() {
                     try {
-                        notificationConsumerClients.get(consumerEndpoint)
+                        ProxyMonitoringManagerImpl.this.notificationConsumerClients.get(
+                                consumerEndpoint)
                                 .notify(
                                         createRawReport(
                                                 consumerEndpoint, source,

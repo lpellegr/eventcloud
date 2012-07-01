@@ -137,11 +137,15 @@ public class CommandLineReader<T> {
 
                             command.execute(this, this.context);
                         } catch (ParameterException e) {
-                            System.out.println("\\/!\\ " + e.getMessage());
+                            System.err.println(e.getMessage());
                         }
                     } else {
-                        System.err.println("No command found for: "
-                                + lineArgs[0]);
+                        if (lineArgs[0].isEmpty()) {
+                            System.err.println("Please enter a command, see help.");
+                        } else {
+                            System.err.println("No command found for: "
+                                    + lineArgs[0]);
+                        }
                     }
                 }
             }
@@ -189,7 +193,8 @@ public class CommandLineReader<T> {
          */
         @Override
         public void execute(CommandLineReader<T> reader, T context) {
-            StringBuilder out = new StringBuilder("usage:\n");
+            StringBuilder out = new StringBuilder("Usage:\n");
+
             for (Command<T> command : reader.commands) {
                 out.append(String.format(
                         "    * %-25.25s    %s\n", command.getName(),
@@ -199,11 +204,12 @@ public class CommandLineReader<T> {
                     Parameter ap =
                             ((Parameter) param.getField().getAnnotations()[0]);
                     out.append(String.format(
-                            "        %-23s    %s %s\n", ap.names()[0],
+                            "        %-23s        %s %s\n", ap.names()[0],
                             ap.description(), ap.required()
                                     ? "(required)" : "(optional)"));
                 }
             }
+
             System.out.println(out.toString());
         }
     }
