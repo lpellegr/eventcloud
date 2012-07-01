@@ -332,10 +332,10 @@ public class TurtleWriter2 {
                 return;
             }
         }
-        
+
         StringWriter tmp = new StringWriter();
         OutputLangUtils.output(tmp, node, null);
-        
+
         print(out, tmp.getBuffer().toString());
     }
 

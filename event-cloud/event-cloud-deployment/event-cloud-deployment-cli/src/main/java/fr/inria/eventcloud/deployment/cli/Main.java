@@ -114,7 +114,8 @@ public class Main {
                             packageName + '.' + stripFilenameExtension(file);
                     Class<?> clazz = Class.forName(name);
                     if (!Modifier.isAbstract(clazz.getModifiers())
-                            && !Modifier.isInterface(clazz.getModifiers())) {
+                            && !Modifier.isInterface(clazz.getModifiers())
+                            && clazz.getEnclosingClass() == null) {
                         classes.add(clazz);
                     }
                 }
@@ -124,28 +125,42 @@ public class Main {
     }
 
     private static Set<Class<?>> getFromJARFile(String jar, String packageName)
-            throws FileNotFoundException, IOException, ClassNotFoundException {
+            throws FileNotFoundException, ClassNotFoundException {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        JarInputStream jarFile = new JarInputStream(new FileInputStream(jar));
-        JarEntry jarEntry;
+        JarInputStream jarFile = null;
+        try {
+            jarFile = new JarInputStream(new FileInputStream(jar));
+            JarEntry jarEntry;
 
-        do {
-            jarEntry = jarFile.getNextJarEntry();
-            if (jarEntry != null) {
-                String className = jarEntry.getName();
-                if (className.endsWith(".class")) {
-                    className = stripFilenameExtension(className);
-                    if (className.startsWith(packageName)) {
-                        Class<?> clazz =
-                                Class.forName(className.replace('/', '.'));
-                        if (!Modifier.isAbstract(clazz.getModifiers())
-                                && !Modifier.isInterface(clazz.getModifiers())) {
-                            classes.add(clazz);
+            do {
+                jarEntry = jarFile.getNextJarEntry();
+                if (jarEntry != null) {
+                    String className = jarEntry.getName();
+                    if (className.endsWith(".class")) {
+                        className = stripFilenameExtension(className);
+                        if (className.startsWith(packageName)) {
+                            Class<?> clazz =
+                                    Class.forName(className.replace('/', '.'));
+                            if (!Modifier.isAbstract(clazz.getModifiers())
+                                    && !Modifier.isInterface(clazz.getModifiers())
+                                    && clazz.getEnclosingClass() == null) {
+                                classes.add(clazz);
+                            }
                         }
                     }
                 }
+            } while (jarEntry != null);
+        } catch (IOException e) {
+            throw new IllegalStateException();
+        } finally {
+            if (jarFile != null) {
+                try {
+                    jarFile.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        } while (jarEntry != null);
+        }
 
         return classes;
     }
