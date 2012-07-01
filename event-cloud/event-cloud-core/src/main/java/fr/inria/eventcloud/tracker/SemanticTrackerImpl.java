@@ -19,6 +19,7 @@ package fr.inria.eventcloud.tracker;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -50,6 +51,7 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
     public void initComponentActivity(Body body) {
         this.p2pConfigurationProperty = "eventcloud.configuration";
         super.initComponentActivity(body);
+        EventCloudProperties.loadConfiguration();
     }
 
     /**

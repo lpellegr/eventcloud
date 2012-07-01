@@ -32,6 +32,7 @@ import org.objectweb.proactive.extensions.dataspaces.exceptions.ConfigurationExc
 import org.objectweb.proactive.extensions.dataspaces.exceptions.FileSystemException;
 import org.objectweb.proactive.extensions.dataspaces.exceptions.NotConfiguredException;
 import org.objectweb.proactive.extensions.dataspaces.exceptions.SpaceNotFoundException;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +61,9 @@ public abstract class AbstractComponent implements ComponentInitActive {
      */
     @Override
     public void initComponentActivity(Body body) {
-        this.loadLog4jConfigurationFromIS();
+        P2PStructuredProperties.loadConfiguration();
 
+        this.loadLog4jConfigurationFromIS();
         this.loadP2PConfigurationFromIS();
     }
 

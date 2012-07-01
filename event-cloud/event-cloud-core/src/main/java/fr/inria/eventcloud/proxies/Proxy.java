@@ -18,12 +18,14 @@ package fr.inria.eventcloud.proxies;
 
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
+import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.monitoring.ProxyMonitoringActions;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
@@ -54,6 +56,15 @@ public abstract class Proxy extends AbstractComponent implements
 
     protected Proxy() {
         super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initComponentActivity(Body body) {
+        super.initComponentActivity(body);
+        EventCloudProperties.loadConfiguration();
     }
 
     public void sendv(Request<?> request) throws DispatchException {
