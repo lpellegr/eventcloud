@@ -45,6 +45,7 @@ import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
@@ -117,6 +118,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
 
         this.p2pConfigurationProperty = "eventcloud.configuration";
         super.initComponentActivity(body);
+        EventCloudProperties.loadConfiguration();
 
         this.threadPool =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());

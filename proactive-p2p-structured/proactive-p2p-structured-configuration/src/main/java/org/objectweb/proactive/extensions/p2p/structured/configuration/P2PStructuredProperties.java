@@ -82,12 +82,18 @@ public class P2PStructuredProperties {
     public static final PropertyInteger TRACKER_JOIN_RETRY_INTERVAL =
             new PropertyInteger("tracker.join.retry.interval", 500);
 
-    static {
-        ConfigurationParser.load(
-                P2PStructuredProperties.class,
-                "proactive.p2p.structured.configuration",
-                System.getProperty("user.home")
-                        + "/.proactive/p2p-structured.properties");
+    private static boolean configurationLoaded = false;
+
+    public static void loadConfiguration() {
+        if (!configurationLoaded) {
+            ConfigurationParser.load(
+                    P2PStructuredProperties.class,
+                    "proactive.p2p.structured.configuration",
+                    System.getProperty("user.home")
+                            + "/.proactive/p2p-structured.properties");
+
+            configurationLoaded = true;
+        }
     }
 
 }

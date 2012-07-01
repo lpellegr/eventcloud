@@ -159,18 +159,22 @@ public class EventCloudProperties {
     public static final PropertyDouble SOCIAL_FILTER_THRESHOLD =
             new PropertyDouble("eventcloud.socialfilter.threshold", 0.5);
 
-    private static final File configurationFileLoaded;
+    private static File configurationFileLoaded;
 
-    static {
-        configurationFileLoaded =
-                ConfigurationParser.load(
-                        EventCloudProperties.class, "eventcloud.configuration",
-                        System.getProperty("user.home") + File.pathSeparator
-                                + ".eventcloud" + File.pathSeparator
-                                + "eventcloud.properties");
+    public static void loadConfiguration() {
+        if (configurationFileLoaded == null) {
+            configurationFileLoaded =
+                    ConfigurationParser.load(
+                            EventCloudProperties.class,
+                            "eventcloud.configuration",
+                            System.getProperty("user.home")
+                                    + File.pathSeparator + ".eventcloud"
+                                    + File.pathSeparator
+                                    + "eventcloud.properties");
 
-        // forces the number of dimensions in a CAN network to 4
-        P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
+            // forces the number of dimensions in a CAN network to 4
+            P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
+        }
     }
 
     public static final File getRepositoryPath(String streamUrl) {

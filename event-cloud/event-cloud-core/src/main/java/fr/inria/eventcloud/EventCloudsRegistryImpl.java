@@ -33,6 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import com.google.common.collect.ImmutableSet;
 
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
@@ -81,6 +82,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      */
     @Override
     public void initComponentActivity(Body body) {
+        EventCloudProperties.loadConfiguration();
         this.p2pConfigurationProperty = "eventcloud.configuration";
 
         super.initComponentActivity(body);
