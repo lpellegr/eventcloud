@@ -14,7 +14,7 @@ WS_INSTANCE_FILE=$1
 WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT=$2
 shift 2
 
-java -Xms2048m -Xmx8192m \
+java -Xms256m -Xmx10240m \
      -server \
      -Djava.security.policy=$PATH_TO_RESOURCES/proactive.security.policy \
      -Deventcloud.bundle.home=$BUNDLE_HOME \
