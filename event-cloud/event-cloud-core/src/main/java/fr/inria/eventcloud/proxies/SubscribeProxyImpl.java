@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +27,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.jdbm.DB;
+import org.apache.jdbm.DBMaker;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
@@ -79,6 +82,8 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
 
     private static final long serialVersionUID = 1L;
 
+    private static final String DB_NAME = "eventIdsReceived";
+
     /**
      * ADL name of the subscribe proxy component.
      */
@@ -102,15 +107,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
     // contains the solutions that are being received
     private ConcurrentMap<NotificationId, Solution> solutions;
 
-    // TODO: this set has to be replaced by a DataBag. The number of events ids
-    // received will grow quickly and after some time it is possible to get an
-    // OutOfMemory exception. That's why it would be nice to have the
-    // possibility to define a threshold that defines what is the maximum number
-    // of eventIds to store in memory. Then by using a DataBag and when the
-    // threshold is reached, the data write are spilled to the disk
-    // example from pig:
-    // http://pig.apache.org/docs/r0.7.0/api/org/apache/pig/data/DataBag.html
-    private ConcurrentMap<Node, SubscriptionId> eventIdsReceived;
+    private DB eventIdsReceivedDB;
 
     private String componentUri;
 
@@ -134,6 +131,34 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         body.setImmediateService("setImmediateServices", false);
         body.setImmediateService("setAttributes", false);
         body.setImmediateService("receive", false);
+
+        this.createAndRegisterEventIdsReceivedDB(body);
+    }
+
+    private void createAndRegisterEventIdsReceivedDB(Body body) {
+        String dbPath =
+                EventCloudProperties.getDefaultTemporaryPath() + "jdbm"
+                        + File.separatorChar;
+
+        new File(dbPath).mkdirs();
+
+        String dbFilename = dbPath + body.getID();
+
+        this.eventIdsReceivedDB =
+                DBMaker.openFile(dbFilename)
+                        .deleteFilesAfterClose()
+                        .disableTransactions()
+                        .enableSoftCache()
+                        .make();
+
+        this.eventIdsReceivedDB.createHashMap(DB_NAME);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                eventIdsReceivedDB.close();
+            }
+        }));
     }
 
     /**
@@ -153,8 +178,6 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             this.listeners =
                     new HashMap<SubscriptionId, NotificationListener<?>>();
             this.solutions = new ConcurrentHashMap<NotificationId, Solution>();
-            this.eventIdsReceived =
-                    new ConcurrentHashMap<Node, SubscriptionId>();
             // TODO: use the properties field to initialize ELA properties
         }
     }
@@ -256,7 +279,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         // or event is a solution and thus the subscribe proxy receives a
         // notification for each quadruple even if all these quadruples are part
         // of the same compound event.
-        if (this.eventIdsReceived.containsKey(eventId)) {
+        if (this.getEventIdsReceived().containsKey(eventId.getURI())) {
             return null;
         }
 
@@ -272,7 +295,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         while (quadsReceived.size() != expectedNumberOfQuadruples) {
             // the reconstruct operation is stopped if an another thread has
             // already reconstructed the compound event before the current one
-            if (this.eventIdsReceived.containsKey(eventId)) {
+            if (this.getEventIdsReceived().containsKey(eventId.getURI())) {
                 return null;
             }
 
@@ -312,7 +335,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             }
         }
 
-        if (this.eventIdsReceived.putIfAbsent(eventId, id) != null) {
+        if (this.getEventIdsReceived().putIfAbsent(eventId.getURI(), id) != null) {
             // an another thread has already reconstructed the same event
             return null;
         }
@@ -338,7 +361,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         // for this subscription are ignored
         Subscription subscription = this.subscriptions.remove(id);
         this.listeners.remove(id);
-        this.eventIdsReceived.values().remove(id);
+        this.getEventIdsReceived().values().remove(id);
 
         // updates the network to stop sending notifications
         for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
@@ -489,6 +512,10 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             // property that is verified
             this.deliver(notification.getId());
         }
+    }
+
+    private ConcurrentMap<Object, Object> getEventIdsReceived() {
+        return this.eventIdsReceivedDB.getHashMap(DB_NAME);
     }
 
     /**
