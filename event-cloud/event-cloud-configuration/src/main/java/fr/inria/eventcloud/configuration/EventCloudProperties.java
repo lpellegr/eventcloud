@@ -85,9 +85,8 @@ public class EventCloudProperties {
      */
     public static final PropertyString COLANDER_REPOSITORIES_PATH =
             new PropertyString(
-                    "colander.repositories.path",
-                    System.getProperty("java.io.tmpdir")
-                            + "/eventcloud/colanders/");
+                    "colander.repositories.path", getDefaultTemporaryPath()
+                            + "colanders" + File.separatorChar);
 
     /**
      * This property is used to have the possibility to restore a repository
@@ -261,6 +260,16 @@ public class EventCloudProperties {
         buffer.append(File.separator);
 
         return buffer.toString();
+    }
+
+    /**
+     * Returns the path to the default temporary directory for files.
+     * 
+     * @return the path to the default temporary directory for files.
+     */
+    public static final String getDefaultTemporaryPath() {
+        return System.getProperty("java.io.tmpdir") + File.separatorChar
+                + "eventcloud" + File.separatorChar;
     }
 
 }
