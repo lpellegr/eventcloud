@@ -246,8 +246,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
                     this.lowerBound, (C) upperBoundCopy), this.createZoneView(
                     (C) lowerBoundCopy, this.upperBound));
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -266,8 +265,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
 
             return this.createZoneView((C) lowerBoundCopy, (C) upperBoundCopy);
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 
