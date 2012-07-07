@@ -147,6 +147,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         this.eventIdsReceivedDB =
                 DBMaker.openFile(dbFilename)
                         .deleteFilesAfterClose()
+                        .disableLocking()
                         .disableTransactions()
                         .enableSoftCache()
                         .make();
