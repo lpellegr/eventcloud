@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -157,7 +158,7 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override
             public void run() {
-                eventIdsReceivedDB.close();
+                SubscribeProxyImpl.this.eventIdsReceivedDB.close();
             }
         }));
     }
@@ -179,7 +180,24 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
             this.listeners =
                     new HashMap<SubscriptionId, NotificationListener<?>>();
             this.solutions = new ConcurrentHashMap<NotificationId, Solution>();
+
             // TODO: use the properties field to initialize ELA properties
+
+            // removes remaining subscriptions at shutdown
+            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Iterator<SubscriptionId> it =
+                            SubscribeProxyImpl.this.subscriptions.keySet()
+                                    .iterator();
+
+                    while (it.hasNext()) {
+                        SubscriptionId id = it.next();
+                        SubscribeProxyImpl.this.unsubscribe(id);
+                        it.remove();
+                    }
+                }
+            }));
         }
     }
 
