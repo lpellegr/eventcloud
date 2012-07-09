@@ -31,6 +31,13 @@ import java.io.Serializable;
  */
 public final class Subscription implements Serializable {
 
+    /**
+     * SPARQL used for any subscription object build with
+     * {@link Subscription#any()}. The value is set to {@value} .
+     */
+    private static final String ANY =
+            "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
+
     private static final long serialVersionUID = 1L;
 
     private final SubscriptionId id;
@@ -85,6 +92,19 @@ public final class Subscription implements Serializable {
     public boolean equals(Object obj) {
         return (obj instanceof Subscription)
                 && this.id.equals(((Subscription) obj).id);
+    }
+
+    /**
+     * Returns a new subscription object which accepts any quadruple value. In
+     * other words the associated SPARQL query is equals to {@code SELECT ?g ?s
+     * ?p ?o WHERE \ GRAPH ?g \ ?s ?p ?o \} .
+     * 
+     * @return a new subscription object which accepts any quadruple value. In
+     *         other words the associated SPARQL query is equals to
+     *         {@code SELECT ?g ?s ?p ?o WHERE \ GRAPH ?g \ ?s ?p ?o \} .
+     */
+    public static Subscription any() {
+        return new Subscription(ANY);
     }
 
 }
