@@ -132,12 +132,15 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
                     this.updateStubsService =
                             Executors.newSingleThreadScheduledExecutor();
                     this.updateStubsService.scheduleAtFixedRate(new Runnable() {
-
                         @Override
                         public void run() {
-                            ProxyImpl.this.peerStubs.clear();
-                            ProxyImpl.this.peerStubs.addAll(ProxyImpl.this.selectTracker()
-                                    .getPeers());
+                            List<Peer> peers =
+                                    ProxyImpl.this.selectTracker().getPeers();
+
+                            synchronized (ProxyImpl.this.peerStubs) {
+                                ProxyImpl.this.peerStubs.clear();
+                                ProxyImpl.this.peerStubs.addAll(peers);
+                            }
                         }
                     }, 600, 600, TimeUnit.SECONDS);
                 }
