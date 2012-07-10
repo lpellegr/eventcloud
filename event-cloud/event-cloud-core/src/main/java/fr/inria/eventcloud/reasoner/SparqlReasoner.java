@@ -16,33 +16,41 @@
  **/
 package fr.inria.eventcloud.reasoner;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
 
 /**
+ * The aim of this SPARQL reasoner is to decompose a SPARQL query into several
+ * independent queries that can be executed in parallel on the network.
  * 
  * @author lpellegr
  */
 public class SparqlReasoner {
 
-    private final SparqlDecomposer decomposer;
+    private SparqlReasoner() {
 
-    public SparqlReasoner() {
-        this.decomposer = new SparqlDecomposer();
     }
 
-    public List<SparqlAtomicRequest> parseSparql(String sparqlQuery) {
-        List<AtomicQuery> subQueries = this.decomposer.decompose(sparqlQuery);
-        List<SparqlAtomicRequest> subRequests =
-                new ArrayList<SparqlAtomicRequest>(subQueries.size());
+    public static List<SparqlAtomicRequest> parse(String sparqlQuery) {
+        try {
+            List<AtomicQuery> atomicQueries =
+                    SparqlDecomposer.getInstance().decompose(sparqlQuery);
 
-        for (AtomicQuery query : subQueries) {
-            subRequests.add(new SparqlAtomicRequest(query));
+            return FluentIterable.from(atomicQueries).transform(
+                    new Function<AtomicQuery, SparqlAtomicRequest>() {
+                        @Override
+                        public SparqlAtomicRequest apply(AtomicQuery input) {
+                            return new SparqlAtomicRequest(input);
+                        };
+                    }).toImmutableList();
+        } catch (DecompositionException e) {
+            throw new IllegalArgumentException(sparqlQuery);
         }
-
-        return subRequests;
     }
 
 }

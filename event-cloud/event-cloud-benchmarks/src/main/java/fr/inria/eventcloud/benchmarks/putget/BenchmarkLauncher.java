@@ -30,6 +30,10 @@ import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.utils.Callback;
 
+/**
+ * 
+ * @author mantoine
+ */
 public class BenchmarkLauncher {
 
     private EventCloudId eventCloudId;
@@ -41,8 +45,6 @@ public class BenchmarkLauncher {
     private final Callback<Quadruple> callback;
 
     private List<Quadruple> quadruples;
-
-    private SparqlReasoner reasoner;
 
     private static String query1 =
             "PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/> "
@@ -181,9 +183,8 @@ public class BenchmarkLauncher {
             this.elapsedTime = System.currentTimeMillis() - this.startTime;
             this.responses.get(i).setTimeToGetResult(this.elapsedTime);
             this.testTime += this.elapsedTime;
-            this.reasoner = new SparqlReasoner();
             this.responses.get(i).setNbSubQueries(
-                    this.reasoner.parseSparql(this.queries.get(i)).size());
+                    SparqlReasoner.parse(this.queries.get(i)).size());
         }
 
         XmlWriter xmlWriter =

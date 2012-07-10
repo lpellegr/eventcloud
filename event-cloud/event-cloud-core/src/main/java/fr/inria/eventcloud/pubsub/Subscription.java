@@ -70,6 +70,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
@@ -378,12 +379,20 @@ public class Subscription implements Quadruplable, Serializable {
 
     public synchronized Subsubscription[] getSubSubscriptions() {
         if (this.subSubscriptions == null) {
-            List<AtomicQuery> subQueries =
-                    new SparqlDecomposer().decompose(this.sparqlQuery);
-            this.subSubscriptions = new Subsubscription[subQueries.size()];
-            for (int i = 0; i < subQueries.size(); i++) {
-                this.subSubscriptions[i] =
-                        new Subsubscription(this.id, subQueries.get(i), i);
+            try {
+                List<AtomicQuery> atomicQueries =
+                        SparqlDecomposer.getInstance().decompose(
+                                this.sparqlQuery);
+
+                this.subSubscriptions =
+                        new Subsubscription[atomicQueries.size()];
+                for (int i = 0; i < atomicQueries.size(); i++) {
+                    this.subSubscriptions[i] =
+                            new Subsubscription(
+                                    this.id, atomicQueries.get(i), i);
+                }
+            } catch (DecompositionException e) {
+                throw new IllegalStateException(e);
             }
         }
 

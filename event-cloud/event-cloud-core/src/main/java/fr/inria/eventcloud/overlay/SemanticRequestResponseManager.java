@@ -61,24 +61,17 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     private static final long serialVersionUID = 1L;
 
-    private SparqlReasoner reasoner;
-
     private SparqlColander colander;
 
     private final ConcurrentHashMap<UUID, Future<? extends Object>> pendingResults;
 
     private ExecutorService threadPool;
 
-    private int nbIntermediateResults = 0;
-
-    private Map<String, Integer> mapSubQueryNbResults;
-
     public SemanticRequestResponseManager(
             TransactionalTdbDatastore colanderDatastore) {
         super();
 
         this.colander = new SparqlColander(colanderDatastore);
-        this.reasoner = new SparqlReasoner();
 
         this.pendingResults =
                 new ConcurrentHashMap<UUID, Future<? extends Object>>();
@@ -88,7 +81,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     }
 
     /**
-     * Dispatches a SPARQL Ask query over the overlay network.
+     * Dispatches a SPARQL ASK query over the overlay network.
      * 
      * @param sparqlAskQuery
      *            the SPARQL ASK query to execute.
@@ -100,8 +93,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery,
                                               StructuredOverlay overlay) {
         List<QuadruplePatternResponse> responses =
-                this.dispatch(
-                        this.getReasoner().parseSparql(sparqlAskQuery), overlay);
+                this.dispatch(SparqlReasoner.parse(sparqlAskQuery), overlay);
 
         boolean result =
                 this.getColander().filterSparqlAsk(
@@ -114,19 +106,21 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 measurements[3], result);
     }
 
-    /* 
-    * @param sparqlConstructQuery
-    *            the SPARQL CONSTRUCT query to execute.
-    * @param overlay
-    *            the overlay from where the request is sent.
-    * 
-    * @return a response corresponding to the type of the query dispatched.
-    */
+    /**
+     * Dispatches a SPARQL CONSTRUCT query over the overlay network.
+     * 
+     * @param sparqlConstructQuery
+     *            the SPARQL CONSTRUCT query to execute.
+     * @param overlay
+     *            the overlay from where the request is sent.
+     * 
+     * @return a response corresponding to the type of the query dispatched.
+     */
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery,
                                                           StructuredOverlay overlay) {
         List<QuadruplePatternResponse> responses =
-                this.dispatch(this.getReasoner().parseSparql(
-                        sparqlConstructQuery), overlay);
+                this.dispatch(
+                        SparqlReasoner.parse(sparqlConstructQuery), overlay);
 
         Model result =
                 this.getColander().filterSparqlConstruct(
@@ -152,9 +146,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery,
                                                     StructuredOverlay overlay) {
         List<QuadruplePatternResponse> responses =
-                this.dispatch(
-                        this.getReasoner().parseSparql(sparqlSelectQuery),
-                        overlay);
+                this.dispatch(SparqlReasoner.parse(sparqlSelectQuery), overlay);
 
         ResultSet result =
                 this.getColander().filterSparqlSelect(
@@ -166,30 +158,33 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 new SparqlSelectResponse(
                         measurements[0], measurements[1], measurements[2],
                         measurements[3], new ResultSetWrapper(result));
+
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+            Map<String, Integer> mapSubQueryNbResults =
+                    new HashMap<String, Integer>();
             long responsesSizeInBytes = 0;
-            this.mapSubQueryNbResults = new HashMap<String, Integer>();
+            int nbIntermediateResults = 0;
+
             for (int i = 0; i < responses.size(); i++) {
-                this.nbIntermediateResults +=
-                        responses.get(i).getResult().size();
-                for (int j = 0; j < responses.get(i).getResult().size(); j++) {
+                QuadruplePatternResponse response = responses.get(i);
+
+                mapSubQueryNbResults.put(
+                        response.getInitialRequestForThisResponse(),
+                        response.getResult().size());
+
+                nbIntermediateResults += response.getResult().size();
+
+                for (int j = 0; j < response.getResult().size(); j++) {
                     responsesSizeInBytes +=
-                            this.responseToBytes(responses.get(i)
-                                    .getResult()
-                                    .get(j));
+                            this.responseToBytes(response.getResult().get(j));
                 }
             }
-            for (QuadruplePatternResponse quads : responses) {
-                this.mapSubQueryNbResults.put(
-                        quads.getInitialRequestForThisResponse(),
-                        quads.getResult().size());
-            }
-            sparqlSelectResponse.setNbIntermediateResults(this.nbIntermediateResults);
+
+            sparqlSelectResponse.setMapSubQueryNbResults(mapSubQueryNbResults);
+            sparqlSelectResponse.setNbIntermediateResults(nbIntermediateResults);
             sparqlSelectResponse.setSizeOfIntermediateResultsInBytes(responsesSizeInBytes);
-            sparqlSelectResponse.setMapSubQueryNbResults(this.mapSubQueryNbResults);
-            this.setNbIntermediateResults(0);
-            this.mapSubQueryNbResults = null;
         }
+
         return sparqlSelectResponse;
     }
 
@@ -282,26 +277,13 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
         return this.threadPool;
     }
 
-    private synchronized SparqlReasoner getReasoner() {
-        return this.reasoner;
-    }
-
     public SparqlColander getColander() {
         return this.colander;
     }
 
-    public int getNnbIntermediateResults() {
-        return this.nbIntermediateResults;
-    }
-
-    public void setNbIntermediateResults(int nbIntermediateResults) {
-        this.nbIntermediateResults = nbIntermediateResults;
-    }
-
     public int responseToBytes(Object sparqlResponse) {
-        byte[] bytes;
         try {
-            bytes = ObjectToByteConverter.convert(sparqlResponse);
+            byte[] bytes = ObjectToByteConverter.convert(sparqlResponse);
             return bytes.length;
         } catch (IOException e) {
             throw new IllegalStateException();
