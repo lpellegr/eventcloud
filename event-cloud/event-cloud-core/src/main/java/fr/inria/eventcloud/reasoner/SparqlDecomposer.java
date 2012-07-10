@@ -20,130 +20,144 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.TriplePath;
-import com.hp.hpl.jena.sparql.syntax.Element;
-import com.hp.hpl.jena.sparql.syntax.ElementGroup;
+import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;
-import com.hp.hpl.jena.sparql.syntax.ElementUnion;
+import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
+import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 
-import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 
 /**
- * A SPARQL decomposer is in charge of decomposing a SPARQL query into
- * sub-queries ( {@link AtomicQuery}s).
- * <p>
- * TODO: The field of applications of this decomposer is very limited. It would
- * be nice to create a parser that parses the SPARQL grammar and extracts
- * informations while the grammar is parsed.
+ * This SPARQL decomposer is in charge of decomposing SPARQL queries into set of
+ * atomic queries by parsing a SPARQL query as String. Currently this decomposer
+ * is limited and does not support multiple graph patterns.
  * 
  * @author lpellegr
  */
 public final class SparqlDecomposer {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(SparqlDecomposer.class);
+    private static class Singleton {
+        private static final SparqlDecomposer INSTANCE = new SparqlDecomposer();
+    }
 
-    public List<AtomicQuery> decompose(String sparqlQuery) {
+    private SparqlDecomposer() {
+
+    }
+
+    public List<AtomicQuery> decompose(String sparqlQuery)
+            throws DecompositionException {
         Query query = QueryFactory.create(sparqlQuery);
 
-        ParentQueryForm parentQueryForm;
+        CustomElementVisitor visitor = new CustomElementVisitor();
 
-        if (query.isAskType()) {
-            parentQueryForm = ParentQueryForm.ASK;
-        } else if (query.isConstructType()) {
-            parentQueryForm = ParentQueryForm.CONSTRUCT;
-        } else if (query.isDescribeType()) {
-            parentQueryForm = ParentQueryForm.DESCRIBE;
-        } else if (query.isSelectType()) {
-            parentQueryForm = ParentQueryForm.SELECT;
+        // TODO: add support for multiple graph patterns
+        ElementWalker.walk(query.getQueryPattern(), visitor);
+
+        if (visitor.nbGraphPatterns == 1) {
+            return this.createAtomicQueries(query, visitor);
         } else {
-            throw new IllegalArgumentException("Unknown query type");
-        }
-
-        return this.parseQueryTree(
-                parentQueryForm, (ElementGroup) query.getQueryPattern());
-    }
-
-    private List<AtomicQuery> parseQueryTree(ParentQueryForm parentQueryForm,
-                                             ElementGroup group) {
-        log.debug("SparqlDecomposer.parseQueryTree({}, {})", new Object[] {
-                parentQueryForm, group.toString().replaceAll("\n", "")});
-
-        List<AtomicQuery> atomicQueries = new ArrayList<AtomicQuery>();
-
-        for (Element elt : group.getElements()) {
-            this.processElement(parentQueryForm, elt, atomicQueries, null);
-        }
-
-        return atomicQueries;
-    }
-
-    private void processElement(ParentQueryForm parentQueryForm, Element elt,
-                                List<AtomicQuery> atomicQueries, Node graph) {
-
-        log.debug(
-                "SparqlDecomposer.processElement({}, {}, {}, {})",
-                new Object[] {
-                        parentQueryForm, elt.toString().replaceAll("\n", ""),
-                        atomicQueries, graph});
-        if (elt instanceof ElementNamedGraph) {
-            log.debug("    ElementNamedGraph");
-
-            // parses the graph variable
-            Node graphValue = ((ElementNamedGraph) elt).getGraphNameNode();
-
-            for (Element e : ((ElementGroup) ((ElementNamedGraph) elt).getElement()).getElements()) {
-                this.processElement(
-                        parentQueryForm, e, atomicQueries, graphValue);
+            if (visitor.nbGraphPatterns == 0) {
+                throw new DecompositionException(
+                        "The specified SPARQL query does not contain any graph pattern: "
+                                + sparqlQuery);
+            } else {
+                throw new DecompositionException(
+                        "Multiple graph patterns are not yet supported");
             }
-        } else if (elt instanceof ElementPathBlock) {
-            log.debug("    ElementpathBlock");
-            // parses a Basic Graph Pattern
-            this.parse(
-                    parentQueryForm, (ElementPathBlock) elt, atomicQueries,
-                    graph);
-        } else if (elt instanceof ElementUnion) {
-            log.debug("    ElementUnion");
-            // parses an UNION keyword which forms a disjunction
-            // of two graph patterns
-            ElementUnion unionBlock = ((ElementUnion) elt);
-            for (Element unionElt : unionBlock.getElements()) {
-                for (Element graphPattern : ((ElementGroup) unionElt).getElements()) {
-                    this.parse(
-                            parentQueryForm, (ElementPathBlock) graphPattern,
-                            atomicQueries, graph);
-                }
-            }
-        } else {
-            log.debug(" elt type " + elt.getClass());
         }
     }
 
-    public void parse(ParentQueryForm parentQueryForm, ElementPathBlock elt,
-                      List<AtomicQuery> atomicQueries, Node graph) {
-        log.debug("SparqlDecomposer.parse({}, {}, {}, {})", new Object[] {
-                parentQueryForm, elt.toString().replaceAll("\n", ""),
-                atomicQueries, graph});
-        ElementPathBlock block = elt;
-        Iterator<TriplePath> it = block.patternElts();
+    private List<AtomicQuery> createAtomicQueries(Query query,
+                                                  CustomElementVisitor visitor) {
+        List<AtomicQuery> result =
+                new ArrayList<AtomicQuery>(visitor.elementPathBlocks.size());
 
-        TriplePath triple;
+        for (ElementPathBlock epb : visitor.elementPathBlocks) {
+            Iterator<TriplePath> it = epb.patternElts();
 
-        while (it.hasNext()) {
-            triple = it.next();
+            TriplePath triple;
+            while (it.hasNext()) {
+                triple = it.next();
 
-            // TODO adds support for FilterElement
-            atomicQueries.add(new AtomicQuery(
-                    parentQueryForm, graph, triple.getSubject(),
-                    triple.getPredicate(), triple.getObject()));
+                AtomicQuery atomicQuery =
+                        this.createAtomicQuery(query, visitor, triple);
+
+                result.add(atomicQuery);
+            }
         }
+
+        return result;
+    }
+
+    private AtomicQuery createAtomicQuery(Query query,
+                                          CustomElementVisitor visitor,
+                                          TriplePath triple) {
+        AtomicQuery atomicQuery =
+                new AtomicQuery(
+                        visitor.graphNode, triple.getSubject(),
+                        triple.getPredicate(), triple.getObject());
+
+        // set sequence modifiers
+        if (query.isDistinct()) {
+            atomicQuery.setDistinct(true);
+        }
+        if (query.isReduced()) {
+            atomicQuery.setReduced(true);
+        }
+        if (query.hasLimit()) {
+            atomicQuery.setLimit(query.getLimit());
+        }
+
+        return atomicQuery;
+    }
+
+    public static SparqlDecomposer getInstance() {
+        return SparqlDecomposer.Singleton.INSTANCE;
+    }
+
+    private static class CustomElementVisitor extends ElementVisitorBase {
+
+        private List<ElementPathBlock> elementPathBlocks;
+
+        private Node graphNode;
+
+        private int nbGraphPatterns;
+
+        public CustomElementVisitor() {
+            super();
+            this.elementPathBlocks = new ArrayList<ElementPathBlock>(1);
+        }
+
+        @Override
+        public void visit(ElementNamedGraph elt) {
+            super.visit(elt);
+
+            if (this.graphNode == null) {
+                this.graphNode = elt.getGraphNameNode();
+            }
+
+            this.nbGraphPatterns++;
+        }
+
+        @Override
+        public void visit(ElementPathBlock elt) {
+            super.visit(elt);
+
+            this.elementPathBlocks.add(elt);
+        }
+
+        @Override
+        public void visit(ElementFilter el) {
+            super.visit(el);
+
+            // TODO: add support for filter constraints
+        }
+
     }
 
 }

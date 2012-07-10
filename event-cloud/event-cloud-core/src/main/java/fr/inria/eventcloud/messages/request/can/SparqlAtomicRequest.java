@@ -18,11 +18,16 @@ package fr.inria.eventcloud.messages.request.can;
 
 import java.util.List;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.algebra.Algebra;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.QueryIterator;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.datastore.AccessMode;
@@ -46,9 +51,7 @@ public class SparqlAtomicRequest extends
 
     private static final long serialVersionUID = 1L;
 
-    private int nbResults;
-
-    private String query;
+    private final AtomicQuery atomicQuery;
 
     public SparqlAtomicRequest(AtomicQuery atomicQuery) {
         // TODO offer the possibility to use a constraints validator that will
@@ -56,9 +59,8 @@ public class SparqlAtomicRequest extends
         // route the request
         super(atomicQuery.getQuadruplePattern(),
                 new QuadruplePatternResponseProvider());
-        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-            this.setQuery(atomicQuery.toString());
-        }
+
+        this.atomicQuery = atomicQuery;
     }
 
     /**
@@ -68,32 +70,53 @@ public class SparqlAtomicRequest extends
     public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
                                                           AnycastRequest request,
                                                           fr.inria.eventcloud.api.QuadruplePattern quadruplePattern) {
-        List<Quadruple> result = null;
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
 
         try {
-            result = Lists.newArrayList(txnGraph.find(quadruplePattern));
-            this.nbResults = result.size();
+            QueryIterator iterator =
+                    Algebra.exec(
+                            this.atomicQuery.getOpRepresentation(),
+                            txnGraph.toDataset());
+
+            return this.toQuadruple(iterator, this.atomicQuery);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } finally {
             txnGraph.end();
         }
-
-        return result;
     }
 
-    public int getNbResults() {
-        return this.nbResults;
+    private List<Quadruple> toQuadruple(QueryIterator it,
+                                        AtomicQuery atomicQuery) {
+        Builder<Quadruple> builder = ImmutableList.builder();
+
+        while (it.hasNext()) {
+            Binding binding = it.next();
+
+            Node graph = this.getBoundValue(binding, atomicQuery.getGraph());
+            Node subject =
+                    this.getBoundValue(binding, atomicQuery.getSubject());
+            Node predicate =
+                    this.getBoundValue(binding, atomicQuery.getPredicate());
+            Node object = this.getBoundValue(binding, atomicQuery.getObject());
+
+            builder.add(new Quadruple(graph, subject, predicate, object));
+        }
+
+        return builder.build();
+    }
+
+    private Node getBoundValue(Binding binding, Node node) {
+        if (node.isVariable()) {
+            return binding.get(Var.alloc(node.getName()));
+        } else {
+            return node;
+        }
     }
 
     public String getQuery() {
-        return this.query;
-    }
-
-    public void setQuery(String query) {
-        this.query = query;
+        return this.atomicQuery.toString();
     }
 
 }

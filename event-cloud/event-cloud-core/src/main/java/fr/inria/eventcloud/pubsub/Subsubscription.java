@@ -47,7 +47,6 @@ import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.VariableDatatype;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
-import fr.inria.eventcloud.reasoner.AtomicQuery.ParentQueryForm;
 
 /**
  * A Sub-subscription is modeled by using an {@link AtomicQuery} that knows who
@@ -78,10 +77,7 @@ public class Subsubscription implements Quadruplable {
         this.parentId = parentId;
         this.id = id;
         this.index = index;
-        this.atomicQuery =
-                new AtomicQuery(
-                        ParentQueryForm.SELECT, graph, subject, predicate,
-                        object);
+        this.atomicQuery = new AtomicQuery(graph, subject, predicate, object);
     }
 
     public SubscriptionId getParentId() {

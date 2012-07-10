@@ -24,11 +24,13 @@ import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
  * The response returned for a Select SPARQL query form that has been executed.
  * 
  * @author lpellegr
+ * @author mantoine
  */
 public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
 
     private static final long serialVersionUID = 1L;
 
+    // the following fields are used exclusively for benchmarking purposes
     private int nbIntermediateResults, nbSubQueries;
     private long timeToGetResult, sizeOfIntermediateResultsInBytes;
     private Map<String, Integer> mapSubQueryNbResults;
@@ -64,9 +66,11 @@ public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
     }
 
     /**
+     * Returns the size (in bytes) of all the quadruples contained in the
+     * intermediate results for this SparqlSelectResponse.
      * 
      * @return the size (in bytes) of all the quadruples contained in the
-     *         intermediate results for this SparqlSelectResponse
+     *         intermediate results for this SparqlSelectResponse.
      */
     public long getSizeOfIntermediateResultsInBytes() {
         return this.sizeOfIntermediateResultsInBytes;
@@ -78,9 +82,11 @@ public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
     }
 
     /**
+     * Returns the number of results for each subquery of the query for this
+     * response.
      * 
      * @return gives the number of results for each subquery of the query for
-     *         this response
+     *         this response.
      */
     public Map<String, Integer> getMapSubQueryNbResults() {
         return this.mapSubQueryNbResults;

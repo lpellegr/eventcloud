@@ -476,7 +476,6 @@ public class Quadruple implements Event {
         for (int i = 1; i < this.nodes.length; i++) {
             this.nodes[i] = tokenizer.next().asNode();
         }
-
     }
 
     private Node extractAndSetMetaInformation(Node graph) {

@@ -239,7 +239,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect() {
+    public void testExecuteSparqlSelect1() {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         Quadruple quadruple;
@@ -254,6 +254,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                         .executeSparqlSelect(
                                 "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }")
                         .getResult();
+
         Binding binding = null;
         Quadruple quad = null;
 
@@ -274,6 +275,41 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         }
 
         Assert.assertEquals(100, count);
+    }
+
+    @Test
+    public void testExecuteSparqlSelect2() {
+        for (int i = 0; i < 100; i++) {
+            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+        }
+
+        ResultSet resultSet =
+                super.getRandomSemanticPeer()
+                        .executeSparqlSelect(
+                                "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 10")
+                        .getResult();
+
+        assertEquals(resultSet, 10);
+    }
+
+    @Test
+    public void testExecuteSparqlSelect3() {
+        for (int i = 0; i < 5; i++) {
+            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+        }
+
+        Quadruple quadruple = QuadrupleGenerator.random();
+        for (int i = 0; i < 5; i++) {
+            super.getRandomSemanticPeer().add(quadruple);
+        }
+
+        ResultSet resultSet =
+                super.getRandomSemanticPeer()
+                        .executeSparqlSelect(
+                                "SELECT DISTINCT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 10")
+                        .getResult();
+
+        assertEquals(resultSet, 6);
     }
 
     @Test
@@ -366,6 +402,20 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Assert.assertEquals(
                 "The number of inbound hop count is not equals to the number of outbound hop count",
                 response.getInboundHopCount(), response.getOutboundHopCount());
+    }
+
+    private static void assertEquals(ResultSet resultSet, int expectedSize) {
+        Assert.assertEquals(expectedSize, size(resultSet));
+    }
+
+    private static int size(ResultSet resultSet) {
+        int count = 0;
+        while (resultSet.hasNext()) {
+            resultSet.next();
+            count++;
+        }
+
+        return count;
     }
 
 }

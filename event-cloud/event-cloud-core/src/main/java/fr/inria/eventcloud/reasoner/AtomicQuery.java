@@ -16,52 +16,85 @@
  **/
 package fr.inria.eventcloud.reasoner;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.List;
 
+import org.openjena.riot.out.OutputLangUtils;
+import org.openjena.riot.tokens.Token;
+import org.openjena.riot.tokens.TokenType;
+import org.openjena.riot.tokens.Tokenizer;
+import org.openjena.riot.tokens.TokenizerFactory;
+
+import com.google.common.base.Function;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableBiMap.Builder;
+import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.algebra.Op;
+import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
+import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
+import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
+import com.hp.hpl.jena.sparql.algebra.op.OpProject;
+import com.hp.hpl.jena.sparql.algebra.op.OpReduced;
+import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
+import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 
 /**
- * An atomic query is a {@link QuadruplePattern} that may have some constraints
- * associated to the variables.
+ * Atomic queries are {@link QuadruplePattern}s that may contain sequence
+ * modifiers such as limit, offset, order by, etc. but also filter constraints
+ * for any declared variable.
  * 
  * @author lpellegr
  * 
  * @see SparqlDecomposer
  */
-public final class AtomicQuery {
+public final class AtomicQuery implements Serializable {
 
-    public enum ParentQueryForm {
-        ASK, CONSTRUCT, DESCRIBE, SELECT
-    };
+    private static final long serialVersionUID = 1L;
 
-    private final ParentQueryForm parentQueryForm;
+    /* Transient fields */
 
-    private final Node nodes[];
+    private transient Node nodes[];
 
-    // contains the variables and its associated positions
-    // TODO: this field could be transient?
-    private Map<String, Integer> vars;
+    private transient BiMap<String, Integer> vars;
 
-    public AtomicQuery(ParentQueryForm form, Node graph, Node subject,
-            Node predicate, Node object) {
-        this.parentQueryForm = form;
+    private transient Op opRepresentation;
+
+    /* 
+     * Sequence modifiers 
+     * 
+     * Projection is ignored because results have to be filtered 
+     * again once they are received. Offset must also be ignored 
+     * because we can not foretell the final indexes that will be 
+     * associated to the results returned by this atomic query.
+     */
+
+    // eliminates duplicate solutions
+    private boolean distinct = false;
+    // permits duplicate solutions to be eliminated
+    private boolean reduced = false;
+    // puts an upper bound on the number of solutions returned
+    private long limit = Long.MIN_VALUE;
+
+    // TODO: add support for order by modifier
+
+    // TODO: add support for filter constraints
+    // do not forget to update equals + hashcode accordingly
+
+    public AtomicQuery(Node graph, Node subject, Node predicate, Node object) {
         this.nodes = new Node[] {graph, subject, predicate, object};
-
-        this.vars = new HashMap<String, Integer>(4);
-        Node[] nodes = {graph, subject, predicate, object};
-        for (int i = 0; i < nodes.length; i++) {
-            if (nodes[i].isVariable()) {
-                this.vars.put(nodes[i].getName(), i);
-            }
-        }
     }
 
     public boolean hasLiteralObject() {
@@ -69,17 +102,12 @@ public final class AtomicQuery {
     }
 
     public String getVarName(int index) {
-        for (Entry<String, Integer> entry : this.vars.entrySet()) {
-            if (entry.getValue().equals(index)) {
-                return entry.getKey();
-            }
-        }
-
-        return null;
+        return this.getVarDetails().inverse().get(index);
     }
 
     public int getVarIndex(String varName) {
-        Integer result = this.vars.get(varName);
+        Integer result = this.getVarDetails().get(varName);
+
         if (result == null) {
             return -1;
         }
@@ -88,11 +116,75 @@ public final class AtomicQuery {
     }
 
     public boolean hasVariable(String varName) {
-        return this.getVarIndex(varName) != -1;
+        return this.getVarDetails().containsKey(varName);
     }
 
-    public ParentQueryForm getParentQueryForm() {
-        return this.parentQueryForm;
+    public synchronized Op getOpRepresentation() {
+        if (this.opRepresentation == null) {
+            BasicPattern bp = new BasicPattern();
+            bp.add(Triple.create(
+                    this.filterAndTransformNodeVariableToVar(this.getSubject()),
+                    this.filterAndTransformNodeVariableToVar(this.getPredicate()),
+                    this.filterAndTransformNodeVariableToVar(this.getObject())));
+
+            // named graph + projection
+            Op opProjection =
+                    new OpProject(
+                            new OpGraph(
+                                    this.filterAndTransformNodeVariableToVar(this.getGraph()),
+                                    new OpBGP(bp)),
+                            ImmutableList.copyOf(this.getVars()));
+
+            // apply sequence modifiers
+            Op op = opProjection;
+
+            if (this.distinct) {
+                op = new OpDistinct(op);
+            }
+            if (this.reduced) {
+                op = OpReduced.create(op);
+            }
+            if (this.hasLimit()) {
+                // offset is ignored by using the internal Jena default value
+                op = new OpSlice(op, Long.MIN_VALUE, this.limit);
+            }
+
+            return op;
+        }
+
+        return this.opRepresentation;
+    }
+
+    public Node filterAndTransformNodeVariableToVar(Node node) {
+        if (node.isVariable()) {
+            return Var.alloc(node);
+        } else {
+            return node;
+        }
+    }
+
+    private synchronized BiMap<String, Integer> getVarDetails() {
+        if (this.vars == null) {
+            Builder<String, Integer> bimapBuilder = ImmutableBiMap.builder();
+
+            for (int i = 0; i < this.nodes.length; i++) {
+                if (this.nodes[i].isVariable()) {
+                    bimapBuilder.put(this.nodes[i].getName(), i);
+                }
+            }
+
+            this.vars = bimapBuilder.build();
+        }
+
+        return this.vars;
+    }
+
+    private static final Node replaceVarNodeByNodeAny(Node node) {
+        if (node.isVariable()) {
+            return Node.ANY;
+        }
+
+        return node;
     }
 
     public QuadruplePattern getQuadruplePattern() {
@@ -120,27 +212,49 @@ public final class AtomicQuery {
     }
 
     public Node[] toArray() {
-        return this.nodes;
+        return this.nodes.clone();
     }
 
-    public Set<Var> getVariables() {
-        Set<Var> vars = new HashSet<Var>();
-        for (String varName : this.vars.keySet()) {
-            vars.add(Var.alloc(varName));
-        }
-        return vars;
+    public List<Var> getVars() {
+        return FluentIterable.from(this.getVarDetails().keySet()).transform(
+                new Function<String, Var>() {
+                    @Override
+                    public Var apply(String varName) {
+                        return Var.alloc(varName);
+                    }
+                }).toImmutableList();
     }
 
-    public int getNumberOfVariables() {
-        return this.vars.size();
+    public int getNbVars() {
+        return this.getVarDetails().size();
     }
 
-    private static final Node replaceVarNodeByNodeAny(Node node) {
-        if (node.isVariable()) {
-            return Node.ANY;
-        }
+    public boolean isDistinct() {
+        return this.distinct;
+    }
 
-        return node;
+    public boolean isReduced() {
+        return this.reduced;
+    }
+
+    public long getLimit() {
+        return this.limit;
+    }
+
+    public boolean hasLimit() {
+        return this.limit >= 0;
+    }
+
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
+    }
+
+    public void setReduced(boolean reduced) {
+        this.reduced = reduced;
+    }
+
+    public void setLimit(long limit) {
+        this.limit = limit;
     }
 
     /**
@@ -148,7 +262,15 @@ public final class AtomicQuery {
      */
     @Override
     public int hashCode() {
-        return Arrays.hashCode(this.nodes);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (this.distinct
+                ? 1231 : 1237);
+        result = prime * result + (int) (this.limit ^ (this.limit >>> 32));
+        result = prime * result + Arrays.hashCode(this.nodes);
+        result = prime * result + (this.reduced
+                ? 1231 : 1237);
+        return result;
     }
 
     /**
@@ -156,8 +278,29 @@ public final class AtomicQuery {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof AtomicQuery
-                && Arrays.equals(this.nodes, ((AtomicQuery) obj).toArray());
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        AtomicQuery other = (AtomicQuery) obj;
+        if (this.distinct != other.distinct) {
+            return false;
+        }
+        if (this.limit != other.limit) {
+            return false;
+        }
+        if (!Arrays.equals(this.nodes, other.nodes)) {
+            return false;
+        }
+        if (this.reduced != other.reduced) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -165,16 +308,44 @@ public final class AtomicQuery {
      */
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder('(');
-        result.append(this.getGraph());
-        result.append(' ');
-        result.append(this.getSubject());
-        result.append(' ');
-        result.append(this.getPredicate());
-        result.append(' ');
-        result.append(this.getObject());
-        result.append(')');
-        return result.toString();
+        return OpAsQuery.asQuery(this.getOpRepresentation()).toString();
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
+        in.defaultReadObject();
+
+        this.nodes = new Node[4];
+
+        Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
+
+        for (int i = 0; i < this.nodes.length; i++) {
+            Token token = tokenizer.next();
+
+            Node node;
+            if (token.getType() == TokenType.VAR) {
+                node = Node.createVariable(token.getImage());
+            } else {
+                node = token.asNode();
+            }
+
+            this.nodes[i] = node;
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+
+        OutputStreamWriter outWriter = new OutputStreamWriter(out);
+
+        for (int i = 0; i < this.nodes.length; i++) {
+            OutputLangUtils.output(outWriter, this.nodes[i], null);
+
+            if (i < this.nodes.length - 1) {
+                outWriter.write(' ');
+            }
+        }
+        outWriter.flush();
     }
 
 }

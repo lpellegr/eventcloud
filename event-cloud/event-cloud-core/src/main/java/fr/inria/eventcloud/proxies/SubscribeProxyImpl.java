@@ -33,6 +33,7 @@ import org.apache.jdbm.DBMaker;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
@@ -78,8 +79,8 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
-        SubscribeProxyAttributeController {
+public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
+        SubscribeProxy, SubscribeProxyAttributeController {
 
     private static final long serialVersionUID = 1L;
 
@@ -136,6 +137,14 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
         this.createAndRegisterEventIdsReceivedDB(body);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void endComponentActivity(Body body) {
+        this.unsubscribeAndCloseDB();
+    }
+
     private void createAndRegisterEventIdsReceivedDB(Body body) {
         String dbPath =
                 EventCloudProperties.getDefaultTemporaryPath() + "jdbm"
@@ -154,13 +163,6 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
                         .make();
 
         this.eventIdsReceivedDB.createHashMap(DB_NAME);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SubscribeProxyImpl.this.eventIdsReceivedDB.close();
-            }
-        }));
     }
 
     /**
@@ -183,22 +185,30 @@ public class SubscribeProxyImpl extends Proxy implements SubscribeProxy,
 
             // TODO: use the properties field to initialize ELA properties
 
-            // removes remaining subscriptions at shutdown
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Iterator<SubscriptionId> it =
-                            SubscribeProxyImpl.this.subscriptions.keySet()
-                                    .iterator();
-
-                    while (it.hasNext()) {
-                        SubscriptionId id = it.next();
-                        SubscribeProxyImpl.this.unsubscribe(id);
-                        it.remove();
-                    }
+                    SubscribeProxyImpl.this.unsubscribeAndCloseDB();
                 }
             }));
         }
+    }
+
+    private void unsubscribeAndCloseDB() {
+        if (!this.eventIdsReceivedDB.isClosed()) {
+            // removes remaining subscriptions at shutdown
+            Iterator<SubscriptionId> it =
+                    SubscribeProxyImpl.this.subscriptions.keySet().iterator();
+
+            while (it.hasNext()) {
+                SubscriptionId id = it.next();
+                SubscribeProxyImpl.this.unsubscribe(id);
+                it.remove();
+            }
+
+            this.eventIdsReceivedDB.close();
+        }
+
     }
 
     /**

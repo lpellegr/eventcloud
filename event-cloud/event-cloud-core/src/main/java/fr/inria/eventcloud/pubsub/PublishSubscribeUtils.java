@@ -40,6 +40,7 @@ import org.openjena.riot.tokens.TokenizerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
@@ -424,7 +425,8 @@ public final class PublishSubscribeUtils {
     public static final Binding filter(Quadruple quad, Set<Var> resultVars,
                                        AtomicQuery atomicQuery) {
         Set<Var> vars =
-                Sets.intersection(resultVars, atomicQuery.getVariables());
+                Sets.intersection(resultVars, FluentIterable.from(
+                        atomicQuery.getVars()).toImmutableSet());
         BindingMap binding = BindingFactory.create();
         Node[] quadNodes = quad.toArray();
 

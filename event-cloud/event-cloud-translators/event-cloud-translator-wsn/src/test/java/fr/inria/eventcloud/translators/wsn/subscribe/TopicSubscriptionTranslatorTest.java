@@ -55,7 +55,7 @@ public class TopicSubscriptionTranslatorTest {
         Assert.assertNotNull(sparqlQuery);
 
         QuadruplePattern quadruplePattern =
-                new SparqlReasoner().parseSparql(sparqlQuery)
+                SparqlReasoner.parse(sparqlQuery)
                         .get(0)
                         .getQuadruplePattern()
                         .getValue();
