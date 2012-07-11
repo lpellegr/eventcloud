@@ -151,6 +151,15 @@ public class EventCloudManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
+    public boolean isCreated(String streamUrl) {
+        return this.getEventCloudsRegistry().contains(
+                new EventCloudId(streamUrl));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean destroyEventCloud(String streamUrl) {
         EventCloudId eventCloudId = new EventCloudId(streamUrl);
 
