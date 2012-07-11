@@ -17,18 +17,21 @@
 package fr.inria.eventcloud.reasoner;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.core.TriplePath;
-import com.hp.hpl.jena.sparql.syntax.ElementFilter;
-import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
-import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;
-import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
-import com.hp.hpl.jena.sparql.syntax.ElementWalker;
+import com.hp.hpl.jena.sparql.algebra.Algebra;
+import com.hp.hpl.jena.sparql.algebra.Op;
+import com.hp.hpl.jena.sparql.algebra.OpVisitorBase;
+import com.hp.hpl.jena.sparql.algebra.OpWalker;
+import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
+import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
+import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
+import com.hp.hpl.jena.sparql.core.BasicPattern;
 
 import fr.inria.eventcloud.exceptions.DecompositionException;
 
@@ -52,11 +55,12 @@ public final class SparqlDecomposer {
     public List<AtomicQuery> decompose(String sparqlQuery)
             throws DecompositionException {
         Query query = QueryFactory.create(sparqlQuery);
+        Op op = Algebra.compile(query);
 
-        CustomElementVisitor visitor = new CustomElementVisitor();
+        CustomOpVisitor visitor = new CustomOpVisitor();
 
         // TODO: add support for multiple graph patterns
-        ElementWalker.walk(query.getQueryPattern(), visitor);
+        OpWalker.walk(op, visitor);
 
         if (visitor.nbGraphPatterns == 1) {
             return this.createAtomicQueries(query, visitor);
@@ -73,16 +77,15 @@ public final class SparqlDecomposer {
     }
 
     private List<AtomicQuery> createAtomicQueries(Query query,
-                                                  CustomElementVisitor visitor) {
+                                                  CustomOpVisitor visitor) {
         List<AtomicQuery> result =
-                new ArrayList<AtomicQuery>(visitor.elementPathBlocks.size());
+                new ArrayList<AtomicQuery>(visitor.basicGraphPatterns.size());
 
-        for (ElementPathBlock epb : visitor.elementPathBlocks) {
-            Iterator<TriplePath> it = epb.patternElts();
+        for (OpBGP bgp : visitor.basicGraphPatterns) {
+            BasicPattern bp = bgp.getPattern();
 
-            TriplePath triple;
-            while (it.hasNext()) {
-                triple = it.next();
+            for (int i = 0; i < bp.size(); i++) {
+                Triple triple = bp.get(i);
 
                 AtomicQuery atomicQuery =
                         this.createAtomicQuery(query, visitor, triple);
@@ -94,9 +97,8 @@ public final class SparqlDecomposer {
         return result;
     }
 
-    private AtomicQuery createAtomicQuery(Query query,
-                                          CustomElementVisitor visitor,
-                                          TriplePath triple) {
+    private AtomicQuery createAtomicQuery(Query query, CustomOpVisitor visitor,
+                                          Triple triple) {
         AtomicQuery atomicQuery =
                 new AtomicQuery(
                         visitor.graphNode, triple.getSubject(),
@@ -120,42 +122,50 @@ public final class SparqlDecomposer {
         return SparqlDecomposer.Singleton.INSTANCE;
     }
 
-    private static class CustomElementVisitor extends ElementVisitorBase {
+    private static class CustomOpVisitor extends OpVisitorBase {
 
-        private List<ElementPathBlock> elementPathBlocks;
+        private List<OpBGP> basicGraphPatterns;
 
         private Node graphNode;
 
         private int nbGraphPatterns;
 
-        public CustomElementVisitor() {
+        public CustomOpVisitor() {
             super();
-            this.elementPathBlocks = new ArrayList<ElementPathBlock>(1);
+
+            this.basicGraphPatterns = new ArrayList<OpBGP>();
         }
 
         @Override
-        public void visit(ElementNamedGraph elt) {
-            super.visit(elt);
+        public void visit(OpGraph opGraph) {
+            super.visit(opGraph);
 
             if (this.graphNode == null) {
-                this.graphNode = elt.getGraphNameNode();
+                this.graphNode = opGraph.getNode();
             }
 
             this.nbGraphPatterns++;
         }
 
         @Override
-        public void visit(ElementPathBlock elt) {
-            super.visit(elt);
+        public void visit(OpBGP opBGP) {
+            super.visit(opBGP);
 
-            this.elementPathBlocks.add(elt);
+            this.basicGraphPatterns.add(opBGP);
         }
 
         @Override
-        public void visit(ElementFilter el) {
-            super.visit(el);
+        public void visit(OpFilter opFilter) {
+            super.visit(opFilter);
 
             // TODO: add support for filter constraints
+        }
+
+        @Override
+        public void visit(OpOrder opOrder) {
+            super.visit(opOrder);
+
+            // TODO: add support for order by modifiers
         }
 
     }
