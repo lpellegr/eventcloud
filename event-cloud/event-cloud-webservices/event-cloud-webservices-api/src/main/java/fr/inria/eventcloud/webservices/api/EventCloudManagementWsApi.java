@@ -61,6 +61,18 @@ public interface EventCloudManagementWsApi {
     boolean destroyEventCloud(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
+     * Indicates whether an eventcloud exists or not according to its streamUrl.
+     * 
+     * @param streamUrl
+     *            an URL which identifies an eventcloud among an organization.
+     * 
+     * @return {@code true} if the eventcloud identified by the specified
+     *         streamUrl is already created, {@code false} otherwise.
+     */
+    @WebMethod
+    boolean isCreated(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
      * Returns the endpoint URL associated to the eventclouds registry which
      * knows what are the eventclouds that are manageable.
      * 
