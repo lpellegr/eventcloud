@@ -115,10 +115,13 @@ public final class SparqlDecomposer {
         if (query.isReduced()) {
             atomicQuery.setReduced(true);
         }
-        if (query.hasLimit()) {
+        // to avoid wrong results limit must be applied if and only
+        // if the number of triple patterns is equals to 1
+        if (visitor.basicGraphPatterns.size() == 1 && query.hasLimit()) {
             atomicQuery.setLimit(query.getLimit());
         }
-        if (query.getOrderBy() != null) {
+        // it is unnecessary to order results if no limit is applied
+        if (query.hasLimit() && query.getOrderBy() != null) {
             atomicQuery.setOrderBy(this.filterSortConditions(
                     atomicQuery, query.getOrderBy()));
         }
