@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,16 +39,21 @@ import com.google.common.collect.ImmutableBiMap.Builder;
 import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
+import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.algebra.op.OpReduced;
 import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.sse.writers.WriterExpr;
+import com.hp.hpl.jena.sparql.util.ExprUtils;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 
@@ -64,8 +70,6 @@ public final class AtomicQuery implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /* Transient fields */
-
     private transient Node nodes[];
 
     private transient BiMap<String, Integer> vars;
@@ -78,7 +82,9 @@ public final class AtomicQuery implements Serializable {
      * Projection is ignored because results have to be filtered 
      * again once they are received. Offset must also be ignored 
      * because we can not foretell the final indexes that will be 
-     * associated to the results returned by this atomic query.
+     * associated to the results returned by this atomic query. 
+     * Indeed, applying an offset to each atomic query may filter 
+     * results that should be available in the final result.
      */
 
     // eliminates duplicate solutions
@@ -87,8 +93,8 @@ public final class AtomicQuery implements Serializable {
     private boolean reduced = false;
     // puts an upper bound on the number of solutions returned
     private long limit = Long.MIN_VALUE;
-
-    // TODO: add support for order by modifier
+    // put the solutions in order
+    private transient List<SortCondition> orderBy;
 
     // TODO: add support for filter constraints
     // do not forget to update equals + hashcode accordingly
@@ -115,7 +121,7 @@ public final class AtomicQuery implements Serializable {
         return result;
     }
 
-    public boolean hasVariable(String varName) {
+    public boolean containsVariable(String varName) {
         return this.getVarDetails().containsKey(varName);
     }
 
@@ -127,17 +133,20 @@ public final class AtomicQuery implements Serializable {
                     this.filterAndTransformNodeVariableToVar(this.getPredicate()),
                     this.filterAndTransformNodeVariableToVar(this.getObject())));
 
-            // named graph + projection
-            Op opProjection =
-                    new OpProject(
-                            new OpGraph(
-                                    this.filterAndTransformNodeVariableToVar(this.getGraph()),
-                                    new OpBGP(bp)),
-                            ImmutableList.copyOf(this.getVars()));
+            // named graph
+            Op op =
+                    new OpGraph(
+                            this.filterAndTransformNodeVariableToVar(this.getGraph()),
+                            new OpBGP(bp));
+
+            if (this.orderBy != null) {
+                op = new OpOrder(op, this.orderBy);
+            }
+
+            // projection
+            op = new OpProject(op, ImmutableList.copyOf(this.getVars()));
 
             // apply sequence modifiers
-            Op op = opProjection;
-
             if (this.distinct) {
                 op = new OpDistinct(op);
             }
@@ -241,6 +250,10 @@ public final class AtomicQuery implements Serializable {
         return this.limit;
     }
 
+    public List<SortCondition> getOrderBy() {
+        return this.orderBy;
+    }
+
     public boolean hasLimit() {
         return this.limit >= 0;
     }
@@ -257,6 +270,10 @@ public final class AtomicQuery implements Serializable {
         this.limit = limit;
     }
 
+    public void setOrderBy(List<SortCondition> sortConditions) {
+        this.orderBy = sortConditions;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -268,6 +285,8 @@ public final class AtomicQuery implements Serializable {
                 ? 1231 : 1237);
         result = prime * result + (int) (this.limit ^ (this.limit >>> 32));
         result = prime * result + Arrays.hashCode(this.nodes);
+        result = prime * result + ((this.orderBy == null)
+                ? 0 : this.orderBy.hashCode());
         result = prime * result + (this.reduced
                 ? 1231 : 1237);
         return result;
@@ -297,6 +316,13 @@ public final class AtomicQuery implements Serializable {
         if (!Arrays.equals(this.nodes, other.nodes)) {
             return false;
         }
+        if (this.orderBy == null) {
+            if (other.orderBy != null) {
+                return false;
+            }
+        } else if (!this.orderBy.equals(other.orderBy)) {
+            return false;
+        }
         if (this.reduced != other.reduced) {
             return false;
         }
@@ -315,8 +341,22 @@ public final class AtomicQuery implements Serializable {
             ClassNotFoundException {
         in.defaultReadObject();
 
-        this.nodes = new Node[4];
+        // reads sort conditions
+        int nbSortConditions = in.readInt();
 
+        if (nbSortConditions > 0) {
+            this.orderBy = new ArrayList<SortCondition>(nbSortConditions);
+
+            for (int i = 0; i < nbSortConditions; i++) {
+                int direction = in.readInt();
+                Expr expr = ExprUtils.parse(in.readUTF());
+
+                this.orderBy.add(new SortCondition(expr, direction));
+            }
+        }
+
+        // read nodes
+        this.nodes = new Node[4];
         Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
 
         for (int i = 0; i < this.nodes.length; i++) {
@@ -336,8 +376,21 @@ public final class AtomicQuery implements Serializable {
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
 
+        // write sort conditions
+        if (this.orderBy != null) {
+            out.writeInt(this.orderBy.size());
+
+            for (SortCondition sortCondition : this.orderBy) {
+                out.writeInt(sortCondition.getDirection());
+                out.writeUTF(WriterExpr.asString(sortCondition.getExpression()));
+            }
+        } else {
+            out.writeInt(0);
+        }
+
         OutputStreamWriter outWriter = new OutputStreamWriter(out);
 
+        // write nodes
         for (int i = 0; i < this.nodes.length; i++) {
             OutputLangUtils.output(outWriter, this.nodes[i], null);
 
@@ -345,6 +398,7 @@ public final class AtomicQuery implements Serializable {
                 outWriter.write(' ');
             }
         }
+
         outWriter.flush();
     }
 

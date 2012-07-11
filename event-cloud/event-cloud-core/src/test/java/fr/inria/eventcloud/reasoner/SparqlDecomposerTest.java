@@ -19,6 +19,7 @@ package fr.inria.eventcloud.reasoner;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -123,6 +124,18 @@ public class SparqlDecomposerTest {
         assertFalse(atomicQuery.isDistinct());
         assertTrue(atomicQuery.isReduced());
         assertEquals(1000, atomicQuery.getLimit());
+    }
+
+    @Test
+    public void testLegalSelectQuery7() throws DecompositionException {
+        List<AtomicQuery> atomicQueries =
+                this.decomposer.decompose("SELECT DISTINCT ?s ?p ?o { GRAPH ?g { ?s ?p ?o } } ORDER BY ?o DESC(?p) ?u LIMIT 1000");
+
+        assertCorrectDecomposition(atomicQueries, 1, 4);
+
+        AtomicQuery atomicQuery = atomicQueries.get(0);
+        assertNotNull(atomicQuery.getOrderBy());
+        assertEquals(2, atomicQuery.getOrderBy().size());
     }
 
     @Test(expected = DecompositionException.class)
