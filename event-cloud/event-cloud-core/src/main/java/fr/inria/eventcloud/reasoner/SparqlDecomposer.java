@@ -23,6 +23,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpVisitorBase;
@@ -30,8 +31,11 @@ import com.hp.hpl.jena.sparql.algebra.OpWalker;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
-import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.expr.ExprList;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.expr.ExprVisitorBase;
+import com.hp.hpl.jena.sparql.expr.ExprWalker;
 
 import fr.inria.eventcloud.exceptions.DecompositionException;
 
@@ -99,7 +103,7 @@ public final class SparqlDecomposer {
 
     private AtomicQuery createAtomicQuery(Query query, CustomOpVisitor visitor,
                                           Triple triple) {
-        AtomicQuery atomicQuery =
+        final AtomicQuery atomicQuery =
                 new AtomicQuery(
                         visitor.graphNode, triple.getSubject(),
                         triple.getPredicate(), triple.getObject());
@@ -114,26 +118,75 @@ public final class SparqlDecomposer {
         if (query.hasLimit()) {
             atomicQuery.setLimit(query.getLimit());
         }
+        if (query.getOrderBy() != null) {
+            atomicQuery.setOrderBy(this.filterSortConditions(
+                    atomicQuery, query.getOrderBy()));
+        }
 
         return atomicQuery;
+    }
+
+    /**
+     * Filters the specified list of sortConditions to keep only the sort
+     * conditions that use a variable declared inside the specified atomicQuery.
+     * 
+     * @param atomicQuery
+     *            the atomic query containing the variables to look for.
+     * @param sortConditions
+     *            the sort conditions to filter.
+     * 
+     * @return a list of sortConditions that keeps only the sort conditions that
+     *         use a variable declared inside the specified atomicQuery.
+     */
+    private List<SortCondition> filterSortConditions(AtomicQuery atomicQuery,
+                                                     List<SortCondition> sortConditions) {
+        SortConditionVisitor sortConditionVisitor = new SortConditionVisitor();
+        List<SortCondition> result =
+                new ArrayList<SortCondition>(sortConditions.size());
+
+        for (SortCondition sortCondition : sortConditions) {
+            ExprWalker.walk(sortConditionVisitor, sortCondition.getExpression());
+
+            if (atomicQuery.containsVariable(sortConditionVisitor.var.getVarName())) {
+                result.add(sortCondition);
+            }
+        }
+
+        return result;
     }
 
     public static SparqlDecomposer getInstance() {
         return SparqlDecomposer.Singleton.INSTANCE;
     }
 
-    private static class CustomOpVisitor extends OpVisitorBase {
+    private static class SortConditionVisitor extends ExprVisitorBase {
 
-        private List<OpBGP> basicGraphPatterns;
+        private ExprVar var;
+
+        @Override
+        public void visit(ExprVar var) {
+            super.visit(var);
+
+            this.var = var;
+        }
+
+    }
+
+    private static class CustomOpVisitor extends OpVisitorBase {
 
         private Node graphNode;
 
+        private List<OpBGP> basicGraphPatterns;
+
         private int nbGraphPatterns;
+
+        private List<ExprList> filterConstraints;
 
         public CustomOpVisitor() {
             super();
 
             this.basicGraphPatterns = new ArrayList<OpBGP>();
+            this.filterConstraints = new ArrayList<ExprList>();
         }
 
         @Override
@@ -158,14 +211,7 @@ public final class SparqlDecomposer {
         public void visit(OpFilter opFilter) {
             super.visit(opFilter);
 
-            // TODO: add support for filter constraints
-        }
-
-        @Override
-        public void visit(OpOrder opOrder) {
-            super.visit(opOrder);
-
-            // TODO: add support for order by modifiers
+            this.filterConstraints.add(opFilter.getExprs());
         }
 
     }

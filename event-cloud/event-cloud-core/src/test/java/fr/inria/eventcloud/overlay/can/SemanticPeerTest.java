@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -310,6 +311,43 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                         .getResult();
 
         assertEquals(resultSet, 6);
+    }
+
+    @Test
+    public void testExecuteSparqlSelect4() {
+        for (int i = 0; i < 5; i++) {
+            super.getRandomSemanticPeer().add(
+                    QuadrupleGenerator.randomWithLiteral());
+        }
+
+        Quadruple quadruple = QuadrupleGenerator.randomWithLiteral();
+        for (int i = 0; i < 5; i++) {
+            super.getRandomSemanticPeer().add(quadruple);
+        }
+
+        ResultSet resultSet =
+                super.getRandomSemanticPeer()
+                        .executeSparqlSelect(
+                                "SELECT DISTINCT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } } ORDER BY DESC(?o) LIMIT 10")
+                        .getResult();
+
+        assertEquals(resultSet, 6);
+
+        int i = 0;
+        String lastLiteralValue = null;
+
+        while (resultSet.hasNext()) {
+            QuerySolution binding = resultSet.next();
+            String currentLiteralValue =
+                    binding.get("o").asNode().getLiteralLexicalForm();
+
+            if (i > 0) {
+                Assert.assertTrue(lastLiteralValue.compareTo(currentLiteralValue) >= 0);
+            }
+
+            lastLiteralValue = currentLiteralValue;
+            i++;
+        }
     }
 
     @Test
