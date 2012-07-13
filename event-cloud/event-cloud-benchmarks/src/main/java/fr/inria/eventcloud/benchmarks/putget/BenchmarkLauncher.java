@@ -183,8 +183,11 @@ public class BenchmarkLauncher {
             this.elapsedTime = System.currentTimeMillis() - this.startTime;
             this.responses.get(i).setTimeToGetResult(this.elapsedTime);
             this.testTime += this.elapsedTime;
-            this.responses.get(i).setNbSubQueries(
-                    SparqlReasoner.parse(this.queries.get(i)).size());
+            this.responses.get(i)
+                    .setNbSubQueries(
+                            SparqlReasoner.parse(this.queries.get(i))
+                                    .getFirst()
+                                    .size());
         }
 
         XmlWriter xmlWriter =

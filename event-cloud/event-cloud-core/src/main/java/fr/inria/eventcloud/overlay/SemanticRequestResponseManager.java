@@ -33,12 +33,12 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
 
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
-import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
@@ -92,12 +92,15 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery,
                                               StructuredOverlay overlay) {
+        Pair<List<SparqlAtomicRequest>, Boolean> parsingResult =
+                SparqlReasoner.parse(sparqlAskQuery);
+
         List<QuadruplePatternResponse> responses =
-                this.dispatch(SparqlReasoner.parse(sparqlAskQuery), overlay);
+                this.dispatch(parsingResult.getFirst(), overlay);
 
         boolean result =
                 this.getColander().filterSparqlAsk(
-                        sparqlAskQuery, extractQuadruples(responses));
+                        sparqlAskQuery, responses, parsingResult.getSecond());
 
         long[] measurements = this.aggregateMeasurements(responses);
 
@@ -118,13 +121,16 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery,
                                                           StructuredOverlay overlay) {
+        Pair<List<SparqlAtomicRequest>, Boolean> parsingResult =
+                SparqlReasoner.parse(sparqlConstructQuery);
+
         List<QuadruplePatternResponse> responses =
-                this.dispatch(
-                        SparqlReasoner.parse(sparqlConstructQuery), overlay);
+                this.dispatch(parsingResult.getFirst(), overlay);
 
         Model result =
                 this.getColander().filterSparqlConstruct(
-                        sparqlConstructQuery, extractQuadruples(responses));
+                        sparqlConstructQuery, responses,
+                        parsingResult.getSecond());
 
         long[] measurements = this.aggregateMeasurements(responses);
 
@@ -145,12 +151,17 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery,
                                                     StructuredOverlay overlay) {
+        Pair<List<SparqlAtomicRequest>, Boolean> parsingResult =
+                SparqlReasoner.parse(sparqlSelectQuery);
+
         List<QuadruplePatternResponse> responses =
-                this.dispatch(SparqlReasoner.parse(sparqlSelectQuery), overlay);
+                this.dispatch(parsingResult.getFirst(), overlay);
 
         ResultSet result =
-                this.getColander().filterSparqlSelect(
-                        sparqlSelectQuery, extractQuadruples(responses));
+                this.getColander()
+                        .filterSparqlSelect(
+                                sparqlSelectQuery, responses,
+                                parsingResult.getSecond());
 
         long[] measurements = this.aggregateMeasurements(responses);
 
@@ -186,15 +197,6 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
         }
 
         return sparqlSelectResponse;
-    }
-
-    private static List<Quadruple> extractQuadruples(List<QuadruplePatternResponse> responses) {
-        List<Quadruple> quadruples = new ArrayList<Quadruple>();
-        for (QuadruplePatternResponse response : responses) {
-            quadruples.addAll(response.getResult());
-        }
-
-        return quadruples;
     }
 
     /**

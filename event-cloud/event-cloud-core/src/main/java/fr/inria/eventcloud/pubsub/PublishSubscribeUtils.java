@@ -634,7 +634,7 @@ public final class PublishSubscribeUtils {
             subscriberConnectionFailure.incNbAttempts();
 
             // tries to remove subscriptions for proxies which are not reachable
-            // after PROXY_MAX_LOOKUP_ATTEMPTS attempts but there is no
+            // after at least PROXY_MAX_LOOKUP_ATTEMPTS attempts. There is no
             // guarantee that it will be done exactly after this number of
             // attempts due to connection failure information that are stored by
             // using soft references.
