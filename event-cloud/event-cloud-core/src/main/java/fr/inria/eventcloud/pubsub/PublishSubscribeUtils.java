@@ -650,6 +650,11 @@ public final class PublishSubscribeUtils {
 
                         semanticCanOverlay.getSubscriberConnectionFailures()
                                 .remove(subscription.getOriginalId());
+
+                        log.info(
+                                "Removed subscription {} due to subscriber which is not reachable under URL {}",
+                                subscription.getId(),
+                                subscription.getSubscriberUrl());
                     } catch (DispatchException de) {
                         de.printStackTrace();
                     }
