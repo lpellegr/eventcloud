@@ -42,68 +42,68 @@ public class SparqlDecomposerTest {
 
     @Test
     public void testLegalAskQuery() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("ASK { GRAPH ?g { ?s ?p ?o } }");
 
-        assertCorrectDecomposition(atomicQueries, 1, 4);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
     }
 
     @Test
     public void testLegalConstructQuery() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }");
 
-        assertCorrectDecomposition(atomicQueries, 1, 4);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
     }
 
     @Test
     public void testLegalDescribeQuery() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("DESCRIBE ?s ?p ?o { GRAPH ?g { ?s ?p ?o } }");
 
-        assertCorrectDecomposition(atomicQueries, 1, 4);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
     }
 
     @Test
     public void testLegalSelectQuery1() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("SELECT ?s ?p ?o { GRAPH ?g { ?s ?p ?o } }");
 
-        assertCorrectDecomposition(atomicQueries, 1, 4);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
     }
 
     @Test
     public void testLegalSelectQuery2() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("SELECT ?s ?p ?o { GRAPH ?g { ?s ?p ?o . ?o ?p ?s } }");
 
-        assertCorrectDecomposition(atomicQueries, 2, 4);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 2, 4);
     }
 
     @Test
     public void testLegalSelectQuery3() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("SELECT ?s ?p ?o { GRAPH ?g { ?s <urn:p:0> ?o . ?s <urn:p:1> ?p } }");
 
-        assertCorrectDecomposition(atomicQueries, 2, 3);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 2, 3);
     }
 
     @Test
     public void testLegalSelectQuery4() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("SELECT ?s ?p ?o { GRAPH ?g { { ?s <urn:p:0> ?o } UNION { ?s <urn:p:1> ?p } } }");
 
-        assertCorrectDecomposition(atomicQueries, 2, 3);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 2, 3);
     }
 
     @Test
     public void testLegalSelectQuery5() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("SELECT DISTINCT ?s ?p ?o { GRAPH ?g { ?s ?p ?o } } LIMIT 1000");
 
-        assertCorrectDecomposition(atomicQueries, 1, 4);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
 
-        AtomicQuery atomicQuery = atomicQueries.get(0);
+        AtomicQuery atomicQuery = decompositionResult.getAtomicQueries().get(0);
 
         assertTrue(atomicQuery.hasLimit());
         assertTrue(atomicQuery.isDistinct());
@@ -113,12 +113,12 @@ public class SparqlDecomposerTest {
 
     @Test
     public void testLegalSelectQuery6() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("SELECT REDUCED ?s ?p ?o { GRAPH ?g { ?s ?p ?o } } LIMIT 1000 OFFSET 200");
 
-        assertCorrectDecomposition(atomicQueries, 1, 4);
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
 
-        AtomicQuery atomicQuery = atomicQueries.get(0);
+        AtomicQuery atomicQuery = decompositionResult.getAtomicQueries().get(0);
 
         assertTrue(atomicQuery.hasLimit());
         assertFalse(atomicQuery.isDistinct());
@@ -128,14 +128,24 @@ public class SparqlDecomposerTest {
 
     @Test
     public void testLegalSelectQuery7() throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
+        SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("SELECT DISTINCT ?s ?p ?o { GRAPH ?g { ?s ?p ?o } } ORDER BY ?o DESC(?p) ?u LIMIT 1000");
 
-        assertCorrectDecomposition(atomicQueries, 1, 4);
+        assertFalse(decompositionResult.isReturnMetaGraphValue());
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
 
-        AtomicQuery atomicQuery = atomicQueries.get(0);
+        AtomicQuery atomicQuery = decompositionResult.getAtomicQueries().get(0);
         assertNotNull(atomicQuery.getOrderBy());
         assertEquals(2, atomicQuery.getOrderBy().size());
+    }
+
+    @Test
+    public void testLegalSelectQuery8() throws DecompositionException {
+        SparqlDecompositionResult decompositionResult =
+                this.decomposer.decompose("PREFIX eventcloud: <http://eventcloud.inria.fr/function#> SELECT DISTINCT ?s ?p ?o { GRAPH ?g { ?s ?p ?o } FILTER (eventcloud:metaGraph(?g)) }");
+
+        assertTrue(decompositionResult.isReturnMetaGraphValue());
+        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
     }
 
     @Test(expected = DecompositionException.class)

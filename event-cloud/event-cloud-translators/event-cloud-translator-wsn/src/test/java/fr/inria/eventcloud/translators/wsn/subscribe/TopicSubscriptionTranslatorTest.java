@@ -56,6 +56,7 @@ public class TopicSubscriptionTranslatorTest {
 
         QuadruplePattern quadruplePattern =
                 SparqlReasoner.parse(sparqlQuery)
+                        .getFirst()
                         .get(0)
                         .getQuadruplePattern()
                         .getValue();

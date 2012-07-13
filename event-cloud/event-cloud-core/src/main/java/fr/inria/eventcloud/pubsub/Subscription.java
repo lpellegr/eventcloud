@@ -382,7 +382,7 @@ public class Subscription implements Quadruplable, Serializable {
             try {
                 List<AtomicQuery> atomicQueries =
                         SparqlDecomposer.getInstance().decompose(
-                                this.sparqlQuery);
+                                this.sparqlQuery).getAtomicQueries();
 
                 this.subSubscriptions =
                         new Subsubscription[atomicQueries.size()];

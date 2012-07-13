@@ -32,6 +32,7 @@ import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 
 /**
  * SparqlColander is used to filter the results from a set of
@@ -62,15 +63,20 @@ public class SparqlColander implements Closeable {
      * 
      * @param sparqlAskQuery
      *            the SPARQL query to use for filtering quadruples.
-     * @param quadruples
-     *            the quadruples to filter
+     * @param quadruplePatternResponses
+     *            the quadruples to filter.
+     * @param returnMetaGraphValue
+     *            indicates whether the meta graph value must be returned or
+     *            not.
      * 
      * @return {@code true} if there are some values matching the
      *         {@code sparqlAskQuery}, {@code false} otherwise.
      */
     public synchronized boolean filterSparqlAsk(String sparqlAskQuery,
-                                                List<Quadruple> quadruples) {
-        this.cleanAndFill(this.datastore, quadruples);
+                                                List<QuadruplePatternResponse> quadruplePatternResponses,
+                                                boolean returnMetaGraphValue) {
+        this.cleanAndFill(
+                this.datastore, quadruplePatternResponses, returnMetaGraphValue);
 
         boolean result = false;
 
@@ -101,15 +107,20 @@ public class SparqlColander implements Closeable {
      * 
      * @param sparqlConstructQuery
      *            the SPARQL query to use for filtering quadruples.
-     * @param quadruples
-     *            the quadruples to filter
+     * @param quadruplePatternResponses
+     *            the quadruples to filter.
+     * @param returnMetaGraphValue
+     *            indicates whether the meta graph value must be returned or
+     *            not.
      * 
      * @return {@code true} if there are some values matching the
      *         {@code sparqlConstructQuery}, {@code false} otherwise.
      */
     public synchronized Model filterSparqlConstruct(String sparqlConstructQuery,
-                                                    List<Quadruple> quadruples) {
-        this.cleanAndFill(this.datastore, quadruples);
+                                                    List<QuadruplePatternResponse> quadruplePatternResponses,
+                                                    boolean returnMetaGraphValue) {
+        this.cleanAndFill(
+                this.datastore, quadruplePatternResponses, returnMetaGraphValue);
 
         Model result = null;
 
@@ -140,15 +151,20 @@ public class SparqlColander implements Closeable {
      * 
      * @param sparqlSelectQuery
      *            the SPARQL query to use for filtering quadruples.
-     * @param quadruples
-     *            the quadruples to filter
+     * @param quadruplePatternResponses
+     *            the quadruples to filter.
+     * @param returnMetaGraphValue
+     *            indicates whether the meta graph value must be returned or
+     *            not.
      * 
      * @return {@code true} if there are some values matching the
      *         {@code sparqlSelectQuery}, {@code false} otherwise.
      */
     public synchronized ResultSet filterSparqlSelect(String sparqlSelectQuery,
-                                                     List<Quadruple> quadruples) {
-        this.cleanAndFill(this.datastore, quadruples);
+                                                     List<QuadruplePatternResponse> quadruplePatternResponses,
+                                                     boolean returnMetaGraphValue) {
+        this.cleanAndFill(
+                this.datastore, quadruplePatternResponses, returnMetaGraphValue);
 
         ResultSet result = null;
 
@@ -174,13 +190,24 @@ public class SparqlColander implements Closeable {
     }
 
     private void cleanAndFill(TransactionalTdbDatastore datastore,
-                              List<Quadruple> quadruples) {
+                              List<QuadruplePatternResponse> quadruplePatternResponses,
+                              boolean returnMetaGraphValue) {
         TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
 
         try {
             txnGraph.delete(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
-            for (Quadruple quad : quadruples) {
-                txnGraph.add(quad);
+            for (QuadruplePatternResponse qpResponse : quadruplePatternResponses) {
+                for (Quadruple quad : qpResponse.getResult()) {
+                    Node graph = quad.getGraph();
+
+                    if (returnMetaGraphValue) {
+                        graph = quad.createMetaGraphNode();
+                    }
+
+                    txnGraph.add(
+                            graph, quad.getSubject(), quad.getPredicate(),
+                            quad.getObject());
+                }
             }
             txnGraph.commit();
         } catch (Exception e) {
