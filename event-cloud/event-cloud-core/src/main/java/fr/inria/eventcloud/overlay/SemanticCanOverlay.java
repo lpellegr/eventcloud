@@ -18,6 +18,7 @@ package fr.inria.eventcloud.overlay;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.api.PAActiveObject;
@@ -30,6 +31,7 @@ import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEn
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.MapMaker;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.update.UpdateAction;
 import com.hp.hpl.jena.update.UpdateFactory;
@@ -44,6 +46,7 @@ import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
+import fr.inria.eventcloud.pubsub.SubscriberConnectionFailure;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.reasoner.SparqlColander;
 
@@ -62,6 +65,8 @@ public class SemanticCanOverlay extends CanOverlay {
     private final LoadingCache<String, SemanticPeer> peerStubsCache;
 
     private final LoadingCache<SubscriptionId, Subscription> subscriptionsCache;
+
+    private final ConcurrentMap<SubscriptionId, SubscriberConnectionFailure> subscriberConnectionFailures;
 
     /**
      * Constructs a new overlay with the specified {@code dataHandler} and
@@ -109,6 +114,9 @@ public class SemanticCanOverlay extends CanOverlay {
                                         key);
                             }
                         });
+
+        this.subscriberConnectionFailures =
+                new MapMaker().softValues().makeMap();
     }
 
     /**
@@ -290,6 +298,10 @@ public class SemanticCanOverlay extends CanOverlay {
 
             this.subscriptionsCache.invalidate(originalSubscriptionId);
         }
+    }
+
+    public ConcurrentMap<SubscriptionId, SubscriberConnectionFailure> getSubscriberConnectionFailures() {
+        return this.subscriberConnectionFailures;
     }
 
     /**

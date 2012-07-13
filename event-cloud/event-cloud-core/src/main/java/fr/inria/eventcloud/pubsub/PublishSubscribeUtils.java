@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.mutable.MutableObject;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
@@ -75,6 +76,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
@@ -563,7 +565,13 @@ public final class PublishSubscribeUtils {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    subscriber.receive(n);
+                    try {
+                        subscriber.receive(n);
+                    } catch (Throwable t) {
+                        log.warn(t.getMessage());
+                        handleSubscriberConnectionFailure(
+                                semanticCanOverlay, subscription);
+                    }
                 }
             });
             thread.setName("NotifySubscriberThread");
@@ -596,14 +604,57 @@ public final class PublishSubscribeUtils {
                 }
             }
         } catch (ExecutionException e) {
-            log.warn(
-                    "Notification cannot be sent because no SubscribeProxy found under URL: "
-                            + subscription.getSubscriberUrl(), e);
+            log.warn("Notification cannot be sent because no SubscribeProxy found under URL: "
+                    + subscription.getSubscriberUrl());
 
-            // TODO: this could be due to a subscriber which has left
-            // without unsubscribing. In that case we can remove the
-            // subscription information associated to this subscriber
-            // and also send a message
+            // This could be due to a subscriber which has left
+            // without unsubscribing or a temporary network outage.
+            // In that case the subscription could be removed after some
+            // attempts and/or time
+            handleSubscriberConnectionFailure(semanticCanOverlay, subscription);
+        }
+    }
+
+    private static void handleSubscriberConnectionFailure(final SemanticCanOverlay semanticCanOverlay,
+                                                          final Subscription subscription) {
+        SubscriberConnectionFailure subscriberConnectionFailure =
+                new SubscriberConnectionFailure();
+
+        SubscriberConnectionFailure oldValue =
+                semanticCanOverlay.getSubscriberConnectionFailures()
+                        .putIfAbsent(
+                                subscription.getOriginalId(),
+                                subscriberConnectionFailure);
+
+        if (oldValue != null) {
+            subscriberConnectionFailure = oldValue;
+        }
+
+        synchronized (subscriberConnectionFailure) {
+            subscriberConnectionFailure.incNbAttempts();
+
+            // tries to remove subscriptions for proxies which are not reachable
+            // after PROXY_MAX_LOOKUP_ATTEMPTS attempts but there is no
+            // guarantee that it will be done exactly after this number of
+            // attempts due to connection failure information that are stored by
+            // using soft references.
+            if (subscriberConnectionFailure.getNbAttempts() == EventCloudProperties.PROXY_MAX_LOOKUP_ATTEMPTS.getValue()) {
+                for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
+                    try {
+                        PAFuture.waitFor(semanticCanOverlay.getStub()
+                                .send(
+                                        new UnsubscribeRequest(
+                                                subscription.getOriginalId(),
+                                                subSubscription.getAtomicQuery(),
+                                                subscription.getType() == NotificationListenerType.BINDING)));
+
+                        semanticCanOverlay.getSubscriberConnectionFailures()
+                                .remove(subscription.getOriginalId());
+                    } catch (DispatchException de) {
+                        de.printStackTrace();
+                    }
+                }
+            }
         }
     }
 
