@@ -158,6 +158,14 @@ public class EventCloudProperties {
     public static final PropertyDouble SOCIAL_FILTER_THRESHOLD =
             new PropertyDouble("eventcloud.socialfilter.threshold", 0.5);
 
+    /**
+     * Specifies the number maximum of attempts to lookup a proxy that is not
+     * reachable. For instance, this is useful to remove references to subscribe
+     * proxies which have left without unsubscribing.
+     */
+    public static final PropertyInteger PROXY_MAX_LOOKUP_ATTEMPTS =
+            new PropertyInteger("proxy.max.lookup.attempts", 3);
+
     private static File configurationFileLoaded;
 
     public static void loadConfiguration() {
