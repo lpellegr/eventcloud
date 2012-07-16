@@ -131,21 +131,11 @@ public class SparqlDecomposerTest {
         SparqlDecompositionResult decompositionResult =
                 this.decomposer.decompose("SELECT DISTINCT ?s ?p ?o { GRAPH ?g { ?s ?p ?o } } ORDER BY ?o DESC(?p) ?u LIMIT 1000");
 
-        assertFalse(decompositionResult.isReturnMetaGraphValue());
         assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
 
         AtomicQuery atomicQuery = decompositionResult.getAtomicQueries().get(0);
         assertNotNull(atomicQuery.getOrderBy());
         assertEquals(2, atomicQuery.getOrderBy().size());
-    }
-
-    @Test
-    public void testLegalSelectQuery8() throws DecompositionException {
-        SparqlDecompositionResult decompositionResult =
-                this.decomposer.decompose("PREFIX eventcloud: <http://eventcloud.inria.fr/function#> SELECT DISTINCT ?s ?p ?o { GRAPH ?g { ?s ?p ?o } FILTER (eventcloud:metaGraph(?g)) }");
-
-        assertTrue(decompositionResult.isReturnMetaGraphValue());
-        assertCorrectDecomposition(decompositionResult.getAtomicQueries(), 1, 4);
     }
 
     @Test(expected = DecompositionException.class)

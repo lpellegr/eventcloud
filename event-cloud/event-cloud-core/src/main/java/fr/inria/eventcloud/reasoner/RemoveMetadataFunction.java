@@ -16,18 +16,20 @@
  **/
 package fr.inria.eventcloud.reasoner;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.function.FunctionBase1;
 
+import fr.inria.eventcloud.api.Quadruple;
+
 /**
- * This ARQ function serves as a marker for detecting that graph value must be
- * returned with meta-information.
+ * This ARQ function is used for removing meta-information from a graph value.
  * 
  * @author lpellegr
  */
-public class MetaGraphFunction extends FunctionBase1 {
+public class RemoveMetadataFunction extends FunctionBase1 {
 
-    public MetaGraphFunction() {
+    public RemoveMetadataFunction() {
         super();
     }
 
@@ -36,7 +38,9 @@ public class MetaGraphFunction extends FunctionBase1 {
      */
     @Override
     public NodeValue exec(NodeValue v) {
-        return v;
+        Node n = v.asNode();
+
+        return NodeValue.makeNode(Quadruple.removeMetaInformation(n));
     }
 
 }

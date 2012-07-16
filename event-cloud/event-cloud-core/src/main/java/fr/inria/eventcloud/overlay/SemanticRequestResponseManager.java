@@ -33,7 +33,6 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -92,15 +91,14 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery,
                                               StructuredOverlay overlay) {
-        Pair<List<SparqlAtomicRequest>, Boolean> parsingResult =
+        List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlAskQuery);
 
         List<QuadruplePatternResponse> responses =
-                this.dispatch(parsingResult.getFirst(), overlay);
+                this.dispatch(parsingResult, overlay);
 
         boolean result =
-                this.getColander().filterSparqlAsk(
-                        sparqlAskQuery, responses, parsingResult.getSecond());
+                this.getColander().filterSparqlAsk(sparqlAskQuery, responses);
 
         long[] measurements = this.aggregateMeasurements(responses);
 
@@ -121,16 +119,15 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery,
                                                           StructuredOverlay overlay) {
-        Pair<List<SparqlAtomicRequest>, Boolean> parsingResult =
+        List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlConstructQuery);
 
         List<QuadruplePatternResponse> responses =
-                this.dispatch(parsingResult.getFirst(), overlay);
+                this.dispatch(parsingResult, overlay);
 
         Model result =
                 this.getColander().filterSparqlConstruct(
-                        sparqlConstructQuery, responses,
-                        parsingResult.getSecond());
+                        sparqlConstructQuery, responses);
 
         long[] measurements = this.aggregateMeasurements(responses);
 
@@ -151,17 +148,15 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery,
                                                     StructuredOverlay overlay) {
-        Pair<List<SparqlAtomicRequest>, Boolean> parsingResult =
+        List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlSelectQuery);
 
         List<QuadruplePatternResponse> responses =
-                this.dispatch(parsingResult.getFirst(), overlay);
+                this.dispatch(parsingResult, overlay);
 
         ResultSet result =
-                this.getColander()
-                        .filterSparqlSelect(
-                                sparqlSelectQuery, responses,
-                                parsingResult.getSecond());
+                this.getColander().filterSparqlSelect(
+                        sparqlSelectQuery, responses);
 
         long[] measurements = this.aggregateMeasurements(responses);
 
