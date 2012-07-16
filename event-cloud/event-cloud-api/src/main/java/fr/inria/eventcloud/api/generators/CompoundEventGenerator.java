@@ -59,11 +59,30 @@ public class CompoundEventGenerator {
      *         one for specifying the streamUrl it belongs to.
      */
     public static CompoundEvent random(String streamUrl, int nbQuadruples) {
+        return random(streamUrl, nbQuadruples, Generator.DEFAULT_LENGTH);
+    }
+
+    /**
+     * Creates a random node composed of the specified number of quadruples plus
+     * one for specifying the streamUrl it belongs to.
+     * 
+     * @param streamUrl
+     *            the streamUrl to set.
+     * @param nbQuadruples
+     *            the number of quadruples to generate randomly.
+     * @param nodeSize
+     *            the number of characters used for each node generated.
+     * 
+     * @return a random node composed of the specified number of quadruples plus
+     *         one for specifying the streamUrl it belongs to.
+     */
+    public static CompoundEvent random(String streamUrl, int nbQuadruples,
+                                       int nodeSize) {
         Node graphNode = NodeGenerator.randomUri();
 
-        List<Quadruple> quadruples = new ArrayList<Quadruple>();
+        List<Quadruple> quadruples = new ArrayList<Quadruple>(nbQuadruples);
         for (int i = 0; i < nbQuadruples; i++) {
-            quadruples.add(QuadrupleGenerator.random(graphNode));
+            quadruples.add(QuadrupleGenerator.random(graphNode, nodeSize));
         }
 
         if (streamUrl != null) {
