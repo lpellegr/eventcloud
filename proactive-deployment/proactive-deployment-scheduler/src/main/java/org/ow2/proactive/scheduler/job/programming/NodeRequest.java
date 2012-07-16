@@ -64,7 +64,7 @@ public class NodeRequest {
     /**
      * Constructs a new {@link NodeRequest}.
      * 
-     * @param nodeRequestId
+     * @param nodeRequestID
      *            ID of the node request.
      * @param nbNodes
      *            Number of {@link Node nodes} of the node request.

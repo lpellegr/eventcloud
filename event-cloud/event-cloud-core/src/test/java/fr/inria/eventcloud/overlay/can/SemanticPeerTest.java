@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -295,6 +298,37 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
     @Test
     public void testExecuteSparqlSelect3() {
+        for (int i = 0; i < 10; i++) {
+            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+        }
+
+        ResultSet resultSet =
+                super.getRandomSemanticPeer()
+                        .executeSparqlSelect(
+                                "PREFIX eventcloud: <http://eventcloud.inria.fr/function#> SELECT ?g { GRAPH ?g { ?s ?p ?o } }")
+                        .getResult();
+
+        while (resultSet.hasNext()) {
+            QuerySolution binding = resultSet.next();
+            assertTrue(binding.get("g").asNode().getURI().contains(
+                    Quadruple.META_INFORMATION_SEPARATOR));
+        }
+
+        resultSet =
+                super.getRandomSemanticPeer()
+                        .executeSparqlSelect(
+                                "PREFIX eventcloud: <http://eventcloud.inria.fr/function#> SELECT ?shortGraph { GRAPH ?g { ?s ?p ?o . BIND(eventcloud:removeMetadata(?g) AS ?shortGraph) } }")
+                        .getResult();
+
+        while (resultSet.hasNext()) {
+            QuerySolution binding = resultSet.next();
+            assertFalse(binding.get("shortGraph").asNode().getURI().contains(
+                    Quadruple.META_INFORMATION_SEPARATOR));
+        }
+    }
+
+    @Test
+    public void testExecuteSparqlSelect4() {
         for (int i = 0; i < 5; i++) {
             super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
         }
@@ -314,7 +348,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect4() {
+    public void testExecuteSparqlSelect5() {
         for (int i = 0; i < 5; i++) {
             super.getRandomSemanticPeer().add(
                     QuadrupleGenerator.randomWithLiteral());

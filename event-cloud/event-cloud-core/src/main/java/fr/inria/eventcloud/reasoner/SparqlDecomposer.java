@@ -19,8 +19,6 @@ package fr.inria.eventcloud.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
-
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
@@ -34,8 +32,6 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
-import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.expr.ExprFunctionN;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.ExprVisitorBase;
@@ -58,11 +54,11 @@ public final class SparqlDecomposer {
     }
 
     private static final String FUNCTION_META_GRAPH_IRI =
-            "http://eventcloud.inria.fr/function#metaGraph";
+            "http://eventcloud.inria.fr/function#removeMetadata";
 
     private SparqlDecomposer() {
         FunctionRegistry.get().put(
-                FUNCTION_META_GRAPH_IRI, MetaGraphFunction.class);
+                FUNCTION_META_GRAPH_IRI, RemoveMetadataFunction.class);
     }
 
     public SparqlDecompositionResult decompose(String sparqlQuery)
@@ -75,13 +71,9 @@ public final class SparqlDecomposer {
         // TODO: add support for multiple graph patterns
         OpWalker.walk(op, visitor);
 
-        // detects if we have to return meta graph values or not
-        boolean returnMetaGraphValue =
-                this.containsMetaGraphFunction(visitor.filterConstraints);
-
         if (visitor.nbGraphPatterns == 1) {
             return new SparqlDecompositionResult(this.createAtomicQueries(
-                    query, visitor), returnMetaGraphValue);
+                    query, visitor));
         } else {
             if (visitor.nbGraphPatterns == 0) {
                 throw new DecompositionException(
@@ -172,22 +164,6 @@ public final class SparqlDecomposer {
         return result;
     }
 
-    private boolean containsMetaGraphFunction(List<ExprList> exprLists) {
-        MetaGraphExprVisitor visitor = new MetaGraphExprVisitor();
-
-        for (ExprList exprList : exprLists) {
-            for (Expr expr : exprList) {
-                ExprWalker.walk(visitor, expr);
-
-                if (visitor.containsMetaGraphFunction()) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     public static SparqlDecomposer getInstance() {
         return SparqlDecomposer.Singleton.INSTANCE;
     }
@@ -201,29 +177,6 @@ public final class SparqlDecomposer {
             super.visit(var);
 
             this.var = var;
-        }
-
-    }
-
-    private static class MetaGraphExprVisitor extends ExprVisitorBase {
-
-        private MutableBoolean containsMetaGraphFunction;
-
-        public MetaGraphExprVisitor() {
-            this.containsMetaGraphFunction = new MutableBoolean(false);
-        }
-
-        @Override
-        public void visit(ExprFunctionN func) {
-            if (func.getFunctionIRI().equals(FUNCTION_META_GRAPH_IRI)) {
-                this.containsMetaGraphFunction.setValue(true);
-            }
-
-            super.visit(func);
-        }
-
-        public boolean containsMetaGraphFunction() {
-            return this.containsMetaGraphFunction.getValue();
         }
 
     }

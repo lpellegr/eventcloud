@@ -65,7 +65,7 @@ public class Quadruple implements Event {
 
     private static final Logger log = LoggerFactory.getLogger(Quadruple.class);
 
-    protected static final String META_INFORMATION_SEPARATOR = "/$";
+    public static final String META_INFORMATION_SEPARATOR = "/$";
 
     // contains respectively the graph, the subject, the predicate
     // and the object value of the quadruple
@@ -514,6 +514,17 @@ public class Quadruple implements Event {
         }
 
         return null;
+    }
+
+    public static Node removeMetaInformation(Node graph) {
+        String[] splits =
+                graph.getURI().split(Pattern.quote(META_INFORMATION_SEPARATOR));
+
+        if (splits.length == 1) {
+            return graph;
+        } else {
+            return Node.createURI(splits[0]);
+        }
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {

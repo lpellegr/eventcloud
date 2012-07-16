@@ -26,20 +26,12 @@ public class SparqlDecompositionResult {
 
     private final List<AtomicQuery> atomicQueries;
 
-    private final boolean returnMetaGraphValue;
-
-    public SparqlDecompositionResult(List<AtomicQuery> atomicQueries,
-            boolean returnMetaGraphValue) {
+    public SparqlDecompositionResult(List<AtomicQuery> atomicQueries) {
         this.atomicQueries = atomicQueries;
-        this.returnMetaGraphValue = returnMetaGraphValue;
     }
 
     public List<AtomicQuery> getAtomicQueries() {
         return this.atomicQueries;
-    }
-
-    public boolean isReturnMetaGraphValue() {
-        return this.returnMetaGraphValue;
     }
 
 }

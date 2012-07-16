@@ -65,18 +65,13 @@ public class SparqlColander implements Closeable {
      *            the SPARQL query to use for filtering quadruples.
      * @param quadruplePatternResponses
      *            the quadruples to filter.
-     * @param returnMetaGraphValue
-     *            indicates whether the meta graph value must be returned or
-     *            not.
      * 
      * @return {@code true} if there are some values matching the
      *         {@code sparqlAskQuery}, {@code false} otherwise.
      */
     public synchronized boolean filterSparqlAsk(String sparqlAskQuery,
-                                                List<QuadruplePatternResponse> quadruplePatternResponses,
-                                                boolean returnMetaGraphValue) {
-        this.cleanAndFill(
-                this.datastore, quadruplePatternResponses, returnMetaGraphValue);
+                                                List<QuadruplePatternResponse> quadruplePatternResponses) {
+        this.cleanAndFill(this.datastore, quadruplePatternResponses);
 
         boolean result = false;
 
@@ -109,18 +104,13 @@ public class SparqlColander implements Closeable {
      *            the SPARQL query to use for filtering quadruples.
      * @param quadruplePatternResponses
      *            the quadruples to filter.
-     * @param returnMetaGraphValue
-     *            indicates whether the meta graph value must be returned or
-     *            not.
      * 
      * @return {@code true} if there are some values matching the
      *         {@code sparqlConstructQuery}, {@code false} otherwise.
      */
     public synchronized Model filterSparqlConstruct(String sparqlConstructQuery,
-                                                    List<QuadruplePatternResponse> quadruplePatternResponses,
-                                                    boolean returnMetaGraphValue) {
-        this.cleanAndFill(
-                this.datastore, quadruplePatternResponses, returnMetaGraphValue);
+                                                    List<QuadruplePatternResponse> quadruplePatternResponses) {
+        this.cleanAndFill(this.datastore, quadruplePatternResponses);
 
         Model result = null;
 
@@ -153,18 +143,13 @@ public class SparqlColander implements Closeable {
      *            the SPARQL query to use for filtering quadruples.
      * @param quadruplePatternResponses
      *            the quadruples to filter.
-     * @param returnMetaGraphValue
-     *            indicates whether the meta graph value must be returned or
-     *            not.
      * 
      * @return {@code true} if there are some values matching the
      *         {@code sparqlSelectQuery}, {@code false} otherwise.
      */
     public synchronized ResultSet filterSparqlSelect(String sparqlSelectQuery,
-                                                     List<QuadruplePatternResponse> quadruplePatternResponses,
-                                                     boolean returnMetaGraphValue) {
-        this.cleanAndFill(
-                this.datastore, quadruplePatternResponses, returnMetaGraphValue);
+                                                     List<QuadruplePatternResponse> quadruplePatternResponses) {
+        this.cleanAndFill(this.datastore, quadruplePatternResponses);
 
         ResultSet result = null;
 
@@ -190,19 +175,16 @@ public class SparqlColander implements Closeable {
     }
 
     private void cleanAndFill(TransactionalTdbDatastore datastore,
-                              List<QuadruplePatternResponse> quadruplePatternResponses,
-                              boolean returnMetaGraphValue) {
+                              List<QuadruplePatternResponse> quadruplePatternResponses) {
         TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
 
         try {
             txnGraph.delete(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
             for (QuadruplePatternResponse qpResponse : quadruplePatternResponses) {
                 for (Quadruple quad : qpResponse.getResult()) {
-                    Node graph = quad.getGraph();
-
-                    if (returnMetaGraphValue) {
-                        graph = quad.createMetaGraphNode();
-                    }
+                    // returns by default the graph value as it is contained by
+                    // the Jena datastores
+                    Node graph = quad.createMetaGraphNode();
 
                     txnGraph.add(
                             graph, quad.getSubject(), quad.getPredicate(),

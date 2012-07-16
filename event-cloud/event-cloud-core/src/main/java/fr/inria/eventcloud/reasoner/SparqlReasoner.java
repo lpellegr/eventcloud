@@ -18,8 +18,6 @@ package fr.inria.eventcloud.reasoner;
 
 import java.util.List;
 
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
-
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 
@@ -38,7 +36,7 @@ public class SparqlReasoner {
 
     }
 
-    public static Pair<List<SparqlAtomicRequest>, Boolean> parse(String sparqlQuery) {
+    public static List<SparqlAtomicRequest> parse(String sparqlQuery) {
         try {
             SparqlDecompositionResult sparqlDecompositionResult =
                     SparqlDecomposer.getInstance().decompose(sparqlQuery);
@@ -56,9 +54,7 @@ public class SparqlReasoner {
                             })
                             .toImmutableList();
 
-            return Pair.create(
-                    sparqlAtomicRequests,
-                    sparqlDecompositionResult.isReturnMetaGraphValue());
+            return sparqlAtomicRequests;
         } catch (DecompositionException e) {
             throw new IllegalArgumentException(sparqlQuery);
         }
