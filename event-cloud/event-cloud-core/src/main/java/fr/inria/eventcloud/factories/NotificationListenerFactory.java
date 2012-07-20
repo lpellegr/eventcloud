@@ -50,8 +50,8 @@ public class NotificationListenerFactory {
      * 
      * @return the reference on new notification listener active object created.
      */
-    public static <T extends NotificationListener<Object>> T newNotificationListener(Class<T> notificationListenerClass,
-                                                                                     Object[] constructorParameters) {
+    public static <T extends NotificationListener<?>> T newNotificationListener(Class<T> notificationListenerClass,
+                                                                                Object[] constructorParameters) {
         try {
             T notificationListener =
                     PAActiveObject.newActive(

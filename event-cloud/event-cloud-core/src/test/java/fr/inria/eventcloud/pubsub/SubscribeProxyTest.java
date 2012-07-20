@@ -55,6 +55,7 @@ import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
+import fr.inria.eventcloud.factories.NotificationListenerFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -353,6 +354,44 @@ public class SubscribeProxyTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+    }
+
+    /**
+     * Test a basic subscription with a
+     * {@link CompoundEventNotificationListenerActiveObject}.
+     * 
+     * @throws InterruptedException
+     */
+    @Test(timeout = 60000)
+    public void testSubscribeEventNotificationListenerActiveObject()
+            throws InterruptedException {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
+        // subscribes for any quadruples
+        CustomCompoundEventNotificationListenerActiveObject notificationListener =
+                NotificationListenerFactory.newNotificationListener(
+                        CustomCompoundEventNotificationListenerActiveObject.class,
+                        new Object[0]);
+        this.subscribeProxy.subscribe(subscription, notificationListener);
+
+        List<Quadruple> quads = new ArrayList<Quadruple>();
+        for (int i = 0; i < 4; i++) {
+            quads.add(QuadrupleGenerator.random(eventId));
+        }
+
+        CompoundEvent ce = new CompoundEvent(quads);
+
+        this.publishProxy.publish(ce);
+
+        while (notificationListener.getEvents().size() != 1) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
