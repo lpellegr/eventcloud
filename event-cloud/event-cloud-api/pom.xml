@@ -5,26 +5,26 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<artifactId>event-cloud</artifactId>
+		<artifactId>eventcloud</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>event-cloud-api</artifactId>
+	<artifactId>eventcloud-api</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>event-cloud-api</name>
+	<name>eventcloud-api</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-configuration</artifactId>
+			<artifactId>eventcloud-configuration</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-utils</artifactId>
+			<artifactId>eventcloud-utils</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 

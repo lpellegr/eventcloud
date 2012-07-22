@@ -5,15 +5,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<artifactId>event-cloud</artifactId>
+		<artifactId>eventcloud</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>event-cloud-utils</artifactId>
+	<artifactId>eventcloud-utils</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>event-cloud-utils</name>
+	<name>eventcloud-utils</name>
 
 	<dependencies>
 		<dependency>

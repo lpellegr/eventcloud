@@ -6,19 +6,19 @@
 
 	<parent>
 		<groupId>fr.inria.eventcloud</groupId>
-		<artifactId>event-cloud-deployment</artifactId>
+		<artifactId>eventcloud-deployment</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>event-cloud-deployment-cli</artifactId>
+	<artifactId>eventcloud-deployment-cli</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>event-cloud-deployment-cli</name>
+	<name>eventcloud-deployment-cli</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-webservices-core</artifactId>
+			<artifactId>eventcloud-webservices-core</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>

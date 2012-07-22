@@ -6,20 +6,20 @@
 
 	<parent>
 		<groupId>fr.inria.eventcloud</groupId>
-		<artifactId>event-cloud-webservices</artifactId>
+		<artifactId>eventcloud-webservices</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>event-cloud-webservices-api</artifactId>
+	<artifactId>eventcloud-webservices-api</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 
-	<name>event-cloud-webservices-api</name>
+	<name>eventcloud-webservices-api</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-translator-wsn</artifactId>
+			<artifactId>eventcloud-translator-wsn</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>

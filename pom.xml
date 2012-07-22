@@ -10,11 +10,11 @@
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>event-cloud-parent</artifactId>
+	<artifactId>eventcloud-parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>event-cloud-parent</name>
+	<name>eventcloud-parent</name>
 	<description>Parent module for eventcloud maven related modules.</description>
 	<url>https://bitbucket.org/eventcloud/eventcloud</url>
 	<inceptionYear>2010</inceptionYear>
@@ -150,7 +150,7 @@
 	</organization>
 
 	<modules>
-		<module>event-cloud</module>
+		<module>eventcloud</module>
 		<module>proactive-deployment</module>
 		<module>proactive-p2p-structured</module>
 	</modules>

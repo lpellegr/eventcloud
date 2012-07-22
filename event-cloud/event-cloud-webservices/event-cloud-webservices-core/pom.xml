@@ -5,20 +5,20 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<artifactId>event-cloud-webservices</artifactId>
+		<artifactId>eventcloud-webservices</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>event-cloud-webservices-core</artifactId>
+	<artifactId>eventcloud-webservices-core</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>event-cloud-webservices-core</name>
+	<name>eventcloud-webservices-core</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-webservices-api</artifactId>
+			<artifactId>eventcloud-webservices-api</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -41,7 +41,7 @@
 		</dependency>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>event-cloud-core</artifactId>
+			<artifactId>eventcloud-core</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
