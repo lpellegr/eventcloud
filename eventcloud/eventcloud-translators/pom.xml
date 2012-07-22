@@ -10,12 +10,14 @@
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>eventcloud-adapters</artifactId>
+	<artifactId>eventcloud-translators</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>eventcloud-adapters</name>
+	<name>eventcloud-translators</name>
+
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>eventcloud-adapter-rdf2go</module>
+		<module>eventcloud-translators-wsn</module>
 	</modules>
+
 </project>
