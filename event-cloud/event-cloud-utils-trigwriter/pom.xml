@@ -5,13 +5,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>fr.inria.eventcloud</groupId>
-		<artifactId>event-cloud</artifactId>
+		<artifactId>eventcloud</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<groupId>fr.inria.eventcloud</groupId>
-	<artifactId>event-cloud-utils-trigwriter</artifactId>
+	<artifactId>eventcloud-utils-trigwriter</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>event-cloud-utils-trigwriter</name>
+	<name>eventcloud-utils-trigwriter</name>
 
 	<dependencies>
 		<dependency>
