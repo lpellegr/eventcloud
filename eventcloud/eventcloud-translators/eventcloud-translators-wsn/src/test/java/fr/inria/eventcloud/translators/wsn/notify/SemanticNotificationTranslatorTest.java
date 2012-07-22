@@ -26,8 +26,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.slf4j.Logger;

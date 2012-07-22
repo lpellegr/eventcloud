@@ -16,8 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;

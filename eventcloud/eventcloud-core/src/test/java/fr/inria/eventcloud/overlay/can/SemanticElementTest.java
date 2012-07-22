@@ -16,8 +16,7 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 /**

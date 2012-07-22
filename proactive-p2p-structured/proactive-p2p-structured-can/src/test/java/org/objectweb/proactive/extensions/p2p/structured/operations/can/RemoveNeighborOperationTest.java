@@ -18,8 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.util.UUID;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;

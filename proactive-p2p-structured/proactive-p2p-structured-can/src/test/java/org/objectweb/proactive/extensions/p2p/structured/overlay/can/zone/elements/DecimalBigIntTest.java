@@ -19,8 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.eleme
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 
@@ -158,6 +157,7 @@ public class DecimalBigIntTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public List<Pair<DecimalBigInt, DecimalBigInt>> getConfigurationsForTestingNormalization() {
         return Arrays.asList(
         // A > B && A.decimalSeparatorIndex > B.decimalSeparatorIndex
