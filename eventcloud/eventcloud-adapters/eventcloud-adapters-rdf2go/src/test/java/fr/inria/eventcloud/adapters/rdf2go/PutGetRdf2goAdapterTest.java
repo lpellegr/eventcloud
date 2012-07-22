@@ -19,8 +19,7 @@ package fr.inria.eventcloud.adapters.rdf2go;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

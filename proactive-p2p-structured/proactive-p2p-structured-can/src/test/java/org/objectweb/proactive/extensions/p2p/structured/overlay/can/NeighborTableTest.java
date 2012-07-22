@@ -16,8 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
@@ -69,7 +69,6 @@ public class NeighborTableTest extends JunitByClassCanNetworkDeployer {
         assertEquals(0, neighborTable2.findDimension(super.getPeer(1).getId()));
         assertEquals(1, neighborTable2.findDirection(super.getPeer(0).getId()));
         assertEquals(0, neighborTable2.findDirection(super.getPeer(1).getId()));
-
     }
 
 }

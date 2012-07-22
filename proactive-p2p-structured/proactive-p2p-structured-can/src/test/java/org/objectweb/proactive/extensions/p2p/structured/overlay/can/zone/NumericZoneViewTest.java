@@ -16,8 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -50,11 +49,13 @@ public class NumericZoneViewTest {
     public void testDistance() {
         Assert.assertEquals(
                 this.view.distance(CoordinateFactory.createDoubleCoordinate(1.0)),
-                this.view.distance(CoordinateFactory.createDoubleCoordinate(0.0)));
+                this.view.distance(CoordinateFactory.createDoubleCoordinate(0.0)),
+                0.001);
 
         Assert.assertEquals(
                 0.0,
-                this.view.distance(CoordinateFactory.createDoubleCoordinate(0.5)));
+                this.view.distance(CoordinateFactory.createDoubleCoordinate(0.5)),
+                0.001);
 
         Assert.assertTrue(this.view.distance(CoordinateFactory.createDoubleCoordinate(0.75)) < this.view.distance(CoordinateFactory.createDoubleCoordinate(1.0)));
     }
@@ -66,7 +67,7 @@ public class NumericZoneViewTest {
 
         Assert.assertEquals(
                 ((NumericZoneView) views.getFirst()).getArea(),
-                ((NumericZoneView) views.getSecond()).getArea());
+                ((NumericZoneView) views.getSecond()).getArea(), 0.001);
     }
 
 }

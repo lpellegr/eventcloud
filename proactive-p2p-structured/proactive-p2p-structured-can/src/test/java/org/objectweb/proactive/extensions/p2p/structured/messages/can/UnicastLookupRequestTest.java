@@ -19,8 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.can;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;

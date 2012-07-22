@@ -18,8 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.tracker;
 
 import java.io.Serializable;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;

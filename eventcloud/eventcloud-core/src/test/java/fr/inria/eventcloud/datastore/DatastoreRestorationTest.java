@@ -19,9 +19,8 @@ package fr.inria.eventcloud.datastore;
 import java.io.File;
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.core.ProActiveException;

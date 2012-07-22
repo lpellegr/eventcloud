@@ -19,9 +19,8 @@ package fr.inria.eventcloud.adapters.rdf2go.listeners;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.junit.Assert;
 import org.junit.Test;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
 import org.ontoware.rdf2go.impl.jena29.TypeConversion;
