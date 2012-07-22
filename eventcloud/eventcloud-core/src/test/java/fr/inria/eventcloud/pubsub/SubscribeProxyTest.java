@@ -359,8 +359,8 @@ public class SubscribeProxyTest {
     }
 
     /**
-     * Test a basic subscription with a
-     * {@link CompoundEventNotificationListenerActiveObject}.
+     * Test a basic subscription with a compound event listener deployed as an
+     * active object.
      * 
      * @throws InterruptedException
      */
