@@ -214,7 +214,7 @@ function undeploy() {
 function kill_process() {
     if [[ -f $1 ]]
     then
-	kill -9 $(cat $1.pid)
+	kill -9 $(cat $1.pid) &> /dev/null
     fi
 }
 
