@@ -19,7 +19,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>eventcloud-translator-wsn</artifactId>
+			<artifactId>eventcloud-translators-wsn</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
