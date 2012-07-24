@@ -20,6 +20,12 @@
 			<id>semweb4j-releases</id>
 			<name>semweb4j-releases</name>
 			<url>http://semweb4j.org/repo/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
