@@ -17,21 +17,16 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>eventcloud-webservices-api</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>com.ebmwebsourcing.easyesb</groupId>
 			<artifactId>ws-binding-rawreport</artifactId>
 			<version>v2012-05-23</version>
 		</dependency>
-
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<groupId>fr.inria.eventcloud</groupId>
+			<artifactId>eventcloud-webservices-api</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-core</artifactId>
@@ -45,6 +40,11 @@
 			<version>1.0.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
 		</dependency>
 	</dependencies>
 
