@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>eventcloud-webservices</artifactId>
+		<groupId>fr.inria.eventcloud</groupId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>fr.inria.eventcloud</groupId>
+	<artifactId>eventcloud-webservices-core</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>eventcloud-webservices-core</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.ebmwebsourcing.easyesb</groupId>
+			<artifactId>ws-binding-rawreport</artifactId>
+			<version>v2012-05-23</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.inria.eventcloud</groupId>
+			<artifactId>eventcloud-webservices-api</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+			<artifactId>proactive-p2p-structured-core</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>fr.inria.eventcloud</groupId>
+			<artifactId>eventcloud-core</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Xmx2048m</argLine>
+					<systemPropertyVariables>
+						<java.security.policy>${project.build.testOutputDirectory}/proactive.security.policy</java.security.policy>
+						<log4j.configuration>file:${project.build.testOutputDirectory}/log4j.xml</log4j.configuration>
+						<logback.configurationFile>file:${project.build.testOutputDirectory}/logback-test.xml</logback.configurationFile>
+						<proactive.http.port>8888</proactive.http.port>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
