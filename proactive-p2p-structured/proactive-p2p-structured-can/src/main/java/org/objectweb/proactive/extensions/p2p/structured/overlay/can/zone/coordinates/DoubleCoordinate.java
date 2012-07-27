@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class DoubleCoordinate extends Coordinate<DoubleElement, Double> {
+public class DoubleCoordinate extends Coordinate<DoubleElement> {
 
     private static final long serialVersionUID = 1L;
 

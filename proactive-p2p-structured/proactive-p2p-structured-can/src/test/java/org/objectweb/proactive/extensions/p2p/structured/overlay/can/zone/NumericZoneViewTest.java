@@ -62,7 +62,7 @@ public class NumericZoneViewTest {
 
     @Test
     public void testGetArea() {
-        HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement, Double>> views =
+        HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement>> views =
                 this.view.split(CanOverlay.getRandomDimension());
 
         Assert.assertEquals(

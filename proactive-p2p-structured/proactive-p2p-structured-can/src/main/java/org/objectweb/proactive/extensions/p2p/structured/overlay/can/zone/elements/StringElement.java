@@ -16,8 +16,11 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements;
 
-import java.io.IOException;
+import java.math.BigInteger;
 
+import org.apfloat.Apfloat;
+import org.apfloat.ApfloatMath;
+import org.apfloat.Apint;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
 
@@ -26,85 +29,89 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
  * 
  * @author lpellegr
  */
-public class StringElement extends Element<DecimalBigInt> {
+public class StringElement extends Element {
 
     private static final long serialVersionUID = 1L;
 
-    private transient String stringValue;
+    private static final long PRECISION = Apfloat.INFINITE;
+
+    private static final BigInteger RADIX =
+            BigInteger.valueOf(((int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue()) + 1);
+
+    private final Apfloat apfloat;
+
+    private transient String unicodeRepresentation;
 
     /**
-     * Constructs a new element with the specified <code>value</code>.
+     * Constructs a new StringElement from specified string {@code value}.
      * 
      * @param value
      *            the value as string.
      */
     public StringElement(String value) {
-        super(DecimalBigInt.create(
-                UnicodeUtil.fromStringToCodePoints(value), value.length() - 1,
-                P2PStructuredProperties.CAN_UPPER_BOUND.getValue()));
-
-        this.stringValue = value;
+        // converts a string to an integer radix 10 by assuming that each
+        // character is a digit radix StringElement#RADIX
+        this.apfloat = new Apfloat(toIntegerRadix10(value, RADIX), PRECISION);
     }
 
-    public StringElement(DecimalBigInt value) {
-        super(value);
-        this.stringValue = this.createStringRepresentation(value);
+    private StringElement(Apfloat apfloat) {
+        this.apfloat = apfloat;
     }
 
-    private String createStringRepresentation(DecimalBigInt value) {
-        StringBuilder result = new StringBuilder();
+    private static BigInteger toIntegerRadix10(String value, BigInteger radix) {
+        return toIntegerRadix10(
+                UnicodeUtil.fromStringToCodePoints(value), radix);
+    }
 
-        for (Integer codePoint : super.value.getDigits()) {
-            result.append(Character.toChars(codePoint));
+    private static BigInteger toIntegerRadix10(int[] digits, BigInteger radix) {
+        BigInteger result = BigInteger.ZERO;
+
+        for (int i = 0; i < digits.length; i++) {
+            result =
+                    result.add(radix.pow(i).multiply(
+                            BigInteger.valueOf(digits[digits.length - i - 1])));
         }
 
-        return result.toString();
+        return result;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StringElement middle(Element<DecimalBigInt> elt) {
-        return new StringElement(this.value.plus(elt.value).divideByTwo());
-    }
-
-    /**
-     * Returns the string representation of this element.
-     * 
-     * @return the string representation of this element.
-     */
-    public String getStringValue() {
-        return this.stringValue;
+    public StringElement middle(Element elt) {
+        return new StringElement(
+                this.apfloat.add(((StringElement) elt).apfloat).divide(
+                        new Apfloat(2, PRECISION)));
     }
 
     /**
      * Compares the elements by using the lexicographic order on their String
      * representation.
      * 
-     * @param e
+     * @param elt
      *            the element to compare with.
      * 
      * @return a negative integer, zero, or a positive integer as this object is
      *         less than, equal to, or greater than the specified object.
      */
-    public int compareLexicographicallyTo(StringElement e) {
-        return this.getStringValue().compareTo(e.getStringValue());
+    public int compareLexicographicallyTo(StringElement elt) {
+        return this.getUnicodeRepresentation().compareTo(
+                elt.getUnicodeRepresentation());
     }
 
     /**
      * Returns a boolean indicating if the string representation of the current
      * element is between respectively the specified string representations of
-     * the elements <code>e1</code> and <code>e2</code>.
+     * the elements {@code e1} and {@code e2}.
      * 
      * @param e1
      *            the first bound.
-     * 
      * @param e2
      *            the second bound.
      * 
-     * @return <code>true</code> whether <code>e1<0 and this in [e1;e2[</code>
-     *         or <code>e1 > e2 and this in [e2;e1[</code>, <code>false</code>
+     * @return {@code true} if {@code e1 < 0} and this in {@code [e1;e2[} or
+     *         {@code e1 > e2} and this in {@code [e2;e1[}, {@code false}
      *         otherwise.
      */
     public boolean isLexicographicallyBetween(StringElement e1, StringElement e2) {
@@ -118,6 +125,75 @@ public class StringElement extends Element<DecimalBigInt> {
         return false;
     }
 
+    public synchronized String getUnicodeRepresentation() {
+        if (this.unicodeRepresentation == null) {
+            Apint apint = this.apfloat.truncate();
+            Apint quotient = apint;
+
+            // handle integer part
+            StringBuilder integerPart = new StringBuilder();
+            quotient = this.divideQuotientRecursively(integerPart, quotient);
+            integerPart.reverse();
+
+            // handle fractional part
+            long shift = this.apfloat.size() - this.apfloat.scale();
+            apint =
+                    ApfloatMath.scale(ApfloatMath.modf(this.apfloat)[1], shift)
+                            .truncate();
+            quotient = apint;
+
+            StringBuilder fractionalPart = new StringBuilder();
+            this.divideQuotientRecursively(fractionalPart, quotient);
+            fractionalPart.reverse();
+
+            StringBuilder result = integerPart.append(fractionalPart);
+            if (result.length() == 0) {
+                result.append((char) Character.MIN_CODE_POINT);
+            }
+
+            this.unicodeRepresentation = result.toString();
+        }
+
+        return this.unicodeRepresentation;
+    }
+
+    private Apint divideQuotientRecursively(StringBuilder result, Apint quotient) {
+        Apint radix = new Apint(RADIX);
+
+        while (quotient.compareTo(Apint.ZERO) != 0) {
+            int remainder = quotient.mod(radix).intValue();
+            result.append((char) remainder);
+            quotient = quotient.divide(radix);
+        }
+
+        return quotient;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(Element elt) {
+        return this.apfloat.compareTo(((StringElement) elt).apfloat);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return this.apfloat.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object that) {
+        return that instanceof StringElement
+                && this.apfloat.equals(((StringElement) that).apfloat);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -129,29 +205,21 @@ public class StringElement extends Element<DecimalBigInt> {
         StringBuilder result = new StringBuilder();
 
         if (coordinateRepresentation.equals("codepoints")) {
-            result.append(UnicodeUtil.makePrintable(super.value.getDigits()));
+            result.append(UnicodeUtil.makePrintable(this.getUnicodeRepresentation()));
         } else if (coordinateRepresentation.equals("decimal")) {
-            result.append(super.value.toString());
+            result.append(this.apfloat.toString(true));
         } else if (coordinateRepresentation.equals("default")) {
-            result.append(this.stringValue);
+            result.append(this.getUnicodeRepresentation());
         } else {
             throw new IllegalStateException("Unknown value for property "
                     + P2PStructuredProperties.CAN_COORDINATE_DISPLAY.getName());
         }
 
         result.append('{');
-        result.append(super.value.getDecimalSeparatorIndex());
+        result.append(this.getUnicodeRepresentation().length());
         result.append('}');
 
         return result.toString();
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-        // always perform the default de-serialization first
-        in.defaultReadObject();
-        // populates transient fields
-        this.stringValue = this.createStringRepresentation(super.value);
     }
 
 }

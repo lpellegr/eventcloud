@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
@@ -24,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class StringCoordinate extends Coordinate<StringElement, DecimalBigInt> {
+public class StringCoordinate extends Coordinate<StringElement> {
 
     private static final long serialVersionUID = 1L;
 

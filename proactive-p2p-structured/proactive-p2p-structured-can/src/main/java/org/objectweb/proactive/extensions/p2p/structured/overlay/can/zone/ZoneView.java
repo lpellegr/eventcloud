@@ -19,7 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -37,10 +36,8 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  *            the {@link Coordinate} type.
  * @param <E>
  *            the {@link Element}s type contained by the coordinates.
- * @param <T>
- *            the value type associated to each element.
  */
-public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>, T extends Comparable<T>>
+public abstract class ZoneView<C extends Coordinate<E>, E extends Element>
         implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -119,7 +116,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      * @return {@code true} if the specified zone overlaps the current zone,
      *         {@code false} otherwise.
      */
-    public boolean overlaps(ZoneView<C, E, T> view, byte dimension) {
+    public boolean overlaps(ZoneView<C, E> view, byte dimension) {
         E a = this.lowerBound.getElement(dimension);
         E b = this.upperBound.getElement(dimension);
         E c = view.getLowerBound(dimension);
@@ -140,7 +137,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      * @return {@code true} if the specified zone view overlaps the current zone
      *         view on all dimensions, {@code false} otherwise.
      */
-    public boolean overlaps(ZoneView<C, E, T> view) {
+    public boolean overlaps(ZoneView<C, E> view) {
         for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             if (!this.overlaps(view, i)) {
                 return false;
@@ -168,8 +165,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      * @return a boolean indicating if the specified {@code view} abuts the
      *         current zone.
      */
-    public boolean abuts(ZoneView<C, E, T> view, byte dimension,
-                         boolean direction) {
+    public boolean abuts(ZoneView<C, E> view, byte dimension, boolean direction) {
         return (direction && (this.lowerBound.getElement(dimension).compareTo(
                 view.getUpperBound(dimension)) == 0))
                 || (!direction && (this.upperBound.getElement(dimension)
@@ -191,7 +187,7 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      * @return the dimension on which the given {@code view} neighbors the
      *         current one.
      */
-    public byte neighbors(ZoneView<C, E, T> view) {
+    public byte neighbors(ZoneView<C, E> view) {
         byte overlaps = 0;
         byte abuts = 0;
         byte abutsDimension = -1;
@@ -229,18 +225,18 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      *         following the specified {@code dimension}.
      */
     @SuppressWarnings("unchecked")
-    public HomogenousPair<ZoneView<C, E, T>> split(byte dimension) {
-        Element<T> middle =
+    public HomogenousPair<ZoneView<C, E>> split(byte dimension) {
+        E middle =
                 Element.middle(
                         this.lowerBound.getElement(dimension),
                         this.upperBound.getElement(dimension));
 
         try {
-            Coordinate<E, T> lowerBoundCopy = this.lowerBound.clone();
-            Coordinate<E, T> upperBoundCopy = this.upperBound.clone();
+            Coordinate<E> lowerBoundCopy = this.lowerBound.clone();
+            Coordinate<E> upperBoundCopy = this.upperBound.clone();
 
-            lowerBoundCopy.setElement(dimension, (E) middle);
-            upperBoundCopy.setElement(dimension, (E) middle);
+            lowerBoundCopy.setElement(dimension, middle);
+            upperBoundCopy.setElement(dimension, middle);
 
             return HomogenousPair.createHomogenous(this.createZoneView(
                     this.lowerBound, (C) upperBoundCopy), this.createZoneView(
@@ -251,16 +247,16 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
     }
 
     @SuppressWarnings("unchecked")
-    public ZoneView<C, E, T> merge(ZoneView<C, E, T> view) {
+    public ZoneView<C, E> merge(ZoneView<C, E> view) {
         byte d = this.neighbors(view);
 
         try {
-            Coordinate<E, T> lowerBoundCopy = this.lowerBound.clone();
-            Coordinate<E, T> upperBoundCopy = this.upperBound.clone();
+            Coordinate<E> lowerBoundCopy = this.lowerBound.clone();
+            Coordinate<E> upperBoundCopy = this.upperBound.clone();
 
-            lowerBoundCopy.setElement(d, (E) Element.min(
+            lowerBoundCopy.setElement(d, Element.min(
                     this.lowerBound.getElement(d), view.getLowerBound(d)));
-            upperBoundCopy.setElement(d, (E) Element.max(
+            upperBoundCopy.setElement(d, Element.max(
                     this.upperBound.getElement(d), view.getUpperBound(d)));
 
             return this.createZoneView((C) lowerBoundCopy, (C) upperBoundCopy);
@@ -282,31 +278,15 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
      * @return a new {@link ZoneView}.
      */
     @SuppressWarnings("unchecked")
-    private ZoneView<C, E, T> createZoneView(C lowerBound, C upperBound) {
-        ZoneView<C, E, T> result = null;
-
+    private ZoneView<C, E> createZoneView(C lowerBound, C upperBound) {
         try {
-            result =
-                    this.getClass()
-                            .getConstructor(
-                                    lowerBound.getClass(),
-                                    upperBound.getClass())
-                            .newInstance(lowerBound, upperBound);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+            return this.getClass().getConstructor(
+                    lowerBound.getClass(), upperBound.getClass()).newInstance(
+                    lowerBound, upperBound);
 
-        return result;
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public C getUpperBound() {
@@ -335,8 +315,8 @@ public abstract class ZoneView<C extends Coordinate<E, T>, E extends Element<T>,
     @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
         return obj instanceof ZoneView
-                && this.lowerBound.equals(((ZoneView<C, E, T>) obj).lowerBound)
-                && this.upperBound.equals(((ZoneView<C, E, T>) obj).upperBound);
+                && this.lowerBound.equals(((ZoneView<C, E>) obj).lowerBound)
+                && this.upperBound.equals(((ZoneView<C, E>) obj).upperBound);
     }
 
     /**

@@ -22,16 +22,17 @@ import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
+
+import com.google.common.math.DoubleMath;
 
 /**
  * A zone defines a space (rectangle) which is completely logical and managed by
@@ -43,7 +44,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  * {@link P2PStructuredProperties#CAN_UPPER_BOUND} as the lower and upper bound.
  * <p>
  * The former is used to compute a distance or an area whereas the latter is
- * used in order to index the data by using a lexicographic order.
+ * used to index the data by using the lexicographic order.
  * <p>
  * <strong>By default all operations are delegated to the
  * {@link UnicodeZoneView}.</strong>
@@ -97,9 +98,9 @@ public class Zone implements Serializable {
      *         specified {@code dimension}.
      */
     public HomogenousPair<Zone> split(byte dimension) {
-        HomogenousPair<ZoneView<StringCoordinate, StringElement, DecimalBigInt>> newUnicodeViews =
+        HomogenousPair<ZoneView<StringCoordinate, StringElement>> newUnicodeViews =
                 this.unicodeView.split(dimension);
-        HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement, Double>> newNumViews =
+        HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement>> newNumViews =
                 this.numView.split(dimension);
 
         return HomogenousPair.createHomogenous(new Zone(
@@ -127,25 +128,24 @@ public class Zone implements Serializable {
         NumericZoneView newNumView = null;
         try {
             newNumView =
-                    (NumericZoneView) MakeDeepCopy.WithObjectStream.makeDeepCopy(this.numView);
+                    (NumericZoneView) MakeDeepCopy.makeDeepCopy(this.numView);
+
+            newNumView.lowerBound.setElement(neighborDimension, Element.min(
+                    this.numView.lowerBound.getElement(neighborDimension),
+                    zone.getNumericView().getLowerBound(neighborDimension)));
+
+            newNumView.upperBound.setElement(neighborDimension, Element.max(
+                    this.numView.upperBound.getElement(neighborDimension),
+                    zone.getNumericView().getUpperBound(neighborDimension)));
+
+            return DoubleMath.fuzzyEquals(
+                    newNumView.getArea(), this.numView.getArea()
+                            + zone.getNumericView().getArea(), 0.00001);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
-
-        newNumView.lowerBound.setElement(
-                neighborDimension, (DoubleElement) Element.min(
-                        this.numView.lowerBound.getElement(neighborDimension),
-                        zone.getNumericView().getLowerBound(neighborDimension)));
-
-        newNumView.upperBound.setElement(
-                neighborDimension, (DoubleElement) Element.max(
-                        this.numView.upperBound.getElement(neighborDimension),
-                        zone.getNumericView().getUpperBound(neighborDimension)));
-
-        return newNumView.getArea() == this.numView.getArea()
-                + zone.getNumericView().getArea();
     }
 
     public Zone merge(Zone zone) {
@@ -162,16 +162,16 @@ public class Zone implements Serializable {
         return this.numView;
     }
 
-    public boolean overlaps(ZoneView<StringCoordinate, StringElement, DecimalBigInt> view,
+    public boolean overlaps(ZoneView<StringCoordinate, StringElement> view,
                             byte dimension) {
         return this.unicodeView.overlaps(view, dimension);
     }
 
-    public boolean overlaps(ZoneView<StringCoordinate, StringElement, DecimalBigInt> view) {
+    public boolean overlaps(ZoneView<StringCoordinate, StringElement> view) {
         return this.unicodeView.overlaps(view);
     }
 
-    public boolean abuts(ZoneView<StringCoordinate, StringElement, DecimalBigInt> view,
+    public boolean abuts(ZoneView<StringCoordinate, StringElement> view,
                          byte dimension, boolean direction) {
         return this.unicodeView.abuts(view, dimension, direction);
     }

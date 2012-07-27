@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -40,56 +39,55 @@ public class UnicodeUtil {
         return makePrintable(fromStringToCodePoints(string));
     }
 
-    public static String makePrintable(LinkedList<Integer> codePoints) {
+    public static String makePrintable(int[] codePoints) {
         StringBuilder result = new StringBuilder();
 
         int codePoint;
-        for (int i = 0; i < codePoints.size(); i++) {
-            codePoint = codePoints.get(i);
+        for (int i = 0; i < codePoints.length; i++) {
+            codePoint = codePoints[i];
 
             if (codePoint > 0xffff) {
                 result.append("\\u");
-                appendCodePointRepresentation(codePoint, result);
+                appendCodePointRepresentation(result, codePoint);
             } else if (codePoint > 0xfff) {
                 result.append("\\u");
-                appendCodePointRepresentation(codePoint, result);
+                appendCodePointRepresentation(result, codePoint);
             } else if (codePoint > 0xff) {
                 result.append("\\u0");
-                appendCodePointRepresentation(codePoint, result);
+                appendCodePointRepresentation(result, codePoint);
             } else if (codePoint > 0xf) {
                 result.append("\\u00");
-                appendCodePointRepresentation(codePoint, result);
+                appendCodePointRepresentation(result, codePoint);
             } else {
                 result.append("\\u000");
-                appendCodePointRepresentation(codePoint, result);
+                appendCodePointRepresentation(result, codePoint);
             }
         }
 
         return result.toString();
     }
 
-    private static void appendCodePointRepresentation(int codePoint,
-                                                      StringBuilder buffer) {
+    private static void appendCodePointRepresentation(StringBuilder buffer,
+                                                      int codePoint) {
         buffer.append(Integer.toHexString(codePoint));
     }
 
     /**
-     * Transforms a String to its representative list of unicode code points.
+     * Transforms a String to its representative array of unicode code points.
      * 
      * @param string
      *            the string value to transform.
      * 
-     * @return a list of unicode code points.
+     * @return an array of unicode code points.
      */
-    public static LinkedList<Integer> fromStringToCodePoints(String string) {
-        LinkedList<Integer> codePtArray = new LinkedList<Integer>();
+    public static int[] fromStringToCodePoints(String string) {
+        int[] result = new int[string.length()];
 
         for (int i = 0; i < string.length(); i++) {
-            int codePt = string.codePointAt(i);
-            codePtArray.add(codePt);
+            result[i] = string.codePointAt(i);
         }
 
-        return codePtArray;
+        return result;
     }
 
     /**

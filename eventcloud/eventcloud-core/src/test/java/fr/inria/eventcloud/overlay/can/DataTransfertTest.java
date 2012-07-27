@@ -28,7 +28,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneView;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DecimalBigInt;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
@@ -81,7 +80,7 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
         // we compute the value of the split which will be done on the next join
         // from the third peer in order to create data that will be transfered
         // from a peer to an another
-        HomogenousPair<ZoneView<StringCoordinate, StringElement, DecimalBigInt>> res =
+        HomogenousPair<ZoneView<StringCoordinate, StringElement>> res =
                 zone.split(dimensionSplit);
 
         // the next two elements will be contained by two different peers on the
@@ -90,41 +89,49 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
                 res.getFirst()
                         .getLowerBound()
                         .getElement(dimensionSplit)
-                        .getStringValue();
+                        .getUnicodeRepresentation();
 
         String elt2 =
                 res.getSecond()
                         .getLowerBound()
                         .getElement(dimensionSplit)
-                        .getStringValue()
+                        .getUnicodeRepresentation()
                         + "a";
 
-        log.debug("elt1={}", UnicodeUtil.makePrintable(elt1));
-        log.debug("elt2={}", UnicodeUtil.makePrintable(elt2));
+        log.debug(
+                "Element1={}, size ={}", UnicodeUtil.makePrintable(elt1),
+                elt1.length());
+        log.debug(
+                "Element2={}, size ={}", UnicodeUtil.makePrintable(elt2),
+                elt2.length());
 
         Node node1 = Node.createURI(elt1);
         Node node2 = Node.createURI(elt2);
 
         Quadruple quad1 =
-                new Quadruple(node1, Node.createURI(res.getFirst()
-                        .getLowerBound((byte) 1)
-                        .getStringValue()), Node.createURI(res.getFirst()
-                        .getLowerBound((byte) 2)
-                        .getStringValue()), Node.createURI(res.getFirst()
-                        .getLowerBound((byte) 3)
-                        .getStringValue()));
+                new Quadruple(
+                        node1, Node.createURI(res.getFirst().getLowerBound(
+                                (byte) 1).getUnicodeRepresentation()),
+                        Node.createURI(res.getFirst()
+                                .getLowerBound((byte) 2)
+                                .getUnicodeRepresentation()),
+                        Node.createURI(res.getFirst()
+                                .getLowerBound((byte) 3)
+                                .getUnicodeRepresentation()));
 
         Quadruple quad2 =
-                new Quadruple(node2, Node.createURI(res.getSecond()
-                        .getLowerBound((byte) 1)
-                        .getStringValue()), Node.createURI(res.getSecond()
-                        .getLowerBound((byte) 2)
-                        .getStringValue()), Node.createURI(res.getSecond()
-                        .getLowerBound((byte) 3)
-                        .getStringValue()));
+                new Quadruple(
+                        node2, Node.createURI(res.getSecond().getLowerBound(
+                                (byte) 1).getUnicodeRepresentation()),
+                        Node.createURI(res.getSecond()
+                                .getLowerBound((byte) 2)
+                                .getUnicodeRepresentation()),
+                        Node.createURI(res.getSecond()
+                                .getLowerBound((byte) 3)
+                                .getUnicodeRepresentation()));
 
-        log.debug("quad1={}", quad1);
-        log.debug("quad2={}", quad2);
+        log.debug("Quadruple1={}", quad1);
+        log.debug("Quadruple2={}", quad2);
 
         // add two quadruples whose one must be conveyed to the second peer when
         // it joins the first peer
@@ -137,11 +144,11 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
         try {
             secondPeer.join(firstPeer);
         } catch (NetworkAlreadyJoinedException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
 
-        log.debug("first peer manages {}", firstPeer);
-        log.debug("second peer manages {}", secondPeer);
+        log.debug("First peer manages {}", firstPeer);
+        log.debug("Second peer manages {}", secondPeer);
 
         List<Quadruple> firstPeerResult =
                 findQuadruplesOperation(firstPeer, QuadruplePattern.ANY);

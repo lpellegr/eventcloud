@@ -47,6 +47,14 @@ public class ZoneTest {
     }
 
     @Test
+    public void testZoneEquality() {
+        Zone a = new Zone();
+        Zone b = new Zone();
+
+        Assert.assertEquals(a, b);
+    }
+
+    @Test
     public void testSplitAndMerge() {
         Zone z =
                 new Zone(new UnicodeZoneView(
@@ -57,7 +65,10 @@ public class ZoneTest {
 
         HomogenousPair<Zone> newZones =
                 z.split(CanOverlay.getRandomDimension());
-        Assert.assertEquals(z, newZones.getFirst().merge(newZones.getSecond()));
+
+        Zone mergedZone = newZones.getFirst().merge(newZones.getSecond());
+
+        Assert.assertEquals(z, mergedZone);
     }
 
 }

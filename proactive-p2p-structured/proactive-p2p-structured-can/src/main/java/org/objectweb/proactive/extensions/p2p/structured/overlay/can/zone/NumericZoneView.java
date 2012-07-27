@@ -26,8 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class NumericZoneView extends
-        ZoneView<DoubleCoordinate, DoubleElement, Double> {
+public class NumericZoneView extends ZoneView<DoubleCoordinate, DoubleElement> {
 
     private static final long serialVersionUID = 1L;
 

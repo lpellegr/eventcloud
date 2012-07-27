@@ -21,9 +21,11 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.eleme
  * 
  * @author lpellegr
  */
-public class DoubleElement extends Element<Double> {
+public class DoubleElement extends Element {
 
     private static final long serialVersionUID = 1L;
+
+    private final Double value;
 
     /**
      * Constructs a new coordinate element with the specified <code>value</code>
@@ -33,7 +35,7 @@ public class DoubleElement extends Element<Double> {
      *            the String that will be parsed as a Double.
      */
     public DoubleElement(String value) {
-        super(Double.valueOf(value));
+        this.value = Double.valueOf(value);
     }
 
     /**
@@ -44,7 +46,7 @@ public class DoubleElement extends Element<Double> {
      *            the Double value to set.
      */
     public DoubleElement(Double value) {
-        super(value);
+        this.value = value;
     }
 
     /**
@@ -52,7 +54,6 @@ public class DoubleElement extends Element<Double> {
      * 
      * @return the value associated to this element.
      */
-    @Override
     public Double getValue() {
         return this.value;
     }
@@ -61,9 +62,46 @@ public class DoubleElement extends Element<Double> {
      * {@inheritDoc}
      */
     @Override
-    public Element<Double> middle(Element<Double> elt) {
+    public Element middle(Element elt) {
         return new DoubleElement(
-                (this.value + ((DoubleElement) elt).getValue()) / 2.0);
+                (this.value + ((DoubleElement) elt).value) / 2.0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(Element elt) {
+        if (!(elt instanceof DoubleElement)) {
+            throw new IllegalArgumentException();
+        }
+
+        return this.value.compareTo(((DoubleElement) elt).value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object that) {
+        return that instanceof DoubleElement
+                && this.value.equals(((DoubleElement) that).value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return this.value.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return this.value.toString();
     }
 
 }

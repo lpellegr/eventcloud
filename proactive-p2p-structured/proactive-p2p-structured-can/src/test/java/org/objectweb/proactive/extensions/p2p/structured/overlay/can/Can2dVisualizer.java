@@ -472,7 +472,7 @@ public class Can2dVisualizer extends JFrame {
         CanNetworkDeployer deployer =
                 new CanNetworkDeployer(
                         new CanDeploymentDescriptor().setInjectionConstraintsProvider(injectionConstraintsProvider));
-        deployer.deploy(20);
+        deployer.deploy(100);
 
         final List<Peer> peers = deployer.getRandomTracker().getPeers();
 

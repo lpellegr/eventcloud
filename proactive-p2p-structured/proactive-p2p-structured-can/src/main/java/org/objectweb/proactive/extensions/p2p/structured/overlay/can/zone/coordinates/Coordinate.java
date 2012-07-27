@@ -21,10 +21,10 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
 /**
  * Represents a set of elements (i.e. a set of values for each component of the
@@ -34,12 +34,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @param <E>
  *            the {@link Element}s type contained by the coordinate.
- * @param <T>
- *            the value type associated to each element.
  */
-public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>>
-        implements Cloneable, Comparable<Coordinate<E, T>>, Iterable<E>,
-        Serializable {
+public abstract class Coordinate<E extends Element> implements Cloneable,
+        Comparable<Coordinate<E>>, Iterable<E>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -142,9 +139,9 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Coordinate<E, T> clone() throws CloneNotSupportedException {
+    public Coordinate<E> clone() throws CloneNotSupportedException {
         try {
-            return (Coordinate<E, T>) MakeDeepCopy.WithObjectStream.makeDeepCopy(this);
+            return (Coordinate<E>) MakeDeepCopy.makeDeepCopy(this);
         } catch (IOException e) {
             throw new AssertionError(e);
         } catch (ClassNotFoundException e) {
@@ -156,7 +153,7 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>>
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Coordinate<E, T> coord) {
+    public int compareTo(Coordinate<E> coord) {
         if (this.size() != coord.size()) {
             return -1;
         }
@@ -185,7 +182,7 @@ public abstract class Coordinate<E extends Element<T>, T extends Comparable<T>>
     @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
         return obj instanceof Coordinate
-                && this.compareTo((Coordinate<E, T>) obj) == 0;
+                && this.compareTo((Coordinate<E>) obj) == 0;
     }
 
 }
