@@ -429,34 +429,13 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         log.info("Notification {} has been delivered", id);
     }
 
-    private void sendMonitoringReports(SubscriptionId id, Binding binding,
-                                       NotificationListener<?> listener) {
-        if (super.monitoringManager != null) {
-            Node eventId =
-                    this.extractEventId(this.subscriptions.get(id), binding);
-
-            String destination = this.componentUri;
-            if (listener.getSubscriberUrl() != null) {
-                destination = listener.getSubscriberUrl();
-            }
-
-            String source = Quadruple.getPublicationSource(eventId);
-            if (source == null) {
-                source = "http://0.0.0.0";
-            }
-
-            super.monitoringManager.sendInputOutputMonitoringReport(
-                    source, destination, Quadruple.getPublicationTime(eventId));
-        }
-    }
-
     private final void deliver(NotificationId id,
                                BindingNotificationListener listener,
                                Solution solution) {
         listener.onNotification(id.getSubscriptionId(), solution.getSolution());
 
-        this.sendMonitoringReports(
-                id.getSubscriptionId(), solution.getSolution(), listener);
+        this.sendInputOutputMonitoringReportIfNecessary(
+                id.getSubscriptionId(), solution, listener.getSubscriberUrl());
     }
 
     private final void deliver(NotificationId id,
@@ -477,8 +456,9 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         if (compoundEvent != null) {
             listener.onNotification(id.getSubscriptionId(), compoundEvent);
 
-            this.sendMonitoringReports(
-                    id.getSubscriptionId(), solution.getSolution(), listener);
+            this.sendInputOutputMonitoringReport(
+                    id.getSubscriptionId(), solution.getSolution(),
+                    listener.getSubscriberUrl());
         }
     }
 
@@ -487,8 +467,63 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                                Solution solution) {
         listener.onNotification(id.getSubscriptionId());
 
-        this.sendMonitoringReports(
-                id.getSubscriptionId(), solution.getSolution(), listener);
+        this.sendInputOutputMonitoringReportIfNecessary(
+                id.getSubscriptionId(), solution, listener.getSubscriberUrl());
+    }
+
+    /**
+     * This method is used to send an input/output monitoring report per
+     * compound event event and not per notification which is received, even if
+     * a subscriber has subscribed with a SignalNotificationListener or a
+     * BindingNotificationListener.
+     * 
+     * @param id
+     *            the subscription id.
+     * @param solution
+     *            the solution received.
+     * @param subscriberUrl
+     *            the subscriber url.
+     */
+    private void sendInputOutputMonitoringReportIfNecessary(SubscriptionId id,
+                                                            Solution solution,
+                                                            String subscriberUrl) {
+        Subscription subscription = this.subscriptions.get(id);
+
+        Node eventId =
+                this.extractEventId(subscription, solution.getSolution());
+
+        if (this.getEventIdsReceived().put(eventId.getURI(), id) == null) {
+            this.sendInputOutputMonitoringReport(eventId, subscriberUrl);
+        }
+    }
+
+    private void sendInputOutputMonitoringReport(SubscriptionId id,
+                                                 Binding binding,
+                                                 String subscriberUrl) {
+        if (super.monitoringManager != null) {
+            Node eventId =
+                    this.extractEventId(this.subscriptions.get(id), binding);
+
+            this.sendInputOutputMonitoringReport(eventId, subscriberUrl);
+        }
+    }
+
+    private void sendInputOutputMonitoringReport(Node eventId,
+                                                 String subscriberUrl) {
+        if (super.monitoringManager != null) {
+            String destination = this.componentUri;
+            if (subscriberUrl != null) {
+                destination = subscriberUrl;
+            }
+
+            String source = Quadruple.getPublicationSource(eventId);
+            if (source == null) {
+                source = "http://0.0.0.0";
+            }
+
+            super.monitoringManager.sendInputOutputMonitoringReport(
+                    source, destination, Quadruple.getPublicationTime(eventId));
+        }
     }
 
     /**
