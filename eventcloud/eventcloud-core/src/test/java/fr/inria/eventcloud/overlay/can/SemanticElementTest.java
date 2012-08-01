@@ -30,40 +30,40 @@ public final class SemanticElementTest {
     public void testParseElement() {
         Assert.assertEquals(
                 "members",
-                SemanticElement.parseElement("http://www.inria.fr/sophia/members"));
+                SemanticElement.removePrefix("http://www.inria.fr/sophia/members"));
 
         Assert.assertEquals(
                 "members",
-                SemanticElement.parseElement("http://www.inria.fr/sophia#members"));
+                SemanticElement.removePrefix("http://www.inria.fr/sophia#members"));
 
         Assert.assertEquals(
                 "members",
-                SemanticElement.parseElement("http://www.inria.fr/sophia/members/"));
+                SemanticElement.removePrefix("http://www.inria.fr/sophia/members/"));
 
         Assert.assertEquals(
                 "members",
-                SemanticElement.parseElement("http://www.inria.fr/sophia/members#"));
+                SemanticElement.removePrefix("http://www.inria.fr/sophia/members#"));
 
         Assert.assertEquals(
-                "inria.fr", SemanticElement.parseElement("http://www.inria.fr"));
+                "inria.fr", SemanticElement.removePrefix("http://www.inria.fr"));
 
         Assert.assertEquals(
                 "inria.fr",
-                SemanticElement.parseElement("http://www.inria.fr/"));
+                SemanticElement.removePrefix("http://www.inria.fr/"));
 
-        Assert.assertEquals("bn177", SemanticElement.parseElement("_:bn177"));
+        Assert.assertEquals("bn177", SemanticElement.removePrefix("_:bn177"));
 
         Assert.assertEquals(
-                "literal", SemanticElement.parseElement("\"literal\""));
+                "literal", SemanticElement.removePrefix("\"literal\""));
 
         Assert.assertEquals(
                 "\u014b\u0001\u0061",
-                SemanticElement.parseElement("\u014b\u0001\u0061"));
+                SemanticElement.removePrefix("\u014b\u0001\u0061"));
 
         // http://ŋa not a legal URI no transformation is expected
         Assert.assertEquals(
                 "\u0068\u0074\u0074\u0070\u003a\u002f\u002f\u014b\u0001\u0061",
-                SemanticElement.parseElement("\u0068\u0074\u0074\u0070\u003a\u002f\u002f\u014b\u0001\u0061"));
+                SemanticElement.removePrefix("\u0068\u0074\u0074\u0070\u003a\u002f\u002f\u014b\u0001\u0061"));
     }
 
 }

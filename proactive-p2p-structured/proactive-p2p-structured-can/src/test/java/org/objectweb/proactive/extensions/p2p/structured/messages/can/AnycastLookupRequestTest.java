@@ -33,8 +33,10 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -59,12 +61,12 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     public AnycastLookupRequestTest() {
         super(
-                new CanDeploymentDescriptor(
-                        new SerializableProvider<CustomCanOverlay>() {
+                new CanDeploymentDescriptor<StringElement>(
+                        new SerializableProvider<StringCanOverlay>() {
                             private static final long serialVersionUID = 1L;
 
                             @Override
-                            public CustomCanOverlay get() {
+                            public StringCanOverlay get() {
                                 return new CustomCanOverlay();
                             }
                         }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider()),
@@ -87,15 +89,14 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         GetZonesValidatingConstraintsResponse response =
                 (GetZonesValidatingConstraintsResponse) this.proxy.send(
                         new GetZonesValidatingConstraintsRequest(
-                                new StringCoordinate(null, elt, null)),
+                                new Coordinate<StringElement>(null, elt, null)),
                         super.getPeer(0));
 
         checkResponse(response);
 
         // check that all zones retrieved validate the constraints
-        for (Zone zone : response.getZonesValidatingConstraints()) {
-            Assert.assertEquals(0, zone.getUnicodeView()
-                    .containsLexicographically((byte) 1, elt));
+        for (Zone<StringElement> zone : response.getZonesValidatingConstraints()) {
+            Assert.assertEquals(0, zone.contains((byte) 1, elt));
         }
     }
 
@@ -130,26 +131,27 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
     }
 
-    private static class CustomCanOverlay extends CanOverlay {
+    private static class CustomCanOverlay extends StringCanOverlay {
 
         private boolean value = false;
 
     }
 
-    private static class SetValuesRequest extends AnycastRequest {
+    private static class SetValuesRequest extends AnycastRequest<StringElement> {
 
         private static final long serialVersionUID = 1L;
 
         public SetValuesRequest() {
-            super(new DefaultAnycastConstraintsValidator());
+            super(new DefaultAnycastConstraintsValidator<StringElement>(
+                    CoordinateFactory.newStringCoordinate()));
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
-            return new AnycastRequestRouter<GetZonesValidatingConstraintsRequest>() {
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return new AnycastRequestRouter<GetZonesValidatingConstraintsRequest, StringElement>() {
                 @Override
-                public void onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                                           AnycastRequest request) {
+                public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
+                                                           AnycastRequest<StringElement> request) {
                     ((CustomCanOverlay) overlay).value = true;
                 };
             };
@@ -157,17 +159,19 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     }
 
-    private static class GetValuesRequest extends AnycastRequest {
+    private static class GetValuesRequest extends AnycastRequest<StringElement> {
 
         private static final long serialVersionUID = 1L;
 
         public GetValuesRequest() {
-            super(new DefaultAnycastConstraintsValidator(),
-                    new ResponseProvider<AnycastResponse, StringCoordinate>() {
+            super(
+                    new DefaultAnycastConstraintsValidator<StringElement>(
+                            CoordinateFactory.newStringCoordinate()),
+                    new ResponseProvider<AnycastResponse<StringElement>, Coordinate<StringElement>>() {
                         private static final long serialVersionUID = 1L;
 
                         @Override
-                        public AnycastResponse get() {
+                        public AnycastResponse<StringElement> get() {
                             return new GetValuesResponse();
                         }
                     });
@@ -175,7 +179,8 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     }
 
-    private static class GetValuesResponse extends AnycastResponse {
+    private static class GetValuesResponse extends
+            AnycastResponse<StringElement> {
 
         private static final long serialVersionUID = 1L;
 
@@ -189,7 +194,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public void mergeAttributes(AnycastResponse responseReceived) {
+        public void mergeAttributes(AnycastResponse<StringElement> responseReceived) {
             this.result.addAll(((GetValuesResponse) responseReceived).getResult());
         }
 
@@ -200,18 +205,20 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     private static class GetZonesValidatingConstraintsRequest extends
-            AnycastRequest {
+            AnycastRequest<StringElement> {
 
         private static final long serialVersionUID = 1L;
 
         public GetZonesValidatingConstraintsRequest(
-                StringCoordinate coordinatesToReach) {
-            super(new DefaultAnycastConstraintsValidator(coordinatesToReach),
-                    new ResponseProvider<AnycastResponse, StringCoordinate>() {
+                Coordinate<StringElement> coordinatesToReach) {
+            super(
+                    new DefaultAnycastConstraintsValidator<StringElement>(
+                            coordinatesToReach),
+                    new ResponseProvider<AnycastResponse<StringElement>, Coordinate<StringElement>>() {
                         private static final long serialVersionUID = 1L;
 
                         @Override
-                        public AnycastResponse get() {
+                        public AnycastResponse<StringElement> get() {
                             return new GetZonesValidatingConstraintsResponse();
                         }
                     });
@@ -220,25 +227,26 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     private static class GetZonesValidatingConstraintsResponse extends
-            AnycastResponse {
+            AnycastResponse<StringElement> {
 
         private static final long serialVersionUID = 1L;
 
-        private List<Zone> zonesValidatingConstraints = new ArrayList<Zone>();
+        private List<Zone<StringElement>> zonesValidatingConstraints =
+                new ArrayList<Zone<StringElement>>();
 
         @Override
         public void synchronizationPointUnlocked(StructuredOverlay overlay) {
             if (this.validatesKeyConstraints(overlay)) {
-                this.zonesValidatingConstraints.add(((CanOverlay) overlay).getZone());
+                this.zonesValidatingConstraints.add(((StringCanOverlay) overlay).getZone());
             }
         }
 
         @Override
-        public void mergeAttributes(AnycastResponse responseReceived) {
+        public void mergeAttributes(AnycastResponse<StringElement> responseReceived) {
             this.zonesValidatingConstraints.addAll(((GetZonesValidatingConstraintsResponse) responseReceived).zonesValidatingConstraints);
         }
 
-        public List<Zone> getZonesValidatingConstraints() {
+        public List<Zone<StringElement>> getZonesValidatingConstraints() {
             return this.zonesValidatingConstraints;
         }
 

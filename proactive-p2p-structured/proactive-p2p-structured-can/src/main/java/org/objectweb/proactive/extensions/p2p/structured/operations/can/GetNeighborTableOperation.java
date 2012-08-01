@@ -21,14 +21,19 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * Operation used to retrieve the {@link NeighborTable} of the peer which
  * handles the message.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class GetNeighborTableOperation implements SynchronousOperation {
+public class GetNeighborTableOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,9 +45,10 @@ public class GetNeighborTableOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     @Override
-    public GenericResponseOperation<NeighborTable> handle(StructuredOverlay overlay) {
-        return new GenericResponseOperation<NeighborTable>(
-                ((CanOverlay) overlay).getNeighborTable());
+    @SuppressWarnings("unchecked")
+    public GenericResponseOperation<NeighborTable<E>> handle(StructuredOverlay overlay) {
+        return new GenericResponseOperation<NeighborTable<E>>(
+                ((CanOverlay<E>) overlay).getNeighborTable());
     }
 
 }

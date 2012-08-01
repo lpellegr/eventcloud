@@ -24,31 +24,37 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * Operation used in order to replace a neighbor by an another from a
  * {@link NeighborTable}.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class ReplaceNeighborOperation implements SynchronousOperation {
+public class ReplaceNeighborOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
     private final UUID peerIdToReplace;
 
-    private final NeighborEntry entry;
+    private final NeighborEntry<E> entry;
 
-    public ReplaceNeighborOperation(UUID peerIdToReplace, NeighborEntry entry) {
+    public ReplaceNeighborOperation(UUID peerIdToReplace, NeighborEntry<E> entry) {
         super();
         this.peerIdToReplace = peerIdToReplace;
         this.entry = entry;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        NeighborTable table = ((CanOverlay) overlay).getNeighborTable();
+        NeighborTable<E> table = ((CanOverlay<E>) overlay).getNeighborTable();
 
         HomogenousPair<Byte> dimAndDir = table.remove(this.peerIdToReplace);
         table.add(this.entry, dimAndDir.getFirst(), dimAndDir.getSecond());

@@ -22,7 +22,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
@@ -33,9 +34,12 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * <strong>reach</strong> a peer which manages a specified coordinate on a CAN
  * structured peer-to-peer network.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class ForwardRequest extends Request<StringCoordinate> {
+public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,24 +47,24 @@ public class ForwardRequest extends Request<StringCoordinate> {
      * The zone which is managed by the sender. It is used in order to send the
      * response when the keyToReach has been reached.
      */
-    private SerializedValue<StringCoordinate> senderCoordinate;
+    private SerializedValue<Coordinate<E>> senderCoordinate;
 
-    public ForwardRequest(StringCoordinate coordinateToReach) {
-        super(new UnicastConstraintsValidator(coordinateToReach),
-                new ResponseProvider<ForwardResponse, StringCoordinate>() {
+    public ForwardRequest(Coordinate<E> coordinateToReach) {
+        super(new UnicastConstraintsValidator<E>(coordinateToReach),
+                new ResponseProvider<ForwardResponse<E>, Coordinate<E>>() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public ForwardResponse get() {
-                        return new ForwardResponse();
+                    public ForwardResponse<E> get() {
+                        return new ForwardResponse<E>();
                     }
                 });
     }
 
     public ForwardRequest(
-            StringCoordinate coordinateToReach,
-            ResponseProvider<? extends Response<StringCoordinate>, StringCoordinate> responseProvider) {
-        super(new UnicastConstraintsValidator(coordinateToReach),
+            Coordinate<E> coordinateToReach,
+            ResponseProvider<? extends Response<Coordinate<E>>, Coordinate<E>> responseProvider) {
+        super(new UnicastConstraintsValidator<E>(coordinateToReach),
                 responseProvider);
     }
 
@@ -71,7 +75,7 @@ public class ForwardRequest extends Request<StringCoordinate> {
      * @return the key which is managed by the sender in order to send the
      *         response when the keyToReach has been reached.
      */
-    public StringCoordinate getSenderCoordinate() {
+    public Coordinate<E> getSenderCoordinate() {
         return this.senderCoordinate.getValue();
     }
 
@@ -79,18 +83,19 @@ public class ForwardRequest extends Request<StringCoordinate> {
      * {@inheritDoc}
      */
     @Override
-    public Router<ForwardRequest, StringCoordinate> getRouter() {
-        return new UnicastRequestRouter<ForwardRequest>();
+    public Router<ForwardRequest<E>, Coordinate<E>> getRouter() {
+        return new UnicastRequestRouter<ForwardRequest<E>, E>();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void route(StructuredOverlay overlay) {
         if (this.senderCoordinate == null) {
             this.senderCoordinate =
-                    SerializedValue.create(((CanOverlay) overlay).getZone()
+                    SerializedValue.create(((CanOverlay<E>) overlay).getZone()
                             .getLowerBound());
         }
 

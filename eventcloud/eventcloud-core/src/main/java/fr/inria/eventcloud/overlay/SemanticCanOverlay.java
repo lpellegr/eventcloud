@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.openjena.riot.out.NodeFmtLib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,8 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.SubscriberConnectionFailure;
 import fr.inria.eventcloud.pubsub.Subscription;
@@ -55,7 +58,7 @@ import fr.inria.eventcloud.reasoner.SparqlColander;
  * 
  * @author lpellegr
  */
-public class SemanticCanOverlay extends CanOverlay {
+public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private static final Logger log =
             LoggerFactory.getLogger(SemanticCanOverlay.class);
@@ -317,6 +320,14 @@ public class SemanticCanOverlay extends CanOverlay {
         result.append("\nSubscriber proxies cache:\n");
         result.append(Subscription.subscribeProxiesCache.stats());
         return result.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Zone<SemanticElement> newZone() {
+        return new SemanticZone();
     }
 
 }

@@ -24,15 +24,20 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
- * A {@code RemoveNeighborOperation} is used to remove the specified
- * {@link Peer} (by using the given identifier) from the {@link NeighborTable}
- * of the peer which receives this message.
+ * {@code RemoveNeighborOperation} is used to remove the specified {@link Peer}
+ * (by using the given identifier) from the {@link NeighborTable} of the peer
+ * which receives this message.
+ * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */
-public class RemoveNeighborOperation implements SynchronousOperation {
+public class RemoveNeighborOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
@@ -116,8 +121,9 @@ public class RemoveNeighborOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        NeighborTable table = ((CanOverlay) overlay).getNeighborTable();
+        NeighborTable<E> table = ((CanOverlay<E>) overlay).getNeighborTable();
         boolean result;
 
         if (this.dimension == -1 && this.direction == -1) {

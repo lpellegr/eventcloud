@@ -83,8 +83,12 @@ public class UnicodeUtil {
     public static int[] fromStringToCodePoints(String string) {
         int[] result = new int[string.length()];
 
-        for (int i = 0; i < string.length(); i++) {
-            result[i] = string.codePointAt(i);
+        for (int i = 0; i < string.length();) {
+            int codePoint = string.codePointAt(i);
+
+            result[i] = codePoint;
+
+            i += Character.charCount(codePoint);
         }
 
         return result;

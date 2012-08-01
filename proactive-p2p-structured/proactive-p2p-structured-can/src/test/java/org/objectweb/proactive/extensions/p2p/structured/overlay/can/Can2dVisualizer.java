@@ -43,16 +43,16 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -158,7 +158,7 @@ public class Can2dVisualizer extends JFrame {
 
         private static final long serialVersionUID = 1L;
 
-        public Zone zoneClicked = null;
+        public Zone<StringElement> zoneClicked = null;
 
         public Canvas(int width, int height) {
             super();
@@ -175,7 +175,7 @@ public class Can2dVisualizer extends JFrame {
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         if (Can2dVisualizer.this.mode == Mode.JOIN) {
                             Peer newPeer =
-                                    PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class));
+                                    PeerFactory.newPeer(SerializableProvider.create(StringCanOverlay.class));
                             try {
                                 newPeer.join(entry.getStub());
                             } catch (NetworkAlreadyJoinedException ex) {
@@ -201,7 +201,6 @@ public class Can2dVisualizer extends JFrame {
 
                         System.out.println("Clicked in (" + e.getX() + ","
                                 + e.getY() + ") wich is contained by zone "
-                                + entry.getZone().getNumericView() + " <-> "
                                 + entry.getZone());
                     } else if (e.getButton() == MouseEvent.BUTTON3) {
                         for (PeerEntry peerEntry : Can2dVisualizer.this.cache) {
@@ -213,28 +212,20 @@ public class Can2dVisualizer extends JFrame {
             });
         }
 
-        public int getXmin(Zone z) {
-            return this.getWidth(z.getNumericView()
-                    .getLowerBound((byte) 0)
-                    .getValue());
+        public int getXmin(Zone<StringElement> z) {
+            return (int) z.getLowerBound((byte) 0).normalize(0, CANVAS_WIDTH);
         }
 
-        public int getXmax(Zone z) {
-            return this.getWidth(z.getNumericView()
-                    .getUpperBound((byte) 0)
-                    .getValue());
+        public int getXmax(Zone<StringElement> z) {
+            return (int) z.getUpperBound((byte) 0).normalize(0, CANVAS_WIDTH);
         }
 
-        public int getYmin(Zone z) {
-            return this.getWidth(z.getNumericView()
-                    .getLowerBound((byte) 1)
-                    .getValue());
+        public int getYmin(Zone<StringElement> z) {
+            return (int) z.getLowerBound((byte) 1).normalize(0, CANVAS_HEIGHT);
         }
 
-        public int getYmax(Zone z) {
-            return this.getWidth(z.getNumericView()
-                    .getUpperBound((byte) 1)
-                    .getValue());
+        public int getYmax(Zone<StringElement> z) {
+            return (int) z.getUpperBound((byte) 1).normalize(0, CANVAS_HEIGHT);
         }
 
         public int getHeight(double v) {
@@ -257,7 +248,7 @@ public class Can2dVisualizer extends JFrame {
 
             int height, xMin, xMax, yMin, yMax;
             for (PeerEntry entry : Can2dVisualizer.this.cache) {
-                Zone zone = entry.getZone();
+                Zone<StringElement> zone = entry.getZone();
                 xMin = this.getXmin(zone);
                 xMax = this.getXmax(zone);
                 yMin = this.getYmin(zone);
@@ -291,7 +282,7 @@ public class Can2dVisualizer extends JFrame {
                                 Can2dVisualizer.this.cache.findBy(this.zoneClicked);
 
                         if (peerClicked != null) {
-                            for (Zone zone : peerClicked.getNeighbors()) {
+                            for (Zone<StringElement> zone : peerClicked.getNeighbors()) {
                                 xMin = this.getXmin(zone);
                                 xMax = this.getXmax(zone);
                                 yMin = this.getYmin(zone);
@@ -328,16 +319,17 @@ public class Can2dVisualizer extends JFrame {
 
         private Color zoneColor;
 
-        private final Zone zone;
+        private final Zone<StringElement> zone;
 
         private final UUID id;
 
         private final Peer stub;
 
-        private final List<Zone> neighbors;
+        private final List<Zone<StringElement>> neighbors;
 
-        public PeerEntry(final UUID id, final Peer stub, final Zone zone,
-                final Color zoneColor, final List<Zone> neighbors) {
+        public PeerEntry(final UUID id, final Peer stub,
+                final Zone<StringElement> zone, final Color zoneColor,
+                final List<Zone<StringElement>> neighbors) {
             this.id = id;
             this.stub = stub;
             this.zone = zone;
@@ -357,7 +349,7 @@ public class Can2dVisualizer extends JFrame {
             this.zoneColor = zoneColor;
         }
 
-        public Zone getZone() {
+        public Zone<StringElement> getZone() {
             return this.zone;
         }
 
@@ -365,7 +357,7 @@ public class Can2dVisualizer extends JFrame {
             return this.stub;
         }
 
-        public List<Zone> getNeighbors() {
+        public List<Zone<StringElement>> getNeighbors() {
             return this.neighbors;
         }
 
@@ -394,7 +386,7 @@ public class Can2dVisualizer extends JFrame {
             this.cacheEntries.clear();
         }
 
-        public PeerEntry findBy(Zone zone) {
+        public PeerEntry findBy(Zone<StringElement> zone) {
             this.fixCacheCoherence();
 
             for (PeerEntry entry : this.cacheEntries.values()) {
@@ -406,14 +398,24 @@ public class Can2dVisualizer extends JFrame {
             return null;
         }
 
+        private static final double SCALE_HEIGHT =
+                P2PStructuredProperties.CAN_UPPER_BOUND.getValue()
+                        / (double) CANVAS_HEIGHT;
+        private static final double SCALE_WIDTH =
+                P2PStructuredProperties.CAN_UPPER_BOUND.getValue()
+                        / (double) CANVAS_WIDTH;
+
         public PeerEntry findBy(int x, int y) {
             this.fixCacheCoherence();
 
             for (PeerEntry entry : this.cacheEntries.values()) {
-                if (entry.getZone().getNumericView().contains(
-                        new DoubleCoordinate(new DoubleElement(x
-                                / (double) CANVAS_WIDTH), new DoubleElement(y
-                                / (double) CANVAS_HEIGHT)))) {
+                if (entry.getZone()
+                        .contains(
+                                new Coordinate<StringElement>(
+                                        new StringElement(
+                                                Character.toString((char) (x * SCALE_WIDTH))),
+                                        new StringElement(
+                                                Character.toString((char) (y * SCALE_HEIGHT)))))) {
                     return entry;
                 }
             }
@@ -438,23 +440,29 @@ public class Can2dVisualizer extends JFrame {
         }
 
         private void populate(UUID id) {
-            NeighborTable table = null;
-            List<Zone> neighbors = new ArrayList<Zone>();
+            NeighborTable<StringElement> table = null;
+            List<Zone<StringElement>> neighbors =
+                    new ArrayList<Zone<StringElement>>();
             Peer peerStub = this.stubEntries.get(id);
 
             for (byte dim = 0; dim < 2; dim++) {
                 for (byte dir = 0; dir < 2; dir++) {
                     table = CanOperations.getNeighborTable(peerStub);
-                    for (NeighborEntry entry : table.get(dim, dir).values()) {
+                    for (NeighborEntry<StringElement> entry : table.get(
+                            dim, dir).values()) {
                         neighbors.add(entry.getZone());
                     }
                 }
             }
 
-            this.cacheEntries.put(id, new PeerEntry(
-                    id, peerStub, CanOperations.getIdAndZoneResponseOperation(
-                            peerStub).getPeerZone(), getRandomColor(),
-                    neighbors));
+            this.cacheEntries.put(
+                    id,
+                    new PeerEntry(
+                            id,
+                            peerStub,
+                            CanOperations.<StringElement> getIdAndZoneResponseOperation(
+                                    peerStub)
+                                    .getPeerZone(), getRandomColor(), neighbors));
         }
 
     }
@@ -471,7 +479,7 @@ public class Can2dVisualizer extends JFrame {
 
         CanNetworkDeployer deployer =
                 new CanNetworkDeployer(
-                        new CanDeploymentDescriptor().setInjectionConstraintsProvider(injectionConstraintsProvider));
+                        new StringCanDeploymentDescriptor().setInjectionConstraintsProvider(injectionConstraintsProvider));
         deployer.deploy(100);
 
         final List<Peer> peers = deployer.getRandomTracker().getPeers();

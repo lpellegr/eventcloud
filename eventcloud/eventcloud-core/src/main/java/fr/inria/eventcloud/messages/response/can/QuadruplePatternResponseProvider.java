@@ -17,7 +17,9 @@
 package fr.inria.eventcloud.messages.response.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * Default {@link ResponseProvider} for {@link QuadruplePatternResponse}.
@@ -25,7 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
  * @author lpellegr
  */
 public class QuadruplePatternResponseProvider extends
-        ResponseProvider<QuadruplePatternResponse, StringCoordinate> {
+        ResponseProvider<QuadruplePatternResponse, Coordinate<SemanticElement>> {
 
     private static final long serialVersionUID = 1L;
 

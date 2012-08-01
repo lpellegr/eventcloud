@@ -20,21 +20,26 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * Response associated to {@link GetIdAndZoneOperation}.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class GetIdAndZoneResponseOperation implements ResponseOperation {
+public class GetIdAndZoneResponseOperation<E extends Element> implements
+        ResponseOperation {
 
     private static final long serialVersionUID = 1L;
 
     private final UUID peerIdentifier;
 
-    private final Zone peerZone;
+    private final Zone<E> peerZone;
 
-    public GetIdAndZoneResponseOperation(UUID peerIdentifier, Zone peerZone) {
+    public GetIdAndZoneResponseOperation(UUID peerIdentifier, Zone<E> peerZone) {
         this.peerIdentifier = peerIdentifier;
         this.peerZone = peerZone;
     }
@@ -43,7 +48,7 @@ public class GetIdAndZoneResponseOperation implements ResponseOperation {
         return this.peerIdentifier;
     }
 
-    public Zone getPeerZone() {
+    public Zone<E> getPeerZone() {
         return this.peerZone;
     }
 

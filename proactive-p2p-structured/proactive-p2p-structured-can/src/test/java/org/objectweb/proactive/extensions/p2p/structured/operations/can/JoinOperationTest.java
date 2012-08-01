@@ -28,11 +28,14 @@ import java.util.concurrent.Future;
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
@@ -40,7 +43,12 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
  * 
  * @author lpellegr
  */
-public class JoinOperationTest extends JunitByMethodCanNetworkDeployer {
+public class JoinOperationTest extends
+        JunitByMethodCanNetworkDeployer<StringElement> {
+
+    public JoinOperationTest() {
+        super(new StringCanDeploymentDescriptor());
+    }
 
     @Test
     public void testNeighborsAfterJoinOperationWithTwoPeers() {
@@ -92,14 +100,14 @@ public class JoinOperationTest extends JunitByMethodCanNetworkDeployer {
     public void testConcurrentJoin() throws NetworkAlreadyJoinedException,
             InterruptedException, ExecutionException {
         final Peer landmarkPeer =
-                PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class));
+                PeerFactory.newPeer(SerializableProvider.create(StringCanOverlay.class));
         landmarkPeer.create();
 
         int nbPeersToJoin = 20;
 
         List<Peer> peers = new ArrayList<Peer>(nbPeersToJoin);
         for (int i = 0; i < nbPeersToJoin; i++) {
-            peers.add(PeerFactory.newPeer(SerializableProvider.create(CanOverlay.class)));
+            peers.add(PeerFactory.newPeer(SerializableProvider.create(StringCanOverlay.class)));
         }
 
         ExecutorService threadPool =

@@ -16,98 +16,54 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 
-import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createDoubleCoordinate;
-import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createStringCoordinate;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.io.Serializable;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.DoubleCoordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
 import com.google.common.math.DoubleMath;
 
 /**
- * A zone defines a space (rectangle) which is completely logical and managed by
- * a {@link CanOverlay}. The coordinates of this rectangle are maintained in a
- * {@link ZoneView}. By default a zone contain two views. The first one is a
- * {@link NumericZoneView} which uses respectively {@code 0.0} and {@code 1.0}
- * as the lower and upper bound. The second is an {@link UnicodeZoneView} which
- * uses respectively {@link P2PStructuredProperties#CAN_LOWER_BOUND} and
- * {@link P2PStructuredProperties#CAN_UPPER_BOUND} as the lower and upper bound.
- * <p>
- * The former is used to compute a distance or an area whereas the latter is
- * used to index the data by using the lexicographic order.
- * <p>
- * <strong>By default all operations are delegated to the
- * {@link UnicodeZoneView}.</strong>
+ * A zone is a {@code D} dimensional space (e.g. a rectangle in 2D) which is
+ * completely logical and managed by a {@link CanOverlay}. The constant
+ * {@code D} is defined by {@link P2PStructuredProperties#CAN_NB_DIMENSIONS}.
+ * The logical space is maintained by two coordinates which are named the lower
+ * and upper bounds. The lower bound represents the bottom left corner whereas
+ * the upper bound delineates the top right corner of the {@code D} dimensional
+ * space.
+ * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */
-public class Zone implements Serializable {
+public abstract class Zone<E extends Element> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UnicodeZoneView unicodeView;
+    protected final Coordinate<E> lowerBound;
 
-    private final NumericZoneView numView;
-
-    /**
-     * Creates a new Zone with the specified {@code unicodeView} and
-     * {@code numView}.
-     * 
-     * @param unicodeView
-     *            the {@link UnicodeZoneView} to set.
-     * @param numView
-     *            the {@link NumericZoneView} to set.
-     */
-    public Zone(UnicodeZoneView unicodeView, NumericZoneView numView) {
-        this.unicodeView = unicodeView;
-        this.numView = numView;
-    }
+    protected final Coordinate<E> upperBound;
 
     /**
-     * Constructs a new zone by initializing the views with their default
-     * values.
-     */
-    public Zone() {
-        this(
-                new UnicodeZoneView(
-                        createStringCoordinate(Character.toString(P2PStructuredProperties.CAN_LOWER_BOUND.getValue())),
-                        createStringCoordinate(Character.toString(P2PStructuredProperties.CAN_UPPER_BOUND.getValue()))),
-                new NumericZoneView(
-                        createDoubleCoordinate(0.0),
-                        createDoubleCoordinate(1.0)));
-    }
-
-    /**
-     * Returns a new {@link HomogenousPair} containing two zone resulting from
-     * the split of the current one on the specified {@code dimension}.
+     * Constructs a new zone by using the specified {@code lowerBound} and
+     * {@code upperBound}.
      * 
-     * @param dimension
-     *            the dimension to split on.
-     * 
-     * @return two zone resulting from the split of the current one on the
-     *         specified {@code dimension}.
+     * @param lowerBound
+     *            the lower bound coordinate.
+     * @param upperBound
+     *            the upper bound coordinate.
      */
-    public HomogenousPair<Zone> split(byte dimension) {
-        HomogenousPair<ZoneView<StringCoordinate, StringElement>> newUnicodeViews =
-                this.unicodeView.split(dimension);
-        HomogenousPair<ZoneView<DoubleCoordinate, DoubleElement>> newNumViews =
-                this.numView.split(dimension);
-
-        return HomogenousPair.createHomogenous(new Zone(
-                (UnicodeZoneView) newUnicodeViews.getFirst(),
-                (NumericZoneView) newNumViews.getFirst()), new Zone(
-                (UnicodeZoneView) newUnicodeViews.getSecond(),
-                (NumericZoneView) newNumViews.getSecond()));
+    protected Zone(Coordinate<E> lowerBound, Coordinate<E> upperBound) {
+        this.lowerBound = checkNotNull(lowerBound);
+        this.upperBound = checkNotNull(upperBound);
     }
 
     /**
@@ -124,23 +80,25 @@ public class Zone implements Serializable {
      * @return {@code true} if the specified zone can merged with the current
      *         one, {@code false} otherwise.
      */
-    public boolean canMerge(Zone zone, byte neighborDimension) {
-        NumericZoneView newNumView = null;
+    @SuppressWarnings("unchecked")
+    public boolean canMerge(Zone<E> zone, byte neighborDimension) {
+        Zone<E> currentZoneCopy = null;
         try {
-            newNumView =
-                    (NumericZoneView) MakeDeepCopy.makeDeepCopy(this.numView);
+            currentZoneCopy = (Zone<E>) MakeDeepCopy.makeDeepCopy(this);
 
-            newNumView.lowerBound.setElement(neighborDimension, Element.min(
-                    this.numView.lowerBound.getElement(neighborDimension),
-                    zone.getNumericView().getLowerBound(neighborDimension)));
+            currentZoneCopy.lowerBound.setElement(
+                    neighborDimension, Element.min(
+                            this.lowerBound.getElement(neighborDimension),
+                            zone.getLowerBound(neighborDimension)));
 
-            newNumView.upperBound.setElement(neighborDimension, Element.max(
-                    this.numView.upperBound.getElement(neighborDimension),
-                    zone.getNumericView().getUpperBound(neighborDimension)));
+            currentZoneCopy.upperBound.setElement(
+                    neighborDimension, Element.max(
+                            this.upperBound.getElement(neighborDimension),
+                            zone.getUpperBound(neighborDimension)));
 
             return DoubleMath.fuzzyEquals(
-                    newNumView.getArea(), this.numView.getArea()
-                            + zone.getNumericView().getArea(), 0.00001);
+                    currentZoneCopy.getArea(), this.getArea() + zone.getArea(),
+                    0.00001);
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e);
         } catch (IOException e) {
@@ -148,60 +106,265 @@ public class Zone implements Serializable {
         }
     }
 
-    public Zone merge(Zone zone) {
-        return new Zone(
-                (UnicodeZoneView) this.unicodeView.merge(zone.getUnicodeView()),
-                (NumericZoneView) this.numView.merge(zone.getNumericView()));
+    /**
+     * Returns the span of the zone.
+     * 
+     * @return the span of the zone.
+     */
+    protected abstract double getArea();
+
+    /**
+     * Checks if the specified {@code coordinate} is in the zone managed.
+     * 
+     * @param coordinate
+     *            the coordinate to check.
+     * 
+     * @return {@code true} if the coordinate is in the zone managed,
+     *         {@code false} otherwise.
+     */
+    public boolean contains(Coordinate<E> coordinate) {
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            if (this.contains(dim, coordinate.getElement(dim)) != 0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    public UnicodeZoneView getUnicodeView() {
-        return this.unicodeView;
+    /**
+     * Indicates whether the zone contains the specified {@code element} on the
+     * specified {@code dimension} or not.
+     * <p>
+     * An element value set to {@code null} is supposed to be contained by any
+     * zone on any dimension. This semantic is used to construct systems in
+     * which queries can reach several peers.
+     * 
+     * @param dimension
+     *            the dimension.
+     * 
+     * @param element
+     *            the coordinate to check.
+     * 
+     * @return {@code 0} if the specified coordinate is contained by the zone,
+     *         {@code -1} if the coordinate is taller than the lower bound of
+     *         the zone and {@code 1} if the coordinate is greater or equal to
+     *         the upper bound of the zone.
+     */
+    public byte contains(byte dimension, E element) {
+        if (element == null) {
+            return 0;
+        }
+
+        if (element.compareTo(this.upperBound.getElement(dimension)) >= 0) {
+            return 1;
+        } else if (element.compareTo(this.lowerBound.getElement(dimension)) < 0) {
+            return -1;
+        }
+
+        return 0;
     }
 
-    public NumericZoneView getNumericView() {
-        return this.numView;
+    /**
+     * Returns a boolean indicating whether the given {@code zone} overlaps the
+     * current zone along the given axis.
+     * 
+     * @param zone
+     *            the zone to compare with.
+     * 
+     * @param dimension
+     *            the dimension used to perform the check operation.
+     * 
+     * @return {@code true} if the specified zone overlaps the current zone,
+     *         {@code false} otherwise.
+     */
+    public boolean overlaps(Zone<E> zone, byte dimension) {
+        E a = this.lowerBound.getElement(dimension);
+        E b = this.upperBound.getElement(dimension);
+        E c = zone.getLowerBound(dimension);
+        E d = zone.getUpperBound(dimension);
+
+        return (((a.compareTo(c) >= 0) && (a.compareTo(d) < 0))
+                || ((b.compareTo(c) > 0) && (b.compareTo(d) <= 0))
+                || ((c.compareTo(a) >= 0) && (c.compareTo(b) < 0)) || ((d.compareTo(a) > 0) && (d.compareTo(b) <= 0)));
     }
 
-    public boolean overlaps(ZoneView<StringCoordinate, StringElement> view,
-                            byte dimension) {
-        return this.unicodeView.overlaps(view, dimension);
+    /**
+     * Returns a boolean indicating whether the given {@code zone} overlaps the
+     * current zone. The specified {@code zone} must overlap on all dimensions.
+     * 
+     * @param zone
+     *            the zone to compare with.
+     * 
+     * @return {@code true} if the specified zone overlaps the current zone on
+     *         all dimensions, {@code false} otherwise.
+     */
+    public boolean overlaps(Zone<E> zone) {
+        for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+            if (!this.overlaps(zone, i)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    public boolean overlaps(ZoneView<StringCoordinate, StringElement> view) {
-        return this.unicodeView.overlaps(view);
+    /**
+     * Checks whether the given {@code zone} abuts the current one in the given
+     * {@code dimension} and {@code direction}.
+     * 
+     * @param zone
+     *            the zone to compare with.
+     * 
+     * @param dimension
+     *            the dimension on which the check is performed.
+     * 
+     * @param direction
+     *            indicates the direction on which the check is performed:
+     *            {@code false} is the inferior direction and {@code true} is
+     *            the superior direction.
+     * 
+     * @return a boolean indicating if the specified {@code zone} abuts the
+     *         current zone.
+     */
+    public boolean abuts(Zone<E> zone, byte dimension, boolean direction) {
+        return (direction && (this.lowerBound.getElement(dimension).compareTo(
+                zone.getUpperBound(dimension)) == 0))
+                || (!direction && (this.upperBound.getElement(dimension)
+                        .compareTo(zone.getLowerBound(dimension)) == 0));
     }
 
-    public boolean abuts(ZoneView<StringCoordinate, StringElement> view,
-                         byte dimension, boolean direction) {
-        return this.unicodeView.abuts(view, dimension, direction);
+    /**
+     * Returns the dimension on which the given {@code zone} neighbors the
+     * current one. The result is the dimension number or {@code -1} if the
+     * specified zone does not neighbor the current zone.
+     * <p>
+     * In a d-dimensional space, two zones are neighbors if their edges overlap
+     * in exactly {@code d-1} dimensions and abut in exactly {@code 1}
+     * dimension.
+     * 
+     * @param zone
+     *            the zone to compare with.
+     * 
+     * @return the dimension on which the given {@code zone} neighbors the
+     *         current one.
+     */
+    public byte neighbors(Zone<E> zone) {
+        byte overlaps = 0;
+        byte abuts = 0;
+        byte abutsDimension = -1;
+
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            if (this.overlaps(zone, dimension)) {
+                overlaps++;
+            } else {
+                if (this.abuts(zone, dimension, true)
+                        || this.abuts(zone, dimension, false)) {
+                    abutsDimension = dimension;
+                    abuts++;
+                } else {
+                    return -1;
+                }
+            }
+        }
+
+        if ((abuts != 1)
+                || (overlaps != P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1)) {
+            return -1;
+        } else {
+            return abutsDimension;
+        }
     }
 
-    public int neighbors(Zone zone) {
-        return this.unicodeView.neighbors(zone.getUnicodeView());
+    /**
+     * Returns two zones representing the original one split into two following
+     * the specified {@code dimension}.
+     * 
+     * @param dimension
+     *            the dimension to split on.
+     * 
+     * @return two new zone standing for the original one split into two
+     *         following the specified {@code dimension}.
+     */
+    public abstract HomogenousPair<? extends Zone<E>> split(byte dimension);
+
+    @SuppressWarnings("unchecked")
+    protected Coordinate<E>[] splitCoordinates(byte dimension) {
+        E middle =
+                Element.middle(
+                        this.lowerBound.getElement(dimension),
+                        this.upperBound.getElement(dimension));
+
+        try {
+            Coordinate<E> lowerBoundCopy = this.lowerBound.clone();
+            Coordinate<E> upperBoundCopy = this.upperBound.clone();
+
+            lowerBoundCopy.setElement(dimension, middle);
+            upperBoundCopy.setElement(dimension, middle);
+
+            // result={a, b, c, d} where C1={a, b} and C2={c, d}
+            return new Coordinate[] {
+                    this.lowerBound, upperBoundCopy, lowerBoundCopy,
+                    this.upperBound};
+        } catch (CloneNotSupportedException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    public StringCoordinate getUpperBound() {
-        return this.unicodeView.getUpperBound();
+    /**
+     * Returns a new zone which is the merge between the current zone and the
+     * specified one.
+     * 
+     * @param zone
+     *            the zone to merge with.
+     * 
+     * @return a new zone which is the merge between the current zone and the
+     *         specified one.
+     */
+    public abstract Zone<E> merge(Zone<E> zone);
+
+    protected HomogenousPair<Coordinate<E>> mergeCoordinates(Zone<E> zone) {
+        byte d = this.neighbors(zone);
+
+        try {
+            Coordinate<E> lowerBoundCopy = this.lowerBound.clone();
+            Coordinate<E> upperBoundCopy = this.upperBound.clone();
+
+            lowerBoundCopy.setElement(d, Element.min(
+                    this.lowerBound.getElement(d), zone.getLowerBound(d)));
+            upperBoundCopy.setElement(d, Element.max(
+                    this.upperBound.getElement(d), zone.getUpperBound(d)));
+
+            return HomogenousPair.createHomogenous(
+                    lowerBoundCopy, upperBoundCopy);
+        } catch (CloneNotSupportedException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    public StringCoordinate getLowerBound() {
-        return this.unicodeView.getLowerBound();
+    public Coordinate<E> getUpperBound() {
+        return this.upperBound;
     }
 
-    public StringElement getLowerBound(byte dimension) {
-        return this.unicodeView.getLowerBound(dimension);
+    public Coordinate<E> getLowerBound() {
+        return this.lowerBound;
     }
 
-    public StringElement getUpperBound(byte dimension) {
-        return this.unicodeView.getUpperBound(dimension);
+    public E getLowerBound(byte dimension) {
+        return this.lowerBound.getElement(dimension);
+    }
+
+    public E getUpperBound(byte dimension) {
+        return this.upperBound.getElement(dimension);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String toString() {
-        return this.unicodeView.toString();
+    public int hashCode() {
+        return 31 * (31 + this.lowerBound.hashCode())
+                + this.upperBound.hashCode();
     }
 
     /**
@@ -210,17 +373,21 @@ public class Zone implements Serializable {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Zone
-                && this.unicodeView.equals(((Zone) obj).getUnicodeView())
-                && this.numView.equals(((Zone) obj).getNumericView());
+                && this.lowerBound.equals(((Zone<?>) obj).lowerBound)
+                && this.upperBound.equals(((Zone<?>) obj).upperBound);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int hashCode() {
-        return 31 * (31 + this.numView.hashCode())
-                + this.unicodeView.hashCode();
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append(this.lowerBound);
+        result.append(" to ");
+        result.append(this.upperBound);
+
+        return result.toString();
     }
 
 }

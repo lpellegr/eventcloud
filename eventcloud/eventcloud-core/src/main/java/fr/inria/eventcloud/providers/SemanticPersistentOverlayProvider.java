@@ -44,6 +44,7 @@ public final class SemanticPersistentOverlayProvider extends
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("resource")
     public SemanticCanOverlay get() {
         return new SemanticCanOverlay(new TransactionalTdbDatastore(
                 EventCloudProperties.getRepositoryPath(this.streamUrl)

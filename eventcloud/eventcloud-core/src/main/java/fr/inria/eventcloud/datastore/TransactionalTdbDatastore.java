@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
@@ -39,6 +38,7 @@ import com.hp.hpl.jena.tdb.transaction.TDBTransactionException;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticZone;
 
 /**
  * Wraps an instance of {@link StoreConnection}. As for {@link StoreConnection},
@@ -178,7 +178,7 @@ public class TransactionalTdbDatastore extends Datastore {
     }
 
     private List<Quadruple> retrieveDataIn(Object interval, boolean remove) {
-        Zone zone = (Zone) interval;
+        SemanticZone zone = (SemanticZone) interval;
         SemanticElement graph, subject, predicate, object;
 
         List<Quadruple> result = new ArrayList<Quadruple>();
@@ -199,14 +199,14 @@ public class TransactionalTdbDatastore extends Datastore {
                 predicate = new SemanticElement(quad.getPredicate().toString());
                 object = new SemanticElement(quad.getObject().toString());
 
-                if (graph.compareLexicographicallyTo(zone.getLowerBound((byte) 0)) >= 0
-                        && graph.compareLexicographicallyTo(zone.getUpperBound((byte) 0)) < 0
-                        && subject.compareLexicographicallyTo(zone.getLowerBound((byte) 1)) >= 0
-                        && subject.compareLexicographicallyTo(zone.getUpperBound((byte) 1)) < 0
-                        && predicate.compareLexicographicallyTo(zone.getLowerBound((byte) 2)) >= 0
-                        && predicate.compareLexicographicallyTo(zone.getUpperBound((byte) 2)) < 0
-                        && object.compareLexicographicallyTo(zone.getLowerBound((byte) 3)) >= 0
-                        && object.compareLexicographicallyTo(zone.getUpperBound((byte) 3)) < 0) {
+                if (graph.compareTo(zone.getLowerBound((byte) 0)) >= 0
+                        && graph.compareTo(zone.getUpperBound((byte) 0)) < 0
+                        && subject.compareTo(zone.getLowerBound((byte) 1)) >= 0
+                        && subject.compareTo(zone.getUpperBound((byte) 1)) < 0
+                        && predicate.compareTo(zone.getLowerBound((byte) 2)) >= 0
+                        && predicate.compareTo(zone.getUpperBound((byte) 2)) < 0
+                        && object.compareTo(zone.getLowerBound((byte) 3)) >= 0
+                        && object.compareTo(zone.getUpperBound((byte) 3)) < 0) {
                     result.add(quad);
 
                     if (remove) {

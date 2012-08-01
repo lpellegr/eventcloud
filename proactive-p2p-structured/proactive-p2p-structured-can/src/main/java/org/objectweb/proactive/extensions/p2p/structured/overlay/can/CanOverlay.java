@@ -47,7 +47,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -62,15 +63,18 @@ import com.google.common.collect.Sets;
  * composed of a {@link Zone} which indicates the space associated to resources
  * to manage.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class CanOverlay extends StructuredOverlay {
+public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
     private static final Logger log = LoggerFactory.getLogger(CanOverlay.class);
 
     private ScheduledExecutorService maintenanceTask;
 
-    private NeighborTable neighborTable;
+    private NeighborTable<E> neighborTable;
 
     private LinkedList<SplitEntry> splitHistory;
 
@@ -78,9 +82,9 @@ public class CanOverlay extends StructuredOverlay {
 
     private AtomicReference<UUID> peerLeavingId;
 
-    private JoinInformation tmpJoinInformation;
+    private JoinInformation<E> tmpJoinInformation;
 
-    private Zone zone;
+    private Zone<E> zone;
 
     /**
      * Constructs a new overlay with messagingManager set to
@@ -115,7 +119,7 @@ public class CanOverlay extends StructuredOverlay {
             Datastore datastore) {
         super(requestResponseManager, datastore);
 
-        this.neighborTable = new NeighborTable();
+        this.neighborTable = new NeighborTable<E>();
         this.peerJoiningId = new AtomicReference<UUID>();
         this.peerLeavingId = new AtomicReference<UUID>();
         this.splitHistory = new LinkedList<SplitEntry>();
@@ -127,7 +131,7 @@ public class CanOverlay extends StructuredOverlay {
      * outdated, it is removed from the neighbor table.
      */
     public void removeOutdatedNeighbors() {
-        Iterator<NeighborEntry> it = null;
+        Iterator<NeighborEntry<E>> it = null;
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 it = this.neighborTable.get(dim, direction).values().iterator();
@@ -162,12 +166,12 @@ public class CanOverlay extends StructuredOverlay {
      *         {@code coordinate} and which contains the specified coordinate on
      *         {@code dimension-1} dimensions.
      * 
-     * @see CanOverlay#neighborsVerifyingDimensions(Collection,
-     *      StringCoordinate, byte)
+     * @see CanOverlay#neighborsVerifyingDimensions(Collection, Coordinate,
+     *      byte)
      */
-    public NeighborEntry nearestNeighbor(StringCoordinate coordinate,
-                                         byte dimension, byte direction) {
-        List<NeighborEntry> neighbors =
+    public NeighborEntry<E> nearestNeighbor(Coordinate<E> coordinate,
+                                            byte dimension, byte direction) {
+        List<NeighborEntry<E>> neighbors =
                 this.neighborsVerifyingDimensions(this.neighborTable.get(
                         dimension, direction).values(), coordinate, dimension);
 
@@ -192,7 +196,7 @@ public class CanOverlay extends StructuredOverlay {
         }
 
         // TODO: choose a metric to evaluate the nearest peer
-        NeighborEntry entry =
+        NeighborEntry<E> entry =
                 neighbors.get(RandomUtils.nextInt(neighbors.size()));
         if (log.isDebugEnabled()) {
             if (this.zone.neighbors(entry.getZone()) == -1) {
@@ -220,25 +224,23 @@ public class CanOverlay extends StructuredOverlay {
      * 
      * @return a list of neighbors with the best rank
      */
-    private List<NeighborEntry> neighborsWithBestRank(List<NeighborEntry> neighbors,
-                                                      StringCoordinate coordinate) {
+    private List<NeighborEntry<E>> neighborsWithBestRank(List<NeighborEntry<E>> neighbors,
+                                                         Coordinate<E> coordinate) {
         @SuppressWarnings("unchecked")
-        List<NeighborEntry>[] ranks = new List[coordinate.size() + 1];
+        List<NeighborEntry<E>>[] ranks = new List[coordinate.size() + 1];
         int nbEltVerified = 0;
 
         for (int i = 0; i < neighbors.size(); i++) {
             nbEltVerified = 0;
             for (byte j = 0; j < coordinate.size(); j++) {
-                if (neighbors.get(i)
-                        .getZone()
-                        .getUnicodeView()
-                        .containsLexicographically(j, coordinate.getElement(j)) == 0) {
+                if (neighbors.get(i).getZone().contains(
+                        j, coordinate.getElement(j)) == 0) {
                     nbEltVerified++;
                 }
             }
 
             if (ranks[nbEltVerified] == null) {
-                ranks[nbEltVerified] = new ArrayList<NeighborEntry>();
+                ranks[nbEltVerified] = new ArrayList<NeighborEntry<E>>();
             }
 
             ranks[nbEltVerified].add(neighbors.get(i));
@@ -270,17 +272,16 @@ public class CanOverlay extends StructuredOverlay {
      *         {@code d-1} dimensions where {@code d} is the given
      *         {@code dimension}.
      */
-    public List<NeighborEntry> neighborsVerifyingDimensions(Collection<NeighborEntry> neighbors,
-                                                            StringCoordinate coordinate,
-                                                            byte dimension) {
-        List<NeighborEntry> result = new ArrayList<NeighborEntry>();
+    public List<NeighborEntry<E>> neighborsVerifyingDimensions(Collection<NeighborEntry<E>> neighbors,
+                                                               Coordinate<E> coordinate,
+                                                               byte dimension) {
+        List<NeighborEntry<E>> result = new ArrayList<NeighborEntry<E>>();
         boolean validatesPrecedingDimensions;
 
-        for (NeighborEntry entry : neighbors) {
+        for (NeighborEntry<E> entry : neighbors) {
             validatesPrecedingDimensions = true;
             for (byte dim = 0; dim < dimension; dim++) {
-                if (entry.getZone().getUnicodeView().containsLexicographically(
-                        dim, coordinate.getElement(dim)) != 0) {
+                if (entry.getZone().contains(dim, coordinate.getElement(dim)) != 0) {
                     validatesPrecedingDimensions = false;
                     break;
                 }
@@ -298,7 +299,7 @@ public class CanOverlay extends StructuredOverlay {
      * 
      * @return the neighbors of the managed zone.
      */
-    public NeighborTable getNeighborTable() {
+    public NeighborTable<E> getNeighborTable() {
         return this.neighborTable;
     }
 
@@ -336,7 +337,7 @@ public class CanOverlay extends StructuredOverlay {
      * 
      * @return the zone which is managed by the overlay.
      */
-    public Zone getZone() {
+    public Zone<E> getZone() {
         return this.zone;
     }
 
@@ -351,7 +352,7 @@ public class CanOverlay extends StructuredOverlay {
 
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry neighbor : this.neighborTable.get(
+                for (NeighborEntry<E> neighbor : this.neighborTable.get(
                         dim, direction).values()) {
                     buf.append("  - ");
                     buf.append(neighbor.getZone());
@@ -378,7 +379,7 @@ public class CanOverlay extends StructuredOverlay {
      * @return a response associated to the initial message.
      */
     @SuppressWarnings("unchecked")
-    public JoinIntroduceResponseOperation handleJoinIntroduceMessage(JoinIntroduceOperation msg) {
+    public JoinIntroduceResponseOperation<E> handleJoinIntroduceMessage(JoinIntroduceOperation<E> msg) {
         if (!super.activated.get()) {
             throw new PeerNotActivatedRuntimeException();
         } else if (this.peerLeavingId.get() != null
@@ -400,10 +401,10 @@ public class CanOverlay extends StructuredOverlay {
         }
 
         // splits the current peer zone to share it
-        HomogenousPair<Zone> newZones = this.zone.split(dimension);
+        HomogenousPair<? extends Zone<E>> newZones = this.zone.split(dimension);
 
         // neighbors affected for the new peer which joins the network
-        NeighborTable pendingNewNeighborhood = new NeighborTable();
+        NeighborTable<E> pendingNewNeighborhood = new NeighborTable<E>();
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte dir = 0; dir < 2; dir++) {
                 // the peer which is joining don't have the same neighbors as
@@ -411,12 +412,12 @@ public class CanOverlay extends StructuredOverlay {
                 // landmark peer in the dimension and direction of the landmark
                 // peer
                 if (dim != dimension || dir != direction) {
-                    Iterator<NeighborEntry> it =
+                    Iterator<NeighborEntry<E>> it =
                             this.neighborTable.get(dim, dir)
                                     .values()
                                     .iterator();
                     while (it.hasNext()) {
-                        NeighborEntry entry = it.next();
+                        NeighborEntry<E> entry = it.next();
                         // adds to the new peer neighborhood iff the new peer
                         // zone
                         // neighbors the current neighbor
@@ -431,7 +432,8 @@ public class CanOverlay extends StructuredOverlay {
         // adds the landmark peer in the neighborhood of the peer which is
         // joining
         pendingNewNeighborhood.add(
-                new NeighborEntry(super.id, super.stub, newZones.get(direction)),
+                new NeighborEntry<E>(
+                        super.id, super.stub, newZones.get(direction)),
                 dimension, direction);
 
         LinkedList<SplitEntry> historyToTransfert = null;
@@ -446,13 +448,13 @@ public class CanOverlay extends StructuredOverlay {
         }
 
         this.tmpJoinInformation =
-                new JoinInformation(
+                new JoinInformation<E>(
                         dimension, direction, newZones.get(direction),
-                        new NeighborEntry(
+                        new NeighborEntry<E>(
                                 msg.getPeerID(), msg.getRemotePeer(),
                                 newZones.get(directionInv)));
 
-        return new JoinIntroduceResponseOperation(
+        return new JoinIntroduceResponseOperation<E>(
                 super.id,
                 newZones.get(directionInv),
                 historyToTransfert,
@@ -462,7 +464,7 @@ public class CanOverlay extends StructuredOverlay {
                         : this.datastore.removeDataIn(newZones.get(directionInv)));
     }
 
-    public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation operation) {
+    public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation<E> operation) {
         byte directionInv =
                 getOppositeDirection(this.tmpJoinInformation.getDirection());
 
@@ -482,9 +484,9 @@ public class CanOverlay extends StructuredOverlay {
         // the others neighbors
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte dir = 0; dir < 2; dir++) {
-                Iterator<NeighborEntry> it =
+                Iterator<NeighborEntry<E>> it =
                         this.neighborTable.get(dim, dir).values().iterator();
-                NeighborEntry entry = null;
+                NeighborEntry<E> entry = null;
                 while (it.hasNext()) {
                     entry = it.next();
                     // we get a neighbor reference which is back the new peer
@@ -540,11 +542,16 @@ public class CanOverlay extends StructuredOverlay {
                 TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean create() {
-        this.zone = new Zone();
+        this.zone = this.newZone();
         return true;
     }
+
+    protected abstract Zone<E> newZone();
 
     /**
      * Returns {@code true} when the join operation succeed and {@code false}
@@ -559,11 +566,12 @@ public class CanOverlay extends StructuredOverlay {
      *         join/leave operation or when the landmarkPeer is not activated.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public boolean join(Peer landmarkPeer) {
-        JoinIntroduceResponseOperation response = null;
+        JoinIntroduceResponseOperation<E> response = null;
         try {
             response =
-                    (JoinIntroduceResponseOperation) PAFuture.getFutureValue(landmarkPeer.receiveImmediateService(new JoinIntroduceOperation(
+                    (JoinIntroduceResponseOperation<E>) PAFuture.getFutureValue(landmarkPeer.receiveImmediateService(new JoinIntroduceOperation<E>(
                             super.id, super.stub)));
         } catch (PeerNotActivatedRuntimeException e) {
             log.error(
@@ -585,7 +593,7 @@ public class CanOverlay extends StructuredOverlay {
             this.datastore.affectDataReceived(response.getData());
         }
 
-        PAFuture.waitFor(landmarkPeer.receiveImmediateService(new JoinWelcomeOperation()));
+        PAFuture.waitFor(landmarkPeer.receiveImmediateService(new JoinWelcomeOperation<E>()));
 
         // notify the neighbors that the current peer has joined
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -593,8 +601,8 @@ public class CanOverlay extends StructuredOverlay {
                 if (dim != this.splitHistory.getLast().getDimension()
                         || dir != getOppositeDirection(this.splitHistory.getLast()
                                 .getDirection())) {
-                    for (NeighborEntry entry : this.neighborTable.get(dim, dir)
-                            .values()) {
+                    for (NeighborEntry<E> entry : this.neighborTable.get(
+                            dim, dir).values()) {
                         CanOperations.insertNeighbor(
                                 entry.getStub(), this.getNeighborEntry(), dim,
                                 getOppositeDirection(dir));
@@ -625,7 +633,7 @@ public class CanOverlay extends StructuredOverlay {
             }
         }
 
-        NeighborEntry suitableNeighbor =
+        NeighborEntry<E> suitableNeighbor =
                 this.neighborTable.getMergeableNeighbor(this.zone);
 
         if (suitableNeighbor == null) {
@@ -635,13 +643,13 @@ public class CanOverlay extends StructuredOverlay {
             HomogenousPair<Byte> neighborDimDir =
                     this.neighborTable.findDimensionAndDirection(suitableNeighbor.getId());
 
-            Set<NeighborEntry> neighbors =
+            Set<NeighborEntry<E>> neighbors =
                     Sets.newHashSet(this.neighborTable.get(
                             neighborDimDir.getFirst(),
                             neighborDimDir.getSecond()).values());
 
             PAFuture.waitFor(suitableNeighbor.getStub().receive(
-                    new LeaveOperation(
+                    new LeaveOperation<E>(
                             super.id, this.zone, neighbors,
                             this.datastore == null
                                     ? null : this.datastore.retrieveAllData())));
@@ -649,12 +657,12 @@ public class CanOverlay extends StructuredOverlay {
             // updates neighbors NeighborTable
             for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
                 for (byte dir = 0; dir < 2; dir++) {
-                    for (NeighborEntry entry : this.neighborTable.get(dim, dir)
-                            .values()) {
+                    for (NeighborEntry<E> entry : this.neighborTable.get(
+                            dim, dir).values()) {
                         if (dim != neighborDimDir.getFirst()
                                 && dir != neighborDimDir.getSecond()) {
                             PAFuture.waitFor(entry.getStub().receive(
-                                    new ReplaceNeighborOperation(
+                                    new ReplaceNeighborOperation<E>(
                                             super.id, entry)));
                         }
                     }
@@ -688,7 +696,7 @@ public class CanOverlay extends StructuredOverlay {
         this.leave();
     }
 
-    public EmptyResponseOperation processLeave(LeaveOperation operation) {
+    public EmptyResponseOperation processLeave(LeaveOperation<E> operation) {
         if (this.peerJoiningId.get() != null
                 || this.peerLeavingId.compareAndSet(
                         null, operation.getPeerLeavingId())) {
@@ -704,7 +712,7 @@ public class CanOverlay extends StructuredOverlay {
             }
 
             this.neighborTable.removeAll(dim, dir);
-            for (NeighborEntry entry : operation.getNewNeighborsToSet()) {
+            for (NeighborEntry<E> entry : operation.getNewNeighborsToSet()) {
                 this.neighborTable.add(entry, dim, dir);
             }
 
@@ -721,13 +729,13 @@ public class CanOverlay extends StructuredOverlay {
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {
-                Iterator<NeighborEntry> it =
+                Iterator<NeighborEntry<E>> it =
                         this.neighborTable.get(dimension, direction)
                                 .values()
                                 .iterator();
                 while (it.hasNext()) {
                     it.next().getStub().receiveImmediateService(
-                            new UpdateNeighborOperation(
+                            new UpdateNeighborOperation<E>(
                                     this.getNeighborEntry(), dimension,
                                     getOppositeDirection(direction)));
                 }
@@ -736,12 +744,14 @@ public class CanOverlay extends StructuredOverlay {
     }
 
     /**
-     * Returns the {@link NeighborEntry} associated to the current overlay.
+     * Returns the {@link NeighborEntry<Z, E>} associated to the current
+     * overlay.
      * 
-     * @return the {@link NeighborEntry} associated to the current overlay.
+     * @return the {@link NeighborEntry<Z, E>} associated to the current
+     *         overlay.
      */
-    private NeighborEntry getNeighborEntry() {
-        return new NeighborEntry(super.id, super.stub, this.zone);
+    private NeighborEntry<E> getNeighborEntry() {
+        return new NeighborEntry<E>(super.id, super.stub, this.zone);
     }
 
     /**
@@ -760,7 +770,7 @@ public class CanOverlay extends StructuredOverlay {
      * @param zone
      *            the new zone covered.
      */
-    public void setZone(Zone zone) {
+    public void setZone(Zone<E> zone) {
         this.zone = zone;
     }
 
@@ -771,11 +781,11 @@ public class CanOverlay extends StructuredOverlay {
 
     public void dumpNeighbors() {
         log.debug("Peer managing {}", this.zone);
-        NeighborTable neighborTable = this.getNeighborTable();
+        NeighborTable<E> neighborTable = this.getNeighborTable();
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry entry : neighborTable.get(
+                for (NeighborEntry<E> entry : neighborTable.get(
                         dimension, direction).values()) {
                     log.debug(
                             "  * {}, dimension={}, direction={}", new Object[] {

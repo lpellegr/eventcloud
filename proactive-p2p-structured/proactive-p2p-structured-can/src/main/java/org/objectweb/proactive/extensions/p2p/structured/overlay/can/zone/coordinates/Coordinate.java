@@ -30,12 +30,12 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDe
  * Represents a set of elements (i.e. a set of values for each component of the
  * coordinate) used to determine the position of a point in a {@link Zone}.
  * 
- * @author lpellegr
- * 
  * @param <E>
  *            the {@link Element}s type contained by the coordinate.
+ * 
+ * @author lpellegr
  */
-public abstract class Coordinate<E extends Element> implements Cloneable,
+public final class Coordinate<E extends Element> implements Cloneable,
         Comparable<Coordinate<E>>, Iterable<E>, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -96,11 +96,10 @@ public abstract class Coordinate<E extends Element> implements Cloneable,
     }
 
     /**
-     * Sets the specified index to the given value <code>elt</code>.
+     * Sets the specified index to the given value {@code elt}.
      * 
      * @param index
      *            the element index to edit (i.e. the dimension).
-     * 
      * @param elt
      *            the new element to set.
      */
@@ -137,15 +136,15 @@ public abstract class Coordinate<E extends Element> implements Cloneable,
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public Coordinate<E> clone() throws CloneNotSupportedException {
         try {
             return (Coordinate<E>) MakeDeepCopy.makeDeepCopy(this);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw new IllegalStateException(e);
         } catch (ClassNotFoundException e) {
-            throw new AssertionError(e);
+            throw new IllegalStateException(e);
         }
     }
 

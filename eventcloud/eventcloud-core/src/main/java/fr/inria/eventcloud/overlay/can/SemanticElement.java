@@ -18,14 +18,15 @@ package fr.inria.eventcloud.overlay.can;
 
 import java.net.URISyntaxException;
 
+import org.apfloat.Apfloat;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 import com.hp.hpl.jena.graph.Node;
 
 /**
- * Represents a semantic coordinate element. This kind of element extends
- * {@link StringElement} and removes some prefix which are specific to semantic
- * data in order to improve the load balancing.
+ * Represents a semantic coordinate element. This kind of element parses input
+ * value and removes some prefix which are specific to semantic data in order to
+ * improve the load balancing.
  * 
  * @author lpellegr
  */
@@ -36,32 +37,61 @@ public class SemanticElement extends StringElement {
     public static String EMPTY_STRING_ROUTING_CHARACTER = "A";
 
     /**
-     * Constructs a new coordinate element with the specified {@code value}.
+     * Constructs a new semantic coordinate element from the specified
+     * {@code value}.
      * 
      * @param value
-     *            the value that will be parsed.
+     *            the value which is analyzed.
      */
-    public SemanticElement(String value) {
-        super(parseElement(value));
-    }
-
     public SemanticElement(Node value) {
-        super(parseElement(value.toString()));
+        this(value.toString());
     }
 
     /**
-     * Parses the String value from a {@link Node} in order to remove the
-     * prefixes and some characters specific to the RDF syntax used. This
-     * suppression is done to improve the load balancing (i.e. especially to
-     * avoid to have several values with popular prefixes that are managed in
-     * the same zone).
+     * Constructs a new semantic coordinate element from the specified
+     * {@code value}.
+     * 
+     * @param value
+     *            the value which is analyzed.
+     */
+    public SemanticElement(String value) {
+        super(removePrefix(value));
+    }
+
+    private SemanticElement(String value, Void dummy) {
+        super(value);
+    }
+
+    private SemanticElement(Apfloat apfloat) {
+        super(apfloat);
+    }
+
+    /**
+     * Constructs a new semantic coordinate element from the specified
+     * {@code value}. Contrary to the constructor of this class, the value is
+     * not analyzed to remove a potential prefix. It has to be used with care.
+     * 
+     * @param value
+     *            the value to use.
+     * 
+     * @return a new semantic element.
+     */
+    public static SemanticElement newRawSemanticElement(String value) {
+        return new SemanticElement(value);
+    }
+
+    /**
+     * Analyzes the String value from a {@link Node} in order to remove the
+     * prefixes and some characters specific to RDF data. This suppression is
+     * done to improve the load balancing (i.e. especially to avoid to have
+     * several values with popular prefixes that are managed in the same zone).
      * 
      * @param value
      *            the value to parse.
      * 
      * @return a String that has been improved for load balancing.
      */
-    public static String parseElement(String value) {
+    public static String removePrefix(String value) {
         // TODO: add support for opaque URI (c.f.
         // http://download.oracle.com/javase/6/docs/api/java/net/URI.html)
 
@@ -115,6 +145,14 @@ public class SemanticElement extends StringElement {
                 return value;
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected StringElement newStringElement(Apfloat apfloat) {
+        return new SemanticElement(apfloat);
     }
 
 }

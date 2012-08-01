@@ -22,13 +22,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZoneView;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.ZoneView;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZone;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
 import org.slf4j.Logger;
@@ -65,22 +62,20 @@ public class DataTransfertTest extends JunitByClassEventCloudDeployer {
         SemanticPeer secondPeer =
                 SemanticFactory.newSemanticPeer(new SemanticInMemoryOverlayProvider());
 
-        GetIdAndZoneResponseOperation response =
-                (GetIdAndZoneResponseOperation) PAFuture.getFutureValue(firstPeer.receive(new GetIdAndZoneOperation()));
+        GetIdAndZoneResponseOperation<SemanticElement> response =
+                CanOperations.<SemanticElement> getIdAndZoneResponseOperation(firstPeer);
 
-        UnicodeZoneView zone =
-                new UnicodeZoneView(response.getPeerZone()
-                        .getUnicodeView()
-                        .getLowerBound(), response.getPeerZone()
-                        .getUnicodeView()
-                        .getUpperBound());
+        UnicodeZone<SemanticElement> zone =
+                new SemanticZone(
+                        response.getPeerZone().getLowerBound(),
+                        response.getPeerZone().getUpperBound());
 
         byte dimensionSplit = 0;
 
         // we compute the value of the split which will be done on the next join
         // from the third peer in order to create data that will be transfered
         // from a peer to an another
-        HomogenousPair<ZoneView<StringCoordinate, StringElement>> res =
+        HomogenousPair<UnicodeZone<SemanticElement>> res =
                 zone.split(dimensionSplit);
 
         // the next two elements will be contained by two different peers on the

@@ -21,6 +21,7 @@ import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
@@ -32,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 public class RemoveNeighborOperationTest extends JunitByClassCanNetworkDeployer {
 
     public RemoveNeighborOperationTest() {
-        super(1, 2);
+        super(new StringCanDeploymentDescriptor(), 1, 2);
     }
 
     @Test

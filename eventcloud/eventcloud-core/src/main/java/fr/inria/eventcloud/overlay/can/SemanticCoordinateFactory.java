@@ -16,7 +16,8 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 import com.hp.hpl.jena.graph.Node;
@@ -32,17 +33,15 @@ import fr.inria.eventcloud.api.QuadruplePattern;
  * 
  * @author lpellegr
  */
-public class SemanticCoordinate extends StringCoordinate {
+public final class SemanticCoordinateFactory {
 
-    private static final long serialVersionUID = 1L;
+    private SemanticCoordinateFactory() {
 
-    public SemanticCoordinate(SemanticElement... elts) {
-        super(elts);
     }
 
     /**
-     * Creates a {@link SemanticCoordinate} from the specified quadruple
-     * pattern.
+     * Creates a {@link Coordinate} containing {@link SemanticElement}s from the
+     * specified quadruple pattern.
      * 
      * @param quadruplePattern
      *            the quadruple pattern instance to use in order to create the
@@ -50,29 +49,31 @@ public class SemanticCoordinate extends StringCoordinate {
      * 
      * @return the coordinate which has been created.
      */
-    public static SemanticCoordinate create(QuadruplePattern quadruplePattern) {
-        return create(
+    public static Coordinate<SemanticElement> newSemanticCoordinate(QuadruplePattern quadruplePattern) {
+        return newSemanticCoordinate(
                 quadruplePattern.getGraph(), quadruplePattern.getSubject(),
                 quadruplePattern.getPredicate(), quadruplePattern.getObject());
     }
 
     /**
-     * Creates a {@link SemanticCoordinate} from the specified quadruple.
+     * Creates a {@link Coordinate} containing {@link SemanticElement}s from the
+     * specified quadruple.
      * 
      * @param quad
-     *            the quad instance to use in order to create the coordinate.
+     *            the quadruple instance to use in order to create the
+     *            coordinate.
      * 
      * @return the coordinate which has been created.
      */
-    public static SemanticCoordinate create(Quadruple quad) {
-        return create(
+    public static Coordinate<SemanticElement> newSemanticCoordinate(Quadruple quad) {
+        return newSemanticCoordinate(
                 quad.getGraph(), quad.getSubject(), quad.getPredicate(),
                 quad.getObject());
     }
 
     /**
-     * Creates a {@link StringCoordinate} from the specified quadruple
-     * components.
+     * Creates a {@link Coordinate} containing {@link SemanticElement}s from the
+     * specified quadruple components.
      * 
      * @param graph
      *            the graph value.
@@ -85,8 +86,10 @@ public class SemanticCoordinate extends StringCoordinate {
      * 
      * @return the coordinate which has been created.
      */
-    public static SemanticCoordinate create(Node graph, Node subject,
-                                            Node predicate, Node object) {
+    public static Coordinate<SemanticElement> newSemanticCoordinate(Node graph,
+                                                                    Node subject,
+                                                                    Node predicate,
+                                                                    Node object) {
         // if the literal value contains an empty String we have to decide which
         // constraint is associated to this particular case where there is no
         // character to compare.
@@ -95,7 +98,7 @@ public class SemanticCoordinate extends StringCoordinate {
                     Node.createLiteral(SemanticElement.EMPTY_STRING_ROUTING_CHARACTER);
         }
 
-        return new SemanticCoordinate(
+        return new Coordinate<SemanticElement>(
                 createSemanticElementWithVars(graph),
                 createSemanticElementWithVars(subject),
                 createSemanticElementWithVars(predicate),
@@ -124,6 +127,21 @@ public class SemanticCoordinate extends StringCoordinate {
         } else {
             return tripleElt;
         }
+    }
+
+    protected static Coordinate<SemanticElement> newSemanticCoordinate(Character character) {
+        return newRawSemanticCoordinate(Character.toString(character));
+    }
+
+    protected static Coordinate<SemanticElement> newRawSemanticCoordinate(String value) {
+        SemanticElement[] elts =
+                new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+
+        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+            elts[i] = SemanticElement.newRawSemanticElement(value);
+        }
+
+        return new Coordinate<SemanticElement>(elts);
     }
 
 }

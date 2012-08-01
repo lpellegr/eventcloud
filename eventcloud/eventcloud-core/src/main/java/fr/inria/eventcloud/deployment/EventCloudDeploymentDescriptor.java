@@ -21,6 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentDe
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 
 /**
@@ -28,7 +29,8 @@ import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
  * 
  * @author lpellegr
  */
-public class EventCloudDeploymentDescriptor extends CanDeploymentDescriptor {
+public class EventCloudDeploymentDescriptor extends
+        CanDeploymentDescriptor<SemanticElement> {
 
     private static final long serialVersionUID = 1L;
 

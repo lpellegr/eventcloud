@@ -22,16 +22,21 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanRespo
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * Operation used to know if the peer which handles the operation has a neighbor
  * corresponding to the given UUID.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  * 
  * @see CanOverlay#hasNeighbor(UUID)
  */
-public class HasNeighborOperation implements SynchronousOperation {
+public class HasNeighborOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,9 +50,10 @@ public class HasNeighborOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         return new BooleanResponseOperation(
-                ((CanOverlay) overlay).hasNeighbor(this.uuid));
+                ((CanOverlay<E>) overlay).hasNeighbor(this.uuid));
     }
 
 }

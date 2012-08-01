@@ -24,13 +24,17 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAnd
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * NeighborEntry is an entry in a {@link NeighborTable}.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class NeighborEntry implements Serializable {
+public class NeighborEntry<E extends Element> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,19 +42,20 @@ public class NeighborEntry implements Serializable {
 
     private final Peer neighborStub;
 
-    private Zone neighborZone;
+    private Zone<E> neighborZone;
 
     public NeighborEntry(Peer peerStub) {
         this.neighborStub = peerStub;
 
-        GetIdAndZoneResponseOperation response =
-                (GetIdAndZoneResponseOperation) PAFuture.getFutureValue(this.neighborStub.receiveImmediateService(new GetIdAndZoneOperation()));
+        @SuppressWarnings("unchecked")
+        GetIdAndZoneResponseOperation<E> response =
+                (GetIdAndZoneResponseOperation<E>) PAFuture.getFutureValue(this.neighborStub.receiveImmediateService(new GetIdAndZoneOperation<E>()));
 
         this.neighborIdentifier = response.getPeerIdentifier();
         this.neighborZone = response.getPeerZone();
     }
 
-    public NeighborEntry(UUID peerIdentifier, Peer peerStub, Zone peerZone) {
+    public NeighborEntry(UUID peerIdentifier, Peer peerStub, Zone<E> peerZone) {
         this.neighborIdentifier = peerIdentifier;
         this.neighborStub = peerStub;
         this.neighborZone = peerZone;
@@ -64,11 +69,11 @@ public class NeighborEntry implements Serializable {
         return this.neighborStub;
     }
 
-    public Zone getZone() {
+    public Zone<E> getZone() {
         return this.neighborZone;
     }
 
-    public void setZone(Zone newZone) {
+    public void setZone(Zone<E> newZone) {
         this.neighborZone = newZone;
     }
 
@@ -87,8 +92,8 @@ public class NeighborEntry implements Serializable {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof NeighborEntry
-                && this.neighborIdentifier.equals(((NeighborEntry) obj).getId())
-                && this.neighborZone.equals(((NeighborEntry) obj).getZone());
+                && this.neighborIdentifier.equals(((NeighborEntry<?>) obj).getId())
+                && this.neighborZone.equals(((NeighborEntry<?>) obj).getZone());
 
     }
 

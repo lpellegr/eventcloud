@@ -16,6 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+
 /**
  * All the tests contained by a test case that extends this class are executed
  * by using a {@link CanNetworkDeployer}.
@@ -37,16 +39,8 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
  * 
  * @author lpellegr
  */
-public class JunitByMethodCanNetworkDeployer extends
+public class JunitByMethodCanNetworkDeployer<E extends Element> extends
         JunitByMethodNetworkDeployer {
-
-    /**
-     * Creates a new Junit deployer by using an instance of
-     * {@link CanDeploymentDescriptor} for the deployment descriptor.
-     */
-    public JunitByMethodCanNetworkDeployer() {
-        this(new CanDeploymentDescriptor());
-    }
 
     /**
      * Creates a new Junit deployer with the specified deployment configuration.
@@ -56,7 +50,7 @@ public class JunitByMethodCanNetworkDeployer extends
      *            the deployment descriptor to use.
      */
     public JunitByMethodCanNetworkDeployer(
-            CanDeploymentDescriptor deploymentDescriptor) {
+            CanDeploymentDescriptor<E> deploymentDescriptor) {
         super(new CanNetworkDeployer(deploymentDescriptor));
     }
 

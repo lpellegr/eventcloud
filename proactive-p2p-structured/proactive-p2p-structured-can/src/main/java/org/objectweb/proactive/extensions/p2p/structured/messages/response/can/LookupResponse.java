@@ -20,14 +20,18 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Reques
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * Response associated to {@link LookupRequest}.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class LookupResponse extends ForwardResponse {
+public class LookupResponse<E extends Element> extends ForwardResponse<E> {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,11 +45,11 @@ public class LookupResponse extends ForwardResponse {
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(Request<StringCoordinate> request,
+    public void setAttributes(Request<Coordinate<E>> request,
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 
-        this.peerFound = ((LookupRequest) request).getRemotePeerReached();
+        this.peerFound = ((LookupRequest<E>) request).getRemotePeerReached();
     }
 
     public Peer getPeerFound() {

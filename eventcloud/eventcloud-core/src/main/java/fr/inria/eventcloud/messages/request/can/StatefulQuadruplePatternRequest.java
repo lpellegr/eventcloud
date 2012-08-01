@@ -22,13 +22,14 @@ import java.util.concurrent.Callable;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.can.StatefulQuadruplePatternResponse;
 import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * StatelessQuadruplePatternRequest is a {@link QuadruplePattern} query that is
@@ -51,7 +52,7 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
 
     public StatefulQuadruplePatternRequest(
             QuadruplePattern quadPattern,
-            ResponseProvider<? extends StatefulQuadruplePatternResponse<T>, StringCoordinate> responseProvider) {
+            ResponseProvider<? extends StatefulQuadruplePatternResponse<T>, Coordinate<SemanticElement>> responseProvider) {
         super(quadPattern, responseProvider);
     }
 
@@ -59,7 +60,7 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
      * {@inheritDoc}
      */
     @Override
-    public final void onPeerValidatingKeyConstraints(CanOverlay overlay,
+    public final void onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
                                                      QuadruplePattern quadruplePattern) {
         throw new UnsupportedOperationException();
     }
@@ -71,19 +72,19 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
      * <p>
      * The object which is returned must be {@link Serializable}.
      */
-    public abstract T onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                                     AnycastRequest request,
+    public abstract T onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
+                                                     AnycastRequest<SemanticElement> request,
                                                      QuadruplePattern quadruplePattern);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AnycastRequestRouter<StatelessQuadruplePatternRequest> getRouter() {
-        return new AnycastRequestRouter<StatelessQuadruplePatternRequest>() {
+    public AnycastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
+        return new AnycastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
             @Override
-            public void onPeerValidatingKeyConstraints(final CanOverlay overlay,
-                                                       final AnycastRequest request) {
+            public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
+                                                       final AnycastRequest<SemanticElement> request) {
                 final SemanticRequestResponseManager messagingManager =
                         (SemanticRequestResponseManager) overlay.getRequestResponseManager();
 

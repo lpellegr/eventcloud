@@ -25,7 +25,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
  * 
  * @author lpellegr
  */
-public abstract class Element implements Comparable<Element>, Serializable {
+public abstract class Element implements Cloneable, Comparable<Element>,
+        Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -91,8 +92,7 @@ public abstract class Element implements Comparable<Element>, Serializable {
      * @param elt2
      *            second element.
      * 
-     * @return the maximum among the specified coordinate elements using
-     *         {@link Element#compareTo(Element)}.
+     * @return the maximum among the specified coordinate elements.
      */
     public static <T extends Element> T max(T elt1, T elt2) {
         return elt1.compareTo(elt2) > 0
@@ -107,8 +107,7 @@ public abstract class Element implements Comparable<Element>, Serializable {
      * @param elt2
      *            second element.
      * 
-     * @return the minimum among the specified coordinate elements using
-     *         {@link Element#compareTo(Element)}.
+     * @return the minimum among the specified coordinate elements.
      */
     public static <T extends Element> T min(T elt1, T elt2) {
         return elt1.compareTo(elt2) < 0

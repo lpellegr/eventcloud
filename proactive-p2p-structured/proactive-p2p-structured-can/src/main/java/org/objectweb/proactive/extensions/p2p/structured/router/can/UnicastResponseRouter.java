@@ -23,7 +23,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +32,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Router used to route a {@link Response} from a peer to an another.
  * 
- * @author lpellegr
- * 
  * @param <T>
  *            the response type to route.
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
+ * @author lpellegr
  */
-public class UnicastResponseRouter<T extends Response<StringCoordinate>>
-        extends Router<T, StringCoordinate> {
+public class UnicastResponseRouter<T extends Response<Coordinate<E>>, E extends Element>
+        extends Router<T, Coordinate<E>> {
 
     private static final Logger logger =
             LoggerFactory.getLogger(UnicastResponseRouter.class);
@@ -74,8 +77,9 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     protected void route(StructuredOverlay overlay, T response) {
-        CanOverlay overlayCAN = ((CanOverlay) overlay);
+        CanOverlay<E> overlayCAN = ((CanOverlay<E>) overlay);
 
         byte dimension = 0;
         byte direction = NeighborTable.DIRECTION_ANY;
@@ -83,11 +87,8 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
         // finds the dimension on which the key to reach is not contained
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction =
-                    overlayCAN.getZone()
-                            .getUnicodeView()
-                            .containsLexicographically(
-                                    dimension,
-                                    response.getKey().getElement(dimension));
+                    overlayCAN.getZone().contains(
+                            dimension, response.getKey().getElement(dimension));
 
             if (direction == -1) {
                 direction = NeighborTable.DIRECTION_INFERIOR;
@@ -100,7 +101,7 @@ public class UnicastResponseRouter<T extends Response<StringCoordinate>>
 
         // selects one neighbor in the dimension and the direction previously
         // affected
-        NeighborEntry neighborChosen =
+        NeighborEntry<E> neighborChosen =
                 overlayCAN.nearestNeighbor(
                         response.getKey(), dimension, direction);
 

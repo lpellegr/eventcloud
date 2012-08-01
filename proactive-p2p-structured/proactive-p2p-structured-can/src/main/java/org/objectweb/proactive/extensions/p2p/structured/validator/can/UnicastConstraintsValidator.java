@@ -20,21 +20,25 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Lo
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
- * {@link ConstraintsValidator} for {@link LookupRequest} and
+ * {@link ConstraintsValidator} used by {@link LookupRequest} and
  * {@link LookupResponse}.
+ * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */
-public class UnicastConstraintsValidator extends
-        ConstraintsValidator<StringCoordinate> {
+public class UnicastConstraintsValidator<E extends Element> extends
+        ConstraintsValidator<Coordinate<E>> {
 
     private static final long serialVersionUID = 1L;
 
-    public UnicastConstraintsValidator(StringCoordinate key) {
+    public UnicastConstraintsValidator(Coordinate<E> key) {
         super(key);
     }
 
@@ -42,10 +46,10 @@ public class UnicastConstraintsValidator extends
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
-        return ((CanOverlay) overlay).getZone()
-                .getUnicodeView()
-                .containsLexicographically(super.key.getValue());
+        return ((CanOverlay<E>) overlay).getZone().contains(
+                super.key.getValue());
     }
 
 }

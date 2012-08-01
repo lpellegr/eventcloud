@@ -25,27 +25,31 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
- * A {@code LeaveOperation} is used to transfer information from the peer which
- * left to the peer which takes over the zone.
+ * {@code LeaveOperation} is used to transfer information from the peer which
+ * leaves to the peer which takes over the zone.
+ * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */
-public class LeaveOperation implements SynchronousOperation {
+public class LeaveOperation<E extends Element> implements SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
     private final UUID peerLeavingId;
 
-    private final Zone peerLeavingZone;
+    private final Zone<E> peerLeavingZone;
 
-    private final Set<NeighborEntry> newNeighborsToSet;
+    private final Set<NeighborEntry<E>> newNeighborsToSet;
 
     private final Object data;
 
-    public LeaveOperation(UUID peerLeavingId, Zone peerLeavingZone,
-            Set<NeighborEntry> newNeighborsToSet, Object data) {
+    public LeaveOperation(UUID peerLeavingId, Zone<E> peerLeavingZone,
+            Set<NeighborEntry<E>> newNeighborsToSet, Object data) {
         this.peerLeavingId = peerLeavingId;
         this.peerLeavingZone = peerLeavingZone;
         this.newNeighborsToSet = newNeighborsToSet;
@@ -56,11 +60,11 @@ public class LeaveOperation implements SynchronousOperation {
         return this.peerLeavingId;
     }
 
-    public Zone getPeerLeavingZone() {
+    public Zone<E> getPeerLeavingZone() {
         return this.peerLeavingZone;
     }
 
-    public Set<NeighborEntry> getNewNeighborsToSet() {
+    public Set<NeighborEntry<E>> getNewNeighborsToSet() {
         return this.newNeighborsToSet;
     }
 
@@ -72,8 +76,9 @@ public class LeaveOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        return ((CanOverlay) overlay).processLeave(this);
+        return ((CanOverlay<E>) overlay).processLeave(this);
     }
 
 }

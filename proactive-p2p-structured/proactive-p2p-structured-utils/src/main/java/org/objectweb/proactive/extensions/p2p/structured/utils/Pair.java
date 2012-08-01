@@ -73,11 +73,10 @@ public class Pair<A, B> implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public boolean equals(Object that) {
         return that instanceof Pair
-                && this.first.equals(((Pair<A, B>) that).first)
-                && this.second.equals(((Pair<A, B>) that).second);
+                && this.first.equals(((Pair<?, ?>) that).first)
+                && this.second.equals(((Pair<?, ?>) that).second);
     }
 
     /**

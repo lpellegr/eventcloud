@@ -20,7 +20,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 
@@ -29,29 +30,32 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastReque
  * <strong>find</strong> a peer which manages a specified coordinate on a CAN
  * structured peer-to-peer network.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class LookupRequest extends ForwardRequest {
+public class LookupRequest<E extends Element> extends ForwardRequest<E> {
 
     private static final long serialVersionUID = 1L;
 
     protected Peer remotePeerReached;
 
-    public LookupRequest(StringCoordinate coordinateToReach) {
+    public LookupRequest(Coordinate<E> coordinateToReach) {
         super(coordinateToReach,
-                new ResponseProvider<LookupResponse, StringCoordinate>() {
+                new ResponseProvider<LookupResponse<E>, Coordinate<E>>() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public LookupResponse get() {
-                        return new LookupResponse();
+                    public LookupResponse<E> get() {
+                        return new LookupResponse<E>();
                     }
                 });
     }
 
     public LookupRequest(
-            StringCoordinate coordinateToReach,
-            ResponseProvider<? extends LookupResponse, StringCoordinate> responseProvider) {
+            Coordinate<E> coordinateToReach,
+            ResponseProvider<? extends LookupResponse<E>, Coordinate<E>> responseProvider) {
         super(coordinateToReach, responseProvider);
     }
 
@@ -67,12 +71,12 @@ public class LookupRequest extends ForwardRequest {
      * {@inheritDoc}
      */
     @Override
-    public Router<ForwardRequest, StringCoordinate> getRouter() {
-        return new UnicastRequestRouter<ForwardRequest>() {
+    public Router<ForwardRequest<E>, Coordinate<E>> getRouter() {
+        return new UnicastRequestRouter<ForwardRequest<E>, E>() {
             @Override
             protected void onDestinationReached(StructuredOverlay overlay,
-                                                ForwardRequest msg) {
-                ((LookupRequest) msg).setRemotePeerReached(overlay.getStub());
+                                                ForwardRequest<E> msg) {
+                ((LookupRequest<E>) msg).setRemotePeerReached(overlay.getStub());
             };
         };
     }

@@ -19,6 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.eleme
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 /**
  * Test cases for {@link StringElement}.
@@ -38,42 +39,27 @@ public class StringElementTest {
     }
 
     @Test
-    public void testCompareToLexicographicLessThan() {
-        Assert.assertTrue(this.eltA.compareLexicographicallyTo(this.eltB) < 0);
+    public void testCloning() throws CloneNotSupportedException {
+        Assert.assertNotSame(this.eltA, this.eltA.clone());
     }
 
     @Test
-    public void testCompareToLexicographicGreaterThan() {
-        Assert.assertTrue(this.eltB.compareLexicographicallyTo(this.eltA) > 0);
-    }
-
-    @Test
-    public void testCompareToLexicographicEquals() {
-        Assert.assertEquals(0, this.eltA.compareLexicographicallyTo(this.eltA));
-    }
-
-    @Test
-    public void testCompareToLexicographicNotEquals() {
-        Assert.assertNotSame(0, this.eltA.compareLexicographicallyTo(this.eltB));
-    }
-
-    @Test
-    public void testCompareToNumericLessThan() {
+    public void testCompareToLessThan() {
         Assert.assertTrue(this.eltA.compareTo(this.eltB) < 0);
     }
 
     @Test
-    public void testCompareToNumericGreaterThan() {
+    public void testCompareToGreaterThan() {
         Assert.assertTrue(this.eltB.compareTo(this.eltA) > 0);
     }
 
     @Test
-    public void testCompareToNumericEquals() {
+    public void testCompareToEquals() {
         Assert.assertEquals(0, this.eltA.compareTo(this.eltA));
     }
 
     @Test
-    public void testCompareToNumericNotEquals() {
+    public void testCompareToNotEquals() {
         Assert.assertNotSame(0, this.eltA.compareTo(this.eltB));
     }
 
@@ -99,23 +85,42 @@ public class StringElementTest {
     }
 
     @Test
-    public void testSplitMiddle() {
-        StringElement middle =
-                Element.middle(new StringElement("abc"), new StringElement(
-                        "efg"));
+    public void testNormalization1() {
+        Assert.assertEquals(
+                1,
+                new StringElement(
+                        Character.toString(P2PStructuredProperties.CAN_UPPER_BOUND.getValue())).normalize(
+                        0, 1), 1e-9);
+    }
 
-        Assert.assertEquals("cde", middle.getUnicodeRepresentation());
+    @Test
+    public void testNormalization2() {
+        Assert.assertEquals(
+                0,
+                new StringElement(
+                        Character.toString(P2PStructuredProperties.CAN_LOWER_BOUND.getValue())).normalize(
+                        0, 1), 1e-9);
     }
 
     @Test
     public void testSplitMiddleRecursively() {
-        StringElement middleCoordinate = this.eltA;
+        StringElement middleElement = this.eltA;
 
         for (int nbSplits = 0; nbSplits < 1e3; nbSplits++) {
-            middleCoordinate = Element.middle(middleCoordinate, this.eltB);
-
-            Assert.assertTrue(middleCoordinate.compareLexicographicallyTo(this.eltB) < 0);
+            middleElement = Element.middle(middleElement, this.eltB);
+            Assert.assertTrue(middleElement.compareTo(this.eltB) < 0);
         }
+    }
+
+    @Test
+    public void testGetUnicodeRepresentation() {
+        StringElement elt1 = new StringElement("a");
+        StringElement elt2 = new StringElement("ab");
+
+        String elt1UnicodeRepresentation = elt1.getUnicodeRepresentation();
+        String elt2UnicodeRepresentation = elt2.getUnicodeRepresentation();
+
+        Assert.assertTrue(elt1UnicodeRepresentation.length() < elt2UnicodeRepresentation.length());
     }
 
     @Test

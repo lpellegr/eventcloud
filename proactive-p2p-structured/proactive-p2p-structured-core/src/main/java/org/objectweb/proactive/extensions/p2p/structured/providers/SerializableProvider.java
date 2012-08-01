@@ -49,6 +49,9 @@ public abstract class SerializableProvider<T> implements Provider<T>,
      *            create.
      * 
      * @return a provider for the specified {@code clazz}.
+     * 
+     * @throws IllegalArgumentException
+     *             if the instantiation fails.
      */
     public static <T> SerializableProvider<T> create(final Class<T> clazz) {
         return new SerializableProvider<T>() {
@@ -60,11 +63,13 @@ public abstract class SerializableProvider<T> implements Provider<T>,
                 try {
                     return clazz.newInstance();
                 } catch (InstantiationException e) {
-                    e.printStackTrace();
+                    throw new IllegalArgumentException(
+                            "The specified class represents an abstract class, an interface, an array class, a primitive type, or void",
+                            e);
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    throw new IllegalArgumentException(
+                            "Class or empty constructor not accessible", e);
                 }
-                return null;
             }
         };
     }

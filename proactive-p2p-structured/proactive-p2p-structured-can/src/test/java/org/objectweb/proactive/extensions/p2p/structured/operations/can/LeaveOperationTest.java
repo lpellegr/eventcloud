@@ -23,10 +23,13 @@ import java.util.UUID;
 
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.StringZone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
@@ -34,21 +37,26 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  * 
  * @author lpellegr
  */
-public class LeaveOperationTest extends JunitByMethodCanNetworkDeployer {
+public class LeaveOperationTest extends
+        JunitByMethodCanNetworkDeployer<StringElement> {
+
+    public LeaveOperationTest() {
+        super(new StringCanDeploymentDescriptor());
+    }
 
     @Test
     public void testCanMerge() {
-        Zone z1 = new Zone();
-        HomogenousPair<Zone> z1Split = z1.split((byte) 0);
-        Zone z2 = z1Split.getFirst();
-        Zone z3 = z1Split.getSecond();
+        UnicodeZone<StringElement> z1 = new StringZone();
+        HomogenousPair<UnicodeZone<StringElement>> z1Split = z1.split((byte) 0);
+        UnicodeZone<StringElement> z2 = z1Split.getFirst();
+        UnicodeZone<StringElement> z3 = z1Split.getSecond();
 
         // two zones: z1, z2
         assertTrue(z2.canMerge(z3, (byte) 0));
 
-        HomogenousPair<Zone> z3Split = z3.split((byte) 1);
-        Zone z4 = z3Split.getFirst();
-        Zone z5 = z3Split.getSecond();
+        HomogenousPair<UnicodeZone<StringElement>> z3Split = z3.split((byte) 1);
+        UnicodeZone<StringElement> z4 = z3Split.getFirst();
+        UnicodeZone<StringElement> z5 = z3Split.getSecond();
 
         // three zones: z2, z4, z5
         assertFalse(z2.canMerge(z4, (byte) 0));

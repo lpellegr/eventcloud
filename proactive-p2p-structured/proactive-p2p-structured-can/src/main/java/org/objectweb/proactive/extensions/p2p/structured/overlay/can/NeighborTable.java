@@ -24,15 +24,19 @@ import java.util.concurrent.ConcurrentMap;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
  * Data structure used in order to store the neighbors of a {@link Peer} of type
  * CAN where neighbors are in a specified dimension and direction.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class NeighborTable implements Serializable {
+public class NeighborTable<E extends Element> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -60,18 +64,25 @@ public class NeighborTable implements Serializable {
      * two (which corresponds to the upper and lower directions).
      */
     @SuppressWarnings("unchecked")
-    private ConcurrentMap<UUID, NeighborEntry>[][] entries =
+    private ConcurrentMap<UUID, NeighborEntry<E>>[][] entries =
             new ConcurrentHashMap[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()][2];
 
     /**
      * Constructs a new NeighborTable.
      */
     public NeighborTable() {
+        // for a uniformly partitioned space with n nodes and d dimensions
+        // the number of neighbors per node is 2*d
+        int nbNeighbors =
+                P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() * 2;
+
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+            // we over provision the number of neighbors per dimension but not
+            // too much: 2*d per dimension for a total of 2*d^2
             this.entries[i][NeighborTable.DIRECTION_INFERIOR] =
-                    new ConcurrentHashMap<UUID, NeighborEntry>();
+                    new ConcurrentHashMap<UUID, NeighborEntry<E>>(nbNeighbors);
             this.entries[i][NeighborTable.DIRECTION_SUPERIOR] =
-                    new ConcurrentHashMap<UUID, NeighborEntry>();
+                    new ConcurrentHashMap<UUID, NeighborEntry<E>>(nbNeighbors);
         }
     }
 
@@ -89,7 +100,7 @@ public class NeighborTable implements Serializable {
      *            the direction ({@link #DIRECTION_INFERIOR} or
      *            {@link #DIRECTION_SUPERIOR}).
      */
-    public void add(NeighborEntry entry, byte dimension, byte direction) {
+    public void add(NeighborEntry<E> entry, byte dimension, byte direction) {
         this.entries[dimension][direction].put(entry.getId(), entry);
     }
 
@@ -99,7 +110,7 @@ public class NeighborTable implements Serializable {
      * @param table
      *            the neighbors to add.
      */
-    public void addAll(NeighborTable table) {
+    public void addAll(NeighborTable<E> table) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 this.entries[dim][direction].putAll(table.get(dim, direction));
@@ -118,20 +129,22 @@ public class NeighborTable implements Serializable {
      * @param direction
      *            the direction ({@link #DIRECTION_INFERIOR} or
      *            {@link #DIRECTION_SUPERIOR}).
+     * 
      * @return all the neighbors on the specified dimension and direction.
      */
-    public ConcurrentMap<UUID, NeighborEntry> get(byte dimension, byte direction) {
+    public ConcurrentMap<UUID, NeighborEntry<E>> get(byte dimension,
+                                                     byte direction) {
         return this.entries[dimension][direction];
     }
 
-    public ConcurrentMap<UUID, NeighborEntry>[] get(byte dimension) {
+    public ConcurrentMap<UUID, NeighborEntry<E>>[] get(byte dimension) {
         return this.entries[dimension];
     }
 
-    public NeighborEntry getMergeableNeighbor(Zone zone) {
+    public NeighborEntry<E> getMergeableNeighbor(Zone<E> zone) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry entry : this.entries[dim][direction].values()) {
+                for (NeighborEntry<E> entry : this.entries[dim][direction].values()) {
                     if (zone.canMerge(entry.getZone(), dim)) {
                         return entry;
                     }
@@ -151,7 +164,7 @@ public class NeighborTable implements Serializable {
      * 
      * @return the zone found or <code>null</code>.
      */
-    public NeighborEntry getNeighborEntry(UUID peerIdentifier) {
+    public NeighborEntry<E> getNeighborEntry(UUID peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
@@ -317,7 +330,7 @@ public class NeighborTable implements Serializable {
             for (byte direction = 0; direction < 2; direction++) {
                 buf.append('[');
                 int i = 0;
-                for (NeighborEntry entry : this.entries[dim][direction].values()) {
+                for (NeighborEntry<E> entry : this.entries[dim][direction].values()) {
                     buf.append(entry.getZone());
                     if (i < this.entries[dim][direction].values().size() - 1) {
                         buf.append(',');

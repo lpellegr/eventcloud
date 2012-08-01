@@ -18,12 +18,12 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 
 import static org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties.CAN_LOWER_BOUND;
 import static org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties.CAN_UPPER_BOUND;
-import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createDoubleCoordinate;
-import static org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory.createStringCoordinate;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
@@ -35,38 +35,37 @@ public class ZoneTest {
 
     @Test
     public void testZoneCreation() {
-        Zone zone = new Zone();
+        StringZone zone = new StringZone();
 
         Assert.assertEquals(
                 zone.getLowerBound(),
-                createStringCoordinate(Character.toString(CAN_LOWER_BOUND.getValue())));
+                CoordinateFactory.newStringCoordinate(CAN_LOWER_BOUND.getValue()));
 
         Assert.assertEquals(
                 zone.getUpperBound(),
-                createStringCoordinate(Character.toString(CAN_UPPER_BOUND.getValue())));
+                CoordinateFactory.newStringCoordinate(CAN_UPPER_BOUND.getValue()));
     }
 
     @Test
     public void testZoneEquality() {
-        Zone a = new Zone();
-        Zone b = new Zone();
+        StringZone a = new StringZone();
+        StringZone b = new StringZone();
 
         Assert.assertEquals(a, b);
     }
 
     @Test
     public void testSplitAndMerge() {
-        Zone z =
-                new Zone(new UnicodeZoneView(
-                        createStringCoordinate("a"),
-                        createStringCoordinate("z")), new NumericZoneView(
-                        createDoubleCoordinate(0.0),
-                        createDoubleCoordinate(1.0)));
+        StringZone z =
+                new StringZone(
+                        CoordinateFactory.newStringCoordinate("a"),
+                        CoordinateFactory.newStringCoordinate("z"));
 
-        HomogenousPair<Zone> newZones =
+        HomogenousPair<UnicodeZone<StringElement>> newZones =
                 z.split(CanOverlay.getRandomDimension());
 
-        Zone mergedZone = newZones.getFirst().merge(newZones.getSecond());
+        Zone<StringElement> mergedZone =
+                newZones.getFirst().merge(newZones.getSecond());
 
         Assert.assertEquals(z, mergedZone);
     }

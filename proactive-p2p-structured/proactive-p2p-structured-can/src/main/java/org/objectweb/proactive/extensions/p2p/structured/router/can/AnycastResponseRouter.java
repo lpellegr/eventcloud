@@ -20,7 +20,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRouting
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +30,15 @@ import org.slf4j.LoggerFactory;
  * Router used to route {@link AnycastResponse}s. The path followed by the
  * response is the reverse path of the initial path followed by the request.
  * 
- * @author lpellegr
- * 
  * @param <T>
  *            the response type to route.
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
+ * @author lpellegr
  */
-public class AnycastResponseRouter<T extends AnycastResponse> extends
-        Router<AnycastResponse, StringCoordinate> {
+public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Element>
+        extends Router<AnycastResponse<E>, Coordinate<E>> {
 
     private static final Logger logger =
             LoggerFactory.getLogger(AnycastResponseRouter.class);
@@ -51,10 +54,13 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
      * {@inheritDoc}
      */
     @Override
-    public void makeDecision(StructuredOverlay overlay, AnycastResponse response) {
+    public void makeDecision(StructuredOverlay overlay,
+                             AnycastResponse<E> response) {
         ResponseEntry entry = overlay.getResponseEntry(response.getId());
 
-        AnycastResponse entryResponse = (AnycastResponse) entry.getResponse();
+        @SuppressWarnings("unchecked")
+        AnycastResponse<E> entryResponse =
+                (AnycastResponse<E>) entry.getResponse();
         entryResponse = AnycastResponse.merge(entryResponse, response);
         entry.setResponse(entryResponse);
         entry.incrementResponsesCount(1);
@@ -92,7 +98,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
      * {@inheritDoc}
      */
     @Override
-    protected void handle(StructuredOverlay overlay, AnycastResponse response) {
+    protected void handle(StructuredOverlay overlay, AnycastResponse<E> response) {
         // the number of outbound hop count is equal to the number
         // of inbound hop count because the message follows the same
         // path in the forward and backward direction.
@@ -109,7 +115,7 @@ public class AnycastResponseRouter<T extends AnycastResponse> extends
      * {@inheritDoc}
      */
     @Override
-    protected void route(StructuredOverlay overlay, AnycastResponse response) {
+    protected void route(StructuredOverlay overlay, AnycastResponse<E> response) {
         AnycastRoutingEntry entry =
                 response.getAnycastRoutingList().removeLast();
         response.incrementHopCount(1);

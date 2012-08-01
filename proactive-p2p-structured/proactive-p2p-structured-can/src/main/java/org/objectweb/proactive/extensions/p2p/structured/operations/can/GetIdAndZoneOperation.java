@@ -19,14 +19,19 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * Operation used to retrieve the identifier and the zone of the peer which
  * handles the message.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class GetIdAndZoneOperation implements SynchronousOperation {
+public class GetIdAndZoneOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,9 +46,10 @@ public class GetIdAndZoneOperation implements SynchronousOperation {
      *            the overlay which handles the message.
      */
     @Override
-    public GetIdAndZoneResponseOperation handle(StructuredOverlay overlay) {
-        return new GetIdAndZoneResponseOperation(
-                overlay.getId(), ((CanOverlay) overlay).getZone());
+    @SuppressWarnings("unchecked")
+    public GetIdAndZoneResponseOperation<E> handle(StructuredOverlay overlay) {
+        return new GetIdAndZoneResponseOperation<E>(
+                overlay.getId(), ((CanOverlay<E>) overlay).getZone());
     }
 
 }

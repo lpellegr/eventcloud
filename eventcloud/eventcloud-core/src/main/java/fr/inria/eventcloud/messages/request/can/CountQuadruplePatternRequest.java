@@ -19,7 +19,7 @@ package fr.inria.eventcloud.messages.request.can;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 import com.hp.hpl.jena.graph.Node;
 
@@ -29,6 +29,7 @@ import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * Retrieves the number of quadruples that match the {@link QuadruplePattern}
@@ -48,7 +49,7 @@ public class CountQuadruplePatternRequest extends
     public CountQuadruplePatternRequest(QuadruplePattern quadruplePattern) {
         super(
                 quadruplePattern,
-                new ResponseProvider<CountQuadruplePatternResponse, StringCoordinate>() {
+                new ResponseProvider<CountQuadruplePatternResponse, Coordinate<SemanticElement>>() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
@@ -62,8 +63,8 @@ public class CountQuadruplePatternRequest extends
      * {@inheritDoc}
      */
     @Override
-    public Long onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                               AnycastRequest request,
+    public Long onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
+                                               AnycastRequest<SemanticElement> request,
                                                QuadruplePattern quadruplePattern) {
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);

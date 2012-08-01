@@ -23,18 +23,23 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * Operation used in order to update a {@link Zone} of a neighbor cached in the
  * {@link NeighborTable} of the peer which handles it.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class UpdateNeighborOperation implements SynchronousOperation {
+public class UpdateNeighborOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
-    private final NeighborEntry entry;
+    private final NeighborEntry<E> entry;
 
     private final byte dimension;
 
@@ -54,7 +59,7 @@ public class UpdateNeighborOperation implements SynchronousOperation {
      * @param direction
      *            the direction on which the neighbor to update is.
      */
-    public UpdateNeighborOperation(NeighborEntry entry, byte dimension,
+    public UpdateNeighborOperation(NeighborEntry<E> entry, byte dimension,
             byte direction) {
         this.entry = entry;
         this.dimension = dimension;
@@ -68,8 +73,9 @@ public class UpdateNeighborOperation implements SynchronousOperation {
      *            the overlay which handles the message.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        ((CanOverlay) overlay).getNeighborTable().get(
+        ((CanOverlay<E>) overlay).getNeighborTable().get(
                 this.dimension, this.direction).replace(
                 this.entry.getId(), this.entry);
 

@@ -18,6 +18,8 @@ package org.objectweb.proactive.extensions.p2p.structured.validator.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
@@ -28,11 +30,11 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
  * 
  * @author lpellegr
  * 
- * @param <K>
- *            the key type.
+ * @param <E>
+ *            the {@link Element}s type manipulated.
  */
-public abstract class AnycastConstraintsValidator<K> extends
-        ConstraintsValidator<K> {
+public abstract class AnycastConstraintsValidator<E extends Element> extends
+        ConstraintsValidator<Coordinate<E>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,7 +45,7 @@ public abstract class AnycastConstraintsValidator<K> extends
      * @param key
      *            the key to reach.
      */
-    public AnycastConstraintsValidator(K key) {
+    public AnycastConstraintsValidator(Coordinate<E> key) {
         super(key);
     }
 
@@ -56,6 +58,6 @@ public abstract class AnycastConstraintsValidator<K> extends
      * @return {@code true} if the zone contains the key, {@code false}
      *         otherwise.
      */
-    public abstract boolean validatesKeyConstraints(Zone zone);
+    public abstract boolean validatesKeyConstraints(Zone<E> zone);
 
 }

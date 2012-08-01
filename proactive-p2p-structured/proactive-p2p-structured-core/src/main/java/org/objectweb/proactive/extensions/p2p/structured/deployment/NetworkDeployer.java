@@ -20,9 +20,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
@@ -30,7 +27,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Observable;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +46,7 @@ public abstract class NetworkDeployer extends
     private static final Logger log =
             LoggerFactory.getLogger(NetworkDeployer.class);
 
-    private static final int INJECTION_THRESHOLD = 10;
+    // private static final int INJECTION_THRESHOLD = 10;
 
     protected final DeploymentDescriptor descriptor;
 
@@ -93,6 +89,7 @@ public abstract class NetworkDeployer extends
                 case UNDEPLOYING:
                     throw new IllegalStateException(
                             "A call to undeploy is being handled");
+                default:
             }
         }
 
@@ -180,35 +177,35 @@ public abstract class NetworkDeployer extends
         this.notifyPeersInjected();
     }
 
-    private void injectPeersInParallel(int nbPeers) {
-        ExecutorService threadsPool =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
-        final CountDownLatch doneSignal = new CountDownLatch(nbPeers);
-
-        for (int i = 0; i < nbPeers; i++) {
-            threadsPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        NetworkDeployer.this.getRandomTracker().inject(
-                                NetworkDeployer.this.createPeer());
-                    } catch (NetworkAlreadyJoinedException e) {
-                        e.printStackTrace();
-                    } finally {
-                        doneSignal.countDown();
-                    }
-                }
-            });
-        }
-
-        try {
-            doneSignal.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } finally {
-            threadsPool.shutdownNow();
-        }
-    }
+    // private void injectPeersInParallel(int nbPeers) {
+    // ExecutorService threadsPool =
+    // Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
+    // final CountDownLatch doneSignal = new CountDownLatch(nbPeers);
+    //
+    // for (int i = 0; i < nbPeers; i++) {
+    // threadsPool.execute(new Runnable() {
+    // @Override
+    // public void run() {
+    // try {
+    // NetworkDeployer.this.getRandomTracker().inject(
+    // NetworkDeployer.this.createPeer());
+    // } catch (NetworkAlreadyJoinedException e) {
+    // e.printStackTrace();
+    // } finally {
+    // doneSignal.countDown();
+    // }
+    // }
+    // });
+    // }
+    //
+    // try {
+    // doneSignal.await();
+    // } catch (InterruptedException e) {
+    // Thread.currentThread().interrupt();
+    // } finally {
+    // threadsPool.shutdownNow();
+    // }
+    // }
 
     public void undeploy() {
         if (!this.state.compareAndSet(
@@ -223,6 +220,7 @@ public abstract class NetworkDeployer extends
                 case UNDEPLOYING:
                     throw new IllegalStateException(
                             "A call to undeploy is already being handled");
+                default:
             }
         }
 

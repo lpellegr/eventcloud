@@ -22,7 +22,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Reques
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
 
@@ -32,9 +33,12 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRespo
  * implementation has to override {@link #mergeAttributes(AnycastResponse)} if
  * it is supposed to sent back a response.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class AnycastResponse extends Response<StringCoordinate> {
+public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,13 +55,13 @@ public class AnycastResponse extends Response<StringCoordinate> {
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(Request<StringCoordinate> request,
+    public void setAttributes(Request<Coordinate<E>> request,
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 
-        if (!((AnycastRequest) request).isAlreadyReceived()) {
+        if (!((AnycastRequest<E>) request).isAlreadyReceived()) {
             this.anycastRoutingList =
-                    ((AnycastRequest) request).getAnycastRoutingList();
+                    ((AnycastRequest<E>) request).getAnycastRoutingList();
             this.constraintsValidator = request.getConstraintsValidator();
         } else {
             this.isDummy = true;
@@ -101,8 +105,8 @@ public class AnycastResponse extends Response<StringCoordinate> {
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends AnycastResponse, StringCoordinate> getRouter() {
-        return new AnycastResponseRouter<AnycastResponse>();
+    public Router<? extends AnycastResponse<E>, Coordinate<E>> getRouter() {
+        return new AnycastResponseRouter<AnycastResponse<E>, E>();
     }
 
     /**
@@ -114,7 +118,7 @@ public class AnycastResponse extends Response<StringCoordinate> {
      * @param responseReceived
      *            the response to merge with the current one.
      */
-    public void mergeAttributes(AnycastResponse responseReceived) {
+    public void mergeAttributes(AnycastResponse<E> responseReceived) {
         // to be overridden if necessary
     }
 
@@ -135,8 +139,8 @@ public class AnycastResponse extends Response<StringCoordinate> {
      * 
      * @see #mergeAttributes(AnycastResponse)
      */
-    public static AnycastResponse merge(AnycastResponse localResponse,
-                                        AnycastResponse responseReceived) {
+    public static <E extends Element> AnycastResponse<E> merge(AnycastResponse<E> localResponse,
+                                                               AnycastResponse<E> responseReceived) {
         if (responseReceived.isDummy) {
             return localResponse;
         }

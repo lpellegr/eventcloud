@@ -20,13 +20,14 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Reques
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * A ContainsQuadrupleRequest is a request that is used to know if there is a
@@ -40,33 +41,35 @@ public class ContainsQuadrupleRequest extends QuadrupleRequest {
     private static final long serialVersionUID = 1L;
 
     public ContainsQuadrupleRequest(final Quadruple quad) {
-        super(quad, new ResponseProvider<ForwardResponse, StringCoordinate>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public ForwardResponse get() {
-                return new BooleanForwardResponse() {
+        super(
+                quad,
+                new ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>>() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public void setAttributes(Request<StringCoordinate> request,
-                                              StructuredOverlay overlay) {
-                        super.setAttributes(request, overlay);
+                    public ForwardResponse<SemanticElement> get() {
+                        return new BooleanForwardResponse() {
+                            private static final long serialVersionUID = 1L;
 
-                        TransactionalDatasetGraph txnGraph =
-                                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+                            @Override
+                            public void setAttributes(Request<Coordinate<SemanticElement>> request,
+                                                      StructuredOverlay overlay) {
+                                super.setAttributes(request, overlay);
 
-                        try {
-                            this.setResult(txnGraph.contains(quad));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        } finally {
-                            txnGraph.end();
-                        }
+                                TransactionalDatasetGraph txnGraph =
+                                        ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+
+                                try {
+                                    this.setResult(txnGraph.contains(quad));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                } finally {
+                                    txnGraph.end();
+                                }
+                            }
+                        };
                     }
-                };
-            }
-        });
+                });
     }
 
 }

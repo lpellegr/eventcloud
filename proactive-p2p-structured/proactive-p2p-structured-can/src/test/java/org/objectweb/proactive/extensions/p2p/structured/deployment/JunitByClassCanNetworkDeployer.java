@@ -35,20 +35,6 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 public class JunitByClassCanNetworkDeployer extends JunitByClassNetworkDeployer {
 
     /**
-     * Creates a Junit deployer with the given number of trackers and peers. It
-     * uses a {@link CanDeploymentDescriptor}.
-     * 
-     * @param nbTrackers
-     *            the number of trackers to instantiate.
-     * @param nbPeers
-     *            the number of peers to deploy.
-     */
-    public JunitByClassCanNetworkDeployer(int nbTrackers, int nbPeers) {
-        super(new CanNetworkDeployer(new CanDeploymentDescriptor()),
-                nbTrackers, nbPeers);
-    }
-
-    /**
      * Creates a Junit deployer with the specified {@code deploymentDescriptor}
      * and the given number of trackers and peers.
      * 

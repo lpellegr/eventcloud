@@ -17,27 +17,31 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * The JoinInformation class is used to store temporary data that are compute on
  * the landmark peer which is joined. These information are computed during the
  * join introduce phase and will be used during the join welcome phase.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class JoinInformation {
+public class JoinInformation<E extends Element> {
 
     private final byte dimension;
 
     private final byte direction;
 
     // zone of the peer maintaining the JoinInformation object
-    private final Zone zone;
+    private final Zone<E> zone;
 
-    private final NeighborEntry entry;
+    private final NeighborEntry<E> entry;
 
-    public JoinInformation(byte dimension, byte direction, Zone zone,
-            NeighborEntry entry) {
+    public JoinInformation(byte dimension, byte direction, Zone<E> zone,
+            NeighborEntry<E> entry) {
         super();
         this.dimension = dimension;
         this.direction = direction;
@@ -53,11 +57,11 @@ public class JoinInformation {
         return this.direction;
     }
 
-    public Zone getZone() {
+    public Zone<E> getZone() {
         return this.zone;
     }
 
-    public NeighborEntry getEntry() {
+    public NeighborEntry<E> getEntry() {
         return this.entry;
     }
 

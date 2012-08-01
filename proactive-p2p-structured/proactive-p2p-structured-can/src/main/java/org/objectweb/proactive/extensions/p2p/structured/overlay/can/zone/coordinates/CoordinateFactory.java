@@ -17,11 +17,10 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.DoubleElement;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
- * Factory class for creating {@code Coordinate}s.
+ * Creates coordinates.
  * 
  * @author lpellegr
  */
@@ -32,23 +31,15 @@ public final class CoordinateFactory {
     }
 
     /**
-     * Creates a new coordinate containing {@link DoubleElement}s initialized
-     * with the specified {@code value}.
+     * Creates a new coordinate whose all the {@link StringElement}s are
+     * {@code null}.
      * 
-     * @param value
-     *            the default value used to initialize each element.
-     * 
-     * @return a new coordinate containing
-     *         {@link P2PStructuredProperties#CAN_NB_DIMENSIONS}
-     *         {@link DoubleElement}s.
+     * @return a new coordinate whose all the {@link StringElement}s are
+     *         {@code null}.
      */
-    public static DoubleCoordinate createDoubleCoordinate(double value) {
-        DoubleElement[] elts =
-                new DoubleElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
-        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            elts[i] = new DoubleElement(value);
-        }
-        return new DoubleCoordinate(elts);
+    public static Coordinate<StringElement> newStringCoordinate() {
+        return new Coordinate<StringElement>(
+                new StringElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()]);
     }
 
     /**
@@ -62,7 +53,7 @@ public final class CoordinateFactory {
      *         {@link P2PStructuredProperties#CAN_NB_DIMENSIONS}
      *         {@link StringElement}s.
      */
-    public static StringCoordinate createStringCoordinate(String value) {
+    public static Coordinate<StringElement> newStringCoordinate(String value) {
         StringElement[] elts =
                 new StringElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
 
@@ -70,7 +61,22 @@ public final class CoordinateFactory {
             elts[i] = new StringElement(value);
         }
 
-        return new StringCoordinate(elts);
+        return new Coordinate<StringElement>(elts);
+    }
+
+    /**
+     * Creates a new coordinate containing {@link StringElement}s initialized
+     * with the specified {@code value}.
+     * 
+     * @param value
+     *            the default value used to initialize each element.
+     * 
+     * @return a new coordinate containing
+     *         {@link P2PStructuredProperties#CAN_NB_DIMENSIONS}
+     *         {@link StringElement}s.
+     */
+    public static Coordinate<StringElement> newStringCoordinate(Character value) {
+        return newStringCoordinate(Character.toString(value));
     }
 
 }

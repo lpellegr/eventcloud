@@ -21,16 +21,20 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Reques
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 /**
  * Response associated to {@link ForwardRequest}.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class ForwardResponse extends Response<StringCoordinate> {
+public class ForwardResponse<E extends Element> extends Response<Coordinate<E>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,13 +46,13 @@ public class ForwardResponse extends Response<StringCoordinate> {
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(Request<StringCoordinate> request,
+    public void setAttributes(Request<Coordinate<E>> request,
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 
         super.constraintsValidator =
-                new UnicastConstraintsValidator(
-                        ((ForwardRequest) request).getSenderCoordinate());
+                new UnicastConstraintsValidator<E>(
+                        ((ForwardRequest<E>) request).getSenderCoordinate());
     }
 
     /**
@@ -72,8 +76,8 @@ public class ForwardResponse extends Response<StringCoordinate> {
      * {@inheritDoc}
      */
     @Override
-    public UnicastResponseRouter<ForwardResponse> getRouter() {
-        return new UnicastResponseRouter<ForwardResponse>();
+    public UnicastResponseRouter<ForwardResponse<E>, E> getRouter() {
+        return new UnicastResponseRouter<ForwardResponse<E>, E>();
     }
 
 }

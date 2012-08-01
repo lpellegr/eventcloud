@@ -23,7 +23,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.Reques
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
@@ -32,9 +33,12 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastCo
  * Message used to dispatch a request to all peers validating the specified
  * constraints (i.e. the coordinates to reach).
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  */
-public class AnycastRequest extends Request<StringCoordinate> {
+public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -50,8 +54,7 @@ public class AnycastRequest extends Request<StringCoordinate> {
      * @param validator
      *            the constraints validator to use for checking the constraints.
      */
-    public AnycastRequest(
-            AnycastConstraintsValidator<StringCoordinate> validator) {
+    public AnycastRequest(AnycastConstraintsValidator<E> validator) {
         super(validator, null);
     }
 
@@ -65,8 +68,8 @@ public class AnycastRequest extends Request<StringCoordinate> {
      *            the responseProvider to use when a response has to be created.
      */
     public AnycastRequest(
-            AnycastConstraintsValidator<StringCoordinate> validator,
-            ResponseProvider<? extends AnycastResponse, StringCoordinate> responseProvider) {
+            AnycastConstraintsValidator<E> validator,
+            ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> responseProvider) {
         super(validator, responseProvider);
     }
 
@@ -94,12 +97,12 @@ public class AnycastRequest extends Request<StringCoordinate> {
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends RequestResponseMessage<StringCoordinate>, StringCoordinate> getRouter() {
-        return new AnycastRequestRouter<AnycastRequest>();
+    public Router<? extends RequestResponseMessage<Coordinate<E>>, Coordinate<E>> getRouter() {
+        return new AnycastRequestRouter<AnycastRequest<E>, E>();
     }
 
-    public boolean validatesKeyConstraints(Zone zone) {
-        return ((AnycastConstraintsValidator<StringCoordinate>) super.constraintsValidator).validatesKeyConstraints(zone);
+    public boolean validatesKeyConstraints(Zone<E> zone) {
+        return ((AnycastConstraintsValidator<E>) super.constraintsValidator).validatesKeyConstraints(zone);
     }
 
     /**

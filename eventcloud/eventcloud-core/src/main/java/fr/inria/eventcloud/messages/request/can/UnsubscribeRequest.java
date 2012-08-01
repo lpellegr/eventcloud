@@ -23,6 +23,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.messages.response.can.StatelessQuadruplePatternResponse;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -54,7 +55,7 @@ public class UnsubscribeRequest extends StatelessQuadruplePatternRequest {
      * {@inheritDoc}
      */
     @Override
-    public void onPeerValidatingKeyConstraints(CanOverlay overlay,
+    public void onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
                                                QuadruplePattern quadruplePattern) {
         ((SemanticCanOverlay) overlay).deleteSubscriptions(
                 this.originalSubscriptionId.getValue(),

@@ -19,13 +19,15 @@ package fr.inria.eventcloud.messages.response.can;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 
+import fr.inria.eventcloud.overlay.can.SemanticElement;
+
 /**
  * A response that may be associated to a {@link ForwardRequest}. The response
  * contains a boolean value.
  * 
  * @author lpellegr
  */
-public class BooleanForwardResponse extends ForwardResponse {
+public class BooleanForwardResponse extends ForwardResponse<SemanticElement> {
 
     private static final long serialVersionUID = 1L;
 

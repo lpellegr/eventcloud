@@ -168,6 +168,7 @@ public class SemanticNotificationTranslatorTest {
         return quadruples;
     }
 
+    @SuppressWarnings("unused")
     private static String readFileAsString(String filePath)
             throws java.io.IOException {
         byte[] buffer = new byte[(int) new File(filePath).length()];
@@ -186,6 +187,7 @@ public class SemanticNotificationTranslatorTest {
         return new String(buffer);
     }
 
+    @SuppressWarnings("unused")
     private String convertStreamToString(InputStream is) throws IOException {
         /*BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
@@ -213,7 +215,6 @@ public class SemanticNotificationTranslatorTest {
         } else {
             return "";
         }
-
     }
 
 }

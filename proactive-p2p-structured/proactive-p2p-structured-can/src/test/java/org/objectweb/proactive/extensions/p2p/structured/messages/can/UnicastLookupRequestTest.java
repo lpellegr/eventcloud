@@ -32,8 +32,9 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.L
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
@@ -52,11 +53,11 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private Proxy proxy;
 
-    private StringCoordinate targetLowerBound;
+    private Coordinate<StringElement> targetLowerBound;
 
     public UnicastLookupRequestTest() {
         super(
-                new CanDeploymentDescriptor(
+                new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<CustomCanOverlay>() {
                             private static final long serialVersionUID = 1L;
 
@@ -74,9 +75,8 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
         this.target = super.getPeer(9);
         this.targetLowerBound =
-                CanOperations.getIdAndZoneResponseOperation(this.target)
-                        .getPeerZone()
-                        .getLowerBound();
+                CanOperations.<StringElement> getIdAndZoneResponseOperation(
+                        this.target).getPeerZone().getLowerBound();
 
         this.proxy = Proxies.newProxy(super.getRandomTracker());
     }
@@ -85,9 +85,11 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     public void testUnicastLookupRequestWithResponse()
             throws DispatchException, InterruptedException, ExecutionException {
 
-        LookupResponse response =
-                (LookupResponse) this.proxy.send(new LookupRequest(
-                        this.targetLowerBound), super.getPeer(0));
+        @SuppressWarnings("unchecked")
+        LookupResponse<StringElement> response =
+                (LookupResponse<StringElement>) this.proxy.send(
+                        new LookupRequest<StringElement>(this.targetLowerBound),
+                        super.getPeer(0));
 
         checkResponse(response, this.target);
     }
@@ -123,41 +125,43 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
     }
 
-    private static class CustomCanOverlay extends CanOverlay {
+    private static class CustomCanOverlay extends StringCanOverlay {
 
         private boolean value = false;
 
     }
 
-    private static class SetStateRequest extends ForwardRequest {
+    private static class SetStateRequest extends ForwardRequest<StringElement> {
 
         private static final long serialVersionUID = 1L;
 
-        public SetStateRequest(StringCoordinate coordinateToReach) {
+        public SetStateRequest(Coordinate<StringElement> coordinateToReach) {
             super(coordinateToReach, null);
         }
 
         @Override
-        public Router<ForwardRequest, StringCoordinate> getRouter() {
-            return new UnicastRequestRouter<ForwardRequest>() {
+        public Router<ForwardRequest<StringElement>, Coordinate<StringElement>> getRouter() {
+            return new UnicastRequestRouter<ForwardRequest<StringElement>, StringElement>() {
                 @Override
                 protected void onDestinationReached(StructuredOverlay overlay,
-                                                    ForwardRequest msg) {
+                                                    ForwardRequest<StringElement> msg) {
                     ((CustomCanOverlay) overlay).value = true;
                 }
             };
         }
+
     }
 
-    private static class GetStateRequest extends LookupRequest {
+    private static class GetStateRequest extends LookupRequest<StringElement> {
 
         private static final long serialVersionUID = 1L;
 
         private boolean value;
 
-        public GetStateRequest(StringCoordinate coordinateToReach) {
-            super(coordinateToReach,
-                    new ResponseProvider<GetStateResponse, StringCoordinate>() {
+        public GetStateRequest(Coordinate<StringElement> coordinateToReach) {
+            super(
+                    coordinateToReach,
+                    new ResponseProvider<GetStateResponse, Coordinate<StringElement>>() {
                         private static final long serialVersionUID = 1L;
 
                         @Override
@@ -168,11 +172,11 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<ForwardRequest, StringCoordinate> getRouter() {
-            return new UnicastRequestRouter<ForwardRequest>() {
+        public Router<ForwardRequest<StringElement>, Coordinate<StringElement>> getRouter() {
+            return new UnicastRequestRouter<ForwardRequest<StringElement>, StringElement>() {
                 @Override
                 protected void onDestinationReached(StructuredOverlay overlay,
-                                                    ForwardRequest msg) {
+                                                    ForwardRequest<StringElement> msg) {
                     GetStateRequest.this.value =
                             ((CustomCanOverlay) overlay).value;
                 }
@@ -180,14 +184,14 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
     }
 
-    private static class GetStateResponse extends LookupResponse {
+    private static class GetStateResponse extends LookupResponse<StringElement> {
 
         private static final long serialVersionUID = 1L;
 
         private boolean value;
 
         @Override
-        public void setAttributes(Request<StringCoordinate> request,
+        public void setAttributes(Request<Coordinate<StringElement>> request,
                                   StructuredOverlay overlay) {
             super.setAttributes(request, overlay);
 
@@ -200,7 +204,8 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     }
 
-    private static <T> void checkResponse(LookupResponse response, Peer target) {
+    private static <T> void checkResponse(LookupResponse<StringElement> response,
+                                          Peer target) {
         Assert.assertTrue(response.getLatency() > 0);
         Assert.assertTrue(response.getHopCount() > 0);
         Assert.assertTrue(response.getInboundHopCount() > 0);

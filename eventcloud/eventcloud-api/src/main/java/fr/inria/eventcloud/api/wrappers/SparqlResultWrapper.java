@@ -70,10 +70,9 @@ public abstract class SparqlResultWrapper<T> implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
         return obj instanceof SparqlResultWrapper
-                && this.object.equals(((SparqlResultWrapper<T>) obj).object);
+                && this.object.equals(((SparqlResultWrapper<?>) obj).object);
     }
 
 }

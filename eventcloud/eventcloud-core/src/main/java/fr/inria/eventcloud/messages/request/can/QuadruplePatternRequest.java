@@ -30,6 +30,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponseProvider;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * Retrieves all the {@link Quadruple}s that match the {@link QuadruplePattern}
@@ -54,8 +55,8 @@ public class QuadruplePatternRequest extends
      * {@inheritDoc}
      */
     @Override
-    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                                          AnycastRequest request,
+    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
+                                                          AnycastRequest<SemanticElement> request,
                                                           QuadruplePattern quadruplePattern) {
         List<Quadruple> result = null;
 

@@ -18,11 +18,10 @@ package org.objectweb.proactive.extensions.p2p.structured.validator.can;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 
@@ -33,21 +32,10 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastReque
  * 
  * @author lpellegr
  */
-public final class DefaultAnycastConstraintsValidator extends
-        AnycastConstraintsValidator<StringCoordinate> {
+public class DefaultAnycastConstraintsValidator<E extends StringElement>
+        extends AnycastConstraintsValidator<E> {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Creates a new {@code DefaultAnycastConstraintsValidator} which is a very
-     * permissive constraints validator (i.e. the valitor validates the
-     * constraints on any peer).
-     */
-    public DefaultAnycastConstraintsValidator() {
-        super(
-                new StringCoordinate(
-                        new StringElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()]));
-    }
 
     /**
      * Creates a new {@code DefaultAnycastConstraintsValidator} with the
@@ -56,7 +44,7 @@ public final class DefaultAnycastConstraintsValidator extends
      * @param key
      *            the key to reach.
      */
-    public DefaultAnycastConstraintsValidator(StringCoordinate key) {
+    public DefaultAnycastConstraintsValidator(Coordinate<E> key) {
         super(checkNotNull(key));
     }
 
@@ -64,21 +52,21 @@ public final class DefaultAnycastConstraintsValidator extends
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public final boolean validatesKeyConstraints(StructuredOverlay overlay) {
-        return this.validatesKeyConstraints(((CanOverlay) overlay).getZone());
+        return this.validatesKeyConstraints(((CanOverlay<E>) overlay).getZone());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final boolean validatesKeyConstraints(Zone zone) {
+    public final boolean validatesKeyConstraints(Zone<E> zone) {
         for (byte i = 0; i < super.key.getValue().size(); i++) {
             // if coordinate is null we skip the test
             if (super.key.getValue().getElement(i) != null) {
                 // the specified overlay does not contains the key
-                if (zone.getUnicodeView().containsLexicographically(
-                        i, super.key.getValue().getElement(i)) != 0) {
+                if (zone.contains(i, super.key.getValue().getElement(i)) != 0) {
                     return false;
                 }
             }

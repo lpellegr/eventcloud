@@ -28,6 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import fr.inria.eventcloud.messages.request.can.StatefulQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.StatefulRequestAction;
 import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * Response associated to {@link StatefulQuadruplePatternRequest}.
@@ -107,7 +108,7 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
      */
     @Override
     @SuppressWarnings("unchecked")
-    public void mergeAttributes(AnycastResponse responseReceived) {
+    public void mergeAttributes(AnycastResponse<SemanticElement> responseReceived) {
         super.mergeAttributes(responseReceived);
 
         this.intermediateResults.addAll(((StatefulQuadruplePatternResponse<T>) responseReceived).intermediateResults);

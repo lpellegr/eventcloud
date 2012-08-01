@@ -22,18 +22,23 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * This operation is used to performed the join introduce phase: it consists in
  * retrieving the information (i.e. the zone, the neighbors and the data) the
  * peer which join the network have to set.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  * 
  * @see CanOverlay#join(Peer)
  * @see CanOverlay#handleJoinIntroduceMessage(JoinIntroduceOperation)
  */
-public class JoinIntroduceOperation implements SynchronousOperation {
+public class JoinIntroduceOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
@@ -59,8 +64,9 @@ public class JoinIntroduceOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     @Override
-    public JoinIntroduceResponseOperation handle(StructuredOverlay overlay) {
-        return ((CanOverlay) overlay).handleJoinIntroduceMessage(this);
+    @SuppressWarnings("unchecked")
+    public JoinIntroduceResponseOperation<E> handle(StructuredOverlay overlay) {
+        return ((CanOverlay<E>) overlay).handleJoinIntroduceMessage(this);
     }
 
 }

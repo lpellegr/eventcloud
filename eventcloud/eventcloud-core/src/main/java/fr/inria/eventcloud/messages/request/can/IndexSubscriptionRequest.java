@@ -34,6 +34,7 @@ import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.Subsubscription;
@@ -78,7 +79,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
      * {@inheritDoc}
      */
     @Override
-    public void onPeerValidatingKeyConstraints(final CanOverlay overlay,
+    public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
                                                QuadruplePattern quadruplePattern) {
 
         SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;

@@ -68,13 +68,24 @@ public class P2PStructuredProperties {
      * standard output. The value of this property can be set to:
      * <ul>
      * <li>{@code codepoints} in order to display the code points values by
-     * using the notation</li>
-     * <li>{@code decimal} to see the coordinate as a decimal value.</li>
-     * <li>{@code default} for a standard String representation</li>
+     * using the unicode notation.</li>
+     * <li>{@code default} to see the coordinate as a decimal value.</li>
      * </ul>
      */
     public static final PropertyString CAN_COORDINATE_DISPLAY =
-            new PropertyString("can.coordinate.display", "codepoints");
+            new PropertyString("can.coordinate.display", "default");
+
+    /**
+     * Defines the precision used for the internal representation of string
+     * elements as a decimal value. According to some tests, it is necessary to
+     * specify a precision of {@code 300} to avoid loose of precision with
+     * {@code 1000} splits performed recursively by using the same upper bound.
+     * Otherwise some comparisons between string elements may return equals
+     * instead of greater or lower than. The default value is set to {@code 300}
+     * .
+     */
+    public static final PropertyInteger STRING_ELEMENT_PRECISION =
+            new PropertyInteger("string.element.precision", 300);
 
     public static final PropertyDouble TRACKER_STORAGE_PROBABILITY =
             new PropertyDouble("tracker.storage.probability", 1.0);

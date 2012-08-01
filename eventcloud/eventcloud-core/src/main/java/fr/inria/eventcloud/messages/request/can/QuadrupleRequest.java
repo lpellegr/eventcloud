@@ -20,13 +20,14 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Fo
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * QuadrupleRequest is a request that is used to reach the peer which manages
@@ -35,26 +36,30 @@ import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
  * 
  * @author lpellegr
  */
-public abstract class QuadrupleRequest extends ForwardRequest {
+public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
 
     private static final long serialVersionUID = 1L;
 
     private SerializedValue<Quadruple> quadruple;
 
     public QuadrupleRequest(Quadruple quad) {
-        this(quad, new ResponseProvider<ForwardResponse, StringCoordinate>() {
-            private static final long serialVersionUID = 1L;
+        this(
+                quad,
+                new ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>>() {
+                    private static final long serialVersionUID = 1L;
 
-            @Override
-            public ForwardResponse get() {
-                return new ForwardResponse();
-            }
-        });
+                    @Override
+                    public ForwardResponse<SemanticElement> get() {
+                        return new ForwardResponse<SemanticElement>();
+                    }
+                });
     }
 
-    public QuadrupleRequest(Quadruple quad,
-            ResponseProvider<ForwardResponse, StringCoordinate> responseProvider) {
-        super(SemanticCoordinate.create(quad), responseProvider);
+    public QuadrupleRequest(
+            Quadruple quad,
+            ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>> responseProvider) {
+        super(SemanticCoordinateFactory.newSemanticCoordinate(quad),
+                responseProvider);
         this.quadruple = SerializedValue.create(quad);
     }
 
@@ -66,11 +71,11 @@ public abstract class QuadrupleRequest extends ForwardRequest {
      * {@inheritDoc}
      */
     @Override
-    public Router<ForwardRequest, StringCoordinate> getRouter() {
-        return new UnicastRequestRouter<ForwardRequest>() {
+    public Router<ForwardRequest<SemanticElement>, Coordinate<SemanticElement>> getRouter() {
+        return new UnicastRequestRouter<ForwardRequest<SemanticElement>, SemanticElement>() {
             @Override
             protected void onDestinationReached(StructuredOverlay overlay,
-                                                ForwardRequest msg) {
+                                                ForwardRequest<SemanticElement> msg) {
                 QuadrupleRequest.this.onDestinationReached(
                         overlay, QuadrupleRequest.this.getQuadruple());
             };

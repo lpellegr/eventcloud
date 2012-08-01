@@ -34,6 +34,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponseProvider;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -67,8 +68,8 @@ public class SparqlAtomicRequest extends
      * {@inheritDoc}
      */
     @Override
-    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay overlay,
-                                                          AnycastRequest request,
+    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
+                                                          AnycastRequest<SemanticElement> request,
                                                           fr.inria.eventcloud.api.QuadruplePattern quadruplePattern) {
         TransactionalDatasetGraph txnGraph =
                 ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);

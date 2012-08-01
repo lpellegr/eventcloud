@@ -19,10 +19,12 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
  * This class tests some properties of the Content-Addressable Network protocol.
@@ -32,20 +34,26 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 public class CanTest extends JunitByClassCanNetworkDeployer {
 
     public CanTest() {
-        super(new CanDeploymentDescriptor(), 1, 10);
+        super(new StringCanDeploymentDescriptor(), 1, 10);
     }
 
     @Test
     public void testNeighborhood() {
         for (Peer peer : super.getRandomTracker().getPeers()) {
-            NeighborTable table = CanOperations.getNeighborTable(peer);
+
+            NeighborTable<StringElement> table =
+                    CanOperations.getNeighborTable(peer);
+
             for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
                 for (byte dir = 0; dir < 2; dir++) {
-                    for (NeighborEntry entry : table.get(dim, dir).values()) {
-                        Assert.assertTrue(CanOperations.getIdAndZoneResponseOperation(
-                                peer)
-                                .getPeerZone()
-                                .neighbors(entry.getZone()) != -1);
+                    for (NeighborEntry<StringElement> entry : table.get(
+                            dim, dir).values()) {
+                        Zone<StringElement> zone =
+                                CanOperations.<StringElement> getIdAndZoneResponseOperation(
+                                        peer)
+                                        .getPeerZone();
+
+                        Assert.assertTrue(zone.neighbors(entry.getZone()) != -1);
                     }
                 }
             }

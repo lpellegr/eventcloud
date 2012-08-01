@@ -20,8 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
  * Test cases for {@link NeighborTable}.
@@ -31,16 +32,19 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClass
 public class NeighborTableTest extends JunitByClassCanNetworkDeployer {
 
     public NeighborTableTest() {
-        super(new CanDeploymentDescriptor(), 1, 2);
+        super(new StringCanDeploymentDescriptor(), 1, 2);
     }
 
     @Test
     public void testContains() {
-        NeighborTable neighborTable = new NeighborTable();
+        NeighborTable<StringElement> neighborTable =
+                new NeighborTable<StringElement>();
         neighborTable.add(
-                new NeighborEntry(super.getPeer(0)), (byte) 0, (byte) 1);
+                new NeighborEntry<StringElement>(super.getPeer(0)), (byte) 0,
+                (byte) 1);
         neighborTable.add(
-                new NeighborEntry(super.getPeer(1)), (byte) 0, (byte) 0);
+                new NeighborEntry<StringElement>(super.getPeer(1)), (byte) 0,
+                (byte) 0);
 
         assertTrue(neighborTable.contains(
                 super.getPeer(0).getId(), (byte) 0, (byte) 1));
@@ -50,18 +54,22 @@ public class NeighborTableTest extends JunitByClassCanNetworkDeployer {
 
     @Test
     public void testAddAll() {
-        NeighborTable neighborTable = new NeighborTable();
+        NeighborTable<StringElement> neighborTable =
+                new NeighborTable<StringElement>();
         neighborTable.add(
-                new NeighborEntry(super.getPeer(0)), (byte) 0, (byte) 1);
+                new NeighborEntry<StringElement>(super.getPeer(0)), (byte) 0,
+                (byte) 1);
         neighborTable.add(
-                new NeighborEntry(super.getPeer(1)), (byte) 0, (byte) 0);
+                new NeighborEntry<StringElement>(super.getPeer(1)), (byte) 0,
+                (byte) 0);
 
         assertTrue(neighborTable.contains(
                 super.getPeer(0).getId(), (byte) 0, (byte) 1));
         assertTrue(neighborTable.contains(
                 super.getPeer(1).getId(), (byte) 0, (byte) 0));
 
-        NeighborTable neighborTable2 = new NeighborTable();
+        NeighborTable<StringElement> neighborTable2 =
+                new NeighborTable<StringElement>();
         neighborTable2.addAll(neighborTable);
 
         assertEquals(neighborTable.size(), neighborTable2.size());

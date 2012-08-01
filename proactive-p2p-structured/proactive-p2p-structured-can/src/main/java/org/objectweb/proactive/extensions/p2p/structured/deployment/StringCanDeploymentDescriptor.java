@@ -17,33 +17,33 @@
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
- * This class defines a deployment descriptor that is supposed to be used with a
- * {@link CanNetworkDeployer}.
- * 
- * @param <E>
- *            the {@link Element}s type manipulated.
+ * {@link CanDeploymentDescriptor} semiskilled for {@link StringElement}s.
  * 
  * @author lpellegr
  */
-public class CanDeploymentDescriptor<E extends Element> extends
-        DeploymentDescriptor {
+public class StringCanDeploymentDescriptor extends
+        CanDeploymentDescriptor<StringElement> {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a new {@link CanDeploymentDescriptor} with the specified
-     * {@code overlayProvider}.
-     * 
-     * @param overlayProvider
-     *            the overlay provider to use.
+     * Creates a new {@link CanDeploymentDescriptor} by using a
+     * {@link CanOverlay} provider.
      */
-    public CanDeploymentDescriptor(
-            SerializableProvider<? extends CanOverlay<E>> overlayProvider) {
-        super(overlayProvider);
+    public StringCanDeploymentDescriptor() {
+        super(new SerializableProvider<StringCanOverlay>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public StringCanOverlay get() {
+                return new StringCanOverlay();
+            }
+        });
     }
 
 }

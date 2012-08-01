@@ -21,6 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * This operation is used to performed the join welcome phase: it consists to
@@ -28,12 +29,16 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
  * been received and set. Therefore, it is time to the landmark node to update
  * its information.
  * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
+ * 
  * @author lpellegr
  * 
  * @see CanOverlay#join(Peer)
  * @see CanOverlay#handleJoinWelcomeMessage(JoinWelcomeOperation)
  */
-public class JoinWelcomeOperation implements SynchronousOperation {
+public class JoinWelcomeOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,8 +50,9 @@ public class JoinWelcomeOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        return ((CanOverlay) overlay).handleJoinWelcomeMessage(this);
+        return ((CanOverlay<E>) overlay).handleJoinWelcomeMessage(this);
     }
 
 }

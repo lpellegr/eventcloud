@@ -21,22 +21,27 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousO
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * This operation is used to insert a {@link NeighborEntry} at the specified
- * <code>dimension</code> and <code>direction</code> of the peer receiving the
+ * {@code dimension} and {@code direction} from the peer that receives the
  * message.
+ * 
+ * @param <E>
+ *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */
-public class InsertNeighborOperation implements SynchronousOperation {
+public class InsertNeighborOperation<E extends Element> implements
+        SynchronousOperation {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * The neighbor peer to remove.
      */
-    private final NeighborEntry entry;
+    private final NeighborEntry<E> entry;
 
     /**
      * The dimension of the neighbor to remove.
@@ -58,14 +63,14 @@ public class InsertNeighborOperation implements SynchronousOperation {
      * @param direction
      *            the direction of the neighbor to remove
      */
-    public InsertNeighborOperation(NeighborEntry neighborEntry, byte dimension,
-            byte direction) {
+    public InsertNeighborOperation(NeighborEntry<E> neighborEntry,
+            byte dimension, byte direction) {
         this.entry = neighborEntry;
         this.dimension = dimension;
         this.direction = direction;
     }
 
-    public NeighborEntry getEntry() {
+    public NeighborEntry<E> getEntry() {
         return this.entry;
     }
 
@@ -91,8 +96,9 @@ public class InsertNeighborOperation implements SynchronousOperation {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        ((CanOverlay) overlay).getNeighborTable().get(
+        ((CanOverlay<E>) overlay).getNeighborTable().get(
                 this.dimension, this.direction).put(
                 this.entry.getId(), this.entry);
         return new BooleanResponseOperation(true);
