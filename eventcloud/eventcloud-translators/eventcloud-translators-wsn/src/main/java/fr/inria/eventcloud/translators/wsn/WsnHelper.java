@@ -25,6 +25,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.apache.cxf.wsn.util.WSNHelper;
+import org.apache.xerces.dom.ElementNSImpl;
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
@@ -32,8 +33,10 @@ import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
+import org.oasis_open.docs.wsn.b_2.Unsubscribe;
 
 import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
@@ -81,10 +84,33 @@ public class WsnHelper {
 
     /**
      * Creates a {@link SubscribeResponse} with the specified subscription
+     * reference address and the specified {@link SubscriptionId subscription
+     * identifier}.
+     * 
+     * @param subscriptionId
+     *            the {@link SubscriptionId subscription identifier}.
+     * @param subscriptionReferenceAddress
+     *            the subscription reference address.
+     * 
+     * @return a {@link SubscribeResponse} with the specified subscription
+     *         reference address and the specified {@link SubscriptionId
+     *         subscription identifier}.
+     */
+    public static SubscribeResponse createSubscribeResponse(SubscriptionId subscriptionId,
+                                                            String subscriptionReferenceAddress) {
+        SubscribeResponse subscribeResponse =
+                createSubscribeResponse(subscriptionReferenceAddress);
+        subscribeResponse.getAny().add(createJaxbElement(subscriptionId));
+        return subscribeResponse;
+    }
+
+    /**
+     * Creates a {@link SubscribeResponse} with the specified subscription
      * reference address.
      * 
      * @param subscriptionReferenceAddress
      *            the subscription reference address.
+     * 
      * @return a {@link SubscribeResponse} with the specified subscription
      *         reference address.
      */
@@ -92,6 +118,98 @@ public class WsnHelper {
         SubscribeResponse subscribeResponse = new SubscribeResponse();
         subscribeResponse.setSubscriptionReference(WSNHelper.createWSA(subscriptionReferenceAddress));
         return subscribeResponse;
+    }
+
+    /**
+     * Returns the {@link SubscriptionId subscription identifier} contained into
+     * the specified {@link SubscribeResponse}.
+     * 
+     * @param subscribeResponse
+     *            the {@link SubscribeResponse} containing the
+     *            {@link SubscriptionId subscription identifier}.
+     * 
+     * @return the {@link SubscriptionId subscription identifier} contained into
+     *         the specified {@link SubscribeResponse}.
+     */
+    public static SubscriptionId getSubcriptionId(SubscribeResponse subscribeResponse) {
+        if (subscribeResponse.getAny().size() > 0) {
+            return getSubcriptionId(subscribeResponse.getAny().get(0));
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Creates an {@link Unsubscribe unsubscribe request} with the specified
+     * {@link SubscriptionId subscription identifier}.
+     * 
+     * @param subscriptionId
+     *            the {@link SubscriptionId subscription identifier}.
+     * 
+     * @return an {@link Unsubscribe unsubscribe request} with the specified
+     *         {@link SubscriptionId subscription identifier}.
+     */
+    public static Unsubscribe createUnsubscribeRequest(SubscriptionId subscriptionId) {
+        Unsubscribe unsubscribeRequest = new Unsubscribe();
+        unsubscribeRequest.getAny().add(createJaxbElement(subscriptionId));
+        return unsubscribeRequest;
+    }
+
+    /**
+     * Returns the {@link SubscriptionId subscription identifier} contained into
+     * the specified {@link Unsubscribe unsubscribe request}.
+     * 
+     * @param unsubscribeRequest
+     *            the {@link Unsubscribe unsubscribe request} containing the
+     *            {@link SubscriptionId subscription identifier}.
+     * 
+     * @return the {@link SubscriptionId subscription identifier} contained into
+     *         the specified {@link Unsubscribe unsubscribe request}.
+     */
+    public static SubscriptionId getSubcriptionId(Unsubscribe unsubscribeRequest) {
+        if (unsubscribeRequest.getAny().size() > 0) {
+            return getSubcriptionId(unsubscribeRequest.getAny().get(0));
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Creates a {@link JAXBElement} with the specified {@link SubscriptionId
+     * subscription identifier}.
+     * 
+     * @param subscriptionId
+     *            the {@link SubscriptionId subscription identifier}.
+     * 
+     * @return a {@link JAXBElement} with the specified {@link SubscriptionId
+     *         subscription identifier}.
+     */
+    public static JAXBElement<String> createJaxbElement(SubscriptionId subscriptionId) {
+        return new JAXBElement<String>(
+                new QName("http://evencloud.inria.fr", "SubscriptionId"),
+                String.class, subscriptionId.toString());
+    }
+
+    /**
+     * Returns the {@link SubscriptionId subscription identifier} contained into
+     * the specified object.
+     * 
+     * @param any
+     *            the object containing the {@link SubscriptionId subscription
+     *            identifier}.
+     * 
+     * @return the {@link SubscriptionId subscription identifier} contained into
+     *         the specified object.
+     */
+    @SuppressWarnings("unchecked")
+    public static SubscriptionId getSubcriptionId(Object any) {
+        if (any instanceof JAXBElement<?>) {
+            return SubscriptionId.parseSubscriptionId(((JAXBElement<String>) any).getValue());
+        } else if (any instanceof ElementNSImpl) {
+            return SubscriptionId.parseSubscriptionId(((ElementNSImpl) any).getTextContent());
+        } else {
+            return null;
+        }
     }
 
     /**

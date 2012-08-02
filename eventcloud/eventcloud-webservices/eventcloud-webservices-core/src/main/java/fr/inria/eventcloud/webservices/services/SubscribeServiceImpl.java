@@ -19,14 +19,16 @@ package fr.inria.eventcloud.webservices.services;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jws.WebService;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
+import org.oasis_open.docs.wsn.b_2.Renew;
+import org.oasis_open.docs.wsn.b_2.RenewResponse;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
-import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
+import org.oasis_open.docs.wsn.b_2.Unsubscribe;
+import org.oasis_open.docs.wsn.b_2.UnsubscribeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,27 +43,27 @@ import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
 import fr.inria.eventcloud.webservices.WsEventNotificationListener;
+import fr.inria.eventcloud.webservices.api.SubscribeServiceApi;
 
 /**
- * Defines a subscribe web service as defined by the WS-Notification
- * specification. All the calls to the subscribe request will be translated and
- * redirected to a {@link SubscribeProxy} in order to be treated into an Event
- * Cloud.
+ * SubscribeServiceImpl is a concrete implementation of
+ * {@link SubscribeServiceApi}. All the calls to the subscribe request will be
+ * translated and redirected to a {@link SubscribeProxy} in order to be treated
+ * into an Event Cloud.
  * 
  * @author lpellegr
  */
-@WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", name = "EventCloudSubscribePortType")
 public class SubscribeServiceImpl extends
         EventCloudTranslatableProxyService<SubscribeApi> implements
-        NotificationProducer {
+        SubscribeServiceApi {
 
     private final Map<SubscriptionId, String> subscribers;
 
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeServiceImpl.class);
 
-    public SubscribeServiceImpl(String registryUrl, String eventCloudIdUrl) {
-        super(registryUrl, eventCloudIdUrl);
+    public SubscribeServiceImpl(String registryUrl, String streamUrl) {
+        super(registryUrl, streamUrl);
         this.subscribers = new HashMap<SubscriptionId, String>();
     }
 
@@ -111,7 +113,8 @@ public class SubscribeServiceImpl extends
                             subscription, new WsEventNotificationListener(
                                     super.streamUrl, subscriberWsEndpointUrl));
 
-                    WsnHelper.createSubscribeResponse(subscriberWsEndpointUrl);
+                    return WsnHelper.createSubscribeResponse(
+                            subscription.getId(), subscriberWsEndpointUrl);
                 } catch (TranslationException e) {
                     log.error("Translation error:");
                     logAndThrowIllegalArgumentException(e.getMessage());
@@ -124,6 +127,23 @@ public class SubscribeServiceImpl extends
         }
 
         return WsnHelper.createSubscribeResponse("http://eventcloud.inria.fr/notification:NotificationService@Endpoint");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RenewResponse renew(Renew renewRequest) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UnsubscribeResponse unsubscribe(Unsubscribe unsubscribeRequest) {
+        super.proxy.unsubscribe(WsnHelper.getSubcriptionId(unsubscribeRequest));
+        return new UnsubscribeResponse();
     }
 
     /**

@@ -16,9 +16,9 @@
  **/
 package fr.inria.eventcloud.webservices.monitoring;
 
-import java.util.ArrayList;
 import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -46,6 +46,7 @@ import easybox.petalslink.com.esrawreport._1.EJaxbReportListType;
 import easybox.petalslink.com.esrawreport._1.EJaxbReportTimeStampType;
 import easybox.petalslink.com.esrawreport._1.EJaxbReportType;
 import easybox.petalslink.com.esrawreport._1.ObjectFactory;
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.monitoring.ProxyMonitoringActions;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
@@ -95,7 +96,7 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
                         }
                     });
 
-    private List<String> consumerEndpoints;
+    private Map<SubscriptionId, String> consumerEndpoints;
 
     private ExecutorService cachedThreadPool;
 
@@ -108,16 +109,17 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
      */
     @Override
     public void initComponentActivity(Body body) {
-        this.consumerEndpoints = new ArrayList<String>();
+        this.consumerEndpoints = new HashMap<SubscriptionId, String>();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean enableInputOutputMonitoring(String consumerEndpoint) {
-        if (!this.consumerEndpoints.contains(consumerEndpoint)) {
-            this.consumerEndpoints.add(consumerEndpoint);
+    public boolean enableInputOutputMonitoring(SubscriptionId subscriptionId,
+                                               String consumerEndpoint) {
+        if (!this.consumerEndpoints.containsValue(consumerEndpoint)) {
+            this.consumerEndpoints.put(subscriptionId, consumerEndpoint);
             return true;
         }
 
@@ -128,9 +130,9 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
      * {@inheritDoc}
      */
     @Override
-    public boolean disableInputOutputMonitoring(String consumerEndpoint) {
-        if (this.consumerEndpoints.contains(consumerEndpoint)) {
-            this.consumerEndpoints.remove(consumerEndpoint);
+    public boolean disableInputOutputMonitoring(SubscriptionId subscriptionId) {
+        if (this.consumerEndpoints.containsKey(subscriptionId)) {
+            this.consumerEndpoints.remove(subscriptionId);
             return true;
         }
 
@@ -152,7 +154,7 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
     public void sendInputOutputMonitoringReport(final String source,
                                                 final String destination,
                                                 final long eventPublicationTimestamp) {
-        for (final String consumerEndpoint : this.consumerEndpoints) {
+        for (final String consumerEndpoint : this.consumerEndpoints.values()) {
             this.getCachedThreadPool().execute(new Runnable() {
 
                 @Override

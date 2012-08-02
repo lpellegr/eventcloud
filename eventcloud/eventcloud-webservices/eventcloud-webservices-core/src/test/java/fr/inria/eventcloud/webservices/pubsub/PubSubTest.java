@@ -30,8 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
-import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
-import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
+import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
@@ -47,11 +46,14 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.webservices.api.PublishServiceApi;
+import fr.inria.eventcloud.webservices.api.SubscribeServiceApi;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
@@ -76,9 +78,9 @@ public class PubSubTest {
 
     private ServiceInformation publishServiceInformation;
 
-    private NotificationProducer subscribeClient;
+    private SubscribeServiceApi subscribeClient;
 
-    private NotificationConsumer publishClient;
+    private PublishServiceApi publishClient;
 
     private SubscriberServiceImpl subscriberService;
 
@@ -113,7 +115,12 @@ public class PubSubTest {
                         this.subscriberWsEndpointUrl, topic);
 
         // Subscribes for any events with topic TaxiUc
-        this.subscribeClient.subscribe(subscribeRequest);
+        SubscribeResponse subscribeResponse =
+                this.subscribeClient.subscribe(subscribeRequest);
+        SubscriptionId subscriptionId =
+                WsnHelper.getSubcriptionId(subscribeResponse);
+
+        log.info("Subscription submitted, ID is " + subscriptionId);
 
         // Creates the notify request
         Notify notifyRequest =
@@ -135,6 +142,18 @@ public class PubSubTest {
         }
 
         log.info("Compound event received!");
+
+        // Unsubscribes
+        this.subscribeClient.unsubscribe(WsnHelper.createUnsubscribeRequest(subscriptionId));
+
+        // Publishes a second event
+        this.publishClient.notify(notifyRequest);
+
+        // Checks that no more events are received
+        synchronized (this.subscriberService.eventsReceived) {
+            this.subscriberService.eventsReceived.wait(4000);
+            Assert.assertTrue(this.subscriberService.eventsReceived.size() == 1);
+        }
     }
 
     @Test(timeout = 180000)
@@ -248,7 +267,7 @@ public class PubSubTest {
         // Clients associated to Web services
         this.subscribeClient =
                 WsClientFactory.createWsClient(
-                        NotificationProducer.class,
+                        SubscribeServiceApi.class,
                         this.subscribeServiceInformation.getServer()
                                 .getEndpoint()
                                 .getEndpointInfo()
@@ -256,7 +275,7 @@ public class PubSubTest {
 
         this.publishClient =
                 WsClientFactory.createWsClient(
-                        NotificationConsumer.class,
+                        PublishServiceApi.class,
                         this.publishServiceInformation.getServer()
                                 .getEndpoint()
                                 .getEndpointInfo()

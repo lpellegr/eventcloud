@@ -47,7 +47,7 @@ import fr.inria.eventcloud.webservices.api.adapters.SparqlSelectResponseAdapter;
  * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudPutGet", portName = "EventCloudPutGetPort", targetNamespace = "http://webservices.eventcloud.inria.fr/", name = "EventCloudPutGetPortType")
+@WebService(serviceName = "EventCloudPutGet", portName = "EventCloudPutGetPort", name = "EventCloudPutGetPortType", targetNamespace = "http://webservices.eventcloud.inria.fr/")
 public interface PutGetWsApi {
 
     /**

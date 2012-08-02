@@ -34,17 +34,17 @@ import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
 
 /**
- * Defines a put/get web service. All the calls to the requests will be
- * redirected to a {@link PutGetProxy} in order to be treated into an Event
- * Cloud.
+ * PutGetServiceImpl is a concrete implementation of {@link PutGetWsApi}. All
+ * the calls to the requests will be redirected to a {@link PutGetProxy} in
+ * order to be treated into an Event Cloud.
  * 
  * @author lpellegr
  */
 public class PutGetServiceImpl extends EventCloudProxyService<PutGetApi>
         implements PutGetWsApi {
 
-    public PutGetServiceImpl(String registryUrl, String eventCloudIdUrl) {
-        super(registryUrl, eventCloudIdUrl);
+    public PutGetServiceImpl(String registryUrl, String streamUrl) {
+        super(registryUrl, streamUrl);
     }
 
     /**

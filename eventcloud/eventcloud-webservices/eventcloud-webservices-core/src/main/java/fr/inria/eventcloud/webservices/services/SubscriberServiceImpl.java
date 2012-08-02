@@ -26,15 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 
 /**
  * Defines a publish web service as defined by the WS-Notification
- * specification. All the calls to the notify request will be translated and
- * redirected to a {@link PublishProxy} in order to be published into an Event
- * Cloud.
+ * specification.
  * 
  * @author lpellegr
  */

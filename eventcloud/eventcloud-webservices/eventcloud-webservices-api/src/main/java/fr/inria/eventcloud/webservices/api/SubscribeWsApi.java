@@ -52,7 +52,7 @@ import fr.inria.eventcloud.webservices.api.adapters.SubscriptionIdAdapter;
  * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2", name = "EventCloudSubscribePortType")
+@WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", name = "EventCloudSubscribePortType", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2")
 @XmlSeeAlso(value = {
         org.oasis_open.docs.wsn.br_2.ObjectFactory.class,
         org.oasis_open.docs.wsrf.rp_2.ObjectFactory.class,
