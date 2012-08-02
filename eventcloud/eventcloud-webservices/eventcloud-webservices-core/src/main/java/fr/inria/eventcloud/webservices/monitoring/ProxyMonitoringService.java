@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.webservices.monitoring;
 
+import fr.inria.eventcloud.api.SubscriptionId;
+
 /**
  * Defines methods for managing the monitoring service for proxies (e.g.
  * enabling/disabling sensors).
@@ -29,6 +31,8 @@ public interface ProxyMonitoringService {
      * to the specified {@code consumerEndpoint} which is supposed to be
      * WS-Notification compliant.
      * 
+     * @param subscriptionId
+     *            the {@link SubscriptionId subscription identifier}.
      * @param consumerEndpoint
      *            the consumer endpoint to contact in order to send reports.
      * 
@@ -36,17 +40,21 @@ public interface ProxyMonitoringService {
      *         the input/output monitoring is already enabled for the specified
      *         {@code consumerEndpoint}.
      */
-    boolean enableInputOutputMonitoring(String consumerEndpoint);
+    boolean enableInputOutputMonitoring(SubscriptionId subscriptionId,
+                                        String consumerEndpoint);
 
     /**
-     * Disables input/output monitoring for the specified
-     * {@code consumerEndpoint}.
+     * Disables input/output monitoring for the specified {@link SubscriptionId
+     * subscription identifier}.
+     * 
+     * @param subscriptionId
+     *            the {@link SubscriptionId subscription identifier}.
      * 
      * @return {@code true} when the deactivation has succeeded, {@code false}
      *         if input/output monitoring was not enabled for the specified
-     *         {@code consumerEndpoint}.
+     *         {@link SubscriptionId subscription identifier}.
      */
-    boolean disableInputOutputMonitoring(String consumerEndpoint);
+    boolean disableInputOutputMonitoring(SubscriptionId subscriptionId);
 
     /**
      * Returns {@code true} if input/output monitoring is enabled (i.e. one or

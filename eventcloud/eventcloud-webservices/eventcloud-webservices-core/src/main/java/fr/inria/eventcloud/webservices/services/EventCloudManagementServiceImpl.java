@@ -27,22 +27,12 @@ import javax.xml.namespace.QName;
 import org.etsi.uri.gcm.util.GCM;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
 import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
+import org.oasis_open.docs.wsn.b_2.Renew;
+import org.oasis_open.docs.wsn.b_2.RenewResponse;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
-import org.oasis_open.docs.wsn.bw_2.InvalidFilterFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidMessageContentExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidProducerPropertiesExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.MultipleTopicsSpecifiedFault;
-import org.oasis_open.docs.wsn.bw_2.NoCurrentMessageOnTopicFault;
-import org.oasis_open.docs.wsn.bw_2.NotifyMessageNotSupportedFault;
-import org.oasis_open.docs.wsn.bw_2.SubscribeCreationFailedFault;
-import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
-import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
-import org.oasis_open.docs.wsn.bw_2.UnacceptableInitialTerminationTimeFault;
-import org.oasis_open.docs.wsn.bw_2.UnrecognizedPolicyRequestFault;
-import org.oasis_open.docs.wsn.bw_2.UnsupportedPolicyRequestFault;
-import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
+import org.oasis_open.docs.wsn.b_2.Unsubscribe;
+import org.oasis_open.docs.wsn.b_2.UnsubscribeResponse;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -63,14 +53,14 @@ import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.webservices.api.EventCloudManagementWsApi;
-import fr.inria.eventcloud.webservices.api.EventCloudManagementWsServiceApi;
+import fr.inria.eventcloud.webservices.api.EventCloudManagementServiceApi;
 import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
 import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 import fr.inria.eventcloud.webservices.factories.ProxyMonitoringManagerFactory;
@@ -78,12 +68,12 @@ import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManager;
 import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManagerImpl;
 
 /**
- * Web service implementation for {@link EventCloudManagementWsApi}.
+ * Web service implementation for {@link EventCloudManagementServiceApi}.
  * 
  * @author lpellegr
  */
 public class EventCloudManagementServiceImpl implements
-        EventCloudManagementWsServiceApi {
+        EventCloudManagementServiceApi {
 
     private static final String RAW_REPORT_TOPIC =
             "http://www.petalslink.org/rawreport/1.0/RawReportTopic";
@@ -398,10 +388,7 @@ public class EventCloudManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage getCurrentMessageRequest)
-            throws NoCurrentMessageOnTopicFault, TopicNotSupportedFault,
-            ResourceUnknownFault, MultipleTopicsSpecifiedFault,
-            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
+    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage getCurrentMessageRequest) {
         throw new UnsupportedOperationException();
     }
 
@@ -409,16 +396,8 @@ public class EventCloudManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public SubscribeResponse subscribe(Subscribe subscribe)
-            throws UnrecognizedPolicyRequestFault,
-            SubscribeCreationFailedFault,
-            InvalidProducerPropertiesExpressionFault,
-            UnsupportedPolicyRequestFault, TopicNotSupportedFault,
-            NotifyMessageNotSupportedFault, ResourceUnknownFault,
-            UnacceptableInitialTerminationTimeFault,
-            InvalidMessageContentExpressionFault, InvalidFilterFault,
-            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
-
+    public SubscribeResponse subscribe(Subscribe subscribe) {
+        SubscriptionId subscriptionId = new SubscriptionId();
         String consumerReference =
                 WsnHelper.getAddress(subscribe.getConsumerReference());
         QName topic = WsnHelper.getTopic(subscribe);
@@ -431,34 +410,62 @@ public class EventCloudManagementServiceImpl implements
             for (EventCloudId id : eventCloudIds) {
                 for (SubscribeProxy proxy : this.getEventCloudsRegistry()
                         .getSubscribeProxies(id)) {
-                    this.enableInputOutputMonitoring(proxy, consumerReference);
+                    ProxyMonitoringManager proxyMonitoringManagerInterface =
+                            this.getProxyMonitoringManagerInterface(proxy);
+
+                    if (proxyMonitoringManagerInterface != null) {
+                        proxyMonitoringManagerInterface.enableInputOutputMonitoring(
+                                subscriptionId, consumerReference);
+                    }
                 }
             }
         }
 
-        return WsnHelper.createSubscribeResponse(consumerReference);
+        return WsnHelper.createSubscribeResponse(
+                subscriptionId, consumerReference);
     }
 
-    private void enableInputOutputMonitoring(Object proxyStub,
-                                             String consumerReference) {
+    @Override
+    public RenewResponse renew(Renew renewRequest) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public UnsubscribeResponse unsubscribe(Unsubscribe unsubscribeRequest) {
+        SubscriptionId subscriptionId =
+                WsnHelper.getSubcriptionId(unsubscribeRequest);
+        Set<EventCloudId> eventCloudIds =
+                this.getEventCloudsRegistry().listEventClouds();
+
+        // disable input/output monitoring for all eventclouds
+        for (EventCloudId id : eventCloudIds) {
+            for (SubscribeProxy proxy : this.getEventCloudsRegistry()
+                    .getSubscribeProxies(id)) {
+                ProxyMonitoringManager proxyMonitoringManagerInterface =
+                        this.getProxyMonitoringManagerInterface(proxy);
+
+                if (proxyMonitoringManagerInterface != null) {
+                    proxyMonitoringManagerInterface.disableInputOutputMonitoring(subscriptionId);
+                }
+            }
+        }
+
+        return new UnsubscribeResponse();
+    }
+
+    private ProxyMonitoringManager getProxyMonitoringManagerInterface(Object proxyStub) {
         try {
             Component proxy = ((PAInterface) proxyStub).getFcItfOwner();
             PAMembraneController membraneController =
                     Utils.getPAMembraneController(proxy);
             Component proxyMonitoringManager =
                     membraneController.nfGetFcSubComponent(ProxyMonitoringManagerImpl.COMPONENT_NAME);
-            ProxyMonitoringManager stub = null;
 
             if (proxyMonitoringManager == null) {
-                stub =
-                        this.addProxyMonitoringManager(
-                                proxy, membraneController);
+                return this.addProxyMonitoringManager(proxy, membraneController);
             } else {
-                stub =
-                        (ProxyMonitoringManager) proxyMonitoringManager.getFcInterface(ProxyMonitoringManagerImpl.MONITORING_SERVICES_ITF);
+                return (ProxyMonitoringManager) proxyMonitoringManager.getFcInterface(ProxyMonitoringManagerImpl.MONITORING_SERVICES_ITF);
             }
-
-            stub.enableInputOutputMonitoring(consumerReference);
         } catch (NoSuchInterfaceException nsie) {
             nsie.printStackTrace();
         } catch (NoSuchComponentException nsce) {
@@ -470,6 +477,8 @@ public class EventCloudManagementServiceImpl implements
         } catch (IllegalBindingException ibe) {
             ibe.printStackTrace();
         }
+
+        return null;
     }
 
     private ProxyMonitoringManager addProxyMonitoringManager(Component proxy,

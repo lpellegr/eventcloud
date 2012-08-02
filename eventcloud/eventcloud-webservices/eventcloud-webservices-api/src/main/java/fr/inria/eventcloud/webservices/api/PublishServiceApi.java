@@ -16,24 +16,16 @@
  **/
 package fr.inria.eventcloud.webservices.api;
 
-import java.util.Collection;
-
-import javax.jws.Oneway;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.webservices.api.adapters.CompoundEventCollectionAdapter;
+import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 
 /**
- * Defines the publish operations that can be executed on an Event Cloud and can
- * be exposed as web services by a publish proxy component.
+ * Defines a publish web service as defined by the WS-Notification
+ * specification.
  * 
- * @author lpellegr
  * @author bsauvan
  */
 @WebService(serviceName = "EventCloudPublish", portName = "EventCloudPublishPort", name = "EventCloudPublishPortType", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2")
@@ -45,16 +37,6 @@ import fr.inria.eventcloud.webservices.api.adapters.CompoundEventCollectionAdapt
         org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
         org.oasis_open.docs.wsn.b_2.ObjectFactory.class})
 @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
-public interface PublishWsApi {
-
-    /**
-     * Publishes the specified collection of events.
-     * 
-     * @param events
-     *            the collection of compound events to publish.
-     */
-    @Oneway
-    @WebMethod(operationName = "Notify")
-    public void publish(@WebParam(partName = "Notify", name = "Notify", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(CompoundEventCollectionAdapter.class) Collection<CompoundEvent> events);
+public interface PublishServiceApi extends NotificationConsumer {
 
 }

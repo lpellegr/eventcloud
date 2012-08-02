@@ -22,6 +22,8 @@ import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
+import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
+import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
@@ -36,6 +38,10 @@ import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.webservices.api.EventCloudManagementServiceApi;
+import fr.inria.eventcloud.webservices.api.PublishServiceApi;
+import fr.inria.eventcloud.webservices.api.PutGetWsApi;
+import fr.inria.eventcloud.webservices.api.SubscribeServiceApi;
 import fr.inria.eventcloud.webservices.proxies.PublishWsProxyImpl;
 import fr.inria.eventcloud.webservices.proxies.PutGetWsProxyImpl;
 import fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyImpl;
@@ -198,7 +204,7 @@ public class WebServiceDeployer {
     }
 
     /**
-     * Deploys a new {@link EventCloudManagementServiceImpl}.
+     * Deploys a new {@link EventCloudManagementServiceApi}.
      * 
      * @param registryUrl
      *            the registry to connect to in order to retrieve information
@@ -209,19 +215,37 @@ public class WebServiceDeployer {
      * @param urlSuffix
      *            the suffix appended to the end of the URL associated to the
      *            service deployed.
-     * @param webServicePort
+     * @param port
      *            the port used to deploy the web service.
      * 
-     * @return a new {@link EventCloudManagementServiceImpl}.
+     * @return a new {@link EventCloudManagementServiceApi}.
      */
     public static Server deployEventCloudManagementWebService(String registryUrl,
                                                               int portLowerBound,
                                                               String urlSuffix,
-                                                              int webServicePort) {
-        return deployWebService(new EventCloudManagementServiceImpl(
-                registryUrl, portLowerBound), urlSuffix, webServicePort);
+                                                              int port) {
+        return deployWebService(
+                EventCloudManagementServiceApi.class,
+                new EventCloudManagementServiceImpl(registryUrl, portLowerBound),
+                urlSuffix, port);
     }
 
+    /**
+     * Deploys a new {@link PublishServiceApi}.
+     * 
+     * @param registryUrl
+     *            the registry to connect to in order to retrieve information
+     *            about eventclouds running.
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            service deployed.
+     * @param port
+     *            the port used to deploy the web service.
+     * 
+     * @return a new {@link PublishServiceApi}.
+     */
     public static ServiceInformation deployPublishWebService(String registryUrl,
                                                              String streamUrl,
                                                              String urlSuffix,
@@ -230,12 +254,30 @@ public class WebServiceDeployer {
                 new PublishServiceImpl(registryUrl, streamUrl);
 
         Server publishServer =
-                deployWebService(publishService, urlSuffix, port);
+                deployWebService(
+                        PublishServiceApi.class, publishService, urlSuffix,
+                        port);
 
         return new ServiceInformation(
                 publishService, publishServer, streamUrl, port);
     }
 
+    /**
+     * Deploys a new {@link SubscribeServiceApi}.
+     * 
+     * @param registryUrl
+     *            the registry to connect to in order to retrieve information
+     *            about eventclouds running.
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            service deployed.
+     * @param port
+     *            the port used to deploy the web service.
+     * 
+     * @return a new {@link SubscribeServiceApi}.
+     */
     public static ServiceInformation deploySubscribeWebService(String registryUrl,
                                                                String streamUrl,
                                                                String urlSuffix,
@@ -243,10 +285,28 @@ public class WebServiceDeployer {
         SubscribeServiceImpl subscribeService =
                 new SubscribeServiceImpl(registryUrl, streamUrl);
 
-        return new ServiceInformation(subscribeService, deployWebService(
-                subscribeService, urlSuffix, port), streamUrl, port);
+        return new ServiceInformation(
+                subscribeService, deployWebService(
+                        SubscribeServiceApi.class, subscribeService, urlSuffix,
+                        port), streamUrl, port);
     }
 
+    /**
+     * Deploys a new {@link PutGetWsApi}.
+     * 
+     * @param registryUrl
+     *            the registry to connect to in order to retrieve information
+     *            about eventclouds running.
+     * @param streamUrl
+     *            an URL which identifies an eventcloud which is running.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            service deployed.
+     * @param port
+     *            the port used to deploy the web service.
+     * 
+     * @return a new {@link PutGetWsApi}.
+     */
     public static ServiceInformation deployPutGetWebService(String registryUrl,
                                                             String streamUrl,
                                                             String urlSuffix,
@@ -254,15 +314,65 @@ public class WebServiceDeployer {
         PutGetServiceImpl putGetService =
                 new PutGetServiceImpl(registryUrl, streamUrl);
 
-        return new ServiceInformation(putGetService, deployWebService(
-                putGetService, urlSuffix, port), streamUrl, port);
+        return new ServiceInformation(
+                putGetService, deployWebService(
+                        PutGetWsApi.class, putGetService, urlSuffix, port),
+                streamUrl, port);
     }
 
+    /**
+     * Deploys a new {@link NotificationConsumer}.
+     * 
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            service deployed.
+     * @param port
+     *            the port used to deploy the web service.
+     * 
+     * @return a new {@link NotificationConsumer}.
+     */
     public static Server deploySubscriberWebService(String urlSuffix, int port) {
-        return deployWebService(new SubscriberServiceImpl(), urlSuffix, port);
+        return deployWebService(
+                NotificationProducer.class, new SubscriberServiceImpl(),
+                urlSuffix, port);
     }
 
+    /**
+     * Deploys a new web service.
+     * 
+     * @param service
+     *            Service to expose as web service.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            service deployed.
+     * @param port
+     *            the port used to deploy the web service.
+     * 
+     * @return a new web service.
+     */
     public static Server deployWebService(Object service, String addressSuffix,
+                                          int port) {
+        return deployWebService(
+                service.getClass(), service, addressSuffix, port);
+    }
+
+    /**
+     * Deploys a new web service.
+     * 
+     * @param serviceClass
+     *            Class defining the services to expose as web services.
+     * @param service
+     *            Service to expose as web service.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            service deployed.
+     * @param port
+     *            the port used to deploy the web service.
+     * 
+     * @return a new web service.
+     */
+    public static Server deployWebService(Class<?> serviceClass,
+                                          Object service, String addressSuffix,
                                           int port) {
         StringBuilder address = new StringBuilder("http://");
         try {
@@ -278,7 +388,7 @@ public class WebServiceDeployer {
         }
 
         JaxWsServerFactoryBean svrFactory = new JaxWsServerFactoryBean();
-        svrFactory.setServiceClass(service.getClass());
+        svrFactory.setServiceClass(serviceClass);
         svrFactory.setAddress(address.toString());
         svrFactory.setServiceBean(service);
 

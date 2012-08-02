@@ -34,8 +34,8 @@ public abstract class EventCloudTranslatableProxyService<T> extends
     protected final WsnTranslator translator;
 
     public EventCloudTranslatableProxyService(String registryUrl,
-            String eventcloudUrl) {
-        super(registryUrl, eventcloudUrl);
+            String streamUrl) {
+        super(registryUrl, streamUrl);
         this.translator = new WsnTranslator();
     }
 

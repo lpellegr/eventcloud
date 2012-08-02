@@ -20,7 +20,6 @@ import javax.jws.WebService;
 
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
-import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,25 +31,25 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
+import fr.inria.eventcloud.webservices.api.PublishServiceApi;
 
 /**
- * Defines a publish web service as defined by the WS-Notification
- * specification. All the calls to the notify request will be translated and
- * redirected to a {@link PublishProxy} in order to be published into an
- * eventcloud.
+ * PublishServiceImpl is a concrete implementation of {@link PublishServiceApi}.
+ * All the calls to the notify request will be translated and redirected to a
+ * {@link PublishProxy} in order to be published into an eventcloud.
  * 
  * @author lpellegr
  */
 @WebService(serviceName = "EventCloudPublish", portName = "EventCloudPublishPort", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2", name = "EventCloudPublishPortType")
 public class PublishServiceImpl extends
         EventCloudTranslatableProxyService<PublishApi> implements
-        NotificationConsumer {
+        PublishServiceApi {
 
     private static final Logger log =
             LoggerFactory.getLogger(PublishServiceImpl.class);
 
-    public PublishServiceImpl(String registryUrl, String eventCloudIdUrl) {
-        super(registryUrl, eventCloudIdUrl);
+    public PublishServiceImpl(String registryUrl, String streamUrl) {
+        super(registryUrl, streamUrl);
     }
 
     /**
