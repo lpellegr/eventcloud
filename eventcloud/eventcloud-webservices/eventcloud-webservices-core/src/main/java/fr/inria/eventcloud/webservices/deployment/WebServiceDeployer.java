@@ -374,12 +374,8 @@ public class WebServiceDeployer {
     public static Server deployWebService(Class<?> serviceClass,
                                           Object service, String addressSuffix,
                                           int port) {
-        StringBuilder address = new StringBuilder("http://");
-        try {
-            address.append(java.net.InetAddress.getLocalHost().getHostAddress());
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        // binds the webservice to all interfaces by default
+        StringBuilder address = new StringBuilder("http://0.0.0.0");
         address.append(':');
         address.append(port);
         address.append('/');
