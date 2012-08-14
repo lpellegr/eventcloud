@@ -158,7 +158,7 @@ public final class AtomicQuery implements Serializable {
                 op = new OpSlice(op, Long.MIN_VALUE, this.limit);
             }
 
-            return op;
+            this.opRepresentation = op;
         }
 
         return this.opRepresentation;

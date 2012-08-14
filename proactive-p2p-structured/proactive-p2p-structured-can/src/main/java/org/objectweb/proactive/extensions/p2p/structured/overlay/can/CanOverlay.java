@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.util.converter.MakeDeepCopy;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
@@ -52,6 +51,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -407,10 +407,9 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         NeighborTable<E> pendingNewNeighborhood = new NeighborTable<E>();
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte dir = 0; dir < 2; dir++) {
-                // the peer which is joining don't have the same neighbors as
-                // the
-                // landmark peer in the dimension and direction of the landmark
-                // peer
+                // the peer which is joining does not have the same neighbors as
+                // the landmark peer in the dimension and direction of the
+                // landmark peer
                 if (dim != dimension || dir != direction) {
                     Iterator<NeighborEntry<E>> it =
                             this.neighborTable.get(dim, dir)
@@ -419,8 +418,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                     while (it.hasNext()) {
                         NeighborEntry<E> entry = it.next();
                         // adds to the new peer neighborhood iff the new peer
-                        // zone
-                        // neighbors the current neighbor
+                        // zone neighbors the current neighbor
                         if (newZones.get(directionInv).neighbors(
                                 entry.getZone()) != -1) {
                             pendingNewNeighborhood.add(entry, dim, dir);
@@ -439,7 +437,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         LinkedList<SplitEntry> historyToTransfert = null;
         try {
             historyToTransfert =
-                    (LinkedList<SplitEntry>) MakeDeepCopy.WithObjectStream.makeDeepCopy(this.splitHistory);
+                    (LinkedList<SplitEntry>) MakeDeepCopy.makeDeepCopy(this.splitHistory);
             historyToTransfert.add(new SplitEntry(dimension, directionInv));
         } catch (IOException e) {
             e.printStackTrace();
