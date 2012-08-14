@@ -234,8 +234,8 @@ public class BenchmarkLauncher {
             oos.close();
             bos.close();
             bytes = bos.toByteArray();
-        } catch (IOException ex) {
-            // TODO: Handle the exception
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
         return bytes.length;
     }
