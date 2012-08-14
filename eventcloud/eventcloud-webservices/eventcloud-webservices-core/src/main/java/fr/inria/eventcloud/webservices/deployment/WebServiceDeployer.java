@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.webservices.deployment;
 
-import java.net.UnknownHostException;
-
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
