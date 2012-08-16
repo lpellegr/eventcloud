@@ -165,7 +165,7 @@ public interface Peer extends Serializable {
      * @throws DispatchException
      *             if a problem occurs when the query is dispatched.
      */
-    public void sendv(Request<?> request) throws DispatchException;
+    public void sendv(Request<?> request);
 
     /**
      * Sends a request over the overlay by using message passing.

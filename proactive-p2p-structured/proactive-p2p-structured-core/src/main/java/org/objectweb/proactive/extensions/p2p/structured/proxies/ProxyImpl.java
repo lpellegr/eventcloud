@@ -61,7 +61,7 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
      * {@inheritDoc}
      */
     @Override
-    public void sendv(Request<?> request) throws DispatchException {
+    public void sendv(Request<?> request) {
         this.sendv(request, this.selectPeer());
     }
 
@@ -69,8 +69,7 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
      * {@inheritDoc}
      */
     @Override
-    public void sendv(final Request<?> request, final Peer peer)
-            throws DispatchException {
+    public void sendv(final Request<?> request, final Peer peer) {
         if (request.getResponseProvider() != null) {
             throw new IllegalArgumentException(
                     "Response provider specified for a request with no answer");
@@ -85,8 +84,6 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
                 } catch (ProActiveRuntimeException e) {
                     ProxyImpl.this.evictPeer(peer);
                     throw e;
-                } catch (DispatchException e) {
-                    e.printStackTrace();
                 }
             }
         });

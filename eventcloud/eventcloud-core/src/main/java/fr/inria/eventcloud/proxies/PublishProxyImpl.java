@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.util.Collection;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
@@ -94,11 +93,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
 
         // the quadruple is routed without taking into account the publication
         // datetime
-        try {
-            super.sendv(new PublishQuadrupleRequest(quad));
-        } catch (DispatchException e) {
-            e.printStackTrace();
-        }
+        super.sendv(new PublishQuadrupleRequest(quad));
     }
 
     /**
