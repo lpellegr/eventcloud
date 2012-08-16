@@ -31,12 +31,12 @@ import com.beust.jcommander.ParameterException;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 import fr.inria.eventcloud.deployment.cli.commands.CreateEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.DestroyEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
 import fr.inria.eventcloud.deployment.cli.commands.SubscribeEventCloudCommand;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 
 /**
  * This class is used to execute some operation (e.g. to create an
@@ -80,7 +80,7 @@ public class EventCloudsRegistryReader {
 
         EventCloudsRegistry registry = null;
         try {
-            registry = EventCloudsRegistryImpl.lookup(this.registryUrl);
+            registry = EventCloudsRegistryFactory.from(this.registryUrl);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

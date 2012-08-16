@@ -51,11 +51,11 @@ import com.google.common.collect.Sets;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -375,7 +375,7 @@ public class EventCloudManagementServiceImpl implements
         if (this.registry == null) {
             try {
                 this.registry =
-                        EventCloudsRegistryImpl.lookup(this.registryUrl);
+                        EventCloudsRegistryFactory.from(this.registryUrl);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }

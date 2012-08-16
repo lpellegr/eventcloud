@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableSet;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -298,10 +299,13 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * @param componentUri
      *            the URL of the component.
      * 
-     * @return a ProActive stub representation of an EventCloudsRegistry .
+     * @return a ProActive stub representation of an EventCloudsRegistry.
      * 
      * @throws IOException
      *             if an error occurs during the construction of the stub.
+     * 
+     * @deprecated This method will be removed for the next release. Please use
+     *             {@link EventCloudsRegistryFactory#from(String)} instead.
      */
     public static EventCloudsRegistry lookup(String componentUri)
             throws IOException {

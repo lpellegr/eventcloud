@@ -23,11 +23,11 @@ import java.util.List;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 
 /**
@@ -53,7 +53,7 @@ public class EventCloudCache implements Serializable {
     public EventCloudCache(String registryUrl, EventCloudId eventcloudId)
             throws EventCloudIdNotManaged {
         try {
-            this.registry = EventCloudsRegistryImpl.lookup(registryUrl);
+            this.registry = EventCloudsRegistryFactory.from(registryUrl);
 
             this.deployer = this.registry.find(eventcloudId);
 
