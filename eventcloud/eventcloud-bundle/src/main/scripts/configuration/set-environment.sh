@@ -3,12 +3,10 @@
 CURRENT_DIR=$PWD/$(dirname $0)
 
 function export_variables() {
-    cd $CURRENT_DIR/../
+    cd $CURRENT_DIR/..
     export BUNDLE_HOME=$PWD
-    cd $CURRENT_DIR/../libs/
-    export PATH_TO_LIBRARIES=$PWD
-    cd $CURRENT_DIR/../resources
-    export PATH_TO_RESOURCES=$PWD
+    export PATH_TO_LIBRARIES=$BUNDLE_HOME/libs
+    export PATH_TO_RESOURCES=$BUNDLE_HOME/resources
     cd $CURRENT_DIR
 	
     unset CLASSPATH
