@@ -5,11 +5,12 @@
 # Paths to output files
 LOGS_DIR=$BUNDLE_HOME/logs
 REGISTRY_OUTPUT_FILE=$LOGS_DIR/eventclouds-registry.output
+WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE=$LOGS_DIR/ws-eventclouds-management.output
 
 # Paths to instance files
 INSTANCES_DIR=$BUNDLE_HOME/instances
 REGISTRY_INSTANCE_FILE=$INSTANCES_DIR/eventclouds-registry
-EVENTCLOUDS_INSTANCE_FILE=$INSTANCES_DIR/eventclouds
+WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE=$INSTANCES_DIR/ws-eventclouds-management
 
 # Ports assignation
 EVENTCLOUDS_REGISTRY_PORT=8081
@@ -43,7 +44,7 @@ function main() {
 
     if [[ -d $INSTANCES_DIR ]];
     then
-	    echo "Eventclouds registry already running. Use -k option to kill all existing instances."
+	    echo "Eventclouds registry already running. Use -k or -kc option to kill all existing instances."
 	    return 1;
     fi;
 
@@ -54,14 +55,34 @@ function main() {
 }
 
 function check_requirements() {
-    if ! command_exists watchmedo;
+    if ! command_exists java
     then
-        print_requirements
+        print_java_requirements
         exit 1
-    fi 
+    fi
+	if ! command_exists python
+    then
+        print_python_requirements
+        exit 1
+    fi
+    if ! command_exists watchmedo
+    then
+        print_watchdog_requirements
+        exit 1
+    fi
 }
 
-function print_requirements() {
+function print_java_requirements() {
+    echo "Java is required!"
+    echo "Download from http://www.oracle.com/technetwork/java/javase/downloads/index.html and install it"
+}
+
+function print_python_requirements() {
+    echo "Python is required!"
+    echo "Download from http://www.python.org/download/ and install it"
+}
+
+function print_watchdog_requirements() {
     echo "Please install the watchdog library by using *one* of the following commands:"
     echo "  sudo easy_install watchdog"
     echo "  sudo pip install watchdog"
@@ -90,7 +111,7 @@ function deploy() {
 }
 
 function deploy_eventclouds_registry() {
-	java -Xms128m -Xmx256m \
+    java -Xms128m -Xmx256m \
      -server \
      -Djava.security.policy=$PATH_TO_RESOURCES/proactive.security.policy \
      -Deventcloud.bundle.home=$BUNDLE_HOME \
@@ -115,8 +136,6 @@ function deploy_eventclouds_registry() {
 }
 
 function deploy_ws_management_proxy() {
-    WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE=$INSTANCES_DIR/ws-eventclouds-management
-
     java -Xms256m -Xmx10240m \
      -server \
      -Djava.security.policy=$PATH_TO_RESOURCES/proactive.security.policy \
@@ -130,7 +149,7 @@ function deploy_ws_management_proxy() {
      -Dproactive.pnp.port=$WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT \
      -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.EventCloudManagementWsLaucher \
      --registry-url $EVENTCLOUDS_REGISTRY_URL --port-lower-bound $PROXIES_PORTS_LOWER_BOUND \
-     -p $WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT &> $LOGS_DIR/ws-eventclouds-management.output &
+     -p $WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT &> $WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE &
 
     echo $! > $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE.pid
         
@@ -143,8 +162,8 @@ function deploy_ws_management_proxy() {
 # $1 absolute path to directory where file creation is expected
 # $2 expected filename
 function wait_file_creation() {
-	if [[ ! -f $1/$2 ]]
-	then
+    if [[ ! -f $1/$2 ]]
+    then
     	python $BUNDLE_HOME/scripts/filename-watchdog.py $1 $2 &> /dev/null
     fi
 }
@@ -177,4 +196,3 @@ function kill_process() {
 main $@
 
 . $BUNDLE_HOME/scripts/configuration/unset-environment.sh
-
