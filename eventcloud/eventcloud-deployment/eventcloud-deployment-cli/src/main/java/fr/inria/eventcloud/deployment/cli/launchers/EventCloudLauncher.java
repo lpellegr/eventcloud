@@ -22,10 +22,10 @@ import com.beust.jcommander.Parameter;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
@@ -72,7 +72,7 @@ public final class EventCloudLauncher extends Launcher {
         boolean registered = false;
         try {
             registered =
-                    EventCloudsRegistryImpl.lookup(this.registryUrl).register(
+                    EventCloudsRegistryFactory.from(this.registryUrl).register(
                             deployer);
         } catch (IOException e) {
             throw new IllegalStateException(e);

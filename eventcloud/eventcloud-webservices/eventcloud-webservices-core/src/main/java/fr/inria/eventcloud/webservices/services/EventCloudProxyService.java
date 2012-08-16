@@ -25,9 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.EventCloudsRegistryImpl;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -72,7 +72,7 @@ public abstract class EventCloudProxyService<T> {
     public void terminateProxy() {
         try {
             EventCloudsRegistry registry =
-                    EventCloudsRegistryImpl.lookup(this.registryUrl);
+                    EventCloudsRegistryFactory.from(this.registryUrl);
 
             EventCloudId eventCloudId = new EventCloudId(this.streamUrl);
 
