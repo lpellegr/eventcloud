@@ -778,19 +778,14 @@ public final class PublishSubscribeUtils {
                 PAActiveObject.getUrl(overlay.getStub()),
                 quadrupleMatching.hashValue()));
 
-        try {
-            if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-                log.info("Peer "
-                        + overlay
-                        + " is about to dispatch a rewritten subscription, creation time = "
-                        + rewrittenSubscription.getCreationTime()
-                        + " , subscription: "
-                        + rewrittenSubscription.getSparqlQuery());
-            }
-            overlay.dispatchv(new IndexSubscriptionRequest(
-                    rewrittenSubscription));
-        } catch (DispatchException e) {
-            e.printStackTrace();
+        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+            log.info("Peer "
+                    + overlay
+                    + " is about to dispatch a rewritten subscription, creation time = "
+                    + rewrittenSubscription.getCreationTime()
+                    + " , subscription: "
+                    + rewrittenSubscription.getSparqlQuery());
         }
+        overlay.dispatchv(new IndexSubscriptionRequest(rewrittenSubscription));
     }
 }

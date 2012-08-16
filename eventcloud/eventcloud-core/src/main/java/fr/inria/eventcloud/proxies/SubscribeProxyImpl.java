@@ -254,11 +254,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                             + subscription.getId());
         }
 
-        try {
-            super.sendv(new IndexSubscriptionRequest(internalSubscription));
-        } catch (DispatchException e) {
-            e.printStackTrace();
-        }
+        super.sendv(new IndexSubscriptionRequest(internalSubscription));
 
         log.info(
                 "New subscription has been registered from {} with id {}",

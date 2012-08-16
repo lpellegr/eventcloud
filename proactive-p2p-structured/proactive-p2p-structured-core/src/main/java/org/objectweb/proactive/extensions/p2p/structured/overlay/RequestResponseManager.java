@@ -78,8 +78,7 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
      * @param overlay
      *            the overlay from where the request is sent.
      */
-    public void dispatchv(Request<?> request, StructuredOverlay overlay)
-            throws DispatchException {
+    public void dispatchv(Request<?> request, StructuredOverlay overlay) {
         if (log.isDebugEnabled()) {
             log.debug("Dispatching " + request.getClass().getSimpleName()
                     + " with id " + request.getId() + " from " + overlay);

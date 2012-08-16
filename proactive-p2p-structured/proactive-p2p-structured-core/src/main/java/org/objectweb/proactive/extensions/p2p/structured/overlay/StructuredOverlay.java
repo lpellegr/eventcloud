@@ -86,7 +86,7 @@ public abstract class StructuredOverlay {
      * @param request
      *            the request to dispatch.
      */
-    public void dispatchv(Request<?> request) throws DispatchException {
+    public void dispatchv(Request<?> request) {
         this.messageManager.dispatchv(request, this);
     }
 

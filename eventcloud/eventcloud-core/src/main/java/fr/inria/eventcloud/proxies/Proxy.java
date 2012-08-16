@@ -67,11 +67,11 @@ public abstract class Proxy extends AbstractComponent implements
         EventCloudProperties.loadConfiguration();
     }
 
-    public void sendv(Request<?> request) throws DispatchException {
+    public void sendv(Request<?> request) {
         this.proxy.sendv(request);
     }
 
-    public void sendv(Request<?> request, Peer peer) throws DispatchException {
+    public void sendv(Request<?> request, Peer peer) {
         this.proxy.sendv(request, peer);
     }
 

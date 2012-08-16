@@ -38,11 +38,8 @@ public interface Proxy extends Closeable {
      * 
      * @param request
      *            the request to handle.
-     * 
-     * @throws DispatchException
-     *             if a problem occurs when the query is dispatched.
      */
-    void sendv(Request<?> request) throws DispatchException;
+    void sendv(Request<?> request);
 
     /**
      * Sends a request over the overlay by using message passing but without any
@@ -52,11 +49,8 @@ public interface Proxy extends Closeable {
      *            the request to handle.
      * @param peer
      *            the stub from where the request is sent.
-     * 
-     * @throws DispatchException
-     *             if a problem occurs when the query is dispatched.
      */
-    void sendv(Request<?> request, Peer peer) throws DispatchException;
+    void sendv(Request<?> request, Peer peer);
 
     /**
      * Sends a request over the overlay by using message passing.
