@@ -375,7 +375,7 @@ public class EventCloudManagementServiceImpl implements
         if (this.registry == null) {
             try {
                 this.registry =
-                        EventCloudsRegistryFactory.from(this.registryUrl);
+                        EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
