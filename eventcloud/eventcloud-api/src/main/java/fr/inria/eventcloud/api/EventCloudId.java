@@ -17,8 +17,8 @@
 package fr.inria.eventcloud.api;
 
 import java.io.Serializable;
-import java.util.UUID;
 
+import fr.inria.eventcloud.api.generators.UuidGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
@@ -38,7 +38,7 @@ public class EventCloudId implements Serializable {
      */
     public EventCloudId() {
         this(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                + UUID.randomUUID().toString());
+                + UuidGenerator.randomUuid());
     }
 
     /**

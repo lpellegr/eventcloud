@@ -18,7 +18,6 @@ package fr.inria.eventcloud.pubsub;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -50,6 +49,7 @@ import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
+import fr.inria.eventcloud.api.generators.UuidGenerator;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
@@ -134,7 +134,7 @@ public class SubscribeProxyTest {
                         List<Quadruple> quadruples = new ArrayList<Quadruple>();
                         Node graphValue =
                                 Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
-                                        + "/" + UUID.randomUUID().toString());
+                                        + "/" + UuidGenerator.randomUuid());
                         for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
                             quadruples.add(QuadrupleGenerator.random(graphValue));
                         }
