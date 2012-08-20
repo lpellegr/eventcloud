@@ -24,6 +24,7 @@ import java.util.List;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -204,6 +205,22 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
         return super.selectPeer().executeSparqlSelect(sparqlSelectQuery);
     }
 
+    /**
+     * Lookups a put/get proxy component on the specified {@code componentUri}.
+     * 
+     * @param componentUri
+     *            the URL of the put/get proxy component.
+     * 
+     * @return the reference on the {@link PutGetApi} interface of the put/get
+     *         proxy component.
+     * 
+     * @throws IOException
+     *             if an error occurs during the construction of the stub.
+     * 
+     * @deprecated This method will be removed for the next release. Please use
+     *             {@link ProxyFactory#lookupPutGetProxy(String)} instead.
+     */
+    @Deprecated
     public static PutGetProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, PUTGET_SERVICES_ITF, PutGetProxy.class);
