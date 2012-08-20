@@ -307,6 +307,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * @deprecated This method will be removed for the next release. Please use
      *             {@link EventCloudsRegistryFactory#from(String)} instead.
      */
+    @Deprecated
     public static EventCloudsRegistry lookup(String componentUri)
             throws IOException {
         return ComponentUtils.lookupFcInterface(
