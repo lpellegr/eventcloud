@@ -1,0 +1,57 @@
+/**
+ * Copyright (c) 2011-2012 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
+package fr.inria.eventcloud.webservices.api;
+
+import java.io.Serializable;
+
+/**
+ * Class used to contain required subscription informations coming from a WS
+ * Notification Subcription.
+ * 
+ * @author lpellegr
+ * @author bsauvan
+ */
+public class SubscribeInfos implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private String sparqlQuery;
+
+    private String subscriberWsEndpointUrl;
+
+    public SubscribeInfos(String sparqlQuery, String subscriberWsEndpointUrl) {
+        this.sparqlQuery = sparqlQuery;
+        this.subscriberWsEndpointUrl = subscriberWsEndpointUrl;
+    }
+
+    public String getSparqlQuery() {
+        return this.sparqlQuery;
+    }
+
+    public void setSparqlQuery(String sparqlQuery) {
+        this.sparqlQuery = sparqlQuery;
+    }
+
+    public String getSubscriberWsEndpointUrl() {
+        return this.subscriberWsEndpointUrl;
+    }
+
+    public void setSubscriberWsEndpointUrl(String subscriberWsEndpointUrl) {
+        this.subscriberWsEndpointUrl = subscriberWsEndpointUrl;
+    }
+
+}
