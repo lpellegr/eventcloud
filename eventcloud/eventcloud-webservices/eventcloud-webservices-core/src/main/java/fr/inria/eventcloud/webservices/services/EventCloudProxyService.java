@@ -72,7 +72,7 @@ public abstract class EventCloudProxyService<T> {
     public void terminateProxy() {
         try {
             EventCloudsRegistry registry =
-                    EventCloudsRegistryFactory.from(this.registryUrl);
+                    EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
 
             EventCloudId eventCloudId = new EventCloudId(this.streamUrl);
 

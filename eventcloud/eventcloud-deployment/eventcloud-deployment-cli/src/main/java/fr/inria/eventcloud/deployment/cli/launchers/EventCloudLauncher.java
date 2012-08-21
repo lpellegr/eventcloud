@@ -72,7 +72,7 @@ public final class EventCloudLauncher extends Launcher {
         boolean registered = false;
         try {
             registered =
-                    EventCloudsRegistryFactory.from(this.registryUrl).register(
+                    EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl).register(
                             deployer);
         } catch (IOException e) {
             throw new IllegalStateException(e);
