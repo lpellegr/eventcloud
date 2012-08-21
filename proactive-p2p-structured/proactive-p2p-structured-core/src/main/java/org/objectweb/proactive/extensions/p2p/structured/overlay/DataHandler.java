@@ -14,36 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.overlay.datastore;
+package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import java.io.Serializable;
 
 /**
- * A DataHandler defines methods that are used by a peer managing data. This
- * allows to automate/ease the data transfer during the
+ * PeerDataHandler defines the methods that are used by a peer managing data.
+ * This allows to automate/ease the data transfer during the
  * {@link StructuredOverlay#join(Peer)} and {@link StructuredOverlay#leave()}
  * operations.
  * 
  * @author lpellegr
  */
-public interface PeerDataHandler {
+public interface DataHandler {
 
     /**
-     * Affects the specified {@code dataReceived} to the datastore.
+     * Defines how to assign the data received from a neighbor (during a join
+     * operation) to the desired data structure.
      * 
      * @param dataReceived
-     *            the data which have been received (e.g. when the peer has join
-     *            a network from a landmark node).
+     *            the data that are received when a peer joins a network from a
+     *            landmark node.
      */
-    public abstract void affectDataReceived(Object dataReceived);
+    public abstract void assignDataReceived(Serializable dataReceived);
 
     /**
-     * Returns a copy of all the data from the datastore.
+     * Returns a copy of all the data managed by the current peer.
      * 
      * @return all the data managed by the peer.
      */
-    public abstract Object retrieveAllData();
+    public abstract Serializable retrieveAllData();
 
     /**
      * Returns a copy of all the data which are contained in the specified
@@ -51,24 +51,24 @@ public interface PeerDataHandler {
      * 
      * @param interval
      *            the interval to use in order to restrict the scope of the
-     *            retrieve operation (e.g. with CAN, the interval condition is a
+     *            retrieve operation (e.g. with CAN the interval condition is a
      *            zone).
      * 
      * @return the data which are contained in the specified {@code interval}.
      */
-    public abstract Object retrieveDataIn(Object interval);
+    public abstract Serializable retrieveDataIn(Object interval);
 
     /**
      * Removes and returns all the data which are in the given {@code interval}.
      * 
      * @param interval
      *            the interval to use in order to restrict the scope of the
-     *            remove operation (e.g. with CAN, the interval condition is a
+     *            remove operation (e.g. with CAN the interval condition is a
      *            zone).
      * 
      * @return all the data which have been removed from the given
      *         {@code interval}.
      */
-    public abstract Object removeDataIn(Object interval);
+    public abstract Serializable removeDataIn(Object interval);
 
 }
