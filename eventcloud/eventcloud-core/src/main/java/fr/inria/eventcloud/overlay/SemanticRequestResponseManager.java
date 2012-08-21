@@ -293,6 +293,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     @Override
     public void close() throws IOException {
         this.colander.close();
+        this.threadPool.shutdown();
     }
 
 }

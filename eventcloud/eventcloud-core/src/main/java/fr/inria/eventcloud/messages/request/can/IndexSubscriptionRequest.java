@@ -32,7 +32,6 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -96,8 +95,6 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
         semanticOverlay.storeSubscription(subscription);
 
-        TransactionalTdbDatastore datastore =
-                (TransactionalTdbDatastore) overlay.getDatastore();
         Subsubscription firstSubsubscription =
                 subscription.getSubSubscriptions()[0];
 
@@ -112,7 +109,8 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 firstSubsubscription.getAtomicQuery().getQuadruplePattern();
 
         TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.READ_ONLY);
 
         try {
             QuadrupleIterator it =

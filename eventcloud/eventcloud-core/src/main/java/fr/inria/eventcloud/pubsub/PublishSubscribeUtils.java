@@ -734,16 +734,14 @@ public final class PublishSubscribeUtils {
     private static void rewriteAndIndexSubscription(final SemanticCanOverlay overlay,
                                                     final Subscription subscription,
                                                     final Quadruple quadrupleMatching) {
-        TransactionalTdbDatastore datastore =
-                (TransactionalTdbDatastore) overlay.getDatastore();
-
         if (subscription.getType() == NotificationListenerType.BINDING) {
             // stores a quadruple that contains the information about the
             // subscription that is matched and the quadruple that matches the
             // subscription. This is useful to create the notification later.
             // The matching quadruple is not sent directly to the next peers
-            // because the quadruple value will be stored in memory on several
-            // peer. Moreover, there is no limit about the size of a quadruple.
+            // because this imply to store the quadruple value in memory on
+            // several peers. Moreover, there is no limit about the size of a
+            // quadruple.
             Quadruple metaQuad =
                     PublishSubscribeUtils.createMetaQuadruple(
                             quadrupleMatching,
@@ -753,7 +751,7 @@ public final class PublishSubscribeUtils {
                                     XSDDatatype.XSDlong));
 
             TransactionalDatasetGraph txnGraph =
-                    datastore.begin(AccessMode.WRITE);
+                    overlay.getSubscriptionsDatastore().begin(AccessMode.WRITE);
 
             try {
                 txnGraph.add(metaQuad);
@@ -786,6 +784,8 @@ public final class PublishSubscribeUtils {
                     + " , subscription: "
                     + rewrittenSubscription.getSparqlQuery());
         }
+
         overlay.dispatchv(new IndexSubscriptionRequest(rewrittenSubscription));
     }
+
 }

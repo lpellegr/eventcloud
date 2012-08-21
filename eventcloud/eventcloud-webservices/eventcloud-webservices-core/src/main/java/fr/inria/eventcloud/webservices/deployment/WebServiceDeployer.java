@@ -340,7 +340,7 @@ public class WebServiceDeployer {
      * 
      * @param service
      *            Service to expose as web service.
-     * @param urlSuffix
+     * @param addressSuffix
      *            the suffix appended to the end of the URL associated to the
      *            service deployed.
      * @param port
@@ -361,7 +361,7 @@ public class WebServiceDeployer {
      *            Class defining the services to expose as web services.
      * @param service
      *            Service to expose as web service.
-     * @param urlSuffix
+     * @param addressSuffix
      *            the suffix appended to the end of the URL associated to the
      *            service deployed.
      * @param port

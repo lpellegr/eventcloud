@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
  * A DeleteQuadrupleRequest is used to remove a quadruple from the network. The
@@ -50,7 +50,8 @@ public class DeleteQuadrupleRequest extends QuadrupleRequest {
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
         TransactionalDatasetGraph txnGraph =
-                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.WRITE);
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.WRITE);
 
         try {
             txnGraph.delete(quad);

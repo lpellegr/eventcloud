@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.UUID;
 
@@ -47,11 +48,11 @@ public class JoinIntroduceResponseOperation<E extends Element> implements
 
     private final NeighborTable<E> neighbors;
 
-    private final Object data;
+    private final Serializable data;
 
     public JoinIntroduceResponseOperation(UUID peerId, Zone<E> zone,
             LinkedList<SplitEntry> splitHistory, NeighborTable<E> neighbors,
-            Object data) {
+            Serializable data) {
         this.peerId = peerId;
         this.zone = zone;
         this.splitHistory = splitHistory;
@@ -75,7 +76,7 @@ public class JoinIntroduceResponseOperation<E extends Element> implements
         return this.neighbors;
     }
 
-    public Object getData() {
+    public Serializable getData() {
         return this.data;
     }
 

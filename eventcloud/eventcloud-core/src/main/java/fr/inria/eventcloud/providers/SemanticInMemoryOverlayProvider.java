@@ -39,7 +39,7 @@ public final class SemanticInMemoryOverlayProvider extends
     public SemanticCanOverlay get() {
         return new SemanticCanOverlay(
                 new TransactionalTdbDatastoreMem(),
+                new TransactionalTdbDatastoreMem(),
                 new TransactionalTdbDatastoreMem());
     }
-
 }

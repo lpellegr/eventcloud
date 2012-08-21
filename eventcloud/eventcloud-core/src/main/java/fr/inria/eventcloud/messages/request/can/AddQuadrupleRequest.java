@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
  * An AddQuadrupleRequest is used to insert a quadruple into the network. The
- * request will be routed on the network until to reach the peer which manage
- * the quad components. Then, the quad is stored on that peer.
+ * request will be routed on the network until to reach the peer which manages
+ * the quad components. Then, the quadruple is stored on that peer.
  * 
  * @author lpellegr
  */
@@ -49,7 +49,8 @@ public class AddQuadrupleRequest extends QuadrupleRequest {
     @Override
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
         TransactionalDatasetGraph txnGraph =
-                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.WRITE);
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.WRITE);
 
         try {
             txnGraph.add(quad);
@@ -61,5 +62,4 @@ public class AddQuadrupleRequest extends QuadrupleRequest {
             txnGraph.end();
         }
     }
-
 }

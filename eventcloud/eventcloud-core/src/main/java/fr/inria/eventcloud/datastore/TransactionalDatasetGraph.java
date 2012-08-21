@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.datastore;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Dataset;
@@ -36,13 +36,13 @@ public interface TransactionalDatasetGraph {
 
     void add(Quadruple quadruple);
 
-    void add(List<Quadruple> quadruples);
+    void add(Collection<Quadruple> quadruples);
 
     boolean contains(Quadruple quadruple);
 
     void delete(Quadruple quadruple);
 
-    void delete(List<Quadruple> quadruples);
+    void delete(Collection<Quadruple> quadruples);
 
     void delete(QuadruplePattern quadruplePattern);
 

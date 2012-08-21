@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.providers;
 
+import java.io.File;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -44,26 +45,43 @@ public final class SemanticPersistentOverlayProvider extends
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("resource")
     public SemanticCanOverlay get() {
-        return new SemanticCanOverlay(new TransactionalTdbDatastore(
-                EventCloudProperties.getRepositoryPath(this.streamUrl)
-                        .getAbsolutePath(),
-                EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue()),
+        // datastore used to store publications, historical data, etc.
+        TransactionalTdbDatastore miscDatastore =
+                new TransactionalTdbDatastore(
+                        EventCloudProperties.getRepositoryPath(this.streamUrl)
+                                .getAbsolutePath()
+                                + File.pathSeparator + "misc",
+                        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue());
 
-        // the repository used for colanders may be in-memory or
-        // persistent
-                EventCloudProperties.COLANDER_IN_MEMORY.getValue()
-                        ? new TransactionalTdbDatastoreMem()
-                        : new TransactionalTdbDatastore(
-                                EventCloudProperties.COLANDER_REPOSITORIES_PATH.getValue()
-                                        + "/" + UUID.randomUUID().toString(),
-                                true));
+        // datastore used to store subscriptions
+        TransactionalTdbDatastore subscriptionsDatastore =
+                new TransactionalTdbDatastore(
+                        EventCloudProperties.getRepositoryPath(this.streamUrl)
+                                .getAbsolutePath()
+                                + File.pathSeparator + "subscriptions",
+                        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue());
+
+        // datastore used to filter intermediate results for SPARQL requests
+        // from a SparqlColander
+        TransactionalTdbDatastore colanderDatastore;
+        if (EventCloudProperties.COLANDER_IN_MEMORY.getValue()) {
+            colanderDatastore = new TransactionalTdbDatastoreMem();
+        } else {
+            colanderDatastore =
+                    new TransactionalTdbDatastore(
+                            EventCloudProperties.COLANDER_REPOSITORIES_PATH.getValue()
+                                    + File.pathSeparator
+                                    + UUID.randomUUID().toString(), true);
+        }
+
+        return new SemanticCanOverlay(
+                miscDatastore, subscriptionsDatastore, colanderDatastore);
     }
 
     public void setStreamUrl(String streamUrl) {
         Preconditions.checkState(
-                this.streamUrl == null, "Stream URL was already set");
+                this.streamUrl == null, "Stream URL already set");
 
         this.streamUrl = streamUrl;
     }

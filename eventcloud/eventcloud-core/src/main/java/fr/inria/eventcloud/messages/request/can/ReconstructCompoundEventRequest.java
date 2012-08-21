@@ -34,7 +34,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 
@@ -97,7 +97,8 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
         List<Quadruple> result = new ArrayList<Quadruple>();
 
         TransactionalDatasetGraph txnGraph =
-                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.READ_ONLY);
 
         try {
             // all events which belong to a compound event share the same graph

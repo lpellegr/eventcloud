@@ -48,7 +48,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
@@ -88,10 +87,10 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
     /**
      * Constructs a new overlay with messagingManager set to
-     * {@link CanRequestResponseManager} and no {@link Datastore}.
+     * {@link CanRequestResponseManager}.
      */
     public CanOverlay() {
-        this(new CanRequestResponseManager(), null);
+        this(new CanRequestResponseManager());
     }
 
     /**
@@ -102,22 +101,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      *            the {@link RequestResponseManager} to use.
      */
     public CanOverlay(RequestResponseManager requestResponseManager) {
-        this(requestResponseManager, null);
-    }
-
-    /**
-     * Constructs a new overlay with the specified {@code dataHandler} and
-     * {@code requestResponseManager}.
-     * 
-     * @param requestResponseManager
-     *            the {@link RequestResponseManager} to use.
-     * 
-     * @param datastore
-     *            the datastore instance to set.
-     */
-    public CanOverlay(RequestResponseManager requestResponseManager,
-            Datastore datastore) {
-        super(requestResponseManager, datastore);
+        super(requestResponseManager);
 
         this.neighborTable = new NeighborTable<E>();
         this.peerJoiningId = new AtomicReference<UUID>();
@@ -453,13 +437,9 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                                 newZones.get(directionInv)));
 
         return new JoinIntroduceResponseOperation<E>(
-                super.id,
-                newZones.get(directionInv),
-                historyToTransfert,
+                super.id, newZones.get(directionInv), historyToTransfert,
                 pendingNewNeighborhood,
-                this.datastore == null
-                        ? null
-                        : this.datastore.removeDataIn(newZones.get(directionInv)));
+                this.removeDataIn(newZones.get(directionInv)));
     }
 
     public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation<E> operation) {
@@ -472,10 +452,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                 this.tmpJoinInformation.getDimension(),
                 this.tmpJoinInformation.getDirection()));
 
-        if (this.datastore != null) {
-            this.datastore.removeDataIn(this.tmpJoinInformation.getEntry()
-                    .getZone());
-        }
+        this.removeDataIn(this.tmpJoinInformation.getEntry().getZone());
 
         // removes the current peer from the neighbors that are back
         // the new peer which join and updates the zone maintained by
@@ -587,9 +564,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         this.splitHistory = response.getSplitHistory();
         this.neighborTable = response.getNeighbors();
 
-        if (this.datastore != null) {
-            this.datastore.affectDataReceived(response.getData());
-        }
+        this.assignDataReceived(response.getData());
 
         PAFuture.waitFor(landmarkPeer.receiveImmediateService(new JoinWelcomeOperation<E>()));
 
@@ -649,8 +624,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             PAFuture.waitFor(suitableNeighbor.getStub().receive(
                     new LeaveOperation<E>(
                             super.id, this.zone, neighbors,
-                            this.datastore == null
-                                    ? null : this.datastore.retrieveAllData())));
+                            this.retrieveAllData())));
 
             // updates neighbors NeighborTable
             for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -706,7 +680,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             this.zone = this.zone.merge(operation.getPeerLeavingZone());
 
             if (operation.getData() != null) {
-                this.datastore.affectDataReceived(operation.getData());
+                this.assignDataReceived(operation.getData());
             }
 
             this.neighborTable.removeAll(dim, dir);

@@ -148,6 +148,38 @@ public class TrackerTest implements Serializable {
             return this.toString();
         }
 
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void assignDataReceived(Serializable dataReceived) {
+
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Serializable retrieveAllData() {
+            return null;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Serializable retrieveDataIn(Object interval) {
+            return null;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Serializable removeDataIn(Object interval) {
+            return null;
+        }
+
     }
 
     public static final class CanMockOverlay extends MockOverlay {

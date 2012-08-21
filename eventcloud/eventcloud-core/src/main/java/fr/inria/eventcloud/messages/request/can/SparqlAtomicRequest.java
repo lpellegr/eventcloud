@@ -32,8 +32,8 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponseProvider;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
@@ -72,7 +72,8 @@ public class SparqlAtomicRequest extends
                                                           AnycastRequest<SemanticElement> request,
                                                           fr.inria.eventcloud.api.QuadruplePattern quadruplePattern) {
         TransactionalDatasetGraph txnGraph =
-                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.READ_ONLY);
 
         try {
             QueryIterator iterator =
@@ -80,7 +81,7 @@ public class SparqlAtomicRequest extends
                             this.atomicQuery.getOpRepresentation(),
                             txnGraph.toDataset());
 
-            return this.toQuadruple(iterator, this.atomicQuery);
+            return toQuadruples(iterator, this.atomicQuery);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         } finally {
@@ -88,19 +89,17 @@ public class SparqlAtomicRequest extends
         }
     }
 
-    private List<Quadruple> toQuadruple(QueryIterator it,
-                                        AtomicQuery atomicQuery) {
+    private static List<Quadruple> toQuadruples(QueryIterator it,
+                                                AtomicQuery atomicQuery) {
         Builder<Quadruple> builder = ImmutableList.builder();
 
         while (it.hasNext()) {
             Binding binding = it.next();
 
-            Node graph = this.getBoundValue(binding, atomicQuery.getGraph());
-            Node subject =
-                    this.getBoundValue(binding, atomicQuery.getSubject());
-            Node predicate =
-                    this.getBoundValue(binding, atomicQuery.getPredicate());
-            Node object = this.getBoundValue(binding, atomicQuery.getObject());
+            Node graph = getBoundValue(binding, atomicQuery.getGraph());
+            Node subject = getBoundValue(binding, atomicQuery.getSubject());
+            Node predicate = getBoundValue(binding, atomicQuery.getPredicate());
+            Node object = getBoundValue(binding, atomicQuery.getObject());
 
             builder.add(new Quadruple(graph, subject, predicate, object));
         }
@@ -108,7 +107,7 @@ public class SparqlAtomicRequest extends
         return builder.build();
     }
 
-    private Node getBoundValue(Binding binding, Node node) {
+    private static Node getBoundValue(Binding binding, Node node) {
         if (node.isVariable()) {
             return binding.get(Var.alloc(node.getName()));
         } else {

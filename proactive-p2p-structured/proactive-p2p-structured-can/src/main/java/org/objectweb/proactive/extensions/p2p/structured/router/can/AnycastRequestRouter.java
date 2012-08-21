@@ -133,7 +133,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
     protected void handle(final StructuredOverlay overlay,
                           final AnycastRequest<E> request) {
         @SuppressWarnings("unchecked")
-        CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
+        CanOverlay<E> canOverlay = (CanOverlay<E>) overlay;
 
         // the current peer has no neighbor: this means that the query can
         // only be handled by itself
@@ -251,7 +251,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
     @Override
     protected void route(StructuredOverlay overlay, AnycastRequest<E> request) {
         @SuppressWarnings("unchecked")
-        CanOverlay<E> overlayCAN = ((CanOverlay<E>) overlay);
+        CanOverlay<E> overlayCAN = (CanOverlay<E>) overlay;
 
         byte dimension = 0;
         byte direction = NeighborTable.DIRECTION_ANY;
@@ -306,5 +306,4 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             e.printStackTrace();
         }
     }
-
 }

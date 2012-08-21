@@ -72,8 +72,10 @@ public class RetrieveSubSolutionOperation implements AsynchronousOperation {
         // when this operation is handled we can suppose that a binding
         // notification listener is used
 
+        SemanticCanOverlay semanticOverlay = ((SemanticCanOverlay) overlay);
+
         TransactionalTdbDatastore datastore =
-                (TransactionalTdbDatastore) overlay.getDatastore();
+                semanticOverlay.getSubscriptionsDatastore();
 
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);

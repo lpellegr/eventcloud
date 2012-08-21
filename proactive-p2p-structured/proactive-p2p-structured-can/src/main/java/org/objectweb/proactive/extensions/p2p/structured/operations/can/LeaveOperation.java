@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
 
@@ -46,10 +47,10 @@ public class LeaveOperation<E extends Element> implements SynchronousOperation {
 
     private final Set<NeighborEntry<E>> newNeighborsToSet;
 
-    private final Object data;
+    private final Serializable data;
 
     public LeaveOperation(UUID peerLeavingId, Zone<E> peerLeavingZone,
-            Set<NeighborEntry<E>> newNeighborsToSet, Object data) {
+            Set<NeighborEntry<E>> newNeighborsToSet, Serializable data) {
         this.peerLeavingId = peerLeavingId;
         this.peerLeavingZone = peerLeavingZone;
         this.newNeighborsToSet = newNeighborsToSet;
@@ -68,7 +69,7 @@ public class LeaveOperation<E extends Element> implements SynchronousOperation {
         return this.newNeighborsToSet;
     }
 
-    public Object getData() {
+    public Serializable getData() {
         return this.data;
     }
 

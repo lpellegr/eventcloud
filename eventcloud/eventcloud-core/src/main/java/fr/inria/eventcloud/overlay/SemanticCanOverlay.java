@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.overlay;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -32,12 +33,14 @@ import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEn
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.update.UpdateAction;
 import com.hp.hpl.jena.update.UpdateFactory;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
@@ -71,23 +74,35 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private final ConcurrentMap<SubscriptionId, SubscriberConnectionFailure> subscriberConnectionFailures;
 
+    private final TransactionalTdbDatastore miscDatastore;
+
+    private final TransactionalTdbDatastore subscriptionsDatastore;
+
     /**
-     * Constructs a new overlay with the specified {@code dataHandler} and
-     * {@code requestResponseManager}.
+     * Constructs a new overlay with the specified datastore instances.
      * 
-     * @param peerDatastore
-     *            the datastore instance to set for storing semantic data.
+     * @param subscriptionsDatastore
+     *            the datastore instance that is used to store subscriptions.
+     * 
+     * @param miscDatastore
+     *            the datastore instance that is used to store miscellaneous
+     *            data (publications, historical data, etc.).
      * 
      * @param colanderDatastore
-     *            the datastore instance to set for filtering sparql answers
-     *            from a {@link SparqlColander}.
+     *            the datastore instance that is used to filter intermediate
+     *            results for SPARQL requests from a {@link SparqlColander}.
      */
-    public SemanticCanOverlay(TransactionalTdbDatastore peerDatastore,
+    public SemanticCanOverlay(
+            final TransactionalTdbDatastore subscriptionsDatastore,
+            TransactionalTdbDatastore miscDatastore,
             TransactionalTdbDatastore colanderDatastore) {
-        super(new SemanticRequestResponseManager(colanderDatastore),
-                peerDatastore);
+        super(new SemanticRequestResponseManager(colanderDatastore));
 
-        this.socialFilter = null;
+        this.miscDatastore = miscDatastore;
+        this.subscriptionsDatastore = subscriptionsDatastore;
+
+        this.miscDatastore.open();
+        this.subscriptionsDatastore.open();
 
         this.peerStubsCache =
                 CacheBuilder.newBuilder()
@@ -112,13 +127,13 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                             @Override
                             public Subscription load(SubscriptionId key) {
                                 return Subscription.parseFrom(
-                                        (TransactionalTdbDatastore) SemanticCanOverlay.this.datastore,
-                                        key);
+                                        subscriptionsDatastore, key);
                             }
                         });
 
         this.subscriberConnectionFailures =
                 new MapMaker().softValues().makeMap();
+
     }
 
     /**
@@ -203,7 +218,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     public void storeSubscription(Subscription subscription) {
         TransactionalDatasetGraph txnGraph =
-                ((TransactionalTdbDatastore) super.datastore).begin(AccessMode.WRITE);
+                this.subscriptionsDatastore.begin(AccessMode.WRITE);
 
         try {
             txnGraph.add(subscription.toQuadruples());
@@ -247,11 +262,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         deleteSubsubscriptionsQuery.append(" ?subSubscriptionIdUri . ?subSubscriptionIdUri ?p ?o }}");
 
         synchronized (this.subscriptionsCache) {
-            TransactionalTdbDatastore datastore =
-                    (TransactionalTdbDatastore) super.datastore;
-
             TransactionalDatasetGraph txnGraph =
-                    datastore.begin(AccessMode.WRITE);
+                    this.subscriptionsDatastore.begin(AccessMode.WRITE);
             try {
                 // deletes potential intermediate results if the original
                 // subscription uses a binding notification listener
@@ -302,6 +314,14 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         }
     }
 
+    public TransactionalTdbDatastore getMiscDatastore() {
+        return this.miscDatastore;
+    }
+
+    public TransactionalTdbDatastore getSubscriptionsDatastore() {
+        return this.subscriptionsDatastore;
+    }
+
     public ConcurrentMap<SubscriptionId, SubscriberConnectionFailure> getSubscriberConnectionFailures() {
         return this.subscriberConnectionFailures;
     }
@@ -327,6 +347,125 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     @Override
     protected Zone<SemanticElement> newZone() {
         return new SemanticZone();
+    }
+
+    /*
+     * DataHandler interface implementation
+     */
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void assignDataReceived(Serializable dataReceived) {
+        SemanticData semanticDataReceived = ((SemanticData) dataReceived);
+
+        if (semanticDataReceived.getMiscData() != null) {
+            TransactionalDatasetGraph txnGraph =
+                    this.miscDatastore.begin(AccessMode.WRITE);
+
+            try {
+                txnGraph.add(semanticDataReceived.getMiscData());
+                txnGraph.commit();
+            } finally {
+                txnGraph.end();
+            }
+        }
+        // TODO: add subscriptions support
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SemanticData retrieveAllData() {
+        TransactionalDatasetGraph txnGraph =
+                this.miscDatastore.begin(AccessMode.READ_ONLY);
+
+        List<Quadruple> data = null;
+        try {
+            data = Lists.newArrayList(txnGraph.find(QuadruplePattern.ANY));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
+
+        // TODO: add subscriptions support
+
+        return new SemanticData(data, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public SemanticData retrieveDataIn(Object interval) {
+        return this.retrieveDataIn((Zone<SemanticElement>) interval, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public SemanticData removeDataIn(Object interval) {
+        return this.retrieveDataIn((Zone<SemanticElement>) interval, true);
+    }
+
+    private SemanticData retrieveDataIn(Zone<SemanticElement> zone,
+                                        boolean remove) {
+        SemanticElement graph, subject, predicate, object;
+
+        List<Quadruple> result = new ArrayList<Quadruple>();
+
+        TransactionalDatasetGraph txnGraph =
+                this.miscDatastore.begin(AccessMode.READ_ONLY);
+        try {
+            QuadrupleIterator it = txnGraph.find(QuadruplePattern.ANY);
+
+            while (it.hasNext()) {
+                Quadruple quad = it.next();
+
+                graph = new SemanticElement(quad.getGraph().toString());
+                subject = new SemanticElement(quad.getSubject().toString());
+                predicate = new SemanticElement(quad.getPredicate().toString());
+                object = new SemanticElement(quad.getObject().toString());
+
+                if (graph.compareTo(zone.getLowerBound((byte) 0)) >= 0
+                        && graph.compareTo(zone.getUpperBound((byte) 0)) < 0
+                        && subject.compareTo(zone.getLowerBound((byte) 1)) >= 0
+                        && subject.compareTo(zone.getUpperBound((byte) 1)) < 0
+                        && predicate.compareTo(zone.getLowerBound((byte) 2)) >= 0
+                        && predicate.compareTo(zone.getUpperBound((byte) 2)) < 0
+                        && object.compareTo(zone.getLowerBound((byte) 3)) >= 0
+                        && object.compareTo(zone.getUpperBound((byte) 3)) < 0) {
+                    result.add(quad);
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        } finally {
+            txnGraph.end();
+        }
+
+        if (remove) {
+            txnGraph = this.miscDatastore.begin(AccessMode.WRITE);
+            try {
+                for (Quadruple q : result) {
+                    txnGraph.delete(q);
+                }
+                txnGraph.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                txnGraph.end();
+            }
+        }
+
+        // TODO: add subscriptions support
+        return new SemanticData(result, null);
     }
 
 }

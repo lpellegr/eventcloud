@@ -18,27 +18,18 @@ package fr.inria.eventcloud.datastore;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.tdb.StoreConnection;
 import com.hp.hpl.jena.tdb.base.block.FileMode;
 import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.tdb.sys.SystemTDB;
 import com.hp.hpl.jena.tdb.transaction.TDBTransactionException;
-
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
-import fr.inria.eventcloud.overlay.can.SemanticZone;
 
 /**
  * Wraps an instance of {@link StoreConnection}. As for {@link StoreConnection},
@@ -109,7 +100,7 @@ public class TransactionalTdbDatastore extends Datastore {
      * {@inheritDoc}
      */
     @Override
-    protected void internalOpen() {
+    protected void _open() {
 
     }
 
@@ -117,7 +108,7 @@ public class TransactionalTdbDatastore extends Datastore {
      * {@inheritDoc}
      */
     @Override
-    protected void internalClose() {
+    protected void _close() {
         boolean released = false;
 
         // TODO: avoid active wait. The best solution consist in providing a
@@ -159,118 +150,6 @@ public class TransactionalTdbDatastore extends Datastore {
                                 + " has failed", e);
             }
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Quadruple> retrieveDataIn(Object interval) {
-        return this.retrieveDataIn(interval, false);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Quadruple> removeDataIn(Object interval) {
-        return this.retrieveDataIn(interval, true);
-    }
-
-    private List<Quadruple> retrieveDataIn(Object interval, boolean remove) {
-        SemanticZone zone = (SemanticZone) interval;
-        SemanticElement graph, subject, predicate, object;
-
-        List<Quadruple> result = new ArrayList<Quadruple>();
-        List<Quadruple> quadruplesToRemove = null;
-        if (remove) {
-            quadruplesToRemove = new ArrayList<Quadruple>();
-        }
-
-        TransactionalDatasetGraph txnGraph = this.begin(AccessMode.READ_ONLY);
-        try {
-            QuadrupleIterator it = txnGraph.find(QuadruplePattern.ANY);
-
-            while (it.hasNext()) {
-                Quadruple quad = it.next();
-
-                graph = new SemanticElement(quad.getGraph().toString());
-                subject = new SemanticElement(quad.getSubject().toString());
-                predicate = new SemanticElement(quad.getPredicate().toString());
-                object = new SemanticElement(quad.getObject().toString());
-
-                if (graph.compareTo(zone.getLowerBound((byte) 0)) >= 0
-                        && graph.compareTo(zone.getUpperBound((byte) 0)) < 0
-                        && subject.compareTo(zone.getLowerBound((byte) 1)) >= 0
-                        && subject.compareTo(zone.getUpperBound((byte) 1)) < 0
-                        && predicate.compareTo(zone.getLowerBound((byte) 2)) >= 0
-                        && predicate.compareTo(zone.getUpperBound((byte) 2)) < 0
-                        && object.compareTo(zone.getLowerBound((byte) 3)) >= 0
-                        && object.compareTo(zone.getUpperBound((byte) 3)) < 0) {
-                    result.add(quad);
-
-                    if (remove) {
-                        quadruplesToRemove.add(quad);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            txnGraph.end();
-        }
-
-        if (remove) {
-            txnGraph = this.begin(AccessMode.WRITE);
-            try {
-                for (Quadruple q : quadruplesToRemove) {
-                    txnGraph.delete(q);
-                }
-                txnGraph.commit();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                txnGraph.end();
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public void affectDataReceived(Object dataReceived) {
-        TransactionalDatasetGraph txnGraph = this.begin(AccessMode.WRITE);
-
-        try {
-            txnGraph.add((List<Quadruple>) dataReceived);
-            txnGraph.commit();
-        } finally {
-            txnGraph.end();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Quadruple> retrieveAllData() {
-        List<Quadruple> result = null;
-
-        TransactionalDatasetGraph txnGraph = this.begin(AccessMode.READ_ONLY);
-
-        try {
-            result = Lists.newArrayList(txnGraph.find(QuadruplePattern.ANY));
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            txnGraph.end();
-        }
-
-        return result;
     }
 
 }

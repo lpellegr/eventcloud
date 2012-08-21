@@ -24,9 +24,6 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchExce
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The StructuredOverlay class contains the logic associated to methods exposed
@@ -35,14 +32,9 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lpellegr
  */
-public abstract class StructuredOverlay {
-
-    private static final Logger log =
-            LoggerFactory.getLogger(StructuredOverlay.class);
+public abstract class StructuredOverlay implements DataHandler {
 
     protected final UUID id;
-
-    protected Datastore datastore;
 
     protected RequestResponseManager messageManager;
 
@@ -62,20 +54,8 @@ public abstract class StructuredOverlay {
         this.id = UUID.randomUUID();
     }
 
-    protected StructuredOverlay(RequestResponseManager queryManager) {
-        this(queryManager, null);
-    }
-
-    protected StructuredOverlay(RequestResponseManager messageManager,
-            Datastore datastore) {
+    protected StructuredOverlay(RequestResponseManager messageManager) {
         this();
-        this.datastore = datastore;
-
-        if (this.datastore != null) {
-            this.datastore.open();
-            log.debug("Datastore opened on {}", this);
-        }
-
         this.messageManager = messageManager;
     }
 
@@ -134,15 +114,6 @@ public abstract class StructuredOverlay {
      */
     public UUID getId() {
         return this.id;
-    }
-
-    /**
-     * Returns the datastore instance.
-     * 
-     * @return the datastore instance.
-     */
-    public Datastore getDatastore() {
-        return this.datastore;
     }
 
     /**

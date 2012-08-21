@@ -19,15 +19,11 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 /**
  * Class used to deploy a Content-Addressable Network where each {@link Peer}
  * and {@link Tracker} is initialized as a Component.
- * 
- * @param <E>
- *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */

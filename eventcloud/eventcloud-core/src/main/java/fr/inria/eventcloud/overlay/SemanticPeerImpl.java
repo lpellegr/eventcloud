@@ -98,8 +98,8 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     public SemanticPeerImpl() {
         // keep it empty because it is called each time we have to reify
-        // a SemanticPeer object (e.g. each time you call getRandomPeer()
-        // from a tracker)
+        // a SemanticPeer object (e.g. each time a call to getRandomPeer()
+        // from a tracker is performed)
     }
 
     /**
@@ -120,6 +120,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         super.initComponentActivity(body);
         EventCloudProperties.loadConfiguration();
 
+        // FIXME issue #24
         this.threadPool =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
     }

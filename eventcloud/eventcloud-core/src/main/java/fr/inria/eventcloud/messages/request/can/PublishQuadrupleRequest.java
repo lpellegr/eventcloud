@@ -50,7 +50,6 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
@@ -106,13 +105,13 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                     + quadrupleMatching.getPredicate() + " "
                     + quadrupleMatching.getObject());
         }
-        final TransactionalTdbDatastore datastore =
-                ((TransactionalTdbDatastore) overlay.getDatastore());
 
-        TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
+        TransactionalDatasetGraph txnGraph =
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.WRITE);
 
         try {
-            // the quadruple is stored by using its timestamped graph value
+            // the quadruple is stored by using its meta graph value
             txnGraph.add(
                     quadrupleMatching.createMetaGraphNode(),
                     quadrupleMatching.getSubject(),
@@ -128,7 +127,9 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         // finds the sub subscriptions which are stored locally and that are
         // matching the quadruple which have been just inserted into the
         // local datastore
-        txnGraph = datastore.begin(AccessMode.READ_ONLY);
+        txnGraph =
+                ((SemanticCanOverlay) overlay).getSubscriptionsDatastore()
+                        .begin(AccessMode.READ_ONLY);
 
         QueryIterator it = null;
         try {

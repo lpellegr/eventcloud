@@ -16,14 +16,15 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
+import java.io.Serializable;
+
 import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.StringZone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.datastore.Datastore;
 
 /**
- * A {@link CanOverlay} semiskilled for {@link StringElements}.
+ * A {@link CanOverlay} semiskilled for {@link StringElement}s.
  * 
  * @author lpellegr
  */
@@ -39,13 +40,9 @@ public class StringCanOverlay extends CanOverlay<StringElement> {
      * 
      * @param requestResponseManager
      *            the {@link RequestResponseManager} to use.
-     * 
-     * @param datastore
-     *            the datastore instance to set.
      */
-    public StringCanOverlay(RequestResponseManager requestResponseManager,
-            Datastore datastore) {
-        super(requestResponseManager, datastore);
+    public StringCanOverlay(RequestResponseManager requestResponseManager) {
+        super(requestResponseManager);
     }
 
     /**
@@ -54,6 +51,26 @@ public class StringCanOverlay extends CanOverlay<StringElement> {
     @Override
     protected Zone<StringElement> newZone() {
         return new StringZone();
+    }
+
+    @Override
+    public void assignDataReceived(Serializable dataReceived) {
+
+    }
+
+    @Override
+    public Serializable retrieveAllData() {
+        return null;
+    }
+
+    @Override
+    public Serializable retrieveDataIn(Object interval) {
+        return null;
+    }
+
+    @Override
+    public Serializable removeDataIn(Object interval) {
+        return null;
     }
 
 }

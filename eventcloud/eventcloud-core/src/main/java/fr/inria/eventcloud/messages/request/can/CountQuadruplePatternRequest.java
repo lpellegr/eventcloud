@@ -27,8 +27,8 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
@@ -67,7 +67,8 @@ public class CountQuadruplePatternRequest extends
                                                AnycastRequest<SemanticElement> request,
                                                QuadruplePattern quadruplePattern) {
         TransactionalDatasetGraph txnGraph =
-                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.READ_ONLY);
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.READ_ONLY);
 
         try {
             QuadrupleIterator it = txnGraph.find(quadruplePattern);

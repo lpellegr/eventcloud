@@ -28,8 +28,8 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponseProvider;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
@@ -60,10 +60,9 @@ public class DeleteQuadruplesRequest extends
                                                           QuadruplePattern quadruplePattern) {
         List<Quadruple> result = null;
 
-        TransactionalTdbDatastore datastore =
-                (TransactionalTdbDatastore) overlay.getDatastore();
         TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.READ_ONLY);
         try {
             result = Lists.newArrayList(txnGraph.find(quadruplePattern));
         } catch (Exception e) {
@@ -73,7 +72,8 @@ public class DeleteQuadruplesRequest extends
         }
 
         txnGraph =
-                ((TransactionalTdbDatastore) overlay.getDatastore()).begin(AccessMode.WRITE);
+                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
+                        AccessMode.WRITE);
 
         try {
             txnGraph.delete(quadruplePattern);

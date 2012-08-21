@@ -113,11 +113,6 @@ public class PeerImpl extends AbstractComponent implements Peer,
         // e.printStackTrace();
         // }
         // }
-
-        if (this.overlay.datastore != null
-                && this.overlay.datastore.isInitialized()) {
-            this.overlay.datastore.close();
-        }
     }
 
     /**
