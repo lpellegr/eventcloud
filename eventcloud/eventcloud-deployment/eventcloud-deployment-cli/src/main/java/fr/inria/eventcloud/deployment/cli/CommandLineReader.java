@@ -28,7 +28,6 @@ import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.StringsCompleter;
 
 import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterDescription;
 import com.beust.jcommander.ParameterException;
 
@@ -201,11 +200,12 @@ public class CommandLineReader<T> {
                         command.getDescription()));
 
                 for (ParameterDescription param : command.getParameters()) {
-                    Parameter ap =
-                            ((Parameter) param.getField().getAnnotations()[0]);
                     out.append(String.format(
-                            "        %-23s        %s %s\n", ap.names()[0],
-                            ap.description(), ap.required()
+                            "        %-23s        %s %s\n",
+                            param.getLongestName(), param.getDescription(),
+                            param.getParameterized()
+                                    .getWrappedParameter()
+                                    .required()
                                     ? "(required)" : "(optional)"));
                 }
             }

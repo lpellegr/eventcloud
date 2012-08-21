@@ -19,8 +19,8 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 import java.io.Serializable;
 
 /**
- * PeerDataHandler defines the methods that are used by a peer managing data.
- * This allows to automate/ease the data transfer during the
+ * DataHandler defines the methods that are used by a peer managing data. This
+ * allows to automate/ease the data transfer during the
  * {@link StructuredOverlay#join(Peer)} and {@link StructuredOverlay#leave()}
  * operations.
  * 
