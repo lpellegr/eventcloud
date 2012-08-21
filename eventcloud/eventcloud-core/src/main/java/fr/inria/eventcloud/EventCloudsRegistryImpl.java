@@ -28,7 +28,6 @@ import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -293,26 +292,26 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     }
 
     /**
-     * Lookups a ProActive stub representation for the specified
+     * Lookups an EventClouds registry component on the specified
      * {@code componentUri}.
      * 
      * @param componentUri
-     *            the URL of the component.
+     *            the URL of the EventClouds registry component.
      * 
-     * @return a ProActive stub representation of an EventCloudsRegistry.
+     * @return the reference on the {@link EventCloudsRegistry} interface of the
+     *         EventClouds registry component.
      * 
      * @throws IOException
      *             if an error occurs during the construction of the stub.
      * 
      * @deprecated This method will be removed for the next release. Please use
-     *             {@link EventCloudsRegistryFactory#from(String)} instead.
+     *             {@link EventCloudsRegistryFactory#lookupEventCloudsRegistry(String)}
+     *             instead.
      */
     @Deprecated
     public static EventCloudsRegistry lookup(String componentUri)
             throws IOException {
-        return ComponentUtils.lookupFcInterface(
-                componentUri, EVENTCLOUDS_REGISTRY_SERVICES_ITF,
-                EventCloudsRegistry.class);
+        return EventCloudsRegistryFactory.lookupEventCloudsRegistry(componentUri);
     }
 
 }

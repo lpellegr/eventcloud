@@ -46,18 +46,19 @@ public class EventCloudsRegistryFactory {
     }
 
     /**
-     * Lookups a ProActive stub representation for the specified
+     * Lookups an EventClouds registry component on the specified
      * {@code componentUri}.
      * 
      * @param componentUri
-     *            the URL of the component.
+     *            the URL of the EventClouds registry component.
      * 
-     * @return a ProActive stub representation of an EventCloudsRegistry.
+     * @return the reference on the {@link EventCloudsRegistry} interface of the
+     *         EventClouds registry component.
      * 
      * @throws IOException
      *             if an error occurs during the construction of the stub.
      */
-    public static EventCloudsRegistry from(String componentUri)
+    public static EventCloudsRegistry lookupEventCloudsRegistry(String componentUri)
             throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri,
