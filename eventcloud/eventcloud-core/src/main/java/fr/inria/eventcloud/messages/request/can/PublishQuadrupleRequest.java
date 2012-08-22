@@ -32,7 +32,6 @@ import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.algebra.optimize.Optimize;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.expr.E_Datatype;
@@ -50,6 +49,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.Vars;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
@@ -72,22 +72,6 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     /*
      * Jena variables used to build the algebra
      */
-    private static final Var subscriptionIdVar = Var.alloc("sId");
-
-    private static final Var subscriptionSourceVar = Var.alloc("sSrc");
-
-    private static final Var subSubscriptionIdVar = Var.alloc("ssId");
-
-    private static final Var subSubscriptionSourceVar = Var.alloc("ssSrc");
-
-    private static final Var subSubscriptionGraphVar = Var.alloc("ssGraph");
-
-    private static final Var subSubscriptionSubjectVar = Var.alloc("ssSubject");
-
-    private static final Var subSubscriptionPredicateVar =
-            Var.alloc("ssPredicate");
-
-    private static final Var subSubscriptionObjectVar = Var.alloc("ssObject");
 
     public PublishQuadrupleRequest(Quadruple quad) {
         super(quad, null);
@@ -151,7 +135,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 // executed
                 SubscriptionId subscriptionId =
                         SubscriptionId.parseSubscriptionId(binding.get(
-                                Var.alloc("sId")).getLiteralLexicalForm());
+                                Vars.SUBSCRIPTION_ID).getLiteralLexicalForm());
 
                 Subscription subscription =
                         ((SemanticCanOverlay) overlay).findSubscription(subscriptionId);
@@ -177,38 +161,38 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         // Basic Graph Pattern
         BasicPattern bp = new BasicPattern();
         bp.add(Triple.create(
-                subSubscriptionSourceVar,
+                Vars.SUBSUBSCRIPTION_SOURCE,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_NODE,
-                subSubscriptionGraphVar));
+                Vars.SUBSUBSCRIPTION_GRAPH));
         bp.add(Triple.create(
-                subSubscriptionSourceVar,
+                Vars.SUBSUBSCRIPTION_SOURCE,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE,
-                subSubscriptionSubjectVar));
+                Vars.SUBSUBSCRIPTION_SUBJECT));
         bp.add(Triple.create(
-                subSubscriptionSourceVar,
+                Vars.SUBSUBSCRIPTION_SOURCE,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_NODE,
-                subSubscriptionPredicateVar));
+                Vars.SUBSUBSCRIPTION_PREDICATE));
         bp.add(Triple.create(
-                subSubscriptionSourceVar,
+                Vars.SUBSUBSCRIPTION_SOURCE,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_NODE,
-                subSubscriptionObjectVar));
+                Vars.SUBSUBSCRIPTION_OBJECT));
         bp.add(Triple.create(
-                subSubscriptionSourceVar,
+                Vars.SUBSUBSCRIPTION_SOURCE,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_ID_NODE,
-                subSubscriptionIdVar));
+                Vars.SUBSUBSCRIPTION_ID));
         bp.add(Triple.create(
-                subscriptionSourceVar,
+                Vars.SUBSCRIPTION_SOURCE,
                 PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE,
-                subSubscriptionIdVar));
+                Vars.SUBSUBSCRIPTION_ID));
         bp.add(Triple.create(
-                subscriptionSourceVar,
+                Vars.SUBSCRIPTION_SOURCE,
                 PublishSubscribeConstants.SUBSCRIPTION_ID_NODE,
-                subscriptionIdVar));
+                Vars.SUBSCRIPTION_ID));
 
         // Conditions
         NodeValue ssVariableExpr =
                 NodeValue.makeNode(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE);
-        ExprVar ssGraphExprVar = new ExprVar(subSubscriptionGraphVar);
+        ExprVar ssGraphExprVar = new ExprVar(Vars.SUBSUBSCRIPTION_GRAPH);
         NodeValue graphExpr = NodeValue.makeNode(quad.getGraph());
 
         E_LogicalOr graphConditions =
@@ -223,7 +207,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                         // to the quadruple which is matching the subscription
                                 new E_Equals(ssGraphExprVar, graphExpr)));
 
-        ExprVar ssSubjectExprVar = new ExprVar(subSubscriptionSubjectVar);
+        ExprVar ssSubjectExprVar = new ExprVar(Vars.SUBSUBSCRIPTION_SUBJECT);
         E_LogicalOr subjectConditions =
                 new E_LogicalOr(
                         new E_SameTerm(
@@ -233,14 +217,15 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 new E_Datatype(ssSubjectExprVar),
                                 ssVariableExpr));
 
-        ExprVar ssPredicateExprVar = new ExprVar(subSubscriptionPredicateVar);
+        ExprVar ssPredicateExprVar =
+                new ExprVar(Vars.SUBSUBSCRIPTION_PREDICATE);
         E_LogicalOr predicateConditions =
                 new E_LogicalOr(new E_SameTerm(
                         ssPredicateExprVar,
                         NodeValue.makeNode(quad.getPredicate())), new E_Equals(
                         new E_Datatype(ssPredicateExprVar), ssVariableExpr));
 
-        ExprVar ssObjectExprVar = new ExprVar(subSubscriptionObjectVar);
+        ExprVar ssObjectExprVar = new ExprVar(Vars.SUBSUBSCRIPTION_OBJECT);
         E_LogicalOr objectConditions =
                 new E_LogicalOr(
                         new E_SameTerm(
@@ -261,7 +246,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         return new OpProject(
                 new OpGraph(
                         PublishSubscribeConstants.SUBSCRIPTION_NS_NODE, filter),
-                Arrays.asList(subscriptionIdVar));
+                Arrays.asList(Vars.SUBSCRIPTION_ID));
     }
 
 }

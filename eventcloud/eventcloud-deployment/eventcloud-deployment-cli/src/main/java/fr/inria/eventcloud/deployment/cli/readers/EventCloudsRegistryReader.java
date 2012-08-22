@@ -80,7 +80,8 @@ public class EventCloudsRegistryReader {
 
         EventCloudsRegistry registry = null;
         try {
-            registry = EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
+            registry =
+                    EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
