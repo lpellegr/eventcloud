@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -58,6 +57,7 @@ import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.datastore.Vars;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
@@ -268,7 +268,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         }
 
         Node eventId;
-        if ((eventId = binding.get(Var.alloc("g"))) == null) {
+        if ((eventId = binding.get(Vars.GRAPH)) == null) {
             throw new IllegalArgumentException(
                     "The specified binding does not contain a graph value");
         }

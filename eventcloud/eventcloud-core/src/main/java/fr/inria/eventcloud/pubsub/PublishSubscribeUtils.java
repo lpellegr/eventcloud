@@ -75,6 +75,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.datastore.Vars;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
@@ -155,18 +156,20 @@ public final class PublishSubscribeUtils {
     public static final List<SubscriptionId> findSubscriptionIds(TransactionalTdbDatastore datastore,
                                                                  SubscriptionId originalSubscriptionId) {
         StringBuilder query = new StringBuilder();
-        query.append("SELECT ?subscriptionId WHERE {\n    GRAPH ");
+        query.append("SELECT ");
+        query.append(Vars.SUBSCRIPTION_ID.toString());
+        query.append(" WHERE {\n    GRAPH ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
         query.append(" {\n        ");
-        query.append("?subscriptionIdUri ");
+        query.append("?sIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
         query.append(' ');
         query.append(NodeFmtLib.str(originalSubscriptionId.toJenaNode()));
-        query.append(" .\n        ?subscriptionIdUri ");
-        // query.append(NodeFmtLib.serialize(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE));
-        // query.append(" ?subSubscriptionId .\n        ?subscriptionIdUri ");
+        query.append(" .\n        ?sIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
-        query.append(" ?subscriptionId .\n    }\n}");
+        query.append(' ');
+        query.append(Vars.SUBSCRIPTION_ID.toString());
+        query.append(" .\n    }\n}");
 
         List<SubscriptionId> ids = new ArrayList<SubscriptionId>();
 
@@ -185,13 +188,7 @@ public final class PublishSubscribeUtils {
 
                 SubscriptionId subscriptionId =
                         SubscriptionId.parseSubscriptionId(binding.get(
-                                Var.alloc("subscriptionId"))
-                                .getLiteralLexicalForm());
-                // SubscriptionId subSubscriptionId =
-                // new SubscriptionId(
-                // ((Number) binding.get(
-                // Var.alloc("subSubscriptionId"))
-                // .getLiteralValue()).longValue());
+                                Vars.SUBSCRIPTION_ID).getLiteralLexicalForm());
                 ids.add(subscriptionId);
             }
         } finally {

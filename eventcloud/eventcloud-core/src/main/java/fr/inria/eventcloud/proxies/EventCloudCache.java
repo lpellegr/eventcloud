@@ -53,7 +53,8 @@ public class EventCloudCache implements Serializable {
     public EventCloudCache(String registryUrl, EventCloudId eventcloudId)
             throws EventCloudIdNotManaged {
         try {
-            this.registry = EventCloudsRegistryFactory.lookupEventCloudsRegistry(registryUrl);
+            this.registry =
+                    EventCloudsRegistryFactory.lookupEventCloudsRegistry(registryUrl);
 
             this.deployer = this.registry.find(eventcloudId);
 
