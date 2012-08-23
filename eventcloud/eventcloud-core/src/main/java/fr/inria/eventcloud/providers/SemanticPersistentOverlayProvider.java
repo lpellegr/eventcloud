@@ -46,20 +46,21 @@ public final class SemanticPersistentOverlayProvider extends
      */
     @Override
     public SemanticCanOverlay get() {
+        Preconditions.checkNotNull(this.streamUrl);
+
+        File repositoryPath =
+                EventCloudProperties.getRepositoryPath(this.streamUrl);
+
         // datastore used to store publications, historical data, etc.
         TransactionalTdbDatastore miscDatastore =
                 new TransactionalTdbDatastore(
-                        EventCloudProperties.getRepositoryPath(this.streamUrl)
-                                .getAbsolutePath()
-                                + File.pathSeparator + "misc",
+                        new File(repositoryPath, "misc"),
                         EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue());
 
         // datastore used to store subscriptions
         TransactionalTdbDatastore subscriptionsDatastore =
                 new TransactionalTdbDatastore(
-                        EventCloudProperties.getRepositoryPath(this.streamUrl)
-                                .getAbsolutePath()
-                                + File.pathSeparator + "subscriptions",
+                        new File(repositoryPath, "subscriptions"),
                         EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue());
 
         // datastore used to filter intermediate results for SPARQL requests
@@ -70,9 +71,9 @@ public final class SemanticPersistentOverlayProvider extends
         } else {
             colanderDatastore =
                     new TransactionalTdbDatastore(
-                            EventCloudProperties.COLANDER_REPOSITORIES_PATH.getValue()
-                                    + File.pathSeparator
-                                    + UUID.randomUUID().toString(), true);
+                            new File(
+                                    EventCloudProperties.COLANDER_REPOSITORIES_PATH.getValue(),
+                                    UUID.randomUUID().toString()), true);
         }
 
         return new SemanticCanOverlay(
@@ -80,9 +81,6 @@ public final class SemanticPersistentOverlayProvider extends
     }
 
     public void setStreamUrl(String streamUrl) {
-        Preconditions.checkState(
-                this.streamUrl == null, "Stream URL already set");
-
         this.streamUrl = streamUrl;
     }
 

@@ -188,7 +188,7 @@ public class EventCloudProperties {
         // adds file separator at the end of the repositories path
         if (!REPOSITORIES_PATH.getValue().endsWith("/")) {
             REPOSITORIES_PATH.setValue(REPOSITORIES_PATH.getValue()
-                    + File.separator);
+                    + File.separatorChar);
         }
 
         File repositoryPath =
@@ -235,7 +235,7 @@ public class EventCloudProperties {
     public static final String getPreferencesFilePath() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getPreferencesPath());
-        buffer.append(File.separator);
+        buffer.append(File.separatorChar);
         buffer.append("preferences");
 
         return buffer.toString();
@@ -249,9 +249,9 @@ public class EventCloudProperties {
     public static final String getPreferencesPath() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(System.getProperty("user.home"));
-        buffer.append(File.separator);
+        buffer.append(File.separatorChar);
         buffer.append(".eventcloud");
-        buffer.append(File.separator);
+        buffer.append(File.separatorChar);
 
         return buffer.toString();
     }
@@ -265,7 +265,7 @@ public class EventCloudProperties {
         StringBuffer buffer = new StringBuffer();
         buffer.append(getPreferencesPath());
         buffer.append("repositories");
-        buffer.append(File.separator);
+        buffer.append(File.separatorChar);
 
         return buffer.toString();
     }

@@ -63,6 +63,10 @@ public class TransactionalTdbDatastore extends Datastore {
         this(new Location(location), autoRemove);
     }
 
+    public TransactionalTdbDatastore(File location, boolean autoRemove) {
+        this(location.getAbsolutePath(), autoRemove);
+    }
+
     protected TransactionalTdbDatastore(Location location, boolean autoRemove) {
         if (!location.isMem()) {
             new File(location.getDirectoryPath()).mkdirs();
