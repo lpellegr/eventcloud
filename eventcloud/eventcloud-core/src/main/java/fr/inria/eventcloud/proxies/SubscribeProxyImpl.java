@@ -19,11 +19,9 @@ package fr.inria.eventcloud.proxies;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -101,10 +99,10 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
             LoggerFactory.getLogger(SubscribeProxy.class);
 
     // contains the subscriptions that have been registered from this proxy
-    private Map<SubscriptionId, Subscription> subscriptions;
+    private ConcurrentMap<SubscriptionId, Subscription> subscriptions;
 
     // contains the listeners to use in order to deliver the solutions
-    private Map<SubscriptionId, NotificationListener<?>> listeners;
+    private ConcurrentMap<SubscriptionId, NotificationListener<?>> listeners;
 
     // contains the solutions that are being received
     private ConcurrentMap<NotificationId, Solution> solutions;
@@ -178,9 +176,10 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
             super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
 
             this.componentUri = componentUri;
-            this.subscriptions = new HashMap<SubscriptionId, Subscription>();
+            this.subscriptions =
+                    new ConcurrentHashMap<SubscriptionId, Subscription>();
             this.listeners =
-                    new HashMap<SubscriptionId, NotificationListener<?>>();
+                    new ConcurrentHashMap<SubscriptionId, NotificationListener<?>>();
             this.solutions = new ConcurrentHashMap<NotificationId, Solution>();
 
             // TODO: use the properties field to initialize ELA properties
