@@ -18,6 +18,7 @@ package fr.inria.eventcloud.overlay;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -26,8 +27,6 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.openjena.riot.out.NodeFmtLib;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import com.google.common.cache.CacheBuilder;
@@ -36,6 +35,12 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFormatter;
+import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.update.UpdateAction;
 import com.hp.hpl.jena.update.UpdateFactory;
 
@@ -49,6 +54,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.datastore.WithoutPrefixFunction;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -62,9 +68,6 @@ import fr.inria.eventcloud.reasoner.SparqlColander;
  * @author lpellegr
  */
 public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
-
-    private static final Logger log =
-            LoggerFactory.getLogger(SemanticCanOverlay.class);
 
     private RelationshipStrengthEngineManager socialFilter;
 
@@ -167,9 +170,9 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     /**
      * Finds the subscription associated to the specified subscription
-     * {@code id} from the cache. When no subscription is found into the cache,
-     * a lookup is performed in the datastore. If no subscription is found for
-     * the specified {@code id}, a {@code null} value is returned.
+     * {@code id} from the cache. When no subscription is found in the cache, a
+     * lookup is performed in the datastore. If no subscription is found for the
+     * specified {@code id}, a {@code null} value is returned.
      * 
      * @param id
      *            the subscription identifier used to lookup the subscription.
@@ -180,16 +183,14 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         try {
             return this.subscriptionsCache.get(id);
         } catch (ExecutionException e) {
-            log.error(
-                    "Error while retrieving subscription {} from the cache",
-                    id, e);
-            return null;
+            throw new IllegalStateException("Subscription " + id
+                    + " not found in cache and datastore");
         }
     }
 
     /**
      * Finds the peer stub associated to the specified {@code peerUrl} from the
-     * cache. When no stub is found into the cache, the stub is created on the
+     * cache. When no stub is found in the cache, the stub is created on the
      * fly. If an error occurs during the creation of the stub, a {@code null}
      * value is returned.
      * 
@@ -202,15 +203,15 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         try {
             return this.peerStubsCache.get(peerUrl);
         } catch (ExecutionException e) {
-            log.error(
-                    "Error while retrieving stub from the cache for url: {}",
-                    peerUrl, e);
-            return null;
+            throw new IllegalStateException(
+                    "Stub associated to URL "
+                            + peerUrl
+                            + " not found in cache and the construction of the remote reference failed");
         }
     }
 
     /**
-     * Stores the specified {@code subscription} into the cache and the local
+     * Stores the specified {@code subscription} in cache and the local
      * persistent datastore.
      * 
      * @param subscription
@@ -296,7 +297,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                         txnGraph.toDataset());
 
                 // deletes quadruples related to the subscription
-
                 for (Node node : subscriptionsIdUris) {
                     txnGraph.delete(new QuadruplePattern(
                             PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
@@ -338,6 +338,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         result.append(this.peerStubsCache.stats());
         result.append("\nSubscriber proxies cache:\n");
         result.append(Subscription.subscribeProxiesCache.stats());
+
         return result.toString();
     }
 
@@ -360,18 +361,26 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     public void assignDataReceived(Serializable dataReceived) {
         SemanticData semanticDataReceived = ((SemanticData) dataReceived);
 
-        if (semanticDataReceived.getMiscData() != null) {
-            TransactionalDatasetGraph txnGraph =
-                    this.miscDatastore.begin(AccessMode.WRITE);
+        store(this.miscDatastore, semanticDataReceived.getMiscData());
+        store(
+                this.subscriptionsDatastore,
+                semanticDataReceived.getSubscriptions());
+    }
 
-            try {
-                txnGraph.add(semanticDataReceived.getMiscData());
-                txnGraph.commit();
-            } finally {
-                txnGraph.end();
-            }
+    private static void store(TransactionalTdbDatastore datastore,
+                              Collection<Quadruple> quadruples) {
+        if (quadruples == null || quadruples.size() == 0) {
+            return;
         }
-        // TODO: add subscriptions support
+
+        TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
+
+        try {
+            txnGraph.add(quadruples);
+            txnGraph.commit();
+        } finally {
+            txnGraph.end();
+        }
     }
 
     /**
@@ -379,21 +388,20 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     public SemanticData retrieveAllData() {
-        TransactionalDatasetGraph txnGraph =
-                this.miscDatastore.begin(AccessMode.READ_ONLY);
+        return new SemanticData(
+                retrieveAll(this.miscDatastore),
+                retrieveAll(this.subscriptionsDatastore));
+    }
 
-        List<Quadruple> data = null;
+    private static List<Quadruple> retrieveAll(TransactionalTdbDatastore datastore) {
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+
         try {
-            data = Lists.newArrayList(txnGraph.find(QuadruplePattern.ANY));
-        } catch (Exception e) {
-            e.printStackTrace();
+            return Lists.newArrayList(txnGraph.find(QuadruplePattern.ANY));
         } finally {
             txnGraph.end();
         }
-
-        // TODO: add subscriptions support
-
-        return new SemanticData(data, null);
     }
 
     /**
@@ -416,6 +424,15 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private SemanticData retrieveDataIn(Zone<SemanticElement> zone,
                                         boolean remove) {
+        List<Quadruple> miscData = this.retrieveMiscDataIn(zone, remove);
+        List<Quadruple> subscriptions =
+                this.retrieveSubscriptionsIn(zone, remove);
+
+        return new SemanticData(miscData, subscriptions);
+    }
+
+    private List<Quadruple> retrieveMiscDataIn(Zone<SemanticElement> zone,
+                                               boolean remove) {
         SemanticElement graph, subject, predicate, object;
 
         List<Quadruple> result = new ArrayList<Quadruple>();
@@ -451,21 +468,150 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         }
 
         if (remove) {
-            txnGraph = this.miscDatastore.begin(AccessMode.WRITE);
-            try {
-                for (Quadruple q : result) {
-                    txnGraph.delete(q);
-                }
-                txnGraph.commit();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                txnGraph.end();
-            }
+            delete(this.miscDatastore, result);
         }
 
-        // TODO: add subscriptions support
-        return new SemanticData(result, null);
+        return result;
+    }
+
+    private List<Quadruple> retrieveSubscriptionsIn(Zone<SemanticElement> zone,
+                                                    boolean remove) {
+        String graphLowerBound =
+                zone.getLowerBound((byte) 0).getUnicodeRepresentation();
+        String graphUpperBound =
+                zone.getUpperBound((byte) 0).getUnicodeRepresentation();
+        String subjectLowerBound =
+                zone.getLowerBound((byte) 1).getUnicodeRepresentation();
+        String subjectUpperBound =
+                zone.getUpperBound((byte) 1).getUnicodeRepresentation();
+        String predicateLowerBound =
+                zone.getLowerBound((byte) 2).getUnicodeRepresentation();
+        String predicateUpperBound =
+                zone.getUpperBound((byte) 2).getUnicodeRepresentation();
+        String objectLowerBound =
+                zone.getLowerBound((byte) 3).getUnicodeRepresentation();
+        String objectUpperBound =
+                zone.getUpperBound((byte) 3).getUnicodeRepresentation();
+
+        TransactionalDatasetGraph txnGraph =
+                this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);
+        QueryExecution qexec =
+                QueryExecutionFactory.create(
+                        QueryFactory.create(createSparqlQueryRetrievingSubscriptionsToCopy(new String[] {
+                                graphLowerBound, graphUpperBound,
+                                subjectLowerBound, subjectUpperBound,
+                                predicateLowerBound, predicateUpperBound,
+                                objectLowerBound, objectUpperBound})),
+                        txnGraph.toDataset());
+
+        List<Quadruple> result = new ArrayList<Quadruple>();
+
+        try {
+            ResultSet results = qexec.execSelect();
+
+            while (results.hasNext()) {
+                QuadrupleIterator it =
+                        txnGraph.find(new QuadruplePattern(
+                                results.nextBinding().get(Var.alloc("oid")),
+                                Node.ANY, Node.ANY, Node.ANY));
+
+                while (it.hasNext()) {
+                    result.add(it.next());
+                }
+            }
+
+            // TODO intermediate results also have to be retrieved
+        } finally {
+            qexec.close();
+            txnGraph.end();
+        }
+
+        if (remove) {
+            // TODO warning some subscriptions have to be copied but not deleted
+            // from the original peer whereas some others have to be transfered
+            // and thus deleted
+
+            // delete(this.subscriptionsDatastore, result);
+        }
+
+        return result;
+    }
+
+    private static void delete(TransactionalTdbDatastore datastore,
+                               Collection<Quadruple> quadruples) {
+        TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);
+        try {
+            for (Quadruple q : quadruples) {
+                txnGraph.delete(q);
+            }
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
+    }
+
+    private static String createSparqlQueryRetrievingSubscriptionsToCopy(String[] bounds) {
+        char[] vars = {'g', 's', 'p', 'o'};
+
+        StringBuilder result = new StringBuilder();
+        result.append("PREFIX ec: <");
+        result.append(EventCloudProperties.FILTER_FUNCTIONS_NS.getValue());
+        result.append(">\n");
+        result.append("SELECT ?oid WHERE {\n  GRAPH ?oid {\n");
+        result.append("    ?oid <");
+        result.append(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_PROPERTY);
+        result.append("> ?iref .\n");
+        result.append("    ?ssid <");
+        result.append(PublishSubscribeConstants.SUBSUBSCRIPTION_ID_PROPERTY);
+        result.append("> ?iref .\n");
+
+        for (int i = 0; i < vars.length; i++) {
+            result.append("    ?ssid <");
+            result.append(PublishSubscribeConstants.SUBSUBSCRIPTION_NS);
+            result.append(vars[i]);
+            result.append("> ?");
+            result.append(vars[i]);
+            result.append(" .\n");
+        }
+        result.append("  }\n");
+
+        for (int i = 0; i < vars.length; i++) {
+            result.append("  BIND (ec:");
+            result.append(WithoutPrefixFunction.NAME);
+            result.append("(str(?");
+            result.append(vars[i]);
+            result.append(")) as ?s");
+            result.append(vars[i]);
+            result.append(") .\n");
+        }
+        result.append("  FILTER (\n    ");
+
+        for (int i = 0, j = 0; i < vars.length; i++, j += 2) {
+            result.append("(datatype(?");
+            result.append(vars[i]);
+            result.append(") = <");
+            result.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
+            result.append("> || (?s");
+            result.append(vars[i]);
+            result.append(" >= \"");
+            result.append(bounds[j]);
+            result.append("\" && ?s");
+            result.append(vars[i]);
+            result.append(" < \"");
+            result.append(bounds[j + 1]);
+            result.append("\"))");
+
+            if (i < vars.length - 1) {
+                result.append(" &&\n    ");
+            } else {
+                result.append(")");
+            }
+        }
+        result.append("\n}");
+
+        return result.toString();
     }
 
 }

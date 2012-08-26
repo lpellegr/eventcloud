@@ -53,17 +53,10 @@ public class EventCloudProperties {
      * Defines the prefix that is used for transforming an event cloud
      * identifier to an URL.
      */
-    public static final PropertyString EVENT_CLOUD_ID_PREFIX =
+    public static final PropertyString EVENTCLOUD_ID_PREFIX =
             new PropertyString(
                     "eventcloud.id.prefix",
                     "http://events.event-processing.org/ids/");
-
-    /**
-     * Defines the namespace which is used to prefix some of the URI declared
-     * into the project.
-     */
-    public static final PropertyString EVENT_CLOUD_NS = new PropertyString(
-            "eventcloud.namespace", "urn:eventcloud:");
 
     /**
      * Specifies where the repositories that store the RDF data are created.
@@ -87,6 +80,14 @@ public class EventCloudProperties {
             new PropertyString(
                     "colander.repositories.path", getDefaultTemporaryPath()
                             + "colanders" + File.separatorChar);
+
+    /**
+     * 
+     */
+    public static final PropertyString FILTER_FUNCTIONS_NS =
+            new PropertyString(
+                    "filter.functions.ns",
+                    "http://eventcloud.inria.fr/function#");
 
     /**
      * This property is used to have the possibility to restore a repository

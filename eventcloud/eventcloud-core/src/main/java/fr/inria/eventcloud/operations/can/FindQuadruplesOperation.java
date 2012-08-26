@@ -28,6 +28,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -42,8 +43,22 @@ public final class FindQuadruplesOperation implements SynchronousOperation {
 
     private final QuadruplePattern quadruplePattern;
 
+    private final boolean useSubscriptionsDatastore;
+
+    /**
+     * The quadruple pattern to execute against the misc datastore by default.
+     * 
+     * @param quadruplePattern
+     *            the quadruple pattern to resolve.
+     */
     public FindQuadruplesOperation(QuadruplePattern quadruplePattern) {
+        this(quadruplePattern, false);
+    }
+
+    public FindQuadruplesOperation(QuadruplePattern quadruplePattern,
+            boolean useSubscriptionsDatastore) {
         this.quadruplePattern = quadruplePattern;
+        this.useSubscriptionsDatastore = useSubscriptionsDatastore;
     }
 
     /**
@@ -53,9 +68,17 @@ public final class FindQuadruplesOperation implements SynchronousOperation {
     public ResponseOperation handle(StructuredOverlay overlay) {
         List<Quadruple> result = null;
 
+        TransactionalTdbDatastore datastore;
+
+        if (this.useSubscriptionsDatastore) {
+            datastore =
+                    ((SemanticCanOverlay) overlay).getSubscriptionsDatastore();
+        } else {
+            datastore = ((SemanticCanOverlay) overlay).getMiscDatastore();
+        }
+
         TransactionalDatasetGraph txnGraph =
-                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
-                        AccessMode.READ_ONLY);
+                datastore.begin(AccessMode.READ_ONLY);
 
         try {
             result = Lists.newArrayList(txnGraph.find(this.quadruplePattern));

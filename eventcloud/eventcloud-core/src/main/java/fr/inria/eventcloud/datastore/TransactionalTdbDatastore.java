@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.tdb.StoreConnection;
 import com.hp.hpl.jena.tdb.base.block.FileMode;
 import com.hp.hpl.jena.tdb.base.file.Location;
@@ -98,6 +99,9 @@ public class TransactionalTdbDatastore extends Datastore {
     private void registerPlugins() {
         TypeMapper.getInstance().registerDatatype(
                 VariableDatatype.getInstance());
+
+        FunctionRegistry.get().put(
+                WithoutPrefixFunction.URI, WithoutPrefixFunction.class);
     }
 
     /**
@@ -115,7 +119,7 @@ public class TransactionalTdbDatastore extends Datastore {
     protected void _close() {
         boolean released = false;
 
-        // TODO: avoid active wait. The best solution consist in providing a
+        // TODO: avoid active wait. The best solution consists of providing a
         // patch to Jena in order to force a wait by using wait/notify mechanism
         // when Location#release is called
         while (!released) {

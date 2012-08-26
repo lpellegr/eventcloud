@@ -37,7 +37,7 @@ public class EventCloudId implements Serializable {
      * Creates a new event cloud identifier with randomly generated stream URL.
      */
     public EventCloudId() {
-        this(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+        this(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
                 + UUID.randomUUID().toString());
     }
 

@@ -78,7 +78,7 @@ public class SubscribeProxyTest {
     private static MutableInteger signals = new MutableInteger();
 
     private static Node eventId =
-            NodeGenerator.randomUri(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue());
+            NodeGenerator.randomUri(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue());
 
     private EventCloudId eventCloudId;
 
@@ -129,7 +129,7 @@ public class SubscribeProxyTest {
                     if (nbEventsPublished.incrementAndGet() <= NB_EVENTS_TO_WAIT) {
                         List<Quadruple> quadruples = new ArrayList<Quadruple>();
                         Node graphValue =
-                                Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                                Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
                                         + "/" + UUID.randomUUID().toString());
                         for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
                             quadruples.add(QuadrupleGenerator.random(graphValue));
@@ -424,7 +424,7 @@ public class SubscribeProxyTest {
 
         for (int i = 0; i < nbDays; i++) {
             Node graphId =
-                    Node.createURI(EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue()
+                    Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
                             + Integer.toString(i));
             quads = new ArrayList<Quadruple>(2);
             quads.add(new Quadruple(
