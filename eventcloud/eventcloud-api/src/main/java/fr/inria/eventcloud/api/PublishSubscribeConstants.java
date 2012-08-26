@@ -18,8 +18,6 @@ package fr.inria.eventcloud.api;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.configuration.EventCloudProperties;
-
 /**
  * Defines constants that are regularly used by the publish/subscribe
  * algorithms.
@@ -32,20 +30,17 @@ public final class PublishSubscribeConstants {
      * Namespaces
      */
 
-    public static final String EVENT_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "event:";
+    public static final String EVENTCLOUD_NS = "urn:ec:";
 
-    public static final String SUBSCRIPTION_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "subscription:";
+    public static final String EVENT_NS = EVENTCLOUD_NS + "event:";
 
-    public static final String SUBSUBSCRIPTION_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "subsubscription:";
+    public static final String SUBSCRIPTION_NS = EVENTCLOUD_NS + "s:";
 
-    public static final String PUBLICATION_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "publication:";
+    public static final String SUBSUBSCRIPTION_NS = EVENTCLOUD_NS + "ss:";
 
-    public static final String QUADRUPLE_NS =
-            EventCloudProperties.EVENT_CLOUD_NS.getValue() + "quadruple:";
+    public static final String PUBLICATION_NS = EVENTCLOUD_NS + "pub:";
+
+    public static final String QUADRUPLE_NS = EVENTCLOUD_NS + "quad:";
 
     /*
      * Nodes associated to namespaces
@@ -74,19 +69,19 @@ public final class PublishSubscribeConstants {
             + "id";
 
     public static final String SUBSCRIPTION_PARENT_ID_PROPERTY =
-            SUBSCRIPTION_NS + "parentId";
+            SUBSCRIPTION_NS + "pid";
 
     public static final String SUBSCRIPTION_ORIGINAL_ID_PROPERTY =
-            SUBSCRIPTION_NS + "originalId";
+            SUBSCRIPTION_NS + "oid";
 
     public static final String SUBSCRIPTION_SPARQL_QUERY_PROPERTY =
-            SUBSCRIPTION_NS + "sparqlQuery";
+            SUBSCRIPTION_NS + "query";
 
     public static final String SUBSCRIPTION_CREATION_DATETIME_PROPERTY =
-            SUBSCRIPTION_NS + "creationDateTime";
+            SUBSCRIPTION_NS + "ctime";
 
     public static final String SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY =
-            SUBSCRIPTION_NS + "indexationDateTime";
+            SUBSCRIPTION_NS + "itime";
 
     public static final String SUBSCRIPTION_TYPE_PROPERTY = SUBSCRIPTION_NS
             + "type";
@@ -95,16 +90,16 @@ public final class PublishSubscribeConstants {
             SUBSCRIPTION_NS + "subscriber";
 
     public static final String SUBSCRIPTION_DESTINATION_PROPERTY = EVENT_NS
-            + "subscriptionDestination";
+            + "sdestination";
 
     public static final String SUBSCRIPTION_INDEXED_WITH_PROPERTY =
-            SUBSCRIPTION_NS + "indexedWith";
+            SUBSCRIPTION_NS + "iref";
 
     public static final String SUBSCRIPTION_STUB_PROPERTY = SUBSCRIPTION_NS
             + "stub";
 
     public static final String SUBSCRIPTION_HAS_SUBSUBSCRIPTION_PROPERTY =
-            SUBSCRIPTION_NS + "hasSubSubscription";
+            SUBSCRIPTION_NS + "hss";
 
     public static final String SUBSUBSCRIPTION_ID_PROPERTY = SUBSUBSCRIPTION_NS
             + "id";
@@ -113,19 +108,16 @@ public final class PublishSubscribeConstants {
             SUBSUBSCRIPTION_NS + "index";
 
     public static final String SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY =
-            SUBSUBSCRIPTION_NS + "graphValue";
+            SUBSUBSCRIPTION_NS + "g";
 
     public static final String SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY =
-            SUBSUBSCRIPTION_NS + "subjectValue";
+            SUBSUBSCRIPTION_NS + "s";
 
     public static final String SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY =
-            SUBSUBSCRIPTION_NS + "predicateValue";
+            SUBSUBSCRIPTION_NS + "p";
 
     public static final String SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY =
-            SUBSUBSCRIPTION_NS + "objectValue";
-
-    public static final String PUBLICATION_INSERTION_DATETIME_PROPERTY =
-            SUBSCRIPTION_NS + "insertionDateTime";
+            SUBSUBSCRIPTION_NS + "o";
 
     /*
      *  Nodes associated to the properties
@@ -188,14 +180,11 @@ public final class PublishSubscribeConstants {
     public static final Node SUBSUBSCRIPTION_OBJECT_VALUE_NODE =
             Node.createURI(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY);
 
-    public static final Node PUBLICATION_INSERTION_DATETIME_NODE =
-            Node.createURI(PUBLICATION_INSERTION_DATETIME_PROPERTY);
-
     /*
      * Values
      */
 
-    public static final String SUBSCRIPTION_VARIABLE_VALUE = SUBSCRIPTION_NS
+    public static final String SUBSCRIPTION_VARIABLE_VALUE = EVENTCLOUD_NS
             + "var";
 
     public static final String QUADRUPLE_MATCHES_SUBSCRIPTION_VALUE =

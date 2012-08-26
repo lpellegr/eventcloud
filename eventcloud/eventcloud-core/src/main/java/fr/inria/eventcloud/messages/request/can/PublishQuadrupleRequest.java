@@ -244,8 +244,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
 
         // Named Graph + Projection
         return new OpProject(
-                new OpGraph(
-                        PublishSubscribeConstants.SUBSCRIPTION_NS_NODE, filter),
+                new OpGraph(Vars.GRAPH, filter),
                 Arrays.asList(Vars.SUBSCRIPTION_ID));
     }
 

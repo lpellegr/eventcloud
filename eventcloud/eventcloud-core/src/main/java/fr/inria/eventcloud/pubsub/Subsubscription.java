@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.pubsub;
 
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_ID_NODE;
@@ -56,6 +55,8 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  */
 public class Subsubscription implements Quadruplable {
 
+    private final SubscriptionId originalId;
+
     private final SubscriptionId parentId;
 
     private final SubscriptionId id;
@@ -64,20 +65,27 @@ public class Subsubscription implements Quadruplable {
 
     private final AtomicQuery atomicQuery;
 
-    public Subsubscription(SubscriptionId parentId, AtomicQuery atomicQuery,
-            int index) {
+    public Subsubscription(SubscriptionId originalId, SubscriptionId parentId,
+            AtomicQuery atomicQuery, int index) {
+        this.originalId = originalId;
         this.parentId = parentId;
         this.atomicQuery = atomicQuery;
         this.index = index;
         this.id = new SubscriptionId();
     }
 
-    private Subsubscription(SubscriptionId parentId, SubscriptionId id,
-            int index, Node graph, Node subject, Node predicate, Node object) {
+    private Subsubscription(SubscriptionId originalId, SubscriptionId parentId,
+            SubscriptionId id, int index, Node graph, Node subject,
+            Node predicate, Node object) {
+        this.originalId = originalId;
         this.parentId = parentId;
         this.id = id;
         this.index = index;
         this.atomicQuery = new AtomicQuery(graph, subject, predicate, object);
+    }
+
+    public SubscriptionId getOriginalId() {
+        return this.originalId;
     }
 
     public SubscriptionId getParentId() {
@@ -107,43 +115,46 @@ public class Subsubscription implements Quadruplable {
     @Override
     public List<Quadruple> toQuadruples() {
         List<Quadruple> quads = new ArrayList<Quadruple>();
+
+        Node originalSubscriptionURI =
+                PublishSubscribeUtils.createSubscriptionIdUri(this.originalId);
         Node subSubscriptionURI =
                 Node.createURI(SUBSUBSCRIPTION_NS + this.id.toString());
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subSubscriptionURI,
+                originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_ID_NODE,
                 Node.createLiteral(this.id.toString()), false, false));
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subSubscriptionURI,
+                originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_INDEX_NODE, Node.createLiteral(
                         Integer.toString(this.index), XSDDatatype.XSDint),
                 false, false));
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE,
+                originalSubscriptionURI,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_GRAPH_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getGraph()),
                 false, false));
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE,
+                originalSubscriptionURI,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_SUBJECT_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getSubject()),
                 false, false));
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE,
+                originalSubscriptionURI,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_PREDICATE_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getPredicate()),
                 false, false));
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE,
+                originalSubscriptionURI,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_OBJECT_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getObject()),
@@ -205,6 +216,7 @@ public class Subsubscription implements Quadruplable {
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
 
+        SubscriptionId originalId = null;
         try {
             QuadrupleIterator it =
                     txnGraph.find(
@@ -213,14 +225,18 @@ public class Subsubscription implements Quadruplable {
             while (it.hasNext()) {
                 Quadruple quad = it.next();
                 properties.put(quad.getPredicate().toString(), quad.getObject());
+
+                if (!it.hasNext()) {
+                    originalId =
+                            PublishSubscribeUtils.extractSubscriptionId(quad.getGraph());
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             txnGraph.end();
         }
 
         return new Subsubscription(
+                originalId,
                 subscriptionId,
                 SubscriptionId.parseSubscriptionId(PublishSubscribeUtils.extractSubscriptionId(subSubscriptionIdNode.getURI())),
                 (Integer) properties.get(SUBSUBSCRIPTION_INDEX_PROPERTY)

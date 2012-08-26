@@ -37,8 +37,8 @@ import com.hp.hpl.jena.graph.Node;
 import eu.play_project.play_commons.constants.Stream;
 import eu.play_project.play_commons.eventformat.xml.DocumentBuilder;
 import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
 import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
@@ -81,10 +81,9 @@ public class XmlCompoundEventTranslator extends
         String eventId = null;
 
         for (Quadruple quad : event.getQuadruples()) {
-            if (quad.getPredicate()
-                    .equals(
-                            Node.createURI(EventCloudProperties.EVENT_CLOUD_NS.getValue()
-                                    + "event/" + "nbquads"))) {
+            if (quad.getPredicate().equals(
+                    Node.createURI(PublishSubscribeConstants.EVENTCLOUD_NS
+                            + "event/" + "nbquads"))) {
                 continue;
             }
 

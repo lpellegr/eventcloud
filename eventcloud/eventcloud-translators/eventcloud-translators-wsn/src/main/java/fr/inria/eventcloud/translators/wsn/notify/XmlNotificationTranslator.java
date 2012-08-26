@@ -261,7 +261,7 @@ public class XmlNotificationTranslator extends
             eventId =
                     UriGenerator.randomPrefixed(
                             10,
-                            EventCloudProperties.EVENT_CLOUD_ID_PREFIX.getValue())
+                            EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue())
                             .toString()
                             + WsnTranslatorConstants.XML_TRANSLATION_MARKER;
         }

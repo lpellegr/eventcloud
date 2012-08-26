@@ -452,6 +452,9 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                 this.tmpJoinInformation.getDimension(),
                 this.tmpJoinInformation.getDirection()));
 
+        // TODO: do it in background (i.e. in another thread). We don't have to
+        // wait for the termination of this operation in order to complete the
+        // join operation
         this.removeDataIn(this.tmpJoinInformation.getEntry().getZone());
 
         // removes the current peer from the neighbors that are back
@@ -465,7 +468,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                 while (it.hasNext()) {
                     entry = it.next();
                     // we get a neighbor reference which is back the new peer
-                    // which join
+                    // which joins
                     if (dim == this.tmpJoinInformation.getDimension()
                             && dir == directionInv) {
                         CanOperations.removeNeighbor(
@@ -480,7 +483,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                                 getOppositeDirection(dir));
                         it.remove();
                     } else {
-                        // the neighbor have to update the zone associated to
+                        // the neighbors have to update the zone associated to
                         // our id
                         CanOperations.updateNeighborOperation(
                                 entry.getStub(), this.getNeighborEntry(), dim,

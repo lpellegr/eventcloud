@@ -26,7 +26,6 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ID_
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_INDEXATION_DATETIME_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_PARENT_ID_NODE;
@@ -389,7 +388,8 @@ public class Subscription implements Quadruplable, Serializable {
                 for (int i = 0; i < atomicQueries.size(); i++) {
                     this.subSubscriptions[i] =
                             new Subsubscription(
-                                    this.id, atomicQueries.get(i), i);
+                                    this.originalId, this.id,
+                                    atomicQueries.get(i), i);
                 }
             } catch (DecompositionException e) {
                 throw new IllegalStateException(e);
@@ -430,20 +430,23 @@ public class Subscription implements Quadruplable, Serializable {
         Node subscriptionURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.id);
 
+        Node subscriptionOriginalURI =
+                PublishSubscribeUtils.createSubscriptionIdUri(this.originalId);
+
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subscriptionURI, SUBSCRIPTION_ID_NODE,
+                subscriptionOriginalURI, subscriptionURI, SUBSCRIPTION_ID_NODE,
                 Node.createLiteral(this.id.toString()), false, false));
 
         if (this.parentId != null) {
             quads.add(new Quadruple(
-                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_PARENT_ID_NODE,
                     Node.createLiteral(this.parentId.toString()), false, false));
         }
 
         if (this.originalId != null) {
             quads.add(new Quadruple(
-                    SUBSCRIPTION_NS_NODE,
+                    subscriptionOriginalURI,
                     subscriptionURI,
                     SUBSCRIPTION_ORIGINAL_ID_NODE,
                     PublishSubscribeUtils.createSubscriptionIdUri(this.originalId),
@@ -451,20 +454,20 @@ public class Subscription implements Quadruplable, Serializable {
         }
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subscriptionURI,
+                subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SERIALIZED_VALUE_NODE,
                 Node.createLiteral(this.sparqlQuery), false, false));
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(this.creationTime);
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subscriptionURI,
+                subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_CREATION_DATETIME_NODE, Node.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime), false, false));
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subscriptionURI,
+                subscriptionOriginalURI, subscriptionURI,
                 PublishSubscribeConstants.SUBSCRIPTION_TYPE_NODE,
                 Node.createLiteral(
                         Short.toString(this.type.convert()),
@@ -472,33 +475,33 @@ public class Subscription implements Quadruplable, Serializable {
 
         calendar.setTimeInMillis(this.indexationTime);
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subscriptionURI,
+                subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_INDEXATION_DATETIME_NODE, Node.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime), false, false));
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subscriptionURI,
+                subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SUBSCRIBER_NODE,
                 Node.createLiteral(this.subscriberUrl), false, false));
 
         if (this.subscriptionDestination != null) {
             quads.add(new Quadruple(
-                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_DESTINATION_NODE,
                     Node.createLiteral(this.subscriptionDestination), false,
                     false));
         }
 
         quads.add(new Quadruple(
-                SUBSCRIPTION_NS_NODE, subscriptionURI,
+                subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_INDEXED_WITH_NODE,
                 Node.createLiteral(this.getSubSubscriptions()[0].getId()
                         .toString()), false, false));
 
         for (Stub stub : this.stubs) {
             quads.add(new Quadruple(
-                    SUBSCRIPTION_NS_NODE, subscriptionURI,
+                    subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_STUB_NODE,
                     Node.createLiteral(stub.quadrupleHash.toString() + " "
                             + stub.peerUrl), false, false));
@@ -506,7 +509,7 @@ public class Subscription implements Quadruplable, Serializable {
 
         for (Subsubscription ssubscription : this.getSubSubscriptions()) {
             quads.add(new Quadruple(
-                    SUBSCRIPTION_NS_NODE,
+                    subscriptionOriginalURI,
                     subscriptionURI,
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
                     // Node.createLiteral(ssubscription.getId().toString()),
