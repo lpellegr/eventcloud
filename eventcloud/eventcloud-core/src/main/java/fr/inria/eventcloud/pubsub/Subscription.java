@@ -70,8 +70,8 @@ import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.exceptions.DecompositionException;
+import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
-import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
 
@@ -95,7 +95,7 @@ public class Subscription implements Quadruplable, Serializable {
                         @Override
                         public SubscribeProxy load(String subscriberUrl)
                                 throws Exception {
-                            return SubscribeProxyImpl.lookup(subscriberUrl);
+                            return (SubscribeProxy) ProxyFactory.lookupSubscribeProxy(subscriberUrl);
                         }
                     });
 
