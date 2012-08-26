@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.factories;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -194,6 +195,25 @@ public class ProxyFactory implements Serializable {
     }
 
     /**
+     * Lookups a publish proxy component on the specified {@code componentUri}.
+     * 
+     * @param componentUri
+     *            the URL of the publish proxy component.
+     * 
+     * @return the reference on the {@link PublishApi} interface of the publish
+     *         proxy component.
+     * 
+     * @throws IOException
+     *             if an error occurs during the construction of the stub.
+     */
+    public static PublishApi lookupPublishProxy(String componentUri)
+            throws IOException {
+        return ComponentUtils.lookupFcInterface(
+                componentUri, PublishProxyImpl.PUBLISH_SERVICES_ITF,
+                PublishApi.class);
+    }
+
+    /**
      * Creates a new subscribe proxy component deployed on the local JVM and by
      * registering the proxy to the registry in order to have the possibility to
      * receive notification.
@@ -343,6 +363,26 @@ public class ProxyFactory implements Serializable {
     }
 
     /**
+     * Lookups a subscribe proxy component on the specified {@code componentUri}
+     * .
+     * 
+     * @param componentUri
+     *            the URL of the subscribe proxy component.
+     * 
+     * @return the reference on the {@link SubscribeApi} interface of the
+     *         subscribe proxy component.
+     * 
+     * @throws IOException
+     *             if an error occurs during the construction of the stub.
+     */
+    public static SubscribeApi lookupSubscribeProxy(String componentUri)
+            throws IOException {
+        return ComponentUtils.lookupFcInterface(
+                componentUri, SubscribeProxyImpl.SUBSCRIBE_SERVICES_ITF,
+                SubscribeApi.class);
+    }
+
+    /**
      * Creates a new put/get proxy component deployed on the local JVM.
      * 
      * @param registryUrl
@@ -453,6 +493,25 @@ public class ProxyFactory implements Serializable {
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Lookups a put/get proxy component on the specified {@code componentUri}.
+     * 
+     * @param componentUri
+     *            the URL of the put/get proxy component.
+     * 
+     * @return the reference on the {@link PutGetApi} interface of the put/get
+     *         proxy component.
+     * 
+     * @throws IOException
+     *             if an error occurs during the construction of the stub.
+     */
+    public static PutGetApi lookupPutGetProxy(String componentUri)
+            throws IOException {
+        return ComponentUtils.lookupFcInterface(
+                componentUri, PutGetProxyImpl.PUTGET_SERVICES_ITF,
+                PutGetApi.class);
     }
 
 }

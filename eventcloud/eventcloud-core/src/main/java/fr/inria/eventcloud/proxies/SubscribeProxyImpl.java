@@ -47,6 +47,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
@@ -594,6 +595,23 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         return this.componentUri;
     }
 
+    /**
+     * Lookups a subscribe proxy component on the specified {@code componentUri}
+     * .
+     * 
+     * @param componentUri
+     *            the URL of the subscribe proxy component.
+     * 
+     * @return the reference on the {@link SubscribeApi} interface of the
+     *         subscribe proxy component.
+     * 
+     * @throws IOException
+     *             if an error occurs during the construction of the stub.
+     * 
+     * @deprecated This method will be removed for the next release. Please use
+     *             {@link ProxyFactory#lookupSubscribeProxy(String)} instead.
+     */
+    @Deprecated
     public static SubscribeProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, SUBSCRIBE_SERVICES_ITF, SubscribeProxy.class);

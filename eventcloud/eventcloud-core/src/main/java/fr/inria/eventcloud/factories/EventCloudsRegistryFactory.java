@@ -46,27 +46,6 @@ public class EventCloudsRegistryFactory {
     }
 
     /**
-     * Lookups an EventClouds registry component on the specified
-     * {@code componentUri}.
-     * 
-     * @param componentUri
-     *            the URL of the EventClouds registry component.
-     * 
-     * @return the reference on the {@link EventCloudsRegistry} interface of the
-     *         EventClouds registry component.
-     * 
-     * @throws IOException
-     *             if an error occurs during the construction of the stub.
-     */
-    public static EventCloudsRegistry lookupEventCloudsRegistry(String componentUri)
-            throws IOException {
-        return ComponentUtils.lookupFcInterface(
-                componentUri,
-                EventCloudsRegistryImpl.EVENTCLOUDS_REGISTRY_SERVICES_ITF,
-                EventCloudsRegistry.class);
-    }
-
-    /**
      * Creates a new EventClouds registry component deployed on the local JVM.
      * 
      * @return the reference on the {@link EventCloudsRegistry} interface of the
@@ -129,6 +108,27 @@ public class EventCloudsRegistryFactory {
         log.info("EventCloudsRegistry created");
 
         return registry;
+    }
+
+    /**
+     * Lookups an EventClouds registry component on the specified
+     * {@code componentUri}.
+     * 
+     * @param componentUri
+     *            the URL of the EventClouds registry component.
+     * 
+     * @return the reference on the {@link EventCloudsRegistry} interface of the
+     *         EventClouds registry component.
+     * 
+     * @throws IOException
+     *             if an error occurs during the construction of the stub.
+     */
+    public static EventCloudsRegistry lookupEventCloudsRegistry(String componentUri)
+            throws IOException {
+        return ComponentUtils.lookupFcInterface(
+                componentUri,
+                EventCloudsRegistryImpl.EVENTCLOUDS_REGISTRY_SERVICES_ITF,
+                EventCloudsRegistry.class);
     }
 
 }

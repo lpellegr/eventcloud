@@ -18,7 +18,6 @@ package fr.inria.eventcloud.pubsub;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -27,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.joda.time.DateTime;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.core.util.MutableInteger;
@@ -49,6 +49,7 @@ import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
+import fr.inria.eventcloud.api.generators.UuidGenerator;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
@@ -103,6 +104,9 @@ public class SubscribeProxyTest {
                         this.eventCloudId);
     }
 
+    /**
+     * Test a basic subscription with concurrent publications.
+     */
     @Test
     public void testSubscribeWithConcurrentPublications()
             throws EventCloudIdNotManaged {
@@ -130,7 +134,8 @@ public class SubscribeProxyTest {
                         List<Quadruple> quadruples = new ArrayList<Quadruple>();
                         Node graphValue =
                                 Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
-                                        + "/" + UUID.randomUUID().toString());
+                                        + "/" + UuidGenerator.randomUuid());
+
                         for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
                             quadruples.add(QuadrupleGenerator.random(graphValue));
                         }
@@ -184,8 +189,6 @@ public class SubscribeProxyTest {
 
     /**
      * Test a basic subscription with a {@link BindingNotificationListener}.
-     * 
-     * @throws InterruptedException
      */
     @Test(timeout = 60000)
     public void testSubscribeBindingNotificationListener() {
@@ -272,12 +275,9 @@ public class SubscribeProxyTest {
 
     /**
      * Test a basic subscription with a {@link SignalNotificationListener}.
-     * 
-     * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeSignalNotificationListener()
-            throws InterruptedException {
+    public void testSubscribeSignalNotificationListener() {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
@@ -309,12 +309,9 @@ public class SubscribeProxyTest {
     /**
      * Test a basic subscription with a
      * {@link CompoundEventNotificationListener}.
-     * 
-     * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeEventNotificationListener()
-            throws InterruptedException {
+    public void testSubscribeEventNotificationListener() {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
@@ -344,7 +341,7 @@ public class SubscribeProxyTest {
 
         ce = events.get(0);
 
-        // try to republish the event which has been received
+        // tries to republish the event which has been received
         this.publishProxy.publish(ce);
 
         synchronized (events) {
@@ -361,12 +358,9 @@ public class SubscribeProxyTest {
     /**
      * Test a basic subscription with a compound event listener deployed as an
      * active object.
-     * 
-     * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeEventNotificationListenerActiveObject()
-            throws InterruptedException {
+    public void testSubscribeEventNotificationListenerActiveObject() {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
@@ -399,12 +393,9 @@ public class SubscribeProxyTest {
     /**
      * Test a basic subscription with a
      * {@link CompoundEventNotificationListener}.
-     * 
-     * @throws InterruptedException
      */
     @Test(timeout = 60000)
-    public void testSubscribeEventNotificationListenerWeatherUsecase()
-            throws InterruptedException {
+    public void testSubscribeEventNotificationListenerWeatherUsecase() {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g WHERE { GRAPH ?g { "
@@ -513,6 +504,61 @@ public class SubscribeProxyTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+    }
+
+    /**
+     * Test to unsubscribe from a basic subscription.
+     */
+    @Test(timeout = 60000)
+    public void testUnsubscribe() {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
+        // subscribes for any quadruples
+        this.subscribeProxy.subscribe(
+                subscription, new CustomCompoundEventNotificationListener());
+
+        List<Quadruple> quads = new ArrayList<Quadruple>();
+        for (int i = 0; i < 4; i++) {
+            quads.add(QuadrupleGenerator.random(eventId));
+        }
+
+        CompoundEvent ce = new CompoundEvent(quads);
+
+        this.publishProxy.publish(ce);
+
+        synchronized (events) {
+            while (events.size() != 1) {
+                try {
+                    events.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // unsubscribes
+        this.subscribeProxy.unsubscribe(subscription.getId());
+
+        quads = new ArrayList<Quadruple>();
+        for (int i = 0; i < 4; i++) {
+            quads.add(QuadrupleGenerator.random(eventId));
+        }
+
+        ce = new CompoundEvent(quads);
+
+        // publishes a new event
+        this.publishProxy.publish(ce);
+
+        synchronized (events) {
+            try {
+                events.wait(4000);
+                Assert.assertTrue(events.size() == 1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
