@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -146,6 +147,45 @@ public abstract class StructuredOverlay implements DataHandler {
 
     public Map<UUID, ResponseEntry> getResponseEntries() {
         return this.messageManager.getResponsesReceived();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * To be overridden if necessary.
+     */
+    @Override
+    public void assignDataReceived(Serializable dataReceived) {
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * To be overridden if necessary.
+     */
+    @Override
+    public Serializable retrieveAllData() {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * To be overridden if necessary.
+     */
+    @Override
+    public Serializable retrieveDataIn(Object interval) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * To be overridden if necessary.
+     */
+    @Override
+    public Serializable removeDataIn(Object interval) {
+        return null;
     }
 
 }
