@@ -16,10 +16,12 @@
  **/
 package fr.inria.eventcloud.formatters;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.util.FmtUtils;
@@ -93,7 +95,7 @@ public class QuadruplesFormatter {
         append(result, ' ', columnWidths[3] - OBJECT_TITLE.length());
         result.append(" |\n");
         result.append('|');
-        append(result, '-', columnWidthSum + extraSpaces);
+        append(result, '=', columnWidthSum + extraSpaces);
         result.append("|\n");
 
         for (Quadruple q : quadruples) {
@@ -129,6 +131,18 @@ public class QuadruplesFormatter {
         } catch (IOException e) {
             throw new IllegalArgumentException();
         }
+    }
+
+    public static String toString(Collection<Quadruple> quadruples) {
+        return toString(quadruples, false);
+    }
+
+    public static String toString(Collection<Quadruple> quadruples,
+                                  boolean showMetaGraphValue) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        output(baos, quadruples, showMetaGraphValue);
+
+        return new String(baos.toByteArray(), Charsets.UTF_8);
     }
 
     private static void append(StringBuilder stringBuilder, char character,
