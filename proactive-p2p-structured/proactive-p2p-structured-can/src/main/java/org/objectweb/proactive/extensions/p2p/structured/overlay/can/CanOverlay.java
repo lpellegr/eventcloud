@@ -719,11 +719,9 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
     }
 
     /**
-     * Returns the {@link NeighborEntry<Z, E>} associated to the current
-     * overlay.
+     * Returns the {@link NeighborEntry} associated to the current overlay.
      * 
-     * @return the {@link NeighborEntry<Z, E>} associated to the current
-     *         overlay.
+     * @return the {@link NeighborEntry} associated to the current overlay.
      */
     private NeighborEntry<E> getNeighborEntry() {
         return new NeighborEntry<E>(super.id, super.stub, this.zone);
