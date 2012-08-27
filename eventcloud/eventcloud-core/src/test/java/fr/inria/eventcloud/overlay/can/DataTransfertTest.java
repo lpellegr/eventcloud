@@ -21,7 +21,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
@@ -46,8 +45,7 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.formatters.QuadruplesFormatter;
-import fr.inria.eventcloud.operations.can.FindQuadruplesOperation;
-import fr.inria.eventcloud.operations.can.FindQuadruplesResponseOperation;
+import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 
@@ -149,7 +147,7 @@ public class DataTransfertTest {
         firstPeer.add(quad1);
         firstPeer.add(quad2);
 
-        Assert.assertEquals(2, findQuadruplesOperation(
+        Assert.assertEquals(2, Operations.findQuadruplesOperation(
                 firstPeer, QuadruplePattern.ANY).size());
 
         secondPeer.join(firstPeer);
@@ -158,9 +156,11 @@ public class DataTransfertTest {
         log.debug("Second peer manages {}", secondPeer);
 
         List<Quadruple> firstPeerResult =
-                findQuadruplesOperation(firstPeer, QuadruplePattern.ANY);
+                Operations.findQuadruplesOperation(
+                        firstPeer, QuadruplePattern.ANY);
         List<Quadruple> secondPeerResult =
-                findQuadruplesOperation(secondPeer, QuadruplePattern.ANY);
+                Operations.findQuadruplesOperation(
+                        secondPeer, QuadruplePattern.ANY);
 
         Assert.assertEquals(1, firstPeerResult.size());
         Assert.assertEquals(1, secondPeerResult.size());
@@ -229,7 +229,8 @@ public class DataTransfertTest {
         Thread.sleep(5000);
 
         List<Quadruple> subscriptions =
-                findQuadruplesOperation(firstPeer, QuadruplePattern.ANY, true);
+                Operations.findQuadruplesOperation(
+                        firstPeer, QuadruplePattern.ANY, true);
         int nbSubscriptionQuadsFirstPeerBeforeJoin = subscriptions.size();
 
         log.debug(
@@ -239,7 +240,8 @@ public class DataTransfertTest {
         secondPeer.join(firstPeer);
 
         subscriptions =
-                findQuadruplesOperation(firstPeer, QuadruplePattern.ANY, true);
+                Operations.findQuadruplesOperation(
+                        firstPeer, QuadruplePattern.ANY, true);
         // int nbSubscriptionQuadsFirstPeerAfterJoin = subscriptions.size();
 
         log.debug(
@@ -247,7 +249,8 @@ public class DataTransfertTest {
                 QuadruplesFormatter.toString(subscriptions));
 
         subscriptions =
-                findQuadruplesOperation(secondPeer, QuadruplePattern.ANY, true);
+                Operations.findQuadruplesOperation(
+                        secondPeer, QuadruplePattern.ANY, true);
 
         log.debug(
                 "Subscriptions for second peer after join:\n{}",
@@ -302,18 +305,6 @@ public class DataTransfertTest {
 
         }
 
-    }
-
-    private static List<Quadruple> findQuadruplesOperation(SemanticPeer peer,
-                                                           QuadruplePattern quadruplePattern) {
-        return findQuadruplesOperation(peer, quadruplePattern, false);
-    }
-
-    private static List<Quadruple> findQuadruplesOperation(SemanticPeer peer,
-                                                           QuadruplePattern quadruplePattern,
-                                                           boolean useSubscriptionsDatastore) {
-        return ((FindQuadruplesResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new FindQuadruplesOperation(
-                quadruplePattern, useSubscriptionsDatastore)))).getQuadruples();
     }
 
 }

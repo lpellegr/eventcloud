@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutionException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.openjena.riot.out.NodeFmtLib;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import com.google.common.cache.CacheBuilder;
@@ -40,8 +39,6 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.update.UpdateAction;
-import com.hp.hpl.jena.update.UpdateFactory;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -246,20 +243,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     public void deleteSubscriptions(SubscriptionId originalSubscriptionId,
                                     boolean useBindingNotificationListener) {
-        Node osidNode =
+        Node oidNode =
                 PublishSubscribeUtils.createSubscriptionIdUri(originalSubscriptionId);
-
-        StringBuilder deleteSubsubscriptionsQuery = new StringBuilder();
-        deleteSubsubscriptionsQuery.append("DELETE WHERE { GRAPH ");
-        deleteSubsubscriptionsQuery.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
-        deleteSubsubscriptionsQuery.append(" { ?subscriptionIdUri ");
-        deleteSubsubscriptionsQuery.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE));
-        deleteSubsubscriptionsQuery.append(' ');
-        deleteSubsubscriptionsQuery.append(NodeFmtLib.str(osidNode));
-        deleteSubsubscriptionsQuery.append(" . ?subscriptionIdUri ");
-        deleteSubsubscriptionsQuery.append(' ');
-        deleteSubsubscriptionsQuery.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE));
-        deleteSubsubscriptionsQuery.append(" ?subSubscriptionIdUri . ?subSubscriptionIdUri ?p ?o }}");
 
         synchronized (this.subscriptionsCache) {
             TransactionalDatasetGraph txnGraph =
@@ -270,41 +255,15 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                 if (useBindingNotificationListener) {
                     txnGraph.delete(new QuadruplePattern(
                             Node.ANY,
-                            osidNode,
+                            oidNode,
                             PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
                             Node.ANY));
                 }
 
-                // retrieves the uri of subscriptions which have the specified
-                // original id
-                List<Node> subscriptionsIdUris = new ArrayList<Node>();
-
-                QuadrupleIterator result =
-                        txnGraph.find(new QuadruplePattern(
-                                PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
-                                Node.ANY,
-                                PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_NODE,
-                                osidNode));
-                while (result.hasNext()) {
-                    subscriptionsIdUris.add(result.next().getSubject());
-                }
-
-                // deletes quadruples related to sub subscriptions indexed with
-                // the subscription
-                UpdateAction.execute(
-                        UpdateFactory.create(deleteSubsubscriptionsQuery.toString()),
-                        txnGraph.toDataset());
-
-                // deletes quadruples related to the subscription
-                for (Node node : subscriptionsIdUris) {
-                    txnGraph.delete(new QuadruplePattern(
-                            PublishSubscribeConstants.SUBSCRIPTION_NS_NODE,
-                            node, Node.ANY, Node.ANY));
-                }
+                txnGraph.delete(new QuadruplePattern(
+                        oidNode, Node.ANY, Node.ANY, Node.ANY));
 
                 txnGraph.commit();
-            } catch (Exception e) {
-                e.printStackTrace();
             } finally {
                 txnGraph.end();
             }

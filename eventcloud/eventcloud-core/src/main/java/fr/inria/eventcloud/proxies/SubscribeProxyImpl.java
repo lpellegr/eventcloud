@@ -449,7 +449,8 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
             }
         }
 
-        if (compoundEvent != null) {
+        if (compoundEvent != null
+                && this.subscriptions.containsKey(id.getSubscriptionId())) {
             listener.onNotification(id.getSubscriptionId(), compoundEvent);
 
             this.sendInputOutputMonitoringReport(
@@ -535,7 +536,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         // this condition is used to ignore the notifications which may be
         // received after an unsubscribe operation because the unsubscribe
         // operation is not atomic
-        if (!this.subscriptions.containsKey(subscriptionId)) {
+        if (subscription == null) {
             return;
         }
 

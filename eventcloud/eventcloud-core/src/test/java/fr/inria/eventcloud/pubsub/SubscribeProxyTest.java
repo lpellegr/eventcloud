@@ -30,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.core.util.MutableInteger;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -58,6 +60,8 @@ import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.NotificationListenerFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.formatters.QuadruplesFormatter;
+import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
@@ -512,7 +516,7 @@ public class SubscribeProxyTest {
      * Test to unsubscribe from a basic subscription.
      */
     @Test(timeout = 60000)
-    public void testUnsubscribe() {
+    public void testUnsubscribe() throws InterruptedException {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
@@ -521,7 +525,7 @@ public class SubscribeProxyTest {
         this.subscribeProxy.subscribe(
                 subscription, new CustomCompoundEventNotificationListener());
 
-        List<Quadruple> quads = new ArrayList<Quadruple>();
+        List<Quadruple> quads = new ArrayList<Quadruple>(4);
         for (int i = 0; i < 4; i++) {
             quads.add(QuadrupleGenerator.random(eventId));
         }
@@ -540,8 +544,23 @@ public class SubscribeProxyTest {
             }
         }
 
+        for (Peer p : this.deployer.getRandomSemanticTracker(this.eventCloudId)
+                .getPeers()) {
+            log.info(
+                    "Before unsubscribe peer {} contains the following subscriptions:\n{}",
+                    p,
+                    QuadruplesFormatter.toString(Operations.findQuadruplesOperation(
+                            p, QuadruplePattern.ANY, true)));
+        }
+
         // unsubscribes
         this.subscribeProxy.unsubscribe(subscription.getId());
+
+        // sleep a little because there is no guarantee that the unsubscribe
+        // operation is performed before the publish even if the unsubscribe
+        // call is before the publish. Indeed, remember that pub/sub operations
+        // are asynchronous.
+        Thread.sleep(1000);
 
         quads = new ArrayList<Quadruple>();
         for (int i = 0; i < 4; i++) {
@@ -560,6 +579,18 @@ public class SubscribeProxyTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+
+        for (Peer p : this.deployer.getRandomSemanticTracker(this.eventCloudId)
+                .getPeers()) {
+            List<Quadruple> subscriptionData =
+                    Operations.findQuadruplesOperation(
+                            p, QuadruplePattern.ANY, true);
+
+            log.info(
+                    "After unsubscribe peer {} contains the following subscriptions:\n{}",
+                    p, QuadruplesFormatter.toString(subscriptionData));
+            Assert.assertEquals(0, subscriptionData.size());
         }
     }
 
