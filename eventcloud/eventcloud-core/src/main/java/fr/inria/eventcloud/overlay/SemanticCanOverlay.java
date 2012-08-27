@@ -214,6 +214,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      *            the subscription to store.
      */
     public void storeSubscription(Subscription subscription) {
+        this.subscriptionsCache.put(subscription.getId(), subscription);
+
         TransactionalDatasetGraph txnGraph =
                 this.subscriptionsDatastore.begin(AccessMode.WRITE);
 
