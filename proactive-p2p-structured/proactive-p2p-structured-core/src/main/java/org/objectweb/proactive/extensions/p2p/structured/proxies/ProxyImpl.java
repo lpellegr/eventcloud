@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -93,7 +92,7 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
      * {@inheritDoc}
      */
     @Override
-    public Response<?> send(final Request<?> request) throws DispatchException {
+    public Response<?> send(final Request<?> request) {
         return this.send(request, this.selectPeer());
     }
 
@@ -101,8 +100,7 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
      * {@inheritDoc}
      */
     @Override
-    public Response<?> send(final Request<?> request, Peer peer)
-            throws DispatchException {
+    public Response<?> send(final Request<?> request, Peer peer) {
         if (request.getResponseProvider() == null) {
             throw new IllegalArgumentException(
                     "Impossible to send a request with response without any response provider");

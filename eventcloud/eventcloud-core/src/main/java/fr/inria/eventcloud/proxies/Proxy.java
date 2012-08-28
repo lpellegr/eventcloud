@@ -20,7 +20,6 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -75,12 +74,11 @@ public abstract class Proxy extends AbstractComponent implements
         this.proxy.sendv(request, peer);
     }
 
-    public Response<?> send(Request<?> request) throws DispatchException {
+    public Response<?> send(Request<?> request) {
         return this.proxy.send(request);
     }
 
-    public Response<?> send(Request<?> request, Peer peer)
-            throws DispatchException {
+    public Response<?> send(Request<?> request, Peer peer) {
         return this.proxy.send(request, peer);
     }
 
