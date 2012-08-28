@@ -125,7 +125,7 @@ public class Main {
     }
 
     private static Set<Class<?>> getFromJARFile(String jar, String packageName)
-            throws FileNotFoundException, ClassNotFoundException {
+            throws ClassNotFoundException {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         JarInputStream jarFile = null;
         try {
