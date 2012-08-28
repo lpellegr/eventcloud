@@ -131,7 +131,14 @@ public class StringElement extends Element {
             // apfloat precision is set as infinite
             // TODO: detect set of digits that repeat and stop after n
             // repetition
+            int loop = 0;
             while (fractionalPart.compareTo(Apfloat.ZERO) > 0) {
+                // simple test to stop after PRECISION loops and thus to avoid
+                // infinite loop
+                if (loop > PRECISION) {
+                    break;
+                }
+
                 // shift radix point to right by 1.
                 fractionalPart = fractionalPart.multiply(RADIX);
 
@@ -145,6 +152,8 @@ public class StringElement extends Element {
                 } else {
                     integerPart.append((char) 0);
                 }
+
+                loop++;
             }
 
             if (integerPart.length() == 0) {
