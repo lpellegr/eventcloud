@@ -256,9 +256,9 @@ public class EventCloudManagementWsDeployer {
         File tmpResourcesDir = new File(resourcesDirPath);
         tmpResourcesDir.mkdir();
 
-        FileUtils.copyURLToFile(
-                new URL(resourcesUrl + "proactive.java.policy"), new File(
-                        tmpResourcesDir, "proactive.java.policy"));
+        FileUtils.copyURLToFile(new URL(resourcesUrl
+                + "proactive.security.policy"), new File(
+                tmpResourcesDir, "proactive.security.policy"));
 
         if (activateLoggers) {
             FileUtils.copyURLToFile(new URL(resourcesUrl
