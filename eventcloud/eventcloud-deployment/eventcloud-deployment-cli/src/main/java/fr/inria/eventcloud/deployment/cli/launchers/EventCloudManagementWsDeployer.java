@@ -41,11 +41,8 @@ import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
 
 public class EventCloudManagementWsDeployer {
 
-    private static final String LIB_DIR_URL =
-            "http://eventcloud.inria.fr/binaries/libs/";
-
-    private static final String RESOURCES_DIR_URL =
-            "http://eventcloud.inria.fr/binaries/resources/";
+    private static final String EVENTCLOUD_BINARIES_URL =
+            "http://eventcloud.inria.fr/binaries/";
 
     private static final String LOG_MANAGEMENT_WS_DEPLOYED =
             "Event Cloud management web service deployed at ";
@@ -69,30 +66,30 @@ public class EventCloudManagementWsDeployer {
         });
     }
 
-    public static String deploy(int eventCloudWsStartPort,
+    public static String deploy(boolean onRelease, int eventCloudWsStartPort,
                                 String eventCloudManagementWsUrlSuffix,
                                 boolean activateLoggers) throws IOException {
         return deploy(
-                eventCloudWsStartPort, eventCloudManagementWsUrlSuffix, null,
+                onRelease, eventCloudWsStartPort,
+                eventCloudManagementWsUrlSuffix, null,
                 EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
                 activateLoggers);
     }
 
-    public static String deploy(int eventCloudWsStartPort,
-                                String eventCloudManagementWsUrlSuffix,
-                                String socialFilterUrl) throws IOException {
-        return deploy(
-                eventCloudWsStartPort, eventCloudManagementWsUrlSuffix,
-                socialFilterUrl,
-                EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(), true);
-    }
-
-    public static String deploy(int eventCloudWsStartPort,
+    public static String deploy(boolean onRelease, int eventCloudWsStartPort,
                                 String eventCloudManagementWsUrlSuffix,
                                 String socialFilterUrl,
                                 double socialFilterThreshold,
                                 boolean activateLoggers) throws IOException {
         if (eventCloudManagementWsProcess == null) {
+            String binariesBaseUrl = EVENTCLOUD_BINARIES_URL;
+
+            if (onRelease) {
+                binariesBaseUrl += "releases/latest/";
+            } else {
+                binariesBaseUrl += "snapshots/latest/";
+            }
+
             List<String> cmd = new ArrayList<String>();
 
             String javaBinaryPath =
@@ -106,9 +103,10 @@ public class EventCloudManagementWsDeployer {
             cmd.add(javaBinaryPath);
 
             cmd.add("-cp");
-            cmd.add(addClassPath());
+            cmd.add(addClassPath(binariesBaseUrl + "libs/"));
 
-            cmd.addAll(addProperties(activateLoggers));
+            cmd.addAll(addProperties(
+                    binariesBaseUrl + "resources/", activateLoggers));
 
             cmd.add(EventCloudManagementWsDeployer.class.getCanonicalName());
             cmd.add(Integer.toString(eventCloudWsStartPort));
@@ -179,8 +177,8 @@ public class EventCloudManagementWsDeployer {
         }
     }
 
-    private static String addClassPath() throws IOException {
-        downloadLibs();
+    private static String addClassPath(String libsUrl) throws IOException {
+        downloadLibs(libsUrl);
 
         File libDir = new File(libDirPath);
         String[] libNames = libDir.list(new FilenameFilter() {
@@ -200,7 +198,7 @@ public class EventCloudManagementWsDeployer {
         return classPath.toString();
     }
 
-    private static void downloadLibs() throws IOException {
+    private static void downloadLibs(String libsUrl) throws IOException {
         libDirPath =
                 System.getProperty("java.io.tmpdir") + File.separator
                         + "eventcloud-libs";
@@ -208,18 +206,19 @@ public class EventCloudManagementWsDeployer {
         tmpLibDir.mkdir();
 
         File readme = new File(tmpLibDir, "README");
-        FileUtils.copyURLToFile(new URL(LIB_DIR_URL + "README"), readme);
+        FileUtils.copyURLToFile(new URL(libsUrl + "README"), readme);
 
         String[] libNames = FileUtils.readFileToString(readme).split("\n");
         for (String libName : libNames) {
-            FileUtils.copyURLToFile(new URL(LIB_DIR_URL + libName), new File(
+            FileUtils.copyURLToFile(new URL(libsUrl + libName), new File(
                     tmpLibDir, libName));
         }
     }
 
-    private static List<String> addProperties(boolean activateLoggers)
+    private static List<String> addProperties(String resourcesUrl,
+                                              boolean activateLoggers)
             throws IOException {
-        downloadResources(activateLoggers);
+        downloadResources(resourcesUrl, activateLoggers);
 
         List<String> properties = new ArrayList<String>();
 
@@ -247,7 +246,8 @@ public class EventCloudManagementWsDeployer {
         return properties;
     }
 
-    private static void downloadResources(boolean activateLoggers)
+    private static void downloadResources(String resourcesUrl,
+                                          boolean activateLoggers)
             throws IOException {
         resourcesDirPath =
                 System.getProperty("java.io.tmpdir") + File.separator
@@ -256,31 +256,31 @@ public class EventCloudManagementWsDeployer {
         File tmpResourcesDir = new File(resourcesDirPath);
         tmpResourcesDir.mkdir();
 
-        FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
-                + "proactive.java.policy"), new File(
-                tmpResourcesDir, "proactive.java.policy"));
+        FileUtils.copyURLToFile(
+                new URL(resourcesUrl + "proactive.java.policy"), new File(
+                        tmpResourcesDir, "proactive.java.policy"));
 
         if (activateLoggers) {
-            FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
+            FileUtils.copyURLToFile(new URL(resourcesUrl
                     + "log4j-console.properties"), new File(
                     tmpResourcesDir, "log4j-console.properties"));
 
-            FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
+            FileUtils.copyURLToFile(new URL(resourcesUrl
                     + "logback-console.xml"), new File(
                     tmpResourcesDir, "logback-console.xml"));
         } else {
-            FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
+            FileUtils.copyURLToFile(new URL(resourcesUrl
                     + "log4j-inactive.properties"), new File(
                     tmpResourcesDir, "log4j-inactive.properties"));
 
-            FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
+            FileUtils.copyURLToFile(new URL(resourcesUrl
                     + "logback-inactive.xml"), new File(
                     tmpResourcesDir, "logback-inactive.xml"));
         }
 
-        FileUtils.copyURLToFile(new URL(RESOURCES_DIR_URL
-                + "eventcloud.properties"), new File(
-                tmpResourcesDir, "eventcloud.properties"));
+        FileUtils.copyURLToFile(
+                new URL(resourcesUrl + "eventcloud.properties"), new File(
+                        tmpResourcesDir, "eventcloud.properties"));
         List<String> eventCloudProperties =
                 FileUtils.readLines(new File(resourcesDirPath + File.separator
                         + "eventcloud.properties"));
