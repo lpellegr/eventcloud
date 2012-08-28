@@ -7,8 +7,8 @@
 	</appender>
 
 	<logger name="com.hp" level="off" />
-	<logger name="org.objectweb.proactive.extensions.p2p" level="debug" />
-	<logger name="fr.inria.eventcloud" level="debug" />
+	<logger name="org.objectweb.proactive.extensions.p2p" level="info" />
+	<logger name="fr.inria.eventcloud" level="info" />
 	<logger name="fr.inria.eventcloud.benchmarks.PublishSubscribeBenchmarkTest"
 		level="debug" />
 	<logger name="com.hp.hpl.jena.tdb.info" level="off" />

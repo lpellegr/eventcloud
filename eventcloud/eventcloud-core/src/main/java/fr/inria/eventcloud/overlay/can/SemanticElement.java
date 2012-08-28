@@ -34,7 +34,8 @@ public class SemanticElement extends StringElement {
 
     private static final long serialVersionUID = 1L;
 
-    public static String EMPTY_STRING_ROUTING_CHARACTER = "A";
+    // \u00A2 -> ¢, CENT SIGN
+    public static String EMPTY_STRING_ROUTING_CHARACTER = "\u00A2";
 
     /**
      * Constructs a new semantic coordinate element from the specified
