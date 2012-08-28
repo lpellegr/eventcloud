@@ -184,8 +184,7 @@ public class WsnTranslator {
         return TopicSubscriptionTranslator.getInstance().translate(subscribe);
     }
 
-    public String translateContentBasedSubscription(Subscribe subscribe)
-            throws TranslationException {
+    public String translateContentBasedSubscription(Subscribe subscribe) {
         // TODO implement
         return null;
     }
