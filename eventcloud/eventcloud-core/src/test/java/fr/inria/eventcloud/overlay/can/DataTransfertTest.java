@@ -18,6 +18,7 @@ package fr.inria.eventcloud.overlay.can;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,14 +33,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
@@ -66,11 +70,17 @@ public class DataTransfertTest {
     @Before
     public void setUp() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
-        this.eventCloudId = this.deployer.newEventCloud(1, 1);
+    }
+
+    @After
+    public void tearDown() {
+        this.deployer.undeploy();
     }
 
     @Test
     public void testMiscDataTransfert() throws NetworkAlreadyJoinedException {
+        this.eventCloudId = this.deployer.newEventCloud(1, 1);
+
         SemanticPeer firstPeer =
                 this.deployer.getRandomSemanticPeer(this.eventCloudId);
         SemanticPeer secondPeer =
@@ -169,6 +179,8 @@ public class DataTransfertTest {
     @Test
     public void testSubscriptionsTransfert() throws EventCloudIdNotManaged,
             InterruptedException, NetworkAlreadyJoinedException {
+        this.eventCloudId = this.deployer.newEventCloud(1, 2);
+
         SemanticPeer firstPeer =
                 this.deployer.getRandomSemanticPeer(this.eventCloudId);
 
@@ -177,10 +189,10 @@ public class DataTransfertTest {
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.eventCloudId);
 
-        // PublishApi publishProxy =
-        // ProxyFactory.newPublishProxy(
-        // this.deployer.getEventCloudsRegistryUrl(),
-        // this.eventCloudId);
+        PublishApi publishProxy =
+                ProxyFactory.newPublishProxy(
+                        this.deployer.getEventCloudsRegistryUrl(),
+                        this.eventCloudId);
 
         GetIdAndZoneResponseOperation<SemanticElement> response =
                 CanOperations.<SemanticElement> getIdAndZoneResponseOperation(firstPeer);
@@ -191,7 +203,9 @@ public class DataTransfertTest {
                         response.getPeerZone().getUpperBound());
 
         // split dimension
-        byte dimension = 0;
+        byte dimension =
+                (byte) (this.deployer.getRandomSemanticTracker(
+                        this.eventCloudId).getPeers().size() - 1);
 
         // we compute the value of the split which will be done on the next join
         // from the first peer in order to create data that will be transfered
@@ -219,14 +233,22 @@ public class DataTransfertTest {
         log.debug("First subscription:\n{}", s1.getSparqlQuery());
         log.debug("Second subscription:\n{}", s2.getSparqlQuery());
 
-        subscribeProxy.subscribe(s1, new CustomSignalNotificationListener());
-        subscribeProxy.subscribe(s2, new CustomSignalNotificationListener());
+        subscribeProxy.subscribe(s1, new CustomNotificationListener());
+        subscribeProxy.subscribe(s2, new CustomNotificationListener());
 
-        SemanticPeer secondPeer =
+        SemanticPeer thirdPeer =
                 SemanticFactory.newSemanticPeer(new SemanticInMemoryOverlayProvider());
 
+        Node uri1 = Node.createURI(createDummyUri(bound1));
+        Node uri2 = Node.createURI(createDummyUri(bound2));
+
+        publishProxy.publish(new CompoundEvent(new Quadruple(
+                uri1, uri1, uri1, uri1)));
+        publishProxy.publish(new CompoundEvent(new Quadruple(
+                uri2, uri2, uri2, uri2)));
+
         // to ensure that the subscriptions have been indexed
-        Thread.sleep(5000);
+        Thread.sleep(3000);
 
         List<Quadruple> subscriptions =
                 Operations.findQuadruplesOperation(
@@ -237,7 +259,7 @@ public class DataTransfertTest {
                 "Subscriptions for first peer before join:\n{}",
                 QuadruplesFormatter.toString(subscriptions));
 
-        secondPeer.join(firstPeer);
+        thirdPeer.join(firstPeer);
 
         subscriptions =
                 Operations.findQuadruplesOperation(
@@ -250,15 +272,17 @@ public class DataTransfertTest {
 
         subscriptions =
                 Operations.findQuadruplesOperation(
-                        secondPeer, QuadruplePattern.ANY, true);
+                        thirdPeer, QuadruplePattern.ANY, true);
 
         log.debug(
-                "Subscriptions for second peer after join:\n{}",
+                "Subscriptions for third peer after join:\n{}",
                 QuadruplesFormatter.toString(subscriptions));
 
         // Assert.assertTrue(nbSubscriptionQuadsFirstPeerBeforeJoin >
         // nbSubscriptionQuadsFirstPeerAfterJoin);
+
         Assert.assertTrue(nbSubscriptionQuadsFirstPeerBeforeJoin > subscriptions.size());
+
         // Assert.assertEquals(
         // nbSubscriptionQuadsFirstPeerBeforeJoin,
         // nbSubscriptionQuadsFirstPeerAfterJoin + subscriptions.size());
@@ -269,6 +293,8 @@ public class DataTransfertTest {
 
         StringBuilder result = new StringBuilder("SELECT ?");
         result.append(vars[dimension + 1 % vars.length]);
+        result.append(" ?");
+        result.append(vars[0]);
         result.append(" WHERE { GRAPH ");
         append(result, dimension, (byte) 0, rdfTerm, vars);
         result.append(" { ");
@@ -277,16 +303,22 @@ public class DataTransfertTest {
             append(result, dimension, i, rdfTerm, vars);
         }
 
-        result.append(" }} ");
+        result.append(" . ?s ?p <");
+        result.append(createDummyUri(rdfTerm));
+        result.append("> }} ");
 
         return result.toString();
+    }
+
+    private static final String createDummyUri(String localPart) {
+        return "http://namespace.org/" + localPart;
     }
 
     private static void append(StringBuilder result, byte dimension,
                                byte index, String rdfTerm, char[] vars) {
         if (dimension == index) {
-            result.append("<http://namespace.org/");
-            result.append(rdfTerm);
+            result.append('<');
+            result.append(createDummyUri(rdfTerm));
             result.append("> ");
         } else {
             result.append('?');
@@ -295,14 +327,16 @@ public class DataTransfertTest {
         }
     }
 
-    private static class CustomSignalNotificationListener extends
-            SignalNotificationListener {
+    private static class CustomNotificationListener extends
+            BindingNotificationListener {
 
         private static final long serialVersionUID = 1L;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public void onNotification(SubscriptionId id) {
-
+        public void onNotification(SubscriptionId id, Binding solution) {
         }
 
     }

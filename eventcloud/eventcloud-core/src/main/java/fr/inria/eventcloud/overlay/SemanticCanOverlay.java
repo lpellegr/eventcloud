@@ -470,17 +470,28 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             ResultSet results = qexec.execSelect();
 
             while (results.hasNext()) {
+                Node oid = results.nextBinding().get(Var.alloc("oid"));
+
                 QuadrupleIterator it =
                         txnGraph.find(new QuadruplePattern(
-                                results.nextBinding().get(Var.alloc("oid")),
-                                Node.ANY, Node.ANY, Node.ANY));
+                                oid, Node.ANY, Node.ANY, Node.ANY));
+
+                while (it.hasNext()) {
+                    result.add(it.next());
+                }
+
+                // intermediate results also have to be retrieved
+                it =
+                        txnGraph.find(new QuadruplePattern(
+                                Node.ANY,
+                                oid,
+                                PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
+                                Node.ANY));
 
                 while (it.hasNext()) {
                     result.add(it.next());
                 }
             }
-
-            // TODO intermediate results also have to be retrieved
         } finally {
             qexec.close();
             txnGraph.end();
@@ -489,9 +500,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         if (remove) {
             // TODO warning some subscriptions have to be copied but not deleted
             // from the original peer whereas some others have to be transfered
-            // and thus deleted
-
-            // delete(this.subscriptionsDatastore, result);
+            // and thus deleted. The former case is not handled.
         }
 
         return result;

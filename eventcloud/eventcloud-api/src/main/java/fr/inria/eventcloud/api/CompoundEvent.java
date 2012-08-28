@@ -17,13 +17,13 @@
 package fr.inria.eventcloud.api;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -60,7 +60,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      *            the quadruples to put into the Event.
      */
     public CompoundEvent(Quadruple... quads) {
-        this(Arrays.asList(quads));
+        this(Lists.newArrayList(quads));
     }
 
     /**

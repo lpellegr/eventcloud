@@ -439,7 +439,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         return new JoinIntroduceResponseOperation<E>(
                 super.id, newZones.get(directionInv), historyToTransfert,
                 pendingNewNeighborhood,
-                this.removeDataIn(newZones.get(directionInv)));
+                this.retrieveDataIn(newZones.get(directionInv)));
     }
 
     public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation<E> operation) {
