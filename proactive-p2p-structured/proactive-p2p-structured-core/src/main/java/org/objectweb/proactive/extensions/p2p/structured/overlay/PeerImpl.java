@@ -22,7 +22,6 @@ import java.util.UUID;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
@@ -96,6 +95,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
         body.setImmediateService("receiveImmediateService", false);
         body.setImmediateService("setAttributes", false);
         body.setImmediateService("route", false);
+        // TODO: try to do not set send as IS
         body.setImmediateService("send", false);
     }
 
@@ -248,7 +248,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    public Response<?> send(Request<?> request) throws DispatchException {
+    public Response<?> send(Request<?> request) {
         return this.overlay.dispatch(request);
     }
 

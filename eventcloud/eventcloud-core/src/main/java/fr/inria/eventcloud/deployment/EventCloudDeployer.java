@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
@@ -210,11 +209,7 @@ public class EventCloudDeployer extends NetworkDeployer {
         ComponentUtils.terminateComponents(this.putgetProxies);
         ComponentUtils.terminateComponents(this.subscribeProxies);
 
-        try {
-            PAFuture.waitFor(this.getRandomPeer().send(new ShutdownRequest()));
-        } catch (DispatchException e) {
-            e.printStackTrace();
-        }
+        PAFuture.waitFor(this.getRandomPeer().send(new ShutdownRequest()));
 
         ComponentUtils.terminateComponents(super.getRandomTracker().getPeers());
         ComponentUtils.terminateComponents(this.getTrackers());

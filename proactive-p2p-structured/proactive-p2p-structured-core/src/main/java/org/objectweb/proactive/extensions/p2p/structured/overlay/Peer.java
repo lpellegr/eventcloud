@@ -19,7 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 import java.io.Serializable;
 import java.util.UUID;
 
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
@@ -161,9 +160,6 @@ public interface Peer extends Serializable {
      * 
      * @param request
      *            the request to handle.
-     * 
-     * @throws DispatchException
-     *             if a problem occurs when the query is dispatched.
      */
     public void sendv(Request<?> request);
 
@@ -174,11 +170,8 @@ public interface Peer extends Serializable {
      *            the request to handle.
      * 
      * @return the response in agreement with the request type sent.
-     * 
-     * @throws DispatchException
-     *             if a problem occurs when the query is dispatched.
      */
-    public Response<?> send(Request<?> request) throws DispatchException;
+    public Response<?> send(Request<?> request);
 
     /**
      * Returns debug information as String.

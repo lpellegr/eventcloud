@@ -30,7 +30,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
@@ -236,22 +235,18 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
             this.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-                            QuadruplePatternResponse resp =
-                                    (QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
-                                            request, overlay);
-                            resp.setInitialRequestForThisResponse(request.getQuery());
-                            replies.add(resp);
-                        } else {
-                            replies.add((QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
-                                    request, overlay));
-                        }
-                    } catch (DispatchException e) {
-                        e.printStackTrace();
-                    } finally {
-                        doneSignal.countDown();
+                    if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+                        QuadruplePatternResponse resp =
+                                (QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
+                                        request, overlay);
+                        resp.setInitialRequestForThisResponse(request.getQuery());
+                        replies.add(resp);
+                    } else {
+                        replies.add((QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
+                                request, overlay));
                     }
+
+                    doneSignal.countDown();
                 }
             });
 

@@ -27,7 +27,6 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
@@ -147,11 +146,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public boolean add(Quadruple quad) {
-        try {
-            PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
-        } catch (DispatchException e) {
-            e.printStackTrace();
-        }
+        PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
 
         return true;
     }
@@ -202,13 +197,8 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public boolean contains(Quadruple quad) {
-        try {
-            return ((BooleanForwardResponse) PAFuture.getFutureValue(super.send(new ContainsQuadrupleRequest(
-                    quad)))).getResult();
-        } catch (DispatchException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return ((BooleanForwardResponse) PAFuture.getFutureValue(super.send(new ContainsQuadrupleRequest(
+                quad)))).getResult();
     }
 
     /**
@@ -216,11 +206,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public boolean delete(Quadruple quad) {
-        try {
-            PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
-        } catch (DispatchException e) {
-            e.printStackTrace();
-        }
+        PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
 
         return true;
     }
@@ -256,16 +242,11 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public List<Quadruple> delete(QuadruplePattern quadPattern) {
-        try {
-            QuadruplePatternResponse response =
-                    (QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new DeleteQuadruplesRequest(
-                            quadPattern.getGraph(), quadPattern.getSubject(),
-                            quadPattern.getPredicate(), quadPattern.getObject())));
-            return response.getResult();
-        } catch (DispatchException e) {
-            e.printStackTrace();
-            return null;
-        }
+        QuadruplePatternResponse response =
+                (QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new DeleteQuadruplesRequest(
+                        quadPattern.getGraph(), quadPattern.getSubject(),
+                        quadPattern.getPredicate(), quadPattern.getObject())));
+        return response.getResult();
     }
 
     /**
@@ -273,14 +254,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public long count(QuadruplePattern quadPattern) {
-        try {
-            return ((CountQuadruplePatternResponse) PAFuture.getFutureValue((super.send(new CountQuadruplePatternRequest(
-                    quadPattern.getGraph(), quadPattern.getSubject(),
-                    quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
-        } catch (DispatchException e) {
-            e.printStackTrace();
-            throw new IllegalStateException(e);
-        }
+        return ((CountQuadruplePatternResponse) PAFuture.getFutureValue((super.send(new CountQuadruplePatternRequest(
+                quadPattern.getGraph(), quadPattern.getSubject(),
+                quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
     }
 
     /**
@@ -321,14 +297,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public List<Quadruple> find(QuadruplePattern quadPattern) {
-        try {
-            return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
-                    quadPattern.getGraph(), quadPattern.getSubject(),
-                    quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
-        } catch (DispatchException e) {
-            e.printStackTrace();
-            throw new IllegalStateException(e);
-        }
+        return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
+                quadPattern.getGraph(), quadPattern.getSubject(),
+                quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
     }
 
     /**

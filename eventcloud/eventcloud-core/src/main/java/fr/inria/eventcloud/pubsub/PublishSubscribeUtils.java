@@ -32,7 +32,6 @@ import org.apache.commons.lang.mutable.MutableObject;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.openjena.riot.out.NodeFmtLib;
 import org.openjena.riot.out.OutputLangUtils;
@@ -637,24 +636,20 @@ public final class PublishSubscribeUtils {
             // using soft references.
             if (subscriberConnectionFailure.getNbAttempts() == EventCloudProperties.PROXY_MAX_LOOKUP_ATTEMPTS.getValue()) {
                 for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
-                    try {
-                        PAFuture.waitFor(semanticCanOverlay.getStub()
-                                .send(
-                                        new UnsubscribeRequest(
-                                                subscription.getOriginalId(),
-                                                subSubscription.getAtomicQuery(),
-                                                subscription.getType() == NotificationListenerType.BINDING)));
+                    PAFuture.waitFor(semanticCanOverlay.getStub()
+                            .send(
+                                    new UnsubscribeRequest(
+                                            subscription.getOriginalId(),
+                                            subSubscription.getAtomicQuery(),
+                                            subscription.getType() == NotificationListenerType.BINDING)));
 
-                        semanticCanOverlay.getSubscriberConnectionFailures()
-                                .remove(subscription.getOriginalId());
+                    semanticCanOverlay.getSubscriberConnectionFailures()
+                            .remove(subscription.getOriginalId());
 
-                        log.info(
-                                "Removed subscription {} due to subscriber which is not reachable under URL {}",
-                                subscription.getId(),
-                                subscription.getSubscriberUrl());
-                    } catch (DispatchException de) {
-                        de.printStackTrace();
-                    }
+                    log.info(
+                            "Removed subscription {} due to subscriber which is not reachable under URL {}",
+                            subscription.getId(),
+                            subscription.getSubscriberUrl());
                 }
             }
         }

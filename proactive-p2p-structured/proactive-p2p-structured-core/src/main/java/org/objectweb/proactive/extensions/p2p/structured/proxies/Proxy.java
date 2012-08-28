@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
 import java.io.Closeable;
 
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -59,11 +58,8 @@ public interface Proxy extends Closeable {
      *            the request to handle.
      * 
      * @return the response in agreement with the request type sent.
-     * 
-     * @throws DispatchException
-     *             if a problem occurs when the query is dispatched.
      */
-    Response<?> send(Request<?> request) throws DispatchException;
+    Response<?> send(Request<?> request);
 
     /**
      * Sends a request over the overlay by using message passing.
@@ -74,11 +70,8 @@ public interface Proxy extends Closeable {
      *            the stub from where the request is sent.
      * 
      * @return the response in agreement with the request type sent.
-     * 
-     * @throws DispatchException
-     *             if a problem occurs when the query is dispatched.
      */
-    Response<?> send(Request<?> request, Peer peer) throws DispatchException;
+    Response<?> send(Request<?> request, Peer peer);
 
     /**
      * Returns a peer stub randomly selected among the stubs managed by a

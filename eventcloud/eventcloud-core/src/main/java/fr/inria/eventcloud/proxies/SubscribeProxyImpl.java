@@ -33,7 +33,6 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
@@ -330,18 +329,12 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                             id, eventId, quadsReceived.size(),
                             expectedNumberOfQuadruples});
 
-            List<Quadruple> quads;
-            try {
-                quads =
-                        ((QuadruplePatternResponse) PAFuture.getFutureValue(super.selectPeer()
-                                .send(
-                                        new ReconstructCompoundEventRequest(
-                                                reconstructPattern,
-                                                quadHashesReceived)))).getResult();
-            } catch (DispatchException e) {
-                log.error(e.getMessage(), e);
-                quads = new ArrayList<Quadruple>();
-            }
+            List<Quadruple> quads =
+                    ((QuadruplePatternResponse) PAFuture.getFutureValue(super.selectPeer()
+                            .send(
+                                    new ReconstructCompoundEventRequest(
+                                            reconstructPattern,
+                                            quadHashesReceived)))).getResult();
 
             for (Quadruple quad : quads) {
                 if (quad.getPredicate().equals(
@@ -390,16 +383,12 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
         // updates the network to stop sending notifications
         for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
-            try {
-                super.selectPeer()
-                        .send(
-                                new UnsubscribeRequest(
-                                        subscription.getOriginalId(),
-                                        subSubscription.getAtomicQuery(),
-                                        subscription.getType() == NotificationListenerType.BINDING));
-            } catch (DispatchException e) {
-                e.printStackTrace();
-            }
+            super.selectPeer()
+                    .send(
+                            new UnsubscribeRequest(
+                                    subscription.getOriginalId(),
+                                    subSubscription.getAtomicQuery(),
+                                    subscription.getType() == NotificationListenerType.BINDING));
         }
     }
 

@@ -17,13 +17,12 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.can;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
@@ -82,21 +81,19 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     @Test
-    public void testUnicastLookupRequestWithResponse()
-            throws DispatchException, InterruptedException, ExecutionException {
+    public void testUnicastLookupRequestWithResponse() {
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked"})
         LookupResponse<StringElement> response =
-                (LookupResponse<StringElement>) this.proxy.send(
+                (LookupResponse<StringElement>) PAFuture.getFutureValue(this.proxy.send(
                         new LookupRequest<StringElement>(this.targetLowerBound),
-                        super.getPeer(0));
+                        super.getPeer(0)));
 
         checkResponse(response, this.target);
     }
 
     @Test
-    public void testUnicastForwardRequestWithoutResponse()
-            throws DispatchException {
+    public void testUnicastForwardRequestWithoutResponse() {
         this.proxy.sendv(
                 new SetStateRequest(this.targetLowerBound), super.getPeer(0));
 
@@ -108,8 +105,9 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         GetStateResponse response =
-                (GetStateResponse) this.proxy.send(new GetStateRequest(
-                        this.targetLowerBound), super.getPeer(0));
+                (GetStateResponse) PAFuture.getFutureValue(this.proxy.send(
+                        new GetStateRequest(this.targetLowerBound),
+                        super.getPeer(0)));
 
         Assert.assertTrue(response.getValue());
     }

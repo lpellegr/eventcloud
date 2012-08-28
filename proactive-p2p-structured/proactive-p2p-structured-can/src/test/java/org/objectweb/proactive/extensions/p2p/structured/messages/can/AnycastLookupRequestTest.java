@@ -22,10 +22,10 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -81,16 +81,16 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     @Test
-    public void testAnycastRequestWithResponse() throws DispatchException {
+    public void testAnycastRequestWithResponse() {
         StringElement elt =
                 new StringElement(
                         Character.toString((char) ((int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue() - 1)));
 
         GetZonesValidatingConstraintsResponse response =
-                (GetZonesValidatingConstraintsResponse) this.proxy.send(
+                (GetZonesValidatingConstraintsResponse) PAFuture.getFutureValue(this.proxy.send(
                         new GetZonesValidatingConstraintsRequest(
                                 new Coordinate<StringElement>(null, elt, null)),
-                        super.getPeer(0));
+                        super.getPeer(0)));
 
         checkResponse(response);
 
@@ -101,15 +101,14 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     @Test
-    public void testAnycastRequestWithoutResponse() throws DispatchException,
-            InterruptedException {
+    public void testAnycastRequestWithoutResponse() throws InterruptedException {
         this.proxy.sendv(new SetValuesRequest());
 
         // sleep because the previous call is supposed to be asynchronous
         Thread.sleep(1000);
 
         GetValuesResponse response =
-                (GetValuesResponse) this.proxy.send(new GetValuesRequest());
+                (GetValuesResponse) PAFuture.getFutureValue(this.proxy.send(new GetValuesRequest()));
 
         checkResponse(response);
 

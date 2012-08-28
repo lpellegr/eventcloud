@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.DispatchException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -81,7 +80,7 @@ public abstract class StructuredOverlay implements DataHandler {
      * 
      * @return a response associated to the type of the request.
      */
-    public Response<?> dispatch(Request<?> request) throws DispatchException {
+    public Response<?> dispatch(Request<?> request) {
         return this.messageManager.dispatch(request, this);
     }
 
