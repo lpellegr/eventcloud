@@ -30,7 +30,9 @@ public interface DataHandler {
 
     /**
      * Defines how to assign the data received from a neighbor (during a join
-     * operation) to the desired data structure.
+     * operation) to the desired data structure. This method is automatically
+     * executed during a join operation to assign the data retrieved from the
+     * landmark peer to the peer which is joining.
      * 
      * @param dataReceived
      *            the data that are received when a peer joins a network from a
@@ -39,15 +41,18 @@ public interface DataHandler {
     public abstract void assignDataReceived(Serializable dataReceived);
 
     /**
-     * Returns a copy of all the data managed by the current peer.
+     * Returns a copy of all the data managed by the current peer. This is
+     * automatically executed when a peer leaves the network to transfert data.
      * 
-     * @return all the data managed by the peer.
+     * @return all the data managed by the current peer.
      */
     public abstract Serializable retrieveAllData();
 
     /**
      * Returns a copy of all the data which are contained in the specified
-     * {@code interval}.
+     * {@code interval}. This method is automatically executed during the
+     * introduce phase of a join operation to retrieve the data that have to be
+     * transfered from the landmark peer to the new peer.
      * 
      * @param interval
      *            the interval to use in order to restrict the scope of the
@@ -60,6 +65,9 @@ public interface DataHandler {
 
     /**
      * Removes and returns all the data which are in the given {@code interval}.
+     * This method is automatically executed during the welcome phase of a join
+     * operation to remove from the landmark peer the data that have been
+     * transfered to the new peer.
      * 
      * @param interval
      *            the interval to use in order to restrict the scope of the
