@@ -223,7 +223,7 @@ public class EventCloudManagementWsDeployer {
         List<String> properties = new ArrayList<String>();
 
         properties.add("-Djava.security.policy=" + resourcesDirPath
-                + File.separator + "proactive.java.policy");
+                + File.separator + "proactive.security.policy");
 
         if (activateLoggers) {
             properties.add("-Dlog4j.configuration=file:" + resourcesDirPath
