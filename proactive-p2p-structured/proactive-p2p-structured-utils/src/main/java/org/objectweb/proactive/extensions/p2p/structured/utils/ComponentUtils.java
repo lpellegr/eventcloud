@@ -37,7 +37,6 @@ import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
 /**
@@ -98,26 +97,6 @@ public class ComponentUtils {
 
         if (vn != null) {
             context.put(vn.getName(), vn);
-        }
-
-        return context;
-    }
-
-    /**
-     * Creates a map containing the specified GCM deployment and which can be
-     * used as a context to instantiate components.
-     * 
-     * @param gcma
-     *            the GCM deployment to include to the map.
-     * 
-     * @return map containing the specified GCM deployment and which can be used
-     *         as a context to instantiate components.
-     */
-    public static Map<String, Object> createContext(GCMApplication gcma) {
-        Map<String, Object> context = new HashMap<String, Object>();
-
-        if (gcma != null) {
-            context.put("deployment-descriptor", gcma);
         }
 
         return context;

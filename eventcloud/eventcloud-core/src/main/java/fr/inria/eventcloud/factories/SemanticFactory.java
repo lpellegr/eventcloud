@@ -39,7 +39,6 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
-import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,21 +122,6 @@ public final class SemanticFactory extends AbstractFactory {
     }
 
     /**
-     * Creates a new semantic tracker component deployed on a {@code node}
-     * provided by the specified GCM application and associates it to the
-     * network named "default".
-     * 
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * 
-     * @return the reference on the {@link SemanticTracker} interface of the new
-     *         semantic tracker component created.
-     */
-    public static SemanticTracker newSemanticTracker(GCMApplication gcma) {
-        return SemanticFactory.newSemanticTracker("default", gcma);
-    }
-
-    /**
      * Creates a new semantic tracker component deployed on the specified
      * {@code node} and associates it to the given {@code networkName}.
      * 
@@ -172,25 +156,6 @@ public final class SemanticFactory extends AbstractFactory {
                                                      GCMVirtualNode vn) {
         return SemanticFactory.createSemanticTracker(
                 networkName, ComponentUtils.createContext(vn));
-    }
-
-    /**
-     * Creates a new semantic tracker component deployed on a {@code node}
-     * provided by the specified GCM application and associates it to the given
-     * {@code networkName}.
-     * 
-     * @param networkName
-     *            the network name managed by the tracker.
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * 
-     * @return the reference on the {@link SemanticTracker} interface of the new
-     *         semantic tracker component created.
-     */
-    public static SemanticTracker newSemanticTracker(String networkName,
-                                                     GCMApplication gcma) {
-        return SemanticFactory.createSemanticTracker(
-                networkName, ComponentUtils.createContext(gcma));
     }
 
     private static SemanticTracker createSemanticTracker(String networkName,
@@ -264,24 +229,6 @@ public final class SemanticFactory extends AbstractFactory {
                                                                              GCMVirtualNode vn) {
         return SemanticFactory.createSemanticPeer(
                 overlayProvider, ComponentUtils.createContext(vn));
-    }
-
-    /**
-     * Creates a new semantic peer component deployed on a {@code node} provided
-     * by the specified GCM application.
-     * 
-     * @param overlayProvider
-     *            the overlay provider to use.
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * 
-     * @return the reference on the {@link SemanticPeer} interface of the new
-     *         semantic peer component created.
-     */
-    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider,
-                                                                             GCMApplication gcma) {
-        return SemanticFactory.createSemanticPeer(
-                overlayProvider, ComponentUtils.createContext(gcma));
     }
 
     private static <T extends StructuredOverlay> SemanticPeer createSemanticPeer(SerializableProvider<T> overlayProvider,
