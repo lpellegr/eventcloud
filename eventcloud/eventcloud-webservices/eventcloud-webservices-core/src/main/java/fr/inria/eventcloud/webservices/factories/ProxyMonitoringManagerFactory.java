@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
@@ -35,7 +36,7 @@ import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManagerImpl;
  * 
  * @author bsauvan
  */
-public class ProxyMonitoringManagerFactory {
+public class ProxyMonitoringManagerFactory extends AbstractFactory {
 
     private static final Logger log =
             LoggerFactory.getLogger(ProxyMonitoringManagerFactory.class);

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
@@ -37,7 +38,7 @@ import fr.inria.eventcloud.EventCloudsRegistryImpl;
  * @author lpellegr
  * @author bsauvan
  */
-public class EventCloudsRegistryFactory {
+public class EventCloudsRegistryFactory extends AbstractFactory {
 
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudsRegistryFactory.class);
