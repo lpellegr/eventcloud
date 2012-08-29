@@ -31,6 +31,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -57,7 +58,7 @@ import fr.inria.eventcloud.tracker.SemanticTrackerImpl;
  * @author lpellegr
  * @author bsauvan
  */
-public final class SemanticFactory {
+public final class SemanticFactory extends AbstractFactory {
 
     private static final Logger log =
             LoggerFactory.getLogger(SemanticFactory.class);
