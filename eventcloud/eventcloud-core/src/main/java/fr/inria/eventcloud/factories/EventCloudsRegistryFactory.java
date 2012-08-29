@@ -23,7 +23,6 @@ import java.util.Map;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
-import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,20 +81,6 @@ public class EventCloudsRegistryFactory extends AbstractFactory {
      */
     public static EventCloudsRegistry newEventCloudsRegistry(GCMVirtualNode vn) {
         return EventCloudsRegistryFactory.createEventCloudsRegistry(ComponentUtils.createContext(vn));
-    }
-
-    /**
-     * Creates a new EventClouds registry component deployed on a {@code node}
-     * provided by the specified GCM application.
-     * 
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * 
-     * @return the reference on the {@link EventCloudsRegistry} interface of the
-     *         new EventClouds registry component created.
-     */
-    public static EventCloudsRegistry newEventCloudsRegistry(GCMApplication gcma) {
-        return EventCloudsRegistryFactory.createEventCloudsRegistry(ComponentUtils.createContext(gcma));
     }
 
     private static EventCloudsRegistry createEventCloudsRegistry(Map<String, Object> context) {

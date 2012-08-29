@@ -29,7 +29,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
-import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,25 +97,6 @@ public final class PeerFactory extends AbstractFactory {
                                                              GCMVirtualNode vn) {
         return PeerFactory.createPeer(
                 overlayProvider, ComponentUtils.createContext(vn));
-    }
-
-    /**
-     * Creates a new peer component deployed on a {@code node} provided by the
-     * specified GCM application and by using the given {@code overlay}
-     * abstraction.
-     * 
-     * @param overlayProvider
-     *            the overlay provider to use.
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * 
-     * @return the reference on the {@link Peer} interface of the new peer
-     *         component created.
-     */
-    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
-                                                             GCMApplication gcma) {
-        return PeerFactory.createPeer(
-                overlayProvider, ComponentUtils.createContext(gcma));
     }
 
     private static <T extends StructuredOverlay> Peer createPeer(SerializableProvider<T> overlayProvider,

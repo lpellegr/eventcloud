@@ -31,7 +31,6 @@ import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
-import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,30 +145,6 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
             throws EventCloudIdNotManaged {
         return createPublishProxy(
                 ComponentUtils.createContext(vn), registryUrl, id);
-    }
-
-    /**
-     * Creates a new publish proxy component deployed on a {@code node} provided
-     * by the specified GCM application.
-     * 
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * @param registryUrl
-     *            the Event-Cloud registry url.
-     * @param id
-     *            the identifier that identify the Event-Cloud to work on.
-     * 
-     * @return the reference on the {@link PublishApi} interface of the new
-     *         publish proxy component created.
-     * 
-     * @throws EventCloudIdNotManaged
-     *             if the specified registry does not managed the given id.
-     */
-    public static PublishApi newPublishProxy(GCMApplication gcma,
-                                             String registryUrl, EventCloudId id)
-            throws EventCloudIdNotManaged {
-        return createPublishProxy(
-                ComponentUtils.createContext(gcma), registryUrl, id);
     }
 
     private static PublishApi createPublishProxy(Map<String, Object> context,
@@ -298,35 +273,6 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                 ComponentUtils.createContext(vn), registryUrl, id, properties);
     }
 
-    /**
-     * Creates a new subscribe proxy component deployed on a {@code node}
-     * provided by the specified GCM application and by registering the proxy to
-     * the registry in order to have the possibility to receive notification.
-     * 
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * @param registryUrl
-     *            the Event-Cloud registry url.
-     * @param id
-     *            the identifier that identify the Event-Cloud to work on.
-     * @param properties
-     *            the ELA properties to set.
-     * 
-     * @return the reference on the {@link SubscribeApi} interface of the new
-     *         subscribe proxy component created.
-     * 
-     * @throws EventCloudIdNotManaged
-     *             if the specified registry does not managed the given id.
-     */
-    public static SubscribeApi newSubscribeProxy(GCMApplication gcma,
-                                                 String registryUrl,
-                                                 EventCloudId id,
-                                                 AlterableElaProperty... properties)
-            throws EventCloudIdNotManaged {
-        return createSubscribeProxy(
-                ComponentUtils.createContext(gcma), registryUrl, id, properties);
-    }
-
     private static SubscribeApi createSubscribeProxy(Map<String, Object> context,
                                                      String registryUrl,
                                                      EventCloudId id,
@@ -448,30 +394,6 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
             throws EventCloudIdNotManaged {
         return createPutGetProxy(
                 ComponentUtils.createContext(vn), registryUrl, id);
-    }
-
-    /**
-     * Creates a new put/get proxy component deployed on a {@code node} provided
-     * by the specified GCM application.
-     * 
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * @param registryUrl
-     *            the Event-Cloud registry url.
-     * @param id
-     *            the identifier that identify the Event-Cloud to work on.
-     * 
-     * @return the reference on the {@link PutGetApi} interface of the new
-     *         put/get proxy component created.
-     * 
-     * @throws EventCloudIdNotManaged
-     *             if the specified registry does not managed the given id.
-     */
-    public static PutGetApi newPutGetProxy(GCMApplication gcma,
-                                           String registryUrl, EventCloudId id)
-            throws EventCloudIdNotManaged {
-        return createPutGetProxy(
-                ComponentUtils.createContext(gcma), registryUrl, id);
     }
 
     private static PutGetApi createPutGetProxy(Map<String, Object> context,

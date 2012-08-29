@@ -22,7 +22,6 @@ import java.util.Map;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
-import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,21 +83,6 @@ public class ProxyMonitoringManagerFactory extends AbstractFactory {
      */
     public static ProxyMonitoringManager newProxyMonitoringManager(GCMVirtualNode vn) {
         return ProxyMonitoringManagerFactory.createProxyMonitoringManager(ComponentUtils.createContext(vn));
-    }
-
-    /**
-     * Creates a new proxy monitoring manager non functional component deployed
-     * on a {@code node} provided by the specified GCM application.
-     * 
-     * @param gcma
-     *            the GCM application to be used for deployment.
-     * 
-     * @return the reference on the {@link ProxyMonitoringManager} interface of
-     *         the new proxy monitoring manager non functional component
-     *         created.
-     */
-    public static ProxyMonitoringManager newProxyMonitoringManager(GCMApplication gcma) {
-        return ProxyMonitoringManagerFactory.createProxyMonitoringManager(ComponentUtils.createContext(gcma));
     }
 
     private static ProxyMonitoringManager createProxyMonitoringManager(Map<String, Object> context) {
