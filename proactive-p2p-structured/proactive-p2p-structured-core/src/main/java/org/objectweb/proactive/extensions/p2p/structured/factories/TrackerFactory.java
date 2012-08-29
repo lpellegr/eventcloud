@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public class TrackerFactory {
+public class TrackerFactory extends AbstractFactory {
 
     private static final Logger log =
             LoggerFactory.getLogger(TrackerFactory.class);

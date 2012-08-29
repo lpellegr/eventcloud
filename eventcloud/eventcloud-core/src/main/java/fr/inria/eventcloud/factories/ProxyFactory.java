@@ -29,6 +29,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMApplication;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
@@ -59,7 +60,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
  * @author lpellegr
  * @author bsauvan
  */
-public class ProxyFactory implements Serializable {
+public class ProxyFactory extends AbstractFactory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
