@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.webservices.deployment;
 
+import java.net.UnknownHostException;
+
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
@@ -56,6 +58,8 @@ import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
  * @author bsauvan
  */
 public class WebServiceDeployer {
+
+    private static final String DEFAULT_IP = "0.0.0.0";
 
     /**
      * Exposes as a web service the {@code publish-webservices} interface of a
@@ -257,7 +261,8 @@ public class WebServiceDeployer {
                         port);
 
         return new ServiceInformation(
-                publishService, publishServer, streamUrl, port);
+                publishService, publishServer,
+                getEndpointAddress(publishServer), streamUrl, port);
     }
 
     /**
@@ -283,10 +288,14 @@ public class WebServiceDeployer {
         SubscribeServiceImpl subscribeService =
                 new SubscribeServiceImpl(registryUrl, streamUrl);
 
-        return new ServiceInformation(
-                subscribeService, deployWebService(
+        Server server =
+                deployWebService(
                         SubscribeServiceApi.class, subscribeService, urlSuffix,
-                        port), streamUrl, port);
+                        port);
+
+        return new ServiceInformation(
+                subscribeService, server, getEndpointAddress(server),
+                streamUrl, port);
     }
 
     /**
@@ -312,10 +321,31 @@ public class WebServiceDeployer {
         PutGetServiceImpl putGetService =
                 new PutGetServiceImpl(registryUrl, streamUrl);
 
+        Server server =
+                deployWebService(
+                        PutGetWsApi.class, putGetService, urlSuffix, port);
+
         return new ServiceInformation(
-                putGetService, deployWebService(
-                        PutGetWsApi.class, putGetService, urlSuffix, port),
-                streamUrl, port);
+                putGetService, server, getEndpointAddress(server), streamUrl,
+                port);
+    }
+
+    public static String getEndpointAddress(Server server) {
+        String endpointAddress =
+                server.getEndpoint().getEndpointInfo().getAddress();
+
+        if (endpointAddress.contains(DEFAULT_IP)) {
+            try {
+                endpointAddress =
+                        endpointAddress.replaceFirst(
+                                DEFAULT_IP, java.net.InetAddress.getLocalHost()
+                                        .getHostAddress());
+            } catch (UnknownHostException e) {
+                // ignore the exception, the default ip will be used
+            }
+        }
+
+        return endpointAddress;
     }
 
     /**
@@ -373,7 +403,8 @@ public class WebServiceDeployer {
                                           Object service, String addressSuffix,
                                           int port) {
         // binds the webservice to all interfaces by default
-        StringBuilder address = new StringBuilder("http://0.0.0.0");
+        StringBuilder address = new StringBuilder("http://");
+        address.append(DEFAULT_IP);
         address.append(':');
         address.append(port);
         address.append('/');
@@ -396,4 +427,5 @@ public class WebServiceDeployer {
 
         return svrFactory.create();
     }
+
 }

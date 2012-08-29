@@ -278,16 +278,13 @@ public class EventCloudManagementServiceImpl implements
 
     private String storeAndReturnProxyAddress(ServiceInformation serviceInformation,
                                               ListMultimap<String, String> proxyEndpoints) {
-        String serviceAddress =
-                serviceInformation.getServer()
-                        .getEndpoint()
-                        .getEndpointInfo()
-                        .getAddress();
+        proxyEndpoints.put(
+                serviceInformation.getStreamUrl(),
+                serviceInformation.getEndpointAddress());
+        this.proxyInstances.put(
+                serviceInformation.getEndpointAddress(), serviceInformation);
 
-        proxyEndpoints.put(serviceInformation.getStreamUrl(), serviceAddress);
-        this.proxyInstances.put(serviceAddress, serviceInformation);
-
-        return serviceAddress;
+        return serviceInformation.getEndpointAddress();
     }
 
     /**

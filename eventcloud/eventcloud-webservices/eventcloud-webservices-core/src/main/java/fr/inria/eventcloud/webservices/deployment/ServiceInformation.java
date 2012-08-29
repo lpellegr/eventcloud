@@ -32,20 +32,27 @@ public class ServiceInformation {
 
     private final Server server;
 
+    private final String endpointAddress;
+
     private final String streamUrl;
 
     private final int port;
 
     public ServiceInformation(EventCloudProxyService<?> service, Server server,
-            String streamUrl, int port) {
+            String endpointAddress, String streamUrl, int port) {
         this.service = service;
         this.server = server;
+        this.endpointAddress = endpointAddress;
         this.streamUrl = streamUrl;
         this.port = port;
     }
 
     public EventCloudProxyService<?> getService() {
         return this.service;
+    }
+
+    public String getEndpointAddress() {
+        return this.endpointAddress;
     }
 
     public Server getServer() {

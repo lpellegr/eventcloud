@@ -288,7 +288,7 @@ public class EventCloudManagementWsDeployer {
             if (property.startsWith(EventCloudProperties.REPOSITORIES_PATH.getName()
                     + "=")) {
                 repositoriesDirPath =
-                        property.substring(property.indexOf("=") + 1);
+                        property.substring(property.indexOf('=') + 1);
             }
         }
     }
