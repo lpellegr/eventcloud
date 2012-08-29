@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>eventcloud-adapters</artifactId>
+		<groupId>fr.inria.eventcloud</groupId>
+		<version>1.1.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>fr.inria.eventcloud</groupId>
+	<artifactId>eventcloud-adapters-rdf2go</artifactId>
+	<version>1.1.0-SNAPSHOT</version>
+	<name>eventcloud-adapters-rdf2go</name>
+
+	<repositories>
+		<repository>
+			<id>semweb4j-releases</id>
+			<name>semweb4j-releases</name>
+			<url>http://semweb4j.org/repo/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>fr.inria.eventcloud</groupId>
+			<artifactId>eventcloud-core</artifactId>
+			<version>1.1.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.semweb4j</groupId>
+			<artifactId>rdf2go.api</artifactId>
+			<version>4.8.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.semweb4j</groupId>
+			<artifactId>rdf2go.impl.jena</artifactId>
+			<version>4.8.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.jena</groupId>
+					<artifactId>jena-arq</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+</project>
