@@ -62,7 +62,6 @@ import org.ow2.proactive.scheduler.common.job.JobId;
 import org.ow2.proactive.scheduler.common.job.TaskFlowJob;
 import org.ow2.proactive.scheduler.common.task.ForkEnvironment;
 import org.ow2.proactive.scheduler.common.task.JavaTask;
-import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
 import org.ow2.proactive.scripting.InvalidScriptException;
 import org.ow2.proactive.scripting.SelectionScript;
 import org.ow2.proactive.scripting.SimpleScript;
@@ -74,7 +73,7 @@ import org.ow2.proactive.scripting.SimpleScript;
  */
 public class NodeProviderJob {
     private static final Logger logger =
-            ProActiveLogger.getLogger(SchedulerLoggers.SCHEDULE);
+            ProActiveLogger.getLogger(NodeProviderJob.class);
 
     private static final Map<String, FileSystemServerDeployer> fileSystemServers;
 

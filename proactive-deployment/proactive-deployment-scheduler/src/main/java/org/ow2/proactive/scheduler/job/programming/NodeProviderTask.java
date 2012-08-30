@@ -48,7 +48,6 @@ import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.core.util.log.ProActiveLogger;
 import org.ow2.proactive.scheduler.common.task.TaskResult;
 import org.ow2.proactive.scheduler.common.task.executable.JavaExecutable;
-import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
 
 /**
  * Task for {@link NodeProviderJob}.
@@ -57,7 +56,7 @@ import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
  */
 public class NodeProviderTask extends JavaExecutable {
     private static final Logger logger =
-            ProActiveLogger.getLogger(SchedulerLoggers.SCHEDULE);
+            ProActiveLogger.getLogger(NodeProviderTask.class);
 
     private String registryURL;
 

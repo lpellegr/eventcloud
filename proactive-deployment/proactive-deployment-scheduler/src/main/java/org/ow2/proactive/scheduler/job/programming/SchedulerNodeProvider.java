@@ -60,7 +60,6 @@ import org.ow2.proactive.scheduler.common.SchedulerAuthenticationInterface;
 import org.ow2.proactive.scheduler.common.SchedulerConnection;
 import org.ow2.proactive.scheduler.common.exception.AlreadyConnectedException;
 import org.ow2.proactive.scheduler.common.exception.ConnectionException;
-import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
 
 /**
  * This class provides methods to easily acquire {@link Node nodes} or
@@ -80,7 +79,7 @@ import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
 @PublicAPI
 public class SchedulerNodeProvider {
     private static final Logger logger =
-            ProActiveLogger.getLogger(SchedulerLoggers.SCHEDULE);
+            ProActiveLogger.getLogger(SchedulerNodeProvider.class);
 
     private static final int NODES_AQUISITION_TIMEOUT = 60000;
 
