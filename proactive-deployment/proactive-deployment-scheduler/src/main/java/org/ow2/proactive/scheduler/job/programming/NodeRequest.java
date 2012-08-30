@@ -43,7 +43,6 @@ import org.apache.log4j.Logger;
 import org.objectweb.proactive.core.UniqueID;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.core.util.log.ProActiveLogger;
-import org.ow2.proactive.scheduler.common.util.SchedulerLoggers;
 import org.ow2.proactive.scheduler.job.programming.NodeProviderTask.NodeProviderTaskHolder;
 
 /**
@@ -53,7 +52,7 @@ import org.ow2.proactive.scheduler.job.programming.NodeProviderTask.NodeProvider
  */
 public class NodeRequest {
     private static final Logger logger =
-            ProActiveLogger.getLogger(SchedulerLoggers.SCHEDULE);
+            ProActiveLogger.getLogger(NodeRequest.class);
 
     private UniqueID nodeRequestID;
 
