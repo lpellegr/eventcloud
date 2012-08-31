@@ -103,36 +103,46 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         this.miscDatastore.open();
         this.subscriptionsDatastore.open();
 
-        this.peerStubsCache =
+        CacheBuilder<Object, Object> cacheBuilder =
                 CacheBuilder.newBuilder()
                         .softValues()
                         .maximumSize(
-                                EventCloudProperties.PEER_STUBS_CACHE_MAXIMUM_SIZE.getValue())
-                        .build(new CacheLoader<String, SemanticPeer>() {
-                            @Override
-                            public SemanticPeer load(String peerUrl)
-                                    throws Exception {
-                                return PAActiveObject.lookupActive(
-                                        SemanticPeer.class, peerUrl);
-                            }
-                        });
+                                EventCloudProperties.PEER_STUBS_CACHE_MAXIMUM_SIZE.getValue());
+
+        if (EventCloudProperties.RECORD_STATS_PEER_STUBS_CACHE.getValue()) {
+            cacheBuilder.recordStats();
+        }
+
+        this.peerStubsCache =
+                cacheBuilder.build(new CacheLoader<String, SemanticPeer>() {
+                    @Override
+                    public SemanticPeer load(String peerUrl) throws Exception {
+                        return PAActiveObject.lookupActive(
+                                SemanticPeer.class, peerUrl);
+                    }
+                });
+
+        cacheBuilder =
+                CacheBuilder.newBuilder()
+                        .softValues()
+                        .maximumSize(
+                                EventCloudProperties.SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE.getValue());
+
+        if (EventCloudProperties.RECORD_STATS_SUBSCRIPTIONS_CACHE.getValue()) {
+            cacheBuilder.recordStats();
+        }
 
         this.subscriptionsCache =
-                CacheBuilder.newBuilder()
-                        .softValues()
-                        .maximumSize(
-                                EventCloudProperties.SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE.getValue())
-                        .build(new CacheLoader<SubscriptionId, Subscription>() {
-                            @Override
-                            public Subscription load(SubscriptionId key) {
-                                return Subscription.parseFrom(
-                                        subscriptionsDatastore, key);
-                            }
-                        });
+                cacheBuilder.build(new CacheLoader<SubscriptionId, Subscription>() {
+                    @Override
+                    public Subscription load(SubscriptionId key) {
+                        return Subscription.parseFrom(
+                                subscriptionsDatastore, key);
+                    }
+                });
 
         this.subscriberConnectionFailures =
                 new MapMaker().softValues().makeMap();
-
     }
 
     /**
@@ -292,12 +302,30 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     @Override
     public String dump() {
         StringBuilder result = new StringBuilder(super.dump());
-        result.append("Subscriptions cache:\n");
-        result.append(this.subscriptionsCache.stats());
-        result.append("\nPeer stubs cache:\n");
-        result.append(this.peerStubsCache.stats());
-        result.append("\nSubscriber proxies cache:\n");
-        result.append(Subscription.subscribeProxiesCache.stats());
+
+        if (EventCloudProperties.RECORD_STATS_SUBSCRIPTIONS_CACHE.getValue()) {
+            result.append("Subscriptions cache:\n  ");
+            result.append(this.subscriptionsCache.stats());
+            result.append('\n');
+        }
+
+        if (EventCloudProperties.RECORD_STATS_PEER_STUBS_CACHE.getValue()) {
+            result.append("Peer stubs cache:\n  ");
+            result.append(this.peerStubsCache.stats());
+            result.append('\n');
+        }
+
+        if (EventCloudProperties.RECORD_STATS_SUBSCRIBE_PROXIES_CACHE.getValue()) {
+            result.append("Subscribe proxies cache:\n  ");
+            result.append(Subscription.SUBSCRIBE_PROXIES_CACHE.stats());
+            result.append('\n');
+        }
+
+        if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
+            result.append("Misc datastore size: ");
+            result.append(this.miscDatastore.getStatsRecorder().getNbQuads());
+            result.append('\n');
+        }
 
         return result.toString();
     }
