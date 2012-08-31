@@ -160,6 +160,23 @@ public class EventCloudProperties {
             new PropertyDouble("eventcloud.socialfilter.threshold", 0.5);
 
     /**
+     * Defines if statistics recording must be enabled or not for the misc
+     * datastore. When it is enabled, some stats like the number of quadruples
+     * added, etc. are recorded during each data insertion.
+     */
+    public static final PropertyBoolean RECORD_STATS_MISC_DATASTORE =
+            new PropertyBoolean("record.stats.misc.datastore", false);
+
+    public static final PropertyBoolean RECORD_STATS_PEER_STUBS_CACHE =
+            new PropertyBoolean("record.stats.peer.stubs.cache", false);
+
+    public static final PropertyBoolean RECORD_STATS_SUBSCRIPTIONS_CACHE =
+            new PropertyBoolean("record.stats.subscriptions.cache", false);
+
+    public static final PropertyBoolean RECORD_STATS_SUBSCRIBE_PROXIES_CACHE =
+            new PropertyBoolean("record.stats.subscribe.proxies.cache", false);
+
+    /**
      * Specifies the number maximum of attempts to lookup a proxy that is not
      * reachable. For instance, this is useful to remove references to subscribe
      * proxies which have left without unsubscribing.

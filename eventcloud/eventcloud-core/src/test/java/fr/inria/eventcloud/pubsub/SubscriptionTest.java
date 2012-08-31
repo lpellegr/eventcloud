@@ -27,7 +27,7 @@ import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
 
 /**
  * Test cases associated to {@link Subscription}.
@@ -51,7 +51,7 @@ public class SubscriptionTest {
         List<Quadruple> quads = subscription.toQuadruples();
 
         TransactionalTdbDatastore datastore =
-                new TransactionalTdbDatastoreMem();
+                new TransactionalTdbDatastoreBuilder().build();
         datastore.open();
 
         TransactionalDatasetGraph txnGraph = datastore.begin(AccessMode.WRITE);

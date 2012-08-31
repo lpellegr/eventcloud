@@ -55,7 +55,8 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
      */
     @Override
     public CompoundEvent get() {
-        List<Quadruple> quadruples = new ArrayList<Quadruple>();
+        List<Quadruple> quadruples = new ArrayList<Quadruple>(this.size);
+
         Node graph =
                 Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
                         + UuidGenerator.randomUuid());

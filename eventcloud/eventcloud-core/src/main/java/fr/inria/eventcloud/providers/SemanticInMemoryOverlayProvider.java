@@ -18,7 +18,8 @@ package fr.inria.eventcloud.providers;
 
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -37,9 +38,17 @@ public final class SemanticInMemoryOverlayProvider extends
      */
     @Override
     public SemanticCanOverlay get() {
+        TransactionalTdbDatastoreBuilder miscDatastoreBuilder =
+                new TransactionalTdbDatastoreBuilder();
+
+        if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
+            miscDatastoreBuilder.recordStats();
+        }
+
         return new SemanticCanOverlay(
-                new TransactionalTdbDatastoreMem(),
-                new TransactionalTdbDatastoreMem(),
-                new TransactionalTdbDatastoreMem());
+                new TransactionalTdbDatastoreBuilder().build(),
+                miscDatastoreBuilder.build(),
+                new TransactionalTdbDatastoreBuilder().build());
     }
+
 }

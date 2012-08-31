@@ -332,23 +332,30 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         buf.append(super.id);
         buf.append(" manages zone ");
         buf.append(this);
-        buf.append(" and has the following neighbor(s):\n");
 
-        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-            for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry<E> neighbor : this.neighborTable.get(
-                        dim, direction).values()) {
-                    buf.append("  - ");
-                    buf.append(neighbor.getZone());
-                    buf.append(", id is ");
-                    buf.append(neighbor.getId());
-                    buf.append(", abuts in dim "
-                            + neighbor.getZone().neighbors(this.zone)
-                            + " and is in dim=" + dim + ", dir=" + direction);
-                    buf.append('\n');
+        if (this.neighborTable.size() > 0) {
+            buf.append(" and has the following neighbor(s):\n");
+
+            for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+                for (byte direction = 0; direction < 2; direction++) {
+                    for (NeighborEntry<E> neighbor : this.neighborTable.get(
+                            dim, direction).values()) {
+                        buf.append("  - ");
+                        buf.append(neighbor.getZone());
+                        buf.append(", id is ");
+                        buf.append(neighbor.getId());
+                        buf.append(", abuts in dim "
+                                + neighbor.getZone().neighbors(this.zone)
+                                + " and is in dim=" + dim + ", dir="
+                                + direction);
+                        buf.append('\n');
+                    }
                 }
             }
+        } else {
+            buf.append('\n');
         }
+
         return buf.toString();
     }
 
