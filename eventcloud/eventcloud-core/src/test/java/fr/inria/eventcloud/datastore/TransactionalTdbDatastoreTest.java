@@ -48,7 +48,7 @@ public final class TransactionalTdbDatastoreTest {
 
     @Before
     public void setUp() {
-        this.datastore = new TransactionalTdbDatastoreMem();
+        this.datastore = new TransactionalTdbDatastoreBuilder().build();
         this.datastore.open();
     }
 

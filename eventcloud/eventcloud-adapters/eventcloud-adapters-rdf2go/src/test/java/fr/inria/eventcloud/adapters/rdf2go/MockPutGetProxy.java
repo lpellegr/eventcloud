@@ -39,7 +39,7 @@ import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
 
@@ -54,7 +54,7 @@ public class MockPutGetProxy implements PutGetApi {
     private TransactionalTdbDatastore datastore;
 
     public MockPutGetProxy() {
-        this.datastore = new TransactionalTdbDatastoreMem();
+        this.datastore = new TransactionalTdbDatastoreBuilder().build();
         this.datastore.open();
     }
 

@@ -35,7 +35,7 @@ public class StringElement extends Element {
     private static final long PRECISION =
             P2PStructuredProperties.STRING_ELEMENT_PRECISION.getValue();
 
-    private static final Apint RADIX = new Apint(
+    public static final Apint RADIX = new Apint(
             ((int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue()) + 1);
 
     private final Apfloat apfloat;
@@ -58,7 +58,11 @@ public class StringElement extends Element {
         this.apfloat = apfloat;
     }
 
-    private static Apfloat toIntegerRadix10(String value, Apint radix) {
+    public static Apfloat toIntegerRadix10(String value) {
+        return toIntegerRadix10(value, RADIX);
+    }
+
+    public static Apfloat toIntegerRadix10(String value, Apint radix) {
         int[] codepoints = UnicodeUtil.fromStringToCodePoints(value);
 
         // codepoints[0] x radix^0 = codepoints[0]
