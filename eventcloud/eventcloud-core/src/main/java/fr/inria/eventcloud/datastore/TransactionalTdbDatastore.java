@@ -32,6 +32,8 @@ import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.tdb.sys.SystemTDB;
 import com.hp.hpl.jena.tdb.transaction.TDBTransactionException;
 
+import fr.inria.eventcloud.datastore.stats.StatsRecorder;
+
 /**
  * Wraps an instance of {@link StoreConnection}. As for {@link StoreConnection},
  * only one JVM at a time can access to a given datastore location.
@@ -49,6 +51,8 @@ public class TransactionalTdbDatastore extends Datastore {
 
     private final boolean autoRemove;
 
+    private final StatsRecorder statsRecorder;
+
     /**
      * Creates a new datastore that stores data into the specified
      * {@code repositoryPath}.
@@ -56,26 +60,27 @@ public class TransactionalTdbDatastore extends Datastore {
      * @param location
      *            the path where the internal datastore files are created.
      * 
+     * @param statsRecorder
+     *            the stats recorder instance to use.
+     * 
      * @param autoRemove
      *            indicates whether the repository has to be removed or not when
      *            it is closed.
      */
-    public TransactionalTdbDatastore(String location, boolean autoRemove) {
-        this(new Location(location), autoRemove);
-    }
-
-    public TransactionalTdbDatastore(File location, boolean autoRemove) {
-        this(location.getAbsolutePath(), autoRemove);
-    }
-
-    protected TransactionalTdbDatastore(Location location, boolean autoRemove) {
-        if (!location.isMem()) {
+    protected TransactionalTdbDatastore(Location location,
+            StatsRecorder statsRecorder, boolean autoRemove) {
+        if (location != null && !location.isMem()) {
+            // creates location directory if it does not already exist
             new File(location.getDirectoryPath()).mkdirs();
+
+            this.storeConnection = StoreConnection.make(location);
+        } else {
+            this.storeConnection = StoreConnection.createMemUncached();
         }
 
-        this.storeConnection = StoreConnection.make(location);
-        this.storeLocation = location;
         this.autoRemove = autoRemove;
+        this.statsRecorder = statsRecorder;
+        this.storeLocation = location;
 
         this.registerPlugins();
     }
@@ -83,17 +88,13 @@ public class TransactionalTdbDatastore extends Datastore {
     /**
      * In-memory store for testing purpose only.
      */
-    protected TransactionalTdbDatastore() {
-        this.storeConnection = StoreConnection.createMemUncached();
-        this.storeLocation = null;
-        this.autoRemove = false;
-
-        this.registerPlugins();
+    protected TransactionalTdbDatastore(StatsRecorder statsRecorder) {
+        this(null, statsRecorder, false);
     }
 
     public TransactionalDatasetGraph begin(AccessMode mode) {
         return new TransactionalDatasetGraphImpl(
-                this.storeConnection.begin(mode.toJena()));
+                this.storeConnection.begin(mode.toJena()), this.statsRecorder);
     }
 
     private void registerPlugins() {
@@ -158,6 +159,10 @@ public class TransactionalTdbDatastore extends Datastore {
                                 + " has failed", e);
             }
         }
+    }
+
+    public StatsRecorder getStatsRecorder() {
+        return this.statsRecorder;
     }
 
 }

@@ -24,6 +24,7 @@ import com.hp.hpl.jena.tdb.transaction.DatasetGraphTxn;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
 /**
  * This class provides an implementation of {@link TransactionalDatasetGraph} by
@@ -38,8 +39,12 @@ public final class TransactionalDatasetGraphImpl implements
 
     private final DatasetGraphTxn dataset;
 
-    public TransactionalDatasetGraphImpl(DatasetGraphTxn dataset) {
+    private final StatsRecorder statsRecorder;
+
+    public TransactionalDatasetGraphImpl(DatasetGraphTxn dataset,
+            StatsRecorder statsRecorder) {
         this.dataset = dataset;
+        this.statsRecorder = statsRecorder;
     }
 
     /**
@@ -48,6 +53,7 @@ public final class TransactionalDatasetGraphImpl implements
     @Override
     public void add(Node g, Node s, Node p, Node o) {
         this.dataset.add(g, s, p, o);
+        this.recordStatsIfNecessary(g, s, p, o);
     }
 
     /**
@@ -56,6 +62,9 @@ public final class TransactionalDatasetGraphImpl implements
     @Override
     public void add(Quadruple quadruple) {
         this.dataset.add(
+                quadruple.getGraph(), quadruple.getSubject(),
+                quadruple.getPredicate(), quadruple.getObject());
+        this.recordStatsIfNecessary(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
     }
@@ -166,6 +175,12 @@ public final class TransactionalDatasetGraphImpl implements
     @Override
     public Dataset toDataset() {
         return this.dataset.toDataset();
+    }
+
+    private void recordStatsIfNecessary(Node g, Node s, Node p, Node o) {
+        if (this.statsRecorder != null) {
+            this.statsRecorder.recordStats(g, s, p, o);
+        }
     }
 
 }

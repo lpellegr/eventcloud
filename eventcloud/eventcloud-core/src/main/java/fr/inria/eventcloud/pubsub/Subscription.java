@@ -86,18 +86,28 @@ public class Subscription implements Quadruplable, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final LoadingCache<String, SubscribeProxy> subscribeProxiesCache =
-            CacheBuilder.newBuilder()
-                    .softValues()
-                    .maximumSize(
-                            EventCloudProperties.SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE.getValue())
-                    .build(new CacheLoader<String, SubscribeProxy>() {
-                        @Override
-                        public SubscribeProxy load(String subscriberUrl)
-                                throws Exception {
-                            return (SubscribeProxy) ProxyFactory.lookupSubscribeProxy(subscriberUrl);
-                        }
-                    });
+    public static final LoadingCache<String, SubscribeProxy> SUBSCRIBE_PROXIES_CACHE;
+
+    static {
+        CacheBuilder<Object, Object> cacheBuilder =
+                CacheBuilder.newBuilder()
+                        .softValues()
+                        .maximumSize(
+                                EventCloudProperties.SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE.getValue());
+
+        if (EventCloudProperties.RECORD_STATS_SUBSCRIPTIONS_CACHE.getValue()) {
+            cacheBuilder.recordStats();
+        }
+
+        SUBSCRIBE_PROXIES_CACHE =
+                cacheBuilder.build(new CacheLoader<String, SubscribeProxy>() {
+                    @Override
+                    public SubscribeProxy load(String subscriberUrl)
+                            throws Exception {
+                        return (SubscribeProxy) ProxyFactory.lookupSubscribeProxy(subscriberUrl);
+                    }
+                });
+    }
 
     // the id of the subscription before someone rewrites it
     private final SubscriptionId originalId;
@@ -365,7 +375,7 @@ public class Subscription implements Quadruplable, Serializable {
      *             when the lookup operation fails.
      */
     public SubscribeProxy getSubscriberProxy() throws ExecutionException {
-        return subscribeProxiesCache.get(this.subscriberUrl);
+        return SUBSCRIBE_PROXIES_CACHE.get(this.subscriberUrl);
     }
 
     public String getSparqlQuery() {

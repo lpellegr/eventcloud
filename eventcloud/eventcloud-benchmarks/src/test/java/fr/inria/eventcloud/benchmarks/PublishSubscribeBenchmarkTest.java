@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.objectweb.proactive.core.util.MutableInteger;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.slf4j.Logger;
@@ -98,7 +99,6 @@ public class PublishSubscribeBenchmarkTest {
             Supplier<? extends Event> supplier,
             Class<? extends NotificationListener<?>> notificationListenerType,
             DatastoreType type) {
-        super();
         this.nbPeers = nbPeers;
         this.nbPublishers = nbPublishers;
         this.nbSubscribers = nbSubscribers;
@@ -110,6 +110,11 @@ public class PublishSubscribeBenchmarkTest {
         this.receiveExpectedEventsStopwatch = new Stopwatch();
         this.threadPool =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
+
+        // EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
+        // EventCloudProperties.RECORD_STATS_PEER_STUBS_CACHE.setValue(true);
+        // EventCloudProperties.RECORD_STATS_SUBSCRIBE_PROXIES_CACHE.setValue(true);
+        // EventCloudProperties.RECORD_STATS_SUBSCRIPTIONS_CACHE.setValue(true);
     }
 
     @Parameters
@@ -187,7 +192,7 @@ public class PublishSubscribeBenchmarkTest {
             for (int i = 0; i < this.nbPublishers; i++) {
                 final PublishApi publishProxy = publishProxies.get(i);
 
-                if (this.nbEventsPublished.getValue() <= this.expectedNbEvents) {
+                if (this.nbEventsPublished.getValue() < this.expectedNbEvents) {
                     this.threadPool.submit(new Runnable() {
                         @Override
                         public void run() {
@@ -226,8 +231,9 @@ public class PublishSubscribeBenchmarkTest {
                         this.nbPeers, this.nbPublishers, this.nbSubscribers,
                         this.notificationListenerType.getSimpleName()});
 
-        // System.err.println("DUMP:\n"
-        // + deployer.getRandomSemanticPeer(ecId).dump());
+        for (Peer p : deployer.getRandomSemanticTracker(ecId).getPeers()) {
+            log.info(p.dump());
+        }
 
         deployer.undeploy();
     }

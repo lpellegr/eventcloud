@@ -25,7 +25,7 @@ import com.google.common.base.Preconditions;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreMem;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -51,33 +51,40 @@ public final class SemanticPersistentOverlayProvider extends
         File repositoryPath =
                 EventCloudProperties.getRepositoryPath(this.streamUrl);
 
+        TransactionalTdbDatastoreBuilder miscDatastoreBuilder =
+                new TransactionalTdbDatastoreBuilder(new File(
+                        repositoryPath, "misc")).deleteFilesAfterClose(EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue());
+
+        if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
+            miscDatastoreBuilder.recordStats();
+        }
+
         // datastore used to store publications, historical data, etc.
-        TransactionalTdbDatastore miscDatastore =
-                new TransactionalTdbDatastore(
-                        new File(repositoryPath, "misc"),
-                        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue());
+        TransactionalTdbDatastore miscDatastore = miscDatastoreBuilder.build();
 
         // datastore used to store subscriptions
         TransactionalTdbDatastore subscriptionsDatastore =
-                new TransactionalTdbDatastore(
-                        new File(repositoryPath, "subscriptions"),
-                        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue());
+                new TransactionalTdbDatastoreBuilder(new File(
+                        repositoryPath, "subscriptions")).deleteFilesAfterClose(
+                        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue())
+                        .build();
 
         // datastore used to filter intermediate results for SPARQL requests
         // from a SparqlColander
         TransactionalTdbDatastore colanderDatastore;
         if (EventCloudProperties.COLANDER_IN_MEMORY.getValue()) {
-            colanderDatastore = new TransactionalTdbDatastoreMem();
+            colanderDatastore = new TransactionalTdbDatastoreBuilder().build();
         } else {
             colanderDatastore =
-                    new TransactionalTdbDatastore(
+                    new TransactionalTdbDatastoreBuilder(
                             new File(
                                     EventCloudProperties.COLANDER_REPOSITORIES_PATH.getValue(),
-                                    UUID.randomUUID().toString()), true);
+                                    UUID.randomUUID().toString())).deleteFilesAfterClose()
+                            .build();
         }
 
         return new SemanticCanOverlay(
-                miscDatastore, subscriptionsDatastore, colanderDatastore);
+                subscriptionsDatastore, miscDatastore, colanderDatastore);
     }
 
     public void setStreamUrl(String streamUrl) {
