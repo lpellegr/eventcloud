@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -51,6 +52,7 @@ import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
@@ -110,11 +112,6 @@ public class PublishSubscribeBenchmarkTest {
         this.receiveExpectedEventsStopwatch = new Stopwatch();
         this.threadPool =
                 Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
-
-        // EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
-        // EventCloudProperties.RECORD_STATS_PEER_STUBS_CACHE.setValue(true);
-        // EventCloudProperties.RECORD_STATS_SUBSCRIBE_PROXIES_CACHE.setValue(true);
-        // EventCloudProperties.RECORD_STATS_SUBSCRIPTIONS_CACHE.setValue(true);
     }
 
     @Parameters
@@ -127,12 +124,34 @@ public class PublishSubscribeBenchmarkTest {
                         DatastoreType.PERSISTENT},
                 {
                         1, 1, 1, 1000, new QuadrupleSupplier(),
+                        SignalNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
+                        BindingNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
                         BindingNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
                         1, 1, 1, 100, new CompoundEventSupplier(10),
                         CompoundEventNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 100, new CompoundEventSupplier(10),
+                        CompoundEventNotificationListener.class,
                         DatastoreType.PERSISTENT}});
+    }
+
+    @BeforeClass
+    public static void setUp() {
+        EventCloudProperties.REPOSITORIES_AUTO_REMOVE.setValue(true);
+
+        // EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
+        // EventCloudProperties.RECORD_STATS_PEER_STUBS_CACHE.setValue(true);
+        // EventCloudProperties.RECORD_STATS_SUBSCRIBE_PROXIES_CACHE.setValue(true);
+        // EventCloudProperties.RECORD_STATS_SUBSCRIPTIONS_CACHE.setValue(true);
     }
 
     @Test(timeout = 1800000)

@@ -58,6 +58,6 @@ public interface TransactionalDatasetGraph {
 
     void end();
 
-    Dataset toDataset();
+    Dataset getUnderlyingDataset();
 
 }

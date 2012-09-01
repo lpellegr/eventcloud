@@ -25,12 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.tdb.StoreConnection;
+import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.tdb.base.block.FileMode;
 import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.tdb.sys.SystemTDB;
-import com.hp.hpl.jena.tdb.transaction.TDBTransactionException;
 
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
@@ -45,11 +46,11 @@ public class TransactionalTdbDatastore extends Datastore {
     private static final Logger log =
             LoggerFactory.getLogger(TransactionalTdbDatastore.class);
 
-    private final StoreConnection storeConnection;
-
-    private final Location storeLocation;
-
     private final boolean autoRemove;
+
+    private final Dataset dataset;
+
+    private final Location location;
 
     private final StatsRecorder statsRecorder;
 
@@ -73,14 +74,15 @@ public class TransactionalTdbDatastore extends Datastore {
             // creates location directory if it does not already exist
             new File(location.getDirectoryPath()).mkdirs();
 
-            this.storeConnection = StoreConnection.make(location);
+            this.dataset = TDBFactory.createDataset(location);
+            this.location = location;
         } else {
-            this.storeConnection = StoreConnection.createMemUncached();
+            this.dataset = TDBFactory.createDataset();
+            this.location = null;
         }
 
         this.autoRemove = autoRemove;
         this.statsRecorder = statsRecorder;
-        this.storeLocation = location;
 
         this.registerPlugins();
     }
@@ -93,8 +95,9 @@ public class TransactionalTdbDatastore extends Datastore {
     }
 
     public TransactionalDatasetGraph begin(AccessMode mode) {
+        this.dataset.begin(mode.toJena());
         return new TransactionalDatasetGraphImpl(
-                this.storeConnection.begin(mode.toJena()), this.statsRecorder);
+                this.dataset, this.statsRecorder);
     }
 
     private void registerPlugins() {
@@ -118,27 +121,7 @@ public class TransactionalTdbDatastore extends Datastore {
      */
     @Override
     protected void _close() {
-        boolean released = false;
-
-        // TODO: avoid active wait. The best solution consists of providing a
-        // patch to Jena in order to force a wait by using wait/notify mechanism
-        // when Location#release is called
-        while (!released) {
-            try {
-                if (this.storeLocation != null) {
-                    StoreConnection.release(this.storeLocation);
-                }
-                released = true;
-            } catch (TDBTransactionException e) {
-                // it is only used to detect that they are still some
-                // active transactions to close before to release
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
+        TDBFactory.release(this.dataset);
 
         if (this.autoRemove) {
             if (SystemUtil.isWindows()
@@ -151,12 +134,10 @@ public class TransactionalTdbDatastore extends Datastore {
             }
 
             try {
-                Files.deleteDirectory(this.storeLocation.getDirectoryPath());
+                Files.deleteDirectory(this.location.getDirectoryPath());
             } catch (IOException e) {
-                log.error(
-                        "The deletion of the repository "
-                                + this.storeLocation.getDirectoryPath()
-                                + " has failed", e);
+                log.error("The deletion of the repository "
+                        + this.location.getDirectoryPath() + " has failed", e);
             }
         }
     }
