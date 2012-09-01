@@ -79,7 +79,7 @@ public class SparqlAtomicRequest extends
             QueryIterator iterator =
                     Algebra.exec(
                             this.atomicQuery.getOpRepresentation(),
-                            txnGraph.toDataset());
+                            txnGraph.getUnderlyingDataset());
 
             return toQuadruples(iterator, this.atomicQuery);
         } catch (Exception e) {

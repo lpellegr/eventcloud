@@ -245,7 +245,7 @@ public class MockPutGetProxy implements PutGetApi {
         try {
             qExec =
                     QueryExecutionFactory.create(
-                            sparqlAskQuery, txnGraph.toDataset());
+                            sparqlAskQuery, txnGraph.getUnderlyingDataset());
             result = qExec.execAsk();
         } catch (Exception e) {
             e.printStackTrace();
@@ -273,7 +273,8 @@ public class MockPutGetProxy implements PutGetApi {
         try {
             qExec =
                     QueryExecutionFactory.create(
-                            sparqlConstructQuery, txnGraph.toDataset());
+                            sparqlConstructQuery,
+                            txnGraph.getUnderlyingDataset());
             result = new ModelWrapper(qExec.execConstruct());
         } catch (Exception e) {
             e.printStackTrace();
@@ -309,7 +310,7 @@ public class MockPutGetProxy implements PutGetApi {
         try {
             QueryExecution queryExecution =
                     QueryExecutionFactory.create(
-                            sparqlSelectQuery, txnGraph.toDataset());
+                            sparqlSelectQuery, txnGraph.getUnderlyingDataset());
             result = new ResultSetWrapper(queryExecution.execSelect());
 
         } catch (Exception e) {

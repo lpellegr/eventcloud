@@ -37,11 +37,11 @@ import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 public final class TransactionalDatasetGraphImpl implements
         TransactionalDatasetGraph {
 
-    private final DatasetGraphTxn dataset;
+    private final Dataset dataset;
 
     private final StatsRecorder statsRecorder;
 
-    public TransactionalDatasetGraphImpl(DatasetGraphTxn dataset,
+    public TransactionalDatasetGraphImpl(Dataset dataset,
             StatsRecorder statsRecorder) {
         this.dataset = dataset;
         this.statsRecorder = statsRecorder;
@@ -52,7 +52,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public void add(Node g, Node s, Node p, Node o) {
-        this.dataset.add(g, s, p, o);
+        this.dataset.asDatasetGraph().add(g, s, p, o);
         this.recordStatsIfNecessary(g, s, p, o);
     }
 
@@ -61,7 +61,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public void add(Quadruple quadruple) {
-        this.dataset.add(
+        this.dataset.asDatasetGraph().add(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
         this.recordStatsIfNecessary(
@@ -84,7 +84,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public boolean contains(Quadruple quadruple) {
-        return this.dataset.contains(
+        return this.dataset.asDatasetGraph().contains(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
     }
@@ -94,7 +94,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public void delete(Quadruple quadruple) {
-        this.dataset.delete(
+        this.dataset.asDatasetGraph().delete(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
     }
@@ -124,7 +124,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public void delete(Node g, Node s, Node p, Node o) {
-        this.dataset.deleteAny(g, s, p, o);
+        this.dataset.asDatasetGraph().deleteAny(g, s, p, o);
     }
 
     /**
@@ -142,7 +142,8 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public QuadrupleIterator find(Node g, Node s, Node p, Node o) {
-        return new QuadrupleIterator(this.dataset.findNG(g, s, p, o));
+        return new QuadrupleIterator(this.dataset.asDatasetGraph().findNG(
+                g, s, p, o));
     }
 
     /**
@@ -173,8 +174,8 @@ public final class TransactionalDatasetGraphImpl implements
      * {@inheritDoc}
      */
     @Override
-    public Dataset toDataset() {
-        return this.dataset.toDataset();
+    public Dataset getUnderlyingDataset() {
+        return this.dataset;
     }
 
     private void recordStatsIfNecessary(Node g, Node s, Node p, Node o) {

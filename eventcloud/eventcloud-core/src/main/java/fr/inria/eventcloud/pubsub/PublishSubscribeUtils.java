@@ -179,7 +179,7 @@ public final class PublishSubscribeUtils {
         try {
             qExec =
                     QueryExecutionFactory.create(
-                            query.toString(), txnGraph.toDataset());
+                            query.toString(), txnGraph.getUnderlyingDataset());
             ResultSet result = qExec.execSelect();
 
             while (result.hasNext()) {

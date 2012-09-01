@@ -99,7 +99,7 @@ public abstract class Striped64 extends Number {
         volatile long q0, q1, q2, q3, q4, q5, q6;
 
         Cell(long x) {
-            value = x;
+            this.value = x;
         }
 
         final boolean cas(long cmp, long val) {
@@ -132,7 +132,7 @@ public abstract class Striped64 extends Number {
 
         HashCode() {
             int h = rng.nextInt(); // Avoid zero to allow xorShift rehash
-            code = (h == 0)
+            this.code = (h == 0)
                     ? 1 : h;
         }
     }
@@ -141,6 +141,7 @@ public abstract class Striped64 extends Number {
      * The corresponding ThreadLocal class
      */
     static final class ThreadHashCode extends ThreadLocal<HashCode> {
+        @Override
         public HashCode initialValue() {
             return new HashCode();
         }
@@ -226,47 +227,50 @@ public abstract class Striped64 extends Number {
             Cell a;
             int n;
             long v;
-            if ((as = cells) != null && (n = as.length) > 0) {
+            if ((as = this.cells) != null && (n = as.length) > 0) {
                 if ((a = as[(n - 1) & h]) == null) {
-                    if (busy == 0) { // Try to attach new Cell
+                    if (this.busy == 0) { // Try to attach new Cell
                         Cell r = new Cell(x); // Optimistically create
-                        if (busy == 0 && casBusy()) {
+                        if (this.busy == 0 && this.casBusy()) {
                             boolean created = false;
                             try { // Recheck under lock
                                 Cell[] rs;
                                 int m, j;
-                                if ((rs = cells) != null && (m = rs.length) > 0
+                                if ((rs = this.cells) != null
+                                        && (m = rs.length) > 0
                                         && rs[j = (m - 1) & h] == null) {
                                     rs[j] = r;
                                     created = true;
                                 }
                             } finally {
-                                busy = 0;
+                                this.busy = 0;
                             }
-                            if (created)
+                            if (created) {
                                 break;
+                            }
                             continue; // Slot is now non-empty
                         }
                     }
                     collide = false;
-                } else if (!wasUncontended) // CAS already known to fail
+                } else if (!wasUncontended) {
                     wasUncontended = true; // Continue after rehash
-                else if (a.cas(v = a.value, fn(v, x)))
+                } else if (a.cas(v = a.value, this.fn(v, x))) {
                     break;
-                else if (n >= NCPU || cells != as)
+                } else if (n >= NCPU || this.cells != as) {
                     collide = false; // At max size or stale
-                else if (!collide)
+                } else if (!collide) {
                     collide = true;
-                else if (busy == 0 && casBusy()) {
+                } else if (this.busy == 0 && this.casBusy()) {
                     try {
-                        if (cells == as) { // Expand table unless stale
+                        if (this.cells == as) { // Expand table unless stale
                             Cell[] rs = new Cell[n << 1];
-                            for (int i = 0; i < n; ++i)
+                            for (int i = 0; i < n; ++i) {
                                 rs[i] = as[i];
-                            cells = rs;
+                            }
+                            this.cells = rs;
                         }
                     } finally {
-                        busy = 0;
+                        this.busy = 0;
                     }
                     collide = false;
                     continue; // Retry with expanded table
@@ -274,22 +278,24 @@ public abstract class Striped64 extends Number {
                 h ^= h << 13; // Rehash
                 h ^= h >>> 17;
                 h ^= h << 5;
-            } else if (busy == 0 && cells == as && casBusy()) {
+            } else if (this.busy == 0 && this.cells == as && this.casBusy()) {
                 boolean init = false;
                 try { // Initialize table
-                    if (cells == as) {
+                    if (this.cells == as) {
                         Cell[] rs = new Cell[2];
                         rs[h & 1] = new Cell(x);
-                        cells = rs;
+                        this.cells = rs;
                         init = true;
                     }
                 } finally {
-                    busy = 0;
+                    this.busy = 0;
                 }
-                if (init)
+                if (init) {
                     break;
-            } else if (casBase(v = base, fn(v, x)))
+                }
+            } else if (this.casBase(v = this.base, this.fn(v, x))) {
                 break; // Fall back on using base
+            }
         }
         hc.code = h; // Record index for next time
     }
@@ -298,14 +304,15 @@ public abstract class Striped64 extends Number {
      * Sets base and all cells to the given value.
      */
     final void internalReset(long initialValue) {
-        Cell[] as = cells;
-        base = initialValue;
+        Cell[] as = this.cells;
+        this.base = initialValue;
         if (as != null) {
             int n = as.length;
             for (int i = 0; i < n; ++i) {
                 Cell a = as[i];
-                if (a != null)
+                if (a != null) {
                     a.value = initialValue;
+                }
             }
         }
     }
@@ -338,6 +345,7 @@ public abstract class Striped64 extends Number {
         } catch (SecurityException se) {
             try {
                 return java.security.AccessController.doPrivileged(new java.security.PrivilegedExceptionAction<sun.misc.Unsafe>() {
+                    @Override
                     public sun.misc.Unsafe run() throws Exception {
                         java.lang.reflect.Field f =
                                 sun.misc.Unsafe.class.getDeclaredField("theUnsafe");

@@ -49,6 +49,7 @@ public final class LongAdder extends Striped64 implements Serializable {
     /**
      * Version of plus for use in retryUpdate
      */
+    @Override
     final long fn(long v, long x) {
         return v + x;
     }
@@ -71,13 +72,14 @@ public final class LongAdder extends Striped64 implements Serializable {
         HashCode hc;
         Cell a;
         int n;
-        if ((as = cells) != null || !casBase(b = base, b + x)) {
+        if ((as = this.cells) != null || !this.casBase(b = this.base, b + x)) {
             boolean uncontended = true;
             int h = (hc = threadHashCode.get()).code;
             if (as == null || (n = as.length) < 1
                     || (a = as[(n - 1) & h]) == null
-                    || !(uncontended = a.cas(v = a.value, v + x)))
-                retryUpdate(x, hc, uncontended);
+                    || !(uncontended = a.cas(v = a.value, v + x))) {
+                this.retryUpdate(x, hc, uncontended);
+            }
         }
     }
 
@@ -85,14 +87,14 @@ public final class LongAdder extends Striped64 implements Serializable {
      * Equivalent to {@code add(1)}.
      */
     public void increment() {
-        add(1L);
+        this.add(1L);
     }
 
     /**
      * Equivalent to {@code add(-1)}.
      */
     public void decrement() {
-        add(-1L);
+        this.add(-1L);
     }
 
     /**
@@ -104,14 +106,15 @@ public final class LongAdder extends Striped64 implements Serializable {
      * @return the sum
      */
     public long sum() {
-        long sum = base;
-        Cell[] as = cells;
+        long sum = this.base;
+        Cell[] as = this.cells;
         if (as != null) {
             int n = as.length;
             for (int i = 0; i < n; ++i) {
                 Cell a = as[i];
-                if (a != null)
+                if (a != null) {
                     sum += a.value;
+                }
             }
         }
         return sum;
@@ -125,7 +128,7 @@ public final class LongAdder extends Striped64 implements Serializable {
      * updating.
      */
     public void reset() {
-        internalReset(0L);
+        this.internalReset(0L);
     }
 
     /**
@@ -138,9 +141,9 @@ public final class LongAdder extends Striped64 implements Serializable {
      * @return the sum
      */
     public long sumThenReset() {
-        long sum = base;
-        Cell[] as = cells;
-        base = 0L;
+        long sum = this.base;
+        Cell[] as = this.cells;
+        this.base = 0L;
         if (as != null) {
             int n = as.length;
             for (int i = 0; i < n; ++i) {
@@ -159,8 +162,9 @@ public final class LongAdder extends Striped64 implements Serializable {
      * 
      * @return the String representation of the {@link #sum}
      */
+    @Override
     public String toString() {
-        return Long.toString(sum());
+        return Long.toString(this.sum());
     }
 
     /**
@@ -168,46 +172,50 @@ public final class LongAdder extends Striped64 implements Serializable {
      * 
      * @return the sum
      */
+    @Override
     public long longValue() {
-        return sum();
+        return this.sum();
     }
 
     /**
      * Returns the {@link #sum} as an {@code int} after a narrowing primitive
      * conversion.
      */
+    @Override
     public int intValue() {
-        return (int) sum();
+        return (int) this.sum();
     }
 
     /**
      * Returns the {@link #sum} as a {@code float} after a widening primitive
      * conversion.
      */
+    @Override
     public float floatValue() {
-        return (float) sum();
+        return this.sum();
     }
 
     /**
      * Returns the {@link #sum} as a {@code double} after a widening primitive
      * conversion.
      */
+    @Override
     public double doubleValue() {
-        return (double) sum();
+        return this.sum();
     }
 
     private void writeObject(java.io.ObjectOutputStream s)
             throws java.io.IOException {
         s.defaultWriteObject();
-        s.writeLong(sum());
+        s.writeLong(this.sum());
     }
 
     private void readObject(ObjectInputStream s) throws IOException,
             ClassNotFoundException {
         s.defaultReadObject();
-        busy = 0;
-        cells = null;
-        base = s.readLong();
+        this.busy = 0;
+        this.cells = null;
+        this.base = s.readLong();
     }
 
 }

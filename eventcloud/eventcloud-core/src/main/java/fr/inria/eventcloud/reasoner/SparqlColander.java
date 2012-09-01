@@ -82,7 +82,7 @@ public class SparqlColander implements Closeable {
         try {
             qExec =
                     QueryExecutionFactory.create(
-                            sparqlAskQuery, txnGraph.toDataset());
+                            sparqlAskQuery, txnGraph.getUnderlyingDataset());
             result = qExec.execAsk();
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,7 +121,8 @@ public class SparqlColander implements Closeable {
         try {
             qExec =
                     QueryExecutionFactory.create(
-                            sparqlConstructQuery, txnGraph.toDataset());
+                            sparqlConstructQuery,
+                            txnGraph.getUnderlyingDataset());
             result = qExec.execConstruct();
         } catch (Exception e) {
             e.printStackTrace();
@@ -160,7 +161,7 @@ public class SparqlColander implements Closeable {
         try {
             qExec =
                     QueryExecutionFactory.create(
-                            sparqlSelectQuery, txnGraph.toDataset());
+                            sparqlSelectQuery, txnGraph.getUnderlyingDataset());
             result = new ResultSetWrapper(qExec.execSelect());
         } catch (Exception e) {
             e.printStackTrace();

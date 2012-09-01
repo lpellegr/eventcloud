@@ -121,7 +121,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             it =
                     Algebra.exec(
                             createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
-                            txnGraph.toDataset());
+                            txnGraph.getUnderlyingDataset());
 
             while (it.hasNext()) {
                 final Binding binding = it.nextBinding();

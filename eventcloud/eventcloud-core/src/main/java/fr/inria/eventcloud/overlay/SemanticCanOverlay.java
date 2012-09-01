@@ -490,7 +490,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                                 subjectLowerBound, subjectUpperBound,
                                 predicateLowerBound, predicateUpperBound,
                                 objectLowerBound, objectUpperBound})),
-                        txnGraph.toDataset());
+                        txnGraph.getUnderlyingDataset());
 
         List<Quadruple> result = new ArrayList<Quadruple>();
 
