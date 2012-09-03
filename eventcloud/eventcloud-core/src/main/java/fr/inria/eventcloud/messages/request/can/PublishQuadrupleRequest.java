@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.messages.request.can;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -115,6 +117,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 ((SemanticCanOverlay) overlay).getSubscriptionsDatastore()
                         .begin(AccessMode.READ_ONLY);
 
+        Set<Subscription> subscriptionsMatching = new HashSet<Subscription>();
+
         QueryIterator it = null;
         try {
             Optimize.noOptimizer();
@@ -138,13 +142,17 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 Vars.SUBSCRIPTION_ID).getLiteralLexicalForm());
 
                 Subscription subscription =
-                        ((SemanticCanOverlay) overlay).findSubscription(subscriptionId);
+                        ((SemanticCanOverlay) overlay).findSubscription(
+                                txnGraph, subscriptionId);
 
-                // a subscription with only one sub subscription (that matches
-                // the quadruple which has been inserted) has been detected
-                PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
-                        (SemanticCanOverlay) overlay, subscription,
-                        quadrupleMatching);
+                // We have to use an intermediate collection because nested
+                // transactions are currently not allowed (i.e. a write
+                // transaction inside a read) with Jena (or we have to force the
+                // overall transaction to be a write transaction and to pass the
+                // txnGraph variable to the
+                // PublishSubscribeUtils.rewriteSubscriptionOrNotifySender
+                // method. However this implies more contention).
+                subscriptionsMatching.add(subscription);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -154,6 +162,14 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             }
             txnGraph.end();
             Optimize.setFactory(Optimize.stdOptimizationFactory);
+        }
+
+        for (Subscription subscriptionMatching : subscriptionsMatching) {
+            // a subscription with only one sub subscription (that matches
+            // the quadruple which has been inserted) has been detected
+            PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
+                    (SemanticCanOverlay) overlay, subscriptionMatching,
+                    quadrupleMatching);
         }
     }
 

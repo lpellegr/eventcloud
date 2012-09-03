@@ -23,8 +23,8 @@ import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * This class is used to build a {@link SemanticCanOverlay} with a
- * {@link TransactionalTdbDatastoreMem} .
+ * This class is used to build a {@link SemanticCanOverlay} with in-memory
+ * datastores.
  * 
  * @author lpellegr
  */

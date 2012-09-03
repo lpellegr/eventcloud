@@ -182,6 +182,18 @@ public class Subscription implements Quadruplable, Serializable {
 
     public static final Subscription parseFrom(TransactionalTdbDatastore datastore,
                                                SubscriptionId id) {
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+
+        try {
+            return parseFrom(txnGraph, id);
+        } finally {
+            txnGraph.end();
+        }
+    }
+
+    public static final Subscription parseFrom(TransactionalDatasetGraph txnGraph,
+                                               SubscriptionId id) {
         // contains the data about the subscription itself
         Map<String, Node> basicInfo = new HashMap<String, Node>();
         // contains the identifier of the sub-subscriptions
@@ -189,33 +201,23 @@ public class Subscription implements Quadruplable, Serializable {
         // contains the stub urls associated to the subscription
         List<String> stubs = new ArrayList<String>();
 
-        TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
+        QuadrupleIterator it =
+                txnGraph.find(
+                        Node.ANY,
+                        PublishSubscribeUtils.createSubscriptionIdUri(id),
+                        Node.ANY, Node.ANY);
 
-        try {
-            QuadrupleIterator it =
-                    txnGraph.find(
-                            Node.ANY,
-                            PublishSubscribeUtils.createSubscriptionIdUri(id),
-                            Node.ANY, Node.ANY);
+        while (it.hasNext()) {
+            Quadruple quad = it.next();
 
-            while (it.hasNext()) {
-                Quadruple quad = it.next();
-
-                if (quad.getPredicate().equals(
-                        SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
-                    subSubscriptionIds.add(quad.getObject());
-                } else if (quad.getPredicate().equals(SUBSCRIPTION_STUB_NODE)) {
-                    stubs.add(quad.getObject().getLiteralLexicalForm());
-                } else {
-                    basicInfo.put(
-                            quad.getPredicate().toString(), quad.getObject());
-                }
+            if (quad.getPredicate().equals(
+                    SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
+                subSubscriptionIds.add(quad.getObject());
+            } else if (quad.getPredicate().equals(SUBSCRIPTION_STUB_NODE)) {
+                stubs.add(quad.getObject().getLiteralLexicalForm());
+            } else {
+                basicInfo.put(quad.getPredicate().toString(), quad.getObject());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            txnGraph.end();
         }
 
         SubscriptionId parentId = null;
@@ -281,7 +283,7 @@ public class Subscription implements Quadruplable, Serializable {
         for (Node subSubscriptionIdNode : subSubscriptionIds) {
             Subsubscription s =
                     Subsubscription.parseFrom(
-                            datastore,
+                            txnGraph,
                             SubscriptionId.parseSubscriptionId(basicInfo.get(
                                     SUBSCRIPTION_ID_PROPERTY)
                                     .getLiteralLexicalForm()),

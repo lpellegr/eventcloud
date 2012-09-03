@@ -93,7 +93,7 @@ public final class SubscriptionRewriter {
     /**
      * Removes the first triple pattern from the SPARQL query and rewrites the
      * next triple patterns. This method assumes that the SPARQL query has only
-     * <strong>one</strong> Basic Graph Pattern.
+     * {@code one} Basic Graph Pattern.
      * 
      * @param subscription
      *            the subscription to transform.

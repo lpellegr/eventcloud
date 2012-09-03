@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
@@ -188,6 +189,22 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     public final Subscription findSubscription(SubscriptionId id) {
         try {
             return this.subscriptionsCache.get(id);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Subscription " + id
+                    + " not found in cache and datastore");
+        }
+    }
+
+    public final Subscription findSubscription(final TransactionalDatasetGraph dataset,
+                                               final SubscriptionId id) {
+        try {
+            return this.subscriptionsCache.get(
+                    id, new Callable<Subscription>() {
+                        @Override
+                        public Subscription call() throws Exception {
+                            return Subscription.parseFrom(dataset, id);
+                        };
+                    });
         } catch (ExecutionException e) {
             throw new IllegalStateException("Subscription " + id
                     + " not found in cache and datastore");
