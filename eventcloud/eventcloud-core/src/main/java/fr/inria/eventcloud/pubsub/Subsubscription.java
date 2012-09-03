@@ -190,13 +190,26 @@ public class Subsubscription implements Quadruplable {
                 + "]";
     };
 
+    public static final Subsubscription parseFrom(TransactionalTdbDatastore datastore,
+                                                  SubscriptionId subscriptionId,
+                                                  Node subSubscriptionIdNode) {
+        TransactionalDatasetGraph txnGraph =
+                datastore.begin(AccessMode.READ_ONLY);
+
+        try {
+            return parseFrom(txnGraph, subscriptionId, subSubscriptionIdNode);
+        } finally {
+            txnGraph.end();
+        }
+    }
+
     /**
      * Parses a {@link Subsubscription} from the specified
      * {@link TransactionalTdbDatastore} by using the specified
      * {@code subscriptionId} and {@code subSubscriptionId}.
      * 
-     * @param datastore
-     *            the datastore where the information about the sub subscription
+     * @param txnGraph
+     *            the dataset where the information about the sub subscription
      *            are stored.
      * @param subscriptionId
      *            the subscriptionId which is the parent id for the
@@ -206,33 +219,26 @@ public class Subsubscription implements Quadruplable {
      * 
      * @return the sub subscription which has been parsed.
      */
-    public static final Subsubscription parseFrom(TransactionalTdbDatastore datastore,
+    public static final Subsubscription parseFrom(TransactionalDatasetGraph txnGraph,
                                                   SubscriptionId subscriptionId,
                                                   Node subSubscriptionIdNode) {
         // contains the properties and their associated values that are read
         // from the datastore for the given subSubscriptionId
         Map<String, Node> properties = new HashMap<String, Node>();
 
-        TransactionalDatasetGraph txnGraph =
-                datastore.begin(AccessMode.READ_ONLY);
-
         SubscriptionId originalId = null;
-        try {
-            QuadrupleIterator it =
-                    txnGraph.find(
-                            Node.ANY, subSubscriptionIdNode, Node.ANY, Node.ANY);
+        QuadrupleIterator it =
+                txnGraph.find(
+                        Node.ANY, subSubscriptionIdNode, Node.ANY, Node.ANY);
 
-            while (it.hasNext()) {
-                Quadruple quad = it.next();
-                properties.put(quad.getPredicate().toString(), quad.getObject());
+        while (it.hasNext()) {
+            Quadruple quad = it.next();
+            properties.put(quad.getPredicate().toString(), quad.getObject());
 
-                if (!it.hasNext()) {
-                    originalId =
-                            PublishSubscribeUtils.extractSubscriptionId(quad.getGraph());
-                }
+            if (!it.hasNext()) {
+                originalId =
+                        PublishSubscribeUtils.extractSubscriptionId(quad.getGraph());
             }
-        } finally {
-            txnGraph.end();
         }
 
         return new Subsubscription(

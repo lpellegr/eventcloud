@@ -376,7 +376,7 @@ public class SubscribeProxyTest {
                         new Object[0]);
         this.subscribeProxy.subscribe(subscription, notificationListener);
 
-        List<Quadruple> quads = new ArrayList<Quadruple>();
+        List<Quadruple> quads = new ArrayList<Quadruple>(4);
         for (int i = 0; i < 4; i++) {
             quads.add(QuadrupleGenerator.random(eventId));
         }
