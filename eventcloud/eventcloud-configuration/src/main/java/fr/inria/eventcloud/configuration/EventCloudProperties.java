@@ -295,7 +295,8 @@ public class EventCloudProperties {
      */
     public static final String getDefaultTemporaryPath() {
         return System.getProperty("java.io.tmpdir") + File.separatorChar
-                + "eventcloud" + File.separatorChar;
+                + "eventcloud-" + System.getProperty("user.name")
+                + File.separatorChar;
     }
 
 }
