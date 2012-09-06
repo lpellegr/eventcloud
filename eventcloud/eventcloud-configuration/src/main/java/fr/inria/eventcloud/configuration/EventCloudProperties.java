@@ -22,6 +22,7 @@ import java.util.UUID;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.ConfigurationParser;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyClass;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyDouble;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyInteger;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
@@ -88,6 +89,17 @@ public class EventCloudProperties {
             new PropertyString(
                     "filter.functions.ns",
                     "http://eventcloud.inria.fr/function#");
+
+    /**
+     * Defines whether static load balancing must be enabled or not. When it is
+     * enabled, a join operation use the statistics wich have been recorded
+     * during data insertion to compute a value that indicates where to split
+     * the zone managed by the landmark peer. By default this property is
+     * disabled. This property must be enabled in conjunction to
+     * {@link #RECORD_STATS_MISC_DATASTORE} in order to work.
+     */
+    public static final PropertyBoolean STATIC_LOAD_BALANCING =
+            new PropertyBoolean("static.load.balancing", false);
 
     /**
      * This property is used to have the possibility to restore a repository
@@ -175,6 +187,10 @@ public class EventCloudProperties {
 
     public static final PropertyBoolean RECORD_STATS_SUBSCRIBE_PROXIES_CACHE =
             new PropertyBoolean("record.stats.subscribe.proxies.cache", false);
+
+    public static final PropertyClass STATS_RECORDER_CLASS = new PropertyClass(
+            "stats.recorder.class",
+            "fr.inria.eventcloud.datastore.stats.MeanStatsRecorder");
 
     /**
      * Specifies the number maximum of attempts to lookup a proxy that is not

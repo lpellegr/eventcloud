@@ -17,22 +17,34 @@
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
 /**
- * A {@link Double} property.
+ * A {@link Class} property.
  * 
  * @author lpellegr
  */
-public class PropertyDouble extends Property<Double> {
+public class PropertyClass extends Property<Class<?>> {
 
-    public PropertyDouble(String name, Double defaultValue) {
+    public PropertyClass(String name, Class<?> defaultValue) {
         super(name, defaultValue);
+    }
+
+    public PropertyClass(String name, String className) {
+        super(name, transform(className));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.value = Double.valueOf(value);
+    public void setValueAsString(String className) {
+        super.value = transform(className);
+    }
+
+    private static Class<?> transform(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
 }

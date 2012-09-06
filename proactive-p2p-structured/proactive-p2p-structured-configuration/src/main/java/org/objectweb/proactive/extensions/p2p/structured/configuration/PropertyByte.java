@@ -17,7 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
 /**
- * A Byte property.
+ * A {@link Byte} property.
  * 
  * @author lpellegr
  */

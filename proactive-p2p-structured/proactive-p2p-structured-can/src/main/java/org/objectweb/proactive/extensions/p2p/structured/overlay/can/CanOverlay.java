@@ -83,7 +83,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
     private JoinInformation<E> tmpJoinInformation;
 
-    private Zone<E> zone;
+    protected Zone<E> zone;
 
     /**
      * Constructs a new overlay with messagingManager set to
@@ -392,7 +392,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         }
 
         // splits the current peer zone to share it
-        HomogenousPair<? extends Zone<E>> newZones = this.zone.split(dimension);
+        HomogenousPair<? extends Zone<E>> newZones = this.splitZones(dimension);
 
         // neighbors affected for the new peer which joins the network
         NeighborTable<E> pendingNewNeighborhood = new NeighborTable<E>();
@@ -447,6 +447,10 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                 super.id, newZones.get(directionInv), historyToTransfert,
                 pendingNewNeighborhood,
                 this.retrieveDataIn(newZones.get(directionInv)));
+    }
+
+    protected HomogenousPair<? extends Zone<E>> splitZones(byte dimension) {
+        return this.zone.split(dimension);
     }
 
     public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation<E> operation) {

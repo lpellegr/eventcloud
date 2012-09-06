@@ -20,6 +20,7 @@ import java.io.File;
 
 import com.hp.hpl.jena.tdb.base.file.Location;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
@@ -74,7 +75,14 @@ public class TransactionalTdbDatastoreBuilder {
      * @return the current builder instance.
      */
     public TransactionalTdbDatastoreBuilder recordStats() {
-        return this.recordStats(new CentroidStatsRecorder());
+        try {
+            return this.recordStats((StatsRecorder) EventCloudProperties.STATS_RECORDER_CLASS.getValue()
+                    .newInstance());
+        } catch (InstantiationException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public TransactionalTdbDatastoreBuilder recordStats(StatsRecorder statsRecorder) {
