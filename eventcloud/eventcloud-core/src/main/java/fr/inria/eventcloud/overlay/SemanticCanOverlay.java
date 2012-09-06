@@ -23,10 +23,13 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import com.google.common.cache.CacheBuilder;
@@ -339,6 +342,9 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         }
 
         if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
+            result.append("Misc datastore stats recorded with ");
+            result.append(this.miscDatastore.getStatsRecorder().getClass());
+            result.append('\n');
             result.append("Misc datastore size: ");
             result.append(this.miscDatastore.getStatsRecorder().getNbQuads());
             result.append('\n');
@@ -500,6 +506,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         TransactionalDatasetGraph txnGraph =
                 this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);
+
         QueryExecution qexec =
                 QueryExecutionFactory.create(
                         QueryFactory.create(createSparqlQueryRetrievingSubscriptionsToCopy(new String[] {
@@ -610,11 +617,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append("> || (?s");
             result.append(vars[i]);
             result.append(" >= \"");
-            result.append(bounds[j]);
+            result.append(Matcher.quoteReplacement(bounds[j]));
             result.append("\" && ?s");
             result.append(vars[i]);
             result.append(" < \"");
-            result.append(bounds[j + 1]);
+            result.append(Matcher.quoteReplacement(bounds[j + 1]));
             result.append("\"))");
 
             if (i < vars.length - 1) {
@@ -626,6 +633,39 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         result.append("\n}");
 
         return result.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected HomogenousPair<? extends Zone<SemanticElement>> splitZones(byte dimension) {
+        if (!EventCloudProperties.STATIC_LOAD_BALANCING.getValue()
+                || (EventCloudProperties.STATIC_LOAD_BALANCING.getValue() && this.miscDatastore.getStatsRecorder() == null)) {
+            return super.splitZones(dimension);
+        } else {
+            SemanticElement estimatedMiddle =
+                    this.miscDatastore.getStatsRecorder()
+                            .computeSplitEstimation(dimension);
+
+            try {
+                Coordinate<SemanticElement> lowerBoundCopy =
+                        super.zone.getLowerBound().clone();
+                Coordinate<SemanticElement> upperBoundCopy =
+                        super.zone.getUpperBound().clone();
+
+                lowerBoundCopy.setElement(dimension, estimatedMiddle);
+                upperBoundCopy.setElement(dimension, estimatedMiddle);
+
+                return HomogenousPair.createHomogenous(
+                        new SemanticZone(
+                                super.zone.getLowerBound(), upperBoundCopy),
+                        new SemanticZone(
+                                lowerBoundCopy, super.zone.getUpperBound()));
+            } catch (CloneNotSupportedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
 }

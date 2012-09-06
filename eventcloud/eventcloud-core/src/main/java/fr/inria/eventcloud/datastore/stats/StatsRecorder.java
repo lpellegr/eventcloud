@@ -16,11 +16,16 @@
  **/
 package fr.inria.eventcloud.datastore.stats;
 
+import java.io.Serializable;
+
+import org.apfloat.Apfloat;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.utils.LongAdder;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * Defines methods to record statistics about {@link Quadruple}s which are
@@ -28,27 +33,63 @@ import fr.inria.eventcloud.utils.LongAdder;
  * 
  * @author lpellegr
  */
-public abstract class StatsRecorder {
+public abstract class StatsRecorder implements Serializable {
 
-    private LongAdder nbQuads;
+    private static final long serialVersionUID = 1L;
 
-    public StatsRecorder() {
-        this.nbQuads = new LongAdder();
-    }
+    private long nbQuads = 0;
 
-    private void recordHits() {
-        this.nbQuads.increment();
-    }
-
-    public void recordStats(Node g, Node s, Node p, Node o) {
-        this.recordHits();
-
+    public void quadrupleAdded(Node g, Node s, Node p, Node o) {
         synchronized (this) {
-            this.recordQuadruple(g, s, p, o);
+            this.quadrupleAddedComputeStats(g, s, p, o);
+            this.nbQuads++;
         }
     }
 
-    protected abstract void recordQuadruple(Node g, Node s, Node p, Node o);
+    protected abstract void quadrupleAddedComputeStats(Node g, Node s, Node p,
+                                                       Node o);
+
+    public void quadrupleRemoved(Node g, Node s, Node p, Node o) {
+        synchronized (this) {
+            this.quadrupleRemovedComputeStats(g, s, p, o);
+            this.nbQuads--;
+        }
+    }
+
+    protected abstract void quadrupleRemovedComputeStats(Node g, Node s,
+                                                         Node p, Node o);
+
+    public abstract Apfloat computeGraphEstimation();
+
+    public abstract Apfloat computeSubjectEstimation();
+
+    public abstract Apfloat computePredicateEstimation();
+
+    public abstract Apfloat computeObjectEstimation();
+
+    public SemanticElement computeSplitEstimation(byte dimension) {
+        Apfloat estimatedSplitValue = null;
+
+        switch (dimension) {
+            case 0:
+                estimatedSplitValue = this.computeGraphEstimation();
+                break;
+            case 1:
+                estimatedSplitValue = this.computeSubjectEstimation();
+                break;
+            case 2:
+                estimatedSplitValue = this.computePredicateEstimation();
+                break;
+            case 3:
+                estimatedSplitValue = this.computeObjectEstimation();
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Invalid dimension specified: " + dimension);
+        }
+
+        return new SemanticElement(estimatedSplitValue);
+    }
 
     /**
      * Returns the number of quadruples which have been recorded.
@@ -56,7 +97,11 @@ public abstract class StatsRecorder {
      * @return the number of quadruples which have been recorded.
      */
     public long getNbQuads() {
-        return this.nbQuads.sum();
+        return this.nbQuads;
+    }
+
+    protected static Apfloat toRadix10(Node n) {
+        return StringElement.toIntegerRadix10(SemanticElement.removePrefix(n.toString()));
     }
 
 }

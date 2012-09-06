@@ -63,7 +63,7 @@ public class SemanticElement extends StringElement {
         super(value);
     }
 
-    private SemanticElement(Apfloat apfloat) {
+    public SemanticElement(Apfloat apfloat) {
         super(apfloat);
     }
 
