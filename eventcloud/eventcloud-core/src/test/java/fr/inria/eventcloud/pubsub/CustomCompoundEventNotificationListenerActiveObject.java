@@ -32,7 +32,7 @@ public class CustomCompoundEventNotificationListenerActiveObject extends
     private static final long serialVersionUID = 1L;
 
     private static final Logger log =
-            LoggerFactory.getLogger(SubscribeProxyTest.class);
+            LoggerFactory.getLogger(CustomCompoundEventNotificationListenerActiveObject.class);
 
     private List<CompoundEvent> events = new ArrayList<CompoundEvent>();
 
