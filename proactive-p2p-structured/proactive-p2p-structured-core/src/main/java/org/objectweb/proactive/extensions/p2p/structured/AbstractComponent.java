@@ -24,6 +24,8 @@ import java.io.InputStream;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.apfloat.ApfloatContext;
+import org.apfloat.internal.LongBuilderFactory;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.dataspaces.api.DataSpacesFileObject;
@@ -65,6 +67,9 @@ public abstract class AbstractComponent implements ComponentInitActive {
 
         this.loadLog4jConfigurationFromIS();
         this.loadP2PConfigurationFromIS();
+
+        // sets the default builder factory for the Apfloat library
+        ApfloatContext.getContext().setBuilderFactory(new LongBuilderFactory());
     }
 
     private void loadLog4jConfigurationFromIS() {
