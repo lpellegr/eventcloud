@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE definition PUBLIC "-//objectweb.org//DTD Fractal ADL 2.0//EN" "classpath://org/objectweb/proactive/core/component/adl/xml/proactive.dtd">
+
+<definition name="fr.inria.eventcloud.proxies.PublishProxy" extends="fr.inria.eventcloud.proxies.Proxy">
+	<interface role="server" name="publish-services" signature="fr.inria.eventcloud.proxies.PublishProxy"/>
+
+	<content class="fr.inria.eventcloud.proxies.PublishProxyImpl"/>
+
+	<attributes signature="fr.inria.eventcloud.proxies.PublishProxyAttributeController"/>
+</definition>
