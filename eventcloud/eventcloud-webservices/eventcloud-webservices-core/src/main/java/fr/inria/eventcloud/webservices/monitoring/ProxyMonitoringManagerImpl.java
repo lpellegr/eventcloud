@@ -36,6 +36,7 @@ import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
+import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.w3c.dom.Document;
 
 import com.google.common.cache.CacheBuilder;
@@ -47,6 +48,7 @@ import easybox.petalslink.com.esrawreport._1.EJaxbReportTimeStampType;
 import easybox.petalslink.com.esrawreport._1.EJaxbReportType;
 import easybox.petalslink.com.esrawreport._1.ObjectFactory;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.monitoring.ProxyMonitoringActions;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
@@ -57,8 +59,8 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
  * @author lpellegr
  * @author bsauvan
  */
-public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
-        ProxyMonitoringManager, ComponentInitActive {
+public class ProxyMonitoringManagerImpl extends AbstractComponent implements
+        ProxyMonitoringActions, ProxyMonitoringManager, ComponentInitActive {
 
     /**
      * Name of the proxy monitoring manager non functional component.
@@ -109,6 +111,10 @@ public class ProxyMonitoringManagerImpl implements ProxyMonitoringActions,
      */
     @Override
     public void initComponentActivity(Body body) {
+        this.configurationProperty = "eventcloud.configuration";
+        this.propertiesClass = EventCloudProperties.class;
+        super.initComponentActivity(body);
+
         this.consumerEndpoints = new HashMap<SubscriptionId, String>();
     }
 
