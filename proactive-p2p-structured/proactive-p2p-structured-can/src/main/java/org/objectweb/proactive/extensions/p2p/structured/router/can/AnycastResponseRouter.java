@@ -76,6 +76,9 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
             if (entryResponse.getAnycastRoutingList().size() == 0) {
                 this.handle(overlay, entryResponse);
             } else {
+                logger.debug(
+                        "All subreplies received on {} for request {}",
+                        overlay, response.getId());
                 // the synchronization point is on a peer in the sub-tree.
                 // we call the route method in order to know where to sent back
                 // the response.
@@ -86,10 +89,6 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
                 overlay.getRequestResponseManager()
                         .getResponsesReceived()
                         .remove(entryResponse.getId());
-
-                logger.debug(
-                        "All subreplies received on {} for request {}",
-                        overlay, response.getId());
             }
         }
     }
@@ -119,12 +118,13 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
         AnycastRoutingEntry entry =
                 response.getAnycastRoutingList().removeLast();
         response.incrementHopCount(1);
-        entry.getPeerStub().route(response);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Routing response " + response.getId() + " from "
-                    + overlay + " to " + entry.getPeerStub());
+                    + overlay + " -> " + entry.getPeerStub());
         }
+
+        entry.getPeerStub().route(response);
     }
 
 }

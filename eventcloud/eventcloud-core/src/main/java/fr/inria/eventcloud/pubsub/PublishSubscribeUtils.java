@@ -557,21 +557,7 @@ public final class PublishSubscribeUtils {
                             PAActiveObject.getUrl(semanticCanOverlay.getStub()),
                             createBindingSolution(subscription, quadruple));
 
-            // FIXME issue #24
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        subscriber.receive(n);
-                    } catch (Throwable t) {
-                        log.warn(t.getMessage());
-                        handleSubscriberConnectionFailure(
-                                semanticCanOverlay, subscription);
-                    }
-                }
-            });
-            thread.setName("NotifySubscriberThread");
-            thread.start();
+            subscriber.receive(n);
 
             if (subscription.getType() == NotificationListenerType.BINDING) {
                 // broadcasts a message to all the stubs contained by
@@ -582,16 +568,8 @@ public final class PublishSubscribeUtils {
                             semanticCanOverlay.findPeerStub(stub.peerUrl);
 
                     if (peerStub != null) {
-                        // FIXME: issue #24
-                        thread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                peerStub.receive(new RetrieveSubSolutionOperation(
-                                        notificationId, stub.quadrupleHash));
-                            }
-                        });
-                        thread.setName("RetrieveSubSolutionThread");
-                        thread.start();
+                        peerStub.receive(new RetrieveSubSolutionOperation(
+                                notificationId, stub.quadrupleHash));
                     } else {
                         log.error(
                                 "Error while retrieving peer stub for url: {}",

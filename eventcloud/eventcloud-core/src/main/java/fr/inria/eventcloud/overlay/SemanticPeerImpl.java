@@ -19,17 +19,14 @@ package fr.inria.eventcloud.overlay;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import com.hp.hpl.jena.rdf.model.StmtIterator;
@@ -90,8 +87,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     public static final String SOCIAL_FILTER_SERVICES_ITF =
             "social-filter-services";
 
-    private ExecutorService threadPool;
-
     /**
      * No-arg constructor for ProActive.
      */
@@ -106,22 +101,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public void initComponentActivity(Body body) {
-        body.setImmediateService("add", false);
-        body.setImmediateService("contains", false);
-        body.setImmediateService("delete", false);
-        body.setImmediateService("find", false);
-        body.setImmediateService("executeSparqlAsk", false);
-        body.setImmediateService("executeSparqlConstruct", false);
-        body.setImmediateService("executeSparqlDescribe", false);
-        body.setImmediateService("executeSparqlSelect", false);
-
         this.configurationProperty = "eventcloud.configuration";
         this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
-
-        // FIXME issue #24
-        this.threadPool =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
     }
 
     /**
@@ -130,8 +112,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @Override
     public void endComponentActivity(Body body) {
         super.endComponentActivity(body);
-
-        this.threadPool.shutdown();
     }
 
     /*
@@ -145,6 +125,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean add(Quadruple quad) {
         PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
 
@@ -155,23 +136,10 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean add(Collection<Quadruple> quads) {
-        final CountDownLatch doneSignal = new CountDownLatch(quads.size());
-
         for (final Quadruple quad : quads) {
-            this.threadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    SemanticPeerImpl.this.add(quad);
-                    doneSignal.countDown();
-                }
-            });
-        }
-
-        try {
-            doneSignal.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            SemanticPeerImpl.this.add(quad);
         }
 
         return true;
@@ -181,6 +149,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean add(InputStream in, SerializationFormat format) {
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
@@ -196,6 +165,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean contains(Quadruple quad) {
         return ((BooleanForwardResponse) PAFuture.getFutureValue(super.send(new ContainsQuadrupleRequest(
                 quad)))).getResult();
@@ -205,6 +175,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean delete(Quadruple quad) {
         PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
 
@@ -215,23 +186,10 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean delete(Collection<Quadruple> quads) {
-        final CountDownLatch doneSignal = new CountDownLatch(quads.size());
-
         for (final Quadruple quad : quads) {
-            this.threadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    SemanticPeerImpl.this.delete(quad);
-                    doneSignal.countDown();
-                }
-            });
-        }
-
-        try {
-            doneSignal.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            SemanticPeerImpl.this.delete(quad);
         }
 
         return true;
@@ -241,6 +199,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public List<Quadruple> delete(QuadruplePattern quadPattern) {
         QuadruplePatternResponse response =
                 (QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new DeleteQuadruplesRequest(
@@ -253,6 +212,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public long count(QuadruplePattern quadPattern) {
         return ((CountQuadruplePatternResponse) PAFuture.getFutureValue((super.send(new CountQuadruplePatternRequest(
                 quadPattern.getGraph(), quadPattern.getSubject(),
@@ -296,6 +256,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public List<Quadruple> find(QuadruplePattern quadPattern) {
         return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
                 quadPattern.getGraph(), quadPattern.getSubject(),
@@ -306,6 +267,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery) {
         sparqlQuery = sparqlQuery.trim();
 
@@ -327,6 +289,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(
                 sparqlAskQuery, super.overlay);
@@ -336,6 +299,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct) {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(
                 sparqlConstruct, super.overlay);
@@ -345,6 +309,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
         throw new UnsupportedOperationException();
     }
@@ -353,6 +318,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(
                 sparqlSelect, super.overlay);
@@ -362,6 +328,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void bindFc(String clientItfName, Object serverItf)
             throws NoSuchInterfaceException {
         if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
@@ -375,6 +342,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public String[] listFc() {
         return new String[] {SOCIAL_FILTER_SERVICES_ITF};
     }
@@ -383,6 +351,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public Object lookupFc(String clientItfName)
             throws NoSuchInterfaceException {
         if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
@@ -396,6 +365,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void unbindFc(String clientItfName) throws NoSuchInterfaceException {
         if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
             ((SemanticCanOverlay) this.overlay).setSocialFilter(null);

@@ -22,6 +22,10 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.Compatible;
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.DefineRules;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAGroup;
 import org.objectweb.proactive.core.ProActiveException;
@@ -46,6 +50,10 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
+@DefineGroups({
+        @org.objectweb.proactive.annotation.multiactivity.Group(name = "parallel", selfCompatible = true),
+        @org.objectweb.proactive.annotation.multiactivity.Group(name = "peers", selfCompatible = false)})
+@DefineRules({@Compatible(value = {"peers", "parallel"})})
 public class TrackerImpl extends AbstractComponent implements Tracker,
         TrackerAttributeController, ComponentEndActive {
 
@@ -240,6 +248,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("peers")
     public void storePeer(Peer peerReference) {
         this.peers.add(peerReference);
         PAGroup.waitAll(this.untypedGroupView.internalStorePeer(peerReference));
@@ -249,6 +258,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("peers")
     public void removePeer(Peer peerReference) {
         this.internalRemovePeer(peerReference);
         PAGroup.waitAll(this.untypedGroupView.internalRemovePeer(peerReference));
@@ -258,6 +268,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("peers")
     public BooleanWrapper internalStorePeer(Peer peerReference) {
         if (this.type == null) {
             this.type = peerReference.getType();
@@ -270,6 +281,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("peers")
     public BooleanWrapper internalRemovePeer(Peer peerReference) {
         return new BooleanWrapper(this.peers.remove(peerReference));
     }
@@ -278,6 +290,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public BooleanWrapper internalAddTracker(Tracker trackerReference) {
         return new BooleanWrapper(this.typedGroupView.add(trackerReference));
     }
@@ -286,6 +299,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public BooleanWrapper internalRemoveTracker(Tracker trackerReference) {
         return new BooleanWrapper(this.typedGroupView.remove(trackerReference));
     }
@@ -294,6 +308,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public String register() {
         try {
             this.bindingName =
@@ -307,6 +322,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
         return this.bindingName;
     }
 
+    @MemberOf("parallel")
     public String getBindingNameSuffix() {
         if (this.bindingNameSuffix == null) {
             StringBuffer appender = new StringBuffer("tracker/");
@@ -323,6 +339,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public UUID getId() {
         return this.id;
     }
@@ -331,6 +348,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public String getNetworkName() {
         return this.networkName;
     }
@@ -339,6 +357,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("peers")
     public Peer getPeer(int index) {
         if (index < 0 || index >= this.peers.size()) {
             throw new IndexOutOfBoundsException("index " + index
@@ -351,6 +370,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("peers")
     public List<Peer> getPeers() {
         return this.peers;
     }
@@ -359,6 +379,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("peers")
     public Peer getRandomPeer() {
         return this.peers.get(RandomUtils.nextInt(this.peers.size()));
     }
@@ -367,6 +388,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public OverlayType getType() {
         return this.type;
     }
@@ -375,6 +397,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public double getProbabilityToStorePeer() {
         return this.probabilityToStorePeer;
     }
@@ -391,10 +414,12 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public Group<Tracker> getTypedGroupView() {
         return this.typedGroupView;
     }
 
+    @MemberOf("parallel")
     public Tracker getUntypedGroupView() {
         return this.untypedGroupView;
     }

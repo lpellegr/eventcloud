@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.messages.response.can;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -47,7 +48,8 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
     public StatefulQuadruplePatternResponse() {
         super();
         this.actionTime = 0;
-        this.intermediateResults = new ArrayList<SerializedValue<T>>();
+        this.intermediateResults =
+                Collections.synchronizedList(new ArrayList<SerializedValue<T>>());
     }
 
     public T getResult() {

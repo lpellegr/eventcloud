@@ -44,9 +44,6 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
 
     private AnycastRoutingList anycastRoutingList = new AnycastRoutingList();
 
-    /* a response is set as dummy if it comes from a request which has already been received */
-    private boolean isDummy = false;
-
     public AnycastResponse() {
         super();
     }
@@ -59,13 +56,9 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 
-        if (!((AnycastRequest<E>) request).isAlreadyReceived()) {
-            this.anycastRoutingList =
-                    ((AnycastRequest<E>) request).getAnycastRoutingList();
-            this.constraintsValidator = request.getConstraintsValidator();
-        } else {
-            this.isDummy = true;
-        }
+        this.anycastRoutingList =
+                ((AnycastRequest<E>) request).getAnycastRoutingList();
+        this.constraintsValidator = request.getConstraintsValidator();
     }
 
     /**
@@ -141,30 +134,12 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
      */
     public static <E extends Element> AnycastResponse<E> merge(AnycastResponse<E> localResponse,
                                                                AnycastResponse<E> responseReceived) {
-        if (responseReceived.isDummy) {
-            return localResponse;
-        }
-
         if (localResponse == null) {
             return responseReceived;
+        } else {
+            localResponse.incrementHopCount(responseReceived.getOutboundHopCount());
+            localResponse.mergeAttributes(responseReceived);
+            return localResponse;
         }
-
-        localResponse.incrementHopCount(responseReceived.getOutboundHopCount());
-        localResponse.mergeAttributes(responseReceived);
-
-        return localResponse;
     }
-
-    /**
-     * Returns {@code true} if the response is dummy (i.e. this is due to a
-     * request which has already been received), {@code false} otherwise.
-     * 
-     * @return {@code true} if the response is dummy (i.e. this is due to a
-     *         request which has already been received), {@code false}
-     *         otherwise.
-     */
-    public boolean isDummy() {
-        return this.isDummy;
-    }
-
 }

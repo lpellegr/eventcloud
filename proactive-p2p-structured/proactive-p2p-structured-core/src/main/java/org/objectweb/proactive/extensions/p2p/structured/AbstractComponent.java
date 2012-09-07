@@ -29,6 +29,7 @@ import org.apfloat.ApfloatContext;
 import org.apfloat.spi.BuilderFactory;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
+import org.objectweb.proactive.core.component.body.ComponentRunActive;
 import org.objectweb.proactive.extensions.dataspaces.api.DataSpacesFileObject;
 import org.objectweb.proactive.extensions.dataspaces.api.PADataSpaces;
 import org.objectweb.proactive.extensions.dataspaces.exceptions.ConfigurationException;
@@ -36,6 +37,7 @@ import org.objectweb.proactive.extensions.dataspaces.exceptions.FileSystemExcept
 import org.objectweb.proactive.extensions.dataspaces.exceptions.NotConfiguredException;
 import org.objectweb.proactive.extensions.dataspaces.exceptions.SpaceNotFoundException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +48,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author bsauvan
  */
-public abstract class AbstractComponent implements ComponentInitActive {
+public abstract class AbstractComponent implements ComponentInitActive,
+        ComponentRunActive {
 
     private static final String INPUT_SPACE_PREFIX = "INPUT_SPACE";
 
@@ -166,6 +169,11 @@ public abstract class AbstractComponent implements ComponentInitActive {
         } catch (IOException ioe) {
             throw new IllegalStateException(ioe);
         }
+    }
+
+    @Override
+    public void runComponentActivity(Body body) {
+        (new MultiActiveService(body)).multiActiveServing();
     }
 
 }

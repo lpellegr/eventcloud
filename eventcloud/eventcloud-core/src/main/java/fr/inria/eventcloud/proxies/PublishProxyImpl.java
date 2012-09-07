@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.Group;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -44,6 +47,7 @@ import fr.inria.eventcloud.utils.Callback;
  * 
  * @see ProxyFactory
  */
+@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
 public class PublishProxyImpl extends Proxy implements PublishProxy,
         PublishProxyAttributeController {
 
@@ -82,6 +86,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void publish(Quadruple quad) {
         if (quad.getPublicationTime() == -1) {
             quad.setPublicationTime();
@@ -101,6 +106,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void publish(CompoundEvent event) {
         long publicationTime = System.currentTimeMillis();
 
@@ -114,6 +120,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void publish(Collection<CompoundEvent> events) {
         for (CompoundEvent event : events) {
             this.publish(event);
@@ -124,6 +131,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void publish(InputStream in, SerializationFormat format) {
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
@@ -149,6 +157,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      *             {@link ProxyFactory#lookupPublishProxy(String)} instead.
      */
     @Deprecated
+    @MemberOf("parallel")
     public static PublishProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, PUBLISH_SERVICES_ITF, PublishProxy.class);

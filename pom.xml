@@ -47,8 +47,8 @@
 			<url>https://repository.apache.org/content/repositories/snapshots</url>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots-proactive-507</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-507</url>
+			<id>sonatype-snapshots-proactive-201</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-201</url>
 		</repository>
 		<repository>
 			<id>play-private.release</id>
@@ -228,7 +228,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming-bundle</artifactId>
-				<version>5.2.0-update-10</version>
+				<version>5.2.0-update-11</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ow2.proactive</groupId>
