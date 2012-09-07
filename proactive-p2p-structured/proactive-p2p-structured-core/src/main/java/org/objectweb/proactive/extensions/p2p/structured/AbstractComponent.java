@@ -84,13 +84,8 @@ public abstract class AbstractComponent implements ComponentInitActive {
             // sets the default builder factory for the Apfloat library
             ApfloatContext.getContext()
                     .setBuilderFactory(
-                            (BuilderFactory) Class.forName(
-                                    P2PStructuredProperties.APFLOAT_DEFAULT_BUILDER_FACTORY.getValue())
+                            (BuilderFactory) P2PStructuredProperties.APFLOAT_DEFAULT_BUILDER_FACTORY.getValue()
                                     .newInstance());
-        } catch (ClassNotFoundException cnfe) {
-            throw new TypeNotPresentException(
-                    P2PStructuredProperties.APFLOAT_DEFAULT_BUILDER_FACTORY.getValue(),
-                    cnfe);
         } catch (IllegalAccessException iae) {
             throw new IllegalStateException(iae);
         } catch (InstantiationException ie) {
