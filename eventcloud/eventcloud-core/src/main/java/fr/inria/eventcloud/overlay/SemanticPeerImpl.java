@@ -115,9 +115,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         body.setImmediateService("executeSparqlDescribe", false);
         body.setImmediateService("executeSparqlSelect", false);
 
-        this.p2pConfigurationProperty = "eventcloud.configuration";
+        this.configurationProperty = "eventcloud.configuration";
+        this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
-        EventCloudProperties.loadConfiguration();
 
         // FIXME issue #24
         this.threadPool =
