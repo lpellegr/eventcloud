@@ -76,11 +76,13 @@ public abstract class AbstractComponent implements ComponentInitActive {
                                     P2PStructuredProperties.APFLOAT_DEFAULT_BUILDER_FACTORY.getValue())
                                     .newInstance());
         } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
+            throw new TypeNotPresentException(
+                    P2PStructuredProperties.APFLOAT_DEFAULT_BUILDER_FACTORY.getValue(),
+                    cnfe);
         } catch (IllegalAccessException iae) {
-            iae.printStackTrace();
+            throw new IllegalStateException(iae);
         } catch (InstantiationException ie) {
-            ie.printStackTrace();
+            throw new IllegalStateException(ie);
         }
     }
 
@@ -105,15 +107,15 @@ public abstract class AbstractComponent implements ComponentInitActive {
                 log.debug("Log4J configuration successfully loaded from input space");
             }
         } catch (SpaceNotFoundException snfe) {
-            snfe.printStackTrace();
+            throw new IllegalStateException(snfe);
         } catch (FileSystemException fse) {
-            fse.printStackTrace();
+            throw new IllegalStateException(fse);
         } catch (NotConfiguredException nce) {
-            nce.printStackTrace();
+            throw new IllegalStateException(nce);
         } catch (ConfigurationException ce) {
-            ce.printStackTrace();
+            throw new IllegalStateException(ce);
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            throw new IllegalStateException(ioe);
         }
     }
 
@@ -130,48 +132,32 @@ public abstract class AbstractComponent implements ComponentInitActive {
                                 p2pConfigurationPropertyValue.length()));
                 InputStream is =
                         p2pConfigurationDSFile.getContent().getInputStream();
-                File p2pConfigurationFile = null;
-                FileOutputStream fos = null;
+                File p2pConfigurationFile =
+                        File.createTempFile("p2p-configuration-", ".properties");
+                FileOutputStream fos =
+                        new FileOutputStream(p2pConfigurationFile);
 
-                try {
-                    p2pConfigurationFile =
-                            File.createTempFile(
-                                    "p2p-configuration-", ".properties");
-                    fos = new FileOutputStream(p2pConfigurationFile);
+                IOUtils.copy(is, fos);
 
-                    IOUtils.copy(is, fos);
+                is.close();
+                fos.close();
 
-                    System.setProperty(
-                            this.p2pConfigurationProperty,
-                            p2pConfigurationFile.getCanonicalPath());
+                System.setProperty(
+                        this.p2pConfigurationProperty,
+                        p2pConfigurationFile.getCanonicalPath());
 
-                    log.debug("P2P configuration successfully loaded from input space");
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                } finally {
-                    try {
-                        is.close();
-                    } catch (IOException ioe) {
-                        ioe.printStackTrace();
-                    }
-
-                    try {
-                        if (fos != null) {
-                            fos.close();
-                        }
-                    } catch (IOException ioe) {
-                        ioe.printStackTrace();
-                    }
-                }
+                log.debug("P2P configuration successfully loaded from input space");
             }
         } catch (SpaceNotFoundException snfe) {
-            snfe.printStackTrace();
+            throw new IllegalStateException(snfe);
         } catch (FileSystemException fse) {
-            fse.printStackTrace();
+            throw new IllegalStateException(fse);
         } catch (NotConfiguredException nce) {
-            nce.printStackTrace();
+            throw new IllegalStateException(nce);
         } catch (ConfigurationException ce) {
-            ce.printStackTrace();
+            throw new IllegalStateException(ce);
+        } catch (IOException ioe) {
+            throw new IllegalStateException(ioe);
         }
     }
 
