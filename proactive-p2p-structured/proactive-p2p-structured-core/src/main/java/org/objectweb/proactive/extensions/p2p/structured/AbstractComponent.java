@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.log4j.LogManager;
@@ -55,8 +56,10 @@ public abstract class AbstractComponent implements ComponentInitActive {
     protected String log4jConfigurationProperty =
             "log4j.configuration.dataspace";
 
-    protected String p2pConfigurationProperty =
+    protected String configurationProperty =
             "proactive.p2p.structured.configuration";
+
+    protected Class<?> propertiesClass = P2PStructuredProperties.class;
 
     /**
      * {@inheritDoc}
@@ -64,9 +67,18 @@ public abstract class AbstractComponent implements ComponentInitActive {
     @Override
     public void initComponentActivity(Body body) {
         this.loadLog4jConfigurationFromIS();
-        this.loadP2PConfigurationFromIS();
+        this.loadConfigurationFromIS();
 
-        P2PStructuredProperties.loadConfiguration();
+        try {
+            this.propertiesClass.getDeclaredMethod("loadConfiguration").invoke(
+                    null);
+        } catch (IllegalAccessException iae) {
+            throw new IllegalStateException(iae);
+        } catch (InvocationTargetException ite) {
+            throw new IllegalStateException(ite);
+        } catch (NoSuchMethodException nsme) {
+            throw new IllegalStateException(nsme);
+        }
 
         try {
             // sets the default builder factory for the Apfloat library
@@ -119,10 +131,10 @@ public abstract class AbstractComponent implements ComponentInitActive {
         }
     }
 
-    private void loadP2PConfigurationFromIS() {
+    private void loadConfigurationFromIS() {
         try {
             String p2pConfigurationPropertyValue =
-                    System.getProperty(this.p2pConfigurationProperty);
+                    System.getProperty(this.configurationProperty);
 
             if (p2pConfigurationPropertyValue != null
                     && p2pConfigurationPropertyValue.startsWith(INPUT_SPACE_PREFIX)) {
@@ -143,7 +155,7 @@ public abstract class AbstractComponent implements ComponentInitActive {
                 fos.close();
 
                 System.setProperty(
-                        this.p2pConfigurationProperty,
+                        this.configurationProperty,
                         p2pConfigurationFile.getCanonicalPath());
 
                 log.debug("P2P configuration successfully loaded from input space");
