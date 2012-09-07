@@ -26,6 +26,10 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.apfloat</groupId>
+			<artifactId>apfloat</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>

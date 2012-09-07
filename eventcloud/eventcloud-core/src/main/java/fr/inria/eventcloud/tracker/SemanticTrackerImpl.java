@@ -49,9 +49,9 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
      */
     @Override
     public void initComponentActivity(Body body) {
-        this.p2pConfigurationProperty = "eventcloud.configuration";
+        this.configurationProperty = "eventcloud.configuration";
+        this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
-        EventCloudProperties.loadConfiguration();
     }
 
     /**
