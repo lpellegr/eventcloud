@@ -49,11 +49,13 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingWrapperNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
+import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.Vars;
 import fr.inria.eventcloud.factories.ProxyFactory;
@@ -400,6 +402,9 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
         if (listener instanceof BindingNotificationListener) {
             this.deliver(id, (BindingNotificationListener) listener, solution);
+        } else if (listener instanceof BindingWrapperNotificationListener) {
+            this.deliver(
+                    id, (BindingWrapperNotificationListener) listener, solution);
         } else if (listener instanceof CompoundEventNotificationListener) {
             this.deliver(
                     id, (CompoundEventNotificationListener) listener, solution);
@@ -418,6 +423,16 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                                BindingNotificationListener listener,
                                Solution solution) {
         listener.onNotification(id.getSubscriptionId(), solution.getSolution());
+
+        this.sendInputOutputMonitoringReportIfNecessary(
+                id.getSubscriptionId(), solution, listener.getSubscriberUrl());
+    }
+
+    private final void deliver(NotificationId id,
+                               BindingWrapperNotificationListener listener,
+                               Solution solution) {
+        listener.onNotification(id.getSubscriptionId(), new BindingWrapper(
+                solution.getSolution()));
 
         this.sendInputOutputMonitoringReportIfNecessary(
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
