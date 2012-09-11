@@ -240,4 +240,9 @@ public class ProxyMonitoringManagerImpl extends AbstractComponent implements
         }
     }
 
+    @Override
+    public void runComponentActivity(Body arg0) {
+
+    }
+
 }

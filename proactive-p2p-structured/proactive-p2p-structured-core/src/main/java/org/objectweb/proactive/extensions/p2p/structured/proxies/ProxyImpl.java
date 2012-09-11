@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
@@ -31,6 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 
 /**
  * This concrete implementation maintains a list of the peer stubs which are
@@ -60,6 +62,14 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
      * {@inheritDoc}
      */
     @Override
+    public void runComponentActivity(Body body) {
+        (new MultiActiveService(body)).multiActiveServing();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void sendv(Request<?> request) {
         this.sendv(request, this.selectPeer());
     }
@@ -74,18 +84,12 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
                     "Response provider specified for a request with no answer");
         }
 
-        // FIXME: issue #24
-        this.threadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    peer.sendv(request);
-                } catch (ProActiveRuntimeException e) {
-                    ProxyImpl.this.evictPeer(peer);
-                    throw e;
-                }
-            }
-        });
+        try {
+            peer.sendv(request);
+        } catch (ProActiveRuntimeException e) {
+            ProxyImpl.this.evictPeer(peer);
+            throw e;
+        }
     }
 
     /**

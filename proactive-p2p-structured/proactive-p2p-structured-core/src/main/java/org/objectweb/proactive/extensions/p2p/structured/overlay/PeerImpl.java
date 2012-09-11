@@ -17,9 +17,18 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.Compatible;
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.DefineRules;
+import org.objectweb.proactive.annotation.multiactivity.Group;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
@@ -32,6 +41,9 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.Asynchronous
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.ServingPolicy;
+import org.objectweb.proactive.multiactivity.compatibility.StatefulCompatibilityMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +59,10 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
+@DefineGroups({
+        @Group(name = "parallel", selfCompatible = true),
+        @Group(name = "limited", selfCompatible = true)})
+@DefineRules({@Compatible(value = {"parallel", "limited"})})
 public class PeerImpl extends AbstractComponent implements Peer,
         PeerAttributeController, ComponentEndActive, Serializable {
 
@@ -72,6 +88,8 @@ public class PeerImpl extends AbstractComponent implements Peer,
 
     protected transient StructuredOverlay overlay;
 
+    private transient MultiActiveService multiActiveService;
+
     /**
      * No-arg constructor for ProActive.
      */
@@ -85,18 +103,18 @@ public class PeerImpl extends AbstractComponent implements Peer,
     public void initComponentActivity(Body body) {
         super.initComponentActivity(body);
 
-        // these methods do not change the state of the peer
-        body.setImmediateService("equals", false);
-        body.setImmediateService("getId", false);
-        body.setImmediateService("getType", false);
-        body.setImmediateService("hashCode", false);
-        body.setImmediateService("toString", false);
-
-        body.setImmediateService("receiveImmediateService", false);
         body.setImmediateService("setAttributes", false);
-        body.setImmediateService("route", false);
-        // TODO: try to do not set send as IS
-        body.setImmediateService("send", false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+//        customServingPolicy(body, 10);
+        this.multiActiveService = (new MultiActiveService(body));
+        this.multiActiveService.multiActiveServing(Runtime.getRuntime()
+                .availableProcessors(), false, false);
     }
 
     /**
@@ -115,6 +133,80 @@ public class PeerImpl extends AbstractComponent implements Peer,
         // }
     }
 
+    @SuppressWarnings("unused")
+    private void customServingPolicy(Body body, final int maxThreads) {
+        final String prioritizedMethod = "route";
+        this.multiActiveService = (new MultiActiveService(body));
+        this.multiActiveService.policyServing(new ServingPolicy() {
+
+            @Override
+            public List<org.objectweb.proactive.core.body.request.Request> runPolicy(StatefulCompatibilityMap compatibility) {
+                List<org.objectweb.proactive.core.body.request.Request> ret =
+                        new LinkedList<org.objectweb.proactive.core.body.request.Request>();
+                List<org.objectweb.proactive.core.body.request.Request> queue =
+                        compatibility.getQueueContents();
+
+                if (queue.size() == 0) {
+                    return ret;
+                }
+                Collection<org.objectweb.proactive.core.body.request.Request> execQueue =
+                        compatibility.getExecutingRequests();
+                if (execQueue.size() >= maxThreads) {
+                    for (org.objectweb.proactive.core.body.request.Request r : queue) {
+                        if (compatibility.isCompatibleWithRequests(r, execQueue)
+                                && r.getMethodName().equals(prioritizedMethod)) {
+                            ret.add(r);
+                            queue.remove(r);
+                            return ret;
+                        }
+                    }
+                } else {
+                    org.objectweb.proactive.core.body.request.Request current;
+//                    int cpt = 0;
+//                    Iterator<org.objectweb.proactive.core.body.request.Request> it =
+//                            execQueue.iterator();
+//                    while (it.hasNext()) {
+//                        if (compatibility.getGroupOf(it.next()).name.equals("limited")) {
+//                            cpt++;
+//                        }
+//                    }
+                    for (int i = 0; i < queue.size(); i++) {
+                        current = queue.get(i);
+                        if (i < execQueue.size()) {
+//                            if (cpt >= 5
+//                                    && compatibility.getGroupOf(current).name != null
+//                                    && compatibility.getGroupOf(current).name.equals("limited")) {
+//                                System.out.println("method : "
+//                                        + current.getMethodName()
+//                                        + ", group : "
+//                                        + (compatibility.getGroupOf(current) == null
+//                                                ? "null"
+//                                                : compatibility.getGroupOf(current).name));
+//                                // do nothing
+//                            } else
+                            if (compatibility.getIndexOfLastCompatibleWith(
+                                    current, queue) >= i
+                                    && compatibility.isCompatibleWithRequests(
+                                            current, execQueue)) {
+                                ret.add(current);
+                                queue.remove(current);
+                                return ret;
+                            }
+                        } else if (compatibility.isCompatibleWithRequests(
+                                current, execQueue)
+                                && compatibility.getIndexOfLastCompatibleWith(
+                                        current, queue) >= i - 1) {
+                            ret.add(current);
+                            queue.remove(current);
+                            return ret;
+                        }
+                    }
+                }
+                return ret;
+            }
+        });
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -124,6 +216,8 @@ public class PeerImpl extends AbstractComponent implements Peer,
         if (this.overlay == null) {
             this.overlay = overlayProvider.get();
             this.overlay.stub = stub;
+            this.overlay.getRequestResponseManager().multiActiveService =
+                    this.multiActiveService;
         }
     }
 
@@ -131,6 +225,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public UUID getId() {
         return this.overlay.id;
     }
@@ -139,6 +234,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public OverlayType getType() {
         return this.overlay.getType();
     }
@@ -147,6 +243,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean isActivated() {
         return this.overlay.activated.get();
     }
@@ -200,6 +297,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public ResponseOperation receive(SynchronousOperation operation) {
         return operation.handle(this.overlay);
     }
@@ -208,6 +306,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void receive(AsynchronousOperation operation) {
         operation.handle(this.overlay);
     }
@@ -216,6 +315,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public ResponseOperation receiveImmediateService(SynchronousOperation operation) {
         return operation.handle(this.overlay);
     }
@@ -224,6 +324,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void receiveImmediateService(AsynchronousOperation operation) {
         operation.handle(this.overlay);
     }
@@ -232,6 +333,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void route(RequestResponseMessage<?> msg) {
         msg.route(this.overlay);
     }
@@ -240,6 +342,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void sendv(Request<?> request) {
         this.overlay.dispatchv(request);
     }
@@ -248,6 +351,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("limited")
     public Response<?> send(Request<?> request) {
         return this.overlay.dispatch(request);
     }
@@ -256,6 +360,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public String dump() {
         return this.overlay.dump();
     }
@@ -264,6 +369,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean equals(Object obj) {
         return obj instanceof PeerImpl
                 && this.getId().equals(((PeerImpl) obj).getId());
@@ -273,6 +379,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public int hashCode() {
         return this.getId().hashCode();
     }
@@ -281,6 +388,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public String toString() {
         if (this.overlay == null) {
             // toString is performed on a stub

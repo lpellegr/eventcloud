@@ -24,7 +24,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
  * 
  * @author lpellegr
  */
-public abstract class BindingNotificationListener implements
+public abstract class BindingNotificationListener extends
         NotificationListener<Binding> {
 
     private static final long serialVersionUID = 1L;

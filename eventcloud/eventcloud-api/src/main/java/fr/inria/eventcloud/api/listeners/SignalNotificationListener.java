@@ -25,7 +25,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  * 
  * @author lpellegr
  */
-public abstract class SignalNotificationListener implements
+public abstract class SignalNotificationListener extends
         NotificationListener<Object> {
 
     private static final long serialVersionUID = 1L;

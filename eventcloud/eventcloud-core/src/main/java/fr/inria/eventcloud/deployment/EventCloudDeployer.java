@@ -208,9 +208,6 @@ public class EventCloudDeployer extends NetworkDeployer {
         ComponentUtils.terminateComponents(this.publishProxies);
         ComponentUtils.terminateComponents(this.putgetProxies);
         ComponentUtils.terminateComponents(this.subscribeProxies);
-
-        PAFuture.waitFor(this.getRandomPeer().send(new ShutdownRequest()));
-
         ComponentUtils.terminateComponents(super.getRandomTracker().getPeers());
         ComponentUtils.terminateComponents(this.getTrackers());
     }

@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.objectweb.proactive.api.PAFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +70,8 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             quadruples.add(quadruple);
             super.getRandomSemanticPeer().add(quadruple);
         }
+        
+        System.out.println("SemanticPeerTest.testAddQuadruple()");
 
         List<Quadruple> quadruplesFound =
                 super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
@@ -179,6 +182,8 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 super.getRandomSemanticPeer().delete(
                         new QuadruplePattern(
                                 graphValue, Node.ANY, Node.ANY, Node.ANY));
+
+        quadruplesRemoved = PAFuture.getFutureValue(quadruplesRemoved);
 
         List<Quadruple> quadruplesFound =
                 super.getRandomSemanticPeer().find(QuadruplePattern.ANY);

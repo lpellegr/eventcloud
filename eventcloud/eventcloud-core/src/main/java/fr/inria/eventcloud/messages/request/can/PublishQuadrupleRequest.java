@@ -122,14 +122,15 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         QueryIterator it = null;
         try {
             Optimize.noOptimizer();
-            it =
-                    Algebra.exec(
-                            createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
-                            txnGraph.getUnderlyingDataset());
+            synchronized (this) {
+                it =
+                        Algebra.exec(
+                                createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
+                                txnGraph.getUnderlyingDataset());
+            }
 
             while (it.hasNext()) {
                 final Binding binding = it.nextBinding();
-
                 log.debug(
                         "Peer {} has a sub-subscription that matches the quadruple {} ",
                         overlay, quadrupleMatching);

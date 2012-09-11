@@ -87,10 +87,13 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 (CanRequestResponseManager) canOverlay.getRequestResponseManager();
 
         // the current overlay has already received the request
-        if (messagingManager.hasReceivedRequest(request.getId())) {
+        if (!messagingManager.receiveRequest(request.getId())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "Request {} reached peer {} which has already received it",
+                        request.getId(), canOverlay.getZone().toString());
+            }
             if (request.getResponseProvider() != null) {
-                request.markAsAlreadyReceived();
-
                 // send back an empty response
                 request.getAnycastRoutingList()
                         .removeLast()
@@ -98,10 +101,6 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                         .route(
                                 request.getResponseProvider().get(
                                         request, overlay));
-
-                logger.debug(
-                        "Request {} reached peer {} which has already received it",
-                        request.getId(), canOverlay);
             }
         } else {
             // the current overlay validates the constraints
@@ -112,7 +111,6 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             + request.getKey());
                 }
 
-                messagingManager.markRequestAsReceived(request.getId());
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
 
                 // sends the message to the other neighbors which validates the
@@ -173,6 +171,12 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             // operation and the current peer must await for the number
             // of responses sent.
             else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Sending request " + request.getId() + " to "
+                            + neighborsToSendTo.size() + " neighbor(s) from "
+                            + overlay);
+                }
+
                 // adds entry containing the number of responses awaited
                 final ResponseEntry entry =
                         new ResponseEntry(neighborsToSendTo.size());
@@ -194,19 +198,18 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                                         .values()
                                         .iterator();
                         while (it.hasNext()) {
-                            it.next().getStub().route(request);
+                            Peer p = it.next().getStub();
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Sending request "
+                                        + request.getId() + " from " + overlay
+                                        + " -> " + p);
+                            }
+                            p.route(request);
                         }
                     }
                 }
             }
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Request " + request.getId() + " sent to "
-                        + neighborsToSendTo.size() + " neighbor(s) from "
-                        + overlay);
-            }
         }
-
     }
 
     private NeighborTable<E> getNeighborsToSendTo(final CanOverlay<E> overlay,

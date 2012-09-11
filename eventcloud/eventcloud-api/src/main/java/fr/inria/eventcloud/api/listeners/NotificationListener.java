@@ -18,6 +18,13 @@ package fr.inria.eventcloud.api.listeners;
 
 import java.io.Serializable;
 
+import org.objectweb.proactive.Body;
+import org.objectweb.proactive.RunActive;
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.Group;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
+
 import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
@@ -26,7 +33,11 @@ import fr.inria.eventcloud.api.SubscriptionId;
  * 
  * @author lpellegr
  */
-public interface NotificationListener<T> extends Serializable {
+@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
+public abstract class NotificationListener<T> implements Serializable,
+        RunActive {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Handles a notification that has been received.
@@ -37,14 +48,16 @@ public interface NotificationListener<T> extends Serializable {
      * @param solution
      *            a solution that matches the subscription.
      */
-    public void onNotification(SubscriptionId id, T solution);
+    @MemberOf("parallel")
+    public abstract void onNotification(SubscriptionId id, T solution);
 
     /**
      * Returns the notification type.
      * 
      * @return the notification type.
      */
-    public NotificationListenerType getType();
+    @MemberOf("parallel")
+    public abstract NotificationListenerType getType();
 
     /**
      * Returns the URL of the subscriber. This is not {@code null} for proxies
@@ -53,6 +66,11 @@ public interface NotificationListener<T> extends Serializable {
      * @return the URL of the subscriber. This is not {@code null} for proxies
      *         exposed as Webservices but {@code null} for others.
      */
-    public String getSubscriberUrl();
+    @MemberOf("parallel")
+    public abstract String getSubscriberUrl();
 
+    @Override
+    public void runActivity(Body body) {
+        (new MultiActiveService(body)).multiActiveServing();
+    }
 }
