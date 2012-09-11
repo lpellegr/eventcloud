@@ -86,12 +86,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     public void onDestinationReached(final StructuredOverlay overlay,
                                      final Quadruple quadrupleMatching) {
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-            if (log.isInfoEnabled()) {
-                log.info("Peer " + overlay + " is about to store quadruple "
-                        + quadrupleMatching.getSubject() + " "
-                        + quadrupleMatching.getPredicate() + " "
-                        + quadrupleMatching.getObject());
-            }
+            log.info("Peer " + overlay + " is about to store quadruple "
+                    + quadrupleMatching.getSubject() + " "
+                    + quadrupleMatching.getPredicate() + " "
+                    + quadrupleMatching.getObject());
         }
 
         TransactionalDatasetGraph txnGraph =
@@ -133,11 +131,9 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
 
             while (it.hasNext()) {
                 final Binding binding = it.nextBinding();
-                if (log.isDebugEnabled()) {
-                    log.debug(
-                            "Peer {} has a sub-subscription that matches the quadruple {} ",
-                            overlay, quadrupleMatching);
-                }
+                log.debug(
+                        "Peer {} has a sub-subscription that matches the quadruple {} ",
+                        overlay, quadrupleMatching);
 
                 // the identifier of the sub subscription that is matched is
                 // available from the result of the query which has been
