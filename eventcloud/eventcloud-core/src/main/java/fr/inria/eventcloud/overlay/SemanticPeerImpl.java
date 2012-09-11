@@ -329,7 +329,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
     public void bindFc(String clientItfName, Object serverItf)
             throws NoSuchInterfaceException {
         if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
@@ -343,7 +342,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
     public String[] listFc() {
         return new String[] {SOCIAL_FILTER_SERVICES_ITF};
     }
@@ -352,7 +350,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
     public Object lookupFc(String clientItfName)
             throws NoSuchInterfaceException {
         if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
@@ -366,7 +363,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
     public void unbindFc(String clientItfName) throws NoSuchInterfaceException {
         if (clientItfName.equals(SOCIAL_FILTER_SERVICES_ITF)) {
             ((SemanticCanOverlay) this.overlay).setSocialFilter(null);

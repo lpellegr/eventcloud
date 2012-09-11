@@ -122,6 +122,14 @@ public class ProxyMonitoringManagerImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    public void runComponentActivity(Body body) {
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean enableInputOutputMonitoring(SubscriptionId subscriptionId,
                                                String consumerEndpoint) {
         if (!this.consumerEndpoints.containsValue(consumerEndpoint)) {
@@ -238,11 +246,6 @@ public class ProxyMonitoringManagerImpl extends AbstractComponent implements
         } catch (JAXBException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public void runComponentActivity(Body arg0) {
-
     }
 
 }
