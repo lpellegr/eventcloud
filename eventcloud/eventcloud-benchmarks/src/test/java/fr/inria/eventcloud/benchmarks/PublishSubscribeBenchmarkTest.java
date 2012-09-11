@@ -319,9 +319,9 @@ public class PublishSubscribeBenchmarkTest {
 
         @Override
         public void onNotification(SubscriptionId id, Binding solution) {
-            // log.trace(
-            // "New binding received for subscription {}: {}", id,
-            // solution);
+            log.trace(
+                    "New binding received for subscription {}: {}", id,
+                    solution);
             handleNewEvent(id);
         }
     }
@@ -332,9 +332,9 @@ public class PublishSubscribeBenchmarkTest {
 
         @Override
         public void onNotification(SubscriptionId id, CompoundEvent solution) {
-            // log.trace(
-            // "New compound event received for subscription {}: {}", id,
-            // solution);
+            log.trace(
+                    "New compound event received for subscription {}: {}", id,
+                    solution);
             handleNewEvent(id);
         }
     }
@@ -345,7 +345,7 @@ public class PublishSubscribeBenchmarkTest {
 
         @Override
         public void onNotification(SubscriptionId id) {
-            // log.trace("New signal received for subscription {}", id);
+            log.trace("New signal received for subscription {}", id);
             handleNewEvent(id);
         }
     }

@@ -73,4 +73,5 @@ public abstract class NotificationListener<T> implements Serializable,
     public void runActivity(Body body) {
         (new MultiActiveService(body)).multiActiveServing();
     }
+
 }

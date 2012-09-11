@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -111,7 +110,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     public void runComponentActivity(Body body) {
-//        customServingPolicy(body, 10);
+        // customServingPolicy(body, 10);
         this.multiActiveService = (new MultiActiveService(body));
         this.multiActiveService.multiActiveServing(Runtime.getRuntime()
                 .availableProcessors(), false, false);
@@ -136,7 +135,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @SuppressWarnings("unused")
     private void customServingPolicy(Body body, final int maxThreads) {
         final String prioritizedMethod = "route";
-        this.multiActiveService = (new MultiActiveService(body));
+        this.multiActiveService = new MultiActiveService(body);
         this.multiActiveService.policyServing(new ServingPolicy() {
 
             @Override
@@ -162,28 +161,33 @@ public class PeerImpl extends AbstractComponent implements Peer,
                     }
                 } else {
                     org.objectweb.proactive.core.body.request.Request current;
-//                    int cpt = 0;
-//                    Iterator<org.objectweb.proactive.core.body.request.Request> it =
-//                            execQueue.iterator();
-//                    while (it.hasNext()) {
-//                        if (compatibility.getGroupOf(it.next()).name.equals("limited")) {
-//                            cpt++;
-//                        }
-//                    }
+                    // int cpt = 0;
+                    // Iterator<org.objectweb.proactive.core.body.request.Request>
+                    // it =
+                    // execQueue.iterator();
+                    // while (it.hasNext()) {
+                    // if
+                    // (compatibility.getGroupOf(it.next()).name.equals("limited"))
+                    // {
+                    // cpt++;
+                    // }
+                    // }
                     for (int i = 0; i < queue.size(); i++) {
                         current = queue.get(i);
                         if (i < execQueue.size()) {
-//                            if (cpt >= 5
-//                                    && compatibility.getGroupOf(current).name != null
-//                                    && compatibility.getGroupOf(current).name.equals("limited")) {
-//                                System.out.println("method : "
-//                                        + current.getMethodName()
-//                                        + ", group : "
-//                                        + (compatibility.getGroupOf(current) == null
-//                                                ? "null"
-//                                                : compatibility.getGroupOf(current).name));
-//                                // do nothing
-//                            } else
+                            // if (cpt >= 5
+                            // && compatibility.getGroupOf(current).name != null
+                            // &&
+                            // compatibility.getGroupOf(current).name.equals("limited"))
+                            // {
+                            // System.out.println("method : "
+                            // + current.getMethodName()
+                            // + ", group : "
+                            // + (compatibility.getGroupOf(current) == null
+                            // ? "null"
+                            // : compatibility.getGroupOf(current).name));
+                            // // do nothing
+                            // } else
                             if (compatibility.getIndexOfLastCompatibleWith(
                                     current, queue) >= i
                                     && compatibility.isCompatibleWithRequests(
