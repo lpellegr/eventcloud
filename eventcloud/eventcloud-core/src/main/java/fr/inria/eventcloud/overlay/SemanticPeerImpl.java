@@ -212,7 +212,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("limited")
     public long count(QuadruplePattern quadPattern) {
         return ((CountQuadruplePatternResponse) PAFuture.getFutureValue((super.send(new CountQuadruplePatternRequest(
                 quadPattern.getGraph(), quadPattern.getSubject(),
@@ -223,6 +223,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("limited")
     public long count(String sparqlQuery) {
         SparqlResponse<?> response = this.executeSparqlQuery(sparqlQuery);
 
@@ -256,7 +257,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("limited")
     public List<Quadruple> find(QuadruplePattern quadPattern) {
         return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
                 quadPattern.getGraph(), quadPattern.getSubject(),
@@ -267,7 +268,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("limited")
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery) {
         sparqlQuery = sparqlQuery.trim();
 
@@ -289,7 +290,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("limited")
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(
                 sparqlAskQuery, super.overlay);
@@ -299,7 +300,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("limited")
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct) {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(
                 sparqlConstruct, super.overlay);
@@ -309,7 +310,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("limited")
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
         throw new UnsupportedOperationException();
     }
@@ -318,7 +319,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("limited")
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect) {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(
                 sparqlSelect, super.overlay);

@@ -136,7 +136,6 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         // configuration should be done in the ProActive source code.
         body.setImmediateService("setImmediateServices", false);
         body.setImmediateService("setAttributes", false);
-        // body.setImmediateService("receive", false);
 
         this.createAndRegisterEventIdsReceivedDB(body);
     }
@@ -242,23 +241,19 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                         subscription.getSubscriptionDestination(),
                         listener.getType());
 
-        synchronized (this.listeners) {
-            if (this.listeners.put(subscription.getId(), listener) != null) {
-                // same subscription with same creation time
-                throw new IllegalArgumentException(
-                        "Listener already exists for subscription id: "
-                                + subscription.getId());
-            }
+        if (this.listeners.put(subscription.getId(), listener) != null) {
+            // same subscription with same creation time
+            throw new IllegalArgumentException(
+                    "Listener already exists for subscription id: "
+                            + subscription.getId());
         }
 
-        synchronized (this.subscriptions) {
-            if (this.subscriptions.put(
-                    internalSubscription.getId(), internalSubscription) != null) {
-                // same subscription with same creation time
-                throw new IllegalArgumentException(
-                        "Subscription already exists for subscription id: "
-                                + subscription.getId());
-            }
+        if (this.subscriptions.put(
+                internalSubscription.getId(), internalSubscription) != null) {
+            // same subscription with same creation time
+            throw new IllegalArgumentException(
+                    "Subscription already exists for subscription id: "
+                            + subscription.getId());
         }
 
         super.sendv(new IndexSubscriptionRequest(internalSubscription));
@@ -380,24 +375,17 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
     @Override
     @MemberOf("parallel")
     public void unsubscribe(SubscriptionId id) {
-        synchronized (this.subscriptions) {
-            if (!this.subscriptions.containsKey(id)) {
-                throw new IllegalArgumentException(
-                        "No subscription registered with the specified subscription id: "
-                                + id);
-            }
+        if (!this.subscriptions.containsKey(id)) {
+            throw new IllegalArgumentException(
+                    "No subscription registered with the specified subscription id: "
+                            + id);
         }
 
         // once the subscription id is removed from the list of the
         // subscriptions which are matched, the notifications which are received
         // for this subscription are ignored
-        Subscription subscription;
-        synchronized (this.subscriptions) {
-            subscription = this.subscriptions.remove(id);
-        }
-        synchronized (this.listeners) {
-            this.listeners.remove(id);
-        }
+        Subscription subscription = this.subscriptions.remove(id);
+        this.listeners.remove(id);
         this.getEventIdsReceived().values().remove(id);
 
         // updates the network to stop sending notifications
@@ -413,14 +401,10 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
     @MemberOf("parallel")
     private void deliver(NotificationId id) {
-        NotificationListener<?> listener;
-        synchronized (this.listeners) {
-            listener = this.listeners.get(id.getSubscriptionId());
-        }
-        Solution solution;
-        synchronized (this.solutions) {
-            solution = this.solutions.remove(id);
-        }
+        NotificationListener<?> listener =
+                this.listeners.get(id.getSubscriptionId());
+
+        Solution solution = this.solutions.remove(id);
 
         if (listener instanceof BindingNotificationListener) {
             this.deliver(id, (BindingNotificationListener) listener, solution);
@@ -438,9 +422,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                     listener.getClass());
         }
 
-        if (log.isInfoEnabled()) {
-            log.info("Notification {} has been delivered", id);
-        }
+        log.info("Notification {} has been delivered", id);
     }
 
     @MemberOf("parallel")
@@ -517,9 +499,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                                                             Solution solution,
                                                             String subscriberUrl) {
         Subscription subscription;
-        synchronized (this.subscriptions) {
-            subscription = this.subscriptions.get(id);
-        }
+        subscription = this.subscriptions.get(id);
 
         Node eventId =
                 this.extractEventId(subscription, solution.getSolution());
@@ -534,10 +514,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                                                  Binding binding,
                                                  String subscriberUrl) {
         if (super.monitoringManager != null) {
-            Subscription subscription;
-            synchronized (this.subscriptions) {
-                subscription = this.subscriptions.get(id);
-            }
+            Subscription subscription = this.subscriptions.get(id);
 
             Node eventId = this.extractEventId(subscription, binding);
 
@@ -573,10 +550,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         SubscriptionId subscriptionId =
                 notification.getId().getSubscriptionId();
 
-        Subscription subscription;
-        synchronized (this.subscriptions) {
-            subscription = this.subscriptions.get(subscriptionId);
-        }
+        Subscription subscription = this.subscriptions.get(subscriptionId);
 
         // this condition is used to ignore the notifications which may be
         // received after an unsubscribe operation because the unsubscribe
@@ -585,18 +559,12 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
             return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug(
-                    "New notification received {} on {} for subscription id {}",
-                    new Object[] {
-                            notification, this.componentUri, subscriptionId});
-        }
+        log.debug(
+                "New notification received {} on {} for subscription id {}",
+                new Object[] {notification, this.componentUri, subscriptionId});
 
         // avoid creation of solution object when possible
-        Solution solution;
-        synchronized (this.solutions) {
-            solution = this.solutions.get(notification.getId());
-        }
+        Solution solution = this.solutions.get(notification.getId());
 
         if (solution == null) {
             solution =
