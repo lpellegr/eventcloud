@@ -117,18 +117,31 @@ public class PublishSubscribeBenchmarkTest {
     @Parameters
     public static List<Object[]> getParameters() {
         // scenarios
-        return Arrays.asList(new Object[][] {{
-                10, 1, 1, 1000, new QuadrupleSupplier(),
-                SignalNotificationListener.class, DatastoreType.PERSISTENT}
-        // ,{
-        // 10, 1, 1, 1000, new QuadrupleSupplier(),
-        // BindingNotificationListener.class,
-        // DatastoreType.PERSISTENT}
-        // ,{
-        // 10, 1, 1, 100, new CompoundEventSupplier(10),
-        // CompoundEventNotificationListener.class,
-        // DatastoreType.PERSISTENT}
-        });
+        return Arrays.asList(new Object[][] {
+                {
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
+                        SignalNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
+                        SignalNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
+                        BindingNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
+                        BindingNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 100, new CompoundEventSupplier(10),
+                        CompoundEventNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 100, new CompoundEventSupplier(10),
+                        CompoundEventNotificationListener.class,
+                        DatastoreType.PERSISTENT}});
     }
 
     @BeforeClass
