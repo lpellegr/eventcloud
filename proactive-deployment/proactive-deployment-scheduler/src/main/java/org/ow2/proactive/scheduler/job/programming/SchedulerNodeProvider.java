@@ -64,15 +64,15 @@ import org.ow2.proactive.scheduler.common.exception.ConnectionException;
 /**
  * This class provides methods to easily acquire {@link Node nodes} or
  * {@link GCMVirtualNode GCMVirtualNodes} from a ProActive Scheduler in order to
- * deploy a Programming application. <br>
+ * deploy a ProActive Programming application. <br>
  * To acquire {@link Node nodes} from a ProActive Scheduler, a
  * {@link NodeProviderJob} is created and submitted to the ProActive Scheduler
  * with some specifics configurations and options (which allow for instance to
  * enrich the classpath of the {@link Node nodes} with some jars specific to the
- * Programming application the user wants to deploy). <br>
+ * ProActive Programming application the user wants to deploy). <br>
  * Once the deployment of the {@link NodeProviderJob} is finished, the provided
  * list of {@link Node nodes} or {@link GCMVirtualNode} can be then used to
- * deploy a Programming application with the usual API.
+ * deploy a ProActive Programming application with the usual API.
  * 
  * @author The ProActive Team
  */
@@ -81,7 +81,7 @@ public class SchedulerNodeProvider {
     private static final Logger logger =
             ProActiveLogger.getLogger(SchedulerNodeProvider.class);
 
-    private static final int NODES_AQUISITION_TIMEOUT = 60000;
+    private static final int NODES_AQUISITION_TIMEOUT = 1200000;
 
     private final NodeProviderRegistry registry;
 
@@ -119,8 +119,7 @@ public class SchedulerNodeProvider {
      * password). <br>
      * The contents of the specified data folder will be put in the input space
      * of the {@link Node nodes} and the jars contained in this folder will be
-     * used to enrich the classpath of the {@link Node nodes}. <br>
-     * This method is non-blocking.
+     * used to enrich the classpath of the {@link Node nodes}.
      * 
      * @param schedulerURL
      *            URL of the scheduler.
@@ -143,7 +142,7 @@ public class SchedulerNodeProvider {
             throws NodeProviderException {
         return this.submitNodeRequest(
                 schedulerURL, username, password, numberNodes, dataFolder,
-                null, null);
+                null, (String[]) null);
     }
 
     /**
@@ -153,8 +152,7 @@ public class SchedulerNodeProvider {
      * The contents of the specified data folder will be put in the input space
      * of the {@link Node nodes} and the jars contained in this folder will be
      * used to enrich the classpath of the {@link Node nodes}. <br>
-     * The specified JVM arguments will be set to the {@link Node nodes}. <br>
-     * This method is non-blocking.
+     * The specified JVM arguments will be set to the {@link Node nodes}.
      * 
      * @param schedulerURL
      *            URL of the scheduler.
@@ -180,17 +178,16 @@ public class SchedulerNodeProvider {
             throws NodeProviderException {
         return this.submitNodeRequest(
                 this.connectToScheduler(schedulerURL, username, password),
-                numberNodes, dataFolder, jvmArguments, null);
+                numberNodes, dataFolder, jvmArguments);
     }
 
     /**
      * Submits a node request to acquire the specified number of {@link Node
-     * nodes} coming from the specified node source by using the specified
+     * nodes} coming from the specified node sources by using the specified
      * scheduler information (URL, username and password). <br>
      * The contents of the specified data folder will be put in the input space
      * of the {@link Node nodes} and the jars contained in this folder will be
-     * used to enrich the classpath of the {@link Node nodes}. <br>
-     * This method is non-blocking.
+     * used to enrich the classpath of the {@link Node nodes}.
      * 
      * @param schedulerURL
      *            URL of the scheduler.
@@ -203,30 +200,30 @@ public class SchedulerNodeProvider {
      * @param dataFolder
      *            Folder containing the data to transfer to the {@link Node
      *            nodes}.
-     * @param nodeSourceName
-     *            Name of the node source.
+     * @param nodeSourceNames
+     *            Names of the node sources.
      * @return ID of the node request.
      * @throws NodeProviderException
      *             If an error occurs during the deployment.
      */
     public UniqueID submitNodeRequest(String schedulerURL, String username,
                                       String password, int numberNodes,
-                                      String dataFolder, String nodeSourceName)
+                                      String dataFolder,
+                                      String... nodeSourceNames)
             throws NodeProviderException {
         return this.submitNodeRequest(
                 this.connectToScheduler(schedulerURL, username, password),
-                numberNodes, dataFolder, null, nodeSourceName);
+                numberNodes, dataFolder, null, nodeSourceNames);
     }
 
     /**
      * Submits a node request to acquire the specified number of {@link Node
-     * nodes} coming from the specified node source by using the specified
+     * nodes} coming from the specified node sources by using the specified
      * scheduler information (URL, username and password). <br>
      * The contents of the specified data folder will be put in the input space
      * of the {@link Node nodes} and the jars contained in this folder will be
      * used to enrich the classpath of the {@link Node nodes}. <br>
-     * The specified JVM arguments will be set to the {@link Node nodes}. <br>
-     * This method is non-blocking.
+     * The specified JVM arguments will be set to the {@link Node nodes}.
      * 
      * @param schedulerURL
      *            URL of the scheduler.
@@ -241,8 +238,8 @@ public class SchedulerNodeProvider {
      *            nodes}.
      * @param jvmArguments
      *            JVM arguments.
-     * @param nodeSourceName
-     *            Name of the node source.
+     * @param nodeSourceNames
+     *            Names of the node sources.
      * @return ID of the node request.
      * @throws NodeProviderException
      *             If an error occurs during the deployment.
@@ -251,11 +248,11 @@ public class SchedulerNodeProvider {
                                       String password, int numberNodes,
                                       String dataFolder,
                                       List<String> jvmArguments,
-                                      String nodeSourceName)
+                                      String... nodeSourceNames)
             throws NodeProviderException {
         return this.submitNodeRequest(
                 this.connectToScheduler(schedulerURL, username, password),
-                numberNodes, dataFolder, jvmArguments, nodeSourceName);
+                numberNodes, dataFolder, jvmArguments, nodeSourceNames);
     }
 
     /**
@@ -263,8 +260,7 @@ public class SchedulerNodeProvider {
      * nodes} by using the specified scheduler information (URL, credentials). <br>
      * The contents of the specified data folder will be put in the input space
      * of the {@link Node nodes} and the jars contained in this folder will be
-     * used to enrich the classpath of the {@link Node nodes}. <br>
-     * This method is non-blocking.
+     * used to enrich the classpath of the {@link Node nodes}.
      * 
      * @param schedulerURL
      *            URL of the scheduler.
@@ -285,7 +281,7 @@ public class SchedulerNodeProvider {
             throws NodeProviderException {
         return this.submitNodeRequest(
                 schedulerURL, credentialsPath, numberNodes, dataFolder, null,
-                null);
+                (String[]) null);
     }
 
     /**
@@ -294,8 +290,7 @@ public class SchedulerNodeProvider {
      * The contents of the specified data folder will be put in the input space
      * of the {@link Node nodes} and the jars contained in this folder will be
      * used to enrich the classpath of the {@link Node nodes}. <br>
-     * The specified JVM arguments will be set to the {@link Node nodes}. <br>
-     * This method is non-blocking.
+     * The specified JVM arguments will be set to the {@link Node nodes}.
      * 
      * @param schedulerURL
      *            URL of the scheduler.
@@ -319,17 +314,16 @@ public class SchedulerNodeProvider {
             throws NodeProviderException {
         return this.submitNodeRequest(
                 schedulerURL, credentialsPath, numberNodes, dataFolder,
-                jvmArguments, null);
+                jvmArguments);
     }
 
     /**
      * Submits a node request to acquire the specified number of {@link Node
-     * nodes} coming from the specified node source by using the specified
+     * nodes} coming from the specified node sources by using the specified
      * scheduler information (URL, credentials). <br>
      * The contents of the specified data folder will be put in the input space
      * of the {@link Node nodes} and the jars contained in this folder will be
-     * used to enrich the classpath of the {@link Node nodes}. <br>
-     * This method is non-blocking.
+     * used to enrich the classpath of the {@link Node nodes}.
      * 
      * @param schedulerURL
      *            URL of the scheduler.
@@ -340,30 +334,30 @@ public class SchedulerNodeProvider {
      * @param dataFolder
      *            Folder containing the data to transfer to the {@link Node
      *            nodes}.
-     * @param nodeSourceName
-     *            Name of the node source.
+     * @param nodeSourceNames
+     *            Names of the node sources.
      * @return ID of the node request.
      * @throws NodeProviderException
      *             If an error occurs during the deployment.
      */
     public UniqueID submitNodeRequest(String schedulerURL,
                                       String credentialsPath, int numberNodes,
-                                      String dataFolder, String nodeSourceName)
+                                      String dataFolder,
+                                      String... nodeSourceNames)
             throws NodeProviderException {
         return this.submitNodeRequest(
-                this.connectToScheduler(schedulerURL, credentialsPath),
-                numberNodes, dataFolder, null, nodeSourceName);
+                schedulerURL, credentialsPath, numberNodes, dataFolder, null,
+                nodeSourceNames);
     }
 
     /**
      * Submits a node request to acquire the specified number of {@link Node
-     * nodes} coming from the specified node source by using the specified
+     * nodes} coming from the specified node sources by using the specified
      * scheduler information (URL, credentials). <br>
      * The contents of the specified data folder will be put in the input space
      * of the {@link Node nodes} and the jars contained in this folder will be
      * used to enrich the classpath of the {@link Node nodes}. <br>
-     * The specified JVM arguments will be set to the {@link Node nodes}. <br>
-     * This method is non-blocking.
+     * The specified JVM arguments will be set to the {@link Node nodes}.
      * 
      * @param schedulerURL
      *            URL of the scheduler.
@@ -376,8 +370,8 @@ public class SchedulerNodeProvider {
      *            nodes}.
      * @param jvmArguments
      *            JVM arguments.
-     * @param nodeSourceName
-     *            Name of the node source.
+     * @param nodeSourceNames
+     *            Names of the node sources.
      * @return ID of the node request.
      * @throws NodeProviderException
      *             If an error occurs during the deployment.
@@ -386,11 +380,11 @@ public class SchedulerNodeProvider {
                                       String credentialsPath, int numberNodes,
                                       String dataFolder,
                                       List<String> jvmArguments,
-                                      String nodeSourceName)
+                                      String... nodeSourceNames)
             throws NodeProviderException {
         return this.submitNodeRequest(
                 this.connectToScheduler(schedulerURL, credentialsPath),
-                numberNodes, dataFolder, jvmArguments, nodeSourceName);
+                numberNodes, dataFolder, jvmArguments, nodeSourceNames);
     }
 
     private synchronized Scheduler connectToScheduler(String schedulerURL,
@@ -472,7 +466,7 @@ public class SchedulerNodeProvider {
     private UniqueID submitNodeRequest(Scheduler scheduler, int nbNodes,
                                        String dataFolder,
                                        List<String> jvmArguments,
-                                       String nodeSourceName)
+                                       String... nodeSourceNames)
             throws NodeProviderException {
         UniqueID nodeRequestID = new UniqueID();
 
@@ -481,7 +475,7 @@ public class SchedulerNodeProvider {
         NodeProviderJob nodeProviderJob =
                 new NodeProviderJob(
                         nodeRequestID, scheduler, nbNodes, dataFolder,
-                        jvmArguments, this.registry.getURL(), nodeSourceName);
+                        jvmArguments, this.registry.getURL(), nodeSourceNames);
 
         this.nodeProviderJobs.put(nodeRequestID, nodeProviderJob);
 
@@ -582,8 +576,7 @@ public class SchedulerNodeProvider {
      */
     public void releaseNodes(UniqueID nodeRequestID) {
         this.registry.releaseNodes(nodeRequestID);
-
-        this.nodeProviderJobs.remove(nodeRequestID).kill();
+        this.nodeProviderJobs.remove(nodeRequestID);
     }
 
     /**
