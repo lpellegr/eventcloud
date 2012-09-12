@@ -99,21 +99,33 @@ public class CentroidStatsRecorder extends StatsRecorder {
         this.owsum = this.owsum.subtract(ow);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Apfloat computeGraphEstimation() {
         return this.gsum.divide(this.gwsum);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Apfloat computeSubjectEstimation() {
         return this.ssum.divide(this.swsum);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Apfloat computePredicateEstimation() {
         return this.psum.divide(this.pwsum);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Apfloat computeObjectEstimation() {
         return this.osum.divide(this.owsum);

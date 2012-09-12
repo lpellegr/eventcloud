@@ -51,7 +51,7 @@ public final class TransactionalDatasetGraphImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void add(Node g, Node s, Node p, Node o) {
+    public void add(final Node g, final Node s, final Node p, final Node o) {
         this.dataset.asDatasetGraph().add(g, s, p, o);
         this.recordQuadrupleAddedIfNecessary(g, s, p, o);
     }
@@ -61,10 +61,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public void add(Quadruple quadruple) {
-        this.dataset.asDatasetGraph().add(
-                quadruple.getGraph(), quadruple.getSubject(),
-                quadruple.getPredicate(), quadruple.getObject());
-        this.recordQuadrupleAddedIfNecessary(
+        this.add(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
     }
@@ -93,11 +90,10 @@ public final class TransactionalDatasetGraphImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void delete(Quadruple quadruple) {
+    public void delete(final Quadruple quadruple) {
         this.dataset.asDatasetGraph().delete(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
-
         this.recordQuadrupleRemovedIfNecessary(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
