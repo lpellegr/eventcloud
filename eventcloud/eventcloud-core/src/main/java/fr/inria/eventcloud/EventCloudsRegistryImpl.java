@@ -82,9 +82,8 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      */
     @Override
     public void initComponentActivity(Body body) {
-        EventCloudProperties.loadConfiguration();
-        this.p2pConfigurationProperty = "eventcloud.configuration";
-
+        this.configurationProperty = "eventcloud.configuration";
+        this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
 
         this.eventCloudDeployers =
