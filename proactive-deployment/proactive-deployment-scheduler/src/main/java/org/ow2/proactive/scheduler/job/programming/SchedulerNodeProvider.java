@@ -81,13 +81,18 @@ public class SchedulerNodeProvider {
     private static final Logger logger =
             ProActiveLogger.getLogger(SchedulerNodeProvider.class);
 
-    private static final int NODES_AQUISITION_TIMEOUT = 1200000;
+    private static final String NODES_AQUISITION_TIMEOUT_PROPERTY =
+            "scheduler.node.provider.timeout";
+
+    private static final int DEFAULT_NODES_AQUISITION_TIMEOUT = 600000;
 
     private final NodeProviderRegistry registry;
 
     private final Map<String, Scheduler> schedulers;
 
     private final Map<UniqueID, NodeProviderJob> nodeProviderJobs;
+
+    private final int nodesAquisitionTimeout;
 
     /**
      * Constructs a new {@link SchedulerNodeProvider}.
@@ -104,6 +109,10 @@ public class SchedulerNodeProvider {
                 + (new UniqueID()).getCanonString());
         this.schedulers = new HashMap<String, Scheduler>();
         this.nodeProviderJobs = new HashMap<UniqueID, NodeProviderJob>();
+        this.nodesAquisitionTimeout =
+                (System.getProperty(NODES_AQUISITION_TIMEOUT_PROPERTY) != null)
+                        ? Integer.parseInt(System.getProperty(NODES_AQUISITION_TIMEOUT_PROPERTY))
+                        : DEFAULT_NODES_AQUISITION_TIMEOUT;
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -493,11 +502,11 @@ public class SchedulerNodeProvider {
             long startTime = System.currentTimeMillis();
             while (!this.registry.isDeploymentFinished(nodeRequestID)) {
                 try {
-                    if (System.currentTimeMillis() > (startTime + NODES_AQUISITION_TIMEOUT)) {
+                    if (System.currentTimeMillis() > (startTime + this.nodesAquisitionTimeout)) {
                         logger.error("Unsuccessful acquisition of nodes for node request #"
                                 + nodeRequestID
                                 + " after "
-                                + NODES_AQUISITION_TIMEOUT + " ms");
+                                + this.nodesAquisitionTimeout + " ms");
 
                         this.releaseNodes(nodeRequestID);
 
