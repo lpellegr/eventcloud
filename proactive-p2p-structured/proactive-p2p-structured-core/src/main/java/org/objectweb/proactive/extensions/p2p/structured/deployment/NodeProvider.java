@@ -29,14 +29,16 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 public interface NodeProvider {
 
     /**
-     * Initiates the deployment of the ProActive nodes.
+     * Starts the deployment of the ProActive nodes.
      */
-    public void init();
+    public void start();
 
     /**
-     * Terminates the deployment of the ProActive nodes, ie. releases them.
+     * Indicates whether the deployment has been started or not.
+     * 
+     * @return true if the deployment has been started, false otherwise.
      */
-    public void terminate();
+    public boolean isStarted();
 
     /**
      * Returns a ProActive node.
@@ -48,10 +50,15 @@ public interface NodeProvider {
     /**
      * Returns the GCMVirtualNode with the specified name.
      * 
-     * @param vnName
+     * @param virtualNodeName
      *            the name of the GCMVirtualNode.
      * @return the GCMVirtualNode with the specified name.
      */
-    public GCMVirtualNode getGcmVirtualNode(String vnName);
+    public GCMVirtualNode getGcmVirtualNode(String virtualNodeName);
+
+    /**
+     * Terminates the deployment of the ProActive nodes, ie. releases them.
+     */
+    public void terminate();
 
 }
