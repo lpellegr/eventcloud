@@ -96,6 +96,10 @@ public class SemanticElement extends StringElement {
         // TODO: add support for opaque URI (c.f.
         // http://download.oracle.com/javase/6/docs/api/java/net/URI.html)
 
+        if (value.isEmpty()) {
+            return EMPTY_STRING_ROUTING_CHARACTER;
+        }
+
         try {
             java.net.URI uri = new java.net.URI(value);
 
@@ -141,7 +145,16 @@ public class SemanticElement extends StringElement {
             if (value.startsWith("_:")) {
                 return value.substring(2);
             } else if (value.length() > 0 && value.charAt(0) == '"') { // literal
-                return value.substring(1, value.length() - 1);
+                String content = value.substring(1, value.length() - 1);
+
+                if (content.isEmpty()) {
+                    // if the literal value contains an empty String we have to
+                    // decide which constraint is associated to this particular
+                    // case where there is no character to compare.
+                    return EMPTY_STRING_ROUTING_CHARACTER;
+                } else {
+                    return content;
+                }
             } else {
                 return value;
             }
