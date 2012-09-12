@@ -47,6 +47,10 @@
 			<url>https://repository.apache.org/content/repositories/snapshots</url>
 		</repository>
 		<repository>
+			<id>sonatype-snapshots-proactive-201</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-201</url>
+		</repository>
+		<repository>
 			<id>play-private.release</id>
 			<url>http://maven.petalslink.com/private-play-release</url>
 			<releases>
