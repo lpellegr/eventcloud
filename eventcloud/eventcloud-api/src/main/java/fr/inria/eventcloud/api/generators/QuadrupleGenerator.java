@@ -80,6 +80,27 @@ public final class QuadrupleGenerator extends Generator {
     }
 
     /**
+     * Creates a quadruple whose each component is randomly generated. The
+     * object component can be either an URI or a literal.
+     * 
+     * @param prefix
+     *            the prefix to append to each RDF term which is randomly
+     *            generated.
+     * @param length
+     *            number of characters which are randomly generated for each
+     *            node which is created.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple random(String prefix, int length) {
+        return new Quadruple(
+                NodeGenerator.randomUri(prefix, length),
+                NodeGenerator.randomUri(prefix, length),
+                NodeGenerator.randomUri(prefix, length), NodeGenerator.random(
+                        prefix, length));
+    }
+
+    /**
      * Creates a quadruple by using the specified {@code graph} value and whose
      * the other components are randomly generated. The object component can be
      * either an URI or a literal.
@@ -97,6 +118,29 @@ public final class QuadrupleGenerator extends Generator {
         return new Quadruple(
                 graph, NodeGenerator.randomUri(length),
                 NodeGenerator.randomUri(length), NodeGenerator.random(length));
+    }
+
+    /**
+     * Creates a quadruple by using the specified {@code graph} value and whose
+     * the other components are randomly generated. The object component can be
+     * either an URI or a literal.
+     * 
+     * @param graph
+     *            the graph value to use.
+     * @param prefix
+     *            the prefix to append to each RDF term which is randomly
+     *            generated.
+     * @param length
+     *            number of characters which are randomly generated for each
+     *            node which is created.
+     * 
+     * @return a randomly generated quadruple.
+     */
+    public static Quadruple random(Node graph, String prefix, int length) {
+        return new Quadruple(
+                graph, NodeGenerator.randomUri(prefix, length),
+                NodeGenerator.randomUri(prefix, length), NodeGenerator.random(
+                        prefix, length));
     }
 
     /**

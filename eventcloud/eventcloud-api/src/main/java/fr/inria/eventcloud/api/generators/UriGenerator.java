@@ -62,7 +62,6 @@ public class UriGenerator extends Generator {
      * 
      * @param length
      *            the length of random part to create.
-     * 
      * @param schemeName
      *            consists of a sequence of characters beginning with a letter
      *            and followed by any combination of letters, digits, plus
@@ -85,7 +84,6 @@ public class UriGenerator extends Generator {
      * 
      * @param length
      *            the length of random part to create.
-     * 
      * @param prefix
      *            the prefix to concatenate.
      * 
