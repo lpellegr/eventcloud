@@ -29,6 +29,11 @@ public class P2PStructuredProperties {
     public static final PropertyString GCM_PROVIDER = new PropertyString(
             "gcm.provider", "org.objectweb.proactive.core.component.Fractive");
 
+    public static final PropertyClass APFLOAT_DEFAULT_BUILDER_FACTORY =
+            new PropertyClass(
+                    "apfloat.default.builder.factory",
+                    "org.apfloat.internal.LongBuilderFactory");
+
     public static final PropertyBoolean ENABLE_BENCHMARKS_INFORMATION =
             new PropertyBoolean("enable.benchmarks.information", false);
 

@@ -62,8 +62,9 @@ public abstract class Proxy extends AbstractComponent implements
      */
     @Override
     public void initComponentActivity(Body body) {
+        this.configurationProperty = "eventcloud.configuration";
+        this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
-        EventCloudProperties.loadConfiguration();
     }
 
     public void sendv(Request<?> request) {
