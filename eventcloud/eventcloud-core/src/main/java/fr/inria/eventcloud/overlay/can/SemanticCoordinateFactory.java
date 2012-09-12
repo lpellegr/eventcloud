@@ -90,14 +90,6 @@ public final class SemanticCoordinateFactory {
                                                                     Node subject,
                                                                     Node predicate,
                                                                     Node object) {
-        // if the literal value contains an empty String we have to decide which
-        // constraint is associated to this particular case where there is no
-        // character to compare.
-        if (object.isLiteral() && object.getLiteralLexicalForm().isEmpty()) {
-            object =
-                    Node.createLiteral(SemanticElement.EMPTY_STRING_ROUTING_CHARACTER);
-        }
-
         return new Coordinate<SemanticElement>(
                 createSemanticElementWithVars(graph),
                 createSemanticElementWithVars(subject),
