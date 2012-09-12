@@ -56,7 +56,6 @@ import org.ow2.proactive.scheduler.common.exception.JobCreationException;
 import org.ow2.proactive.scheduler.common.exception.NotConnectedException;
 import org.ow2.proactive.scheduler.common.exception.PermissionException;
 import org.ow2.proactive.scheduler.common.exception.SubmissionClosedException;
-import org.ow2.proactive.scheduler.common.exception.UnknownJobException;
 import org.ow2.proactive.scheduler.common.exception.UserException;
 import org.ow2.proactive.scheduler.common.job.JobId;
 import org.ow2.proactive.scheduler.common.job.TaskFlowJob;
@@ -100,7 +99,7 @@ public class NodeProviderJob {
      * It creates a job composed of a number of {@link NodeProviderTask tasks}
      * equals to the specified number of {@link Node nodes}. <br>
      * The {@link Node nodes} of the {@link NodeProviderTask tasks} are selected
-     * by using the node source specified by the given name. <br>
+     * by using the node sources specified by the given names. <br>
      * The contents of the specified data folder is put in the input space of
      * the {@link NodeProviderTask tasks} and the jars contained in this folder
      * are used to enrich the classpath of the JVM of the
@@ -120,14 +119,14 @@ public class NodeProviderJob {
      *            JVM arguments.
      * @param registryURL
      *            URL of the {@link NodeProviderRegistry}.
-     * @param nodeSourceName
-     *            Name of the node source.
+     * @param nodeSourceNames
+     *            Names of the node sources.
      * @throws NodeProviderException
      *             If any error occurs during the deployment of the job.
      */
     public NodeProviderJob(UniqueID nodeRequestID, Scheduler scheduler,
             int nbNodes, String dataFolder, List<String> jvmArguments,
-            String registryURL, String nodeSourceName)
+            String registryURL, String... nodeSourceNames)
             throws NodeProviderException {
         try {
             this.nodeRequestID = nodeRequestID;
@@ -135,7 +134,7 @@ public class NodeProviderJob {
             this.jobID =
                     this.scheduler.submit(this.createJob(
                             nbNodes, dataFolder, jvmArguments, registryURL,
-                            nodeSourceName));
+                            nodeSourceNames));
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Job #" + this.jobID.getReadableName()
@@ -175,7 +174,7 @@ public class NodeProviderJob {
 
     private TaskFlowJob createJob(int nbNodes, String dataFolder,
                                   List<String> jvmArguments,
-                                  String registryURL, String nodeSourceName)
+                                  String registryURL, String... nodeSourceNames)
             throws IOException, InvalidScriptException, UserException {
         TaskFlowJob job = new TaskFlowJob();
         String inputSpaceURL = startFileSystemServer(dataFolder);
@@ -192,8 +191,8 @@ public class NodeProviderJob {
             task.addArgument("registryURL", registryURL);
             task.addArgument("nodeRequestID", this.nodeRequestID);
             task.setRunAsMe(false);
-            if (nodeSourceName != null) {
-                task.setSelectionScript(this.createSelectionScript(nodeSourceName));
+            if (nodeSourceNames != null) {
+                task.setSelectionScript(this.createSelectionScript(nodeSourceNames));
             }
 
             File addClasspathScriptPath =
@@ -257,44 +256,24 @@ public class NodeProviderJob {
         }
     }
 
-    private SelectionScript createSelectionScript(String nodeSourceName)
+    private SelectionScript createSelectionScript(String... nodeSourceNames)
             throws InvalidScriptException {
-        String script =
-                "try {        if (java.lang.System.getProperty('proactive.node.nodesource').equals('"
-                        + nodeSourceName
-                        + "')){                selected = true;} else {                selected = false;}} catch (error) {        selected = false;}";
+        String selectionScript;
 
-        return new SelectionScript(script, "JavaScript");
-    }
-
-    /**
-     * Kills the {@link NodeProviderJob}.
-     */
-    public void kill() {
-        try {
-            try {
-                this.scheduler.killJob(this.jobID);
-            } catch (NotConnectedException nce) {
-                this.scheduler.renewSession();
-                this.scheduler.killJob(this.jobID);
+        if (nodeSourceNames.length > 0) {
+            selectionScript =
+                    "try { var nodeSourceName = java.lang.System.getProperty('proactive.node.nodesource'); if (";
+            for (String nodeSourceName : nodeSourceNames) {
+                selectionScript +=
+                        "nodeSourceName.equals('" + nodeSourceName + "') || ";
             }
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Node provider job #" + this.jobID.value()
-                        + " for node request #" + this.nodeRequestID
-                        + " has been terminated");
-            }
-        } catch (NotConnectedException nce) {
-            logger.error("Cannot kill the node provider job #"
-                    + this.jobID.value()
-                    + " because connection to the scheduler has been lost", nce);
-        } catch (UnknownJobException uje) {
-            logger.error("Cannot kill the node provider job #"
-                    + this.jobID.value() + " because the job is unknown", uje);
-        } catch (PermissionException pe) {
-            logger.error("No permission to kill the node provider job #"
-                    + this.jobID.value(), pe);
+            selectionScript +=
+                    " false) { selected = true; } else { selected = false; } } catch (error) { selected = false; }";
+        } else {
+            selectionScript = "selected = true;";
         }
+
+        return new SelectionScript(selectionScript, "JavaScript");
     }
 
     private static synchronized String startFileSystemServer(final String dataFolder)
