@@ -118,7 +118,7 @@ public final class SemanticElementTest {
     public void testParseElement13() {
         Assert.assertEquals(
                 "fragment",
-                SemanticElement.removePrefix(Node.createURI("./ressource#fragment")));
+                SemanticElement.removePrefix(Node.createURI("./resource#fragment")));
     }
 
     @Test
