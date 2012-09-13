@@ -476,10 +476,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             while (it.hasNext()) {
                 Quadruple quad = it.next();
 
-                graph = new SemanticElement(quad.getGraph().toString());
-                subject = new SemanticElement(quad.getSubject().toString());
-                predicate = new SemanticElement(quad.getPredicate().toString());
-                object = new SemanticElement(quad.getObject().toString());
+                graph = new SemanticElement(quad.getGraph());
+                subject = new SemanticElement(quad.getSubject());
+                predicate = new SemanticElement(quad.getPredicate());
+                object = new SemanticElement(quad.getObject());
 
                 if (graph.compareTo(zone.getLowerBound((byte) 0)) >= 0
                         && graph.compareTo(zone.getUpperBound((byte) 0)) < 0
