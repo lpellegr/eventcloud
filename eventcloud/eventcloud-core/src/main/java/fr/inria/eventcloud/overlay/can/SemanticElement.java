@@ -106,15 +106,15 @@ public class SemanticElement extends StringElement {
                 return content;
             }
 
-            int schemeColonSlashSlashLength = uri.getScheme().length() + 3;
+            int schemeColonSlashSlashLength;
 
             // if there is no other / or # starting from the authority part of
             // the uri, some pre-defined prefixes can be removed from the
             // authority part (e.g. scheme://www). Otherwise the prefix before
             // the last / or # is removed
             if (uri.getScheme() != null
-                    && slashIndex < schemeColonSlashSlashLength
-                    && sharpIndex == -1) {
+                    && slashIndex < (schemeColonSlashSlashLength =
+                            uri.getScheme().length() + 3) && sharpIndex == -1) {
                 // the pre-defined prefix is contained in the authority part
                 if (content.startsWith("www.", schemeColonSlashSlashLength)) {
                     return content.substring(schemeColonSlashSlashLength + 4);

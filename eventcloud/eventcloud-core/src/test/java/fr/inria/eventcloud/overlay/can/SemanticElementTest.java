@@ -107,4 +107,25 @@ public final class SemanticElementTest {
                 SemanticElement.removePrefix(Node.createLiteral("")));
     }
 
+    @Test
+    public void testParseElement12() {
+        Assert.assertEquals(
+                "resource",
+                SemanticElement.removePrefix(Node.createURI("resource")));
+    }
+
+    @Test
+    public void testParseElement13() {
+        Assert.assertEquals(
+                "fragment",
+                SemanticElement.removePrefix(Node.createURI("./ressource#fragment")));
+    }
+
+    @Test
+    public void testParseElement14() {
+        Assert.assertEquals(
+                "fragment",
+                SemanticElement.removePrefix(Node.createURI("#fragment")));
+    }
+
 }
