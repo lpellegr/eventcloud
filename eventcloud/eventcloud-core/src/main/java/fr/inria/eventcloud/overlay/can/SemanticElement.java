@@ -56,8 +56,8 @@ public class SemanticElement extends StringElement {
      * @param value
      *            the value.
      */
-    public SemanticElement(Apfloat apfloat) {
-        super(apfloat);
+    public SemanticElement(Apfloat value) {
+        super(value);
     }
 
     /**
