@@ -130,7 +130,7 @@ public final class SemanticCoordinateFactory {
                 new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
 
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            elts[i] = SemanticElement.newRawSemanticElement(value);
+            elts[i] = new SemanticElement(value);
         }
 
         return new Coordinate<SemanticElement>(elts);

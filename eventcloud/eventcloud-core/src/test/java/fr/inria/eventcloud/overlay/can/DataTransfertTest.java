@@ -281,7 +281,7 @@ public class DataTransfertTest {
         // Assert.assertTrue(nbSubscriptionQuadsFirstPeerBeforeJoin >
         // nbSubscriptionQuadsFirstPeerAfterJoin);
 
-        Assert.assertTrue(nbSubscriptionQuadsFirstPeerBeforeJoin > subscriptions.size());
+        Assert.assertTrue(nbSubscriptionQuadsFirstPeerBeforeJoin >= subscriptions.size());
 
         // Assert.assertEquals(
         // nbSubscriptionQuadsFirstPeerBeforeJoin,

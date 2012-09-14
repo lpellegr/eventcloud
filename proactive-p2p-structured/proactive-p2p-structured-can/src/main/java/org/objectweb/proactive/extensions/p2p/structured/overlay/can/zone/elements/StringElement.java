@@ -51,18 +51,18 @@ public class StringElement extends Element {
     public StringElement(String value) {
         // converts a string to an integer radix 10 by assuming that each
         // character is a digit radix StringElement#RADIX
-        this.apfloat = toIntegerRadix10(value, RADIX);
+        this.apfloat = toFloatRadix10(value, RADIX);
     }
 
     protected StringElement(Apfloat apfloat) {
         this.apfloat = apfloat;
     }
 
-    public static Apfloat toIntegerRadix10(String value) {
-        return toIntegerRadix10(value, RADIX);
+    public static Apfloat toFloatRadix10(String value) {
+        return toFloatRadix10(value, RADIX);
     }
 
-    public static Apfloat toIntegerRadix10(String value, Apint radix) {
+    public static Apfloat toFloatRadix10(String value, Apint radix) {
         int[] codepoints = UnicodeUtil.fromStringToCodePoints(value);
 
         // codepoints[0] x radix^0 = codepoints[0]
@@ -75,7 +75,6 @@ public class StringElement extends Element {
         for (int i = 1; i < codepoints.length; i++) {
             Apint pow = ApintMath.pow(radix, i);
             Apfloat division = new Apfloat(1, PRECISION).divide(pow);
-
             result =
                     result.add(new Apfloat(codepoints[i], PRECISION).multiply(division));
         }

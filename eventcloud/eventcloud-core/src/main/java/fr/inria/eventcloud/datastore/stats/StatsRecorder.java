@@ -97,7 +97,7 @@ public abstract class StatsRecorder implements Serializable {
     }
 
     protected static Apfloat toRadix10(Node n) {
-        return StringElement.toIntegerRadix10(SemanticElement.removePrefix(n.toString()));
+        return StringElement.toFloatRadix10(SemanticElement.removePrefix(n));
     }
 
 }
