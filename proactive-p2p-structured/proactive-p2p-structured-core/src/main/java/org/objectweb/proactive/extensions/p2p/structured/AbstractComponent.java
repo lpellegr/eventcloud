@@ -40,6 +40,10 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+
 /**
  * Abstract class which is common to all components in order to load some
  * configurations from data spaces in case that the components have been
@@ -54,6 +58,9 @@ public abstract class AbstractComponent implements ComponentInitActive {
     private static Logger log =
             LoggerFactory.getLogger(AbstractComponent.class);
 
+    protected String logbackConfigurationProperty =
+            "logback.configuration.dataspace";
+
     protected String log4jConfigurationProperty =
             "log4j.configuration.dataspace";
 
@@ -67,6 +74,7 @@ public abstract class AbstractComponent implements ComponentInitActive {
      */
     @Override
     public void initComponentActivity(Body body) {
+        this.loadLogbackConfigurationFromIS();
         this.loadLog4jConfigurationFromIS();
         this.loadConfigurationFromIS();
 
@@ -91,6 +99,53 @@ public abstract class AbstractComponent implements ComponentInitActive {
             throw new IllegalStateException(iae);
         } catch (InstantiationException ie) {
             throw new IllegalStateException(ie);
+        }
+    }
+
+    private void loadLogbackConfigurationFromIS() {
+        try {
+            String logbackConfigurationPropertyValue =
+                    System.getProperty(this.logbackConfigurationProperty);
+
+            if (logbackConfigurationPropertyValue != null
+                    && logbackConfigurationPropertyValue.startsWith(INPUT_SPACE_PREFIX)) {
+                DataSpacesFileObject logbackConfigurationDSFile =
+                        PADataSpaces.resolveDefaultInput(logbackConfigurationPropertyValue.substring(
+                                INPUT_SPACE_PREFIX.length() + 1,
+                                logbackConfigurationPropertyValue.length()));
+                InputStream logbackConfigurationIs =
+                        logbackConfigurationDSFile.getContent()
+                                .getInputStream();
+
+                try {
+                    LoggerContext context =
+                            (LoggerContext) LoggerFactory.getILoggerFactory();
+                    JoranConfigurator configurator = new JoranConfigurator();
+                    configurator.setContext(context);
+                    context.reset();
+                    configurator.doConfigure(logbackConfigurationIs);
+                } catch (ClassCastException cce) {
+                    log.warn(
+                            "Unable to load Logback configuration from input space because there is conflict with an another implementation of SLF4J",
+                            cce);
+                } catch (JoranException je) {
+                    throw new IllegalStateException(je);
+                } finally {
+                    logbackConfigurationIs.close();
+                }
+
+                log.debug("Logback configuration successfully loaded from input space");
+            }
+        } catch (SpaceNotFoundException snfe) {
+            throw new IllegalStateException(snfe);
+        } catch (FileSystemException fse) {
+            throw new IllegalStateException(fse);
+        } catch (NotConfiguredException nce) {
+            throw new IllegalStateException(nce);
+        } catch (ConfigurationException ce) {
+            throw new IllegalStateException(ce);
+        } catch (IOException ioe) {
+            throw new IllegalStateException(ioe);
         }
     }
 
