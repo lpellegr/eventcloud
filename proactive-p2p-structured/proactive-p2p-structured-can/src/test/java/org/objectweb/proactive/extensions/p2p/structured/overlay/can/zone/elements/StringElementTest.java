@@ -89,7 +89,7 @@ public class StringElementTest {
         Assert.assertEquals(
                 1,
                 new StringElement(
-                        Character.toString(P2PStructuredProperties.CAN_UPPER_BOUND.getValue())).normalize(
+                        P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()).normalize(
                         0, 1), 1e-9);
     }
 
@@ -98,7 +98,7 @@ public class StringElementTest {
         Assert.assertEquals(
                 0,
                 new StringElement(
-                        Character.toString(P2PStructuredProperties.CAN_LOWER_BOUND.getValue())).normalize(
+                        P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()).normalize(
                         0, 1), 1e-9);
     }
 
