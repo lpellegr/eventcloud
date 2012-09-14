@@ -61,27 +61,6 @@ public class SemanticNotificationTranslatorTest {
         CompoundEvent initialEvent =
                 new CompoundEvent(read(
                         "/example.trig", SerializationFormat.TriG));
-        // final List<Quadruple> quads = new List<Quadruple>();
-        /*InputStream is =RdfParser.class.getResourceAsStream("/example.trig");
-        // System.out.println("le fichier Trig : \n"+convertStreamToString(is));
-        System.out.println("******************************* \t ********************\t**************************");
-        String instr = convertStreamToString(is);
-        System.out.println("le fichier Trig avant : \n"+instr);
-        System.out.println("******************************* \t ********************\t**************************");
-        String outstr = StringEscapeUtils.unescapeXml(instr);
-        System.out.println("le fichier Trig apres unescape : \n "+outstr);
-        
-        *//*InputStream iis = new  ByteArrayInputStream(StringEscapeUtils.escapeXml(convertStreamToString(is)).getBytes());
-          
-          //InputStream is = new  ByteArrayInputStream(StringEscapeUtils.escapeXml(inputPayload).getBytes());
-          RdfParser.parse(iis, SerializationFormat.TriG, new Callback<Quadruple>() {
-              @Override
-              public void execute(Quadruple quad) {
-                  quads.add(quad);
-                  //counter++;
-              }
-          } );
-          */
         log.info("Initial quadruples are:");
         logInfo(initialEvent);
         // printQuadruples(initialEvent.getQuadruples());
