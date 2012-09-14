@@ -36,7 +36,7 @@ public class StringElement extends Element {
             P2PStructuredProperties.STRING_ELEMENT_PRECISION.getValue();
 
     public static final Apint RADIX = new Apint(
-            ((int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue()) + 1);
+            (P2PStructuredProperties.CAN_UPPER_BOUND.getValue()) + 1);
 
     private final Apfloat apfloat;
 
@@ -107,9 +107,8 @@ public class StringElement extends Element {
         }
 
         Apfloat scale =
-                new Apfloat(
-                        (upperBound - lowerBound)
-                                / (int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
+                new Apfloat((upperBound - lowerBound)
+                        / P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
 
         return this.apfloat.multiply(scale)
                 .add(new Apfloat(lowerBound))
