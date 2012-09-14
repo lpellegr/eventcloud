@@ -64,6 +64,8 @@ public class UnicodeUtil {
             }
         }
 
+        // TODO add support for supplementary characters (\u10000-\u10FFFF)
+
         return result.toString();
     }
 
