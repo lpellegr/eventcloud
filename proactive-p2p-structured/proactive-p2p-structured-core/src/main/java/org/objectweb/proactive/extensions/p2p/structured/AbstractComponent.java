@@ -53,7 +53,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
  */
 public abstract class AbstractComponent implements ComponentInitActive {
 
-    private static final String INPUT_SPACE_PREFIX = "INPUT_SPACE";
+    public static final String INPUT_SPACE_PREFIX = "INPUT_SPACE";
 
     private static Logger log =
             LoggerFactory.getLogger(AbstractComponent.class);
