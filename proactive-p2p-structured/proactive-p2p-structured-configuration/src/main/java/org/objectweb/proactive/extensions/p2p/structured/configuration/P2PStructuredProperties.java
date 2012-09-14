@@ -45,16 +45,17 @@ public class P2PStructuredProperties {
      * network. It is by default set to &#92;u0000 and <strong>should not be
      * edited</strong>.
      */
-    public static final PropertyCharacter CAN_LOWER_BOUND =
-            new PropertyCharacter("can.lower.bound", '\u0000');
+    public static final PropertyCharacterUnicode CAN_LOWER_BOUND =
+            new PropertyCharacterUnicode("can.lower.bound", "\u0000");
 
     /**
      * This property defines the maximum upper bound associated to a CAN
-     * network. It is by default set to &#92;uffff to support all UTF-16
-     * characters. This is an open bound (i.e. no peer will manage it).
+     * network. It is by default set to &#92;u10FFFF (=&#92;uDBFF&#92;uDFFF) to
+     * support all UTF-16 characters. This is an open bound (i.e. no peer will
+     * manage it).
      */
-    public static final PropertyCharacter CAN_UPPER_BOUND =
-            new PropertyCharacter("can.upper.bound", '\uffff');
+    public static final PropertyCharacterUnicode CAN_UPPER_BOUND =
+            new PropertyCharacterUnicode("can.upper.bound", "\uDBFF\uDFFF");
 
     public static final PropertyInteger CAN_LEAVE_RETRY_MIN =
             new PropertyInteger("can.leave.retry.min", 2000);

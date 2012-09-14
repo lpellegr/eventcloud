@@ -39,11 +39,11 @@ public class ZoneTest {
 
         Assert.assertEquals(
                 zone.getLowerBound(),
-                CoordinateFactory.newStringCoordinate(CAN_LOWER_BOUND.getValue()));
+                CoordinateFactory.newStringCoordinate(CAN_LOWER_BOUND.getValueAsString()));
 
         Assert.assertEquals(
                 zone.getUpperBound(),
-                CoordinateFactory.newStringCoordinate(CAN_UPPER_BOUND.getValue()));
+                CoordinateFactory.newStringCoordinate(CAN_UPPER_BOUND.getValueAsString()));
     }
 
     @Test
