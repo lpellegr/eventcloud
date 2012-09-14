@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.apfloat.ApfloatContext;
 import org.apfloat.spi.BuilderFactory;
@@ -104,12 +105,21 @@ public abstract class AbstractComponent implements ComponentInitActive {
                         PADataSpaces.resolveDefaultInput(log4jConfigurationPropertyValue.substring(
                                 INPUT_SPACE_PREFIX.length() + 1,
                                 log4jConfigurationPropertyValue.length()));
-
-                DOMConfigurator configurator = new DOMConfigurator();
-                InputStream is =
+                InputStream log4jConfigurationIs =
                         log4jConfigurationDSFile.getContent().getInputStream();
-                configurator.doConfigure(is, LogManager.getLoggerRepository());
-                is.close();
+
+                if (log4jConfigurationPropertyValue.endsWith(".xml")) {
+                    // XML configuration file
+                    DOMConfigurator configurator = new DOMConfigurator();
+                    configurator.doConfigure(
+                            log4jConfigurationIs,
+                            LogManager.getLoggerRepository());
+                } else {
+                    // Properties configuration file
+                    PropertyConfigurator.configure(log4jConfigurationIs);
+                }
+
+                log4jConfigurationIs.close();
 
                 log.debug("Log4J configuration successfully loaded from input space");
             }
