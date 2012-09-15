@@ -413,9 +413,11 @@ public class Can2dVisualizer extends JFrame {
                         .contains(
                                 new Coordinate<StringElement>(
                                         new StringElement(
-                                                Character.toString((char) (x * SCALE_WIDTH))),
+                                                new String(
+                                                        Character.toChars((int) (x * SCALE_WIDTH)))),
                                         new StringElement(
-                                                Character.toString((char) (y * SCALE_HEIGHT)))))) {
+                                                new String(
+                                                        Character.toChars((int) (y * SCALE_HEIGHT))))))) {
                     return entry;
                 }
             }
@@ -470,9 +472,6 @@ public class Can2dVisualizer extends JFrame {
     public static void main(String[] args) {
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
         P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
-        // to support the full range (\u0000-\u10FFFF) we must avoid rounding
-        // errors in this class
-        P2PStructuredProperties.CAN_UPPER_BOUND.setValueAsString("\uFFFF");
 
         InjectionConstraintsProvider injectionConstraintsProvider = null;
         if (args.length == 1 && args[0].equals("-fractal")) {

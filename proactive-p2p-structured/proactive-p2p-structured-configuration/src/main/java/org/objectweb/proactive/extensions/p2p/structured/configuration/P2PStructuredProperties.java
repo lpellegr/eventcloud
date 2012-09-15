@@ -70,16 +70,26 @@ public class P2PStructuredProperties {
             new PropertyInteger("can.task.refresh.interval", 500);
 
     /**
-     * Indicates which representation to use for printing characters on the
-     * standard output. The value of this property can be set to:
+     * Indicates which representation to use for printing characters contained
+     * by a coordinate element on the standard output. The value of this
+     * property can be set to:
      * <ul>
-     * <li>{@code codepoints} in order to display the code points values by
-     * using the unicode notation.</li>
-     * <li>{@code default} to see the coordinate as a decimal value.</li>
+     * <li>{@code codepoints} to display the integer values associated to each
+     * code point from a coordinate element.</li>
+     * <li>{@code decimal} to display coordinate element as decimal values.</li>
+     * <li>{@code string} to display a coordinate element as a standard unicode
+     * String. Warning, some unicode characters are not printable or are not
+     * displayed nicely.</li>
+     * <li>{@code utf16} to display coordinate elements based on the unicode
+     * notation for UTF-16 (&#92;uXXXX or &#92;uXXXX&#92;uXXXX if the character
+     * is a supplementary character).</li>
+     * <li>{@code utf32} to display coordinate elements based on the unicode
+     * notation for UTF-32 (&#92;uXXXXX).</li>
      * </ul>
+     * The property is set by default to {@code decimal}.
      */
-    public static final PropertyString CAN_COORDINATE_DISPLAY =
-            new PropertyString("can.coordinate.display", "default");
+    public static final PropertyString CAN_ELEMENT_DISPLAY =
+            new PropertyString("can.element.display", "decimal");
 
     /**
      * Defines the precision used for the internal representation of string

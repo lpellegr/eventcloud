@@ -84,7 +84,8 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     public void testAnycastRequestWithResponse() {
         StringElement elt =
                 new StringElement(
-                        Character.toString((char) (P2PStructuredProperties.CAN_UPPER_BOUND.getValue() - 1)));
+                        new String(
+                                Character.toChars(P2PStructuredProperties.CAN_UPPER_BOUND.getValue() - 1)));
 
         GetZonesValidatingConstraintsResponse response =
                 (GetZonesValidatingConstraintsResponse) PAFuture.getFutureValue(this.proxy.send(
