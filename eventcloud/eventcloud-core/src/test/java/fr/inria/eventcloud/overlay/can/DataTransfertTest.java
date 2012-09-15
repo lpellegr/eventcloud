@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAnd
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZone;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
-import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,23 +111,16 @@ public class DataTransfertTest {
                         .getUnicodeRepresentation();
 
         String elt2 =
-                res.getSecond()
+                new String(Character.toChars(res.getSecond()
                         .getLowerBound()
                         .getElement(dimensionSplit)
                         .getUnicodeRepresentation()
-                        + "a";
-
-        log.debug(
-                "Element1={}, length={}", UnicodeUtil.makePrintable(elt1),
-                elt1.length());
-        log.debug(
-                "Element2={}, length={}", UnicodeUtil.makePrintable(elt2),
-                elt2.length());
+                        .codePointAt(0) + 1));
 
         Node node1 = Node.createURI(elt1);
         Node node2 = Node.createURI(elt2);
 
-        Quadruple quad1 =
+        Quadruple quadruple1 =
                 new Quadruple(
                         node1, Node.createURI(res.getFirst().getLowerBound(
                                 (byte) 1).getUnicodeRepresentation()),
@@ -138,7 +131,7 @@ public class DataTransfertTest {
                                 .getLowerBound((byte) 3)
                                 .getUnicodeRepresentation()));
 
-        Quadruple quad2 =
+        Quadruple quadruple2 =
                 new Quadruple(
                         node2, Node.createURI(res.getSecond().getLowerBound(
                                 (byte) 1).getUnicodeRepresentation()),
@@ -149,13 +142,17 @@ public class DataTransfertTest {
                                 .getLowerBound((byte) 3)
                                 .getUnicodeRepresentation()));
 
-        log.debug("Quadruple1={}", quad1);
-        log.debug("Quadruple2={}", quad2);
+        log.debug(
+                "First generated quadruple is {}",
+                quadruple1.toString(StringRepresentation.CODE_POINTS));
+        log.debug(
+                "Second generated quadruple is {}",
+                quadruple2.toString(StringRepresentation.CODE_POINTS));
 
         // add two quadruples whose one must be conveyed to the second peer when
         // it joins the first peer
-        firstPeer.add(quad1);
-        firstPeer.add(quad2);
+        firstPeer.add(quadruple1);
+        firstPeer.add(quadruple2);
 
         Assert.assertEquals(2, Operations.findQuadruplesOperation(
                 firstPeer, QuadruplePattern.ANY).size());
@@ -223,7 +220,8 @@ public class DataTransfertTest {
 
         // do not use the first zone because low characters are forbidden in
         // IRIs
-        String bound2 = "" + ((char) (bound1.charAt(0) - 1));
+        String bound2 =
+                "" + new String(Character.toChars(bound1.codePointAt(0) - 1));
 
         Subscription s1 =
                 new Subscription(createSubscription(dimension, bound2));

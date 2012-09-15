@@ -21,6 +21,7 @@ import org.apfloat.ApfloatMath;
 import org.apfloat.Apint;
 import org.apfloat.ApintMath;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
 
 /**
@@ -63,7 +64,7 @@ public class StringElement extends Element {
     }
 
     public static Apfloat toFloatRadix10(String value, Apint radix) {
-        int[] codepoints = UnicodeUtil.fromStringToCodePoints(value);
+        int[] codepoints = UnicodeUtil.toCodePointArray(value);
 
         // codepoints[0] x radix^0 = codepoints[0]
         Apfloat result = new Apfloat(codepoints[0], PRECISION);
@@ -118,6 +119,7 @@ public class StringElement extends Element {
     public synchronized String getUnicodeRepresentation() {
         if (this.unicodeRepresentation == null) {
             Apint apint = this.apfloat.truncate();
+
             Apint quotient = apint;
 
             // handle the integer part
@@ -146,9 +148,8 @@ public class StringElement extends Element {
 
                 if (fractionalPart.compareTo(Apfloat.ONE) >= 0) {
                     Apint truncatedPart = fractionalPart.truncate();
-
                     // keep only the integer part
-                    integerPart.append((char) truncatedPart.intValue());
+                    integerPart.append(Character.toChars(truncatedPart.intValue()));
                     // get rid of value left of radix point
                     fractionalPart = fractionalPart.subtract(truncatedPart);
                 } else {
@@ -171,7 +172,7 @@ public class StringElement extends Element {
     private Apint divideQuotientRecursively(StringBuilder result, Apint quotient) {
         while (quotient.compareTo(Apint.ZERO) != 0) {
             int remainder = quotient.mod(RADIX).intValue();
-            result.append((char) remainder);
+            result.append(new String(Character.toChars(remainder)));
             quotient = quotient.divide(RADIX);
         }
 
@@ -216,31 +217,20 @@ public class StringElement extends Element {
      */
     @Override
     public String toString() {
-        String coordinateRepresentation =
-                P2PStructuredProperties.CAN_COORDINATE_DISPLAY.getValue();
+        String representation =
+                P2PStructuredProperties.CAN_ELEMENT_DISPLAY.getValue();
 
-        StringBuilder result = new StringBuilder();
-
-        if (coordinateRepresentation.equals("default")) {
-            result.append(this.apfloat.toString(true));
-        } else if (coordinateRepresentation.equals("codepoints")) {
-            result.append(UnicodeUtil.makePrintable(this.getUnicodeRepresentation()));
-            result.append('{');
-            result.append(this.getUnicodeRepresentation().length());
-            result.append('}');
-        } else {
-            throw new IllegalStateException("Unknown value for property "
-                    + P2PStructuredProperties.CAN_COORDINATE_DISPLAY.getName());
-        }
-
-        return result.toString();
-    }
-
-    public String toString(boolean useInternalRepresentation) {
-        if (useInternalRepresentation) {
+        if (representation.equalsIgnoreCase("decimal")) {
             return this.apfloat.toString(true);
         } else {
-            return this.toString();
+            try {
+                return StringRepresentation.getInstance(representation).apply(
+                        this.getUnicodeRepresentation());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException("Invalid value for property "
+                        + P2PStructuredProperties.CAN_ELEMENT_DISPLAY.getName()
+                        + ": " + representation);
+            }
         }
     }
 
