@@ -94,14 +94,14 @@ public class P2PStructuredProperties {
     /**
      * Defines the precision used for the internal representation of string
      * elements as a decimal value. According to some tests, it is necessary to
-     * specify a precision of {@code 300} to avoid loose of precision with
+     * specify a precision of {@code 310} to avoid loose of precision with
      * {@code 1000} splits performed recursively by using the same upper bound.
      * Otherwise some comparisons between string elements may return equals
-     * instead of greater or lower than. The default value is set to {@code 300}
+     * instead of greater or lower than. The default value is set to {@code 310}
      * .
      */
     public static final PropertyInteger STRING_ELEMENT_PRECISION =
-            new PropertyInteger("string.element.precision", 300);
+            new PropertyInteger("string.element.precision", 310);
 
     public static final PropertyDouble TRACKER_STORAGE_PROBABILITY =
             new PropertyDouble("tracker.storage.probability", 1.0);
