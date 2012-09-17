@@ -39,7 +39,7 @@ public class StringElement extends Element {
     public static final Apint RADIX = new Apint(
             (P2PStructuredProperties.CAN_UPPER_BOUND.getValue()) + 1);
 
-    private final Apfloat apfloat;
+    protected final Apfloat apfloat;
 
     private transient String unicodeRepresentation;
 
@@ -73,8 +73,9 @@ public class StringElement extends Element {
         // are supposed to be between a lower and upper bound that is made of
         // one character, and hence one digit radix the upper bound value (e.g.
         // 2^16).
+        Apint pow = new Apint(1);
         for (int i = 1; i < codepoints.length; i++) {
-            Apint pow = ApintMath.pow(radix, i);
+            pow = pow.multiply(radix);
             Apfloat division = new Apfloat(1, PRECISION).divide(pow);
             result =
                     result.add(new Apfloat(codepoints[i], PRECISION).multiply(division));
@@ -234,7 +235,28 @@ public class StringElement extends Element {
         }
     }
 
+    public String toString(StringRepresentation representation) {
+        return representation.apply(this.getUnicodeRepresentation());
+    }
+
     public static void main(String[] args) {
+        // StringBuilder bd = new StringBuilder(1000);
+        // for (int i = 0; i < 1000; i++) {
+        // bd.append(i + 4000);
+        // }
+        //
+        // long t2 = System.nanoTime();
+        // toFloatRadix10BasicMethod(bd.toString(), RADIX);
+        // long t3 = System.nanoTime();
+        // System.out.println("StringElement.main() toFloatRadixHorner took :  "
+        // + ((t3 - t2) / 1000 / 1000));
+        //
+        // long t0 = System.nanoTime();
+        // toFloatRadix10Horner(bd.toString());
+        // long t1 = System.nanoTime();
+        // System.out.println("StringElement.main() toFloatRadix took : "
+        // + ((t1 - t0) / 1000 / 1000));
+
         Apint radix = new Apint(65536);
         int exponent = 2;
 
