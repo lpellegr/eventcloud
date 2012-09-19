@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,9 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.annotation.multiactivity.Compatible;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
-import org.objectweb.proactive.annotation.multiactivity.DefineRules;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
@@ -44,6 +43,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.ServingPolicy;
 import org.objectweb.proactive.multiactivity.compatibility.StatefulCompatibilityMap;
+import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,9 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author bsauvan
  */
 @DefineGroups({
-        @Group(name = "parallel", selfCompatible = true),
-        @Group(name = "limited", selfCompatible = true)})
-@DefineRules({@Compatible(value = {"parallel", "limited"})})
+        @Group(name = "parallel", selfCompatible = true)})
 public class PeerImpl extends AbstractComponent implements Peer,
         PeerAttributeController, ComponentEndActive, Serializable {
 
@@ -111,10 +109,11 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     public void runComponentActivity(Body body) {
-//        customServingPolicy(body, 10);
+//         customServingPolicy(body,
+//         Runtime.getRuntime().availableProcessors()*4);
         this.multiActiveService = (new MultiActiveService(body));
         this.multiActiveService.multiActiveServing(Runtime.getRuntime()
-                .availableProcessors(), false, false);
+                .availableProcessors()*2, false, false);
     }
 
     /**
@@ -135,8 +134,10 @@ public class PeerImpl extends AbstractComponent implements Peer,
 
     @SuppressWarnings("unused")
     private void customServingPolicy(Body body, final int maxThreads) {
-        final String prioritizedMethod = "route";
-        this.multiActiveService = (new MultiActiveService(body));
+        final String[] prioritizedMethods = {"route"}; // table if we need to
+                                                       // add new prioritized
+                                                       // methods
+        this.multiActiveService = new MultiActiveService(body);
         this.multiActiveService.policyServing(new ServingPolicy() {
 
             @Override
@@ -151,10 +152,16 @@ public class PeerImpl extends AbstractComponent implements Peer,
                 }
                 Collection<org.objectweb.proactive.core.body.request.Request> execQueue =
                         compatibility.getExecutingRequests();
-                if (execQueue.size() >= maxThreads) {
-                    for (org.objectweb.proactive.core.body.request.Request r : queue) {
+                if (execQueue.size()
+                - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() >= maxThreads) {
+                    Iterator<org.objectweb.proactive.core.body.request.Request> itQ =
+                            queue.iterator();
+                    while (itQ.hasNext()) {
+                        org.objectweb.proactive.core.body.request.Request r =
+                                itQ.next();
                         if (compatibility.isCompatibleWithRequests(r, execQueue)
-                                && r.getMethodName().equals(prioritizedMethod)) {
+                                && Arrays.asList(prioritizedMethods).contains(
+                                        r.getMethodName())) {
                             ret.add(r);
                             queue.remove(r);
                             return ret;
@@ -162,42 +169,22 @@ public class PeerImpl extends AbstractComponent implements Peer,
                     }
                 } else {
                     org.objectweb.proactive.core.body.request.Request current;
-//                    int cpt = 0;
-//                    Iterator<org.objectweb.proactive.core.body.request.Request> it =
-//                            execQueue.iterator();
-//                    while (it.hasNext()) {
-//                        if (compatibility.getGroupOf(it.next()).name.equals("limited")) {
-//                            cpt++;
-//                        }
-//                    }
-                    for (int i = 0; i < queue.size(); i++) {
-                        current = queue.get(i);
-                        if (i < execQueue.size()) {
-//                            if (cpt >= 5
-//                                    && compatibility.getGroupOf(current).name != null
-//                                    && compatibility.getGroupOf(current).name.equals("limited")) {
-//                                System.out.println("method : "
-//                                        + current.getMethodName()
-//                                        + ", group : "
-//                                        + (compatibility.getGroupOf(current) == null
-//                                                ? "null"
-//                                                : compatibility.getGroupOf(current).name));
-//                                // do nothing
-//                            } else
-                            if (compatibility.getIndexOfLastCompatibleWith(
-                                    current, queue) >= i
-                                    && compatibility.isCompatibleWithRequests(
-                                            current, execQueue)) {
-                                ret.add(current);
-                                queue.remove(current);
-                                return ret;
-                            }
-                        } else if (compatibility.isCompatibleWithRequests(
-                                current, execQueue)
+                    Iterator<org.objectweb.proactive.core.body.request.Request> itQ =
+                            queue.iterator();
+                    int i = -1;
+                    while (itQ.hasNext()
+                            && execQueue.size() + ret.size() - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() < maxThreads) {
+                        current =
+                                (org.objectweb.proactive.core.body.request.Request) itQ.next();
+                        i++;
+                        if (compatibility.isCompatibleWithRequests(current, ret)
+                                && compatibility.isCompatibleWithRequests(
+                                        current, execQueue)
                                 && compatibility.getIndexOfLastCompatibleWith(
                                         current, queue) >= i - 1) {
                             ret.add(current);
-                            queue.remove(current);
+                            itQ.remove();
+                        } else {
                             return ret;
                         }
                     }
@@ -351,7 +338,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("limited")
+    @MemberOf("parallel")
     public Response<?> send(Request<?> request) {
         return this.overlay.dispatch(request);
     }

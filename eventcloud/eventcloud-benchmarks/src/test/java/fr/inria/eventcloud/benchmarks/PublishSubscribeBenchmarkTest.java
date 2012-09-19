@@ -117,25 +117,27 @@ public class PublishSubscribeBenchmarkTest {
     @Parameters
     public static List<Object[]> getParameters() {
         // scenarios
-        return Arrays.asList(new Object[][] {{
-                10, 1, 1, 1000, new QuadrupleSupplier(),
-                SignalNotificationListener.class, DatastoreType.PERSISTENT}
-        // ,{
-        // 10, 1, 1, 1000, new QuadrupleSupplier(),
-        // BindingNotificationListener.class,
-        // DatastoreType.PERSISTENT}
-        // ,{
-        // 10, 1, 1, 100, new CompoundEventSupplier(10),
-        // CompoundEventNotificationListener.class,
-        // DatastoreType.PERSISTENT}
-        });
+        return Arrays.asList(new Object[][] {
+                {
+                        10, 1, 1, 3000, new QuadrupleSupplier(),
+                        SignalNotificationListener.class,
+                        DatastoreType.PERSISTENT}
+//                ,{
+//                        1, 1, 1, 1000, new QuadrupleSupplier(),
+//                        BindingNotificationListener.class,
+//                        DatastoreType.PERSISTENT}
+//                ,{
+//                        1, 1, 1, 100, new CompoundEventSupplier(10),
+//                        CompoundEventNotificationListener.class,
+//                        DatastoreType.PERSISTENT}
+                });
     }
 
     @BeforeClass
     public static void setUp() {
         EventCloudProperties.REPOSITORIES_AUTO_REMOVE.setValue(true);
 
-        // EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
+        EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
         // EventCloudProperties.RECORD_STATS_PEER_STUBS_CACHE.setValue(true);
         // EventCloudProperties.RECORD_STATS_SUBSCRIBE_PROXIES_CACHE.setValue(true);
         // EventCloudProperties.RECORD_STATS_SUBSCRIPTIONS_CACHE.setValue(true);

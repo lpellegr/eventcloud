@@ -212,7 +212,6 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
             this.eventIdsReceivedDB.close();
         }
-
     }
 
     /**
@@ -446,6 +445,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
     }
 
+    @MemberOf("parallel")
     private final void deliver(NotificationId id,
                                CompoundEventNotificationListener listener,
                                Solution solution) {
