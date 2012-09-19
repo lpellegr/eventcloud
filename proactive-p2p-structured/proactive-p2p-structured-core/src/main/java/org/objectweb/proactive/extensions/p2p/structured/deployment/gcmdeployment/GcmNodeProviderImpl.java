@@ -18,17 +18,19 @@ public class GcmNodeProviderImpl implements NodeProvider, Serializable {
     private static final long serialVersionUID = 1L;
     private GCMApplication gcmad;
     private File pathToGCMADescriptor = null;
+    private boolean started = false;
 
     public GcmNodeProviderImpl(String path) {
         this.pathToGCMADescriptor = new File(path);
-        this.init();
+        this.start();
     }
 
     @Override
-    public void init() {
+    public void start() {
         try {
             this.gcmad =
                     PAGCMDeployment.loadApplicationDescriptor(this.pathToGCMADescriptor);
+            this.started = true;
             this.gcmad.startDeployment();
             this.gcmad.waitReady();
         } catch (ProActiveException e) {
@@ -50,6 +52,11 @@ public class GcmNodeProviderImpl implements NodeProvider, Serializable {
     @Override
     public GCMVirtualNode getGcmVirtualNode(String vnName) {
         return this.gcmad.getVirtualNode(vnName);
+    }
+
+    @Override
+    public boolean isStarted() {
+        return this.started;
     }
 
 }

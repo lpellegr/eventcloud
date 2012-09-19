@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.objectweb.proactive</groupId>
-			<artifactId>proactive-programming-bundle</artifactId>
+			<artifactId>proactive-programming-mao-bundle</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
