@@ -39,21 +39,17 @@ public abstract class StatsRecorder implements Serializable {
 
     private long nbQuads = 0;
 
-    public void quadrupleAdded(Node g, Node s, Node p, Node o) {
-        synchronized (this) {
-            this.quadrupleAddedComputeStats(g, s, p, o);
-            this.nbQuads++;
-        }
+    public synchronized void quadrupleAdded(Node g, Node s, Node p, Node o) {
+        this.quadrupleAddedComputeStats(g, s, p, o);
+        this.nbQuads++;
     }
 
     protected abstract void quadrupleAddedComputeStats(Node g, Node s, Node p,
                                                        Node o);
 
-    public void quadrupleRemoved(Node g, Node s, Node p, Node o) {
-        synchronized (this) {
-            this.quadrupleRemovedComputeStats(g, s, p, o);
-            this.nbQuads--;
-        }
+    public synchronized void quadrupleRemoved(Node g, Node s, Node p, Node o) {
+        this.quadrupleRemovedComputeStats(g, s, p, o);
+        this.nbQuads--;
     }
 
     protected abstract void quadrupleRemovedComputeStats(Node g, Node s,
@@ -101,7 +97,7 @@ public abstract class StatsRecorder implements Serializable {
     }
 
     protected static Apfloat toRadix10(Node n) {
-        return StringElement.toIntegerRadix10(SemanticElement.removePrefix(n.toString()));
+        return StringElement.toFloatRadix10(SemanticElement.removePrefix(n));
     }
 
 }

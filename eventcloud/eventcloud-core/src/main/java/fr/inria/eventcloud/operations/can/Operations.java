@@ -23,6 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
 /**
  * Syntactic sugars for sending common operations.
@@ -41,6 +42,10 @@ public final class Operations {
                                                           boolean useSubscriptionsDatastore) {
         return ((FindQuadruplesResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new FindQuadruplesOperation(
                 quadruplePattern, useSubscriptionsDatastore)))).getQuadruples();
+    }
+
+    public static StatsRecorder getStatsRecorder(Peer p) {
+        return ((GetStatsRecordeResponseOperation) PAFuture.getFutureValue(p.receive(new GetStatsRecorderOperation()))).getStatsRecorder();
     }
 
 }

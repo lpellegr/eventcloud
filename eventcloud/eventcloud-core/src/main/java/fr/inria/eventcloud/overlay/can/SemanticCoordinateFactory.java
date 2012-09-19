@@ -90,14 +90,6 @@ public final class SemanticCoordinateFactory {
                                                                     Node subject,
                                                                     Node predicate,
                                                                     Node object) {
-        // if the literal value contains an empty String we have to decide which
-        // constraint is associated to this particular case where there is no
-        // character to compare.
-        if (object.isLiteral() && object.getLiteralLexicalForm().isEmpty()) {
-            object =
-                    Node.createLiteral(SemanticElement.EMPTY_STRING_ROUTING_CHARACTER);
-        }
-
         return new Coordinate<SemanticElement>(
                 createSemanticElementWithVars(graph),
                 createSemanticElementWithVars(subject),
@@ -129,16 +121,12 @@ public final class SemanticCoordinateFactory {
         }
     }
 
-    protected static Coordinate<SemanticElement> newSemanticCoordinate(Character character) {
-        return newRawSemanticCoordinate(Character.toString(character));
-    }
-
-    protected static Coordinate<SemanticElement> newRawSemanticCoordinate(String value) {
+    protected static Coordinate<SemanticElement> newSemanticCoordinate(String value) {
         SemanticElement[] elts =
                 new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
 
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            elts[i] = SemanticElement.newRawSemanticElement(value);
+            elts[i] = new SemanticElement(value);
         }
 
         return new Coordinate<SemanticElement>(elts);
