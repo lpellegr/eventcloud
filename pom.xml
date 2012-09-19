@@ -48,7 +48,7 @@
 		</repository>
 		<repository>
 			<id>sonatype-snapshots-proactive-912</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-912</url>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-913</url>
 		</repository>
 		<repository>
 			<id>play-private.release</id>
