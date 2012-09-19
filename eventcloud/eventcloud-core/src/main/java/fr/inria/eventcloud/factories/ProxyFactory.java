@@ -35,6 +35,8 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.PutGetApi;
@@ -151,6 +153,8 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                                  String registryUrl,
                                                  EventCloudId id)
             throws EventCloudIdNotManaged {
+        checkNotNull(registryUrl, id);
+
         try {
             PublishProxy pubProxy =
                     ComponentUtils.createComponentAndGetInterface(
@@ -278,6 +282,8 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                                      EventCloudId id,
                                                      AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
+        checkNotNull(registryUrl, id);
+
         try {
             SubscribeProxy subProxy =
                     ComponentUtils.createComponentAndGetInterface(
@@ -400,6 +406,8 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                                String registryUrl,
                                                EventCloudId id)
             throws EventCloudIdNotManaged {
+        checkNotNull(registryUrl, id);
+
         try {
             PutGetProxy putgetProxy =
                     ComponentUtils.createComponentAndGetInterface(
@@ -435,6 +443,12 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
         return ComponentUtils.lookupFcInterface(
                 componentUri, PutGetProxyImpl.PUTGET_SERVICES_ITF,
                 PutGetApi.class);
+    }
+
+    private static void checkNotNull(String registryUrl, EventCloudId id) {
+        Preconditions.checkNotNull(registryUrl, "Invalid registry URL: "
+                + registryUrl);
+        Preconditions.checkNotNull(id, "Invalid eventcloud id: " + id);
     }
 
 }

@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apfloat.Apfloat;
@@ -35,116 +36,120 @@ public class SemanticElement extends StringElement {
     private static final long serialVersionUID = 1L;
 
     // \u00A2 -> ¢, CENT SIGN
-    public static String EMPTY_STRING_ROUTING_CHARACTER = "\u00A2";
+    protected static String EMPTY_STRING_ROUTING_CHARACTER = "\u00A2";
 
     /**
-     * Constructs a new semantic coordinate element from the specified
-     * {@code value}.
+     * Constructs a new semantic element from the specified {@code value} by
+     * trying to remove RDF prefixes.
      * 
      * @param value
      *            the value which is analyzed.
      */
     public SemanticElement(Node value) {
-        this(value.toString());
-    }
-
-    /**
-     * Constructs a new semantic coordinate element from the specified
-     * {@code value}.
-     * 
-     * @param value
-     *            the value which is analyzed.
-     */
-    public SemanticElement(String value) {
         super(removePrefix(value));
     }
 
-    private SemanticElement(String value, Void dummy) {
+    /**
+     * Constructs a new semantic element from the specified {@code value}
+     * representation.
+     * 
+     * @param value
+     *            the value.
+     */
+    public SemanticElement(Apfloat value) {
         super(value);
     }
 
-    public SemanticElement(Apfloat apfloat) {
-        super(apfloat);
-    }
-
     /**
-     * Constructs a new semantic coordinate element from the specified
-     * {@code value}. Contrary to the constructor of this class, the value is
-     * not analyzed to remove a potential prefix. It has to be used with care.
+     * Constructs a new semantic element from the specified {@code value}
+     * without trying to remove RDF prefixes. It has to be used with care.
      * 
      * @param value
-     *            the value to use.
-     * 
-     * @return a new semantic element.
+     *            the value.
      */
-    public static SemanticElement newRawSemanticElement(String value) {
-        return new SemanticElement(value);
+    protected SemanticElement(String value) {
+        super(value);
     }
 
     /**
-     * Analyzes the String value from a {@link Node} in order to remove the
-     * prefixes and some characters specific to RDF data. This suppression is
-     * done to improve the load balancing (i.e. especially to avoid to have
-     * several values with popular prefixes that are managed in the same zone).
+     * Analyze the specified {@link Node} value to remove some prefixes which
+     * are redundant in RDF data. This suppression is done to improve the load
+     * balancing (i.e. especially to avoid to have several values with popular
+     * prefixes that are managed in the same zone).
      * 
      * @param value
      *            the value to parse.
      * 
-     * @return a String that has been improved for load balancing.
+     * @return a String which has been improved for load balancing.
      */
-    public static String removePrefix(String value) {
-        // TODO: add support for opaque URI (c.f.
-        // http://download.oracle.com/javase/6/docs/api/java/net/URI.html)
+    public static final String removePrefix(final Node value) {
+        if (value.isURI()) {
+            // TODO: add support for opaque URI (c.f.
+            // http://download.oracle.com/javase/6/docs/api/java/net/URI.html)
+            String content = value.getURI();
 
-        try {
-            java.net.URI uri = new java.net.URI(value);
+            int slashIndex = content.lastIndexOf('/');
+            int sharpIndex = content.lastIndexOf('#');
+            int lastCharIndex = content.length() - 1;
 
-            int slashIndex = value.lastIndexOf('/');
-            int sharpIndex = value.lastIndexOf('#');
-
-            // if the last character is # or / it can be safely removed
-            if (slashIndex == value.length() - 1
-                    || sharpIndex == value.length() - 1) {
-                value = value.substring(0, value.length() - 1);
-                slashIndex = value.lastIndexOf('/');
-                sharpIndex = value.lastIndexOf('#');
+            // if the last character is # or / it can be removed safely
+            if (slashIndex == lastCharIndex || sharpIndex == lastCharIndex) {
+                content = content.substring(0, lastCharIndex);
+                slashIndex = content.lastIndexOf('/');
+                sharpIndex = content.lastIndexOf('#');
             }
 
-            // if there is no other / or # starting from the authority part of
-            // the uri some pre-defined prefix can be removed in the authority
-            // part (e.g. scheme://www) otherwise the prefix before the last /
-            // or # is removed
-            if (uri.getScheme() != null
-                    && slashIndex < uri.getScheme().length() + 3 // +3 for ://
-                    && sharpIndex == -1) {
-                int wwwDotIndex = -1;
+            URI uri = null;
+            try {
+                uri = new URI(content);
+            } catch (URISyntaxException e) {
+                return content;
+            }
 
+            int schemeColonSlashSlashLength;
+
+            // if there is no other / or # starting from the authority part of
+            // the uri, some pre-defined prefixes can be removed from the
+            // authority part (e.g. scheme://www). Otherwise the prefix before
+            // the last / or # is removed
+            if (uri.getScheme() != null
+                    && slashIndex < (schemeColonSlashSlashLength =
+                            uri.getScheme().length() + 3) && sharpIndex == -1) {
                 // the pre-defined prefix is contained in the authority part
-                if ((wwwDotIndex = value.indexOf("www.")) != -1) {
-                    return value.substring(wwwDotIndex + 4, value.length());
+                if (content.startsWith("www.", schemeColonSlashSlashLength)) {
+                    return content.substring(schemeColonSlashSlashLength + 4);
                 }
 
                 // no pre-defined prefix is contained in the authority part then
                 // only the scheme + :// is removed
-                return value.substring(uri.getScheme().length() + 3);
+                return content.substring(uri.getScheme().length() + 3);
             } else if (slashIndex > sharpIndex) {
                 // remove the prefix before the last /
-                return value.substring(slashIndex + 1, value.length());
+                return content.substring(slashIndex + 1);
             } else if (slashIndex < sharpIndex) {
                 // remove the prefix before the last #
-                return value.substring(sharpIndex + 1, value.length());
+                return content.substring(sharpIndex + 1);
             } else {
-                return value;
+                return content;
             }
-        } catch (URISyntaxException e) {
-            // blank node
-            if (value.startsWith("_:")) {
-                return value.substring(2);
-            } else if (value.length() > 0 && value.charAt(0) == '"') { // literal
-                return value.substring(1, value.length() - 1);
-            } else {
-                return value;
+        } else if (value.isLiteral()) {
+            String literal = value.getLiteralLexicalForm();
+
+            if (literal.isEmpty()) {
+                // if the literal value contains an empty String we have to
+                // decide which constraint is associated to this particular
+                // case where there is no character to compare with
+                return EMPTY_STRING_ROUTING_CHARACTER;
             }
+
+            return literal;
+        } else if (value.isBlank()) {
+            return value.getBlankNodeLabel();
+        } else if (value.isVariable()) {
+            return value.getName();
+        } else {
+            throw new IllegalArgumentException("Unknown node type: "
+                    + value.getClass());
         }
     }
 

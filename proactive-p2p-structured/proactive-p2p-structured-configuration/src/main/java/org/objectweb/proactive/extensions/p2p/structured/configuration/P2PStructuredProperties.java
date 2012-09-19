@@ -45,16 +45,17 @@ public class P2PStructuredProperties {
      * network. It is by default set to &#92;u0000 and <strong>should not be
      * edited</strong>.
      */
-    public static final PropertyCharacter CAN_LOWER_BOUND =
-            new PropertyCharacter("can.lower.bound", '\u0000');
+    public static final PropertyCharacterUnicode CAN_LOWER_BOUND =
+            new PropertyCharacterUnicode("can.lower.bound", "\u0000");
 
     /**
      * This property defines the maximum upper bound associated to a CAN
-     * network. It is by default set to &#92;uffff to support all UTF-16
-     * characters. This is an open bound (i.e. no peer will manage it).
+     * network. It is by default set to &#92;u10FFFF (=&#92;uDBFF&#92;uDFFF) to
+     * support all UTF-16 characters. This is an open bound (i.e. no peer will
+     * manage it).
      */
-    public static final PropertyCharacter CAN_UPPER_BOUND =
-            new PropertyCharacter("can.upper.bound", '\uffff');
+    public static final PropertyCharacterUnicode CAN_UPPER_BOUND =
+            new PropertyCharacterUnicode("can.upper.bound", "\uDBFF\uDFFF");
 
     public static final PropertyInteger CAN_LEAVE_RETRY_MIN =
             new PropertyInteger("can.leave.retry.min", 2000);
@@ -69,28 +70,38 @@ public class P2PStructuredProperties {
             new PropertyInteger("can.task.refresh.interval", 500);
 
     /**
-     * Indicates which representation to use for printing characters on the
-     * standard output. The value of this property can be set to:
+     * Indicates which representation to use for printing characters contained
+     * by a coordinate element on the standard output. The value of this
+     * property can be set to:
      * <ul>
-     * <li>{@code codepoints} in order to display the code points values by
-     * using the unicode notation.</li>
-     * <li>{@code default} to see the coordinate as a decimal value.</li>
+     * <li>{@code codepoints} to display the integer values associated to each
+     * code point from a coordinate element.</li>
+     * <li>{@code decimal} to display coordinate element as decimal values.</li>
+     * <li>{@code string} to display a coordinate element as a standard unicode
+     * String. Warning, some unicode characters are not printable or are not
+     * displayed nicely.</li>
+     * <li>{@code utf16} to display coordinate elements based on the unicode
+     * notation for UTF-16 (&#92;uXXXX or &#92;uXXXX&#92;uXXXX if the character
+     * is a supplementary character).</li>
+     * <li>{@code utf32} to display coordinate elements based on the unicode
+     * notation for UTF-32 (&#92;uXXXXX).</li>
      * </ul>
+     * The property is set by default to {@code decimal}.
      */
-    public static final PropertyString CAN_COORDINATE_DISPLAY =
-            new PropertyString("can.coordinate.display", "default");
+    public static final PropertyString CAN_ELEMENT_DISPLAY =
+            new PropertyString("can.element.display", "decimal");
 
     /**
      * Defines the precision used for the internal representation of string
      * elements as a decimal value. According to some tests, it is necessary to
-     * specify a precision of {@code 300} to avoid loose of precision with
+     * specify a precision of {@code 310} to avoid loose of precision with
      * {@code 1000} splits performed recursively by using the same upper bound.
      * Otherwise some comparisons between string elements may return equals
-     * instead of greater or lower than. The default value is set to {@code 300}
+     * instead of greater or lower than. The default value is set to {@code 310}
      * .
      */
     public static final PropertyInteger STRING_ELEMENT_PRECISION =
-            new PropertyInteger("string.element.precision", 300);
+            new PropertyInteger("string.element.precision", 310);
 
     public static final PropertyDouble TRACKER_STORAGE_PROBABILITY =
             new PropertyDouble("tracker.storage.probability", 1.0);

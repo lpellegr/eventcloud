@@ -21,6 +21,7 @@ import org.apfloat.ApfloatMath;
 import org.apfloat.Apint;
 import org.apfloat.ApintMath;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
 
 /**
@@ -36,9 +37,9 @@ public class StringElement extends Element {
             P2PStructuredProperties.STRING_ELEMENT_PRECISION.getValue();
 
     public static final Apint RADIX = new Apint(
-            ((int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue()) + 1);
+            (P2PStructuredProperties.CAN_UPPER_BOUND.getValue()) + 1);
 
-    private final Apfloat apfloat;
+    protected final Apfloat apfloat;
 
     private transient String unicodeRepresentation;
 
@@ -51,19 +52,19 @@ public class StringElement extends Element {
     public StringElement(String value) {
         // converts a string to an integer radix 10 by assuming that each
         // character is a digit radix StringElement#RADIX
-        this.apfloat = toIntegerRadix10(value, RADIX);
+        this.apfloat = toFloatRadix10(value, RADIX);
     }
 
     protected StringElement(Apfloat apfloat) {
         this.apfloat = apfloat;
     }
 
-    public static Apfloat toIntegerRadix10(String value) {
-        return toIntegerRadix10(value, RADIX);
+    public static Apfloat toFloatRadix10(String value) {
+        return toFloatRadix10(value, RADIX);
     }
 
-    public static Apfloat toIntegerRadix10(String value, Apint radix) {
-        int[] codepoints = UnicodeUtil.fromStringToCodePoints(value);
+    public static Apfloat toFloatRadix10(String value, Apint radix) {
+        int[] codepoints = UnicodeUtil.toCodePointArray(value);
 
         // codepoints[0] x radix^0 = codepoints[0]
         Apfloat result = new Apfloat(codepoints[0], PRECISION);
@@ -72,10 +73,10 @@ public class StringElement extends Element {
         // are supposed to be between a lower and upper bound that is made of
         // one character, and hence one digit radix the upper bound value (e.g.
         // 2^16).
+        Apint pow = new Apint(1);
         for (int i = 1; i < codepoints.length; i++) {
-            Apint pow = ApintMath.pow(radix, i);
+            pow = pow.multiply(radix);
             Apfloat division = new Apfloat(1, PRECISION).divide(pow);
-
             result =
                     result.add(new Apfloat(codepoints[i], PRECISION).multiply(division));
         }
@@ -108,9 +109,8 @@ public class StringElement extends Element {
         }
 
         Apfloat scale =
-                new Apfloat(
-                        (upperBound - lowerBound)
-                                / (int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
+                new Apfloat((upperBound - lowerBound)
+                        / P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
 
         return this.apfloat.multiply(scale)
                 .add(new Apfloat(lowerBound))
@@ -120,6 +120,7 @@ public class StringElement extends Element {
     public synchronized String getUnicodeRepresentation() {
         if (this.unicodeRepresentation == null) {
             Apint apint = this.apfloat.truncate();
+
             Apint quotient = apint;
 
             // handle the integer part
@@ -148,9 +149,8 @@ public class StringElement extends Element {
 
                 if (fractionalPart.compareTo(Apfloat.ONE) >= 0) {
                     Apint truncatedPart = fractionalPart.truncate();
-
                     // keep only the integer part
-                    integerPart.append((char) truncatedPart.intValue());
+                    integerPart.append(Character.toChars(truncatedPart.intValue()));
                     // get rid of value left of radix point
                     fractionalPart = fractionalPart.subtract(truncatedPart);
                 } else {
@@ -173,7 +173,7 @@ public class StringElement extends Element {
     private Apint divideQuotientRecursively(StringBuilder result, Apint quotient) {
         while (quotient.compareTo(Apint.ZERO) != 0) {
             int remainder = quotient.mod(RADIX).intValue();
-            result.append((char) remainder);
+            result.append(new String(Character.toChars(remainder)));
             quotient = quotient.divide(RADIX);
         }
 
@@ -218,35 +218,45 @@ public class StringElement extends Element {
      */
     @Override
     public String toString() {
-        String coordinateRepresentation =
-                P2PStructuredProperties.CAN_COORDINATE_DISPLAY.getValue();
+        String representation =
+                P2PStructuredProperties.CAN_ELEMENT_DISPLAY.getValue();
 
-        StringBuilder result = new StringBuilder();
-
-        if (coordinateRepresentation.equals("default")) {
-            result.append(this.apfloat.toString(true));
-        } else if (coordinateRepresentation.equals("codepoints")) {
-            result.append(UnicodeUtil.makePrintable(this.getUnicodeRepresentation()));
-            result.append('{');
-            result.append(this.getUnicodeRepresentation().length());
-            result.append('}');
-        } else {
-            throw new IllegalStateException("Unknown value for property "
-                    + P2PStructuredProperties.CAN_COORDINATE_DISPLAY.getName());
-        }
-
-        return result.toString();
-    }
-
-    public String toString(boolean useInternalRepresentation) {
-        if (useInternalRepresentation) {
+        if (representation.equalsIgnoreCase("decimal")) {
             return this.apfloat.toString(true);
         } else {
-            return this.toString();
+            try {
+                return StringRepresentation.getInstance(representation).apply(
+                        this.getUnicodeRepresentation());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException("Invalid value for property "
+                        + P2PStructuredProperties.CAN_ELEMENT_DISPLAY.getName()
+                        + ": " + representation);
+            }
         }
+    }
+
+    public String toString(StringRepresentation representation) {
+        return representation.apply(this.getUnicodeRepresentation());
     }
 
     public static void main(String[] args) {
+        // StringBuilder bd = new StringBuilder(1000);
+        // for (int i = 0; i < 1000; i++) {
+        // bd.append(i + 4000);
+        // }
+        //
+        // long t2 = System.nanoTime();
+        // toFloatRadix10BasicMethod(bd.toString(), RADIX);
+        // long t3 = System.nanoTime();
+        // System.out.println("StringElement.main() toFloatRadixHorner took :  "
+        // + ((t3 - t2) / 1000 / 1000));
+        //
+        // long t0 = System.nanoTime();
+        // toFloatRadix10Horner(bd.toString());
+        // long t1 = System.nanoTime();
+        // System.out.println("StringElement.main() toFloatRadix took : "
+        // + ((t1 - t0) / 1000 / 1000));
+
         Apint radix = new Apint(65536);
         int exponent = 2;
 

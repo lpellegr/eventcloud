@@ -47,7 +47,7 @@ import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 /**
- * Tests associated to {@link SparqlResultSerializerTest}.
+ * Tests associated to {@link SparqlResultSerializer}.
  * 
  * @author lpellegr
  */

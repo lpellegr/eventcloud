@@ -32,8 +32,8 @@ public final class StringZone extends UnicodeZone<StringElement> {
 
     public StringZone() {
         super(
-                CoordinateFactory.newStringCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValue()),
-                CoordinateFactory.newStringCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValue()));
+                CoordinateFactory.newStringCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()),
+                CoordinateFactory.newStringCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()));
     }
 
     /**

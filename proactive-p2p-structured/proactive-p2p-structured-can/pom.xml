@@ -5,12 +5,12 @@
 	<parent>
 		<artifactId>proactive-p2p-structured</artifactId>
 		<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
-		<version>1.2.0-SNAPSHOT</version>
+		<version>1.3.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 	<artifactId>proactive-p2p-structured-can</artifactId>
-	<version>1.2.0-SNAPSHOT</version>
+	<version>1.3.0-SNAPSHOT</version>
 
 	<name>proactive-p2p-structured-can</name>
 
@@ -18,13 +18,13 @@
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-core</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
+			<version>1.3.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-core</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
+			<version>1.3.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>

@@ -46,6 +46,28 @@ public class NodeGenerator extends Generator {
      * generated is an URI the final length is equals to
      * {@code length + "http://".size()}.
      * 
+     * @param prefix
+     *            a prefix to append before the randomly generated part of
+     *            {@code length} characters.
+     * @param length
+     *            the length of random string to create.
+     * 
+     * @return the random node.
+     */
+    public static Node random(String prefix, int length) {
+        if (RANDOM.nextInt(2) == 0) {
+            return randomUri(prefix, length);
+        } else {
+            return randomLiteral(prefix, length);
+        }
+    }
+
+    /**
+     * Creates a random Node whose length is the number of characters specified.
+     * The node can be either an URI or a literal. If the node which is
+     * generated is an URI the final length is equals to
+     * {@code length + "http://".size()}.
+     * 
      * @param length
      *            the length of random string to create.
      * 
@@ -62,11 +84,28 @@ public class NodeGenerator extends Generator {
     /**
      * Creates a random URI node by using the specified {@code prefix}.
      * 
+     * @param prefix
+     *            the prefix added to the generated URI.
+     * 
      * @return the random node.
      */
     public static Node randomUri(String prefix) {
         return Node.createURI(UriGenerator.randomPrefixed(
                 DEFAULT_LENGTH, prefix));
+    }
+
+    /**
+     * Creates a random URI node by using the specified {@code prefix}.
+     * 
+     * @param prefix
+     *            the prefix added to the generated URI.
+     * @param length
+     *            the length of random string to create.
+     * 
+     * @return the random node.
+     */
+    public static Node randomUri(String prefix, int length) {
+        return Node.createURI(UriGenerator.randomPrefixed(length, prefix));
     }
 
     /**
@@ -98,6 +137,23 @@ public class NodeGenerator extends Generator {
      */
     public static Node randomLiteral() {
         return randomLiteral(DEFAULT_LENGTH);
+    }
+
+    /**
+     * Creates a random literal node whose length is the number of characters
+     * specified.
+     * 
+     * @param prefix
+     *            a prefix to append before the randomly generated part of
+     *            {@code length} characters.
+     * @param length
+     *            the length of random string to create.
+     * 
+     * @return the random node.
+     */
+    public static Node randomLiteral(String prefix, int length) {
+        return Node.createLiteral(prefix
+                + StringGenerator.randomPrintableAscii(length));
     }
 
     /**
