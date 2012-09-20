@@ -88,11 +88,9 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
 
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(
-                        "Request {} reached peer {} which has already received it",
-                        request.getId(), canOverlay.getZone().toString());
-            }
+            logger.debug(
+                    "Request {} reached peer {} which has already received it",
+                    request.getId(), canOverlay.getZone().toString());
             if (request.getResponseProvider() != null) {
                 // send back an empty response
                 request.getAnycastRoutingList()
