@@ -88,7 +88,7 @@ public class StaticLoadBalancingTest {
      * Two peers, load-balancing disabled but stats recording enabled. MeanStatsRecorder. Short RDF terms length.
      */
     @org.junit.Test
-    public void testStaticLoadBalancingB() {
+    public void testStaticLoadBalancing2() {
         new StaticLoadBalancingTestBuilder(1000, 10).enableStatsRecording(
                 MeanStatsRecorder.class).build().execute();
     }
@@ -457,19 +457,19 @@ public class StaticLoadBalancingTest {
                         if (this.isCentroidStatsRecorderUsed()
                                 && StaticLoadBalancingTestBuilder.this.nbPeersToInject > 1) {
                             if (rdfTermSize > StaticLoadBalancingTestBuilder.this.rdfTermSize) {
-                                return QuadrupleGenerator.random(
+                                return QuadrupleGenerator.randomWithoutLiteral(
                                         graph, CENTROID_LONG_RDF_TERM_PREFIX,
                                         rdfTermSize);
                             } else {
-                                return QuadrupleGenerator.random(
+                                return QuadrupleGenerator.randomWithoutLiteral(
                                         graph, CENTROID_SHORT_RDF_TERM_PREFIX,
                                         rdfTermSize);
                             }
                         } else {
                             if (graph == null) {
-                                return QuadrupleGenerator.random(rdfTermSize);
+                                return QuadrupleGenerator.randomWithoutLiteral(rdfTermSize);
                             } else {
-                                return QuadrupleGenerator.random(
+                                return QuadrupleGenerator.randomWithoutLiteral(
                                         graph, rdfTermSize);
                             }
                         }
@@ -477,19 +477,19 @@ public class StaticLoadBalancingTest {
                         if (this.isCentroidStatsRecorderUsed()
                                 && StaticLoadBalancingTestBuilder.this.nbPeersToInject > 1) {
                             if (rdfTermSize > StaticLoadBalancingTestBuilder.this.rdfTermSize) {
-                                return QuadrupleGenerator.random(
+                                return QuadrupleGenerator.randomWithoutLiteral(
                                         CENTROID_LONG_RDF_TERM_PREFIX,
                                         rdfTermSize);
                             } else {
-                                return QuadrupleGenerator.random(
+                                return QuadrupleGenerator.randomWithoutLiteral(
                                         CENTROID_SHORT_RDF_TERM_PREFIX,
                                         rdfTermSize);
                             }
                         } else {
                             if (graph == null) {
-                                return QuadrupleGenerator.random(rdfTermSize);
+                                return QuadrupleGenerator.randomWithoutLiteral(rdfTermSize);
                             } else {
-                                return QuadrupleGenerator.random(
+                                return QuadrupleGenerator.randomWithoutLiteral(
                                         graph, rdfTermSize);
                             }
                         }
