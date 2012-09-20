@@ -91,14 +91,13 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
         if (quad.getPublicationTime() == -1) {
             quad.setPublicationTime();
         }
+
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
             log.info("About to publish quad : " + quad.getSubject() + " "
                     + quad.getPredicate() + " " + quad.getObject());
         }
-        // TODO: use an asynchronous call with no response (see issue 16)
-
         // the quadruple is routed without taking into account the publication
-        // datetime
+        // datetime (neither the other meta information)
         super.sendv(new PublishQuadrupleRequest(quad));
     }
 
@@ -157,7 +156,6 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      *             {@link ProxyFactory#lookupPublishProxy(String)} instead.
      */
     @Deprecated
-    @MemberOf("parallel")
     public static PublishProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, PUBLISH_SERVICES_ITF, PublishProxy.class);
