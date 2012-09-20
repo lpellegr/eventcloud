@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import org.objectweb.proactive.extensions.p2p.structured.utils.EnumConverter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ReverseEnumMap;
 import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
+import org.openjena.riot.Lang;
 import org.openjena.riot.out.OutputLangUtils;
 import org.openjena.riot.tokens.Tokenizer;
 import org.openjena.riot.tokens.TokenizerFactory;
@@ -81,7 +82,15 @@ public class Quadruple implements Event {
      * write quadruples from and/or to an input stream.
      */
     public enum SerializationFormat {
-        TriG, NQuads
+        TriG, NQuads;
+
+        public Lang toJenaLang() {
+            if (super.ordinal() == 0) {
+                return Lang.TRIG;
+            } else {
+                return Lang.NQUADS;
+            }
+        }
     }
 
     /**
