@@ -59,8 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-@DefineGroups({
-        @Group(name = "parallel", selfCompatible = true)})
+@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
 public class PeerImpl extends AbstractComponent implements Peer,
         PeerAttributeController, ComponentEndActive, Serializable {
 
@@ -109,11 +108,11 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     public void runComponentActivity(Body body) {
-//         customServingPolicy(body,
-//         Runtime.getRuntime().availableProcessors()*4);
+        // customServingPolicy(body,
+        // Runtime.getRuntime().availableProcessors()*4);
         this.multiActiveService = (new MultiActiveService(body));
         this.multiActiveService.multiActiveServing(Runtime.getRuntime()
-                .availableProcessors()*2, false, false);
+                .availableProcessors() * 2, false, false);
     }
 
     /**
@@ -153,7 +152,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
                 Collection<org.objectweb.proactive.core.body.request.Request> execQueue =
                         compatibility.getExecutingRequests();
                 if (execQueue.size()
-                - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() >= maxThreads) {
+                        - ((RequestExecutor) PeerImpl.this.multiActiveService.getServingController()).getExtraActiveRequestCount() >= maxThreads) {
                     Iterator<org.objectweb.proactive.core.body.request.Request> itQ =
                             queue.iterator();
                     while (itQ.hasNext()) {
@@ -173,9 +172,10 @@ public class PeerImpl extends AbstractComponent implements Peer,
                             queue.iterator();
                     int i = -1;
                     while (itQ.hasNext()
-                            && execQueue.size() + ret.size() - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() < maxThreads) {
-                        current =
-                                (org.objectweb.proactive.core.body.request.Request) itQ.next();
+                            && execQueue.size()
+                                    + ret.size()
+                                    - ((RequestExecutor) PeerImpl.this.multiActiveService.getServingController()).getExtraActiveRequestCount() < maxThreads) {
+                        current = itQ.next();
                         i++;
                         if (compatibility.isCompatibleWithRequests(current, ret)
                                 && compatibility.isCompatibleWithRequests(
