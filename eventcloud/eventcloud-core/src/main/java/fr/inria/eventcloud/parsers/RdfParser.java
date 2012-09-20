@@ -10,6 +10,7 @@ import com.hp.hpl.jena.sparql.core.Quad;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.utils.Callback;
 
 /**
@@ -60,7 +61,7 @@ public class RdfParser {
      * @param checkQuadrupleSyntax
      *            indicates whether the syntax of each quadruple which is
      *            reconstructed has to be checked (e.g. to throw an exception if
-     *            a Blank Node is detected because this kind of component is not
+     *            a Blank Node is detected because this kind of RDF term is not
      *            supported).
      */
     public static final void parse(InputStream in, SerializationFormat format,
@@ -101,6 +102,18 @@ public class RdfParser {
 
         parser.parse();
         sink.close();
+    }
+
+    public static final QuadrupleIterator parse(InputStream in,
+                                                SerializationFormat format) {
+        return parse(in, format, true);
+    }
+
+    public static final QuadrupleIterator parse(InputStream in,
+                                                SerializationFormat format,
+                                                boolean checkQuadrupleSyntax) {
+        return new QuadrupleIterator(RiotReader.createIteratorQuads(
+                in, format.toJenaLang(), null), checkQuadrupleSyntax, false);
     }
 
 }
