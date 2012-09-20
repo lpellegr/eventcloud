@@ -50,12 +50,12 @@ public final class CanOperations {
 
     @SuppressWarnings("unchecked")
     public static <E extends Element> GetIdAndZoneResponseOperation<E> getIdAndZoneResponseOperation(Peer peer) {
-        return (GetIdAndZoneResponseOperation<E>) PAFuture.getFutureValue(peer.receiveImmediateService(new GetIdAndZoneOperation<E>()));
+        return (GetIdAndZoneResponseOperation<E>) PAFuture.getFutureValue(peer.receive(new GetIdAndZoneOperation<E>()));
     }
 
     public static <E extends Element> boolean hasNeighbor(Peer peer,
                                                           UUID neighborID) {
-        return ((BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new HasNeighborOperation<E>(
+        return ((BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new HasNeighborOperation<E>(
                 neighborID)))).getValue();
     }
 
@@ -63,13 +63,13 @@ public final class CanOperations {
                                                                               NeighborEntry<E> entry,
                                                                               byte dimension,
                                                                               byte direction) {
-        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new InsertNeighborOperation<E>(
+        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new InsertNeighborOperation<E>(
                 entry, dimension, direction)));
     }
 
     public static <E extends Element> BooleanResponseOperation removeNeighbor(Peer peer,
                                                                               UUID peerIdentifier) {
-        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new RemoveNeighborOperation<E>(
+        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new RemoveNeighborOperation<E>(
                 peerIdentifier)));
     }
 
@@ -77,7 +77,7 @@ public final class CanOperations {
                                                                               UUID peerIdentifier,
                                                                               byte dimension,
                                                                               byte direction) {
-        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new RemoveNeighborOperation<E>(
+        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new RemoveNeighborOperation<E>(
                 peerIdentifier, dimension, direction)));
     }
 
@@ -85,13 +85,13 @@ public final class CanOperations {
                                                                    NeighborEntry<E> entry,
                                                                    byte dimension,
                                                                    byte direction) {
-        PAFuture.waitFor(peer.receiveImmediateService(new UpdateNeighborOperation<E>(
+        PAFuture.waitFor(peer.receive(new UpdateNeighborOperation<E>(
                 entry, dimension, direction)));
     }
 
     @SuppressWarnings("unchecked")
     public static <E extends Element> NeighborTable<E> getNeighborTable(Peer peer) {
-        return ((GenericResponseOperation<NeighborTable<E>>) PAFuture.getFutureValue(peer.receiveImmediateService(new GetNeighborTableOperation<E>()))).getValue();
+        return ((GenericResponseOperation<NeighborTable<E>>) PAFuture.getFutureValue(peer.receive(new GetNeighborTableOperation<E>()))).getValue();
     }
 
 }

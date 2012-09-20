@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  * 
  * @author lpellegr
  */
-public class IsActivatedOperation implements Operation {
+public class IsActivatedOperation implements CallableOperation {
 
     private static final long serialVersionUID = 1L;
 

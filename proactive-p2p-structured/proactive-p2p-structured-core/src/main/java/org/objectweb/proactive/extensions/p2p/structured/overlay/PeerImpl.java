@@ -37,9 +37,9 @@ import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.ServingPolicy;
@@ -290,7 +290,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     @MemberOf("parallel")
-    public ResponseOperation receive(SynchronousOperation operation) {
+    public ResponseOperation receive(CallableOperation operation) {
         return operation.handle(this.overlay);
     }
 
@@ -299,25 +299,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     @MemberOf("parallel")
-    public void receive(AsynchronousOperation operation) {
-        operation.handle(this.overlay);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("parallel")
-    public ResponseOperation receiveImmediateService(SynchronousOperation operation) {
-        return operation.handle(this.overlay);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("parallel")
-    public void receiveImmediateService(AsynchronousOperation operation) {
+    public void receive(RunnableOperation operation) {
         operation.handle(this.overlay);
     }
 

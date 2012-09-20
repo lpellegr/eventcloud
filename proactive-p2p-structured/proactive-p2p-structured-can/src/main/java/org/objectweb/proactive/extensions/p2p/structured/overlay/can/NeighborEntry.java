@@ -49,7 +49,7 @@ public class NeighborEntry<E extends Element> implements Serializable {
 
         @SuppressWarnings("unchecked")
         GetIdAndZoneResponseOperation<E> response =
-                (GetIdAndZoneResponseOperation<E>) PAFuture.getFutureValue(this.neighborStub.receiveImmediateService(new GetIdAndZoneOperation<E>()));
+                (GetIdAndZoneResponseOperation<E>) PAFuture.getFutureValue(this.neighborStub.receive(new GetIdAndZoneOperation<E>()));
 
         this.neighborIdentifier = response.getPeerIdentifier();
         this.neighborZone = response.getPeerZone();
