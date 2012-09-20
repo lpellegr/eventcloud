@@ -88,7 +88,7 @@ public class StaticLoadBalancingTest {
      * Two peers, load-balancing disabled but stats recording enabled. MeanStatsRecorder. Short RDF terms length.
      */
     @org.junit.Test
-    public void testStaticLoadBalancing2() {
+    public void testStaticLoadBalancingB() {
         new StaticLoadBalancingTestBuilder(1000, 10).enableStatsRecording(
                 MeanStatsRecorder.class).build().execute();
     }
@@ -255,10 +255,10 @@ public class StaticLoadBalancingTest {
 
             return new Test() {
 
-                private final String CENTROID_SHORT_RDF_TERM_PREFIX =
+                private static final String CENTROID_SHORT_RDF_TERM_PREFIX =
                         "http://aaa";
 
-                private final String CENTROID_LONG_RDF_TERM_PREFIX =
+                private static final String CENTROID_LONG_RDF_TERM_PREFIX =
                         "http://zzz";
 
                 @Override
@@ -299,7 +299,8 @@ public class StaticLoadBalancingTest {
 
                         int tmpNbQuadsToInsert =
                                 StaticLoadBalancingTestBuilder.this.nbQuadsToInsert;
-                        if (this.isCentroidStatsRecorderUsed()) {
+                        if (this.isCentroidStatsRecorderUsed()
+                                && StaticLoadBalancingTestBuilder.this.nbPeersToInject > 0) {
                             tmpNbQuadsToInsert =
                                     StaticLoadBalancingTestBuilder.this.nbQuadsToInsert / 3 * 2;
                         }
@@ -310,10 +311,11 @@ public class StaticLoadBalancingTest {
                             if (this.simulateCompoundEvents()
                                     && i
                                             % StaticLoadBalancingTestBuilder.this.nbQuadsPerCompoundEvent == 0) {
-                                if (this.isCentroidStatsRecorderUsed()) {
+                                if (this.isCentroidStatsRecorderUsed()
+                                        && StaticLoadBalancingTestBuilder.this.nbPeersToInject > 1) {
                                     graph =
                                             NodeGenerator.randomUri(
-                                                    this.CENTROID_SHORT_RDF_TERM_PREFIX,
+                                                    CENTROID_SHORT_RDF_TERM_PREFIX,
                                                     StaticLoadBalancingTestBuilder.this.rdfTermSize);
                                 } else {
                                     graph =
@@ -359,7 +361,8 @@ public class StaticLoadBalancingTest {
                                 });
                     }
 
-                    if (this.isCentroidStatsRecorderUsed()) {
+                    if (this.isCentroidStatsRecorderUsed()
+                            && StaticLoadBalancingTestBuilder.this.nbPeersToInject > 0) {
                         // add 1/3 of the data which are 10 times longer
                         int longRdfTermSize =
                                 StaticLoadBalancingTestBuilder.this.rdfTermSize * 10;
@@ -367,7 +370,7 @@ public class StaticLoadBalancingTest {
                         if (this.simulateCompoundEvents()) {
                             graph =
                                     NodeGenerator.randomUri(
-                                            this.CENTROID_LONG_RDF_TERM_PREFIX,
+                                            CENTROID_LONG_RDF_TERM_PREFIX,
                                             longRdfTermSize);
                         }
 
@@ -378,13 +381,15 @@ public class StaticLoadBalancingTest {
                                     && i
                                             % StaticLoadBalancingTestBuilder.this.nbQuadsPerCompoundEvent == 0) {
                                 graph =
-                                        NodeGenerator.randomUri(this.CENTROID_LONG_RDF_TERM_PREFIX
+                                        NodeGenerator.randomUri(CENTROID_LONG_RDF_TERM_PREFIX
                                                 + longRdfTermSize);
                             }
 
                             quad = this.buildQuadruple(graph, longRdfTermSize);
 
+                            stopwatch.start();
                             putgetProxy.add(quad);
+                            stopwatch.stop();
                         }
                     }
 
@@ -442,40 +447,53 @@ public class StaticLoadBalancingTest {
                                                 .size());
                             }
                         }
+                    } else {
+                        log.info("Peer dump:\n" + firstPeer.dump());
                     }
                 }
 
                 private Quadruple buildQuadruple(Node graph, int rdfTermSize) {
-                    Quadruple quad;
                     if (this.simulateCompoundEvents()) {
-                        if (rdfTermSize > StaticLoadBalancingTestBuilder.this.rdfTermSize) {
-                            quad =
-                                    QuadrupleGenerator.random(
-                                            graph,
-                                            this.CENTROID_LONG_RDF_TERM_PREFIX,
-                                            rdfTermSize);
+                        if (this.isCentroidStatsRecorderUsed()
+                                && StaticLoadBalancingTestBuilder.this.nbPeersToInject > 1) {
+                            if (rdfTermSize > StaticLoadBalancingTestBuilder.this.rdfTermSize) {
+                                return QuadrupleGenerator.random(
+                                        graph, CENTROID_LONG_RDF_TERM_PREFIX,
+                                        rdfTermSize);
+                            } else {
+                                return QuadrupleGenerator.random(
+                                        graph, CENTROID_SHORT_RDF_TERM_PREFIX,
+                                        rdfTermSize);
+                            }
                         } else {
-                            quad =
-                                    QuadrupleGenerator.random(
-                                            graph,
-                                            this.CENTROID_SHORT_RDF_TERM_PREFIX,
-                                            rdfTermSize);
+                            if (graph == null) {
+                                return QuadrupleGenerator.random(rdfTermSize);
+                            } else {
+                                return QuadrupleGenerator.random(
+                                        graph, rdfTermSize);
+                            }
                         }
                     } else {
-                        if (rdfTermSize > StaticLoadBalancingTestBuilder.this.rdfTermSize) {
-                            quad =
-                                    QuadrupleGenerator.random(
-                                            this.CENTROID_LONG_RDF_TERM_PREFIX,
-                                            rdfTermSize);
+                        if (this.isCentroidStatsRecorderUsed()
+                                && StaticLoadBalancingTestBuilder.this.nbPeersToInject > 1) {
+                            if (rdfTermSize > StaticLoadBalancingTestBuilder.this.rdfTermSize) {
+                                return QuadrupleGenerator.random(
+                                        CENTROID_LONG_RDF_TERM_PREFIX,
+                                        rdfTermSize);
+                            } else {
+                                return QuadrupleGenerator.random(
+                                        CENTROID_SHORT_RDF_TERM_PREFIX,
+                                        rdfTermSize);
+                            }
                         } else {
-                            quad =
-                                    QuadrupleGenerator.random(
-                                            this.CENTROID_SHORT_RDF_TERM_PREFIX,
-                                            rdfTermSize);
+                            if (graph == null) {
+                                return QuadrupleGenerator.random(rdfTermSize);
+                            } else {
+                                return QuadrupleGenerator.random(
+                                        graph, rdfTermSize);
+                            }
                         }
-
                     }
-                    return quad;
                 }
 
                 private boolean isCentroidStatsRecorderUsed() {
