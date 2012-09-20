@@ -43,12 +43,18 @@ public final class TransactionalDatasetGraphImpl implements
 
     private final StatsRecorder statsRecorder;
 
-    private final Executor threadPool = Executors.newSingleThreadExecutor();
+    private final Executor threadPool;
 
     public TransactionalDatasetGraphImpl(Dataset dataset,
             StatsRecorder statsRecorder) {
         this.dataset = dataset;
         this.statsRecorder = statsRecorder;
+
+        if (this.statsRecorder != null) {
+            this.threadPool = Executors.newSingleThreadExecutor();
+        } else {
+            this.threadPool = null;
+        }
     }
 
     /**
@@ -186,7 +192,6 @@ public final class TransactionalDatasetGraphImpl implements
                                                  final Node p, final Node o) {
         if (this.statsRecorder != null) {
             this.threadPool.execute(new Runnable() {
-
                 @Override
                 public void run() {
                     TransactionalDatasetGraphImpl.this.statsRecorder.quadrupleAdded(
@@ -200,7 +205,6 @@ public final class TransactionalDatasetGraphImpl implements
                                                    final Node p, final Node o) {
         if (this.statsRecorder != null) {
             this.threadPool.execute(new Runnable() {
-
                 @Override
                 public void run() {
                     TransactionalDatasetGraphImpl.this.statsRecorder.quadrupleRemoved(
