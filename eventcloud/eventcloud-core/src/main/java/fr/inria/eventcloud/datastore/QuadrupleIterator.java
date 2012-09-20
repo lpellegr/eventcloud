@@ -33,6 +33,10 @@ public class QuadrupleIterator implements Iterator<Quadruple> {
 
     private final Iterator<Quad> it;
 
+    private final boolean checkType;
+
+    private final boolean parseMetaInformation;
+
     /**
      * Creates a quadruple iterator from the specified {@link Quad} iterator.
      * 
@@ -40,7 +44,14 @@ public class QuadrupleIterator implements Iterator<Quadruple> {
      *            the specified iterator to wrap.
      */
     public QuadrupleIterator(Iterator<Quad> it) {
+        this(it, true, false);
+    }
+
+    public QuadrupleIterator(Iterator<Quad> it, boolean checkQuadrupleType,
+            boolean parseQuadrupleMetaInformation) {
         this.it = it;
+        this.checkType = checkQuadrupleType;
+        this.parseMetaInformation = parseQuadrupleMetaInformation;
     }
 
     /**
@@ -59,7 +70,7 @@ public class QuadrupleIterator implements Iterator<Quadruple> {
         Quad q = this.it.next();
         return new Quadruple(
                 q.getGraph(), q.getSubject(), q.getPredicate(), q.getObject(),
-                false, true);
+                this.checkType, this.parseMetaInformation);
     }
 
     /**
