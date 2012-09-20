@@ -31,7 +31,6 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.factories.SemanticFactory;
-import fr.inria.eventcloud.messages.request.can.ShutdownRequest;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 import fr.inria.eventcloud.proxies.PublishProxy;

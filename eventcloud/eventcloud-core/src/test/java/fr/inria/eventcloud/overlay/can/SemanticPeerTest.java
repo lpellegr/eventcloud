@@ -70,8 +70,6 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             quadruples.add(quadruple);
             super.getRandomSemanticPeer().add(quadruple);
         }
-        
-        System.out.println("SemanticPeerTest.testAddQuadruple()");
 
         List<Quadruple> quadruplesFound =
                 super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
