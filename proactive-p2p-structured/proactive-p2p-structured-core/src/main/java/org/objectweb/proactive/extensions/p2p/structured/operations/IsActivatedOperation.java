@@ -39,6 +39,7 @@ public class IsActivatedOperation implements CallableOperation {
      *         if the peer handling this message is activated, {@code false}
      *         otherwise.
      */
+    @Override
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         return new BooleanResponseOperation(overlay.isActivated());
     }

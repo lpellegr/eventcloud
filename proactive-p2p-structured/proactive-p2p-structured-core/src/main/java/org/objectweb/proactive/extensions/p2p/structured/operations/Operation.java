@@ -29,6 +29,4 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  */
 public interface Operation extends Serializable {
 
-    
-
 }

@@ -16,8 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.GenericResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.GenericResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;

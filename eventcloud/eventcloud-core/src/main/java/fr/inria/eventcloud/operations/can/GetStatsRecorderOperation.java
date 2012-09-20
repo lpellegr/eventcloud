@@ -16,8 +16,8 @@
  **/
 package fr.inria.eventcloud.operations.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
