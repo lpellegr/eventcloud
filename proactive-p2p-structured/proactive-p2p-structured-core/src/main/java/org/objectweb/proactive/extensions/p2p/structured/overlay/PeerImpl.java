@@ -30,6 +30,7 @@ import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
@@ -108,11 +109,13 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     public void runComponentActivity(Body body) {
-        // customServingPolicy(body,
-        // Runtime.getRuntime().availableProcessors()*4);
-        this.multiActiveService = (new MultiActiveService(body));
-        this.multiActiveService.multiActiveServing(Runtime.getRuntime()
-                .availableProcessors() * 2, false, false);
+        this.multiActiveService = new MultiActiveService(body);
+        this.multiActiveService.multiActiveServing(
+                P2PStructuredProperties.MAO_SOFT_LIMIT.getValue(), false, false);
+
+        // this.multiActiveService.policyServing(createCustomServingPolicy(
+        // body, multiActiveService,
+        // P2PStructuredProperties.MAO_SOFT_LIMIT.getValue()));
     }
 
     /**
@@ -132,27 +135,28 @@ public class PeerImpl extends AbstractComponent implements Peer,
     }
 
     @SuppressWarnings("unused")
-    private void customServingPolicy(Body body, final int maxThreads) {
+    private static final ServingPolicy createCustomServingPolicy(final Body body,
+                                                                 final MultiActiveService multiActiveService,
+                                                                 final int maxThreads) {
         final String[] prioritizedMethods = {"route"}; // table if we need to
                                                        // add new prioritized
                                                        // methods
-        this.multiActiveService = new MultiActiveService(body);
-        this.multiActiveService.policyServing(new ServingPolicy() {
-
+        return new ServingPolicy() {
             @Override
             public List<org.objectweb.proactive.core.body.request.Request> runPolicy(StatefulCompatibilityMap compatibility) {
-                List<org.objectweb.proactive.core.body.request.Request> ret =
+                List<org.objectweb.proactive.core.body.request.Request> result =
                         new LinkedList<org.objectweb.proactive.core.body.request.Request>();
                 List<org.objectweb.proactive.core.body.request.Request> queue =
                         compatibility.getQueueContents();
 
                 if (queue.size() == 0) {
-                    return ret;
+                    return result;
                 }
+
                 Collection<org.objectweb.proactive.core.body.request.Request> execQueue =
                         compatibility.getExecutingRequests();
                 if (execQueue.size()
-                        - ((RequestExecutor) PeerImpl.this.multiActiveService.getServingController()).getExtraActiveRequestCount() >= maxThreads) {
+                        - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() >= maxThreads) {
                     Iterator<org.objectweb.proactive.core.body.request.Request> itQ =
                             queue.iterator();
                     while (itQ.hasNext()) {
@@ -161,9 +165,9 @@ public class PeerImpl extends AbstractComponent implements Peer,
                         if (compatibility.isCompatibleWithRequests(r, execQueue)
                                 && Arrays.asList(prioritizedMethods).contains(
                                         r.getMethodName())) {
-                            ret.add(r);
+                            result.add(r);
                             queue.remove(r);
-                            return ret;
+                            return result;
                         }
                     }
                 } else {
@@ -173,25 +177,26 @@ public class PeerImpl extends AbstractComponent implements Peer,
                     int i = -1;
                     while (itQ.hasNext()
                             && execQueue.size()
-                                    + ret.size()
-                                    - ((RequestExecutor) PeerImpl.this.multiActiveService.getServingController()).getExtraActiveRequestCount() < maxThreads) {
+                                    + result.size()
+                                    - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() < maxThreads) {
                         current = itQ.next();
                         i++;
-                        if (compatibility.isCompatibleWithRequests(current, ret)
+                        if (compatibility.isCompatibleWithRequests(
+                                current, result)
                                 && compatibility.isCompatibleWithRequests(
                                         current, execQueue)
                                 && compatibility.getIndexOfLastCompatibleWith(
                                         current, queue) >= i - 1) {
-                            ret.add(current);
+                            result.add(current);
                             itQ.remove();
                         } else {
-                            return ret;
+                            return result;
                         }
                     }
                 }
-                return ret;
+                return result;
             }
-        });
+        };
     }
 
     /**

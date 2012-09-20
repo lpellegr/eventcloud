@@ -92,6 +92,13 @@ public class P2PStructuredProperties {
             new PropertyString("can.element.display", "decimal");
 
     /**
+     * Defines the soft limit used by each component or active object that uses
+     * multi active serving.
+     */
+    public static final PropertyInteger MAO_SOFT_LIMIT = new PropertyInteger(
+            "mao.soft.limit", Runtime.getRuntime().availableProcessors() * 2);
+
+    /**
      * Defines the precision used for the internal representation of string
      * elements as a decimal value. According to some tests, it is necessary to
      * specify a precision of {@code 310} to avoid loose of precision with

@@ -236,10 +236,13 @@ public abstract class AbstractComponent implements ComponentInitActive,
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void runComponentActivity(Body body) {
-        (new MultiActiveService(body)).multiActiveServing(Runtime.getRuntime()
-                .availableProcessors() * 2, false, false);
+        new MultiActiveService(body).multiActiveServing(
+                P2PStructuredProperties.MAO_SOFT_LIMIT.getValue(), false, false);
     }
 
 }
