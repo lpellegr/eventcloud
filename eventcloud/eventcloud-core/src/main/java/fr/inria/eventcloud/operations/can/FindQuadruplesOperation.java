@@ -19,7 +19,7 @@ package fr.inria.eventcloud.operations.can;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 import com.google.common.collect.Lists;
@@ -37,7 +37,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  * 
  * @author lpellegr
  */
-public final class FindQuadruplesOperation implements SynchronousOperation {
+public final class FindQuadruplesOperation implements CallableOperation {
 
     private static final long serialVersionUID = 1L;
 

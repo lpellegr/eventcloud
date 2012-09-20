@@ -17,7 +17,7 @@
 package fr.inria.eventcloud.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
@@ -29,7 +29,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  * 
  * @author lpellegr
  */
-public class GetStatsRecorderOperation implements SynchronousOperation {
+public class GetStatsRecorderOperation implements CallableOperation {
 
     private static final long serialVersionUID = 1L;
 

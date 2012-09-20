@@ -560,7 +560,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         JoinIntroduceResponseOperation<E> response = null;
         try {
             response =
-                    (JoinIntroduceResponseOperation<E>) PAFuture.getFutureValue(landmarkPeer.receiveImmediateService(new JoinIntroduceOperation<E>(
+                    (JoinIntroduceResponseOperation<E>) PAFuture.getFutureValue(landmarkPeer.receive(new JoinIntroduceOperation<E>(
                             super.id, super.stub)));
         } catch (PeerNotActivatedRuntimeException e) {
             log.error(
@@ -580,7 +580,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         this.assignDataReceived(response.getData());
 
-        PAFuture.waitFor(landmarkPeer.receiveImmediateService(new JoinWelcomeOperation<E>()));
+        PAFuture.waitFor(landmarkPeer.receive(new JoinWelcomeOperation<E>()));
 
         // notify the neighbors that the current peer has joined
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -720,7 +720,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                                 .values()
                                 .iterator();
                 while (it.hasNext()) {
-                    it.next().getStub().receiveImmediateService(
+                    it.next().getStub().receive(
                             new UpdateNeighborOperation<E>(
                                     this.getNeighborEntry(), dimension,
                                     getOppositeDirection(direction)));

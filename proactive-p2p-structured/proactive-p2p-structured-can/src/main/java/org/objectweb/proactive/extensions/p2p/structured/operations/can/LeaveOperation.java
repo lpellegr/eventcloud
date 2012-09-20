@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -37,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class LeaveOperation<E extends Element> implements SynchronousOperation {
+public class LeaveOperation<E extends Element> implements CallableOperation {
 
     private static final long serialVersionUID = 1L;
 
