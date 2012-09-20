@@ -239,7 +239,7 @@ public abstract class AbstractComponent implements ComponentInitActive,
     @Override
     public void runComponentActivity(Body body) {
         (new MultiActiveService(body)).multiActiveServing(Runtime.getRuntime()
-                .availableProcessors()*2, false, false);
+                .availableProcessors() * 2, false, false);
     }
 
 }
