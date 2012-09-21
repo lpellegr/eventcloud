@@ -256,6 +256,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         Assert.assertTrue(response.getLatency() > 0);
         Assert.assertTrue(response.getOutboundHopCount() > 0);
         Assert.assertTrue(response.getInboundHopCount() > 0);
+
     }
 
 }

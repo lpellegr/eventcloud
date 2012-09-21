@@ -59,22 +59,22 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
         ResponseEntry entry = overlay.getResponseEntry(response.getId());
 
         @SuppressWarnings("unchecked")
-        AnycastResponse<E> entryResponse =
+        AnycastResponse<E> localResponse =
                 (AnycastResponse<E>) entry.getResponse();
-        entryResponse = AnycastResponse.merge(entryResponse, response);
-        entry.setResponse(entryResponse);
+        localResponse = AnycastResponse.merge(localResponse, response);
+        entry.setResponse(localResponse);
         entry.incrementResponsesCount(1);
 
         // we are on a synchronization point and all responses are received,
         // we must ensure that the query datastore operation is terminated
         // before to send back the response.
         if (entry.getStatus() == ResponseEntry.Status.RECEIPT_COMPLETED) {
-            entryResponse.synchronizationPointUnlocked(overlay);
+            localResponse.synchronizationPointUnlocked(overlay);
 
             // we are on the initiator of the query we need to wake up its
             // thread in order to remove the synchronization point
-            if (entryResponse.getAnycastRoutingList().size() == 0) {
-                this.handle(overlay, entryResponse);
+            if (localResponse.getAnycastRoutingList().size() == 0) {
+                this.handle(overlay, localResponse);
             } else {
                 logger.debug(
                         "All subreplies received on {} for request {}",
@@ -82,13 +82,13 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
                 // the synchronization point is on a peer in the sub-tree.
                 // we call the route method in order to know where to sent back
                 // the response.
-                this.route(overlay, entryResponse);
+                this.route(overlay, localResponse);
 
                 // the response has been handled and sent back so we can remove
                 // it from the table.
                 overlay.getRequestResponseManager()
                         .getResponsesReceived()
-                        .remove(entryResponse.getId());
+                        .remove(localResponse.getId());
             }
         }
     }
@@ -105,6 +105,7 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
 
         ResponseEntry entry =
                 overlay.getResponseEntries().get(response.getId());
+
         synchronized (entry) {
             entry.notifyAll();
         }
@@ -121,7 +122,7 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
 
         if (logger.isDebugEnabled()) {
             logger.debug("Routing response " + response.getId() + " from "
-                    + overlay + " -> " + entry.getPeerStub());
+                    + overlay + " to " + entry.getPeerStub());
         }
 
         entry.getPeerStub().route(response);
