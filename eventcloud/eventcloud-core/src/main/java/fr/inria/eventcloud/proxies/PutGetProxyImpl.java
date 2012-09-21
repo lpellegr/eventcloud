@@ -240,7 +240,6 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      *             {@link ProxyFactory#lookupPutGetProxy(String)} instead.
      */
     @Deprecated
-    @MemberOf("parallel")
     public static PutGetProxy lookup(String componentUri) throws IOException {
         return ComponentUtils.lookupFcInterface(
                 componentUri, PUTGET_SERVICES_ITF, PutGetProxy.class);
