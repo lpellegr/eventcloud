@@ -33,9 +33,9 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.proxies.EventCloudCache;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
-import fr.inria.eventcloud.webservices.WsEventNotificationListener;
 import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
+import fr.inria.eventcloud.webservices.listeners.WsEventNotificationListener;
 
 /**
  * SubscribeWsProxyImpl is an extension of {@link SubscribeProxyImpl} in order

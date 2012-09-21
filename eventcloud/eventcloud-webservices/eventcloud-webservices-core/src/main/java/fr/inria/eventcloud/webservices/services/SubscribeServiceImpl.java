@@ -42,8 +42,8 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
-import fr.inria.eventcloud.webservices.WsEventNotificationListener;
 import fr.inria.eventcloud.webservices.api.SubscribeServiceApi;
+import fr.inria.eventcloud.webservices.listeners.WsEventNotificationListener;
 
 /**
  * SubscribeServiceImpl is a concrete implementation of
