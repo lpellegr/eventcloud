@@ -33,6 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
@@ -237,7 +238,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @Override
     @MemberOf("parallel")
     public boolean isActivated() {
-        return this.overlay.activated.get();
+        return this.overlay.activated;
     }
 
     /**
@@ -245,10 +246,11 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     public boolean create() throws NetworkAlreadyJoinedException {
-        if (this.overlay.activated.compareAndSet(false, true)) {
-            return this.overlay.create();
-        } else {
+        if (this.overlay.isActivated()) {
             throw new NetworkAlreadyJoinedException();
+        } else {
+            this.overlay.create();
+            return this.overlay.activated = true;
         }
     }
 
@@ -256,30 +258,33 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    public boolean join(Peer landmarkPeer) throws NetworkAlreadyJoinedException {
-        if (this.overlay.activated.compareAndSet(false, true)) {
-            if (!this.overlay.join(landmarkPeer)) {
-                // a concurrent join operation has been detected
-                // hence we have to reset the activated variable
-                // to false in order to have the possibility to
-                // try again later
-                this.overlay.activated.set(false);
-                return false;
-            } else {
-                return true;
-            }
-        } else {
+    public void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
+            PeerNotActivatedException {
+        // the update to the internal variables do not have to be synchronized
+        // because this operation is supposed to be handled in FIFO (i.e. in
+        // exclusion with all other methods)
+        if (this.overlay.isActivated()) {
             throw new NetworkAlreadyJoinedException();
         }
+
+        if (!landmarkPeer.isActivated()) {
+            throw new PeerNotActivatedException(landmarkPeer.getId());
+        }
+
+        this.overlay.join(landmarkPeer);
+        this.overlay.activated = true;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean leave() throws NetworkNotJoinedException {
-        if (this.overlay.activated.compareAndSet(true, false)) {
-            return this.overlay.leave();
+    public void leave() throws NetworkNotJoinedException {
+        // same as the join this method should be handled in FIFO order
+        // regarding other methods
+        if (this.overlay.isActivated()) {
+            this.overlay.leave();
+            this.overlay.activated = false;
         } else {
             throw new NetworkNotJoinedException();
         }

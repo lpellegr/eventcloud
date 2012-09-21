@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -78,7 +79,8 @@ public class DataTransfertTest {
     }
 
     @Test
-    public void testMiscDataTransfert() throws NetworkAlreadyJoinedException {
+    public void testMiscDataTransfert() throws NetworkAlreadyJoinedException,
+            PeerNotActivatedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 1);
 
         SemanticPeer firstPeer =
@@ -175,7 +177,8 @@ public class DataTransfertTest {
 
     @Test
     public void testSubscriptionsTransfert() throws EventCloudIdNotManaged,
-            InterruptedException, NetworkAlreadyJoinedException {
+            InterruptedException, NetworkAlreadyJoinedException,
+            PeerNotActivatedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 2);
 
         SemanticPeer firstPeer =

@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -80,25 +81,23 @@ public interface Peer extends Serializable {
      * 
      * @param landmarkPeer
      *            the peer used as entry point.
-     * @return Returns {@code true} if the operation has succeeded,
-     *         {@code false} otherwise (e.g. if a concurrent join or leave
-     *         operation is detected).
+     * 
      * @throws NetworkAlreadyJoinedException
      *             if the current peer has already joined a network.
+     * @throws PeerNotActivatedException
+     *             if the specified {@code landmarkPeer} is not activated.
      */
-    public boolean join(Peer landmarkPeer) throws NetworkAlreadyJoinedException;
+    public void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
+            PeerNotActivatedException;
 
     /**
      * Forces the current peer to leave the network it has joined.
-     * 
-     * @return {@code true} if the operation has succeeded, {@code false}
-     *         otherwise.
      * 
      * @throws NetworkNotJoinedException
      *             if the current peer try leave without having joined a
      *             network.
      */
-    public boolean leave() throws NetworkNotJoinedException;
+    public void leave() throws NetworkNotJoinedException;
 
     /**
      * Receives and handles the specified {@code operation} asynchronously by

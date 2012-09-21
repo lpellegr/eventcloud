@@ -38,6 +38,7 @@ import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -191,7 +192,11 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
             peerToJoin = this.getRandomPeer();
         }
 
-        this.inject(remotePeer, peerToJoin);
+        try {
+            this.inject(remotePeer, peerToJoin);
+        } catch (PeerNotActivatedException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -199,7 +204,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      */
     @Override
     public void inject(Peer remotePeer, Peer landmarkPeer)
-            throws NetworkAlreadyJoinedException {
+            throws NetworkAlreadyJoinedException, PeerNotActivatedException {
         OverlayType remotePeerType = remotePeer.getType();
 
         if (this.type == null) {
@@ -214,25 +219,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
                                 + " network and receives " + remotePeerType);
             }
 
-            boolean joinSucceed = false;
-
-            // try to join until the operation succeeds (the operation
-            // can fail if a concurrent join is detected).
-            while (!joinSucceed) {
-                joinSucceed = remotePeer.join(landmarkPeer);
-
-                if (!joinSucceed) {
-                    logger.debug(
-                            "Retry join operation in {} ms because a concurrent join or leave operation has been detected",
-                            P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
-                    try {
-                        Thread.sleep(P2PStructuredProperties.TRACKER_JOIN_RETRY_INTERVAL.getValue());
-                        landmarkPeer = this.getRandomPeer();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+            remotePeer.join(landmarkPeer);
 
             if (ProActiveRandom.nextDouble() <= this.getProbabilityToStorePeer()) {
                 this.storePeer(remotePeer);
