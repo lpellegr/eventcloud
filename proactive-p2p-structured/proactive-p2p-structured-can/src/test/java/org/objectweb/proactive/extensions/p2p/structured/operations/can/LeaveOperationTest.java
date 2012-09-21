@@ -65,27 +65,18 @@ public class LeaveOperationTest extends
     }
 
     @Test
-    public void testLeaveWithOnePeer() {
+    public void testLeaveWithOnePeer() throws NetworkNotJoinedException {
         super.deploy(1);
-
-        try {
-            assertTrue(super.getPeer(0).leave());
-        } catch (NetworkNotJoinedException e) {
-            e.printStackTrace();
-        }
+        super.getPeer(0).leave();
     }
 
     @Test
-    public void testLeaveWithTwoPeers() {
+    public void testLeaveWithTwoPeers() throws NetworkNotJoinedException {
         super.deploy(2);
 
         UUID peerLeavingId = super.getPeer(0).getId();
 
-        try {
-            assertTrue(super.getPeer(0).leave());
-        } catch (NetworkNotJoinedException e) {
-            e.printStackTrace();
-        }
+        super.getPeer(0).leave();
 
         assertFalse(CanOperations.hasNeighbor(super.getPeer(1), peerLeavingId));
     }

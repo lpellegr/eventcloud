@@ -30,6 +30,7 @@ import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
@@ -264,7 +265,8 @@ public class StaticLoadBalancingTest {
                 @Override
                 @SuppressWarnings("resource")
                 protected void _execute() throws EventCloudIdNotManaged,
-                        NetworkAlreadyJoinedException, FileNotFoundException {
+                        NetworkAlreadyJoinedException, FileNotFoundException,
+                        PeerNotActivatedException {
                     if (StaticLoadBalancingTestBuilder.this.enableStatsRecording) {
                         EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
                     }
@@ -525,7 +527,8 @@ public class StaticLoadBalancingTest {
         }
 
         protected abstract void _execute() throws EventCloudIdNotManaged,
-                NetworkAlreadyJoinedException, FileNotFoundException;
+                NetworkAlreadyJoinedException, FileNotFoundException,
+                PeerNotActivatedException;
 
         public void execute() {
             try {

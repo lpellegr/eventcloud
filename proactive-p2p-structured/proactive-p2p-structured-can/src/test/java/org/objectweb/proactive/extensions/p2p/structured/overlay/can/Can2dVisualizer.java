@@ -47,6 +47,7 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.CanNetworkDe
 import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -179,7 +180,9 @@ public class Can2dVisualizer extends JFrame {
                             try {
                                 newPeer.join(entry.getStub());
                             } catch (NetworkAlreadyJoinedException ex) {
-                                ex.printStackTrace();
+                                throw new IllegalStateException(ex);
+                            } catch (PeerNotActivatedException ex) {
+                                throw new IllegalStateException(ex);
                             }
 
                             Can2dVisualizer.this.cache.addEntry(newPeer);

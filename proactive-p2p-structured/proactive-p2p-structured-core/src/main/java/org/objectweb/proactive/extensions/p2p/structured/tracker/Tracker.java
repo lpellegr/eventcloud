@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -67,7 +68,6 @@ public interface Tracker extends Serializable {
      * @throws NetworkAlreadyJoinedException
      *             if the specified {@code remotePeer} has already joined a
      *             network.
-     * 
      * @throws IllegalArgumentException
      *             if the specified {@code remotePeer} does not manage the same
      *             overlay type as the peers that are already maintained by the
@@ -87,14 +87,15 @@ public interface Tracker extends Serializable {
      * @throws NetworkAlreadyJoinedException
      *             if the specified {@code remotePeer} has already joined a
      *             network.
-     * 
+     * @throws PeerNotActivatedException
+     *             if the specified {@code landmarkPeer} is not activated.
      * @throws IllegalArgumentException
      *             if the specified {@code remotePeer} does not manage the same
      *             overlay type as the peers that are already maintained by the
      *             tracker.
      */
     public void inject(Peer remotePeer, Peer landmarkPeer)
-            throws NetworkAlreadyJoinedException;
+            throws NetworkAlreadyJoinedException, PeerNotActivatedException;
 
     /**
      * Stores the specified {@code peerReference} locally and call

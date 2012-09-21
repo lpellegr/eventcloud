@@ -116,24 +116,24 @@ public class TrackerTest implements Serializable {
          * {@inheritDoc}
          */
         @Override
-        public boolean create() {
-            return true;
+        public void create() {
+
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public boolean join(Peer landmarkPeer) {
-            return true;
+        public void join(Peer landmarkPeer) {
+
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public boolean leave() {
-            return true;
+        public void leave() {
+
         }
 
         /**
