@@ -106,14 +106,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         super.initComponentActivity(body);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void endComponentActivity(Body body) {
-        super.endComponentActivity(body);
-    }
-
     /*
      * PutGetApi implementation
      * 
