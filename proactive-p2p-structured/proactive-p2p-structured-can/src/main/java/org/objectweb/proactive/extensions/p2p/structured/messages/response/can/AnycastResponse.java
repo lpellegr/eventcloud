@@ -117,7 +117,7 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
 
     /**
      * Merges two responses on a synchronization point. To merge information
-     * which is specific to the type of response, you have to override
+     * which are specific to the type of response, you have to override
      * {@link #mergeAttributes(AnycastResponse)}.
      * 
      * @param localResponse
@@ -137,7 +137,7 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
         if (localResponse == null) {
             return responseReceived;
         } else {
-            localResponse.incrementHopCount(responseReceived.getOutboundHopCount());
+            localResponse.incrementHopCount(responseReceived.getInboundHopCount());
             localResponse.mergeAttributes(responseReceived);
             return localResponse;
         }
