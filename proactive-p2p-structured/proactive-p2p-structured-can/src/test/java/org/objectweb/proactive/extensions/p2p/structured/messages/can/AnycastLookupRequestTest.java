@@ -257,6 +257,11 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         Assert.assertTrue(response.getOutboundHopCount() > 0);
         Assert.assertTrue(response.getInboundHopCount() > 0);
 
+        // the following condition should be true for the current implementation
+        // of the anycast router because the reverse path is the same as the
+        // forward path
+        Assert.assertEquals(
+                response.getInboundHopCount(), response.getOutboundHopCount());
     }
 
 }
