@@ -122,12 +122,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         QueryIterator it = null;
         try {
             Optimize.noOptimizer();
-            synchronized (this) {
-                it =
-                        Algebra.exec(
-                                createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
-                                txnGraph.getUnderlyingDataset());
-            }
+            it =
+                    Algebra.exec(
+                            createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
+                            txnGraph.getUnderlyingDataset());
 
             while (it.hasNext()) {
                 final Binding binding = it.nextBinding();
