@@ -44,7 +44,7 @@ public class QuadrupleIterator implements Iterator<Quadruple> {
      *            the specified iterator to wrap.
      */
     public QuadrupleIterator(Iterator<Quad> it) {
-        this(it, true, false);
+        this(it, false, true);
     }
 
     public QuadrupleIterator(Iterator<Quad> it, boolean checkQuadrupleType,
