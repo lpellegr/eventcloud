@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.adapters.rdf2go;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,8 +73,8 @@ public final class PutGetRdf2goAdapter extends Rdf2goAdapter<PutGetApi> {
         return super.delegate.add(collection);
     }
 
-    public boolean add(InputStream in, SerializationFormat format) {
-        return super.delegate.add(in, format);
+    public boolean add(URL url, SerializationFormat format) {
+        return super.delegate.add(url, format);
     }
 
     public boolean contains(URI context, Resource subject, URI predicate,

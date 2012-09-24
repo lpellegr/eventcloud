@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.adapters.rdf2go;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -57,7 +57,7 @@ public class MockPublishProxy implements PublishApi {
      * {@inheritDoc}
      */
     @Override
-    public void publish(InputStream in, SerializationFormat format) {
+    public void publish(URL url, SerializationFormat format) {
     }
 
 }
