@@ -35,6 +35,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.bw_2.NotificationConsumer;
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.Service;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.w3c.dom.Document;
@@ -123,7 +124,7 @@ public class ProxyMonitoringManagerImpl extends AbstractComponent implements
      */
     @Override
     public void runComponentActivity(Body body) {
-
+        new Service(body).fifoServing();
     }
 
     /**
