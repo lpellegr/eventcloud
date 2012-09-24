@@ -33,6 +33,7 @@ import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -98,6 +99,16 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
         this.eventCloudDeployers =
                 new HashMap<EventCloudId, EventCloudDeployer>();
         this.registryUrl = null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY.getValue(),
+                false, false);
     }
 
     /**

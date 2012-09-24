@@ -42,6 +42,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActiv
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,6 +132,16 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
         } catch (ClassNotFoundException cnfe) {
             cnfe.printStackTrace();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                P2PStructuredProperties.MAO_SOFT_LIMIT_TRACKERS.getValue(),
+                false, false);
     }
 
     /**

@@ -92,11 +92,20 @@ public class P2PStructuredProperties {
             new PropertyString("can.element.display", "decimal");
 
     /**
-     * Defines the soft limit used by each component or active object that uses
-     * multi active serving.
+     * Defines the soft limit used by each peer that runs with multi active
+     * serving.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT = new PropertyInteger(
-            "mao.soft.limit", Runtime.getRuntime().availableProcessors() * 2);
+    public static final PropertyInteger MAO_SOFT_LIMIT_PEERS =
+            new PropertyInteger("mao.soft.limit.peers", Runtime.getRuntime()
+                    .availableProcessors() + 1);
+
+    /**
+     * Defines the soft limit used by each tracker that runs with multi active
+     * serving.
+     */
+    public static final PropertyInteger MAO_SOFT_LIMIT_TRACKERS =
+            new PropertyInteger("mao.soft.limit.trackers", Runtime.getRuntime()
+                    .availableProcessors() + 1);
 
     /**
      * Defines the precision used for the internal representation of string

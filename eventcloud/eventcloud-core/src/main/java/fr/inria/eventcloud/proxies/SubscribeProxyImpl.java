@@ -38,6 +38,7 @@ import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,6 +139,16 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         body.setImmediateService("setAttributes", false);
 
         this.createAndRegisterEventIdsReceivedDB(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
+                false, false);
     }
 
     /**

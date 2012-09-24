@@ -21,11 +21,13 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
+import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
@@ -36,6 +38,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
@@ -222,6 +225,16 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
     @MemberOf("parallel")
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
         return super.selectPeer().executeSparqlSelect(sparqlSelectQuery);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_PUTGET_PROXIES.getValue(),
+                false, false);
     }
 
     /**
