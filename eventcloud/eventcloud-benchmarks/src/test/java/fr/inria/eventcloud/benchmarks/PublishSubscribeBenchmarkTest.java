@@ -123,8 +123,20 @@ public class PublishSubscribeBenchmarkTest {
                         SignalNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
+                        10, 1, 1, 1000, new QuadrupleSupplier(),
+                        SignalNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
                         1, 1, 1, 1000, new QuadrupleSupplier(),
                         BindingNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
+                        BindingNotificationListener.class,
+                        DatastoreType.PERSISTENT},
+                {
+                        1, 1, 1, 100, new CompoundEventSupplier(10),
+                        CompoundEventNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
                         1, 1, 1, 100, new CompoundEventSupplier(10),
