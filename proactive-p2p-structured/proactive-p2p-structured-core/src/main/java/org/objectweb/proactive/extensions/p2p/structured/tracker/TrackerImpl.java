@@ -321,7 +321,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
     }
 
     @MemberOf("parallel")
-    public String getBindingNameSuffix() {
+    public synchronized String getBindingNameSuffix() {
         if (this.bindingNameSuffix == null) {
             StringBuffer appender = new StringBuffer("tracker/");
             appender.append(this.networkName);
@@ -412,12 +412,10 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
     public Group<Tracker> getTypedGroupView() {
         return this.typedGroupView;
     }
 
-    @MemberOf("parallel")
     public Tracker getUntypedGroupView() {
         return this.untypedGroupView;
     }
