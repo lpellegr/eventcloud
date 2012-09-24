@@ -110,7 +110,7 @@ public class SubscribeProxyTest {
     /**
      * Test a basic subscription with concurrent publications.
      */
-    @Test
+    @Test(timeout = 60000)
     public void testSubscribeWithConcurrentPublications()
             throws EventCloudIdNotManaged {
         final int NB_PRODUCERS = 10;
