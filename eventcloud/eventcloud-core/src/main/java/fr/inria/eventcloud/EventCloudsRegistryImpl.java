@@ -115,7 +115,6 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
     public String register(String bindingName) throws ProActiveException {
         this.registryUrl =
                 Fractive.registerByName(
@@ -126,7 +125,6 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     }
 
     @Override
-    @MemberOf("parallel")
     public void unregister() throws IOException {
         if (this.registryUrl != null) {
             Fractive.unregister(this.registryUrl);
