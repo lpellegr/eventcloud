@@ -38,7 +38,6 @@ import org.objectweb.proactive.extensions.dataspaces.exceptions.FileSystemExcept
 import org.objectweb.proactive.extensions.dataspaces.exceptions.NotConfiguredException;
 import org.objectweb.proactive.extensions.dataspaces.exceptions.SpaceNotFoundException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -234,15 +233,6 @@ public abstract class AbstractComponent implements ComponentInitActive,
         } catch (IOException ioe) {
             throw new IllegalStateException(ioe);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void runComponentActivity(Body body) {
-        new MultiActiveService(body).multiActiveServing(
-                P2PStructuredProperties.MAO_SOFT_LIMIT.getValue(), false, false);
     }
 
 }

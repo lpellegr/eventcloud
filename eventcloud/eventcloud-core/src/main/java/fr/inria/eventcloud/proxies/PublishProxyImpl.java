@@ -20,12 +20,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
+import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.parsers.RdfParser;
@@ -138,6 +141,16 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
                 PublishProxyImpl.this.publish(quad);
             }
         });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_PUBLISH_PROXIES.getValue(),
+                false, false);
     }
 
     /**
