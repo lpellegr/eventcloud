@@ -41,8 +41,9 @@ public final class PublishWsLauncher extends WsProxyLauncher {
                 super.registryUrl, super.eventCloudIdUrl,
                 "proactive/services/EventCloud_publish-webservices", super.port)
                 .getServer()
-                .getDestination()
-                .toString();
+                .getEndpoint()
+                .getEndpointInfo()
+                .getAddress();
     }
 
 }
