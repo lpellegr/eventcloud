@@ -37,8 +37,8 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
     private long deliveryTimestamp;
 
     /*
-     * The number of peers traversed by the query message between its source and
-     * its destination
+     * The number of peers traversed by the request associated to 
+     * this response between its source and its destination.
      */
     private int outboundHopCount;
 
@@ -120,10 +120,10 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
     }
 
     /**
-     * Returns the number of peers traversed by a response between its source
+     * Returns the number of peers traversed by the response between its source
      * and its destination.
      * 
-     * @return the number of peers traversed by a response between its source
+     * @return the number of peers traversed by the response between its source
      *         and its destination.
      */
     public int getInboundHopCount() {
@@ -131,11 +131,11 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
     }
 
     /**
-     * Returns the number of peers traversed by a response between its source
-     * and its destination.
+     * Returns the number of peers traversed by the request associated to this
+     * response between its source and its destination.
      * 
-     * @return the number of peers traversed by a response between its source
-     *         and its destination.
+     * @return the number of peers traversed by the request associated to this
+     *         response between its source and its destination.
      */
     public int getOutboundHopCount() {
         return this.outboundHopCount;
@@ -147,7 +147,8 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
      */
     public void setDeliveryTime() {
         if (this.latency != -1) {
-            throw new IllegalStateException("delivery timestamp is already set");
+            throw new IllegalStateException(
+                    "Delivery timestamp is already set: " + this.latency);
         }
 
         this.deliveryTimestamp = System.currentTimeMillis();
@@ -165,8 +166,8 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
     }
 
     /**
-     * Sets the number of peers traversed by a query message between its source
-     * and destination.
+     * Sets the number of peers traversed by the request associated to this
+     * response between its source and destination.
      * 
      * @param value
      *            the new value to set.

@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.tracker;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import org.junit.Assert;
@@ -25,6 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
@@ -100,28 +102,38 @@ public class TrackerTest implements Serializable {
 
     public static class MockOverlay extends StructuredOverlay {
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean create() {
-            return true;
+        public MockOverlay() {
+            super(new RequestResponseManager() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void close() throws IOException {
+                }
+            });
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public boolean join(Peer landmarkPeer) {
-            return true;
+        public void create() {
+
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public boolean leave() {
-            return true;
+        public void join(Peer landmarkPeer) {
+
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void leave() {
+
         }
 
         /**

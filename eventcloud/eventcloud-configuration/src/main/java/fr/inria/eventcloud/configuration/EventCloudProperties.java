@@ -192,6 +192,43 @@ public class EventCloudProperties {
             "stats.recorder.class",
             "fr.inria.eventcloud.datastore.stats.MeanStatsRecorder");
 
+    private static int DEFAULT_THREADS_LIMIT = Runtime.getRuntime()
+            .availableProcessors() + 1;
+
+    /**
+     * Defines the soft limit used by each eventclouds registry that runs with
+     * multi active serving.
+     */
+    public static final PropertyInteger MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY =
+            new PropertyInteger(
+                    "mao.soft.limit.eventclouds.registry",
+                    DEFAULT_THREADS_LIMIT);
+
+    /**
+     * Defines the soft limit used by each publish proxy that runs with multi
+     * active serving.
+     */
+    public static final PropertyInteger MAO_SOFT_LIMIT_PUBLISH_PROXIES =
+            new PropertyInteger(
+                    "mao.soft.limit.publish.proxies", DEFAULT_THREADS_LIMIT);
+
+    /**
+     * Defines the soft limit used by each putget proxy that runs with multi
+     * active serving.
+     */
+    public static final PropertyInteger MAO_SOFT_LIMIT_PUTGET_PROXIES =
+            new PropertyInteger(
+                    "mao.soft.limit.putget.proxies", DEFAULT_THREADS_LIMIT);
+
+    /**
+     * Defines the soft limit used by each subscribe proxy that runs with multi
+     * active serving.
+     */
+    public static final PropertyInteger MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES =
+            new PropertyInteger(
+                    "mao.soft.limit.subscribe.proxies", Runtime.getRuntime()
+                            .availableProcessors() * 2 + 1);
+
     /**
      * Specifies the number maximum of attempts to lookup a proxy that is not
      * reachable. For instance, this is useful to remove references to subscribe

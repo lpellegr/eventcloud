@@ -19,7 +19,7 @@ package fr.inria.eventcloud.operations.can;
 import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * 
  * @author lpellegr
  */
-public class RetrieveSubSolutionOperation implements AsynchronousOperation {
+public class RetrieveSubSolutionOperation implements RunnableOperation {
 
     private static final long serialVersionUID = 1L;
 

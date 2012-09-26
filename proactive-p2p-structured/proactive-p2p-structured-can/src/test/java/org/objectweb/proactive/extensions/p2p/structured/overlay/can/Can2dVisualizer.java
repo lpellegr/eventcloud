@@ -47,6 +47,7 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.CanNetworkDe
 import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -179,7 +180,9 @@ public class Can2dVisualizer extends JFrame {
                             try {
                                 newPeer.join(entry.getStub());
                             } catch (NetworkAlreadyJoinedException ex) {
-                                ex.printStackTrace();
+                                throw new IllegalStateException(ex);
+                            } catch (PeerNotActivatedException ex) {
+                                throw new IllegalStateException(ex);
                             }
 
                             Can2dVisualizer.this.cache.addEntry(newPeer);
@@ -413,9 +416,11 @@ public class Can2dVisualizer extends JFrame {
                         .contains(
                                 new Coordinate<StringElement>(
                                         new StringElement(
-                                                Character.toString((char) (x * SCALE_WIDTH))),
+                                                new String(
+                                                        Character.toChars((int) (x * SCALE_WIDTH)))),
                                         new StringElement(
-                                                Character.toString((char) (y * SCALE_HEIGHT)))))) {
+                                                new String(
+                                                        Character.toChars((int) (y * SCALE_HEIGHT))))))) {
                     return entry;
                 }
             }
@@ -468,8 +473,8 @@ public class Can2dVisualizer extends JFrame {
     }
 
     public static void main(String[] args) {
-        P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
+        P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
 
         InjectionConstraintsProvider injectionConstraintsProvider = null;
         if (args.length == 1 && args[0].equals("-fractal")) {

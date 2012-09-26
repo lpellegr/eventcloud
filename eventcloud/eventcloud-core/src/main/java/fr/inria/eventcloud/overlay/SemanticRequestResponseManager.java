@@ -180,8 +180,13 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 nbIntermediateResults += response.getResult().size();
 
                 for (int j = 0; j < response.getResult().size(); j++) {
-                    responsesSizeInBytes +=
-                            this.responseToBytes(response.getResult().get(j));
+                    try {
+                        responsesSizeInBytes +=
+                                ObjectToByteConverter.convert(response.getResult()
+                                        .get(j)).length;
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
                 }
             }
 
@@ -205,6 +210,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      *         {@code latency} and the {@code queryDatastoreTime}.
      */
     private long[] aggregateMeasurements(List<QuadruplePatternResponse> responses) {
+        long inboundHopCount = 0;
         long outboundHopCount = 0;
         long latency = 0;
         long queryDatastoreTime = 0;
@@ -214,13 +220,13 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 latency = response.getLatency();
             }
 
+            inboundHopCount += response.getInboundHopCount();
             outboundHopCount += response.getOutboundHopCount();
             queryDatastoreTime += response.getActionTime();
         }
 
-        // inboundHopCount = outboundHopCount
         return new long[] {
-                outboundHopCount, outboundHopCount, latency, queryDatastoreTime};
+                inboundHopCount, outboundHopCount, latency, queryDatastoreTime};
     }
 
     private List<QuadruplePatternResponse> dispatch(final List<SparqlAtomicRequest> requests,
@@ -235,16 +241,13 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
             this.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
+                    QuadruplePatternResponse resp =
+                            (QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
+                                    request, overlay);
                     if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-                        QuadruplePatternResponse resp =
-                                (QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
-                                        request, overlay);
                         resp.setInitialRequestForThisResponse(request.getQuery());
-                        replies.add(resp);
-                    } else {
-                        replies.add((QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
-                                request, overlay));
                     }
+                    replies.add(resp);
 
                     doneSignal.countDown();
                 }
@@ -271,15 +274,6 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     public SparqlColander getColander() {
         return this.colander;
-    }
-
-    public int responseToBytes(Object sparqlResponse) {
-        try {
-            byte[] bytes = ObjectToByteConverter.convert(sparqlResponse);
-            return bytes.length;
-        } catch (IOException e) {
-            throw new IllegalStateException();
-        }
     }
 
     /**

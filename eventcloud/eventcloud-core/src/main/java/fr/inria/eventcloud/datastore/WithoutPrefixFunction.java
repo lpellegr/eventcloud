@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.datastore;
 
 import com.hp.hpl.jena.sparql.expr.NodeValue;
-import com.hp.hpl.jena.sparql.expr.nodevalue.NodeFunctions;
 import com.hp.hpl.jena.sparql.function.FunctionBase1;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -41,7 +40,7 @@ public class WithoutPrefixFunction extends FunctionBase1 {
      */
     @Override
     public NodeValue exec(NodeValue v) {
-        return NodeValue.makeString(SemanticElement.removePrefix(NodeFunctions.str(v.asNode())));
+        return NodeValue.makeString(SemanticElement.removePrefix(v.asNode()));
     }
 
 }

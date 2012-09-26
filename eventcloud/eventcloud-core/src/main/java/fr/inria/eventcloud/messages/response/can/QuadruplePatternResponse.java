@@ -34,7 +34,7 @@ public class QuadruplePatternResponse extends
 
     private static final long serialVersionUID = 1L;
 
-    private String initialRequestForThisResponse;
+    private transient String initialRequestForThisResponse;
 
     public QuadruplePatternResponse() {
         super();

@@ -2,11 +2,9 @@
 <configuration>
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${eventcloud.bundle.home}/logs/${logging.output.filename}.logback
-		</file>
+		<file>${eventcloud.bundle.home}/logs/${logging.output.filename}.logback</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${eventcloud.bundle.home}/logs/${logging.output.filename}.%d{yyyy-MM-dd_HH}.logback
-			</fileNamePattern>
+			<fileNamePattern>${eventcloud.bundle.home}/logs/${logging.output.filename}.logback.%d{yyyy-MM-dd_HH}</fileNamePattern>
 		</rollingPolicy>
 
 		<encoder>

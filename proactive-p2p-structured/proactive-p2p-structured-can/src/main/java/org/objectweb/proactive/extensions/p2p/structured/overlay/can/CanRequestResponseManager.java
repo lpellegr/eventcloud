@@ -64,6 +64,21 @@ public class CanRequestResponseManager extends RequestResponseManager {
         return this.requestsAlreadyReceived.contains(requestId);
     }
 
+    /**
+     * Adds the request to the list of requests already received by the peer,
+     * identified by the specified identifier, and returns whether or not the
+     * requests has already been received.
+     * 
+     * @param requestId
+     *            the identifier to check
+     * 
+     * @return {@code true} if the current peer has already received the
+     *         request, {@code false} otherwise.
+     */
+    public boolean receiveRequest(UUID requestId) {
+        return this.requestsAlreadyReceived.add(requestId);
+    }
+
     @Override
     public void close() throws IOException {
         // TODO Auto-generated method stub

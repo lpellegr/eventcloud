@@ -121,16 +121,12 @@ public final class SemanticCoordinateFactory {
         }
     }
 
-    protected static Coordinate<SemanticElement> newSemanticCoordinate(Character character) {
-        return newRawSemanticCoordinate(Character.toString(character));
-    }
-
-    protected static Coordinate<SemanticElement> newRawSemanticCoordinate(String value) {
+    protected static Coordinate<SemanticElement> newSemanticCoordinate(String value) {
         SemanticElement[] elts =
                 new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
 
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            elts[i] = SemanticElement.newRawSemanticElement(value);
+            elts[i] = new SemanticElement(value);
         }
 
         return new Coordinate<SemanticElement>(elts);

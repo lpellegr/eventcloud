@@ -19,7 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
@@ -42,7 +41,7 @@ public abstract class StructuredOverlay implements DataHandler {
      * Indicates whether the current peer is activated (i.e. if the peer has
      * already joined a network or not).
      */
-    protected AtomicBoolean activated;
+    protected boolean activated;
 
     /**
      * The ProActive stub reference to the outer peer active object.
@@ -50,7 +49,7 @@ public abstract class StructuredOverlay implements DataHandler {
     protected Peer stub;
 
     protected StructuredOverlay() {
-        this.activated = new AtomicBoolean();
+        this.activated = false;
         this.id = UUID.randomUUID();
     }
 
@@ -84,11 +83,11 @@ public abstract class StructuredOverlay implements DataHandler {
         return this.messageManager.dispatch(request, this);
     }
 
-    public abstract boolean create();
+    public abstract void create();
 
-    public abstract boolean join(Peer landmarkPeer);
+    public abstract void join(Peer landmarkPeer);
 
-    public abstract boolean leave();
+    public abstract void leave();
 
     public abstract OverlayType getType();
 
@@ -96,15 +95,15 @@ public abstract class StructuredOverlay implements DataHandler {
 
     /**
      * Returns a boolean indicating whether the current overlay is activated
-     * (i.e. the overlay has handled a join operation but not a leave operation
-     * yet).
+     * (i.e. if the overlay has handled a join operation but not yet a leave
+     * operation).
      * 
-     * @return {@code true} if the overlay is activated (i.e. the overlay has
-     *         handled a join operation but not a leave operation yet),
+     * @return {@code true} if the overlay is activated (i.e. if the overlay has
+     *         handled a join operation but not yet a leave operation).
      *         {@code false} otherwise.
      */
     public boolean isActivated() {
-        return this.activated.get();
+        return this.activated;
     }
 
     /**

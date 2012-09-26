@@ -129,7 +129,6 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
 
             while (it.hasNext()) {
                 final Binding binding = it.nextBinding();
-
                 log.debug(
                         "Peer {} has a sub-subscription that matches the quadruple {} ",
                         overlay, quadrupleMatching);

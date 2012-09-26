@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,8 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
             LoggerFactory.getLogger(RequestResponseManager.class);
 
     private Map<UUID, ResponseEntry> repliesReceived;
+
+    public MultiActiveService multiActiveService;
 
     protected RequestResponseManager() {
         this.repliesReceived = new ConcurrentHashMap<UUID, ResponseEntry>();
@@ -96,6 +100,9 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
      * @return the response for the specified requestId.
      */
     private Response<?> pullResponse(UUID requestId) {
+        ((RequestExecutor) this.multiActiveService.getServingController()).incrementExtraActiveRequestCount(this.getResponsesReceived()
+                .get(requestId)
+                .getExpectedResponsesCount());
         // waits for the final response
         this.waitForFinalResponse(requestId);
 
@@ -133,6 +140,10 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
                 }
             }
         }
+
+        ((RequestExecutor) this.multiActiveService.getServingController()).decrementExtraActiveRequestCount(this.repliesReceived.get(
+                requestId)
+                .getExpectedResponsesCount());
     }
 
     /**

@@ -84,7 +84,8 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     public void testAnycastRequestWithResponse() {
         StringElement elt =
                 new StringElement(
-                        Character.toString((char) ((int) P2PStructuredProperties.CAN_UPPER_BOUND.getValue() - 1)));
+                        new String(
+                                Character.toChars(P2PStructuredProperties.CAN_UPPER_BOUND.getValue() - 1)));
 
         GetZonesValidatingConstraintsResponse response =
                 (GetZonesValidatingConstraintsResponse) PAFuture.getFutureValue(this.proxy.send(
@@ -253,9 +254,14 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static <T> void checkResponse(Response<T> response) {
         Assert.assertTrue(response.getLatency() > 0);
-        Assert.assertTrue(response.getHopCount() > 0);
-        Assert.assertTrue(response.getInboundHopCount() > 0);
         Assert.assertTrue(response.getOutboundHopCount() > 0);
+        Assert.assertTrue(response.getInboundHopCount() > 0);
+
+        // the following condition should be true for the current implementation
+        // of the anycast router because the reverse path is the same as the
+        // forward path
+        Assert.assertEquals(
+                response.getInboundHopCount(), response.getOutboundHopCount());
     }
 
 }
