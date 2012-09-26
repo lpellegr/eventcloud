@@ -40,7 +40,7 @@ public final class Operations {
     public static List<Quadruple> findQuadruplesOperation(Peer peer,
                                                           QuadruplePattern quadruplePattern,
                                                           boolean useSubscriptionsDatastore) {
-        return ((FindQuadruplesResponseOperation) PAFuture.getFutureValue(peer.receiveImmediateService(new FindQuadruplesOperation(
+        return ((FindQuadruplesResponseOperation) PAFuture.getFutureValue(peer.receive(new FindQuadruplesOperation(
                 quadruplePattern, useSubscriptionsDatastore)))).getQuadruples();
     }
 

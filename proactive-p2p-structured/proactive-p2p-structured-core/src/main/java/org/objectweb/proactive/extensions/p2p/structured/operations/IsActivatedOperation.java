@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  * 
  * @author lpellegr
  */
-public class IsActivatedOperation implements Operation {
+public class IsActivatedOperation implements CallableOperation {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,6 +39,7 @@ public class IsActivatedOperation implements Operation {
      *         if the peer handling this message is activated, {@code false}
      *         otherwise.
      */
+    @Override
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         return new BooleanResponseOperation(overlay.isActivated());
     }

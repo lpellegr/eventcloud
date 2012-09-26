@@ -16,27 +16,16 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
-import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
  * Test cases associated to {@link CanOverlay#join(Peer)}.
@@ -78,7 +67,7 @@ public class JoinOperationTest extends
 
     @Test(expected = NetworkAlreadyJoinedException.class)
     public void testJoinWithPeerWhichHasAlreadyJoined()
-            throws NetworkAlreadyJoinedException {
+            throws NetworkAlreadyJoinedException, PeerNotActivatedException {
         Peer landmarkPeer = super.createPeer();
         landmarkPeer.create();
 
@@ -87,66 +76,13 @@ public class JoinOperationTest extends
         joiner.join(landmarkPeer);
     }
 
-    @Test
+    @Test(expected = PeerNotActivatedException.class)
     public void testJoinOnPeerNotActivated()
-            throws NetworkAlreadyJoinedException {
+            throws NetworkAlreadyJoinedException, PeerNotActivatedException {
         Peer landmarkPeer = super.createPeer();
         Peer joiner = super.createPeer();
 
-        Assert.assertFalse(joiner.join(landmarkPeer));
-    }
-
-    @Test
-    public void testConcurrentJoin() throws NetworkAlreadyJoinedException,
-            InterruptedException, ExecutionException {
-        final Peer landmarkPeer =
-                PeerFactory.newPeer(SerializableProvider.create(StringCanOverlay.class));
-        landmarkPeer.create();
-
-        int nbPeersToJoin = 20;
-
-        List<Peer> peers = new ArrayList<Peer>(nbPeersToJoin);
-        for (int i = 0; i < nbPeersToJoin; i++) {
-            peers.add(PeerFactory.newPeer(SerializableProvider.create(StringCanOverlay.class)));
-        }
-
-        ExecutorService threadPool =
-                Executors.newFixedThreadPool(nbPeersToJoin < 20
-                        ? nbPeersToJoin : 20);
-
-        boolean joinResult = true;
-
-        List<Future<Boolean>> futures =
-                new ArrayList<Future<Boolean>>(nbPeersToJoin);
-
-        final CountDownLatch doneSignal = new CountDownLatch(nbPeersToJoin);
-        for (final Peer p : peers) {
-            futures.add(threadPool.submit(new Callable<Boolean>() {
-                @Override
-                public Boolean call() {
-                    try {
-                        return p.join(landmarkPeer);
-                    } catch (NetworkAlreadyJoinedException e) {
-                        e.printStackTrace();
-                        return false;
-                    } finally {
-                        doneSignal.countDown();
-                    }
-                }
-            }));
-        }
-
-        for (Future<Boolean> future : futures) {
-            joinResult &= future.get();
-        }
-
-        // a concurrent join may have occurred.
-        // hence, joinResult must has a false value
-        Assert.assertFalse(
-                "No concurrent join has been detected whereas one is expected",
-                joinResult);
-
-        doneSignal.await();
+        joiner.join(landmarkPeer);
     }
 
 }

@@ -21,12 +21,13 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.operations.AsynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 
 /**
  * A peer defines all operations which are common to structured peer-to-peer
@@ -80,35 +81,34 @@ public interface Peer extends Serializable {
      * 
      * @param landmarkPeer
      *            the peer used as entry point.
-     * @return Returns {@code true} if the operation has succeeded,
-     *         {@code false} otherwise (e.g. if a concurrent join or leave
-     *         operation is detected).
+     * 
      * @throws NetworkAlreadyJoinedException
      *             if the current peer has already joined a network.
+     * @throws PeerNotActivatedException
+     *             if the specified {@code landmarkPeer} is not activated.
      */
-    public boolean join(Peer landmarkPeer) throws NetworkAlreadyJoinedException;
+    public void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
+            PeerNotActivatedException;
 
     /**
      * Forces the current peer to leave the network it has joined.
-     * 
-     * @return {@code true} if the operation has succeeded, {@code false}
-     *         otherwise.
      * 
      * @throws NetworkNotJoinedException
      *             if the current peer try leave without having joined a
      *             network.
      */
-    public boolean leave() throws NetworkNotJoinedException;
+    public void leave() throws NetworkNotJoinedException;
 
     /**
-     * Receives and handles the specified {@code operation} synchronously.
+     * Receives and handles the specified {@code operation} asynchronously by
+     * returning a future.
      * 
      * @param operation
      *            the operation to handle.
      * 
      * @return a response according to the operation type handled.
      */
-    public ResponseOperation receive(SynchronousOperation operation);
+    public ResponseOperation receive(CallableOperation operation);
 
     /**
      * Receives and handles the specified {@code operation} asynchronously.
@@ -116,35 +116,7 @@ public interface Peer extends Serializable {
      * @param operation
      *            the operation to handle.
      */
-    public void receive(AsynchronousOperation operation);
-
-    /**
-     * Receives in immediate service and handles the specified {@code operation}
-     * synchronously.
-     * <p>
-     * To receive the operation in immediate service completely by-passes the
-     * message queue model that comes with the active objects, thus breaks the
-     * theoretical model and may introduce race conditions.
-     * 
-     * @param operation
-     *            the operation to handle.
-     * 
-     * @return a response according to the operation type handled.
-     */
-    public ResponseOperation receiveImmediateService(SynchronousOperation operation);
-
-    /**
-     * Receives in immediate service and handles the specified {@code operation}
-     * synchronously.
-     * <p>
-     * To receive the operation in immediate service completely by-passes the
-     * message queue model that comes with the active objects, thus breaks the
-     * theoretical model and may introduce race conditions.
-     * 
-     * @param operation
-     *            the operation to handle.
-     */
-    public void receiveImmediateService(AsynchronousOperation operation);
+    public void receive(RunnableOperation operation);
 
     /**
      * Routes the specified {@code msg}.

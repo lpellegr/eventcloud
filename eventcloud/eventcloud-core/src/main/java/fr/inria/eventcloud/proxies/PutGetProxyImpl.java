@@ -21,8 +21,13 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
+import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.Group;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
@@ -33,6 +38,7 @@ import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
@@ -46,6 +52,7 @@ import fr.inria.eventcloud.utils.Callback;
  * 
  * @see ProxyFactory
  */
+@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
 public class PutGetProxyImpl extends Proxy implements PutGetProxy,
         PutGetProxyAttributeController {
 
@@ -82,6 +89,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean add(Quadruple quad) {
         return super.selectPeer().add(quad);
     }
@@ -90,6 +98,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean add(Collection<Quadruple> quads) {
         return super.selectPeer().add(quads);
     }
@@ -98,6 +107,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean add(InputStream in, SerializationFormat format) {
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
@@ -113,6 +123,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean contains(Quadruple quad) {
         return super.selectPeer().contains(quad);
     }
@@ -121,6 +132,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean delete(Quadruple quad) {
         return super.selectPeer().delete(quad);
     }
@@ -129,6 +141,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public boolean delete(Collection<Quadruple> quads) {
         return super.selectPeer().delete(quads);
     }
@@ -137,6 +150,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public List<Quadruple> delete(QuadruplePattern quadPattern) {
         return super.selectPeer().delete(quadPattern);
     }
@@ -145,6 +159,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public long count(QuadruplePattern quadPattern) {
         return super.selectPeer().count(quadPattern);
     }
@@ -153,6 +168,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public long count(String sparqlQuery) {
         return super.selectPeer().count(sparqlQuery);
     }
@@ -161,6 +177,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public List<Quadruple> find(QuadruplePattern quadPattern) {
         return super.selectPeer().find(quadPattern);
     }
@@ -169,6 +186,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery) {
         return super.selectPeer().executeSparqlQuery(sparqlQuery);
     }
@@ -177,6 +195,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
         return super.selectPeer().executeSparqlAsk(sparqlAskQuery);
     }
@@ -185,6 +204,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery) {
         return super.selectPeer().executeSparqlConstruct(sparqlConstructQuery);
     }
@@ -193,6 +213,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
         throw new UnsupportedOperationException();
     }
@@ -201,8 +222,19 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
         return super.selectPeer().executeSparqlSelect(sparqlSelectQuery);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_PUTGET_PROXIES.getValue(),
+                false, false);
     }
 
     /**

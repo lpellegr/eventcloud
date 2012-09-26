@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Observable;
@@ -169,7 +170,9 @@ public abstract class NetworkDeployer extends
                     this.getRandomTracker().inject(peersInjected.get(i));
                 }
             } catch (NetworkAlreadyJoinedException e) {
-                e.printStackTrace();
+                throw new IllegalStateException(e);
+            } catch (PeerNotActivatedException e) {
+                throw new IllegalStateException(e);
             }
         }
         // }

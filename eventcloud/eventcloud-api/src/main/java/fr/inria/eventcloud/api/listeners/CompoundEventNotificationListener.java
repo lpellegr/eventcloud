@@ -27,7 +27,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
  * 
  * @author lpellegr
  */
-public abstract class CompoundEventNotificationListener implements
+public abstract class CompoundEventNotificationListener extends
         NotificationListener<CompoundEvent> {
 
     private static final long serialVersionUID = 1L;

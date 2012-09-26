@@ -16,7 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.SynchronousOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -31,7 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @author lpellegr
  */
 public class GetIdAndZoneOperation<E extends Element> implements
-        SynchronousOperation {
+        CallableOperation {
 
     private static final long serialVersionUID = 1L;
 

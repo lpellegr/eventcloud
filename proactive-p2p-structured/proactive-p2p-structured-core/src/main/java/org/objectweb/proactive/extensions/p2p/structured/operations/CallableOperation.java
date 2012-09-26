@@ -19,13 +19,11 @@ package org.objectweb.proactive.extensions.p2p.structured.operations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 /**
- * {@link SynchronousOperation} is an {@link Operation} which returns a non
- * reifiable object. Hence, all operations extending this kind of operation is
- * handled synchronously.
+ * {@link CallableOperation} is an {@link Operation} which returns a response.
  * 
  * @author lpellegr
  */
-public interface SynchronousOperation extends Operation {
+public interface CallableOperation extends Operation {
 
     /**
      * Handles the operation by using the specified {@code overlay}
@@ -35,6 +33,6 @@ public interface SynchronousOperation extends Operation {
      * 
      * @return a response associated to the operation handled.
      */
-    public abstract ResponseOperation handle(StructuredOverlay overlay);
+    ResponseOperation handle(StructuredOverlay overlay);
 
 }

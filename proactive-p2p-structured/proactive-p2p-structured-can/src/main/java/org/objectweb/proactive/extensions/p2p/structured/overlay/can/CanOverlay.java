@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
@@ -371,13 +370,6 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      */
     @SuppressWarnings("unchecked")
     public JoinIntroduceResponseOperation<E> handleJoinIntroduceMessage(JoinIntroduceOperation<E> msg) {
-        if (!super.activated.get()) {
-            throw new PeerNotActivatedRuntimeException();
-        } else if (this.peerLeavingId.get() != null
-                || !this.peerJoiningId.compareAndSet(null, msg.getPeerID())) {
-            throw new ConcurrentModificationException();
-        }
-
         byte dimension = 0;
         // TODO: choose the direction according to the number of triples to
         // transfer
@@ -535,9 +527,8 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      * {@inheritDoc}
      */
     @Override
-    public boolean create() {
+    public void create() {
         this.zone = this.newZone();
-        return true;
     }
 
     protected abstract Zone<E> newZone();
@@ -549,30 +540,13 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      * 
      * @param landmarkPeer
      *            the landmark node to join.
-     * 
-     * @return {@code true} when the join operation succeed and {@code false}
-     *         when the peer receiving the operation is already handling a
-     *         join/leave operation or when the landmarkPeer is not activated.
      */
     @Override
     @SuppressWarnings("unchecked")
-    public boolean join(Peer landmarkPeer) {
-        JoinIntroduceResponseOperation<E> response = null;
-        try {
-            response =
-                    (JoinIntroduceResponseOperation<E>) PAFuture.getFutureValue(landmarkPeer.receiveImmediateService(new JoinIntroduceOperation<E>(
-                            super.id, super.stub)));
-        } catch (PeerNotActivatedRuntimeException e) {
-            log.error(
-                    "Landmark peer {} to join is not activated",
-                    landmarkPeer.getId());
-            return false;
-        } catch (ConcurrentModificationException e) {
-            log.error(
-                    "Peer {} is already handling a join operation for peer {}",
-                    landmarkPeer.getId(), super.id);
-            return false;
-        }
+    public void join(Peer landmarkPeer) {
+        JoinIntroduceResponseOperation<E> response =
+                (JoinIntroduceResponseOperation<E>) PAFuture.getFutureValue(landmarkPeer.receive(new JoinIntroduceOperation<E>(
+                        super.id, super.stub)));
 
         this.zone = response.getZone();
         this.splitHistory = response.getSplitHistory();
@@ -580,7 +554,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         this.assignDataReceived(response.getData());
 
-        PAFuture.waitFor(landmarkPeer.receiveImmediateService(new JoinWelcomeOperation<E>()));
+        PAFuture.waitFor(landmarkPeer.receive(new JoinWelcomeOperation<E>()));
 
         // notify the neighbors that the current peer has joined
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -597,27 +571,15 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                 }
             }
         }
-
-        return true;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean leave() {
+    public void leave() {
         if (this.neighborTable.size() == 0) {
-            return true;
-        }
-
-        synchronized (this) {
-            if (this.peerLeavingId.get() != null
-                    || this.peerJoiningId.get() != null) {
-                this.retryLeave();
-                return false;
-            } else {
-                this.peerLeavingId.set(super.id);
-            }
+            return;
         }
 
         NeighborEntry<E> suitableNeighbor =
@@ -625,7 +587,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         if (suitableNeighbor == null) {
             this.retryLeave();
-            return false;
+            return;
         } else {
             HomogenousPair<Byte> neighborDimDir =
                     this.neighborTable.findDimensionAndDirection(suitableNeighbor.getId());
@@ -659,7 +621,6 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                     "Peer {} has left the network and the zone has been taken over by {}",
                     this, suitableNeighbor.getZone());
             this.peerLeavingId.set(null);
-            return true;
         }
     }
 
@@ -720,7 +681,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                                 .values()
                                 .iterator();
                 while (it.hasNext()) {
-                    it.next().getStub().receiveImmediateService(
+                    it.next().getStub().receive(
                             new UpdateNeighborOperation<E>(
                                     this.getNeighborEntry(), dimension,
                                     getOppositeDirection(direction)));

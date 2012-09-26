@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -111,7 +110,7 @@ public class SubscribeProxyTest {
     /**
      * Test a basic subscription with concurrent publications.
      */
-    @Test
+    @Test(timeout = 60000)
     public void testSubscribeWithConcurrentPublications()
             throws EventCloudIdNotManaged {
         final int NB_PRODUCERS = 10;
@@ -123,7 +122,6 @@ public class SubscribeProxyTest {
         ScheduledExecutorService threadPool =
                 Executors.newScheduledThreadPool(NB_PRODUCERS);
 
-        List<ScheduledFuture<?>> futures = new ArrayList<ScheduledFuture<?>>();
         final AtomicInteger nbEventsPublished = new AtomicInteger();
 
         // simulates producers publishing at different rates
@@ -169,10 +167,6 @@ public class SubscribeProxyTest {
                     e.printStackTrace();
                 }
             }
-        }
-
-        for (ScheduledFuture<?> future : futures) {
-            future.cancel(true);
         }
 
         threadPool.shutdown();

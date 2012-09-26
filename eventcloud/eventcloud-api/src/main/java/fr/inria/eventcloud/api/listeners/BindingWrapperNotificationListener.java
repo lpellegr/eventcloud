@@ -27,7 +27,7 @@ import fr.inria.eventcloud.api.wrappers.BindingWrapper;
  * 
  * @author bsauvan
  */
-public abstract class BindingWrapperNotificationListener implements
+public abstract class BindingWrapperNotificationListener extends
         NotificationListener<BindingWrapper> {
 
     private static final long serialVersionUID = 1L;

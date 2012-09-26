@@ -71,7 +71,13 @@ public class UriGenerator extends Generator {
      */
     public static String random(int length, String schemeName) {
         StringBuilder result = new StringBuilder(schemeName);
-        result.append("://");
+        char[] table =
+                {
+                        (char) 100, (char) 7000, (char) 13500, (char) 20000,
+                        (char) 26500, (char) 31000, (char) 39500, (char) 46000,
+                        (char) 52500, (char) 59000, (char) 63000};
+        char rand = table[(int) Math.floor(Math.random() * table.length)];
+        result.append("://" + rand);
         result.append(StringGenerator.random(
                 length, StringGenerator.ALPHANUMERIC_RANGES));
 

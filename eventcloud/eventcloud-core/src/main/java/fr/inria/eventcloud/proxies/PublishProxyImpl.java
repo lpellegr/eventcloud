@@ -20,9 +20,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
+import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.Group;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +35,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.parsers.RdfParser;
@@ -44,6 +50,7 @@ import fr.inria.eventcloud.utils.Callback;
  * 
  * @see ProxyFactory
  */
+@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
 public class PublishProxyImpl extends Proxy implements PublishProxy,
         PublishProxyAttributeController {
 
@@ -82,18 +89,18 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void publish(Quadruple quad) {
         if (quad.getPublicationTime() == -1) {
             quad.setPublicationTime();
         }
+
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
             log.info("About to publish quad : " + quad.getSubject() + " "
                     + quad.getPredicate() + " " + quad.getObject());
         }
-        // TODO: use an asynchronous call with no response (see issue 16)
-
         // the quadruple is routed without taking into account the publication
-        // datetime
+        // datetime (neither the other meta information)
         super.sendv(new PublishQuadrupleRequest(quad));
     }
 
@@ -101,6 +108,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void publish(CompoundEvent event) {
         long publicationTime = System.currentTimeMillis();
         /*
@@ -118,6 +126,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void publish(Collection<CompoundEvent> events) {
         for (CompoundEvent event : events) {
             this.publish(event);
@@ -128,6 +137,7 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void publish(InputStream in, SerializationFormat format) {
         RdfParser.parse(in, format, new Callback<Quadruple>() {
             @Override
@@ -135,6 +145,16 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
                 PublishProxyImpl.this.publish(quad);
             }
         });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_PUBLISH_PROXIES.getValue(),
+                false, false);
     }
 
     /**

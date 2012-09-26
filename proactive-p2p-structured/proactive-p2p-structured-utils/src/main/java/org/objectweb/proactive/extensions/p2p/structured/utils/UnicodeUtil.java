@@ -23,53 +23,139 @@ import java.util.List;
  * 
  * @author lpellegr
  */
-public class UnicodeUtil {
+public final class UnicodeUtil {
 
     /**
-     * Makes an unicode string printable by replacing each character to their
-     * unicode representation thanks to the \\u notation.
+     * Returns a representation of the specified {@code string} by using the
+     * Unicode notation.
      * 
      * @param string
-     *            the unicode string to make printable.
+     *            the string value.
      * 
-     * @return a printable unicode string where each character is replace to its
-     *         unicode representation thanks to the \\u notation.
+     * @return a representation that uses the unicode notation.
      */
-    public static String makePrintable(String string) {
-        return makePrintable(fromStringToCodePoints(string));
+    public static String toStringUtf32(String string) {
+        return toStringUtf32(toCodePointArray(string));
     }
 
-    public static String makePrintable(int[] codePoints) {
-        StringBuilder result = new StringBuilder();
+    public static String toStringUtf32(int... codePoints) {
+        StringBuilder result = new StringBuilder(codePoints.length);
 
-        int codePoint;
-        for (int i = 0; i < codePoints.length; i++) {
-            codePoint = codePoints[i];
-
-            if (codePoint > 0xffff) {
-                result.append("\\u");
-                appendCodePointRepresentation(result, codePoint);
-            } else if (codePoint > 0xfff) {
-                result.append("\\u");
-                appendCodePointRepresentation(result, codePoint);
-            } else if (codePoint > 0xff) {
-                result.append("\\u0");
-                appendCodePointRepresentation(result, codePoint);
-            } else if (codePoint > 0xf) {
-                result.append("\\u00");
-                appendCodePointRepresentation(result, codePoint);
-            } else {
-                result.append("\\u000");
-                appendCodePointRepresentation(result, codePoint);
-            }
+        for (int codePoint : codePoints) {
+            result.append(getScalarValue(codePoint, true));
         }
 
         return result.toString();
     }
 
-    private static void appendCodePointRepresentation(StringBuilder buffer,
-                                                      int codePoint) {
-        buffer.append(Integer.toHexString(codePoint));
+    /**
+     * Returns a representation of the specified {@code string} by using the
+     * Unicode notation.
+     * 
+     * @param string
+     *            the string value.
+     * 
+     * @return a representation that uses the unicode notation.
+     */
+    public static String toStringUtf16(String string) {
+        return toStringUtf16(toCodePointArray(string));
+    }
+
+    public static String toStringUtf16(int... codePoints) {
+        StringBuilder result = new StringBuilder(codePoints.length);
+
+        for (int codePoint : codePoints) {
+            result.append(getScalarValueUtf16(codePoint));
+        }
+
+        return result.toString();
+    }
+
+    public static String getScalarValueUtf16(int codePoint) {
+        if (Character.isSupplementaryCodePoint(codePoint)) {
+            return getScalarValue(highSurrogate(codePoint), false)
+                    + getScalarValue(lowSurrogate(codePoint), false);
+        } else {
+            return getScalarValue(codePoint, false);
+        }
+    }
+
+    private static String getScalarValue(int codePoint,
+                                         boolean maybeSupplementaryCharacter) {
+        if (!Character.isValidCodePoint(codePoint)) {
+            throw new IllegalArgumentException("Invalid code point: "
+                    + codePoint);
+        }
+
+        String hexValue = Integer.toHexString(codePoint);
+
+        int nbZeros = 4 - hexValue.length();
+
+        if (maybeSupplementaryCharacter) {
+            nbZeros = 6 - hexValue.length();
+        }
+
+        StringBuilder result = new StringBuilder("\\u");
+        for (int i = 0; i < nbZeros; i++) {
+            result.append('0');
+        }
+        result.append(hexValue.toUpperCase());
+
+        return result.toString();
+    }
+
+    /*
+     * The following two methods have been copied from JDK7
+     */
+
+    /**
+     * Returns the leading surrogate (a <a
+     * href="http://www.unicode.org/glossary/#high_surrogate_code_unit"> high
+     * surrogate code unit</a>) of the <a
+     * href="http://www.unicode.org/glossary/#surrogate_pair"> surrogate
+     * pair</a> representing the specified supplementary character (Unicode code
+     * point) in the UTF-16 encoding. If the specified character is not a <a
+     * href="Character.html#supplementary">supplementary character</a>, an
+     * unspecified {@code char} is returned.
+     * <p>
+     * If {@link #isSupplementaryCodePoint isSupplementaryCodePoint(x)} is
+     * {@code true}, then {@link #isHighSurrogate isHighSurrogate}
+     * {@code (highSurrogate(x))} and {@link #toCodePoint toCodePoint}
+     * {@code (highSurrogate(x), }{@link #lowSurrogate lowSurrogate}
+     * {@code (x)) == x} are also always {@code true}.
+     * 
+     * @param codePoint
+     *            a supplementary character (Unicode code point)
+     * @return the leading surrogate code unit used to represent the character
+     *         in the UTF-16 encoding
+     */
+    public static char highSurrogate(int codePoint) {
+        return (char) ((codePoint >>> 10) + (Character.MIN_HIGH_SURROGATE - (Character.MIN_SUPPLEMENTARY_CODE_POINT >>> 10)));
+    }
+
+    /**
+     * Returns the trailing surrogate (a <a
+     * href="http://www.unicode.org/glossary/#low_surrogate_code_unit"> low
+     * surrogate code unit</a>) of the <a
+     * href="http://www.unicode.org/glossary/#surrogate_pair"> surrogate
+     * pair</a> representing the specified supplementary character (Unicode code
+     * point) in the UTF-16 encoding. If the specified character is not a <a
+     * href="Character.html#supplementary">supplementary character</a>, an
+     * unspecified {@code char} is returned.
+     * <p>
+     * If {@link #isSupplementaryCodePoint isSupplementaryCodePoint(x)} is
+     * {@code true}, then {@link #isLowSurrogate isLowSurrogate}
+     * {@code (lowSurrogate(x))} and {@link #toCodePoint toCodePoint}{@code (}
+     * {@link #highSurrogate highSurrogate}{@code (x), lowSurrogate(x)) == x}
+     * are also always {@code true}.
+     * 
+     * @param codePoint
+     *            a supplementary character (Unicode code point)
+     * @return the trailing surrogate code unit used to represent the character
+     *         in the UTF-16 encoding
+     */
+    public static char lowSurrogate(int codePoint) {
+        return (char) ((codePoint & 0x3ff) + Character.MIN_LOW_SURROGATE);
     }
 
     /**
@@ -80,18 +166,34 @@ public class UnicodeUtil {
      * 
      * @return an array of unicode code points.
      */
-    public static int[] fromStringToCodePoints(String string) {
-        int[] result = new int[string.length()];
+    public static int[] toCodePointArray(String string) {
+        // the char array is copied from the string using toCharArray() because
+        // direct access to an array is faster than indirect access through a
+        // method
+        char[] sarray = string.toCharArray();
 
-        for (int i = 0; i < string.length();) {
-            int codePoint = string.codePointAt(i);
+        int[] result =
+                new int[Character.codePointCount(sarray, 0, sarray.length)];
 
-            result[i] = codePoint;
-
-            i += Character.charCount(codePoint);
+        for (int i = 0, j = 0, codePoint = 0; i < sarray.length; i +=
+                Character.charCount(codePoint)) {
+            codePoint = Character.codePointAt(sarray, i);
+            result[j++] = codePoint;
         }
 
         return result;
+    }
+
+    /**
+     * Transforms an array of unicode code points to a String.
+     * 
+     * @param codePoints
+     *            the array to transform.
+     * 
+     * @return a String.
+     */
+    public static String toString(int... codePoints) {
+        return new String(codePoints, 0, codePoints.length);
     }
 
     /**
@@ -102,14 +204,14 @@ public class UnicodeUtil {
      * 
      * @return a String.
      */
-    public static String fromCodePointsToString(List<Integer> codePoints) {
-        StringBuilder result = new StringBuilder(codePoints.size());
+    public static String toString(List<Integer> codePoints) {
+        int[] cpa = new int[codePoints.size()];
 
-        for (int codePoint : codePoints) {
-            result.append(Character.toChars(codePoint));
+        for (int i = 0; i < codePoints.size(); i++) {
+            cpa[i] = codePoints.get(i);
         }
 
-        return result.toString();
+        return toString(cpa);
     }
 
 }

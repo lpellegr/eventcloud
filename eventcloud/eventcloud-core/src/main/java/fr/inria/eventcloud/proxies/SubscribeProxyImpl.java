@@ -29,12 +29,16 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.jdbm.DB;
 import org.apache.jdbm.DBMaker;
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.Group;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +83,7 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  * 
  * @see ProxyFactory
  */
+@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
 public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         SubscribeProxy, SubscribeProxyAttributeController {
 
@@ -132,9 +137,18 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         // configuration should be done in the ProActive source code.
         body.setImmediateService("setImmediateServices", false);
         body.setImmediateService("setAttributes", false);
-        body.setImmediateService("receive", false);
 
         this.createAndRegisterEventIdsReceivedDB(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
+                false, false);
     }
 
     /**
@@ -209,13 +223,13 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
             this.eventIdsReceivedDB.close();
         }
-
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public <T> void subscribe(fr.inria.eventcloud.api.Subscription subscription,
                               NotificationListener<T> listener) {
         String sparqlQuery = subscription.getSparqlQuery();
@@ -237,10 +251,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                         subscription.getSubscriptionDestination(),
                         listener.getType());
 
-        NotificationListener<?> result =
-                this.listeners.put(subscription.getId(), listener);
-
-        if (result != null) {
+        if (this.listeners.put(subscription.getId(), listener) != null) {
             // same subscription with same creation time
             throw new IllegalArgumentException(
                     "Listener already exists for subscription id: "
@@ -369,6 +380,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void unsubscribe(SubscriptionId id) {
         if (!this.subscriptions.containsKey(id)) {
             throw new IllegalArgumentException(
@@ -494,7 +506,8 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
     private void sendInputOutputMonitoringReportIfNecessary(SubscriptionId id,
                                                             Solution solution,
                                                             String subscriberUrl) {
-        Subscription subscription = this.subscriptions.get(id);
+        Subscription subscription;
+        subscription = this.subscriptions.get(id);
 
         Node eventId =
                 this.extractEventId(subscription, solution.getSolution());
@@ -508,8 +521,9 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                                                  Binding binding,
                                                  String subscriberUrl) {
         if (super.monitoringManager != null) {
-            Node eventId =
-                    this.extractEventId(this.subscriptions.get(id), binding);
+            Subscription subscription = this.subscriptions.get(id);
+
+            Node eventId = this.extractEventId(subscription, binding);
 
             this.sendInputOutputMonitoringReport(eventId, subscriberUrl);
         }
@@ -537,6 +551,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void receive(Notification notification) {
         SubscriptionId subscriptionId =
                 notification.getId().getSubscriptionId();
@@ -593,6 +608,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public Subscription find(SubscriptionId id) {
         return this.subscriptions.get(id);
     }
@@ -602,6 +618,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
      * 
      * @return the URI at which the component is bind.
      */
+    @MemberOf("parallel")
     public String getComponentUri() {
         return this.componentUri;
     }

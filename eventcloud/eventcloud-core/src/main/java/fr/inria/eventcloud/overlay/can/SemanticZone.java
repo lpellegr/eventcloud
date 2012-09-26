@@ -30,8 +30,8 @@ public final class SemanticZone extends UnicodeZone<SemanticElement> {
 
     public SemanticZone() {
         super(
-                SemanticCoordinateFactory.newSemanticCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValue()),
-                SemanticCoordinateFactory.newSemanticCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValue()));
+                SemanticCoordinateFactory.newSemanticCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()),
+                SemanticCoordinateFactory.newSemanticCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()));
     }
 
     /**

@@ -23,11 +23,17 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.Compatible;
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.DefineRules;
+import org.objectweb.proactive.annotation.multiactivity.Group;
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -47,6 +53,10 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * @author lpellegr
  * @author bsauvan
  */
+@DefineGroups({
+        @Group(name = "parallel", selfCompatible = true),
+        @Group(name = "deployers", selfCompatible = false)})
+@DefineRules({@Compatible(value = {"deployers", "parallel"})})
 public class EventCloudsRegistryImpl extends AbstractComponent implements
         EventCloudsRegistry {
 
@@ -89,12 +99,16 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
         this.eventCloudDeployers =
                 new HashMap<EventCloudId, EventCloudDeployer>();
         this.registryUrl = null;
+    }
 
-        body.setImmediateService("registerProxy", false);
-        body.setImmediateService("unregisterProxy", false);
-        body.setImmediateService("getPublishProxies", false);
-        body.setImmediateService("getPutGetProxies", false);
-        body.setImmediateService("getSubscribeProxies", false);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        new MultiActiveService(body).multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY.getValue(),
+                false, false);
     }
 
     /**
@@ -121,6 +135,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public boolean register(EventCloudDeployer deployer) {
         if (this.eventCloudDeployers.containsKey(deployer.getEventCloudDescription()
                 .getId())) {
@@ -135,17 +150,18 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public Set<EventCloudId> listEventClouds() {
         // returns an immutable copy because this.eventCloudDeployers.keySet()
         // sends back a non-serializable set
         return ImmutableSet.copyOf(this.eventCloudDeployers.keySet());
-
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public boolean contains(EventCloudId id) {
         return this.eventCloudDeployers.containsKey(id);
     }
@@ -154,6 +170,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public EventCloudDeployer find(EventCloudId id) {
         return this.eventCloudDeployers.get(id);
     }
@@ -162,6 +179,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public List<Tracker> findTrackers(EventCloudId id) {
         if (this.contains(id)) {
             return this.eventCloudDeployers.get(id).getTrackers();
@@ -174,6 +192,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public void registerProxy(EventCloudId id, PublishProxy proxy) {
         this.checkEventCloudIdAndRetrieveNetworkDeployer(id).registerProxy(
                 proxy);
@@ -183,6 +202,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public void registerProxy(EventCloudId id, PutGetProxy proxy) {
         this.checkEventCloudIdAndRetrieveNetworkDeployer(id).registerProxy(
                 proxy);
@@ -192,6 +212,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public void registerProxy(EventCloudId id, SubscribeProxy proxy) {
         this.checkEventCloudIdAndRetrieveNetworkDeployer(id).registerProxy(
                 proxy);
@@ -201,6 +222,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public List<PublishProxy> getPublishProxies(EventCloudId id) {
         this.checkEventCloudId(id);
 
@@ -211,6 +233,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public List<PutGetProxy> getPutGetProxies(EventCloudId id) {
         this.checkEventCloudId(id);
 
@@ -221,6 +244,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public List<SubscribeProxy> getSubscribeProxies(EventCloudId id) {
         this.checkEventCloudId(id);
 
@@ -231,6 +255,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public boolean unregisterProxy(EventCloudId id, PublishProxy proxy) {
         return this.checkEventCloudIdAndRetrieveNetworkDeployer(id)
                 .unregisterProxy(proxy);
@@ -240,6 +265,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public boolean unregisterProxy(EventCloudId id, PutGetProxy proxy) {
         return this.checkEventCloudIdAndRetrieveNetworkDeployer(id)
                 .unregisterProxy(proxy);
@@ -249,11 +275,13 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public boolean unregisterProxy(EventCloudId id, SubscribeProxy proxy) {
         return this.checkEventCloudIdAndRetrieveNetworkDeployer(id)
                 .unregisterProxy(proxy);
     }
 
+    @MemberOf("deployers")
     private void checkEventCloudId(EventCloudId id) {
         if (!this.contains(id)) {
             throw new IllegalArgumentException(
@@ -261,6 +289,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
         }
     }
 
+    @MemberOf("deployers")
     private EventCloudDeployer checkEventCloudIdAndRetrieveNetworkDeployer(EventCloudId id) {
         this.checkEventCloudId(id);
 
@@ -279,6 +308,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("deployers")
     public boolean undeploy(EventCloudId id) {
         EventCloudDeployer deployer = this.eventCloudDeployers.remove(id);
 
@@ -308,6 +338,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
      *             instead.
      */
     @Deprecated
+    @MemberOf("parallel")
     public static EventCloudsRegistry lookup(String componentUri)
             throws IOException {
         return EventCloudsRegistryFactory.lookupEventCloudsRegistry(componentUri);
