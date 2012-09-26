@@ -417,6 +417,11 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         }
 
         log.info("Notification {} has been delivered", id);
+        /*
+         * log information for integration test purposes
+         * TODO: check if the event ID is correct
+         */
+        log.info("EventCloud Exit "+Quadruple.removeMetaInformation(extractEventId(this.subscriptions.get(id.getSubscriptionId()),solution.getSolution())));
     }
 
     private final void deliver(NotificationId id,
@@ -470,6 +475,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
         this.sendInputOutputMonitoringReportIfNecessary(
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
+        
     }
 
     /**

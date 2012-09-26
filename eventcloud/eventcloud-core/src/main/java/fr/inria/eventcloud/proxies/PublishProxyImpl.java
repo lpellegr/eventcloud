@@ -103,7 +103,11 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
     @Override
     public void publish(CompoundEvent event) {
         long publicationTime = System.currentTimeMillis();
-
+        /*
+         * Log information for integration test purposes 
+         */
+        log.info("EventCloud Entry "+event.getGraph());
+        
         for (Quadruple quad : event) {
             quad.setPublicationTime(publicationTime);
             this.publish(quad);
