@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements;
 
-import org.apfloat.Apfloat;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -111,32 +110,6 @@ public class StringElementTest {
             middleElement = Element.middle(middleElement, this.eltB);
             Assert.assertTrue(middleElement.compareTo(this.eltB) < 0);
         }
-    }
-
-    @Test
-    public void testGetUnicodeRepresentation() {
-        StringElement elt1 = new StringElement("a");
-        StringElement elt2 = new StringElement("ab");
-
-        String elt1UnicodeRepresentation = elt1.getUnicodeRepresentation();
-        String elt2UnicodeRepresentation = elt2.getUnicodeRepresentation();
-
-        Assert.assertTrue(elt1UnicodeRepresentation.length() < elt2UnicodeRepresentation.length());
-    }
-
-    @Test
-    public void testStringElementU0000() {
-        String MIN_CODEPOINT_STRING =
-                Character.toString((char) Character.MIN_CODE_POINT);
-
-        Assert.assertEquals(MIN_CODEPOINT_STRING, new StringElement(
-                MIN_CODEPOINT_STRING).getUnicodeRepresentation());
-    }
-
-    @Test
-    public void testToFloatRadix10_1() {
-        StringElement se = new StringElement("a");
-        Assert.assertEquals(new Apfloat('a'), se.apfloat);
     }
 
 }

@@ -434,7 +434,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         if (log.isInfoEnabled()) {
             log.info(
                     "EventCloud Exit {}",
-                    Quadruple.removeMetaInformation(extractEventId(
+                    Quadruple.removeMetaInformation(this.extractEventId(
                             this.subscriptions.get(id.getSubscriptionId()),
                             solution.getSolution())));
         }
