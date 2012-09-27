@@ -89,7 +89,7 @@ public class P2PStructuredProperties {
      * The property is set by default to {@code decimal}.
      */
     public static final PropertyString CAN_ELEMENT_DISPLAY =
-            new PropertyString("can.element.display", "decimal");
+            new PropertyString("can.element.display", "codepoints");
 
     /**
      * Defines the soft limit used by each peer that runs with multi active

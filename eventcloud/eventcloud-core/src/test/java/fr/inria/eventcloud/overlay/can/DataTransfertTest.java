@@ -110,39 +110,35 @@ public class DataTransfertTest {
                 res.getFirst()
                         .getLowerBound()
                         .getElement(dimensionSplit)
-                        .getUnicodeRepresentation();
+                        .getValue();
 
         String elt2 =
                 new String(Character.toChars(res.getSecond()
                         .getLowerBound()
                         .getElement(dimensionSplit)
-                        .getUnicodeRepresentation()
+                        .getValue()
                         .codePointAt(0) + 1));
 
         Node node1 = Node.createURI(elt1);
         Node node2 = Node.createURI(elt2);
 
         Quadruple quadruple1 =
-                new Quadruple(
-                        node1, Node.createURI(res.getFirst().getLowerBound(
-                                (byte) 1).getUnicodeRepresentation()),
-                        Node.createURI(res.getFirst()
-                                .getLowerBound((byte) 2)
-                                .getUnicodeRepresentation()),
-                        Node.createURI(res.getFirst()
-                                .getLowerBound((byte) 3)
-                                .getUnicodeRepresentation()));
+                new Quadruple(node1, Node.createURI(res.getFirst()
+                        .getLowerBound((byte) 1)
+                        .getValue()), Node.createURI(res.getFirst()
+                        .getLowerBound((byte) 2)
+                        .getValue()), Node.createURI(res.getFirst()
+                        .getLowerBound((byte) 3)
+                        .getValue()));
 
         Quadruple quadruple2 =
-                new Quadruple(
-                        node2, Node.createURI(res.getSecond().getLowerBound(
-                                (byte) 1).getUnicodeRepresentation()),
-                        Node.createURI(res.getSecond()
-                                .getLowerBound((byte) 2)
-                                .getUnicodeRepresentation()),
-                        Node.createURI(res.getSecond()
-                                .getLowerBound((byte) 3)
-                                .getUnicodeRepresentation()));
+                new Quadruple(node2, Node.createURI(res.getSecond()
+                        .getLowerBound((byte) 1)
+                        .getValue()), Node.createURI(res.getSecond()
+                        .getLowerBound((byte) 2)
+                        .getValue()), Node.createURI(res.getSecond()
+                        .getLowerBound((byte) 3)
+                        .getValue()));
 
         log.debug(
                 "First generated quadruple is {}",
@@ -219,7 +215,7 @@ public class DataTransfertTest {
                 res.getSecond()
                         .getLowerBound()
                         .getElement(dimension)
-                        .getUnicodeRepresentation();
+                        .getValue();
 
         // do not use the first zone because low characters are forbidden in
         // IRIs

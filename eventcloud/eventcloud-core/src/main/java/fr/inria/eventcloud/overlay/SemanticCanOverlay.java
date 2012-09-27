@@ -507,22 +507,14 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private List<Quadruple> retrieveSubscriptionsIn(Zone<SemanticElement> zone,
                                                     boolean remove) {
-        String graphLowerBound =
-                zone.getLowerBound((byte) 0).getUnicodeRepresentation();
-        String graphUpperBound =
-                zone.getUpperBound((byte) 0).getUnicodeRepresentation();
-        String subjectLowerBound =
-                zone.getLowerBound((byte) 1).getUnicodeRepresentation();
-        String subjectUpperBound =
-                zone.getUpperBound((byte) 1).getUnicodeRepresentation();
-        String predicateLowerBound =
-                zone.getLowerBound((byte) 2).getUnicodeRepresentation();
-        String predicateUpperBound =
-                zone.getUpperBound((byte) 2).getUnicodeRepresentation();
-        String objectLowerBound =
-                zone.getLowerBound((byte) 3).getUnicodeRepresentation();
-        String objectUpperBound =
-                zone.getUpperBound((byte) 3).getUnicodeRepresentation();
+        String graphLowerBound = zone.getLowerBound((byte) 0).getValue();
+        String graphUpperBound = zone.getUpperBound((byte) 0).getValue();
+        String subjectLowerBound = zone.getLowerBound((byte) 1).getValue();
+        String subjectUpperBound = zone.getUpperBound((byte) 1).getValue();
+        String predicateLowerBound = zone.getLowerBound((byte) 2).getValue();
+        String predicateUpperBound = zone.getUpperBound((byte) 2).getValue();
+        String objectLowerBound = zone.getLowerBound((byte) 3).getValue();
+        String objectUpperBound = zone.getUpperBound((byte) 3).getValue();
 
         TransactionalDatasetGraph txnGraph =
                 this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);

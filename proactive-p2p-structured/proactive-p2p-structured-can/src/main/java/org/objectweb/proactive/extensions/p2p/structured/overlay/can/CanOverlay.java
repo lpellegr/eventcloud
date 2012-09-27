@@ -152,18 +152,19 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      * @see CanOverlay#neighborsVerifyingDimensions(Collection, Coordinate,
      *      byte)
      */
-    public NeighborEntry<E> nearestNeighbor(Coordinate<E> coordinate,
-                                            byte dimension, byte direction) {
+    public final NeighborEntry<E> nearestNeighbor(Coordinate<E> coordinate,
+                                                  byte dimension, byte direction) {
         List<NeighborEntry<E>> neighbors =
                 this.neighborsVerifyingDimensions(this.neighborTable.get(
                         dimension, direction).values(), coordinate, dimension);
 
         // no neighbors satisfying the coordinate on the specified dimension AND
         // direction
-        if (neighbors.isEmpty() && log.isDebugEnabled()) {
-            log.debug("No neighbors satisfying the coordinate " + coordinate
-                    + " on the specified dimension " + dimension
-                    + " AND direction " + direction + ", " + this.dump());
+        if (neighbors.size() == 0) {
+            throw new IllegalStateException(
+                    "No neighbor to route to for coordinate " + coordinate
+                            + " on dimension " + dimension + " and direction "
+                            + direction + " , dump is:\n{}" + this.dump());
         }
 
         // from neighbors which verify the dimensions get those which
@@ -172,15 +173,10 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             neighbors = this.neighborsWithBestRank(neighbors, coordinate);
         }
 
-        if (neighbors.size() == 0) {
-            log.error(
-                    "No neighbor to route to for coordinate {} on dimension {} and direction {}, dump is:\n{}",
-                    new Object[] {coordinate, dimension, direction, this.dump()});
-        }
-
         // TODO: choose a metric to evaluate the nearest peer
         NeighborEntry<E> entry =
                 neighbors.get(RandomUtils.nextInt(neighbors.size()));
+
         if (log.isDebugEnabled()) {
             if (this.zone.neighbors(entry.getZone()) == -1) {
                 log.error("Neighbor chosen to route the message is "
@@ -205,7 +201,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      * @param coordinate
      *            the coordinate used to filter the neighbors by rank.
      * 
-     * @return a list of neighbors with the best rank
+     * @return a list of neighbors with the best rank.
      */
     private List<NeighborEntry<E>> neighborsWithBestRank(List<NeighborEntry<E>> neighbors,
                                                          Coordinate<E> coordinate) {

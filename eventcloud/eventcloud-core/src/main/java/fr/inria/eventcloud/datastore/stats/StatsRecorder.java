@@ -19,7 +19,7 @@ package fr.inria.eventcloud.datastore.stats;
 import java.io.Serializable;
 
 import org.apfloat.Apfloat;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtil;
 
 import com.hp.hpl.jena.graph.Node;
 
@@ -97,7 +97,7 @@ public abstract class StatsRecorder implements Serializable {
     }
 
     protected static Apfloat toRadix10(Node n) {
-        return StringElement.toFloatRadix10(SemanticElement.removePrefix(n));
+        return ApfloatUtil.toFloatRadix10(SemanticElement.removePrefix(n));
     }
 
 }

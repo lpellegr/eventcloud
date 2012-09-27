@@ -26,6 +26,45 @@ import java.util.List;
 public final class UnicodeUtil {
 
     /**
+     * Compares two strings lexicographically by using the UTF-32 representation
+     * (i.e. directly the code point value) in contrast to the
+     * {@link String#compareTo(String)} method that uses the UTF-16
+     * representation.
+     * 
+     * @param s1
+     *            a string to be compared.
+     * @param s2
+     *            a string to be compared.
+     * 
+     * @return the value <code>0</code> if the argument string is equal to this
+     *         string; a value less than <code>0</code> if this string is
+     *         lexicographically less than the string argument; and a value
+     *         greater than <code>0</code> if this string is lexicographically
+     *         greater than the string argument.
+     */
+    public static int compareUtf32(String s1, String s2) {
+        int[] cpts1 = toCodePointArray(s1);
+        int[] cpts2 = toCodePointArray(s2);
+
+        int len1 = cpts1.length;
+        int len2 = cpts2.length;
+
+        int min = Math.min(len1, len2);
+
+        for (int i = 0; i < min; i++) {
+            int c1 = cpts1[i];
+            int c2 = cpts2[i];
+
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+        }
+
+        return len1 - len2;
+
+    }
+
+    /**
      * Returns a representation of the specified {@code string} by using the
      * Unicode notation.
      * 
