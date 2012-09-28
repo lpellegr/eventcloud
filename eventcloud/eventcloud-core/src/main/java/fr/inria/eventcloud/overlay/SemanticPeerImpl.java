@@ -35,7 +35,7 @@ import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -217,7 +217,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     @MemberOf("parallel")
-    public long count(String sparqlQuery) throws MalformedSparqlQuery {
+    public long count(String sparqlQuery) throws MalformedSparqlQueryException {
         SparqlResponse<?> response = this.executeSparqlQuery(sparqlQuery);
 
         if (response instanceof SparqlAskResponse) {
@@ -263,7 +263,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @Override
     @MemberOf("parallel")
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         sparqlQuery = sparqlQuery.trim();
 
         if (sparqlQuery.startsWith("ASK")) {
@@ -286,7 +286,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @Override
     @MemberOf("parallel")
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(
                 sparqlAskQuery, super.overlay);
     }
@@ -297,7 +297,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @Override
     @MemberOf("parallel")
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(
                 sparqlConstruct, super.overlay);
     }
@@ -308,7 +308,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @Override
     @MemberOf("parallel")
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         throw new UnsupportedOperationException();
     }
 
@@ -318,7 +318,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @Override
     @MemberOf("parallel")
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(
                 sparqlSelect, super.overlay);
     }

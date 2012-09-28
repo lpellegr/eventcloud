@@ -40,7 +40,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
@@ -207,7 +207,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlAsk() throws MalformedSparqlQuery {
+    public void testExecuteSparqlAsk() throws MalformedSparqlQueryException {
         Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
@@ -227,7 +227,8 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlConstruct() throws MalformedSparqlQuery {
+    public void testExecuteSparqlConstruct()
+            throws MalformedSparqlQueryException {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         Quadruple quadruple;
@@ -247,7 +248,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect1() throws MalformedSparqlQuery {
+    public void testExecuteSparqlSelect1() throws MalformedSparqlQueryException {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         Quadruple quadruple;
@@ -286,7 +287,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect2() throws MalformedSparqlQuery {
+    public void testExecuteSparqlSelect2() throws MalformedSparqlQueryException {
         for (int i = 0; i < 100; i++) {
             super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
         }
@@ -301,7 +302,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect3() throws MalformedSparqlQuery {
+    public void testExecuteSparqlSelect3() throws MalformedSparqlQueryException {
         for (int i = 0; i < 10; i++) {
             super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
         }
@@ -332,7 +333,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect4() throws MalformedSparqlQuery {
+    public void testExecuteSparqlSelect4() throws MalformedSparqlQueryException {
         for (int i = 0; i < 5; i++) {
             super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
         }
@@ -352,7 +353,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect5() throws MalformedSparqlQuery {
+    public void testExecuteSparqlSelect5() throws MalformedSparqlQueryException {
         for (int i = 0; i < 5; i++) {
             super.getRandomSemanticPeer().add(
                     QuadrupleGenerator.randomWithLiteral());
@@ -389,7 +390,8 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlWithEmptyNetwork() throws MalformedSparqlQuery {
+    public void testExecuteSparqlWithEmptyNetwork()
+            throws MalformedSparqlQueryException {
         Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
@@ -410,7 +412,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
     @Test
     public void testExecuteSparqlWithConjunctionsAndOneJoinVariable()
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         Node commonURI = NodeGenerator.randomUri();
         Node graphValue = NodeGenerator.randomUri();
 
@@ -459,7 +461,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
     @Test
     public void testMeasurementsReturnedBySparqlQuery()
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         SparqlAskResponse response =
                 super.getRandomSemanticPeer().executeSparqlAsk(
                         "ASK { GRAPH ?g { ?s ?p ?o } }");

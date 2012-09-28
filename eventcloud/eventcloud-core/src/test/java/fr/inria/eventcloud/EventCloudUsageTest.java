@@ -37,7 +37,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -62,7 +62,7 @@ public class EventCloudUsageTest implements Serializable {
 
     @Test(timeout = 180000)
     public void testEventCloudInstantiationAndUsage()
-            throws EventCloudIdNotManaged, MalformedSparqlQuery {
+            throws EventCloudIdNotManaged, MalformedSparqlQueryException {
         // Creates and deploys an EventCloudsRegistry locally
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();

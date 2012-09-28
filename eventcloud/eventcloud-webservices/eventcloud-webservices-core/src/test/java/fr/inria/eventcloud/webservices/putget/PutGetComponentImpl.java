@@ -26,7 +26,7 @@ import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -137,7 +137,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
      */
     @Override
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         if (this.putgetWs != null) {
             return this.putgetWs.executeSparqlQuery(sparqlQuery);
         } else {
@@ -150,7 +150,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
      */
     @Override
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         if (this.putgetWs != null) {
             return this.putgetWs.executeSparqlAsk(sparqlAskQuery);
         } else {
@@ -163,7 +163,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
      */
     @Override
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         if (this.putgetWs != null) {
             return this.putgetWs.executeSparqlConstruct(sparqlConstructQuery);
         } else {
@@ -176,7 +176,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
      */
     @Override
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         if (this.putgetWs != null) {
             return this.putgetWs.executeSparqlDescribe(sparqlDescribeQuery);
         } else {
@@ -189,7 +189,7 @@ public class PutGetComponentImpl implements PutGetWsApi, BindingController {
      */
     @Override
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         if (this.putgetWs != null) {
             return this.putgetWs.executeSparqlSelect(sparqlSelectQuery);
         } else {

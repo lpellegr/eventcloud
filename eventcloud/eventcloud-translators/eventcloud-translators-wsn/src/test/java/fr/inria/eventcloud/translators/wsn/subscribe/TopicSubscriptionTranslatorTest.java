@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
@@ -67,7 +67,7 @@ public class TopicSubscriptionTranslatorTest {
                     .getURI());
 
             log.info("Translation output:\n" + sparqlQuery);
-        } catch (MalformedSparqlQuery e) {
+        } catch (MalformedSparqlQueryException e) {
             throw new IllegalStateException(e);
         }
 

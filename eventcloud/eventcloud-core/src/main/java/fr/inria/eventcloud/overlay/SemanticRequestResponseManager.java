@@ -37,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.Object
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
@@ -91,7 +91,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery,
                                               StructuredOverlay overlay)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlAskQuery);
 
@@ -120,7 +120,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery,
                                                           StructuredOverlay overlay)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlConstructQuery);
 
@@ -150,7 +150,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      */
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery,
                                                     StructuredOverlay overlay)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlSelectQuery);
 
