@@ -21,7 +21,7 @@ import java.util.List;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
 
@@ -38,7 +38,7 @@ public class SparqlReasoner {
     }
 
     public static List<SparqlAtomicRequest> parse(String sparqlQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         try {
             SparqlDecompositionResult sparqlDecompositionResult =
                     SparqlDecomposer.getInstance().decompose(sparqlQuery);
@@ -58,7 +58,7 @@ public class SparqlReasoner {
 
             return sparqlAtomicRequests;
         } catch (DecompositionException e) {
-            throw new MalformedSparqlQuery(sparqlQuery, e);
+            throw new MalformedSparqlQueryException(sparqlQuery, e);
         }
     }
 }

@@ -32,7 +32,7 @@ import org.ontoware.rdf2go.model.impl.QuadPatternImpl;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.Variable;
 
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 
 /**
  * Provides test cases for the {@link PutGetRdf2goAdapter}. This class provides
@@ -211,7 +211,8 @@ public class PutGetRdf2goAdapterTest extends
     }
 
     @Test
-    public void testExecuteSparqlConstruct() throws MalformedSparqlQuery {
+    public void testExecuteSparqlConstruct()
+            throws MalformedSparqlQueryException {
         for (int i = 0; i < 5; i++) {
             super.adapter.add(model.createStatement(
                     uri, uri, model.createPlainLiteral(Integer.toString(i))));
@@ -238,7 +239,7 @@ public class PutGetRdf2goAdapterTest extends
     }
 
     @Test
-    public void testExecuteSparqlSelect() throws MalformedSparqlQuery {
+    public void testExecuteSparqlSelect() throws MalformedSparqlQueryException {
         for (int i = 0; i < 5; i++) {
             super.adapter.add(model.createStatement(
                     uri, uri, model.createPlainLiteral(Integer.toString(i))));

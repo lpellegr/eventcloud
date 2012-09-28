@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -141,7 +141,7 @@ public interface PutGetApi {
      * 
      * @return the number of solutions for the specified {@code sparqlQuery}.
      */
-    public long count(String sparqlQuery) throws MalformedSparqlQuery;
+    public long count(String sparqlQuery) throws MalformedSparqlQueryException;
 
     /**
      * Finds all the quadruples that match the specified quadruple pattern.
@@ -164,7 +164,7 @@ public interface PutGetApi {
      * @return a response according the query form that has been executed.
      */
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
-            throws MalformedSparqlQuery;
+            throws MalformedSparqlQueryException;
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query that uses a ASK
@@ -176,7 +176,7 @@ public interface PutGetApi {
      * @return a response according the query form that has been executed.
      */
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
-            throws MalformedSparqlQuery;
+            throws MalformedSparqlQueryException;
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query that uses a
@@ -188,7 +188,7 @@ public interface PutGetApi {
      * @return a response according the query form that has been executed.
      */
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery)
-            throws MalformedSparqlQuery;
+            throws MalformedSparqlQueryException;
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query that uses a
@@ -200,7 +200,7 @@ public interface PutGetApi {
      * @return a response according the query form that has been executed.
      */
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery)
-            throws MalformedSparqlQuery;
+            throws MalformedSparqlQueryException;
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query that uses a SELECT
@@ -212,6 +212,6 @@ public interface PutGetApi {
      * @return a response according the query form that has been executed.
      */
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery)
-            throws MalformedSparqlQuery;
+            throws MalformedSparqlQueryException;
 
 }

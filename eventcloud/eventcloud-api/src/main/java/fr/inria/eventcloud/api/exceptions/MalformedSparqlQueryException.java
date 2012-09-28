@@ -21,17 +21,17 @@ package fr.inria.eventcloud.api.exceptions;
  * 
  * @author lpellegr
  */
-public class MalformedSparqlQuery extends Exception {
+public class MalformedSparqlQueryException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
     private final String sparqlQuery;
 
-    public MalformedSparqlQuery(String sparqlQuery) {
+    public MalformedSparqlQueryException(String sparqlQuery) {
         this(sparqlQuery, null);
     }
 
-    public MalformedSparqlQuery(String sparqlQuery, Throwable cause) {
+    public MalformedSparqlQueryException(String sparqlQuery, Throwable cause) {
         super("Malformed SPARQL query: " + sparqlQuery, cause);
         this.sparqlQuery = sparqlQuery;
     }

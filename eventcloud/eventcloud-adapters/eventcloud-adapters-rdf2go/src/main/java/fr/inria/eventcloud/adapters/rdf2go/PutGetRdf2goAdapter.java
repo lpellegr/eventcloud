@@ -32,7 +32,7 @@ import org.ontoware.rdf2go.model.node.URI;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 
 /**
  * This class is used as an adapter for any object that implements the
@@ -120,24 +120,24 @@ public final class PutGetRdf2goAdapter extends Rdf2goAdapter<PutGetApi> {
     }
 
     public boolean executeSparqlAsk(String sparqlAskQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         return super.delegate.executeSparqlAsk(sparqlAskQuery).getResult();
     }
 
     public ClosableIterable<Statement> executeSparqlConstruct(String sparqlConstructQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         return toClosableIterable(super.delegate.executeSparqlConstruct(
                 sparqlConstructQuery).getResult());
     }
 
     public ClosableIterable<Statement> executeSparqlDescribe(String sparqlDescribeQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         return toClosableIterable(super.delegate.executeSparqlDescribe(
                 sparqlDescribeQuery).getResult());
     }
 
     public QueryResultTable executeSparqlSelect(String sparqlSelectQuery)
-            throws MalformedSparqlQuery {
+            throws MalformedSparqlQueryException {
         return toQueryResultTable(super.delegate.executeSparqlSelect(
                 sparqlSelectQuery).getResult());
     }

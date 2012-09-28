@@ -18,7 +18,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -183,7 +183,7 @@ public class BenchmarkLauncher {
 
             try {
                 this.responses.add(this.putGetProxy.executeSparqlSelect(this.queries.get(i)));
-            } catch (MalformedSparqlQuery e) {
+            } catch (MalformedSparqlQueryException e) {
                 throw new IllegalStateException(e);
             }
 
@@ -194,7 +194,7 @@ public class BenchmarkLauncher {
             try {
                 this.responses.get(i).setNbSubQueries(
                         SparqlReasoner.parse(this.queries.get(i)).size());
-            } catch (MalformedSparqlQuery e) {
+            } catch (MalformedSparqlQueryException e) {
                 throw new IllegalStateException(e);
             }
         }
