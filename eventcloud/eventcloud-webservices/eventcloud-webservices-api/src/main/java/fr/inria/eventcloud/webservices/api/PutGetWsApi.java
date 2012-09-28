@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -150,7 +151,8 @@ public interface PutGetWsApi {
      */
     @WebMethod
     @XmlJavaTypeAdapter(SparqlResponseAdapter.class)
-    public SparqlResponse<?> executeSparqlQuery(@WebParam(name = "sparqlQuery") String sparqlQuery);
+    public SparqlResponse<?> executeSparqlQuery(@WebParam(name = "sparqlQuery") String sparqlQuery)
+            throws MalformedSparqlQuery;
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query that uses a ASK
@@ -163,7 +165,8 @@ public interface PutGetWsApi {
      */
     @WebMethod
     @XmlJavaTypeAdapter(SparqlAskResponseAdapter.class)
-    public SparqlAskResponse executeSparqlAsk(@WebParam(name = "sparqlAskQuery") String sparqlAskQuery);
+    public SparqlAskResponse executeSparqlAsk(@WebParam(name = "sparqlAskQuery") String sparqlAskQuery)
+            throws MalformedSparqlQuery;
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query that uses a
@@ -176,7 +179,8 @@ public interface PutGetWsApi {
      */
     @WebMethod
     @XmlJavaTypeAdapter(SparqlConstructResponseAdapter.class)
-    public SparqlConstructResponse executeSparqlConstruct(@WebParam(name = "sparqlConstructQuery") String sparqlConstructQuery);
+    public SparqlConstructResponse executeSparqlConstruct(@WebParam(name = "sparqlConstructQuery") String sparqlConstructQuery)
+            throws MalformedSparqlQuery;
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query that uses a
@@ -189,7 +193,8 @@ public interface PutGetWsApi {
      */
     @WebMethod
     @XmlJavaTypeAdapter(SparqlDescribeResponseAdapter.class)
-    public SparqlDescribeResponse executeSparqlDescribe(@WebParam(name = "sparqlDescribeQuery") String sparqlDescribeQuery);
+    public SparqlDescribeResponse executeSparqlDescribe(@WebParam(name = "sparqlDescribeQuery") String sparqlDescribeQuery)
+            throws MalformedSparqlQuery;
 
     /**
      * Executes on the Event-Cloud the specified SPARQL query that uses a SELECT
@@ -202,6 +207,7 @@ public interface PutGetWsApi {
      */
     @WebMethod
     @XmlJavaTypeAdapter(SparqlSelectResponseAdapter.class)
-    public SparqlSelectResponse executeSparqlSelect(@WebParam(name = "sparqlSelectQuery") String sparqlSelectQuery);
+    public SparqlSelectResponse executeSparqlSelect(@WebParam(name = "sparqlSelectQuery") String sparqlSelectQuery)
+            throws MalformedSparqlQuery;
 
 }

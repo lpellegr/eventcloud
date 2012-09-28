@@ -40,6 +40,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
@@ -206,7 +207,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlAsk() {
+    public void testExecuteSparqlAsk() throws MalformedSparqlQuery {
         Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
@@ -226,7 +227,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlConstruct() {
+    public void testExecuteSparqlConstruct() throws MalformedSparqlQuery {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         Quadruple quadruple;
@@ -246,7 +247,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect1() {
+    public void testExecuteSparqlSelect1() throws MalformedSparqlQuery {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         Quadruple quadruple;
@@ -285,7 +286,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect2() {
+    public void testExecuteSparqlSelect2() throws MalformedSparqlQuery {
         for (int i = 0; i < 100; i++) {
             super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
         }
@@ -300,7 +301,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect3() {
+    public void testExecuteSparqlSelect3() throws MalformedSparqlQuery {
         for (int i = 0; i < 10; i++) {
             super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
         }
@@ -331,7 +332,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect4() {
+    public void testExecuteSparqlSelect4() throws MalformedSparqlQuery {
         for (int i = 0; i < 5; i++) {
             super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
         }
@@ -351,7 +352,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect5() {
+    public void testExecuteSparqlSelect5() throws MalformedSparqlQuery {
         for (int i = 0; i < 5; i++) {
             super.getRandomSemanticPeer().add(
                     QuadrupleGenerator.randomWithLiteral());
@@ -388,7 +389,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlWithEmptyNetwork() {
+    public void testExecuteSparqlWithEmptyNetwork() throws MalformedSparqlQuery {
         Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
@@ -408,7 +409,8 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlWithConjunctionsAndOneJoinVariable() {
+    public void testExecuteSparqlWithConjunctionsAndOneJoinVariable()
+            throws MalformedSparqlQuery {
         Node commonURI = NodeGenerator.randomUri();
         Node graphValue = NodeGenerator.randomUri();
 
@@ -456,7 +458,8 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testMeasurementsReturnedBySparqlQuery() {
+    public void testMeasurementsReturnedBySparqlQuery()
+            throws MalformedSparqlQuery {
         SparqlAskResponse response =
                 super.getRandomSemanticPeer().executeSparqlAsk(
                         "ASK { GRAPH ?g { ?s ?p ?o } }");

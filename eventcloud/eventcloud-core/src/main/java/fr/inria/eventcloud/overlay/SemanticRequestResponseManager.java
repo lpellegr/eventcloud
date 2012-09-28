@@ -37,6 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.Object
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
@@ -89,7 +90,8 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      * @return a response corresponding to the type of the query dispatched.
      */
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery,
-                                              StructuredOverlay overlay) {
+                                              StructuredOverlay overlay)
+            throws MalformedSparqlQuery {
         List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlAskQuery);
 
@@ -117,7 +119,8 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      * @return a response corresponding to the type of the query dispatched.
      */
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery,
-                                                          StructuredOverlay overlay) {
+                                                          StructuredOverlay overlay)
+            throws MalformedSparqlQuery {
         List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlConstructQuery);
 
@@ -146,7 +149,8 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      * @return a response corresponding to the type of the query dispatched.
      */
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery,
-                                                    StructuredOverlay overlay) {
+                                                    StructuredOverlay overlay)
+            throws MalformedSparqlQuery {
         List<SparqlAtomicRequest> parsingResult =
                 SparqlReasoner.parse(sparqlSelectQuery);
 

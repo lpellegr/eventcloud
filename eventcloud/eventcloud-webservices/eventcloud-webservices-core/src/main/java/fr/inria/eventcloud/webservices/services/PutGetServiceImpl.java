@@ -23,6 +23,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -107,7 +108,8 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetApi>
      * {@inheritDoc}
      */
     @Override
-    public SparqlResponse<?> executeSparqlQuery(String sparqlQuery) {
+    public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
+            throws MalformedSparqlQuery {
         return super.proxy.executeSparqlQuery(sparqlQuery);
     }
 
@@ -115,7 +117,8 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetApi>
      * {@inheritDoc}
      */
     @Override
-    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
+    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
+            throws MalformedSparqlQuery {
         return super.proxy.executeSparqlAsk(sparqlAskQuery);
     }
 
@@ -123,7 +126,8 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetApi>
      * {@inheritDoc}
      */
     @Override
-    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery) {
+    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery)
+            throws MalformedSparqlQuery {
         return super.proxy.executeSparqlConstruct(sparqlConstructQuery);
     }
 
@@ -131,7 +135,8 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetApi>
      * {@inheritDoc}
      */
     @Override
-    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
+    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery)
+            throws MalformedSparqlQuery {
         return super.proxy.executeSparqlDescribe(sparqlDescribeQuery);
     }
 
@@ -139,7 +144,8 @@ public class PutGetServiceImpl extends EventCloudProxyService<PutGetApi>
      * {@inheritDoc}
      */
     @Override
-    public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
+    public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery)
+            throws MalformedSparqlQuery {
         return super.proxy.executeSparqlSelect(sparqlSelectQuery);
     }
 

@@ -33,6 +33,7 @@ import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.api.exceptions.MalformedSparqlQuery;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
@@ -169,7 +170,7 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      */
     @Override
     @MemberOf("parallel")
-    public long count(String sparqlQuery) {
+    public long count(String sparqlQuery) throws MalformedSparqlQuery {
         return super.selectPeer().count(sparqlQuery);
     }
 
@@ -187,7 +188,8 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      */
     @Override
     @MemberOf("parallel")
-    public SparqlResponse<?> executeSparqlQuery(String sparqlQuery) {
+    public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
+            throws MalformedSparqlQuery {
         return super.selectPeer().executeSparqlQuery(sparqlQuery);
     }
 
@@ -196,7 +198,8 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      */
     @Override
     @MemberOf("parallel")
-    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery) {
+    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
+            throws MalformedSparqlQuery {
         return super.selectPeer().executeSparqlAsk(sparqlAskQuery);
     }
 
@@ -205,7 +208,8 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      */
     @Override
     @MemberOf("parallel")
-    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery) {
+    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery)
+            throws MalformedSparqlQuery {
         return super.selectPeer().executeSparqlConstruct(sparqlConstructQuery);
     }
 
@@ -223,7 +227,8 @@ public class PutGetProxyImpl extends Proxy implements PutGetProxy,
      */
     @Override
     @MemberOf("parallel")
-    public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery) {
+    public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery)
+            throws MalformedSparqlQuery {
         return super.selectPeer().executeSparqlSelect(sparqlSelectQuery);
     }
 
