@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,7 +88,8 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
     private static final long serialVersionUID = 1L;
 
-    private static final String DB_NAME = "eventIdsReceived";
+    private static final String EVENT_IDS_RECEIVED_MAP_NAME =
+            "eventIdsReceived";
 
     /**
      * ADL name of the subscribe proxy component.
@@ -156,7 +156,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
      */
     @Override
     public void endComponentActivity(Body body) {
-        this.unsubscribeAndCloseDB();
+        this.closeEventIdsReceivedDb();
     }
 
     private void createAndRegisterEventIdsReceivedDB(Body body) {
@@ -168,6 +168,23 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
         String dbFilename = dbPath + body.getID();
 
+        // TODO: find a lightweight key/value store to replace the current JDBM3
+        // alpha implementation which is unstable and no longer maintained.
+        // Several alternatives exist such as BerkeleyDB (API is really
+        // horrible), hawtdb (low level API and seems no longer maintained),
+        // leveldb (really good but the original implementation is c++, some
+        // Java port exists but not really maintained), kyoto cabinet (seems to
+        // be the best alternative even if only a Java binding is provided)
+        //
+        // The features we are interested in:
+        // - concurrent/lock-free reads
+        // - put/get/contains and putIfAbsent (compare-and-swap) operations
+        // - configurable cache size (cache should be evictable or size very
+        // low)
+        // - no write durability (entries should only eventually be written on
+        // the disk but not necessary when the put/commit operation is executed
+        // Optional (i.e. could be implemented ourself):
+        // - database deletion after close
         this.eventIdsReceivedDB =
                 DBMaker.openFile(dbFilename)
                         .deleteFilesAfterClose()
@@ -176,7 +193,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                         .enableSoftCache()
                         .make();
 
-        this.eventIdsReceivedDB.createHashMap(DB_NAME);
+        this.eventIdsReceivedDB.createHashMap(EVENT_IDS_RECEIVED_MAP_NAME);
     }
 
     /**
@@ -203,24 +220,14 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    SubscribeProxyImpl.this.unsubscribeAndCloseDB();
+                    SubscribeProxyImpl.this.closeEventIdsReceivedDb();
                 }
             }));
         }
     }
 
-    private void unsubscribeAndCloseDB() {
+    private synchronized void closeEventIdsReceivedDb() {
         if (!this.eventIdsReceivedDB.isClosed()) {
-            // removes remaining subscriptions at shutdown
-            Iterator<SubscriptionId> it =
-                    SubscribeProxyImpl.this.subscriptions.keySet().iterator();
-
-            while (it.hasNext()) {
-                SubscriptionId id = it.next();
-                SubscribeProxyImpl.this.unsubscribe(id);
-                it.remove();
-            }
-
             this.eventIdsReceivedDB.close();
         }
     }
@@ -382,16 +389,17 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
     @Override
     @MemberOf("parallel")
     public void unsubscribe(SubscriptionId id) {
-        if (!this.subscriptions.containsKey(id)) {
+        // once the subscription id is removed from the list of the
+        // subscriptions which are matched, the notifications which are received
+        // for this subscription are ignored
+        Subscription subscription = this.subscriptions.remove(id);
+
+        if (subscription == null) {
             throw new IllegalArgumentException(
                     "No subscription registered with the specified subscription id: "
                             + id);
         }
 
-        // once the subscription id is removed from the list of the
-        // subscriptions which are matched, the notifications which are received
-        // for this subscription are ignored
-        Subscription subscription = this.subscriptions.remove(id);
         this.listeners.remove(id);
         this.getEventIdsReceived().values().remove(id);
 
@@ -496,8 +504,8 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
     /**
      * This method is used to send an input/output monitoring report per
-     * compound event event and not per notification which is received, even if
-     * a subscriber has subscribed with a SignalNotificationListener or a
+     * compound event and not per notification which is received, even if a
+     * subscriber has subscribed with a SignalNotificationListener or a
      * BindingNotificationListener.
      * 
      * @param id
@@ -605,7 +613,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
     }
 
     private ConcurrentMap<Object, Object> getEventIdsReceived() {
-        return this.eventIdsReceivedDB.getHashMap(DB_NAME);
+        return this.eventIdsReceivedDB.getHashMap(EVENT_IDS_RECEIVED_MAP_NAME);
     }
 
     /**
