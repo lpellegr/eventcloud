@@ -590,10 +590,10 @@ public class SubscribeProxyTest {
 
     @After
     public void tearDown() {
-        this.deployer.undeploy();
-
         ComponentUtils.terminateComponent(this.publishProxy);
         ComponentUtils.terminateComponent(this.subscribeProxy);
+
+        this.deployer.undeploy();
 
         signals.setValue(0);
         bindings.clear();
