@@ -410,7 +410,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
                             new UnsubscribeRequest(
                                     subscription.getOriginalId(),
                                     subSubscription.getAtomicQuery(),
-                                    subscription.getType() == NotificationListenerType.BINDING));
+                                    subscription.getType() == NotificationListenerType.BINDINGS));
         }
     }
 
