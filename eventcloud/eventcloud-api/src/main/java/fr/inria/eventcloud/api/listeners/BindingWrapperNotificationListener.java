@@ -37,7 +37,7 @@ public abstract class BindingWrapperNotificationListener extends
      */
     @Override
     public NotificationListenerType getType() {
-        return NotificationListenerType.BINDING;
+        return NotificationListenerType.BINDINGS;
     }
 
     /**

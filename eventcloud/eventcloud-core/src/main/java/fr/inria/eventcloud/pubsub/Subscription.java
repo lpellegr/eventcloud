@@ -587,7 +587,7 @@ public class Subscription implements Quadruplable, Serializable {
                 new Subscription(
                         id, null, id, System.currentTimeMillis(),
                         "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o }}",
-                        "http://dummy.com", NotificationListenerType.BINDING);
+                        "http://dummy.com", NotificationListenerType.BINDINGS);
 
         System.out.println(subscription.toQuadruples());
     }

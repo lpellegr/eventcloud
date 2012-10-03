@@ -559,7 +559,7 @@ public final class PublishSubscribeUtils {
 
             subscriber.receive(n);
 
-            if (subscription.getType() == NotificationListenerType.BINDING) {
+            if (subscription.getType() == NotificationListenerType.BINDINGS) {
                 // broadcasts a message to all the stubs contained by
                 // the subscription to say to these peers to send their
                 // sub-solutions to the subscriber
@@ -619,7 +619,7 @@ public final class PublishSubscribeUtils {
                                     new UnsubscribeRequest(
                                             subscription.getOriginalId(),
                                             subSubscription.getAtomicQuery(),
-                                            subscription.getType() == NotificationListenerType.BINDING)));
+                                            subscription.getType() == NotificationListenerType.BINDINGS)));
 
                     semanticCanOverlay.getSubscriberConnectionFailures()
                             .remove(subscription.getOriginalId());
@@ -667,7 +667,7 @@ public final class PublishSubscribeUtils {
                                                  Quadruple quadruple) {
         Binding binding = null;
 
-        if (subscription.getType() == NotificationListenerType.BINDING) {
+        if (subscription.getType() == NotificationListenerType.BINDINGS) {
             // only the solutions for the result variables from the
             // original SPARQL query have to be returned to the
             // subscriber
@@ -704,7 +704,7 @@ public final class PublishSubscribeUtils {
     private static void rewriteAndIndexSubscription(final SemanticCanOverlay overlay,
                                                     final Subscription subscription,
                                                     final Quadruple quadrupleMatching) {
-        if (subscription.getType() == NotificationListenerType.BINDING) {
+        if (subscription.getType() == NotificationListenerType.BINDINGS) {
             // stores a quadruple that contains the information about the
             // subscription that is matched and the quadruple that matches the
             // subscription. This is useful to create the notification later.
