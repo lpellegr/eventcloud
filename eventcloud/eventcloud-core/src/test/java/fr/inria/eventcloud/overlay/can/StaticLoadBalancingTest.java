@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.Precision;
@@ -32,6 +33,8 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
+import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -400,6 +403,8 @@ public class StaticLoadBalancingTest {
                             stopwatch.toString(),
                             StaticLoadBalancingTestBuilder.this.nbQuadsToInsert);
 
+                    executionTime = stopwatch.elapsedMillis();
+
                     if (StaticLoadBalancingTestBuilder.this.nbPeersToInject > 0) {
                         log.info("Before join, first peer dump:\n"
                                 + firstPeer.dump());
@@ -518,6 +523,8 @@ public class StaticLoadBalancingTest {
 
         protected EventCloudId eventCloudId;
 
+        protected long executionTime;
+
         public Test() {
             this.deployer = new JunitEventCloudInfrastructureDeployer();
         }
@@ -578,6 +585,45 @@ public class StaticLoadBalancingTest {
             log.info("Distribution is [{}]", distribution);
         }
 
+        public long getExecutionTime() {
+            return this.executionTime;
+        }
+
+    }
+
+    public static void main(String[] args) {
+        // To be run with the following JVM options
+        // -server -Xms4G -Xmx4G
+        LoggerUtils.disableLoggers();
+
+        int nbRuns = 10;
+
+        if (args.length == 1) {
+            try {
+                nbRuns = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                // ignore and use the default number of runs
+            }
+        }
+
+        MicroBenchmark microBenchmark =
+                new MicroBenchmark(nbRuns, new Callable<Long>() {
+                    @Override
+                    public Long call() throws Exception {
+                        Test test =
+                                new StaticLoadBalancingTestBuilder(1000, 10).enableStatsRecording(
+                                        MeanStatsRecorder.class)
+                                        .build();
+
+                        test.execute();
+                        return test.getExecutionTime();
+                    }
+                });
+        microBenchmark.showProgress();
+        microBenchmark.execute();
+
+        System.out.println("Average time for " + nbRuns + " runs is "
+                + microBenchmark.getMean());
     }
 
 }
