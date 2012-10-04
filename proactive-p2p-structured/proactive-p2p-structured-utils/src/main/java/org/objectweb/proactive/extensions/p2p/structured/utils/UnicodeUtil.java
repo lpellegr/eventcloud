@@ -36,10 +36,10 @@ public final class UnicodeUtil {
      * @param s2
      *            a string to be compared.
      * 
-     * @return the value <code>0</code> if the argument string is equal to this
-     *         string; a value less than <code>0</code> if this string is
+     * @return the value {@code 0} if the argument string is equal to this
+     *         string; a value less than {@code 0} if this string is
      *         lexicographically less than the string argument; and a value
-     *         greater than <code>0</code> if this string is lexicographically
+     *         greater than {@code 0} if this string is lexicographically
      *         greater than the string argument.
      */
     public static int compareUtf32(String s1, String s2) {
@@ -61,7 +61,6 @@ public final class UnicodeUtil {
         }
 
         return len1 - len2;
-
     }
 
     /**

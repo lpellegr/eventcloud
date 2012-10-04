@@ -17,8 +17,6 @@
 package fr.inria.eventcloud.datastore;
 
 import java.util.Collection;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Dataset;
@@ -43,18 +41,10 @@ public final class TransactionalDatasetGraphImpl implements
 
     private final StatsRecorder statsRecorder;
 
-    private final Executor threadPool;
-
     public TransactionalDatasetGraphImpl(Dataset dataset,
             StatsRecorder statsRecorder) {
         this.dataset = dataset;
         this.statsRecorder = statsRecorder;
-
-        if (this.statsRecorder != null) {
-            this.threadPool = Executors.newSingleThreadExecutor();
-        } else {
-            this.threadPool = null;
-        }
     }
 
     /**
@@ -191,26 +181,14 @@ public final class TransactionalDatasetGraphImpl implements
     private void recordQuadrupleAddedIfNecessary(final Node g, final Node s,
                                                  final Node p, final Node o) {
         if (this.statsRecorder != null) {
-            this.threadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    TransactionalDatasetGraphImpl.this.statsRecorder.quadrupleAdded(
-                            g, s, p, o);
-                }
-            });
+            this.statsRecorder.quadrupleAdded(g, s, p, o);
         }
     }
 
     private void recordQuadrupleRemovedIfNecessary(final Node g, final Node s,
                                                    final Node p, final Node o) {
         if (this.statsRecorder != null) {
-            this.threadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    TransactionalDatasetGraphImpl.this.statsRecorder.quadrupleRemoved(
-                            g, s, p, o);
-                }
-            });
+            this.statsRecorder.quadrupleRemoved(g, s, p, o);
         }
     }
 
