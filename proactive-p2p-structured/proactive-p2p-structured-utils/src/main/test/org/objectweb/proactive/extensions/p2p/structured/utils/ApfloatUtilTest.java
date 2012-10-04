@@ -32,13 +32,13 @@ public class ApfloatUtilTest {
     public void testToFloatRadix10_1() {
         Assert.assertEquals(
                 new Apfloat((char) Character.MIN_CODE_POINT),
-                ApfloatUtil.toFloatRadix10(new String(
+                ApfloatUtils.toFloatRadix10(new String(
                         Character.toChars(Character.MIN_CODE_POINT))));
     }
 
     @Test
     public void testToFloatRadix10_2() {
-        Assert.assertEquals(new Apfloat('a'), ApfloatUtil.toFloatRadix10("a"));
+        Assert.assertEquals(new Apfloat('a'), ApfloatUtils.toFloatRadix10("a"));
     }
 
 }
