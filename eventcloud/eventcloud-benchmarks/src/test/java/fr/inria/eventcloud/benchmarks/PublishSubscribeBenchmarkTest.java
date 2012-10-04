@@ -33,7 +33,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.objectweb.proactive.core.util.MutableInteger;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +111,7 @@ public class PublishSubscribeBenchmarkTest {
         this.datastoreType = type;
         this.receiveExpectedEventsStopwatch = new Stopwatch();
         this.threadPool =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
+                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads());
     }
 
     @Parameters

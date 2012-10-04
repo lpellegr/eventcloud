@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  * 
  * @author lpellegr
  */
-public class ApfloatUtil {
+public class ApfloatUtils {
 
     private static final Apint RADIX = new Apint(
             P2PStructuredProperties.CAN_UPPER_BOUND.getValue() + 1);
@@ -40,7 +40,7 @@ public class ApfloatUtil {
      * is a digit radix StringElement#RADIX
      */
     public static Apfloat toFloatRadix10(String value, Apint radix) {
-        int[] codepoints = UnicodeUtil.toCodePointArray(value);
+        int[] codepoints = UnicodeUtils.toCodePointArray(value);
         int precision =
                 P2PStructuredProperties.STRING_ELEMENT_PRECISION.getValue();
 

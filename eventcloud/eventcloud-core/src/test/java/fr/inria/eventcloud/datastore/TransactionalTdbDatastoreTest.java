@@ -26,7 +26,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
@@ -71,7 +71,7 @@ public final class TransactionalTdbDatastoreTest {
     @Test
     public void testMultithreadedAdd() {
         ExecutorService executor =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
+                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads());
 
         final CountDownLatch doneSignal =
                 new CountDownLatch(CONCURRENT_ADD_OPERATIONS);
@@ -107,7 +107,7 @@ public final class TransactionalTdbDatastoreTest {
     @Test
     public void testRandomConcurrentAccess() {
         ExecutorService executor =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads());
+                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads());
 
         final AtomicInteger nbQuadruplesAdded = new AtomicInteger();
 

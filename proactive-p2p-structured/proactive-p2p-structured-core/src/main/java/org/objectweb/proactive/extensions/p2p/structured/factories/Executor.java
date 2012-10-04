@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 
 /**
  * Provides static method to execute a specified number of times a given task.
@@ -59,7 +59,7 @@ public final class Executor {
     public static <T> T[] execute(Class<T> clazz, Callable<T> task, int nbTasks) {
         T[] result = (T[]) Array.newInstance(clazz, nbTasks);
         ExecutorService threadPool =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads(
+                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads(
                         1, 0));
 
         // Run nbTasks tasks in parallel

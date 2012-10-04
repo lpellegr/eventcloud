@@ -20,9 +20,9 @@ import org.apfloat.Apfloat;
 import org.apfloat.Apint;
 import org.apfloat.ApintMath;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
-import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 
 /**
  * Embodies a String coordinate element.
@@ -46,7 +46,7 @@ public class StringElement extends Element {
     }
 
     protected StringElement(Apfloat apfloat) {
-        this.value = ApfloatUtil.toString(apfloat);
+        this.value = ApfloatUtils.toString(apfloat);
     }
 
     /**
@@ -54,8 +54,8 @@ public class StringElement extends Element {
      */
     @Override
     public StringElement middle(Element elt) {
-        Apfloat e1 = ApfloatUtil.toFloatRadix10(this.value);
-        Apfloat e2 = ApfloatUtil.toFloatRadix10(((StringElement) elt).value);
+        Apfloat e1 = ApfloatUtils.toFloatRadix10(this.value);
+        Apfloat e2 = ApfloatUtils.toFloatRadix10(((StringElement) elt).value);
 
         return this.newStringElement(e1.add(e2).divide(new Apfloat(2)));
     }
@@ -79,7 +79,7 @@ public class StringElement extends Element {
                 new Apfloat((upperBound - lowerBound)
                         / P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
 
-        return ApfloatUtil.toFloatRadix10(this.value).multiply(scale).add(
+        return ApfloatUtils.toFloatRadix10(this.value).multiply(scale).add(
                 new Apfloat(lowerBound)).doubleValue();
     }
 
@@ -96,7 +96,8 @@ public class StringElement extends Element {
      */
     @Override
     public int compareTo(Element elt) {
-        return UnicodeUtil.compareUtf32(this.value, ((StringElement) elt).value);
+        return UnicodeUtils.compareUtf32(
+                this.value, ((StringElement) elt).value);
     }
 
     /**
@@ -129,7 +130,7 @@ public class StringElement extends Element {
                 P2PStructuredProperties.CAN_ELEMENT_DISPLAY.getValue();
 
         if (representation.equalsIgnoreCase("decimal")) {
-            return ApfloatUtil.toFloatRadix10(this.value).toString(true);
+            return ApfloatUtils.toFloatRadix10(this.value).toString(true);
         } else {
             try {
                 return StringRepresentation.getInstance(representation).apply(

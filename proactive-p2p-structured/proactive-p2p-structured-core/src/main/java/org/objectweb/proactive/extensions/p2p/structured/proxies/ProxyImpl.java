@@ -31,7 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 
 /**
@@ -55,7 +55,7 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
         this.trackers = trackers;
         this.peerStubs = new ArrayList<Peer>();
         this.threadPool =
-                Executors.newFixedThreadPool(SystemUtil.getOptimalNumberOfThreads() * 2);
+                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads() * 2);
     }
 
     /**
