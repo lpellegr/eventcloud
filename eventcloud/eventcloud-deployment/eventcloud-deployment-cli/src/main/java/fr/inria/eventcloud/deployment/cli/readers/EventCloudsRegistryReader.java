@@ -19,11 +19,7 @@ package fr.inria.eventcloud.deployment.cli.readers;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.LoggerContext;
+import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -51,18 +47,9 @@ public class EventCloudsRegistryReader {
     private String registryUrl;
 
     public static void main(String[] args) {
-        disableLogging();
+        LoggerUtils.disableLoggers();
 
         new EventCloudsRegistryReader().run(args);
-    }
-
-    private static void disableLogging() {
-        System.setProperty("log4j.configuration", "");
-        Logger.getRootLogger().setLevel(Level.OFF);
-
-        LoggerContext context =
-                (LoggerContext) LoggerFactory.getILoggerFactory();
-        context.reset();
     }
 
     public void run(String[] args) {
