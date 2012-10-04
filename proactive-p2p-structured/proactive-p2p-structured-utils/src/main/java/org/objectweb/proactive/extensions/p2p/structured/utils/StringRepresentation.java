@@ -30,21 +30,21 @@ public enum StringRepresentation {
     CODE_POINTS("codepoints", new Function<String, String>() {
         @Override
         public String apply(String value) {
-            return Arrays.toString(UnicodeUtil.toCodePointArray(value));
+            return Arrays.toString(UnicodeUtils.toCodePointArray(value));
         }
     }),
 
     UTF_16("utf16", new Function<String, String>() {
         @Override
         public String apply(String value) {
-            return UnicodeUtil.toStringUtf16(value);
+            return UnicodeUtils.toStringUtf16(value);
         }
     }),
 
     UTF_32("utf32", new Function<String, String>() {
         @Override
         public String apply(String value) {
-            return UnicodeUtil.toStringUtf32(value);
+            return UnicodeUtils.toStringUtf32(value);
         }
     }),
 

@@ -403,7 +403,7 @@ public class StaticLoadBalancingTest {
                             stopwatch.toString(),
                             StaticLoadBalancingTestBuilder.this.nbQuadsToInsert);
 
-                    executionTime = stopwatch.elapsedMillis();
+                    this.executionTime = stopwatch.elapsedMillis();
 
                     if (StaticLoadBalancingTestBuilder.this.nbPeersToInject > 0) {
                         log.info("Before join, first peer dump:\n"

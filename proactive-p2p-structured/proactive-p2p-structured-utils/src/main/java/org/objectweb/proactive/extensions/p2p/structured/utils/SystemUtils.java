@@ -24,7 +24,7 @@ package org.objectweb.proactive.extensions.p2p.structured.utils;
  * @author <a href="mailto:dev@avalon.apache.org">Avalon Development Team</a>
  * @author lpellegr
  */
-public final class SystemUtil {
+public final class SystemUtils {
 
     private static final int numProcessors;
 
@@ -45,15 +45,15 @@ public final class SystemUtil {
         osName = System.getProperty("os.name");
         osVersion = System.getProperty("os.version");
         numProcessors = Runtime.getRuntime().availableProcessors();
-        windows = SystemUtil.operatingSystem().startsWith("Windows");
-        linux = SystemUtil.operatingSystem().startsWith("Linux");
-        osx = SystemUtil.operatingSystem().startsWith("Mac");
+        windows = SystemUtils.operatingSystem().startsWith("Windows");
+        linux = SystemUtils.operatingSystem().startsWith("Linux");
+        osx = SystemUtils.operatingSystem().startsWith("Mac");
     }
 
     /**
      * Keep utility from being instantiated.
      */
-    private SystemUtil() {
+    private SystemUtils() {
 
     }
 

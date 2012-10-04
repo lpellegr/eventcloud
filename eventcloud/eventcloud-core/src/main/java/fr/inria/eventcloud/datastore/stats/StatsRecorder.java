@@ -25,7 +25,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apfloat.Apfloat;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -155,7 +155,7 @@ public abstract class StatsRecorder implements Serializable {
     }
 
     protected static Apfloat toRadix10(Node n) {
-        return ApfloatUtil.toFloatRadix10(SemanticElement.removePrefix(n));
+        return ApfloatUtils.toFloatRadix10(SemanticElement.removePrefix(n));
     }
 
     /**

@@ -23,7 +23,7 @@ import java.util.List;
  * 
  * @author lpellegr
  */
-public final class UnicodeUtil {
+public final class UnicodeUtils {
 
     /**
      * Compares two strings lexicographically by using the UTF-32 representation

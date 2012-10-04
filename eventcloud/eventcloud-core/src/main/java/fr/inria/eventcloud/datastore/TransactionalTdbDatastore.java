@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtil;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +124,7 @@ public class TransactionalTdbDatastore extends Datastore {
         TDBFactory.release(this.dataset);
 
         if (this.autoRemove) {
-            if (SystemUtil.isWindows()
+            if (SystemUtils.isWindows()
                     && SystemTDB.fileMode() == FileMode.mapped) {
                 // FIXME: TDB uses mapped files and due to a Java bug
                 // (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4715154),
