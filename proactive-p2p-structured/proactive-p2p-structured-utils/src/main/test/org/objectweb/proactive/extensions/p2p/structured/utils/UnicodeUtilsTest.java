@@ -21,11 +21,11 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- * Test cases associated {@link UnicodeUtil}.
+ * Test cases associated {@link UnicodeUtils}.
  * 
  * @author lpellegr
  */
-public final class UnicodeUtilTest {
+public final class UnicodeUtilsTest {
 
     private static final String CASE1 = "\u0000\u8888\uFFFF";
 
@@ -35,20 +35,20 @@ public final class UnicodeUtilTest {
 
     @Test
     public void testToCodePointArray1() {
-        Assert.assertEquals(3, UnicodeUtil.toCodePointArray(CASE1).length);
+        Assert.assertEquals(3, UnicodeUtils.toCodePointArray(CASE1).length);
     }
 
     @Test
     public void testToCodePointArray2() {
-        Assert.assertEquals(5, UnicodeUtil.toCodePointArray(CASE2).length);
+        Assert.assertEquals(5, UnicodeUtils.toCodePointArray(CASE2).length);
     }
 
     @Test
     public void testToStringUtf16() {
         // by using the UTF-16 notation (U+) each character has a
         // String representation (or scalar value) whose the size is 6
-        Assert.assertEquals(CASE2.length(), UnicodeUtil.toStringUtf16(
-                UnicodeUtil.toCodePointArray(CASE2)).length() / 6);
+        Assert.assertEquals(CASE2.length(), UnicodeUtils.toStringUtf16(
+                UnicodeUtils.toCodePointArray(CASE2)).length() / 6);
     }
 
     @Test
@@ -56,14 +56,14 @@ public final class UnicodeUtilTest {
         // by using the UTF-32 notation (U+) each character has a
         // String representation (or scalar value) whose the size is 6
         // with UTF-32 \uD801\uDC00 and \uD800\uDFFF are each merged into one
-        Assert.assertEquals(CASE2.length() - 2, UnicodeUtil.toStringUtf32(
-                UnicodeUtil.toCodePointArray(CASE2)).length() / 8);
+        Assert.assertEquals(CASE2.length() - 2, UnicodeUtils.toStringUtf32(
+                UnicodeUtils.toCodePointArray(CASE2)).length() / 8);
     }
 
     @Test
     public void testStringComparisonUtf32_1() {
-        String s1 = UnicodeUtil.toString(59000);
-        String s2 = UnicodeUtil.toString(1114111);
+        String s1 = UnicodeUtils.toString(59000);
+        String s2 = UnicodeUtils.toString(1114111);
 
         // Java uses by default the UTF-16 representation for strings
         // comparison. This means that supplementary characters (i.e. characters
@@ -74,42 +74,42 @@ public final class UnicodeUtilTest {
         // equivalent to compare \uE678 with \uDBFF\uDFFF
         Assert.assertFalse(s1.compareTo(s2) < 0);
 
-        Assert.assertTrue(UnicodeUtil.compareUtf32(s1, s2) < 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32(s1, s2) < 0);
     }
 
     @Test
     public void testStringComparisonUtf32_2() {
-        Assert.assertTrue(UnicodeUtil.compareUtf32("a", "a") == 0);
-        Assert.assertTrue(UnicodeUtil.compareUtf32(
-                UnicodeUtil.toString(77000), UnicodeUtil.toString(77000)) == 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32("a", "a") == 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32(
+                UnicodeUtils.toString(77000), UnicodeUtils.toString(77000)) == 0);
     }
 
     @Test
     public void testStringComparisonUtf32_3() {
-        Assert.assertTrue(UnicodeUtil.compareUtf32("a", "b") < 0);
-        Assert.assertTrue(UnicodeUtil.compareUtf32(
-                UnicodeUtil.toString(66000), UnicodeUtil.toString(77000)) < 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32("a", "b") < 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32(
+                UnicodeUtils.toString(66000), UnicodeUtils.toString(77000)) < 0);
     }
 
     @Test
     public void testStringComparisonUtf32_4() {
-        Assert.assertTrue(UnicodeUtil.compareUtf32("b", "a") > 0);
-        Assert.assertTrue(UnicodeUtil.compareUtf32(
-                UnicodeUtil.toString(77000), UnicodeUtil.toString(66000)) > 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32("b", "a") > 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32(
+                UnicodeUtils.toString(77000), UnicodeUtils.toString(66000)) > 0);
     }
 
     @Test
     public void testStringComparisonUtf32_5() {
-        Assert.assertTrue(UnicodeUtil.compareUtf32("ab", "abc") < 0);
-        Assert.assertTrue(UnicodeUtil.compareUtf32(UnicodeUtil.toString(
-                66000, 67000), UnicodeUtil.toString(66000, 67000, 68000)) < 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32("ab", "abc") < 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32(UnicodeUtils.toString(
+                66000, 67000), UnicodeUtils.toString(66000, 67000, 68000)) < 0);
     }
 
     @Test
     public void testStringComparisonUtf32_6() {
-        Assert.assertTrue(UnicodeUtil.compareUtf32("abc", "ab") > 0);
-        Assert.assertTrue(UnicodeUtil.compareUtf32(UnicodeUtil.toString(
-                66000, 67000, 68000), UnicodeUtil.toString(66000, 67000)) > 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32("abc", "ab") > 0);
+        Assert.assertTrue(UnicodeUtils.compareUtf32(UnicodeUtils.toString(
+                66000, 67000, 68000), UnicodeUtils.toString(66000, 67000)) > 0);
     }
 
 }
