@@ -23,9 +23,12 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -439,6 +442,36 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
+    public void join(Peer landmarkPeer) {
+        // Stats are computed in background. Thus, to have an accurate or at
+        // least a not too bad estimation of the coordinate to use for splitting
+        // the zone we have to sync
+        if (this.miscDatastore.getStatsRecorder() != null) {
+            this.miscDatastore.getStatsRecorder().sync();
+        }
+
+        super.join(landmarkPeer);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JoinIntroduceResponseOperation<SemanticElement> handleJoinIntroduceMessage(JoinIntroduceOperation<SemanticElement> msg) {
+        // Stats are computed in background. Thus, to have an accurate or at
+        // least a not too bad estimation of the coordinate to use for splitting
+        // the zone we have to sync
+        if (this.miscDatastore.getStatsRecorder() != null) {
+            this.miscDatastore.getStatsRecorder().sync();
+        }
+
+        return super.handleJoinIntroduceMessage(msg);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @SuppressWarnings("unchecked")
     public SemanticData retrieveDataIn(Object interval) {
         return this.retrieveDataIn((Zone<SemanticElement>) interval, false);
@@ -470,6 +503,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         TransactionalDatasetGraph txnGraph =
                 this.miscDatastore.begin(AccessMode.READ_ONLY);
+
         try {
             QuadrupleIterator it = txnGraph.find(QuadruplePattern.ANY);
 
@@ -629,11 +663,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append("> || (?s");
             result.append(vars[i]);
             result.append(" >= \"");
-            result.append(Matcher.quoteReplacement(bounds[j]));
+            result.append(StringEscapeUtils.escapeJava(bounds[j]));
             result.append("\" && ?s");
             result.append(vars[i]);
             result.append(" < \"");
-            result.append(Matcher.quoteReplacement(bounds[j + 1]));
+            result.append(StringEscapeUtils.escapeJava(bounds[j + 1]));
             result.append("\"))");
 
             if (i < vars.length - 1) {

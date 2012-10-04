@@ -42,7 +42,8 @@ public class MeanStatsRecorder extends StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public void quadrupleAddedComputeStats(Node g, Node s, Node p, Node o) {
+    public synchronized void quadrupleAddedComputeStats(Node g, Node s, Node p,
+                                                        Node o) {
         Apfloat gf = toRadix10(g);
         Apfloat sf = toRadix10(s);
         Apfloat pf = toRadix10(p);
@@ -58,7 +59,8 @@ public class MeanStatsRecorder extends StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    protected void quadrupleRemovedComputeStats(Node g, Node s, Node p, Node o) {
+    protected synchronized void quadrupleRemovedComputeStats(Node g, Node s,
+                                                             Node p, Node o) {
         Apfloat gf = toRadix10(g);
         Apfloat sf = toRadix10(s);
         Apfloat pf = toRadix10(p);

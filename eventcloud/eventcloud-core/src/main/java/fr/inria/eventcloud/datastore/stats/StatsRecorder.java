@@ -17,10 +17,19 @@
 package fr.inria.eventcloud.datastore.stats;
 
 import java.io.Serializable;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apfloat.Apfloat;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtil;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Quadruple;
@@ -37,19 +46,68 @@ public abstract class StatsRecorder implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private long nbQuads = 0;
+    private AtomicLong nbQuads;
 
-    public synchronized void quadrupleAdded(Node g, Node s, Node p, Node o) {
-        this.quadrupleAddedComputeStats(g, s, p, o);
-        this.nbQuads++;
+    private transient final ListeningExecutorService threadPool;
+
+    private transient Queue<ListenableFuture<?>> futures;
+
+    public StatsRecorder() {
+        this.nbQuads = new AtomicLong();
+        this.threadPool =
+                MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+        this.futures = new ConcurrentLinkedQueue<ListenableFuture<?>>();
     }
 
-    protected abstract void quadrupleAddedComputeStats(Node g, Node s, Node p,
-                                                       Node o);
+    public void quadrupleAdded(final Node g, final Node s, final Node p,
+                               final Node o) {
+        final ListenableFuture<?> future =
+                this.threadPool.submit(new Runnable() {
 
-    public synchronized void quadrupleRemoved(Node g, Node s, Node p, Node o) {
-        this.quadrupleRemovedComputeStats(g, s, p, o);
-        this.nbQuads--;
+                    @Override
+                    public void run() {
+                        StatsRecorder.this.quadrupleAddedComputeStats(
+                                g, s, p, o);
+                    }
+                });
+        this.futures.add(future);
+        future.addListener(new Runnable() {
+
+            @Override
+            public void run() {
+                StatsRecorder.this.futures.remove(future);
+            }
+        }, MoreExecutors.sameThreadExecutor());
+
+        this.nbQuads.incrementAndGet();
+    }
+
+    protected abstract void quadrupleAddedComputeStats(final Node g,
+                                                       final Node s,
+                                                       final Node p,
+                                                       final Node o);
+
+    public void quadrupleRemoved(final Node g, final Node s, final Node p,
+                                 final Node o) {
+        final ListenableFuture<?> future =
+                this.threadPool.submit(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        StatsRecorder.this.quadrupleRemovedComputeStats(
+                                g, s, p, o);
+                    }
+                });
+        this.futures.add(future);
+        future.addListener(new Runnable() {
+
+            @Override
+            public void run() {
+                StatsRecorder.this.futures.remove(future);
+            }
+        }, MoreExecutors.sameThreadExecutor());
+
+        this.nbQuads.decrementAndGet();
     }
 
     protected abstract void quadrupleRemovedComputeStats(Node g, Node s,
@@ -93,11 +151,29 @@ public abstract class StatsRecorder implements Serializable {
      * @return the number of quadruples which have been recorded.
      */
     public long getNbQuads() {
-        return this.nbQuads;
+        return this.nbQuads.get();
     }
 
     protected static Apfloat toRadix10(Node n) {
         return ApfloatUtil.toFloatRadix10(SemanticElement.removePrefix(n));
+    }
+
+    /**
+     * Statistics are computed in background by using threads. When this method
+     * is called, we wait for the termination of all the threads.
+     */
+    public void sync() {
+        Future<?> future;
+
+        while ((future = this.futures.poll()) != null) {
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
