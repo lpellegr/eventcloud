@@ -91,9 +91,10 @@ public class PeerImpl extends AbstractComponent implements Peer,
     private transient MultiActiveService multiActiveService;
 
     /**
-     * No-arg constructor for ProActive.
+     * Empty constructor required by ProActive.
      */
     public PeerImpl() {
+
     }
 
     /**

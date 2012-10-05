@@ -102,9 +102,10 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
     protected OverlayType type;
 
     /**
-     * No-arg constructor for ProActive.
+     * Empty constructor required by ProActive.
      */
     public TrackerImpl() {
+
     }
 
     /**

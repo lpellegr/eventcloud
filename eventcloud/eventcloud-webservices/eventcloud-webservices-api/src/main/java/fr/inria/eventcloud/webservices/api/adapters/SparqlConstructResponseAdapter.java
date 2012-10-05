@@ -40,6 +40,7 @@ public class SparqlConstructResponseAdapter extends
      * 
      * @param sparqlConstructResponse
      *            the SPARQL Construct response to be converted.
+     * 
      * @return the byte array representing the specified SPARQL Construct
      *         response.
      */
@@ -55,6 +56,7 @@ public class SparqlConstructResponseAdapter extends
      * 
      * @param sparqlConstructResponseArray
      *            the byte array to be converted.
+     * 
      * @return the SPARQL Construct response represented by the specified byte
      *         array.
      */

@@ -16,7 +16,9 @@
  **/
 package fr.inria.eventcloud.adapters.rdf2go;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -103,19 +105,27 @@ public class MockPutGetProxy implements PutGetApi {
      * {@inheritDoc}
      */
     @Override
-    public boolean add(InputStream in, SerializationFormat format) {
-        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
+    public boolean add(URL url, SerializationFormat format) {
+        try {
+            InputStream in = url.openConnection().getInputStream();
+            final List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
-        RdfParser.parse(in, format, new Callback<Quadruple>() {
-            @Override
-            public void execute(Quadruple quad) {
-                quadruples.add(quad);
-            }
-        });
+            RdfParser.parse(in, format, new Callback<Quadruple>() {
+                @Override
+                public void execute(Quadruple quad) {
+                    quadruples.add(quad);
+                }
+            });
 
-        this.add(quadruples);
+            this.add(quadruples);
 
-        return true;
+            in.close();
+
+            return true;
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            return false;
+        }
     }
 
     /**

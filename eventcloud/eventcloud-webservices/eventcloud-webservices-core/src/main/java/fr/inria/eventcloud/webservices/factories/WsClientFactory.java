@@ -27,6 +27,18 @@ import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
  */
 public class WsClientFactory {
 
+    /**
+     * Creates a web service client for the web service exposed at the specified
+     * URL and exposing the specified interface.
+     * 
+     * @param serviceInterface
+     *            interface exposed by the web service.
+     * @param serviceAddress
+     *            URL of the web service.
+     * 
+     * @return web service client for the web service exposed at the specified
+     *         URL and exposing the specified interface.
+     */
     public static <T> T createWsClient(Class<T> serviceInterface,
                                        String serviceAddress) {
         JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();

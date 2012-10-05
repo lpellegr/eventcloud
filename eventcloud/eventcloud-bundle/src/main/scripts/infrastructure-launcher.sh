@@ -14,10 +14,9 @@ WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE=$INSTANCES_DIR/ws-eventclouds-management
 
 # Ports assignation
 EVENTCLOUDS_REGISTRY_PORT=8081
-EVENTCLOUDS_PORTS_LOWER_BOUND=1100
-PROXIES_PORTS_LOWER_BOUND=9000
 WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT=8082
 WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT=8083
+WS_EVENTCLOUDS_HTTP_PORT=9000
 
 trap clear 1 2 15
 
@@ -44,7 +43,7 @@ function main() {
 
     if [[ -d $INSTANCES_DIR ]];
     then
-	    echo "Eventclouds registry already running. Use -k or -kc option to kill all existing instances."
+	    echo "EventClouds registry already running. Use -k or -kc option to kill all existing instances."
 	    return 1;
     fi;
 
@@ -104,7 +103,7 @@ function deploy() {
     deploy_eventclouds_registry
 
     # deploy eventclouds management web service
-    deploy_ws_management_proxy
+    deploy_ws_eventclouds_management
     
     echo "Logs available at:"
     echo "    $LOGS_DIR"
@@ -131,11 +130,11 @@ function deploy_eventclouds_registry() {
 
     EVENTCLOUDS_REGISTRY_URL=$(cat $REGISTRY_INSTANCE_FILE)
 
-    echo "Eventclouds registry deployed at:"
+    echo "EventClouds registry deployed at:"
     echo "    $EVENTCLOUDS_REGISTRY_URL"
 }
 
-function deploy_ws_management_proxy() {
+function deploy_ws_eventclouds_management() {
     java -Xms256m -Xmx10240m \
      -server \
      -Djava.security.policy=$PATH_TO_RESOURCES/proactive.security.policy \
@@ -147,15 +146,16 @@ function deploy_ws_management_proxy() {
      -Dlogging.output.filename=$(basename $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE) \
      -Dproactive.communication.protocol=pnp \
      -Dproactive.pnp.port=$WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT \
-     -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.EventCloudManagementWsLaucher \
-     --registry-url $EVENTCLOUDS_REGISTRY_URL --port-lower-bound $PROXIES_PORTS_LOWER_BOUND \
+     -Dproactive.http.port=$WS_EVENTCLOUDS_HTTP_PORT \
+     -cp $CLASSPATH fr.inria.eventcloud.deployment.cli.launchers.EventCloudsManagementWsLaucher \
+     -r $EVENTCLOUDS_REGISTRY_URL \
      -p $WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT &> $WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE &
 
     echo $! > $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE.pid
         
     wait_file_creation $INSTANCES_DIR $(basename $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE)
     
-    echo "Eventclouds management web service deployed at:"
+    echo "EventClouds management web service deployed at:"
     echo "    $(cat $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE)"
 }
 

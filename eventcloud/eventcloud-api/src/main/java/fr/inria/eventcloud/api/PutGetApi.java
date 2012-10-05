@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
@@ -61,19 +61,19 @@ public interface PutGetApi {
     public boolean add(Collection<Quadruple> quads);
 
     /**
-     * Publishes the quadruples that are read from the specified input stream.
-     * The input stream is assumed to comply with the <a
+     * Publishes the quadruples that are read from an input stream opened from
+     * the specified URL. The input stream is assumed to comply with the <a
      * href="http://www4.wiwiss.fu-berlin.de/bizer/TriG/">TriG</a> or <a
      * href="http://sw.deri.org/2008/07/n-quads/">N-Quads</a> syntax.
      * 
-     * @param in
-     *            the input stream from where the quadruples are read.
+     * @param url
+     *            the URL from where the quadruples are read.
      * 
      * @param format
      *            the format that is used to read the data from the input
      *            stream.
      */
-    public boolean add(InputStream in, SerializationFormat format);
+    public boolean add(URL url, SerializationFormat format);
 
     /**
      * Indicates whether the specified quadruples is contained by the

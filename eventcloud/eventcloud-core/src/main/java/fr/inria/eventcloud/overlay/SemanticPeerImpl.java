@@ -16,7 +16,9 @@
  **/
 package fr.inria.eventcloud.overlay;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,6 +29,8 @@ import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import com.hp.hpl.jena.rdf.model.StmtIterator;
@@ -76,6 +80,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger log =
+            LoggerFactory.getLogger(SemanticPeerImpl.class);
+
     /**
      * ADL name of the semantic peer component.
      */
@@ -89,7 +96,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
             "social-filter-services";
 
     /**
-     * No-arg constructor for ProActive.
+     * Empty constructor required by ProActive.
      */
     public SemanticPeerImpl() {
         // keep it empty because it is called each time we have to reify
@@ -143,15 +150,24 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     @MemberOf("parallel")
-    public boolean add(InputStream in, SerializationFormat format) {
-        RdfParser.parse(in, format, new Callback<Quadruple>() {
-            @Override
-            public void execute(Quadruple quad) {
-                SemanticPeerImpl.this.add(quad);
-            }
-        });
+    public boolean add(URL url, SerializationFormat format) {
+        try {
+            InputStream in = url.openConnection().getInputStream();
 
-        return true;
+            RdfParser.parse(in, format, new Callback<Quadruple>() {
+                @Override
+                public void execute(Quadruple quad) {
+                    SemanticPeerImpl.this.add(quad);
+                }
+            });
+
+            in.close();
+
+            return true;
+        } catch (IOException ioe) {
+            log.error("An error occurred when reading from the given URL", ioe);
+            return false;
+        }
     }
 
     /**
