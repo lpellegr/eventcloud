@@ -31,7 +31,7 @@ import javax.jws.WebService;
 public interface SignalSubscriberWsApi {
 
     /**
-     * Notifies that a solution matching a subscription have been received.
+     * Notifies that a solution matching a subscription has been received.
      * 
      * @param id
      *            the subscription identifier.

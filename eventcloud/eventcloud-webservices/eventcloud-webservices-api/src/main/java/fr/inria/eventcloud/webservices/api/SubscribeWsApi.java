@@ -20,7 +20,7 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
-import fr.inria.eventcloud.webservices.api.subscribers.BindingSubscriberWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.BindingWrapperSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.CompoundEventSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.SignalSubscriberWsApi;
 
@@ -51,14 +51,14 @@ public interface SubscribeWsApi {
 
     /**
      * Subscribes to interest with the specified SPARQL query and the given
-     * {@link BindingSubscriberWsApi binding subscriber web service} endpoint
-     * URL.
+     * {@link BindingWrapperSubscriberWsApi binding subscriber web service}
+     * endpoint URL.
      * 
      * @param sparqlQuery
      *            the SPARQL query.
      * @param subscriberWsEndpointUrl
-     *            the endpoint URL of the {@link BindingSubscriberWsApi binding
-     *            subscriber web service} to notify.
+     *            the endpoint URL of the {@link BindingWrapperSubscriberWsApi
+     *            binding subscriber web service} to notify.
      * 
      * @return the subscription identifier.
      */

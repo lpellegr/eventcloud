@@ -21,16 +21,16 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ByteToObjectConverter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
 
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 
 /**
- * XML Adapter for {@link Binding} objects.
+ * XML Adapter for {@link BindingWrapper} objects.
  * 
  * @author bsauvan
  */
-public class BindingAdapter extends XmlAdapter<byte[], Binding> {
+public class BindingWrapperAdapter extends XmlAdapter<byte[], BindingWrapper> {
 
-    public BindingAdapter() {
+    public BindingWrapperAdapter() {
     }
 
     /**
@@ -42,7 +42,7 @@ public class BindingAdapter extends XmlAdapter<byte[], Binding> {
      * @return the byte array representing the specified binding.
      */
     @Override
-    public byte[] marshal(Binding binding) throws Exception {
+    public byte[] marshal(BindingWrapper binding) throws Exception {
         return ObjectToByteConverter.convert(binding);
     }
 
@@ -55,8 +55,8 @@ public class BindingAdapter extends XmlAdapter<byte[], Binding> {
      * @return the binding represented by the specified byte array.
      */
     @Override
-    public Binding unmarshal(byte[] bindingArray) throws Exception {
-        return (Binding) ByteToObjectConverter.convert(bindingArray);
+    public BindingWrapper unmarshal(byte[] bindingArray) throws Exception {
+        return (BindingWrapper) ByteToObjectConverter.convert(bindingArray);
     }
 
 }

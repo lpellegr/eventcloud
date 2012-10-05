@@ -19,34 +19,35 @@ package fr.inria.eventcloud.webservices.pubsub;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectweb.proactive.core.util.MutableInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
-
 import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.webservices.CompoundEventNotificationConsumer;
-import fr.inria.eventcloud.webservices.api.subscribers.BindingSubscriberWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.BindingWrapperSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.CompoundEventSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.SignalSubscriberWsApi;
 
 /**
  * Provides a basic implementation of {@link SignalSubscriberWsApi},
- * {@link BindingSubscriberWsApi} and {@link CompoundEventSubscriberWsApi} by
- * storing all incoming signals, bindings and events into in-memory lists. These
- * lists can be retrieved at any time for any purpose.
+ * {@link BindingWrapperSubscriberWsApi} and
+ * {@link CompoundEventSubscriberWsApi} by storing all incoming signals,
+ * bindings and events into in-memory lists. These lists can be retrieved at any
+ * time for any purpose.
  * 
  * @author bsauvan
  */
 public class BasicSubscriberWs implements SignalSubscriberWsApi,
-        BindingSubscriberWsApi, CompoundEventSubscriberWsApi {
+        BindingWrapperSubscriberWsApi, CompoundEventSubscriberWsApi {
 
     private static Logger log =
             LoggerFactory.getLogger(CompoundEventNotificationConsumer.class);
 
-    public Integer signalsReceived;
+    public final MutableInteger signalsReceived;
 
-    public final List<Binding> bindingsReceived;
+    public final List<BindingWrapper> bindingsReceived;
 
     public final List<CompoundEvent> eventsReceived;
 
@@ -54,8 +55,8 @@ public class BasicSubscriberWs implements SignalSubscriberWsApi,
      * Creates a {@link BasicSubscriberWs}.
      */
     public BasicSubscriberWs() {
-        this.signalsReceived = 0;
-        this.bindingsReceived = new ArrayList<Binding>();
+        this.signalsReceived = new MutableInteger(0);
+        this.bindingsReceived = new ArrayList<BindingWrapper>();
         this.eventsReceived = new ArrayList<CompoundEvent>();
     }
 
@@ -65,8 +66,8 @@ public class BasicSubscriberWs implements SignalSubscriberWsApi,
     @Override
     public void notifySignal(String id) {
         synchronized (this.signalsReceived) {
+            this.signalsReceived.add(1);
             this.signalsReceived.notifyAll();
-            this.signalsReceived++;
         }
 
         log.info("New signal received");
@@ -76,7 +77,7 @@ public class BasicSubscriberWs implements SignalSubscriberWsApi,
      * {@inheritDoc}
      */
     @Override
-    public void notifyBinding(String id, Binding binding) {
+    public void notifyBinding(String id, BindingWrapper binding) {
         synchronized (this.bindingsReceived) {
             this.bindingsReceived.add(binding);
             this.bindingsReceived.notifyAll();

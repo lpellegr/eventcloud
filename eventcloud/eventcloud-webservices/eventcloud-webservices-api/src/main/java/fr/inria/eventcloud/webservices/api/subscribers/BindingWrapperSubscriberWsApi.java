@@ -23,7 +23,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.webservices.api.adapters.BindingAdapter;
+import fr.inria.eventcloud.api.wrappers.BindingWrapper;
+import fr.inria.eventcloud.webservices.api.adapters.BindingWrapperAdapter;
 
 /**
  * Defines the notification operation that is exposed as a web service by the
@@ -33,10 +34,10 @@ import fr.inria.eventcloud.webservices.api.adapters.BindingAdapter;
  * @author bsauvan
  */
 @WebService(serviceName = "EventCloudBindingSubscriber", portName = "EventCloudBindingSubscriberPort", name = "EventCloudBindingSubscriberPortType", targetNamespace = "http://webservices.eventcloud.inria.fr/")
-public interface BindingSubscriberWsApi {
+public interface BindingWrapperSubscriberWsApi {
 
     /**
-     * Notifies that a binding matching a subscription have been received.
+     * Notifies that a binding matching a subscription has been received.
      * 
      * @param id
      *            the subscription identifier.
@@ -45,6 +46,6 @@ public interface BindingSubscriberWsApi {
      */
     @WebMethod(operationName = "notifyBinding")
     public void notifyBinding(@WebParam(name = "id") String id,
-                              @WebParam(name = "binding") @XmlJavaTypeAdapter(BindingAdapter.class) Binding binding);
+                              @WebParam(name = "binding") @XmlJavaTypeAdapter(BindingWrapperAdapter.class) BindingWrapper binding);
 
 }

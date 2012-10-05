@@ -36,8 +36,7 @@ import fr.inria.eventcloud.webservices.api.adapters.CompoundEventAdapter;
 public interface CompoundEventSubscriberWsApi {
 
     /**
-     * Notifies that a compound event matching a subscription have been
-     * received.
+     * Notifies that a compound event matching a subscription has been received.
      * 
      * @param id
      *            the subscription identifier.

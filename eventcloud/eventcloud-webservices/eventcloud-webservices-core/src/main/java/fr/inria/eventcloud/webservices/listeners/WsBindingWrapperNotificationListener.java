@@ -21,43 +21,43 @@ import javax.xml.ws.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
-
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.webservices.api.subscribers.BindingSubscriberWsApi;
+import fr.inria.eventcloud.api.listeners.BindingWrapperNotificationListener;
+import fr.inria.eventcloud.api.wrappers.BindingWrapper;
+import fr.inria.eventcloud.webservices.api.subscribers.BindingWrapperSubscriberWsApi;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
 /**
- * A {@link BindingNotificationListener} which invokes a web service.
+ * A {@link BindingWrapperNotificationListener} which invokes a web service.
  * 
  * @author bsauvan
  */
-public class WsBindingNotificationListener extends BindingNotificationListener {
+public class WsBindingWrapperNotificationListener extends
+        BindingWrapperNotificationListener {
 
     private static final long serialVersionUID = 1L;
 
     private static final Logger log =
-            LoggerFactory.getLogger(WsBindingNotificationListener.class);
+            LoggerFactory.getLogger(WsBindingWrapperNotificationListener.class);
 
     private final String subscriberWsEndpointUrl;
 
-    private BindingSubscriberWsApi subscriberWsClient;
+    private BindingWrapperSubscriberWsApi subscriberWsClient;
 
     /**
-     * Creates a {@link WsBindingNotificationListener} with the specified
-     * {@link BindingSubscriberWsApi binding subscriber} web service endpoint
-     * URL.
+     * Creates a {@link WsBindingWrapperNotificationListener} with the specified
+     * {@link BindingWrapperSubscriberWsApi binding subscriber} web service
+     * endpoint URL.
      * 
      * @param subscriberWsEndpointUrl
-     *            the {@link BindingSubscriberWsApi binding subscriber} web
-     *            service endpoint URL.
+     *            the {@link BindingWrapperSubscriberWsApi binding subscriber}
+     *            web service endpoint URL.
      */
-    public WsBindingNotificationListener(String subscriberWsEndpointUrl) {
+    public WsBindingWrapperNotificationListener(String subscriberWsEndpointUrl) {
         this.subscriberWsEndpointUrl = subscriberWsEndpointUrl;
         this.subscriberWsClient =
                 WsClientFactory.createWsClient(
-                        BindingSubscriberWsApi.class,
+                        BindingWrapperSubscriberWsApi.class,
                         this.subscriberWsEndpointUrl);
     }
 
@@ -65,7 +65,7 @@ public class WsBindingNotificationListener extends BindingNotificationListener {
      * {@inheritDoc}
      */
     @Override
-    public void onNotification(SubscriptionId id, Binding binding) {
+    public void onNotification(SubscriptionId id, BindingWrapper binding) {
         try {
             this.subscriberWsClient.notifyBinding(id.toString(), binding);
 
