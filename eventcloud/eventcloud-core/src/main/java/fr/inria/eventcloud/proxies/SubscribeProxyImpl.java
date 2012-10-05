@@ -437,15 +437,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         }
 
         log.info("Notification {} has been delivered", id);
-
-        // log information for integration test purposes
-        if (log.isInfoEnabled()) {
-            log.info(
-                    "EventCloud Exit {}",
-                    Quadruple.removeMetaInformation(this.extractEventId(
-                            this.subscriptions.get(id.getSubscriptionId()),
-                            solution.getSolution())));
-        }
     }
 
     private final void deliver(NotificationId id,
@@ -455,6 +446,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         this.sendInputOutputMonitoringReportIfNecessary(
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
+
+        this.logIntegrationInformation(id, solution);
     }
 
     private final void deliver(NotificationId id,
@@ -465,6 +458,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         this.sendInputOutputMonitoringReportIfNecessary(
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
+
+        this.logIntegrationInformation(id, solution);
     }
 
     private final void deliver(NotificationId id,
@@ -489,6 +484,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             this.sendInputOutputMonitoringReport(
                     id.getSubscriptionId(), solution.getSolution(),
                     listener.getSubscriberUrl());
+
+            this.logIntegrationInformation(id, solution);
         }
     }
 
@@ -499,6 +496,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         this.sendInputOutputMonitoringReportIfNecessary(
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
+
+        this.logIntegrationInformation(id, solution);
     }
 
     /**
@@ -555,6 +554,18 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
             super.monitoringManager.sendInputOutputMonitoringReport(
                     source, destination, Quadruple.getPublicationTime(eventId));
+        }
+    }
+
+    private void logIntegrationInformation(NotificationId id, Solution solution) {
+        // log information for integration test purposes
+        if (EventCloudProperties.INTEGRATION_LOG.getValue()
+                && log.isInfoEnabled()) {
+            log.info(
+                    "EventCloud Exit {}",
+                    Quadruple.removeMetaInformation(this.extractEventId(
+                            this.subscriptions.get(id.getSubscriptionId()),
+                            solution.getSolution())));
         }
     }
 

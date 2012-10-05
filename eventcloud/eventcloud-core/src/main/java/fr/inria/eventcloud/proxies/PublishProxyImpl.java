@@ -113,8 +113,10 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
     public void publish(CompoundEvent event) {
         long publicationTime = System.currentTimeMillis();
 
-        // log information for integration test purposes
-        log.info("EventCloud Entry {}", event.getGraph());
+        if (EventCloudProperties.INTEGRATION_LOG.getValue()) {
+            // log information for integration test purposes
+            log.info("EventCloud Entry {}", event.getGraph());
+        }
 
         for (Quadruple quad : event) {
             quad.setPublicationTime(publicationTime);
