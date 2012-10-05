@@ -79,8 +79,8 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  * 
  * @see ProxyFactory
  */
-public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
-        SubscribeProxy, SubscribeProxyAttributeController {
+public class SubscribeProxyImpl extends AbstractProxy implements
+        ComponentEndActive, SubscribeProxy, SubscribeProxyAttributeController {
 
     private static final long serialVersionUID = 1L;
 
@@ -98,7 +98,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
     public static final String SUBSCRIBE_SERVICES_ITF = "subscribe-services";
 
     private static final Logger log =
-            LoggerFactory.getLogger(SubscribeProxy.class);
+            LoggerFactory.getLogger(SubscribeProxyImpl.class);
 
     // contains the subscriptions that have been registered from this proxy
     private ConcurrentMap<SubscriptionId, Subscription> subscriptions;

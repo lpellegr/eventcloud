@@ -49,7 +49,7 @@ import fr.inria.eventcloud.utils.Callback;
  * 
  * @see ProxyFactory
  */
-public class PutGetProxyImpl extends Proxy implements PutGetProxy,
+public class PutGetProxyImpl extends AbstractProxy implements PutGetProxy,
         PutGetProxyAttributeController {
 
     private static final Logger log =

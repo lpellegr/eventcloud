@@ -64,7 +64,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * @author lpellegr
  * @author bsauvan
  */
-public interface SubscribeProxy extends SubscribeApi, Serializable {
+public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
 
     /**
      * Searches the {@link Subscription} associated to the specified

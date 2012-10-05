@@ -45,7 +45,7 @@ import fr.inria.eventcloud.utils.Callback;
  * 
  * @see ProxyFactory
  */
-public class PublishProxyImpl extends Proxy implements PublishProxy,
+public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
         PublishProxyAttributeController {
 
     private static final Logger log =
