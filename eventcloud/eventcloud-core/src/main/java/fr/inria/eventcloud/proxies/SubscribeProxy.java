@@ -32,7 +32,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
 /**
  * A SubscribeProxy is a proxy that implements the {@link SubscribeApi}. It has
  * to be used by a user who wants to execute asynchronous subscribe operations
- * on an Event Cloud.
+ * on an EventCloud.
  * <p>
  * This proxy offers the possibility to reconstruct an Event from the binding
  * which has matched a subscription by a call to
@@ -46,7 +46,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * {@link QuadruplePattern} query must be sent to all the peers matching the
  * graph value corresponding to the event identifier. Because three dimensions
  * among four are not fixed, a lot of peers are contacted. Moreover, due to the
- * fact that the proxies and the event cloud infrastructure are decoupled (and
+ * fact that the proxies and the EventCloud infrastructure are decoupled (and
  * because each quadruple that belongs to an Event is published asynchronously),
  * it is not possible to guarantee that all the quadruples that belong to the
  * event identifier have been retrieved after the execution of the first

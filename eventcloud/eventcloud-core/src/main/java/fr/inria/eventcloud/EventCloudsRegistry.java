@@ -30,10 +30,10 @@ import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
- * An eventclouds registry is in charge of maintaining the list of eventclouds
+ * An EventClouds registry is in charge of maintaining the list of EventClouds
  * which are running for an organization or a group. In addition, for each
- * eventcloud which is managed, the registry also have to store the entry points
- * associated to an eventcloud.
+ * EventCloud which is managed, the registry also have to store the entry points
+ * associated to an EventCloud.
  * <p>
  * <strong>This first prototype is centralized and stores the information in
  * memory.</strong>
@@ -67,30 +67,30 @@ public interface EventCloudsRegistry {
      * Registers the given {@link EventCloudDeployer} into the registry.
      * 
      * @param eventCloudDeployer
-     *            the eventcloud to register into the registry.
+     *            the EventCloud to register into the registry.
      * 
      * @return {@code true} if the registration has succeed or {@code false} if
-     *         the eventcloud is already registered into the registry.
+     *         the EventCloud is already registered into the registry.
      */
     public boolean register(EventCloudDeployer eventCloudDeployer);
 
     /**
-     * Returns a list that contains the identifier of the eventclouds which are
+     * Returns a list that contains the identifier of the EventClouds which are
      * managed by the registry.
      * 
-     * @return a list that contains the identifier of the eventclouds which are
+     * @return a list that contains the identifier of the EventClouds which are
      *         managed by the registry.
      */
     public Set<EventCloudId> listEventClouds();
 
     /**
-     * Returns a boolean which indicates if the eventcloud identified by the
-     * specified {@code eventcloudId} is already managed by the registry.
+     * Returns a boolean which indicates if the EventCloud identified by the
+     * specified {@code EventCloudId} is already managed by the registry.
      * 
      * @param id
-     *            the eventcloud identifier to check for.
+     *            the EventCloud identifier to check for.
      * 
-     * @return {@code true} if the eventcloud identifier is already managed,
+     * @return {@code true} if the EventCloud identifier is already managed,
      *         {@code false} otherwise.
      */
     public boolean contains(EventCloudId id);
@@ -100,7 +100,7 @@ public interface EventCloudsRegistry {
      * specified {@code id} if it is managed by the registry.
      * 
      * @param id
-     *            the eventcloud identifier to look for.
+     *            the EventCloud identifier to look for.
      * 
      * @return the {@link EventCloudDescription} object associated to the
      *         specified {@code id} if it is managed by the registry or
@@ -115,7 +115,7 @@ public interface EventCloudsRegistry {
      * @param id
      *            the Event Cloud identifier to look for.
      * 
-     * @return the trackers associated to the eventcloud identified by the
+     * @return the trackers associated to the EventCloud identified by the
      *         specified {@link EventCloudId} or {@code null}.
      */
     public List<Tracker> findTrackers(EventCloudId id);
@@ -239,13 +239,13 @@ public interface EventCloudsRegistry {
     public boolean unregisterProxy(EventCloudId id, SubscribeProxy proxy);
 
     /**
-     * Undeploys the eventcloud identified with the specified {@code id}.
+     * Undeploys the EventCloud identified with the specified {@code id}.
      * 
      * @param id
      *            the Event Cloud identifier to look for.
      * 
-     * @return {@code true} if the eventcloud has been undeployed, {@code false}
-     *         if the specified {@code id} does not correspond to any eventcloud
+     * @return {@code true} if the EventCloud has been undeployed, {@code false}
+     *         if the specified {@code id} does not correspond to any EventCloud
      *         running.
      */
     boolean undeploy(EventCloudId id);

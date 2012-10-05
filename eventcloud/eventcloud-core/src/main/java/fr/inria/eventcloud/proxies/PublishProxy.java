@@ -20,7 +20,7 @@ import fr.inria.eventcloud.api.PublishApi;
 
 /**
  * A PublishProxy is a proxy that implements the {@link PublishApi}. It has to
- * be used by a user who wants to execute publish operations on an Event Cloud.
+ * be used by a user who wants to execute publish operations on an EventCloud.
  * 
  * @author lpellegr
  * @author bsauvan

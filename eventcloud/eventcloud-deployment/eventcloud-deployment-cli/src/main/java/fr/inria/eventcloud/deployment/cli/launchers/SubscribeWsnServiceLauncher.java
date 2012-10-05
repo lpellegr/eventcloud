@@ -41,9 +41,9 @@ public final class SubscribeWsnServiceLauncher extends WsnServiceLauncher {
     public String run() {
         return WsDeployer.deploySubscribeWsnService(
                 super.registryUrl,
-                super.eventCloudIdUrl,
+                super.eventCloudUrl,
                 "proactive/services/eventclouds/"
-                        + this.getTopicName(super.eventCloudIdUrl)
+                        + this.getTopicName(super.eventCloudUrl)
                         + "/wsn-service-" + this.numberId
                         + "_subscribe-webservices", this.port)
                 .getWsEndpointUrl();

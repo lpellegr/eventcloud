@@ -44,7 +44,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 public class SubscribeEventCloudCommand extends Command<EventCloudsRegistry> {
 
     @Parameter(names = {"--stream-url"}, description = "Stream URL", converter = EventCloudIdConverter.class, required = true)
-    private EventCloudId eventcloudId;
+    private EventCloudId id;
 
     @Parameter(names = {"--sparql-query", "-q"}, description = "SPARQL query used to subscribe")
     private String sparqlQuery = "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o. } }";
@@ -52,7 +52,7 @@ public class SubscribeEventCloudCommand extends Command<EventCloudsRegistry> {
     public SubscribeEventCloudCommand() {
         super(
                 "subscribe-eventcloud",
-                "Subscribes to the eventcloud identified by the specified stream URL",
+                "Subscribes to the EventCloud identified by the specified stream URL",
                 new String[] {"subscribe"});
     }
 
@@ -62,12 +62,11 @@ public class SubscribeEventCloudCommand extends Command<EventCloudsRegistry> {
     @Override
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
-        if (registry.contains(this.eventcloudId)) {
+        if (registry.contains(this.id)) {
             try {
                 SubscribeApi subscribeProxy =
                         ProxyFactory.newSubscribeProxy(
-                                PAActiveObject.getUrl(registry),
-                                this.eventcloudId);
+                                PAActiveObject.getUrl(registry), this.id);
 
                 Subscription subscription = new Subscription(this.sparqlQuery);
 
@@ -87,7 +86,7 @@ public class SubscribeEventCloudCommand extends Command<EventCloudsRegistry> {
             }
         } else {
             System.out.println("EventCloud identified by stream URL '"
-                    + this.eventcloudId.getStreamUrl() + "' does not exist");
+                    + this.id.getStreamUrl() + "' does not exist");
         }
     }
 

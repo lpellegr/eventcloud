@@ -41,10 +41,10 @@ public final class SubscribeWsProxyLauncher extends WsLauncher {
     public String run() {
         return WsDeployer.deploySubscribeWsProxy(
                 super.registryUrl,
-                super.eventCloudIdUrl,
+                super.eventCloudUrl,
                 "proactive/services/eventclouds/"
-                        + this.getTopicName(super.eventCloudIdUrl)
-                        + "/ws-proxy-" + this.numberId).getWsEndpointUrl();
+                        + this.getTopicName(super.eventCloudUrl) + "/ws-proxy-"
+                        + this.numberId).getWsEndpointUrl();
     }
 
 }

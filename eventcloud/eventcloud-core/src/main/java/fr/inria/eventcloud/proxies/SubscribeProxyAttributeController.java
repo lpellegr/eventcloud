@@ -31,7 +31,7 @@ public interface SubscribeProxyAttributeController extends AttributeController {
      * Sets the attributes of the subscribe proxy.
      * 
      * @param proxy
-     *            the event cloud proxy instance to set to the subscribe proxy.
+     *            the EventCloud proxy instance to set to the subscribe proxy.
      * @param componentUri
      *            the URI at which the component is bind.
      * @param properties

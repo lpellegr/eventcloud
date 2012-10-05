@@ -22,7 +22,7 @@ import java.util.Collection;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 
 /**
- * Defines the publish operations that can be executed on an Event Cloud.
+ * Defines the publish operations that can be executed on an EventCloud.
  * 
  * @author lpellegr
  */

@@ -41,7 +41,7 @@ public class SubscribeCommand extends Command<SubscribeProxy> {
 
     public SubscribeCommand() {
         super("subscribe",
-                "Subscribe on the Event Cloud with the specified SPARQL query");
+                "Subscribe on the EventCloud with the specified SPARQL query");
     }
 
     /**

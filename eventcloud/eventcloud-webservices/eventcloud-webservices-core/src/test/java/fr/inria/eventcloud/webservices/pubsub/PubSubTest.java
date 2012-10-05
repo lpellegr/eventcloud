@@ -55,7 +55,7 @@ public class PubSubTest extends WsTest {
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
-    private EventCloudId ecId;
+    private EventCloudId id;
 
     private WsProxyInfo subscribeWsProxyInfo;
 
@@ -252,18 +252,18 @@ public class PubSubTest extends WsTest {
 
     private void initEventCloudEnvironmentAndClients() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
-        this.ecId =
+        this.id =
                 this.deployer.newEventCloud(new EventCloudDescription(
                         "http://streams.event-processing.org/ids/TaxiUc"), 1, 1);
 
         this.subscribeWsProxyInfo =
                 WsDeployer.deploySubscribeWsProxy(
                         this.deployer.getEventCloudsRegistryUrl(),
-                        this.ecId.getStreamUrl(), "subscribe");
+                        this.id.getStreamUrl(), "subscribe");
         this.publishWsProxyInfo =
                 WsDeployer.deployPublishWsProxy(
                         this.deployer.getEventCloudsRegistryUrl(),
-                        this.ecId.getStreamUrl(), "publish");
+                        this.id.getStreamUrl(), "publish");
 
         this.subscribeWsClient =
                 WsClientFactory.createWsClient(

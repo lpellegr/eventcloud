@@ -24,7 +24,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * This ARQ function is used to remove prefixes from a RDF term as for data that
- * are indexed on an eventcloud.
+ * are indexed on an EventCloud.
  * 
  * @author lpellegr
  */

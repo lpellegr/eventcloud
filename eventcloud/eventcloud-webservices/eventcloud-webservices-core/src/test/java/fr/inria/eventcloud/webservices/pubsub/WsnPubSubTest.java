@@ -74,7 +74,7 @@ public class WsnPubSubTest extends WsTest {
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
-    private EventCloudId ecId;
+    private EventCloudId id;
 
     private WsnServiceInfo subscribeWsnServiceInfo;
 
@@ -103,12 +103,12 @@ public class WsnPubSubTest extends WsTest {
         // Creates the subscriber web service
         this.createNotificationConsumerWebService();
 
-        int lastIndexOfSlash = this.ecId.getStreamUrl().lastIndexOf('/');
+        int lastIndexOfSlash = this.id.getStreamUrl().lastIndexOf('/');
 
         // Extracts topic information
         QName topic =
-                new QName(this.ecId.getStreamUrl().substring(
-                        0, lastIndexOfSlash + 1), this.ecId.getStreamUrl()
+                new QName(this.id.getStreamUrl().substring(
+                        0, lastIndexOfSlash + 1), this.id.getStreamUrl()
                         .substring(lastIndexOfSlash + 1), "s");
 
         // Creates the subscribe request
@@ -189,12 +189,12 @@ public class WsnPubSubTest extends WsTest {
         // Initializes the EventCloud, web services and web service clients
         this.initEventCloudEnvironmentAndClients();
 
-        int lastIndexOfSlash = this.ecId.getStreamUrl().lastIndexOf('/');
+        int lastIndexOfSlash = this.id.getStreamUrl().lastIndexOf('/');
 
         // Extracts topic information
         QName topic =
-                new QName(this.ecId.getStreamUrl().substring(
-                        0, lastIndexOfSlash + 1), this.ecId.getStreamUrl()
+                new QName(this.id.getStreamUrl().substring(
+                        0, lastIndexOfSlash + 1), this.id.getStreamUrl()
                         .substring(lastIndexOfSlash + 1), "s");
 
         // Creates the subscribe request
@@ -247,18 +247,18 @@ public class WsnPubSubTest extends WsTest {
     private void initEventCloudEnvironmentAndClients() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
 
-        this.ecId =
+        this.id =
                 this.deployer.newEventCloud(new EventCloudDescription(
                         "http://streams.event-processing.org/ids/TaxiUc"), 1, 1);
 
         this.subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
                         this.deployer.getEventCloudsRegistryUrl(),
-                        this.ecId.getStreamUrl(), "subscribe", WEBSERVICES_PORT);
+                        this.id.getStreamUrl(), "subscribe", WEBSERVICES_PORT);
         this.publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
                         this.deployer.getEventCloudsRegistryUrl(),
-                        this.ecId.getStreamUrl(), "publish", WEBSERVICES_PORT);
+                        this.id.getStreamUrl(), "publish", WEBSERVICES_PORT);
 
         this.subscribeWsnClient =
                 WsClientFactory.createWsClient(

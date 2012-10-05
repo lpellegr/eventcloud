@@ -26,11 +26,11 @@ import com.beust.jcommander.Parameter;
  */
 public abstract class WsLauncher extends Launcher {
 
-    @Parameter(names = {"--registry-url", "-r"}, description = "Eventclouds registry URL", required = true)
+    @Parameter(names = {"--registry-url", "-r"}, description = "EventClouds registry URL", required = true)
     protected String registryUrl;
 
-    @Parameter(names = {"--eventcloud-url", "-e"}, description = "URL identifying an eventcloud which is deployed and running", required = true)
-    protected String eventCloudIdUrl;
+    @Parameter(names = {"--eventcloud-url", "-e"}, description = "URL identifying an EventCloud which is deployed and running", required = true)
+    protected String eventCloudUrl;
 
     @Parameter(names = {"--number-id", "-n"}, description = "Identification number which will be part of the web service endpoint URL", required = true)
     protected int numberId;
