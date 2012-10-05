@@ -16,15 +16,12 @@
  **/
 package fr.inria.eventcloud.webservices.monitoring;
 
-import java.util.List;
-
 import javax.xml.namespace.QName;
 
 import org.apache.cxf.endpoint.Server;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.objectweb.proactive.core.ProActiveException;
 
@@ -40,21 +37,21 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.webservices.BasicNotificationConsumer;
-import fr.inria.eventcloud.webservices.api.EventCloudManagementServiceApi;
-import fr.inria.eventcloud.webservices.api.PublishServiceApi;
-import fr.inria.eventcloud.webservices.api.SubscribeServiceApi;
-import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
-import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
+import fr.inria.eventcloud.webservices.CompoundEventNotificationConsumer;
+import fr.inria.eventcloud.webservices.WsTest;
+import fr.inria.eventcloud.webservices.api.EventCloudsManagementWsnApi;
+import fr.inria.eventcloud.webservices.api.PublishWsnApi;
+import fr.inria.eventcloud.webservices.api.SubscribeWsnApi;
+import fr.inria.eventcloud.webservices.deployment.WsDeployer;
+import fr.inria.eventcloud.webservices.deployment.WsnServiceInfo;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
-import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
 
 /**
  * Test cases for input/output monitoring.
  * 
  * @author lpellegr
  */
-public class InputOutputMonitoringTest {
+public class InputOutputMonitoringTest extends WsTest {
 
     private static final QName RAW_REPORT_QNAME = new QName(
             "http://www.petalslink.org/rawreport/1.0", "RawReportTopic", "bsm");
@@ -70,44 +67,44 @@ public class InputOutputMonitoringTest {
 
     private String registryUrl;
 
-    private Server eventCloudManagementWebServer;
+    private Server eventCloudsManagementServer;
 
-    private EventCloudManagementServiceApi eventCloudManagementClient;
+    private EventCloudsManagementWsnApi eventCloudsManagementWsnClient;
 
     private PublishApi publishProxy;
 
     private SubscribeApi subscribeProxy;
 
-    private ServiceInformation subscribeServiceInformation;
+    private WsnServiceInfo subscribeWsnServiceInfo;
 
-    private ServiceInformation publishServiceInformation;
+    private WsnServiceInfo publishWsnServiceInfo;
 
-    private SubscribeServiceApi subscribeClient;
+    private SubscribeWsnApi subscribeWsnClient;
 
-    private PublishServiceApi publishClient;
+    private PublishWsnApi publishWsnClient;
 
     private BasicNotificationConsumer monitoringService;
 
     private Server monitoringServer;
 
-    private SubscriberServiceImpl subscriberService;
+    private CompoundEventNotificationConsumer notificationConsumerService;
 
-    private Server subscriberWsServer;
+    private Server notificationConsumerServer;
 
-    private String subscriberWsEndpointUrl;
+    private String notificationConsumerWsEndpointUrl;
 
     @Before
     public void setUp() throws ProActiveException, EventCloudIdNotManaged {
         this.initializeEventCloudsInfrastructure();
         this.initializeJavaProxies();
-        this.initializeWsProxies();
+        this.initializeWebServices();
     }
 
     @Test(timeout = 180000)
     public void testInputOutputMonitoring() throws Exception {
         // Sends a subscribe request to enable input/output monitoring
         SubscribeResponse subscribeResponse =
-                this.eventCloudManagementClient.subscribe(WsnHelper.createSubscribeMessage(
+                this.eventCloudsManagementWsnClient.subscribe(WsnHelper.createSubscribeMessage(
                         this.monitoringServer.getEndpoint()
                                 .getEndpointInfo()
                                 .getAddress(), RAW_REPORT_QNAME));
@@ -120,31 +117,22 @@ public class InputOutputMonitoringTest {
                 new CustomSignalNotificationListener());
 
         // Subscribes with a WSN proxy
-        this.subscribeClient.subscribe(WsnHelper.createSubscribeMessage(
-                this.subscriberWsEndpointUrl, STREAM_QNAME));
+        this.subscribeWsnClient.subscribe(WsnHelper.createSubscribeMessage(
+                this.notificationConsumerWsEndpointUrl, STREAM_QNAME));
 
         // Publishes a compound event through a ws publish proxy
-        this.publishClient.notify(WsnHelper.createNotifyMessage(
-                this.publishServiceInformation.getServer()
-                        .getEndpoint()
-                        .toString(), STREAM_QNAME,
+        this.publishWsnClient.notify(WsnHelper.createNotifyMessage(
+                this.publishWsnServiceInfo.getWsEndpointUrl(), STREAM_QNAME,
                 CompoundEventGenerator.random(STREAM_URL, 10)));
 
         // Publishes a compound event through a java publish proxy
         this.publishProxy.publish(CompoundEventGenerator.random(STREAM_URL, 10));
 
-        List<Notify> monitoringReportsReceived =
-                this.monitoringService.getNotificationsReceived();
-
         // We must receive one report for each subscribe proxy times the number
         // of publications matching the subscriptions
-        synchronized (monitoringReportsReceived) {
-            while (monitoringReportsReceived.size() != 4) {
-                try {
-                    monitoringReportsReceived.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+        synchronized (this.monitoringService.notificationsReceived) {
+            while (this.monitoringService.notificationsReceived.size() != 4) {
+                this.monitoringService.notificationsReceived.wait();
             }
         }
 
@@ -155,15 +143,15 @@ public class InputOutputMonitoringTest {
         // notify.getAny().get(0) returns null.
 
         // Sends an unsubscribe request to disable input/output monitoring
-        this.eventCloudManagementClient.unsubscribe(WsnHelper.createUnsubscribeRequest(subscriptionId));
+        this.eventCloudsManagementWsnClient.unsubscribe(WsnHelper.createUnsubscribeRequest(subscriptionId));
 
         // Publishes a compound event through a java publish proxy
         this.publishProxy.publish(CompoundEventGenerator.random(STREAM_URL, 10));
 
         // Checks that no more reports are received
-        synchronized (monitoringReportsReceived) {
-            monitoringReportsReceived.wait(4000);
-            Assert.assertTrue(monitoringReportsReceived.size() == 4);
+        synchronized (this.monitoringService.notificationsReceived) {
+            this.monitoringService.notificationsReceived.wait(4000);
+            Assert.assertTrue(this.monitoringService.notificationsReceived.size() == 4);
         }
     }
 
@@ -173,18 +161,17 @@ public class InputOutputMonitoringTest {
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
         this.registryUrl = registry.register("registry");
 
-        this.eventCloudManagementWebServer =
-                WebServiceDeployer.deployEventCloudManagementWebService(
-                        this.registryUrl, 22004, "management", 22005);
-
-        this.eventCloudManagementClient =
+        this.eventCloudsManagementServer =
+                WsDeployer.deployEventCloudManagementWebService(
+                        this.registryUrl, "management", WEBSERVICES_PORT);
+        this.eventCloudsManagementWsnClient =
                 WsClientFactory.createWsClient(
-                        EventCloudManagementServiceApi.class,
-                        this.eventCloudManagementWebServer.getEndpoint()
+                        EventCloudsManagementWsnApi.class,
+                        this.eventCloudsManagementServer.getEndpoint()
                                 .getEndpointInfo()
                                 .getAddress());
 
-        this.eventCloudManagementClient.createEventCloud(STREAM_URL);
+        this.eventCloudsManagementWsnClient.createEventCloud(STREAM_URL);
     }
 
     private void initializeJavaProxies() throws EventCloudIdNotManaged {
@@ -194,44 +181,38 @@ public class InputOutputMonitoringTest {
                 ProxyFactory.newPublishProxy(this.registryUrl, EVENTCLOUD_ID);
     }
 
-    private void initializeWsProxies() {
+    private void initializeWebServices() {
+        this.subscribeWsnServiceInfo =
+                WsDeployer.deploySubscribeWsnService(
+                        this.registryUrl, STREAM_URL, "subscribe",
+                        WEBSERVICES_PORT);
+        this.publishWsnServiceInfo =
+                WsDeployer.deployPublishWsnService(
+                        this.registryUrl, STREAM_URL, "publish",
+                        WEBSERVICES_PORT);
+
+        this.subscribeWsnClient =
+                WsClientFactory.createWsClient(
+                        SubscribeWsnApi.class,
+                        this.subscribeWsnServiceInfo.getWsEndpointUrl());
+        this.publishWsnClient =
+                WsClientFactory.createWsClient(
+                        PublishWsnApi.class,
+                        this.publishWsnServiceInfo.getWsEndpointUrl());
+
         this.monitoringService = new BasicNotificationConsumer();
         this.monitoringServer =
-                WebServiceDeployer.deployWebService(
-                        this.monitoringService, "monitoring", 22000);
+                WsDeployer.deployWebService(
+                        this.monitoringService, "monitoring", WEBSERVICES_PORT);
 
-        // Web services which are deployed
-        this.subscribeServiceInformation =
-                WebServiceDeployer.deploySubscribeWebService(
-                        this.registryUrl, STREAM_URL, "subscribe", 22001);
-
-        this.publishServiceInformation =
-                WebServiceDeployer.deployPublishWebService(
-                        this.registryUrl, STREAM_URL, "publish", 22002);
-
-        // Clients associated to web services
-        this.subscribeClient =
-                WsClientFactory.createWsClient(
-                        SubscribeServiceApi.class,
-                        this.subscribeServiceInformation.getServer()
-                                .getEndpoint()
-                                .getEndpointInfo()
-                                .getAddress());
-
-        this.publishClient =
-                WsClientFactory.createWsClient(
-                        PublishServiceApi.class,
-                        this.publishServiceInformation.getServer()
-                                .getEndpoint()
-                                .getEndpointInfo()
-                                .getAddress());
-
-        this.subscriberService = new SubscriberServiceImpl();
-        this.subscriberWsServer =
-                WebServiceDeployer.deployWebService(
-                        this.subscriberService, "subscriber", 22003);
-        this.subscriberWsEndpointUrl =
-                this.subscriberWsServer.getEndpoint()
+        this.notificationConsumerService =
+                new CompoundEventNotificationConsumer();
+        this.notificationConsumerServer =
+                WsDeployer.deployWebService(
+                        this.notificationConsumerService, "subscriber",
+                        WEBSERVICES_PORT);
+        this.notificationConsumerWsEndpointUrl =
+                this.notificationConsumerServer.getEndpoint()
                         .getEndpointInfo()
                         .getAddress();
     }

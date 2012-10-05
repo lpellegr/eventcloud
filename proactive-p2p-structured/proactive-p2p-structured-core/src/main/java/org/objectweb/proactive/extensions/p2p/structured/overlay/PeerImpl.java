@@ -73,9 +73,10 @@ public class PeerImpl extends AbstractComponent implements Peer,
     protected transient StructuredOverlay overlay;
 
     /**
-     * No-arg constructor for ProActive.
+     * Empty constructor required by ProActive.
      */
     public PeerImpl() {
+
     }
 
     /**

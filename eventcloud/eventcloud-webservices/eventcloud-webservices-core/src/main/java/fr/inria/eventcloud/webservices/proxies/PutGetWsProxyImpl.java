@@ -25,8 +25,8 @@ import fr.inria.eventcloud.proxies.PutGetProxyImpl;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
 
 /**
- * PutGetWsProxyImpl is an extension of {@link PutGetProxyImpl} in order to be
- * able to expose the proxy as a web service.
+ * Extension of {@link PutGetProxyImpl} in order to be able to expose a put/get
+ * proxy as a web service.
  * 
  * @author bsauvan
  */

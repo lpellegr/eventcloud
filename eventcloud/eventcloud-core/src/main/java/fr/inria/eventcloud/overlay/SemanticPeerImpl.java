@@ -100,7 +100,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     private ExecutorService threadPool;
 
     /**
-     * No-arg constructor for ProActive.
+     * Empty constructor required by ProActive.
      */
     public SemanticPeerImpl() {
         // keep it empty because it is called each time we have to reify

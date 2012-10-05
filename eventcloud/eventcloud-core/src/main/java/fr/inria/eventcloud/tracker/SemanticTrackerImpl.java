@@ -40,6 +40,9 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
     public static final String SEMANTIC_TRACKER_ADL =
             "fr.inria.eventcloud.tracker.SemanticTracker";
 
+    /**
+     * Empty constructor required by ProActive.
+     */
     public SemanticTrackerImpl() {
         super();
     }

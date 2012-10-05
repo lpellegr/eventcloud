@@ -72,9 +72,10 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     private String registryUrl;
 
     /**
-     * No-arg constructor for ProActive.
+     * Empty constructor required by ProActive.
      */
     public EventCloudsRegistryImpl() {
+
     }
 
     /**

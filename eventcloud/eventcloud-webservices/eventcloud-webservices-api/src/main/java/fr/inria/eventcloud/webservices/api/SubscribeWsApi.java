@@ -18,76 +18,78 @@ package fr.inria.eventcloud.webservices.api;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
-import javax.jws.WebResult;
 import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
-import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
-import org.oasis_open.docs.wsn.bw_2.InvalidFilterFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidMessageContentExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidProducerPropertiesExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.MultipleTopicsSpecifiedFault;
-import org.oasis_open.docs.wsn.bw_2.NoCurrentMessageOnTopicFault;
-import org.oasis_open.docs.wsn.bw_2.NotifyMessageNotSupportedFault;
-import org.oasis_open.docs.wsn.bw_2.SubscribeCreationFailedFault;
-import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
-import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
-import org.oasis_open.docs.wsn.bw_2.UnacceptableInitialTerminationTimeFault;
-import org.oasis_open.docs.wsn.bw_2.UnrecognizedPolicyRequestFault;
-import org.oasis_open.docs.wsn.bw_2.UnsupportedPolicyRequestFault;
-import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
-
-import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.webservices.api.adapters.SubscribeInfosAdapter;
-import fr.inria.eventcloud.webservices.api.adapters.SubscriptionIdAdapter;
+import fr.inria.eventcloud.webservices.api.subscribers.BindingSubscriberWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.CompoundEventSubscriberWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.SignalSubscriberWsApi;
 
 /**
- * Defines the subscribe operations that can be executed on an Event-Cloud and
+ * Defines the subscribe operations that can be executed on an EventCloud and
  * can be exposed as web services by a subscribe proxy component.
  * 
- * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudSubscribe", portName = "EventCloudSubscribePort", name = "EventCloudSubscribePortType", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2")
-@XmlSeeAlso(value = {
-        org.oasis_open.docs.wsn.br_2.ObjectFactory.class,
-        org.oasis_open.docs.wsrf.rp_2.ObjectFactory.class,
-        org.oasis_open.docs.wsrf.bf_2.ObjectFactory.class,
-        org.oasis_open.docs.wsrf.r_2.ObjectFactory.class,
-        org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
-        org.oasis_open.docs.wsn.b_2.ObjectFactory.class})
-@SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+@WebService(serviceName = "EventCloudSubscribeWs", portName = "EventCloudSubscribeWsPort", name = "EventCloudSubscribeWsPortType", targetNamespace = "http://webservices.eventcloud.inria.fr/")
 public interface SubscribeWsApi {
 
-    @WebResult(name = "GetCurrentMessageResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", partName = "GetCurrentMessageResponse")
-    @WebMethod(operationName = "GetCurrentMessage")
-    public GetCurrentMessageResponse getCurrentMessage(@WebParam(partName = "GetCurrentMessageRequest", name = "GetCurrentMessage", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") GetCurrentMessage currentMessage)
-            throws NoCurrentMessageOnTopicFault, TopicNotSupportedFault,
-            ResourceUnknownFault, MultipleTopicsSpecifiedFault,
-            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault;
-
     /**
-     * Subscribes for notifications with the specified {@link SubscribeInfos}.
+     * Subscribes to interest with the specified SPARQL query and the given
+     * {@link SignalSubscriberWsApi signal subscriber web service} endpoint URL.
      * 
-     * @param subscribeInfos
+     * @param sparqlQuery
+     *            the SPARQL query.
+     * @param subscriberWsEndpointUrl
+     *            the endpoint URL of the {@link SignalSubscriberWsApi signal
+     *            subscriber web service} to notify.
      * 
      * @return the subscription identifier.
      */
-    @WebResult(name = "SubscribeResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", partName = "SubscribeResponse")
-    @WebMethod(operationName = "Subscribe")
-    @XmlJavaTypeAdapter(SubscriptionIdAdapter.class)
-    public SubscriptionId subscribe(@WebParam(partName = "SubscribeRequest", name = "Subscribe", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(SubscribeInfosAdapter.class) SubscribeInfos subscribeInfos)
-            throws UnrecognizedPolicyRequestFault,
-            SubscribeCreationFailedFault,
-            InvalidProducerPropertiesExpressionFault,
-            UnsupportedPolicyRequestFault, TopicNotSupportedFault,
-            NotifyMessageNotSupportedFault, ResourceUnknownFault,
-            UnacceptableInitialTerminationTimeFault,
-            InvalidMessageContentExpressionFault, InvalidFilterFault,
-            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault;
+    @WebMethod(operationName = "subscribeSignal")
+    public String subscribeSignal(@WebParam(name = "sparqlQuery") String sparqlQuery,
+                                  @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
+
+    /**
+     * Subscribes to interest with the specified SPARQL query and the given
+     * {@link BindingSubscriberWsApi binding subscriber web service} endpoint
+     * URL.
+     * 
+     * @param sparqlQuery
+     *            the SPARQL query.
+     * @param subscriberWsEndpointUrl
+     *            the endpoint URL of the {@link BindingSubscriberWsApi binding
+     *            subscriber web service} to notify.
+     * 
+     * @return the subscription identifier.
+     */
+    @WebMethod(operationName = "subscribeBinding")
+    public String subscribeBinding(@WebParam(name = "sparqlQuery") String sparqlQuery,
+                                   @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
+
+    /**
+     * Subscribes to interest with the specified SPARQL query and the given
+     * {@link CompoundEventSubscriberWsApi compound event subscriber web
+     * service} endpoint URL.
+     * 
+     * @param sparqlQuery
+     *            the SPARQL query.
+     * @param subscriberWsEndpointUrl
+     *            the endpoint URL of the {@link CompoundEventSubscriberWsApi
+     *            compound event subscriber web service} to notify.
+     * 
+     * @return the subscription identifier.
+     */
+    @WebMethod(operationName = "subscribeCompoundEvent")
+    public String subscribeCompoundEvent(@WebParam(name = "sparqlQuery") String sparqlQuery,
+                                         @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
+
+    /**
+     * Unsubscribes by using the specified subscription identifier.
+     * 
+     * @param id
+     *            the subscription identifier.
+     */
+    @WebMethod(operationName = "unsubscribe")
+    public void unsubscribe(@WebParam(name = "id") String id);
 
 }

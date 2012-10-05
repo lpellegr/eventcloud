@@ -16,124 +16,201 @@
  **/
 package fr.inria.eventcloud.webservices.pubsub;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 import org.apache.cxf.endpoint.Server;
-import org.etsi.uri.gcm.util.GCM;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.oasis_open.docs.wsn.b_2.Notify;
-import org.oasis_open.docs.wsn.b_2.Subscribe;
-import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
-import org.objectweb.fractal.api.Interface;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngine;
-import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
-import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerAttributeController;
-import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerFactory;
-import org.soceda.socialfilter.socialnetwork.SocialNetwork;
+
+import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.EventCloudDescription;
-import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
-import fr.inria.eventcloud.parsers.RdfParser;
-import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.utils.Callback;
-import fr.inria.eventcloud.webservices.api.PublishServiceApi;
-import fr.inria.eventcloud.webservices.api.SubscribeServiceApi;
-import fr.inria.eventcloud.webservices.deployment.ServiceInformation;
-import fr.inria.eventcloud.webservices.deployment.WebServiceDeployer;
+import fr.inria.eventcloud.webservices.api.PublishWsApi;
+import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
+import fr.inria.eventcloud.webservices.deployment.WsDeployer;
+import fr.inria.eventcloud.webservices.deployment.WsProxyInfo;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
-import fr.inria.eventcloud.webservices.services.SubscriberServiceImpl;
 
 /**
- * Class used to test a subscribe proxy component and a publish proxy component
- * by using web services.
+ * Test cases for {@link PublishWsApi publish web service proxies} and
+ * {@link SubscribeWsApi subscribe web service proxies}.
  * 
  * @author bsauvan
  * @author lpellegr
  */
 public class PubSubTest {
 
-    private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(PubSubTest.class);
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
     private EventCloudId ecId;
 
-    private ServiceInformation subscribeServiceInformation;
+    private WsProxyInfo subscribeWsProxyInfo;
 
-    private ServiceInformation publishServiceInformation;
+    private WsProxyInfo publishWsProxyInfo;
 
-    private SubscribeServiceApi subscribeClient;
+    private SubscribeWsApi subscribeWsClient;
 
-    private PublishServiceApi publishClient;
+    private PublishWsApi publishWsClient;
 
-    private SubscriberServiceImpl subscriberService;
+    private BasicSubscriberWs subscriberService;
 
-    private Server subscriberWsServer;
+    private Server subscriberServer;
 
-    private String subscriberWsEndpointUrl;
+    private String subscriberEndpointUrl;
 
     @Before
-    public void init() {
-        EventCloudProperties.SOCIAL_FILTER_URL.setValue(null);
+    public void setUp() {
+        this.initEventCloudEnvironmentAndClients();
+    }
+
+    @Test(timeout = 60000)
+    public void testSubscribeSignalNotificationListener() throws Exception {
+        // Subscribes for any quadruples
+        String subscriptionId =
+                this.subscribeWsClient.subscribeSignal(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
+                        this.subscriberEndpointUrl);
+
+        // Publishes an event
+        this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(1));
+
+        synchronized (this.subscriberService.signalsReceived) {
+            while (this.subscriberService.signalsReceived != 1) {
+                this.subscriberService.signalsReceived.wait();
+            }
+        }
+
+        log.info("Signal received!");
+
+        // Unsubscribes
+        this.subscribeWsClient.unsubscribe(subscriptionId);
+
+        // Publishes a second event
+        this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(1));
+
+        // Checks that no more events are received
+        synchronized (this.subscriberService.signalsReceived) {
+            this.subscriberService.signalsReceived.wait(4000);
+            Assert.assertTrue(this.subscriberService.signalsReceived == 1);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSubscribeBindingNotificationListener() throws Exception {
+        // Subscribes for any quadruples
+        String subscriptionId =
+                this.subscribeWsClient.subscribeBinding(
+                        "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
+                        this.subscriberEndpointUrl);
+
+        // Publishes 6 events
+        long publicationTime = System.currentTimeMillis();
+
+        Quadruple q1 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/825349613"),
+                        Node.createURI("https://plus.google.com/107234124364605485774"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                        Node.createLiteral("user1@company.com"));
+        q1.setPublicationTime(publicationTime);
+        this.publishWsClient.publishQuadruple(q1);
+
+        Quadruple q2 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/825349613"),
+                        Node.createURI("https://plus.google.com/107234124364605485774"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                        Node.createLiteral("User1"));
+        q2.setPublicationTime(publicationTime);
+        this.publishWsClient.publishQuadruple(q2);
+
+        // This quadruple shows chronicle context property because it is
+        // delivered by reconsuming the first quadruple which was published
+        Quadruple q3 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/825349613"),
+                        Node.createURI("https://plus.google.com/107234124364605485774"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                        Node.createLiteral("user1.new.email@company.com"));
+        q3.setPublicationTime(publicationTime);
+        this.publishWsClient.publishQuadruple(q3);
+
+        publicationTime = System.currentTimeMillis();
+
+        Quadruple q4 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
+                        Node.createURI("https://plus.google.com/107545688688906540962"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                        Node.createLiteral("user2@company.com"));
+        q4.setPublicationTime(publicationTime);
+        this.publishWsClient.publishQuadruple(q4);
+
+        Quadruple q5 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
+                        Node.createURI("https://plus.google.com/14023231238123495031/"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                        Node.createLiteral("User 3"));
+        q5.setPublicationTime();
+        this.publishWsClient.publishQuadruple(q5);
+
+        Quadruple q6 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
+                        Node.createURI("https://plus.google.com/107545688688906540962"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
+                        Node.createLiteral("User 2"));
+        q6.setPublicationTime(publicationTime);
+        this.publishWsClient.publishQuadruple(q6);
+
+        synchronized (this.subscriberService.bindingsReceived) {
+            while (this.subscriberService.bindingsReceived.size() != 3) {
+                this.subscriberService.bindingsReceived.wait();
+            }
+        }
+
+        log.info("Bindings received!");
+
+        // Unsubscribes
+        this.subscribeWsClient.unsubscribe(subscriptionId);
+
+        // Publishes a 7th quadruple
+        Quadruple q7 =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
+                        Node.createURI("https://plus.google.com/14023231238123495031/"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                        Node.createLiteral("user3@company.com"));
+        q6.setPublicationTime(publicationTime);
+        this.publishWsClient.publishQuadruple(q7);
+
+        // Checks that no more events are received
+        synchronized (this.subscriberService.eventsReceived) {
+            this.subscriberService.eventsReceived.wait(4000);
+            Assert.assertTrue(this.subscriberService.eventsReceived.size() == 1);
+        }
     }
 
     @Test(timeout = 180000)
-    public void testPublishSubscribeWsProxies() throws Exception {
-        // Initializes the Event Cloud, proxies and web service clients
-        this.initEventCloudAndProxiesAndClients();
+    public void testSubscribeEventNotificationListener() throws Exception {
+        // Subscribes for any quadruples
+        String subscriptionId =
+                this.subscribeWsClient.subscribeCompoundEvent(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
+                        this.subscriberEndpointUrl);
 
-        // Creates the subscriber web service
-        this.createSubscriberWebService();
-
-        int lastIndexOfSlash = this.ecId.getStreamUrl().lastIndexOf('/');
-
-        // Extracts topic information
-        QName topic =
-                new QName(this.ecId.getStreamUrl().substring(
-                        0, lastIndexOfSlash + 1), this.ecId.getStreamUrl()
-                        .substring(lastIndexOfSlash + 1), "s");
-
-        // Creates the subscribe request
-        Subscribe subscribeRequest =
-                WsnHelper.createSubscribeMessage(
-                        this.subscriberWsEndpointUrl, topic);
-
-        // Subscribes for any events with topic TaxiUc
-        SubscribeResponse subscribeResponse =
-                this.subscribeClient.subscribe(subscribeRequest);
-        SubscriptionId subscriptionId =
-                WsnHelper.getSubcriptionId(subscribeResponse);
-
-        log.info("Subscription submitted, ID is " + subscriptionId);
-
-        // Creates the notify request
-        Notify notifyRequest =
-                WsnHelper.createNotifyMessage(
-                        this.publishServiceInformation.getServer()
-                                .getEndpoint()
-                                .toString(), topic, new CompoundEvent(
-                                this.read(
-                                        "/notification-01.trig",
-                                        SerializationFormat.TriG, null)));
-
-        // Publishes the event
-        this.publishClient.notify(notifyRequest);
+        // Publishes an event
+        this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(4));
 
         synchronized (this.subscriberService.eventsReceived) {
             while (this.subscriberService.eventsReceived.size() != 1) {
@@ -144,10 +221,10 @@ public class PubSubTest {
         log.info("Compound event received!");
 
         // Unsubscribes
-        this.subscribeClient.unsubscribe(WsnHelper.createUnsubscribeRequest(subscriptionId));
+        this.subscribeWsClient.unsubscribe(subscriptionId);
 
         // Publishes a second event
-        this.publishClient.notify(notifyRequest);
+        this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(4));
 
         // Checks that no more events are received
         synchronized (this.subscriberService.eventsReceived) {
@@ -156,178 +233,46 @@ public class PubSubTest {
         }
     }
 
-    @Test(timeout = 180000)
-    public void testPublishSubscribeWsProxiesWithSocialFilter()
-            throws Exception {
-        // Creates the subscriber web service
-        this.createSubscriberWebService();
-
-        // Creates and initializes the social filter
-        String source1 = "http://127.0.0.1:8891/source1";
-        String source2 = "http://127.0.0.1:8891/source2";
-        SocialNetwork socialNetwork = new SocialNetwork();
-        socialNetwork.add_node(source1);
-        socialNetwork.add_node(source2);
-        socialNetwork.add_node(this.subscriberWsEndpointUrl);
-        socialNetwork.add_relationship(source1, this.subscriberWsEndpointUrl);
-        socialNetwork.add_relationship(source2, this.subscriberWsEndpointUrl);
-        socialNetwork.get_relationship(source1, this.subscriberWsEndpointUrl)
-                .set_trust((float) 0.8);
-        socialNetwork.get_relationship(source2, this.subscriberWsEndpointUrl)
-                .set_trust((float) 0.4);
-        RelationshipStrengthEngineManager socialFilter =
-                RelationshipStrengthEngineManagerFactory.newRelationshipStrengthEngineManager(new RelationshipStrengthEngine(
-                        socialNetwork));
-        String socialFilterUri =
-                ((RelationshipStrengthEngineManagerAttributeController) GCM.getAttributeController(((Interface) socialFilter).getFcItfOwner())).getComponentURI();
-        EventCloudProperties.SOCIAL_FILTER_URL.setValue(socialFilterUri);
-
-        // Initializes the Event Cloud, proxies and web service clients
-        this.initEventCloudAndProxiesAndClients();
-
-        int lastIndexOfSlash = this.ecId.getStreamUrl().lastIndexOf('/');
-
-        // Extracts topic information
-        QName topic =
-                new QName(this.ecId.getStreamUrl().substring(
-                        0, lastIndexOfSlash + 1), this.ecId.getStreamUrl()
-                        .substring(lastIndexOfSlash + 1), "s");
-
-        // Creates the subscribe request
-        Subscribe subscribeRequest =
-                WsnHelper.createSubscribeMessage(
-                        this.subscriberWsEndpointUrl, topic);
-
-        // Subscribes for any events with topic TaxiUc
-        this.subscribeClient.subscribe(subscribeRequest);
-
-        // Creates the notify request emitted by source1
-        Notify notifyRequest =
-                WsnHelper.createNotifyMessage(
-                        this.publishServiceInformation.getServer()
-                                .getEndpoint()
-                                .toString(), topic, new CompoundEvent(
-                                this.read(
-                                        "/notification-01.trig",
-                                        SerializationFormat.TriG, source1)));
-
-        // Publishes the event
-        this.publishClient.notify(notifyRequest);
-
-        synchronized (this.subscriberService.eventsReceived) {
-            while (this.subscriberService.eventsReceived.size() != 1) {
-                this.subscriberService.eventsReceived.wait();
-            }
-        }
-
-        log.info("Compound event received!");
-
-        // Creates the notify request emitted by source2
-        notifyRequest =
-                WsnHelper.createNotifyMessage(
-                        this.publishServiceInformation.getServer()
-                                .getEndpoint()
-                                .toString(), topic, new CompoundEvent(
-                                this.read(
-                                        "/notification-01.trig",
-                                        SerializationFormat.TriG, source2)));
-
-        // Publishes the event
-        this.publishClient.notify(notifyRequest);
-
-        synchronized (this.subscriberService.eventsReceived) {
-            this.subscriberService.eventsReceived.wait(4000);
-            Assert.assertTrue(this.subscriberService.eventsReceived.size() == 1);
-        }
-
-        ComponentUtils.terminateComponent(socialFilter);
-        EventCloudProperties.SOCIAL_FILTER_URL.setValue(null);
-    }
-
-    private void initEventCloudAndProxiesAndClients() {
+    private void initEventCloudEnvironmentAndClients() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
-
         this.ecId =
-                this.deployer.newEventCloud(
-                        new EventCloudDescription(
-                                "http://streams.event-processing.org/ids/TaxiUc"),
-                        1, 10);
+                this.deployer.newEventCloud(new EventCloudDescription(
+                        "http://streams.event-processing.org/ids/TaxiUc"), 1, 1);
 
-        // Web services which are deployed
-        this.subscribeServiceInformation =
-                WebServiceDeployer.deploySubscribeWebService(
+        this.subscribeWsProxyInfo =
+                WsDeployer.deploySubscribeWsProxy(
                         this.deployer.getEventCloudsRegistryUrl(),
-                        this.ecId.getStreamUrl(), "subscribe", 8889);
-
-        this.publishServiceInformation =
-                WebServiceDeployer.deployPublishWebService(
+                        this.ecId.getStreamUrl(), "subscribe");
+        this.publishWsProxyInfo =
+                WsDeployer.deployPublishWsProxy(
                         this.deployer.getEventCloudsRegistryUrl(),
-                        this.ecId.getStreamUrl(), "publish", 8890);
+                        this.ecId.getStreamUrl(), "publish");
 
-        // Clients associated to Web services
-        this.subscribeClient =
+        this.subscribeWsClient =
                 WsClientFactory.createWsClient(
-                        SubscribeServiceApi.class,
-                        this.subscribeServiceInformation.getServer()
-                                .getEndpoint()
-                                .getEndpointInfo()
-                                .getAddress());
-
-        this.publishClient =
+                        SubscribeWsApi.class,
+                        this.subscribeWsProxyInfo.getWsEndpointUrl());
+        this.publishWsClient =
                 WsClientFactory.createWsClient(
-                        PublishServiceApi.class,
-                        this.publishServiceInformation.getServer()
-                                .getEndpoint()
-                                .getEndpointInfo()
-                                .getAddress());
-    }
+                        PublishWsApi.class,
+                        this.publishWsProxyInfo.getWsEndpointUrl());
 
-    private void createSubscriberWebService() {
-        this.subscriberService = new SubscriberServiceImpl();
-        this.subscriberWsServer =
-                WebServiceDeployer.deployWebService(
+        this.subscriberService = new BasicSubscriberWs();
+        this.subscriberServer =
+                WsDeployer.deployWebService(
                         this.subscriberService, "subscriber", 8891);
-        this.subscriberWsEndpointUrl =
-                this.subscriberWsServer.getEndpoint()
+        this.subscriberEndpointUrl =
+                this.subscriberServer.getEndpoint()
                         .getEndpointInfo()
                         .getAddress();
     }
 
-    private List<Quadruple> read(String file, SerializationFormat format,
-                                 final String publicationSource) {
-        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
-
-        RdfParser.parse(
-                this.inputStreamFrom(file), format, new Callback<Quadruple>() {
-                    @Override
-                    public void execute(Quadruple quad) {
-                        if (publicationSource != null) {
-                            quad.setPublicationSource(publicationSource);
-                        }
-                        quadruples.add(quad);
-                    }
-
-                });
-
-        return quadruples;
-    }
-
-    private InputStream inputStreamFrom(String file) {
-        InputStream is = null;
-
-        if (file != null) {
-            is = PubSubTest.class.getResourceAsStream(file);
-        }
-
-        return is;
-    }
-
     @After
     public void tearDown() {
-        this.subscribeServiceInformation.destroy();
-        this.publishServiceInformation.destroy();
+        this.subscribeWsProxyInfo.destroy();
+        this.publishWsProxyInfo.destroy();
         this.deployer.undeploy();
-        this.subscriberWsServer.destroy();
+        this.subscriberServer.destroy();
     }
 
 }
