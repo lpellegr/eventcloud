@@ -27,12 +27,17 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.EventCloudDescription;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
+import fr.inria.eventcloud.webservices.WsTest;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.BindingWrapperSubscriberWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.CompoundEventSubscriberWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.SignalSubscriberWsApi;
 import fr.inria.eventcloud.webservices.deployment.WsDeployer;
 import fr.inria.eventcloud.webservices.deployment.WsProxyInfo;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
@@ -44,10 +49,9 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
  * @author bsauvan
  * @author lpellegr
  */
-public class PubSubTest {
+public class PubSubTest extends WsTest {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(PubSubTest.class);
+    private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
@@ -63,28 +67,37 @@ public class PubSubTest {
 
     private BasicSubscriberWs subscriberService;
 
-    private Server subscriberServer;
+    private Server signalSubscriberServer;
 
-    private String subscriberEndpointUrl;
+    private Server bindingSubscriberServer;
+
+    private Server eventSubscriberServer;
+
+    private String signalSubscriberEndpointUrl;
+
+    private String bindingSubscriberEndpointUrl;
+
+    private String eventSubscriberEndpointUrl;
 
     @Before
     public void setUp() {
         this.initEventCloudEnvironmentAndClients();
     }
 
-    @Test(timeout = 60000)
+    @Test(timeout = 180000)
     public void testSubscribeSignalNotificationListener() throws Exception {
         // Subscribes for any quadruples
         String subscriptionId =
                 this.subscribeWsClient.subscribeSignal(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
-                        this.subscriberEndpointUrl);
+                        this.signalSubscriberEndpointUrl);
 
         // Publishes an event
-        this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(1));
+        CompoundEvent event = CompoundEventGenerator.random(1);
+        this.publishWsClient.publishCompoundEvent(event);
 
         synchronized (this.subscriberService.signalsReceived) {
-            while (this.subscriberService.signalsReceived != 1) {
+            while (this.subscriberService.signalsReceived.getValue() != event.size()) {
                 this.subscriberService.signalsReceived.wait();
             }
         }
@@ -95,22 +108,23 @@ public class PubSubTest {
         this.subscribeWsClient.unsubscribe(subscriptionId);
 
         // Publishes a second event
-        this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(1));
+        event = CompoundEventGenerator.random(1);
+        this.publishWsClient.publishCompoundEvent(event);
 
         // Checks that no more events are received
         synchronized (this.subscriberService.signalsReceived) {
             this.subscriberService.signalsReceived.wait(4000);
-            Assert.assertTrue(this.subscriberService.signalsReceived == 1);
+            Assert.assertTrue(this.subscriberService.signalsReceived.getValue() == event.size());
         }
     }
 
-    @Test(timeout = 60000)
+    @Test(timeout = 180000)
     public void testSubscribeBindingNotificationListener() throws Exception {
         // Subscribes for any quadruples
         String subscriptionId =
                 this.subscribeWsClient.subscribeBinding(
                         "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
-                        this.subscriberEndpointUrl);
+                        this.bindingSubscriberEndpointUrl);
 
         // Publishes 6 events
         long publicationTime = System.currentTimeMillis();
@@ -184,6 +198,9 @@ public class PubSubTest {
         // Unsubscribes
         this.subscribeWsClient.unsubscribe(subscriptionId);
 
+        // TODO Remove sleep
+        Thread.sleep(4000);
+
         // Publishes a 7th quadruple
         Quadruple q7 =
                 new Quadruple(
@@ -195,9 +212,9 @@ public class PubSubTest {
         this.publishWsClient.publishQuadruple(q7);
 
         // Checks that no more events are received
-        synchronized (this.subscriberService.eventsReceived) {
-            this.subscriberService.eventsReceived.wait(4000);
-            Assert.assertTrue(this.subscriberService.eventsReceived.size() == 1);
+        synchronized (this.subscriberService.bindingsReceived) {
+            this.subscriberService.bindingsReceived.wait(4000);
+            Assert.assertTrue(this.subscriberService.bindingsReceived.size() == 3);
         }
     }
 
@@ -207,7 +224,7 @@ public class PubSubTest {
         String subscriptionId =
                 this.subscribeWsClient.subscribeCompoundEvent(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
-                        this.subscriberEndpointUrl);
+                        this.eventSubscriberEndpointUrl);
 
         // Publishes an event
         this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(4));
@@ -258,11 +275,30 @@ public class PubSubTest {
                         this.publishWsProxyInfo.getWsEndpointUrl());
 
         this.subscriberService = new BasicSubscriberWs();
-        this.subscriberServer =
+        this.signalSubscriberServer =
                 WsDeployer.deployWebService(
-                        this.subscriberService, "subscriber", 8891);
-        this.subscriberEndpointUrl =
-                this.subscriberServer.getEndpoint()
+                        SignalSubscriberWsApi.class, this.subscriberService,
+                        "signal-subscriber", WEBSERVICES_PORT);
+        this.signalSubscriberEndpointUrl =
+                this.signalSubscriberServer.getEndpoint()
+                        .getEndpointInfo()
+                        .getAddress();
+        this.bindingSubscriberServer =
+                WsDeployer.deployWebService(
+                        BindingWrapperSubscriberWsApi.class,
+                        this.subscriberService, "binding-subscriber",
+                        WEBSERVICES_PORT);
+        this.bindingSubscriberEndpointUrl =
+                this.bindingSubscriberServer.getEndpoint()
+                        .getEndpointInfo()
+                        .getAddress();
+        this.eventSubscriberServer =
+                WsDeployer.deployWebService(
+                        CompoundEventSubscriberWsApi.class,
+                        this.subscriberService, "event-subscriber",
+                        WEBSERVICES_PORT);
+        this.eventSubscriberEndpointUrl =
+                this.eventSubscriberServer.getEndpoint()
                         .getEndpointInfo()
                         .getAddress();
     }
@@ -272,7 +308,9 @@ public class PubSubTest {
         this.subscribeWsProxyInfo.destroy();
         this.publishWsProxyInfo.destroy();
         this.deployer.undeploy();
-        this.subscriberServer.destroy();
+        this.signalSubscriberServer.destroy();
+        this.bindingSubscriberServer.destroy();
+        this.eventSubscriberServer.destroy();
     }
 
 }

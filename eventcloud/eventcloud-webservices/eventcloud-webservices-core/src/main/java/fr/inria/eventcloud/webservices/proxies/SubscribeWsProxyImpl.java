@@ -21,7 +21,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
-import fr.inria.eventcloud.webservices.listeners.WsBindingNotificationListener;
+import fr.inria.eventcloud.webservices.listeners.WsBindingWrapperNotificationListener;
 import fr.inria.eventcloud.webservices.listeners.WsCompoundEventNotificationListener;
 import fr.inria.eventcloud.webservices.listeners.WsSignalNotificationListener;
 
@@ -72,8 +72,9 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public String subscribeBinding(String sparqlQuery,
                                    String subscriberWsEndpointUrl) {
-        return this.subscribe(sparqlQuery, new WsBindingNotificationListener(
-                subscriberWsEndpointUrl));
+        return this.subscribe(
+                sparqlQuery, new WsBindingWrapperNotificationListener(
+                        subscriberWsEndpointUrl));
     }
 
     /**
