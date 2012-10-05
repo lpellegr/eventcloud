@@ -136,7 +136,7 @@ public class StringElementTest {
     @Test
     public void testToFloatRadix10_1() {
         StringElement se = new StringElement("a");
-        Assert.assertEquals(new Apfloat((long) 'a'), se.apfloat);
+        Assert.assertEquals(new Apfloat('a'), se.apfloat);
     }
 
 }

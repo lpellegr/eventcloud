@@ -40,6 +40,7 @@ public class SparqlAskResponseAdapter extends
      * 
      * @param sparqlAskResponse
      *            the SPARQL Ask response to be converted.
+     * 
      * @return the byte array representing the specified SPARQL Ask response.
      */
     @Override
@@ -53,6 +54,7 @@ public class SparqlAskResponseAdapter extends
      * 
      * @param sparqlAskResponseArray
      *            the byte array to be converted.
+     * 
      * @return the SPARQL Ask response represented by the specified byte array.
      */
     @Override
