@@ -26,6 +26,6 @@ import fr.inria.eventcloud.api.PutGetApi;
  * @author lpellegr
  * @author bsauvan
  */
-public interface PutGetProxy extends PutGetApi {
+public interface PutGetProxy extends Proxy, PutGetApi {
 
 }

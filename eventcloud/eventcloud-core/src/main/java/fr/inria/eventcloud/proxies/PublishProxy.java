@@ -25,6 +25,6 @@ import fr.inria.eventcloud.api.PublishApi;
  * @author lpellegr
  * @author bsauvan
  */
-public interface PublishProxy extends PublishApi {
+public interface PublishProxy extends Proxy, PublishApi {
 
 }

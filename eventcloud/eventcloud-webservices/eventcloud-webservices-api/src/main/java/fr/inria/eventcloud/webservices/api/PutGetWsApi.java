@@ -42,88 +42,88 @@ import fr.inria.eventcloud.webservices.api.adapters.SparqlResponseAdapter;
 import fr.inria.eventcloud.webservices.api.adapters.SparqlSelectResponseAdapter;
 
 /**
- * Defines the synchronous operations that can be executed on an Event-Cloud and
+ * Defines the synchronous operations that can be executed on an EventCloud and
  * can be exposed as web services by a put/get proxy component.
  * 
  * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudPutGet", portName = "EventCloudPutGetPort", name = "EventCloudPutGetPortType", targetNamespace = "http://webservices.eventcloud.inria.fr/")
+@WebService(serviceName = "EventCloudPutGetWs", portName = "EventCloudPutGetWsPort", name = "EventCloudPutGetWsPortType", targetNamespace = "http://webservices.eventcloud.inria.fr/")
 public interface PutGetWsApi {
 
     /**
-     * Inserts the specified quadruple into the Event-Cloud.
+     * Inserts the specified quadruple into the EventCloud.
      * 
      * @param quad
-     *            the quadruple to insert into the Event-Cloud.
+     *            the quadruple to insert into the EventCloud.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "addQuadruple")
     public boolean addQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
-     * Loads the specified collection of quadruples into the Event-Cloud in
+     * Loads the specified collection of quadruples into the EventCloud in
      * parallel.
      * 
      * @param quads
-     *            the quadruples to insert into the Event-Cloud.
+     *            the quadruples to insert into the EventCloud.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "addQuadrupleCollection")
     public boolean addQuadrupleCollection(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
 
     /**
      * Indicates whether the specified quadruples is contained by the
-     * Event-Cloud.
+     * EventCloud.
      * 
      * @param quad
-     *            the quadruple whose presence in Event-Cloud is to be tested.
+     *            the quadruple whose presence in EventCloud is to be tested.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "containsQuadruple")
     public boolean containsQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
-     * Deletes the specified quadruple from the Event-Cloud.
+     * Deletes the specified quadruple from the EventCloud.
      * 
      * @param quad
-     *            the quadruple to remove from the Event-Cloud.
+     *            the quadruple to remove from the EventCloud.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "deleteQuadruple")
     public boolean deleteQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
-     * Deletes the specified quadruples from the Event-Cloud.
+     * Deletes the specified quadruples from the EventCloud.
      * 
      * @param quads
-     *            the collection of quadruples to remove from the Event-Cloud.
+     *            the collection of quadruples to remove from the EventCloud.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "deleteQuadrupleCollection")
     public boolean deleteQuadrupleCollection(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
 
     /**
-     * Deletes from the Event-Cloud the quadruples that match the specified
+     * Deletes from the EventCloud the quadruples that match the specified
      * quadruple pattern.
      * 
      * @param quadPattern
      *            the quadruple pattern that is used to remove the quadruples.
      * 
-     * @return the quadruples that have been removed from the Event-Cloud
+     * @return the quadruples that have been removed from the EventCloud
      *         according to the quadruple pattern.
      */
-    @WebMethod
+    @WebMethod(operationName = "deleteQuadruplePattern")
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
     public List<Quadruple> deleteQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
@@ -136,12 +136,12 @@ public interface PutGetWsApi {
      * @return the quadruples that match the quadruple pattern that has been
      *         specified.
      */
-    @WebMethod
+    @WebMethod(operationName = "findQuadruplePattern")
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
     public List<Quadruple> findQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query. This SPARQL query
+     * Executes on the EventCloud the specified SPARQL query. This SPARQL query
      * can have any query form.
      * 
      * @param sparqlQuery
@@ -149,13 +149,13 @@ public interface PutGetWsApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    @WebMethod
+    @WebMethod(operationName = "executeSparqlQuery")
     @XmlJavaTypeAdapter(SparqlResponseAdapter.class)
     public SparqlResponse<?> executeSparqlQuery(@WebParam(name = "sparqlQuery") String sparqlQuery)
             throws MalformedSparqlQueryException;
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query that uses a ASK
+     * Executes on the EventCloud the specified SPARQL query that uses a ASK
      * query form.
      * 
      * @param sparqlAskQuery
@@ -163,13 +163,13 @@ public interface PutGetWsApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    @WebMethod
+    @WebMethod(operationName = "executeSparqlAsk")
     @XmlJavaTypeAdapter(SparqlAskResponseAdapter.class)
     public SparqlAskResponse executeSparqlAsk(@WebParam(name = "sparqlAskQuery") String sparqlAskQuery)
             throws MalformedSparqlQueryException;
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query that uses a
+     * Executes on the EventCloud the specified SPARQL query that uses a
      * CONSTRUCT query form.
      * 
      * @param sparqlConstructQuery
@@ -177,13 +177,13 @@ public interface PutGetWsApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    @WebMethod
+    @WebMethod(operationName = "executeSparqlConstruct")
     @XmlJavaTypeAdapter(SparqlConstructResponseAdapter.class)
     public SparqlConstructResponse executeSparqlConstruct(@WebParam(name = "sparqlConstructQuery") String sparqlConstructQuery)
             throws MalformedSparqlQueryException;
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query that uses a
+     * Executes on the EventCloud the specified SPARQL query that uses a
      * DESCRIBE query form.
      * 
      * @param sparqlDescribeQuery
@@ -191,13 +191,13 @@ public interface PutGetWsApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    @WebMethod
+    @WebMethod(operationName = "executeSparqlDescribe")
     @XmlJavaTypeAdapter(SparqlDescribeResponseAdapter.class)
     public SparqlDescribeResponse executeSparqlDescribe(@WebParam(name = "sparqlDescribeQuery") String sparqlDescribeQuery)
             throws MalformedSparqlQueryException;
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query that uses a SELECT
+     * Executes on the EventCloud the specified SPARQL query that uses a SELECT
      * query form.
      * 
      * @param sparqlSelectQuery
@@ -205,7 +205,7 @@ public interface PutGetWsApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    @WebMethod
+    @WebMethod(operationName = "executeSparqlSelect")
     @XmlJavaTypeAdapter(SparqlSelectResponseAdapter.class)
     public SparqlSelectResponse executeSparqlSelect(@WebParam(name = "sparqlSelectQuery") String sparqlSelectQuery)
             throws MalformedSparqlQueryException;

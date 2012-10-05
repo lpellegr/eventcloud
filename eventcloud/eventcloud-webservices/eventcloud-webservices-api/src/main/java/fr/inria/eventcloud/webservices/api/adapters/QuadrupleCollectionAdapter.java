@@ -42,6 +42,7 @@ public class QuadrupleCollectionAdapter extends
      * 
      * @param quads
      *            the collection of quadruples to be converted.
+     * 
      * @return the byte array representing the specified collection of
      *         quadruples.
      */
@@ -56,6 +57,7 @@ public class QuadrupleCollectionAdapter extends
      * 
      * @param quadsArray
      *            the byte array to be converted.
+     * 
      * @return the collection of quadruples represented by the specified byte
      *         array.
      */

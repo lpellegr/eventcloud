@@ -16,21 +16,14 @@
  **/
 package fr.inria.eventcloud.webservices.api.adapters;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
-import org.oasis_open.docs.wsn.b_2.Notify;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ByteToObjectConverter;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
 
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.translators.wsn.TranslationException;
-import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
-import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 
 /**
  * XML Adapter for {@link Collection} of {@link CompoundEvent} objects.
@@ -38,83 +31,42 @@ import fr.inria.eventcloud.translators.wsn.WsnTranslator;
  * @author bsauvan
  */
 public class CompoundEventCollectionAdapter extends
-        XmlAdapter<Notify, Collection<CompoundEvent>> {
-
-    private static Logger log =
-            LoggerFactory.getLogger(CompoundEventCollectionAdapter.class);
-
-    private WsnTranslator translator;
+        XmlAdapter<byte[], Collection<CompoundEvent>> {
 
     public CompoundEventCollectionAdapter() {
-        this.translator = new WsnTranslator();
     }
 
     /**
-     * Converts the specified collection of compound events to its notify object
+     * Converts the specified collection of compound events to its byte array
      * representation.
      * 
      * @param compoundEvents
      *            the collection of compound events to be converted.
-     * @return the notify object representing the specified collection of
-     *         compound events.
+     * 
+     * @return the byte array representing the specified collection of compound
+     *         events.
      */
     @Override
-    public Notify marshal(Collection<CompoundEvent> compoundEvents) {
-        Notify notify = new Notify();
-
-        for (CompoundEvent compoundEvent : compoundEvents) {
-            try {
-                NotificationMessageHolderType notificationMessage =
-                        this.translator.translate(compoundEvent);
-                notify.getNotificationMessage().add(notificationMessage);
-            } catch (TranslationException e) {
-                this.logAndThrowIllegalArgumentException(e.getMessage());
-            }
-        }
-
-        return notify;
+    public byte[] marshal(Collection<CompoundEvent> compoundEvents)
+            throws Exception {
+        return ObjectToByteConverter.convert(compoundEvents);
     }
 
     /**
-     * Converts the specified notify object to its corresponding collection of
+     * Converts the specified byte array to its corresponding collection of
      * compound events.
      * 
-     * @param notify
-     *            the notify object to be converted.
+     * @param compoundEventsArray
+     *            the byte array to be converted.
      * 
      * @return the collection of compound events represented by the specified
-     *         notify object.
+     *         byte array.
      */
     @Override
-    public Collection<CompoundEvent> unmarshal(Notify notify) {
-        List<CompoundEvent> compoundEvents = new ArrayList<CompoundEvent>();
-        List<NotificationMessageHolderType> notificationMessages =
-                notify.getNotificationMessage();
-
-        for (NotificationMessageHolderType notificationMessage : notificationMessages) {
-            try {
-                WsnLogUtils.logNotificationMessageHolderType(notificationMessage);
-
-                CompoundEvent compoundEvent =
-                        this.translator.translate(notificationMessage);
-
-                compoundEvents.add(compoundEvent);
-
-                log.info("Translation output:\n{}", compoundEvent);
-            } catch (TranslationException e) {
-                this.logAndThrowIllegalArgumentException(e.getMessage());
-            }
-        }
-
-        log.info("New notification message handled");
-
-        return compoundEvents;
-    }
-
-    private final void logAndThrowIllegalArgumentException(String msg) {
-        log.error("Translation error:");
-        log.error(msg);
-        throw new IllegalArgumentException(msg);
+    @SuppressWarnings("unchecked")
+    public Collection<CompoundEvent> unmarshal(byte[] compoundEventsArray)
+            throws Exception {
+        return (Collection<CompoundEvent>) ByteToObjectConverter.convert(compoundEventsArray);
     }
 
 }
