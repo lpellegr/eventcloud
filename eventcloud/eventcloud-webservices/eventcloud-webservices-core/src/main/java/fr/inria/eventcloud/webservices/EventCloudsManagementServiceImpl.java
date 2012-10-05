@@ -161,10 +161,10 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public boolean createEventCloud(String streamUrl) {
-        EventCloudId ecId = new EventCloudId(streamUrl);
+        EventCloudId id = new EventCloudId(streamUrl);
 
-        if (!this.registry.contains(ecId)) {
-            EventCloudDescription description = new EventCloudDescription(ecId);
+        if (!this.registry.contains(id)) {
+            EventCloudDescription description = new EventCloudDescription(id);
 
             EventCloudDeployer deployer =
                     new EventCloudDeployer(
@@ -192,11 +192,11 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public List<String> getEventCloudIds() {
-        Set<EventCloudId> ecIds = this.registry.listEventClouds();
-        List<String> result = new ArrayList<String>(ecIds.size());
+        Set<EventCloudId> ids = this.registry.listEventClouds();
+        List<String> result = new ArrayList<String>(ids.size());
 
-        for (EventCloudId ecId : ecIds) {
-            result.add(ecId.getStreamUrl());
+        for (EventCloudId id : ids) {
+            result.add(id.getStreamUrl());
         }
 
         return result;
@@ -207,9 +207,9 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public boolean destroyEventCloud(String streamUrl) {
-        EventCloudId ecId = new EventCloudId(streamUrl);
+        EventCloudId id = new EventCloudId(streamUrl);
 
-        if (this.registry.contains(ecId)) {
+        if (this.registry.contains(id)) {
             boolean result = true;
 
             result &=
@@ -228,7 +228,7 @@ public class EventCloudsManagementServiceImpl implements
                     this.destroyWebServices(
                             streamUrl, this.putgetWsProxyEndpointUrls);
 
-            return result && this.registry.undeploy(ecId);
+            return result && this.registry.undeploy(id);
         }
 
         return false;
@@ -338,9 +338,9 @@ public class EventCloudsManagementServiceImpl implements
     }
 
     private void checkEventCloudId(String streamUrl) {
-        EventCloudId ecId = new EventCloudId(streamUrl);
+        EventCloudId id = new EventCloudId(streamUrl);
 
-        if (!this.registry.contains(ecId)) {
+        if (!this.registry.contains(id)) {
             throw new IllegalArgumentException("No EventCloud running for "
                     + streamUrl);
         }
@@ -515,11 +515,11 @@ public class EventCloudsManagementServiceImpl implements
         QName topic = WsnHelper.getTopic(subscribe);
 
         if ((topic.getNamespaceURI() + topic.getLocalPart()).equals(RAW_REPORT_TOPIC)) {
-            Set<EventCloudId> ecIds = this.registry.listEventClouds();
+            Set<EventCloudId> ids = this.registry.listEventClouds();
 
-            // enable input/output monitoring for all eventclouds
-            for (EventCloudId ecId : ecIds) {
-                for (SubscribeProxy proxy : this.registry.getSubscribeProxies(ecId)) {
+            // enable input/output monitoring for all EventClouds
+            for (EventCloudId id : ids) {
+                for (SubscribeProxy proxy : this.registry.getSubscribeProxies(id)) {
                     ProxyMonitoringManager proxyMonitoringManagerInterface =
                             this.getProxyMonitoringManagerInterface(proxy);
 
@@ -550,11 +550,11 @@ public class EventCloudsManagementServiceImpl implements
     public UnsubscribeResponse unsubscribe(Unsubscribe unsubscribeRequest) {
         SubscriptionId subscriptionId =
                 WsnHelper.getSubcriptionId(unsubscribeRequest);
-        Set<EventCloudId> ecIds = this.registry.listEventClouds();
+        Set<EventCloudId> ids = this.registry.listEventClouds();
 
-        // disable input/output monitoring for all eventclouds
-        for (EventCloudId ecId : ecIds) {
-            for (SubscribeProxy proxy : this.registry.getSubscribeProxies(ecId)) {
+        // disable input/output monitoring for all EventClouds
+        for (EventCloudId id : ids) {
+            for (SubscribeProxy proxy : this.registry.getSubscribeProxies(id)) {
                 ProxyMonitoringManager proxyMonitoringManagerInterface =
                         this.getProxyMonitoringManagerInterface(proxy);
 

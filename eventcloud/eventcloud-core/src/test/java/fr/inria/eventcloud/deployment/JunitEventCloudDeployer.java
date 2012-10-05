@@ -50,7 +50,7 @@ public class JunitEventCloudDeployer extends EventCloudDeployer {
      * {@code DeploymentDescriptor}.
      * 
      * @param eventCloudDescription
-     *            the eventcloud description to use.
+     *            the EventCloud description to use.
      * @param deploymentDescriptor
      *            the deployment descriptor to use.
      */

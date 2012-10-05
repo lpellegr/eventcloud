@@ -459,7 +459,7 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
     private static void checkNotNull(String registryUrl, EventCloudId id) {
         Preconditions.checkNotNull(registryUrl, "Invalid registry URL: "
                 + registryUrl);
-        Preconditions.checkNotNull(id, "Invalid eventcloud id: " + id);
+        Preconditions.checkNotNull(id, "Invalid EventCloud id: " + id);
     }
 
 }

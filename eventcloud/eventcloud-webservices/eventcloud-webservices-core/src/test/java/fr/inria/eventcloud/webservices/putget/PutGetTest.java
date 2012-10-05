@@ -102,12 +102,12 @@ public class PutGetTest extends WsTest {
     private void initEventCloudEnvironmentAndClient() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
 
-        EventCloudId ecId = this.deployer.newEventCloud(1, 1);
+        EventCloudId id = this.deployer.newEventCloud(1, 1);
 
         this.putgetWsProxyInfo =
                 WsDeployer.deployPutGetWsProxy(
                         this.deployer.getEventCloudsRegistryUrl(),
-                        ecId.getStreamUrl(), "putget");
+                        id.getStreamUrl(), "putget");
 
         this.putgetWsClient =
                 WsClientFactory.createWsClient(

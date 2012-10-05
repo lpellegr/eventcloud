@@ -55,7 +55,7 @@ public final class AlterableElaProperty extends ElaProperty {
     public AlterableElaProperty(List<Quadruple> quads) {
         super();
         // TODO implement the translation but for that we have to define the
-        // event-cloud namespace
+        // EventCloud namespace
     }
 
     /**

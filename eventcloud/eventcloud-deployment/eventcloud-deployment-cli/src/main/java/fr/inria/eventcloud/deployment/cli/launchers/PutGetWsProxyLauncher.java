@@ -41,8 +41,8 @@ public final class PutGetWsProxyLauncher extends WsLauncher {
     public String run() {
         return WsDeployer.deployPutGetWsProxy(
                 super.registryUrl,
-                super.eventCloudIdUrl,
-                "eventclouds/" + this.getTopicName(super.eventCloudIdUrl)
+                super.eventCloudUrl,
+                "eventclouds/" + this.getTopicName(super.eventCloudUrl)
                         + "/ws-proxy-" + this.numberId).getWsEndpointUrl();
     }
 }

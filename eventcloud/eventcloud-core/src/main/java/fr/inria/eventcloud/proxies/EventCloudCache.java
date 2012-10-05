@@ -50,17 +50,16 @@ public class EventCloudCache implements Serializable {
     /*
      * TODO: add a thread that updates periodically the trackers.
      */
-    public EventCloudCache(String registryUrl, EventCloudId eventcloudId)
+    public EventCloudCache(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         try {
             this.registry =
                     EventCloudsRegistryFactory.lookupEventCloudsRegistry(registryUrl);
 
-            this.deployer = this.registry.find(eventcloudId);
+            this.deployer = this.registry.find(id);
 
             if (this.deployer == null) {
-                throw new EventCloudIdNotManaged(
-                        eventcloudId.toString(), registryUrl);
+                throw new EventCloudIdNotManaged(id.toString(), registryUrl);
             }
         } catch (IOException e) {
             throw new IllegalStateException(e);

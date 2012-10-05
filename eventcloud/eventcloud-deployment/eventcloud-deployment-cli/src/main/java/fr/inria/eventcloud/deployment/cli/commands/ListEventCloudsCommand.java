@@ -21,7 +21,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 
 /**
- * This command lists the event clouds that are registered by an
+ * This command lists the EventClouds that are registered by an
  * {@link EventCloudsRegistry}.
  * 
  * @author lpellegr
@@ -30,7 +30,7 @@ public class ListEventCloudsCommand extends Command<EventCloudsRegistry> {
 
     public ListEventCloudsCommand() {
         super("list-eventclouds",
-                "Lists the eventclouds maintained by the eventclouds registry",
+                "Lists the EventClouds maintained by the EventClouds registry",
                 new String[] {"list"});
     }
 

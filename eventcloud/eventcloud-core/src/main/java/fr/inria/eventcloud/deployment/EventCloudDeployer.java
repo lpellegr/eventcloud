@@ -38,7 +38,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
- * Initializes an Event Cloud (i.e. a Content-Addressable-Network composed of
+ * Initializes an EventCloud (i.e. a Content-Addressable-Network composed of
  * four dimensions) on a local machine or by distributing the components on
  * several machines.
  * 

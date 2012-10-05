@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 
 	<name>eventcloud-parent</name>
-	<description>Parent module for eventcloud maven related modules.</description>
+	<description>Parent module for EventCloud maven related modules.</description>
 	<url>https://bitbucket.org/eventcloud/eventcloud</url>
 	<inceptionYear>2010</inceptionYear>
 

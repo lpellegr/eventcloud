@@ -31,11 +31,9 @@ public class EventCloudIdNotManaged extends Exception {
         super();
     }
 
-    public EventCloudIdNotManaged(String eventcloudId,
-            String eventcloudsRegistryUrl) {
-        super("Eventcloud identifier " + eventcloudId
-                + " not managed by eventclouds registry "
-                + eventcloudsRegistryUrl);
+    public EventCloudIdNotManaged(String id, String registryUrl) {
+        super("EventCloud identifier " + id
+                + " not managed by EventClouds registry " + registryUrl);
     }
 
     public EventCloudIdNotManaged(String message, Throwable cause) {

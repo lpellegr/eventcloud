@@ -105,12 +105,12 @@ public abstract class WsnService<T> {
         try {
             EventCloudsRegistry registry =
                     EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
-            EventCloudId ecId = new EventCloudId(this.streamUrl);
+            EventCloudId id = new EventCloudId(this.streamUrl);
 
             if (this.proxy instanceof PublishProxy) {
-                registry.unregisterProxy(ecId, (PublishProxy) this.proxy);
+                registry.unregisterProxy(id, (PublishProxy) this.proxy);
             } else if (this.proxy instanceof SubscribeProxy) {
-                registry.unregisterProxy(ecId, (SubscribeProxy) this.proxy);
+                registry.unregisterProxy(id, (SubscribeProxy) this.proxy);
             } else {
                 logAndThrowIllegalArgumentException("Unknow proxy type: "
                         + this.proxy.getClass());

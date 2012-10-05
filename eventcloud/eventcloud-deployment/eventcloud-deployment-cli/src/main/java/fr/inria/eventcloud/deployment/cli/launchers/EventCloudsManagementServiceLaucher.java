@@ -6,7 +6,7 @@ import fr.inria.eventcloud.webservices.deployment.WsDeployer;
 
 public class EventCloudsManagementServiceLaucher extends Launcher {
 
-    @Parameter(names = {"--registry-url", "-r"}, description = "Eventclouds registry URL", required = true)
+    @Parameter(names = {"--registry-url", "-r"}, description = "EventClouds registry URL", required = true)
     private String registryUrl;
 
     @Parameter(names = {"--port", "-p"}, description = "Port on which to deploy the web service", required = true)
