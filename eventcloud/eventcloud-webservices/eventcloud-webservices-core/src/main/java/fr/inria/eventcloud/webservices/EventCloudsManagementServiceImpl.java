@@ -394,7 +394,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public List<String> getPublishWsProxyEndpointUrls(String streamUrl) {
-        return this.putgetWsProxyEndpointUrls.get(streamUrl);
+        return this.publishWsProxyEndpointUrls.get(streamUrl);
     }
 
     /**
@@ -402,7 +402,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public List<String> getSubscribeWsProxyEndpointUrls(String streamUrl) {
-        return this.putgetWsProxyEndpointUrls.get(streamUrl);
+        return this.subscribeWsProxyEndpointUrls.get(streamUrl);
     }
 
     /**
