@@ -139,7 +139,7 @@ goto:eof
      -Dproactive.communication.protocol=pnp ^
      -Dproactive.pnp.port=%WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT% ^
      -Dproactive.http.port=%WS_EVENTCLOUDS_HTTP_PORT% ^
-     -cp %CLASSPATH% fr.inria.eventcloud.deployment.cli.launchers.EventCloudsManagementServiceLaucher ^
+     -cp %CLASSPATH% fr.inria.eventcloud.deployment.cli.launchers.EventCloudsManagementServiceLauncher ^
      -r %EVENTCLOUDS_REGISTRY_URL% ^
      -p %WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT% > %WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE% 2>&1
 	 
