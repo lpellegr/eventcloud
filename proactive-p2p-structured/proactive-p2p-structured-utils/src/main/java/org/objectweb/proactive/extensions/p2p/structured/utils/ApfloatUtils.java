@@ -28,6 +28,8 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  */
 public class ApfloatUtils {
 
+    public static final long DEFAULT_PRECISION = 350;
+
     private static final Apint RADIX = new Apint(
             P2PStructuredProperties.CAN_UPPER_BOUND.getValue() + 1);
 
@@ -40,9 +42,16 @@ public class ApfloatUtils {
      * is a digit radix StringElement#RADIX
      */
     public static Apfloat toFloatRadix10(String value, Apint radix) {
+        return toFloatRadix10(value, radix, DEFAULT_PRECISION);
+    }
+
+    public static Apfloat toFloatRadix10(String value, long precision) {
+        return toFloatRadix10(value, RADIX, precision);
+    }
+
+    public static Apfloat toFloatRadix10(String value, Apint radix,
+                                         long precision) {
         int[] codepoints = UnicodeUtils.toCodePointArray(value);
-        int precision =
-                P2PStructuredProperties.STRING_ELEMENT_PRECISION.getValue();
 
         // codepoints[0] x radix^0 = codepoints[0]
         Apfloat result = new Apfloat(codepoints[0], precision);
@@ -52,17 +61,28 @@ public class ApfloatUtils {
         // one character, and hence one digit radix the upper bound value (e.g.
         // 2^16).
         Apint pow = new Apint(1);
+
         for (int i = 1; i < codepoints.length; i++) {
             pow = pow.multiply(radix);
+
             Apfloat division = new Apfloat(1, precision).divide(pow);
+
             result =
                     result.add(new Apfloat(codepoints[i], precision).multiply(division));
+
+            if (precision > 0 && i == precision) {
+                break;
+            }
         }
 
         return result;
     }
 
     public static String toString(Apfloat apfloat) {
+        return toString(apfloat, DEFAULT_PRECISION);
+    }
+
+    public static String toString(Apfloat apfloat, long precision) {
         Apint apint = apfloat.truncate();
         Apint quotient = apint;
 
@@ -83,7 +103,7 @@ public class ApfloatUtils {
         while (fractionalPart.compareTo(Apfloat.ZERO) > 0) {
             // simple test to stop after PRECISION loops and thus to avoid
             // infinite loop
-            if (loop > P2PStructuredProperties.STRING_ELEMENT_PRECISION.getValue()) {
+            if (loop > precision) {
                 break;
             }
 
