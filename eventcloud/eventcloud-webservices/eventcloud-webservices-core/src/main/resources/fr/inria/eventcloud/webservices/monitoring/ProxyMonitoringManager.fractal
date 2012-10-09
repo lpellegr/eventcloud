@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE definition PUBLIC "-//objectweb.org//DTD Fractal ADL 2.0//EN" "classpath://org/objectweb/proactive/core/component/adl/xml/proactive.dtd">
+
+<definition name="fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManager">
+	<interface role="server" name="monitoring-services" signature="fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManager"/>
+
+	<content class="fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManagerImpl"/>
+
+	<virtual-node name="ProxyVN"/>
+</definition>
