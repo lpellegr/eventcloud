@@ -58,6 +58,11 @@ public class Radix10ConversionBenchmark {
     @Parameter(names = {"-h", "--help"}, help = true)
     private boolean help;
 
+    /**
+     * Usage example once the jar with dependencies is generated:
+     * 
+     * {@code  java -server -Xms4G -Xmx4G -cp $PWD/target/eventcloud-benchmarks-1.3.0-SNAPSHOT-jar-with-dependencies.jar:$PWD/target/eventcloud-benchmarks-1.3.0-SNAPSHOT.jar fr.inria.eventcloud.benchmarks.radix10_conversion.Radix10ConversionBenchmark --input-file $HOME/Desktop/twitter.trig --statistics -run 1000000,7 -run 1000000,14 -run 1000000,340 -run 10000000,7 -run 10000000,14 -run 10000000,340}
+     */
     public static void main(String[] args) {
         Radix10ConversionBenchmark benchmark = new Radix10ConversionBenchmark();
 
