@@ -18,43 +18,51 @@ package fr.inria.eventcloud.webservices.api;
 
 import java.util.Collection;
 
-import javax.jws.Oneway;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.webservices.api.adapters.CompoundEventAdapter;
 import fr.inria.eventcloud.webservices.api.adapters.CompoundEventCollectionAdapter;
+import fr.inria.eventcloud.webservices.api.adapters.QuadrupleAdapter;
 
 /**
- * Defines the publish operations that can be executed on an Event Cloud and can
+ * Defines the publish operations that can be executed on an EventCloud and can
  * be exposed as web services by a publish proxy component.
  * 
- * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudPublish", portName = "EventCloudPublishPort", name = "EventCloudPublishPortType", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2")
-@XmlSeeAlso(value = {
-        org.oasis_open.docs.wsn.br_2.ObjectFactory.class,
-        org.oasis_open.docs.wsrf.rp_2.ObjectFactory.class,
-        org.oasis_open.docs.wsrf.bf_2.ObjectFactory.class,
-        org.oasis_open.docs.wsrf.r_2.ObjectFactory.class,
-        org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
-        org.oasis_open.docs.wsn.b_2.ObjectFactory.class})
-@SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+@WebService(serviceName = "EventCloudPublishWs", portName = "EventCloudPublishWsPort", name = "EventCloudPublishWsPortType", targetNamespace = "http://webservices.eventcloud.inria.fr/")
 public interface PublishWsApi {
 
     /**
-     * Publishes the specified collection of events.
+     * Publishes the specified quadruple.
+     * 
+     * @param quad
+     *            the quadruple to publish.
+     */
+    @WebMethod(operationName = "publishQuadruple")
+    public void publishQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+
+    /**
+     * Publishes the specified compound event.
+     * 
+     * @param event
+     *            the compound event to publish.
+     */
+    @WebMethod(operationName = "publishCompoundEvent")
+    public void publishCompoundEvent(@WebParam(name = "event") @XmlJavaTypeAdapter(CompoundEventAdapter.class) CompoundEvent event);
+
+    /**
+     * Publishes the specified collection of compound events.
      * 
      * @param events
      *            the collection of compound events to publish.
      */
-    @Oneway
-    @WebMethod(operationName = "Notify")
-    public void publish(@WebParam(partName = "Notify", name = "Notify", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") @XmlJavaTypeAdapter(CompoundEventCollectionAdapter.class) Collection<CompoundEvent> events);
+    @WebMethod(operationName = "publishCompoundEventCollection")
+    public void publishCompoundEventCollection(@WebParam(name = "events") @XmlJavaTypeAdapter(CompoundEventCollectionAdapter.class) Collection<CompoundEvent> events);
 
 }

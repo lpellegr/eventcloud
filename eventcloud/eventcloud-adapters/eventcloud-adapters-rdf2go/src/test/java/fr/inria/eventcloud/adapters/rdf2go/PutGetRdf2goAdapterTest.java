@@ -37,7 +37,7 @@ import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 /**
  * Provides test cases for the {@link PutGetRdf2goAdapter}. This class provides
  * tests in order to test whether the translation between RDF2Go objects and
- * event-cloud-api/Jena objects works.
+ * eventcloud-api/Jena objects works.
  * 
  * @author lpellegr
  */

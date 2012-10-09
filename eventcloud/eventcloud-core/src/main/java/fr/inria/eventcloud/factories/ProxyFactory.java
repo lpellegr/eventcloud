@@ -85,9 +85,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * Creates a new publish proxy component deployed on the local JVM.
      * 
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * 
      * @return the reference on the {@link PublishApi} interface of the new
      *         publish proxy component created.
@@ -98,7 +98,7 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
     public static PublishApi newPublishProxy(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPublishProxy(
-                new HashMap<String, Object>(), registryUrl, id);
+                publishProxyAdl, new HashMap<String, Object>(), registryUrl, id);
     }
 
     /**
@@ -108,9 +108,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * @param node
      *            the node to be used for deployment.
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * 
      * @return the reference on the {@link PublishApi} interface of the new
      *         publish proxy component created.
@@ -122,7 +122,8 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                              EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPublishProxy(
-                ComponentUtils.createContext(node), registryUrl, id);
+                publishProxyAdl, ComponentUtils.createContext(node),
+                registryUrl, id);
     }
 
     /**
@@ -132,9 +133,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * 
      * @return the reference on the {@link PublishApi} interface of the new
      *         publish proxy component created.
@@ -146,12 +147,14 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                              String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPublishProxy(
-                ComponentUtils.createContext(vn), registryUrl, id);
+                publishProxyAdl, ComponentUtils.createContext(vn), registryUrl,
+                id);
     }
 
-    private static PublishApi createPublishProxy(Map<String, Object> context,
-                                                 String registryUrl,
-                                                 EventCloudId id)
+    protected static PublishApi createPublishProxy(String publishProxyAdl,
+                                                   Map<String, Object> context,
+                                                   String registryUrl,
+                                                   EventCloudId id)
             throws EventCloudIdNotManaged {
         checkNotNull(registryUrl, id);
 
@@ -199,9 +202,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * receive notification.
      * 
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * @param properties
      *            the ELA properties to set.
      * 
@@ -216,7 +219,8 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                                  AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         return createSubscribeProxy(
-                new HashMap<String, Object>(), registryUrl, id, properties);
+                subscribeProxyAdl, new HashMap<String, Object>(), registryUrl,
+                id, properties);
     }
 
     /**
@@ -227,9 +231,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * @param node
      *            the node to be used for deployment.
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * @param properties
      *            the ELA properties to set.
      * 
@@ -245,7 +249,8 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                                  AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         return createSubscribeProxy(
-                ComponentUtils.createContext(node), registryUrl, id, properties);
+                subscribeProxyAdl, ComponentUtils.createContext(node),
+                registryUrl, id, properties);
     }
 
     /**
@@ -256,9 +261,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * @param properties
      *            the ELA properties to set.
      * 
@@ -274,13 +279,15 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                                  AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         return createSubscribeProxy(
-                ComponentUtils.createContext(vn), registryUrl, id, properties);
+                subscribeProxyAdl, ComponentUtils.createContext(vn),
+                registryUrl, id, properties);
     }
 
-    private static SubscribeApi createSubscribeProxy(Map<String, Object> context,
-                                                     String registryUrl,
-                                                     EventCloudId id,
-                                                     AlterableElaProperty... properties)
+    protected static SubscribeApi createSubscribeProxy(String subscribeProxyAdl,
+                                                       Map<String, Object> context,
+                                                       String registryUrl,
+                                                       EventCloudId id,
+                                                       AlterableElaProperty... properties)
             throws EventCloudIdNotManaged {
         checkNotNull(registryUrl, id);
 
@@ -339,9 +346,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * Creates a new put/get proxy component deployed on the local JVM.
      * 
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * 
      * @return the reference on the {@link PutGetApi} interface of the new
      *         put/get proxy component created.
@@ -351,7 +358,8 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      */
     public static PutGetApi newPutGetProxy(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
-        return createPutGetProxy(new HashMap<String, Object>(), registryUrl, id);
+        return createPutGetProxy(
+                putgetProxyAdl, new HashMap<String, Object>(), registryUrl, id);
     }
 
     /**
@@ -361,9 +369,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * @param node
      *            the node to be used for deployment.
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * 
      * @return the reference on the {@link PutGetApi} interface of the new
      *         put/get proxy component created.
@@ -375,7 +383,8 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                            EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPutGetProxy(
-                ComponentUtils.createContext(node), registryUrl, id);
+                putgetProxyAdl, ComponentUtils.createContext(node),
+                registryUrl, id);
     }
 
     /**
@@ -385,9 +394,9 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param registryUrl
-     *            the Event-Cloud registry url.
+     *            the EventClouds registry URL.
      * @param id
-     *            the identifier that identify the Event-Cloud to work on.
+     *            the identifier that identify the EventCloud to work on.
      * 
      * @return the reference on the {@link PutGetApi} interface of the new
      *         put/get proxy component created.
@@ -399,12 +408,14 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                                            String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPutGetProxy(
-                ComponentUtils.createContext(vn), registryUrl, id);
+                putgetProxyAdl, ComponentUtils.createContext(vn), registryUrl,
+                id);
     }
 
-    private static PutGetApi createPutGetProxy(Map<String, Object> context,
-                                               String registryUrl,
-                                               EventCloudId id)
+    protected static PutGetApi createPutGetProxy(String putgetProxyAdl,
+                                                 Map<String, Object> context,
+                                                 String registryUrl,
+                                                 EventCloudId id)
             throws EventCloudIdNotManaged {
         checkNotNull(registryUrl, id);
 
@@ -448,7 +459,7 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
     private static void checkNotNull(String registryUrl, EventCloudId id) {
         Preconditions.checkNotNull(registryUrl, "Invalid registry URL: "
                 + registryUrl);
-        Preconditions.checkNotNull(id, "Invalid eventcloud id: " + id);
+        Preconditions.checkNotNull(id, "Invalid EventCloud id: " + id);
     }
 
 }

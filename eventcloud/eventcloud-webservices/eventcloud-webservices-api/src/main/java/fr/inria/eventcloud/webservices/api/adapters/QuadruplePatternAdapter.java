@@ -40,6 +40,7 @@ public class QuadruplePatternAdapter extends
      * 
      * @param quadPattern
      *            the quadruple pattern to be converted.
+     * 
      * @return the byte array representing the specified quadruple pattern.
      */
     @Override
@@ -52,6 +53,7 @@ public class QuadruplePatternAdapter extends
      * 
      * @param quadPatternArray
      *            the byte array to be converted.
+     * 
      * @return the quadruple pattern represented by the specified byte array.
      */
     @Override

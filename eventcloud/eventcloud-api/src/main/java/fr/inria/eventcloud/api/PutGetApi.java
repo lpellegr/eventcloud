@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,8 +29,8 @@ import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 
 /**
- * Defines the synchronous operations that can be executed on an Event-Cloud.
- * The boolean value which is returned for some of the methods is used to ensure
+ * Defines the synchronous operations that can be executed on an EventCloud. The
+ * boolean value which is returned for some of the methods is used to ensure
  * that ProActive calls are synchronous.
  * 
  * @author lpellegr
@@ -38,10 +38,10 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 public interface PutGetApi {
 
     /**
-     * Inserts the specified quadruple into the Event-Cloud.
+     * Inserts the specified quadruple into the EventCloud.
      * 
      * @param quad
-     *            the quadruple to insert into the Event-Cloud.
+     *            the quadruple to insert into the EventCloud.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
@@ -49,11 +49,11 @@ public interface PutGetApi {
     public boolean add(Quadruple quad);
 
     /**
-     * Loads the specified collection of quadruples into the Event-Cloud in
+     * Loads the specified collection of quadruples into the EventCloud in
      * parallel.
      * 
      * @param quads
-     *            the quadruples to insert into the Event-Cloud.
+     *            the quadruples to insert into the EventCloud.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
@@ -61,26 +61,26 @@ public interface PutGetApi {
     public boolean add(Collection<Quadruple> quads);
 
     /**
-     * Publishes the quadruples that are read from the specified input stream.
-     * The input stream is assumed to comply with the <a
+     * Publishes the quadruples that are read from an input stream opened from
+     * the specified URL. The input stream is assumed to comply with the <a
      * href="http://www4.wiwiss.fu-berlin.de/bizer/TriG/">TriG</a> or <a
      * href="http://sw.deri.org/2008/07/n-quads/">N-Quads</a> syntax.
      * 
-     * @param in
-     *            the input stream from where the quadruples are read.
+     * @param url
+     *            the URL from where the quadruples are read.
      * 
      * @param format
      *            the format that is used to read the data from the input
      *            stream.
      */
-    public boolean add(InputStream in, SerializationFormat format);
+    public boolean add(URL url, SerializationFormat format);
 
     /**
      * Indicates whether the specified quadruples is contained by the
-     * Event-Cloud.
+     * EventCloud.
      * 
      * @param quad
-     *            the quadruple whose presence in Event-Cloud is to be tested.
+     *            the quadruple whose presence in EventCloud is to be tested.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
@@ -88,10 +88,10 @@ public interface PutGetApi {
     public boolean contains(Quadruple quad);
 
     /**
-     * Deletes the specified quadruple from the Event-Cloud.
+     * Deletes the specified quadruple from the EventCloud.
      * 
      * @param quad
-     *            the quadruple to remove from the Event-Cloud.
+     *            the quadruple to remove from the EventCloud.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
@@ -99,10 +99,10 @@ public interface PutGetApi {
     public boolean delete(Quadruple quad);
 
     /**
-     * Deletes the specified quadruples from the Event-Cloud.
+     * Deletes the specified quadruples from the EventCloud.
      * 
      * @param quads
-     *            the collection of quadruples to remove from the Event-Cloud.
+     *            the collection of quadruples to remove from the EventCloud.
      * 
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
@@ -110,13 +110,13 @@ public interface PutGetApi {
     public boolean delete(Collection<Quadruple> quads);
 
     /**
-     * Deletes from the Event-Cloud the quadruples that match the specified
+     * Deletes from the EventCloud the quadruples that match the specified
      * quadruple pattern.
      * 
      * @param quadPattern
      *            the quadruple pattern that is used to remove the quadruples.
      * 
-     * @return the quadruples which have been removed from the Event-Cloud
+     * @return the quadruples which have been removed from the EventCloud
      *         according to the quadruple pattern.
      */
     public List<Quadruple> delete(QuadruplePattern quadPattern);
@@ -155,7 +155,7 @@ public interface PutGetApi {
     public List<Quadruple> find(QuadruplePattern quadPattern);
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query. This SPARQL query
+     * Executes on the EventCloud the specified SPARQL query. This SPARQL query
      * can have any query form.
      * 
      * @param sparqlQuery
@@ -167,7 +167,7 @@ public interface PutGetApi {
             throws MalformedSparqlQueryException;
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query that uses a ASK
+     * Executes on the EventCloud the specified SPARQL query that uses a ASK
      * query form.
      * 
      * @param sparqlAskQuery
@@ -179,7 +179,7 @@ public interface PutGetApi {
             throws MalformedSparqlQueryException;
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query that uses a
+     * Executes on the EventCloud the specified SPARQL query that uses a
      * CONSTRUCT query form.
      * 
      * @param sparqlConstructQuery
@@ -191,7 +191,7 @@ public interface PutGetApi {
             throws MalformedSparqlQueryException;
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query that uses a
+     * Executes on the EventCloud the specified SPARQL query that uses a
      * DESCRIBE query form.
      * 
      * @param sparqlDescribeQuery
@@ -203,7 +203,7 @@ public interface PutGetApi {
             throws MalformedSparqlQueryException;
 
     /**
-     * Executes on the Event-Cloud the specified SPARQL query that uses a SELECT
+     * Executes on the EventCloud the specified SPARQL query that uses a SELECT
      * query form.
      * 
      * @param sparqlSelectQuery

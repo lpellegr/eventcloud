@@ -31,12 +31,12 @@ import fr.inria.eventcloud.deployment.cli.converters.EventCloudIdConverter;
 public class DestroyEventCloudCommand extends Command<EventCloudsRegistry> {
 
     @Parameter(names = {"--stream-url"}, description = "Stream URL", converter = EventCloudIdConverter.class, required = true)
-    private EventCloudId eventcloudId;
+    private EventCloudId id;
 
     public DestroyEventCloudCommand() {
         super(
                 "destroy-eventcloud",
-                "Destroy the eventcloud identified by the specified stream URL",
+                "Destroy the EventCloud identified by the specified stream URL",
                 new String[] {"destroy"});
     }
 
@@ -46,14 +46,13 @@ public class DestroyEventCloudCommand extends Command<EventCloudsRegistry> {
     @Override
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
-        if (registry.contains(this.eventcloudId)) {
-            registry.undeploy(this.eventcloudId);
+        if (registry.contains(this.id)) {
+            registry.undeploy(this.id);
             System.out.println("EventCloud associated to stream URL '"
-                    + this.eventcloudId.getStreamUrl()
-                    + "' destroyed with success");
+                    + this.id.getStreamUrl() + "' destroyed with success");
         } else {
             System.out.println("EventCloud identified by stream URL '"
-                    + this.eventcloudId.getStreamUrl() + "' does not exist");
+                    + this.id.getStreamUrl() + "' does not exist");
         }
     }
 

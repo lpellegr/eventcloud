@@ -43,7 +43,7 @@ import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
  */
 public class EventCloudsRegistryReader {
 
-    @Parameter(names = {"-r", "--registry-url"}, description = "Eventclouds registry URL to use", required = true)
+    @Parameter(names = {"-r", "--registry-url"}, description = "EventClouds registry URL to use", required = true)
     private String registryUrl;
 
     public static void main(String[] args) {
@@ -76,7 +76,6 @@ public class EventCloudsRegistryReader {
 
         System.out.println("Type 'help' to know what are the possible actions");
 
-        @SuppressWarnings("unchecked")
         CommandLineReader<EventCloudsRegistry> reader =
                 new CommandLineReader<EventCloudsRegistry>(Arrays.asList(
                         new CreateEventCloudCommand(),

@@ -159,17 +159,17 @@ public class PubSubBenchmarkBSBM {
             overlayProvider = new SemanticPersistentOverlayProvider();
         }
 
-        EventCloudId ecId =
+        EventCloudId id =
                 deployer.newEventCloud(new EventCloudDeploymentDescriptor(
                         overlayProvider), 1, this.nbPeers);
 
         final List<PublishApi> publishProxies =
                 this.createPublishProxies(
-                        deployer.getEventCloudsRegistryUrl(), ecId,
+                        deployer.getEventCloudsRegistryUrl(), id,
                         this.nbPublishers);
         final List<SubscribeApi> subscribeProxies =
                 this.createSubscribeProxies(
-                        deployer.getEventCloudsRegistryUrl(), ecId,
+                        deployer.getEventCloudsRegistryUrl(), id,
                         this.nbSubscribers);
 
         nbEventsReceivedBySubscriber.clear();
@@ -260,7 +260,7 @@ public class PubSubBenchmarkBSBM {
                         this.notificationListenerType.getSimpleName()});
 
         // System.err.println("DUMP:\n"
-        // + deployer.getRandomSemanticPeer(ecId).dump());
+        // + deployer.getRandomSemanticPeer(id).dump());
 
         deployer.undeploy();
     }

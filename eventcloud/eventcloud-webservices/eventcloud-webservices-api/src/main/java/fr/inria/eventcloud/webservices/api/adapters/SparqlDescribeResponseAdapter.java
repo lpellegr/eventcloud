@@ -40,6 +40,7 @@ public class SparqlDescribeResponseAdapter extends
      * 
      * @param sparqlDescribeResponse
      *            the SPARQL Describe response to be converted.
+     * 
      * @return the byte array representing the specified SPARQL Describe
      *         response.
      */
@@ -55,6 +56,7 @@ public class SparqlDescribeResponseAdapter extends
      * 
      * @param sparqlDescribeResponseArray
      *            the byte array to be converted.
+     * 
      * @return the SPARQL Describe response represented by the specified byte
      *         array.
      */

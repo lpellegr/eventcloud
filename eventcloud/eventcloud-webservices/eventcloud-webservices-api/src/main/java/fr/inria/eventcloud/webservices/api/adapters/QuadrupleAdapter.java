@@ -38,6 +38,7 @@ public class QuadrupleAdapter extends XmlAdapter<byte[], Quadruple> {
      * 
      * @param quad
      *            the quadruple to be converted.
+     * 
      * @return the byte array representing the specified quadruple.
      */
     @Override
@@ -50,6 +51,7 @@ public class QuadrupleAdapter extends XmlAdapter<byte[], Quadruple> {
      * 
      * @param quadArray
      *            the byte array to be converted.
+     * 
      * @return the quadruple represented by the specified byte array.
      */
     @Override

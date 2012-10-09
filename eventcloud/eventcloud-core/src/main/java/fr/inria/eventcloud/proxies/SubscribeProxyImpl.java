@@ -83,8 +83,8 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  * @see ProxyFactory
  */
 @DefineGroups({@Group(name = "parallel", selfCompatible = true)})
-public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
-        SubscribeProxy, SubscribeProxyAttributeController {
+public class SubscribeProxyImpl extends AbstractProxy implements
+        ComponentEndActive, SubscribeProxy, SubscribeProxyAttributeController {
 
     private static final long serialVersionUID = 1L;
 
@@ -103,7 +103,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
     public static final String SUBSCRIBE_SERVICES_ITF = "subscribe-services";
 
     private static final Logger log =
-            LoggerFactory.getLogger(SubscribeProxy.class);
+            LoggerFactory.getLogger(SubscribeProxyImpl.class);
 
     // contains the subscriptions that have been registered from this proxy
     private ConcurrentMap<SubscriptionId, Subscription> subscriptions;
@@ -437,15 +437,6 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         }
 
         log.info("Notification {} has been delivered", id);
-
-        // log information for integration test purposes
-        if (log.isInfoEnabled()) {
-            log.info(
-                    "EventCloud Exit {}",
-                    Quadruple.removeMetaInformation(this.extractEventId(
-                            this.subscriptions.get(id.getSubscriptionId()),
-                            solution.getSolution())));
-        }
     }
 
     private final void deliver(NotificationId id,
@@ -455,6 +446,8 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
         this.sendInputOutputMonitoringReportIfNecessary(
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
+
+        this.logIntegrationInformation(id, solution);
     }
 
     private final void deliver(NotificationId id,
@@ -465,6 +458,8 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
         this.sendInputOutputMonitoringReportIfNecessary(
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
+
+        this.logIntegrationInformation(id, solution);
     }
 
     private final void deliver(NotificationId id,
@@ -489,6 +484,8 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
             this.sendInputOutputMonitoringReport(
                     id.getSubscriptionId(), solution.getSolution(),
                     listener.getSubscriberUrl());
+
+            this.logIntegrationInformation(id, solution);
         }
     }
 
@@ -500,6 +497,7 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
         this.sendInputOutputMonitoringReportIfNecessary(
                 id.getSubscriptionId(), solution, listener.getSubscriberUrl());
 
+        this.logIntegrationInformation(id, solution);
     }
 
     /**
@@ -556,6 +554,18 @@ public class SubscribeProxyImpl extends Proxy implements ComponentEndActive,
 
             super.monitoringManager.sendInputOutputMonitoringReport(
                     source, destination, Quadruple.getPublicationTime(eventId));
+        }
+    }
+
+    private void logIntegrationInformation(NotificationId id, Solution solution) {
+        // log information for integration test purposes
+        if (EventCloudProperties.INTEGRATION_LOG.getValue()
+                && log.isInfoEnabled()) {
+            log.info(
+                    "EventCloud Exit {}",
+                    Quadruple.removeMetaInformation(this.extractEventId(
+                            this.subscriptions.get(id.getSubscriptionId()),
+                            solution.getSolution())));
         }
     }
 

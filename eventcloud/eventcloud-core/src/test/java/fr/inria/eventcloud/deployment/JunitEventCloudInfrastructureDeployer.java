@@ -32,7 +32,7 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
 /**
- * This class is used to instantiate an Event Cloud infrastructure (i.e. an
+ * This class is used to instantiate an EventCloud infrastructure (i.e. an
  * {@link EventCloudsRegistry} and one or several EventClouds).
  * 
  * @author lpellegr
@@ -85,7 +85,7 @@ public class JunitEventCloudInfrastructureDeployer {
 
         if (!this.eventCloudsRegistry.register(deployer)) {
             throw new IllegalStateException(
-                    "Eventcloud registration failed: it is already registered");
+                    "EventCloud registration failed: it is already registered");
         }
 
         return eventCloudDescription.getId();
@@ -130,8 +130,8 @@ public class JunitEventCloudInfrastructureDeployer {
         Iterator<EventCloudId> it = this.eventClouds.keySet().iterator();
 
         while (it.hasNext()) {
-            EventCloudId ecId = it.next();
-            this.eventClouds.get(ecId).undeploy();
+            EventCloudId id = it.next();
+            this.eventClouds.get(id).undeploy();
         }
 
         ComponentUtils.terminateComponent(this.eventCloudsRegistry);
@@ -139,7 +139,7 @@ public class JunitEventCloudInfrastructureDeployer {
 
     public void undeploy(EventCloudId eventCloudId) {
         if (!this.eventClouds.containsKey(eventCloudId)) {
-            throw new IllegalArgumentException("Event cloud id not managed: "
+            throw new IllegalArgumentException("EventCloud id not managed: "
                     + eventCloudId);
         }
 

@@ -24,7 +24,7 @@ import com.hp.hpl.jena.graph.Node_Literal;
 import fr.inria.eventcloud.utils.UniqueId;
 
 /**
- * Uniquely identify a subscription which has been submitted on an eventcloud.
+ * Uniquely identify a subscription which has been submitted on an EventCloud.
  * 
  * @author lpellegr
  */

@@ -82,9 +82,10 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     private String registryUrl;
 
     /**
-     * No-arg constructor for ProActive.
+     * Empty constructor required by ProActive.
      */
     public EventCloudsRegistryImpl() {
+
     }
 
     /**
@@ -297,7 +298,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
 
         if (!(networkDeployer instanceof EventCloudDeployer)) {
             throw new IllegalArgumentException(
-                    "Network deployer associated to eventcloud identifier '"
+                    "Network deployer associated to EventCloud identifier '"
                             + id + "' is not an instance of EventCloudDeployer");
         }
 

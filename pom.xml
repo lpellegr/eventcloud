@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 
 	<name>eventcloud-parent</name>
-	<description>Parent module for eventcloud maven related modules.</description>
+	<description>Parent module for EventCloud maven related modules.</description>
 	<url>https://bitbucket.org/eventcloud/eventcloud</url>
 	<inceptionYear>2010</inceptionYear>
 
@@ -278,6 +278,31 @@
 					<exclusion>
 						<groupId>log4j</groupId>
 						<artifactId>log4j</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>eu.play-project</groupId>
+				<artifactId>play-commons-eventformat</artifactId>
+				<version>1.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>eu.play-project</groupId>
+				<artifactId>play-commons-constants</artifactId>
+				<version>1.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.soceda</groupId>
+				<artifactId>social-filter</artifactId>
+				<version>1.0-SNAPSHOT</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.objectweb.proactive</groupId>
+						<artifactId>proactive-programming-bundle</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.objectweb.proactive</groupId>
+						<artifactId>proactive-programming-mao-bundle</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
