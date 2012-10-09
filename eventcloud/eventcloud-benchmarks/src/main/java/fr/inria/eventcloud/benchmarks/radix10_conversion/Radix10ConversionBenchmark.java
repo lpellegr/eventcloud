@@ -173,9 +173,9 @@ public class Radix10ConversionBenchmark {
                 System.out.println("  RDF term average size after prefix removal is "
                         + statsWithPrefixRemoval.getMean());
                 System.out.println("  RDF term median after prefix removal is "
-                        + statsWithoutPrefixRemoval.getPercentile(50));
+                        + statsWithPrefixRemoval.getPercentile(50));
                 System.out.println("  RDF term third quartile after prefix removal is "
-                        + statsWithoutPrefixRemoval.getPercentile(75));
+                        + statsWithPrefixRemoval.getPercentile(75));
             }
 
             System.out.println("Time to perform radix 10 conversion for " + i
