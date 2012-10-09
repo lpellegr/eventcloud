@@ -18,6 +18,7 @@ package fr.inria.eventcloud.proxies;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 
 import org.objectweb.proactive.Body;
@@ -51,7 +52,7 @@ import fr.inria.eventcloud.utils.Callback;
  * @see ProxyFactory
  */
 @DefineGroups({@Group(name = "parallel", selfCompatible = true)})
-public class PublishProxyImpl extends Proxy implements PublishProxy,
+public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
         PublishProxyAttributeController {
 
     private static final Logger log =
@@ -112,8 +113,10 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
     public void publish(CompoundEvent event) {
         long publicationTime = System.currentTimeMillis();
 
-        // log information for integration test purposes
-        log.info("EventCloud Entry {}", event.getGraph());
+        if (EventCloudProperties.INTEGRATION_LOG.getValue()) {
+            // log information for integration test purposes
+            log.info("EventCloud Entry {}", event.getGraph());
+        }
 
         for (Quadruple quad : event) {
             quad.setPublicationTime(publicationTime);
@@ -137,13 +140,21 @@ public class PublishProxyImpl extends Proxy implements PublishProxy,
      */
     @Override
     @MemberOf("parallel")
-    public void publish(InputStream in, SerializationFormat format) {
-        RdfParser.parse(in, format, new Callback<Quadruple>() {
-            @Override
-            public void execute(Quadruple quad) {
-                PublishProxyImpl.this.publish(quad);
-            }
-        });
+    public void publish(URL url, SerializationFormat format) {
+        try {
+            InputStream in = url.openConnection().getInputStream();
+
+            RdfParser.parse(in, format, new Callback<Quadruple>() {
+                @Override
+                public void execute(Quadruple quad) {
+                    PublishProxyImpl.this.publish(quad);
+                }
+            });
+
+            in.close();
+        } catch (IOException ioe) {
+            log.error("An error occurred when reading from the given URL", ioe);
+        }
     }
 
     /**

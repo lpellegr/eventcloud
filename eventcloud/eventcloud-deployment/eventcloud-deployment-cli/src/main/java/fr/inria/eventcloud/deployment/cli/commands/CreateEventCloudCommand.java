@@ -35,7 +35,7 @@ import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
 
     @Parameter(names = {"--stream-url"}, description = "Stream URL", converter = EventCloudIdConverter.class, required = true)
-    private EventCloudId eventcloudId;
+    private EventCloudId id;
 
     @Parameter(names = {"--nb-peers"}, description = "Number of Peers", required = true)
     private int nbPeers = 1;
@@ -46,7 +46,7 @@ public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
     public CreateEventCloudCommand() {
         super(
                 "create-eventcloud",
-                "Creates a new eventcloud for the specified stream URL and number of peers",
+                "Creates a new EventCloud for the specified stream URL and number of peers",
                 new String[] {"create"});
     }
 
@@ -56,13 +56,13 @@ public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
     @Override
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
-        if (registry.contains(this.eventcloudId)) {
+        if (registry.contains(this.id)) {
             System.out.println("EventCloud already created with stream URL '"
-                    + this.eventcloudId.getStreamUrl() + "'");
+                    + this.id.getStreamUrl() + "'");
         } else {
             EventCloudDeployer deployer =
                     new EventCloudDeployer(
-                            new EventCloudDescription(this.eventcloudId),
+                            new EventCloudDescription(this.id),
                             new EventCloudDeploymentDescriptor(
                                     new SemanticPersistentOverlayProvider()));
 

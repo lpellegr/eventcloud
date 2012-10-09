@@ -16,30 +16,18 @@
  **/
 package fr.inria.eventcloud.webservices.proxies;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
-import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
-import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
-import org.oasis_open.docs.wsn.bw_2.MultipleTopicsSpecifiedFault;
-import org.oasis_open.docs.wsn.bw_2.NoCurrentMessageOnTopicFault;
-import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
-import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
-import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
-
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.properties.AlterableElaProperty;
-import fr.inria.eventcloud.proxies.EventCloudCache;
+import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
-import fr.inria.eventcloud.webservices.WsEventNotificationListener;
-import fr.inria.eventcloud.webservices.api.SubscribeInfos;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
+import fr.inria.eventcloud.webservices.listeners.WsBindingWrapperNotificationListener;
+import fr.inria.eventcloud.webservices.listeners.WsCompoundEventNotificationListener;
+import fr.inria.eventcloud.webservices.listeners.WsSignalNotificationListener;
 
 /**
- * SubscribeWsProxyImpl is an extension of {@link SubscribeProxyImpl} in order
- * to be able to expose the proxy as a web service.
+ * Extension of {@link SubscribeProxyImpl} in order to be able to expose a
+ * subscribe proxy as a web service.
  * 
  * @author lpellegr
  * @author bsauvan
@@ -61,11 +49,6 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     public static final String SUBSCRIBE_WEBSERVICES_ITF =
             "subscribe-webservices";
 
-    // contains the subscriber web service endpoint URLs to use in order to
-    // deliver
-    // the solutions
-    private Map<SubscriptionId, String> subscribers;
-
     /**
      * Empty constructor required by ProActive.
      */
@@ -77,53 +60,49 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(EventCloudCache proxy, String componentUri,
-                              AlterableElaProperty[] properties) {
-        if (this.eventCloudCache == null) {
-            super.setAttributes(proxy, componentUri, properties);
-            this.subscribers = new HashMap<SubscriptionId, String>();
-        }
+    public String subscribeSignal(String sparqlQuery,
+                                  String subscriberWsEndpointUrl) {
+        return this.subscribe(sparqlQuery, new WsSignalNotificationListener(
+                subscriberWsEndpointUrl));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage currentMessage)
-            throws NoCurrentMessageOnTopicFault, TopicNotSupportedFault,
-            ResourceUnknownFault, MultipleTopicsSpecifiedFault,
-            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault {
-        throw new UnsupportedOperationException();
+    public String subscribeBinding(String sparqlQuery,
+                                   String subscriberWsEndpointUrl) {
+        return this.subscribe(
+                sparqlQuery, new WsBindingWrapperNotificationListener(
+                        subscriberWsEndpointUrl));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SubscriptionId subscribe(SubscribeInfos subscribeInfos) {
-        Subscription subscription =
-                new Subscription(
-                        subscribeInfos.getSparqlQuery(),
-                        subscribeInfos.getSubscriberWsEndpointUrl());
+    public String subscribeCompoundEvent(String sparqlQuery,
+                                         String subscriberWsEndpointUrl) {
+        return this.subscribe(
+                sparqlQuery, new WsCompoundEventNotificationListener(
+                        subscriberWsEndpointUrl));
+    }
 
-        this.subscribers.put(
-                subscription.getId(),
-                subscribeInfos.getSubscriberWsEndpointUrl());
+    private <T> String subscribe(String sparqlQuery,
+                                 NotificationListener<T> listener) {
+        Subscription subscription = new Subscription(sparqlQuery);
 
-        this.subscribe(subscription, new WsEventNotificationListener(
-                super.getEventCloudCache().getId().getStreamUrl(),
-                subscribeInfos.getSubscriberWsEndpointUrl()));
+        this.subscribe(subscription, listener);
 
-        return subscription.getId();
+        return subscription.getId().toString();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void unsubscribe(SubscriptionId id) {
-        super.unsubscribe(id);
-        this.subscribers.remove(id);
+    public void unsubscribe(String id) {
+        this.unsubscribe(SubscriptionId.parseSubscriptionId(id));
     }
 
 }

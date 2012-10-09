@@ -46,7 +46,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 
 /**
  * The purpose of this test is just to show how to instantiate and to use an
- * Event Cloud.
+ * EventCloud.
  * 
  * @author lpellegr
  */
@@ -67,7 +67,7 @@ public class EventCloudUsageTest implements Serializable {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
-        // Creates and deploys an Event Cloud composed of 1 tracker and 10 peers
+        // Creates and deploys an EventCloud composed of 1 tracker and 10 peers
         EventCloudId eventCloudId = deployer.newEventCloud(1, 10);
 
         // Creates a PutGet proxy whose the
@@ -103,7 +103,7 @@ public class EventCloudUsageTest implements Serializable {
         // Hereafter, any quadruple which has any value as graph, subject,
         // predicate and object value is returned
         List<Quadruple> result = putGetProxy.find(QuadruplePattern.ANY);
-        log.info("Quadruples contained by the Event-Cloud {}", eventCloudId);
+        log.info("Quadruples contained by the EventCloud {}", eventCloudId);
         for (Quadruple quad : result) {
             log.info(quad.toString());
         }
@@ -282,13 +282,13 @@ public class EventCloudUsageTest implements Serializable {
         JunitEventCloudInfrastructureDeployer deployer =
                 new JunitEventCloudInfrastructureDeployer();
 
-        EventCloudId ecId1 = deployer.newEventCloud(1, 1);
+        EventCloudId id1 = deployer.newEventCloud(1, 1);
 
-        EventCloudId ecId2 = deployer.newEventCloud(1, 1);
+        EventCloudId id2 = deployer.newEventCloud(1, 1);
 
         Assert.assertFalse(
-                "Two Event Clouds created at two different time have the same identifier",
-                ecId1.equals(ecId2));
+                "Two EventClouds created at two different time have the same identifier",
+                id1.equals(id2));
 
         deployer.undeploy();
     }

@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.adapters.rdf2go;
 
-import java.io.InputStream;
+import java.net.URL;
 
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.Node;
@@ -57,8 +57,8 @@ public class PublishRdf2goAdapter extends Rdf2goAdapter<PublishApi> {
                 stmt.getObject());
     }
 
-    public void publish(InputStream in, SerializationFormat format) {
-        super.delegate.publish(in, format);
+    public void publish(URL url, SerializationFormat format) {
+        super.delegate.publish(url, format);
     }
 
 }

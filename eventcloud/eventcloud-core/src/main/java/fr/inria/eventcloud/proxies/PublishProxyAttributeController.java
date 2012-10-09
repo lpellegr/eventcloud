@@ -29,7 +29,7 @@ public interface PublishProxyAttributeController extends AttributeController {
      * Sets the attributes of the publish proxy.
      * 
      * @param proxy
-     *            the event cloud proxy instance to set to the publish proxy.
+     *            the EventCloud proxy instance to set to the publish proxy.
      */
     public void setAttributes(EventCloudCache proxy);
 

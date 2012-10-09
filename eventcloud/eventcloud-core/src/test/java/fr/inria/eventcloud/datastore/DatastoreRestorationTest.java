@@ -41,7 +41,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
- * This class defines a test that checks if an eventcloud which is created two
+ * This class defines a test that checks if an EventCloud which is created two
  * times will use the same repository the second time when the property
  * EventCloudProperties.REPOSITORIES_RESTORE is set to true.
  * 
@@ -76,7 +76,7 @@ public class DatastoreRestorationTest {
 
         registry.undeploy(deployer.getEventCloudDescription().getId());
 
-        // creates a new eventcloud with the same stream url
+        // creates a new EventCloud with the same stream url
         deployer = this.createEventCloudDeployer();
         deployer.deploy(1, 1);
         registry.register(deployer);

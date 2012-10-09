@@ -23,7 +23,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
  * This class defines an identifier (also named stream identifier) that can be
- * used to uniquely identify an eventcloud among an organization.
+ * used to uniquely identify an EventCloud among an organization.
  * 
  * @author lpellegr
  */
@@ -34,7 +34,7 @@ public class EventCloudId implements Serializable {
     private final String streamUrl;
 
     /**
-     * Creates a new event cloud identifier with randomly generated stream URL.
+     * Creates a new EventCloud identifier with randomly generated stream URL.
      */
     public EventCloudId() {
         this(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
@@ -42,12 +42,12 @@ public class EventCloudId implements Serializable {
     }
 
     /**
-     * Creates a new event cloud identifier from the specified {@code streamUrl}
-     * . This URL is assumed to identify a unique eventcloud among an
+     * Creates a new EventCloud identifier from the specified {@code streamUrl}
+     * . This URL is assumed to identify a unique EventCloud among an
      * organization.
      * 
      * @param streamUrl
-     *            the unique URL that identifies an eventcloud among an
+     *            the unique URL that identifies an EventCloud among an
      *            organization.
      */
     public EventCloudId(String streamUrl) {

@@ -34,14 +34,14 @@ import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
  * instance file is created. This instance file contains a three columns value
  * such as {@code 1 1 -932949592}. The first number indicates the number of
  * trackers deployed, the second the number of peers deployed and the last
- * information is an URL which uniquely identifies the eventcloud which is
+ * information is an URL which uniquely identifies the EventCloud which is
  * running.
  * 
  * @author lpellegr
  */
 public final class EventCloudLauncher extends Launcher {
 
-    @Parameter(names = {"--registry-url", "-r"}, description = "Eventclouds registry URL", required = true)
+    @Parameter(names = {"--registry-url", "-r"}, description = "EventClouds registry URL", required = true)
     private String registryUrl;
 
     @Parameter(names = {"--nb-peers"}, description = "Number of peers")
@@ -79,9 +79,9 @@ public final class EventCloudLauncher extends Launcher {
         }
 
         if (!registered) {
-            throw new IllegalStateException("Eventcloud with id "
+            throw new IllegalStateException("EventCloud with id "
                     + deployer.getEventCloudDescription().getId()
-                    + " is already registered into the eventclouds registry "
+                    + " is already registered into the EventClouds registry "
                     + this.registryUrl);
         }
 

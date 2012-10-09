@@ -23,7 +23,7 @@ import org.junit.Test;
 /**
  * Provides test cases for the {@link PublishRdf2goAdapter}. This class provides
  * tests in order to test whether the translation between RDF2Go objects and
- * event-cloud-api/Jena objects works.
+ * eventcloud-api/Jena objects works.
  * 
  * @author lpellegr
  */

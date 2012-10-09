@@ -63,31 +63,29 @@ public class EventCloudDescription implements Serializable {
     }
 
     /**
-     * Returns the {@link EventCloudId} that uniquely identifies the
-     * Event-Cloud.
+     * Returns the {@link EventCloudId} that uniquely identifies the EventCloud.
      * 
-     * @return the {@link EventCloudId} that uniquely identifies the
-     *         Event-Cloud.
+     * @return the {@link EventCloudId} that uniquely identifies the EventCloud.
      */
     public EventCloudId getId() {
         return this.id;
     }
 
     /**
-     * Returns the Event-Cloud creation date.
+     * Returns the EventCloud creation date.
      * 
-     * @return the Event-Cloud creation date.
+     * @return the EventCloud creation date.
      */
     public long getCreationTime() {
         return this.creationTime;
     }
 
     /**
-     * Returns the list of ELA properties that have been set when the
-     * Event-Cloud has been created. These ELA properties are not modifiable.
+     * Returns the list of ELA properties that have been set when the EventCloud
+     * has been created. These ELA properties are not modifiable.
      * 
-     * @return the list of ELA properties that have been set when the
-     *         Event-Cloud has been created.
+     * @return the list of ELA properties that have been set when the EventCloud
+     *         has been created.
      */
     public List<UnalterableElaProperty> getElaProperties() {
         return this.elaProperties;

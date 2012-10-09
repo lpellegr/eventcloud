@@ -16,13 +16,13 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 
 /**
- * Defines the publish operations that can be executed on an Event Cloud.
+ * Defines the publish operations that can be executed on an EventCloud.
  * 
  * @author lpellegr
  */
@@ -53,18 +53,18 @@ public interface PublishApi {
     public void publish(Collection<CompoundEvent> events);
 
     /**
-     * Publishes the quadruples that are read from the specified input stream.
-     * The input stream is assumed to comply with the <a
+     * Publishes the quadruples that are read from an input stream opened from
+     * the specified URL. The input stream is assumed to comply with the <a
      * href="http://www4.wiwiss.fu-berlin.de/bizer/TriG/">TriG</a> or <a
      * href="http://sw.deri.org/2008/07/n-quads/">N-Quads</a> syntax.
      * 
-     * @param in
-     *            the input stream from where the quadruples are read.
+     * @param url
+     *            the URL from where the quadruples are read.
      * 
      * @param format
      *            the format that is used to read the data from the input
      *            stream.
      */
-    public void publish(InputStream in, SerializationFormat format);
+    public void publish(URL url, SerializationFormat format);
 
 }

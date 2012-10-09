@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyI
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
 
 /**
- * Contains default values for Event-Cloud properties.
+ * Contains default values for EventCloud properties.
  * <p>
  * The first time a property is retrieved, before it, the class will try to load
  * properties from a preferences file. The location of this file is by default
@@ -42,17 +42,17 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyS
 public class EventCloudProperties {
 
     /**
-     * Defines whether the eventcloud has to compress the data which are
+     * Defines whether the EventCloud has to compress the data which are
      * transfered between the peers and the users when it is possible. When this
-     * property is enabled, all the entities communicating with the eventcloud
+     * property is enabled, all the entities communicating with the EventCloud
      * must also enable the compression.
      */
     public static final PropertyBoolean COMPRESSION = new PropertyBoolean(
             "compression", false);
 
     /**
-     * Defines the prefix that is used for transforming an event cloud
-     * identifier to an URL.
+     * Defines the prefix that is used for transforming an EventCloud identifier
+     * to an URL.
      */
     public static final PropertyString EVENTCLOUD_ID_PREFIX =
             new PropertyString(
@@ -172,6 +172,12 @@ public class EventCloudProperties {
             new PropertyDouble("eventcloud.socialfilter.threshold", 0.5);
 
     /**
+     * Specifies if the integration information must be logged or not.
+     */
+    public static final PropertyBoolean INTEGRATION_LOG = new PropertyBoolean(
+            "eventcloud.integration.log", false);
+
+    /**
      * Defines if statistics recording must be enabled or not for the misc
      * datastore. When it is enabled, some stats like the number of quadruples
      * added, etc. are recorded during each data insertion.
@@ -196,7 +202,7 @@ public class EventCloudProperties {
             .availableProcessors() + 1;
 
     /**
-     * Defines the soft limit used by each eventclouds registry that runs with
+     * Defines the soft limit used by each EventClouds registry that runs with
      * multi active serving.
      */
     public static final PropertyInteger MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY =

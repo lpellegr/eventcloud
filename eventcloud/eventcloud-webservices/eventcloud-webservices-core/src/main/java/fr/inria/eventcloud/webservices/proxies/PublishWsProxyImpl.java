@@ -16,12 +16,16 @@
  **/
 package fr.inria.eventcloud.webservices.proxies;
 
+import java.util.Collection;
+
+import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.proxies.PublishProxyImpl;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 
 /**
- * PublishWsProxyImpl is an extension of {@link PublishProxyImpl} in order to be
- * able to expose the proxy as a web service.
+ * Extension of {@link PublishProxyImpl} in order to be able to expose a publish
+ * proxy as a web service.
  * 
  * @author bsauvan
  */
@@ -44,6 +48,30 @@ public class PublishWsProxyImpl extends PublishProxyImpl implements
      */
     public PublishWsProxyImpl() {
         super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishQuadruple(Quadruple quad) {
+        this.publish(quad);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishCompoundEvent(CompoundEvent event) {
+        this.publish(event);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishCompoundEventCollection(Collection<CompoundEvent> events) {
+        this.publish(events);
     }
 
 }

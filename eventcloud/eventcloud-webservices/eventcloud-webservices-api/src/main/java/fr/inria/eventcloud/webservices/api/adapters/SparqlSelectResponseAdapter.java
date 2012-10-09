@@ -40,6 +40,7 @@ public class SparqlSelectResponseAdapter extends
      * 
      * @param sparqlSelectResponse
      *            the SPARQL Select response to be converted.
+     * 
      * @return the byte array representing the specified SPARQL Select response.
      */
     @Override
@@ -54,6 +55,7 @@ public class SparqlSelectResponseAdapter extends
      * 
      * @param sparqlSelectResponseArray
      *            the byte array to be converted.
+     * 
      * @return the SPARQL Select response represented by the specified byte
      *         array.
      */

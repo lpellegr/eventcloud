@@ -19,7 +19,7 @@ package fr.inria.eventcloud.api;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 
 /**
- * Defines the subscribe operations that can be executed on an Event Cloud.
+ * Defines the subscribe operations that can be executed on an EventCloud.
  * 
  * @author lpellegr
  */

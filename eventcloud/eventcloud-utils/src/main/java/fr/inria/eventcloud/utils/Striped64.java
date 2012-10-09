@@ -18,7 +18,6 @@ import java.util.Random;
  * supporting dynamic striping on 64bit values. The class extends Number so that
  * concrete subclasses must publicly do so.
  */
-@SuppressWarnings("restriction")
 public abstract class Striped64 extends Number {
     /*
      * This class maintains a lazily-initialized table of atomically

@@ -103,6 +103,9 @@ public class ProxyMonitoringManagerImpl extends AbstractComponent implements
 
     private ExecutorService cachedThreadPool;
 
+    /**
+     * Empty constructor required by ProActive.
+     */
     public ProxyMonitoringManagerImpl() {
 
     }

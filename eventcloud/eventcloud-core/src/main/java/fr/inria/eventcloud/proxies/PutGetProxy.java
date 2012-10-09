@@ -21,11 +21,11 @@ import fr.inria.eventcloud.api.PutGetApi;
 /**
  * A PutGetProxy is a proxy that implements the {@link PutGetApi}. It has to be
  * used by a user who wants to execute put/get synchronous operations on an
- * Event Cloud.
+ * EventCloud.
  * 
  * @author lpellegr
  * @author bsauvan
  */
-public interface PutGetProxy extends PutGetApi {
+public interface PutGetProxy extends Proxy, PutGetApi {
 
 }
