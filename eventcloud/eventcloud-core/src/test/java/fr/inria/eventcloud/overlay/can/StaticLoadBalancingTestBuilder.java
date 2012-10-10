@@ -126,7 +126,7 @@ public class StaticLoadBalancingTestBuilder {
             protected void _execute() throws EventCloudIdNotManaged,
                     NetworkAlreadyJoinedException, FileNotFoundException,
                     PeerNotActivatedException {
-                
+
                 if (StaticLoadBalancingTestBuilder.this.enableStatsRecording) {
                     EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
                 }
