@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  */
 public class ApfloatUtils {
 
-    public static final long DEFAULT_PRECISION = 350;
+    public static long DEFAULT_PRECISION = 350;
 
     private static final Apint RADIX = new Apint(
             P2PStructuredProperties.CAN_UPPER_BOUND.getValue() + 1);

@@ -85,7 +85,7 @@ public class JunitEventCloudInfrastructureDeployer {
 
         if (!this.eventCloudsRegistry.register(deployer)) {
             throw new IllegalStateException(
-                    "EventCloud registration failed: it is already registered");
+                    "Eventcloud registration failed: it is already registered");
         }
 
         return eventCloudDescription.getId();
