@@ -19,6 +19,9 @@ package fr.inria.eventcloud.benchmarks.load_balancing_precision;
 import java.io.File;
 import java.util.concurrent.Callable;
 
+import org.apfloat.ApfloatContext;
+import org.apfloat.spi.BuilderFactory;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
@@ -56,6 +59,21 @@ public class LoadBalancingPrecisionBenchmark {
 
     public static void main(String[] args) {
         LoggerUtils.disableLoggers();
+
+        // TODO: find why it is not called automatically through
+        // AbstractComponent#initComponentActivity or why it must be defined
+        // before a call to the previous method?
+        try {
+            // sets the default builder factory for the Apfloat library
+            ApfloatContext.getContext()
+                    .setBuilderFactory(
+                            (BuilderFactory) P2PStructuredProperties.APFLOAT_DEFAULT_BUILDER_FACTORY.getValue()
+                                    .newInstance());
+        } catch (IllegalAccessException iae) {
+            throw new IllegalStateException(iae);
+        } catch (InstantiationException ie) {
+            throw new IllegalStateException(ie);
+        }
 
         LoadBalancingPrecisionBenchmark benchmark =
                 new LoadBalancingPrecisionBenchmark();
