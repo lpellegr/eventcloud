@@ -1,0 +1,106 @@
+/**
+ * Copyright (c) 2011-2012 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
+package fr.inria.eventcloud.benchmarks.load_balancing_precision;
+
+import java.io.File;
+import java.util.concurrent.Callable;
+
+import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
+import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
+import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.converters.FileConverter;
+
+import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
+import fr.inria.eventcloud.overlay.can.StaticLoadBalancingTestBuilder;
+
+/**
+ * A simple benchmark to test the influence of the precision on the
+ * load-balancing of RDF data on peers.
+ * 
+ * @author lpellegr
+ */
+public class LoadBalancingPrecisionBenchmark {
+
+    @Parameter(names = {"-if", "--input-file"}, description = "TriG input file to use", converter = FileConverter.class, required = true)
+    private File trigResource;
+
+    @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed", required = true)
+    private int nbRuns = 1;
+
+    @Parameter(names = {"-p", "--precision"}, description = "The precision to use", required = true)
+    private long precision = ApfloatUtils.DEFAULT_PRECISION;
+
+    @Parameter(names = {"-np", "--nb-peers"}, description = "The number of peers to inject")
+    private int nbPeersToInject = 10;
+
+    @Parameter(names = {"-h", "--help"}, help = true)
+    private boolean help;
+
+    public static void main(String[] args) {
+        LoggerUtils.disableLoggers();
+
+        LoadBalancingPrecisionBenchmark benchmark =
+                new LoadBalancingPrecisionBenchmark();
+
+        JCommander jCommander = new JCommander(benchmark);
+
+        try {
+            jCommander.parse(args);
+
+            if (benchmark.help) {
+                jCommander.usage();
+                System.exit(0);
+            }
+        } catch (ParameterException e) {
+            jCommander.usage();
+            System.exit(1);
+        }
+
+        benchmark.execute();
+    }
+
+    public void execute() {
+        ApfloatUtils.DEFAULT_PRECISION = this.precision;
+
+        MicroBenchmark microBenchmark =
+                new MicroBenchmark(this.nbRuns, new Callable<Long>() {
+                    @Override
+                    public Long call() throws Exception {
+                        StaticLoadBalancingTestBuilder.Test test =
+                                new StaticLoadBalancingTestBuilder(
+                                        LoadBalancingPrecisionBenchmark.this.trigResource.toString()).enableLoadBalancing(
+                                        CentroidStatsRecorder.class)
+                                        .setNbPeersToInject(
+                                                LoadBalancingPrecisionBenchmark.this.nbPeersToInject)
+                                        .build();
+
+                        test.execute();
+                        return test.getExecutionTime();
+                    }
+                });
+        microBenchmark.showProgress();
+        microBenchmark.execute();
+
+        System.out.println("Average time for " + this.nbRuns + " runs is "
+                + microBenchmark.getMean());
+    }
+
+}
