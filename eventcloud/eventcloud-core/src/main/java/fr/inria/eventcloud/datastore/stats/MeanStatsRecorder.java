@@ -17,8 +17,11 @@
 package fr.inria.eventcloud.datastore.stats;
 
 import org.apfloat.Apfloat;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 
 import com.hp.hpl.jena.graph.Node;
+
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * Defines some methods to compute the online mean estimation for each quadruple
@@ -70,6 +73,10 @@ public class MeanStatsRecorder extends StatsRecorder {
         this.ssum = this.ssum.subtract(sf);
         this.psum = this.psum.subtract(pf);
         this.osum = this.osum.subtract(of);
+    }
+
+    private static final Apfloat toRadix10(Node n) {
+        return ApfloatUtils.toFloatRadix10(SemanticElement.removePrefix(n));
     }
 
     /**

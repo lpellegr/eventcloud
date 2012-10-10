@@ -18,8 +18,11 @@ package fr.inria.eventcloud.datastore.stats;
 
 import org.apfloat.Apfloat;
 import org.apfloat.Apint;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 
 import com.hp.hpl.jena.graph.Node;
+
+import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
  * Defines some methods to compute the online centroid estimation for each
@@ -53,15 +56,21 @@ public class CentroidStatsRecorder extends StatsRecorder {
     @Override
     public synchronized void quadrupleAddedComputeStats(Node g, Node s, Node p,
                                                         Node o) {
-        Apfloat gf = toRadix10(g);
-        Apfloat sf = toRadix10(s);
-        Apfloat pf = toRadix10(p);
-        Apfloat of = toRadix10(o);
 
-        Apint gw = new Apint(g.toString().length());
-        Apint sw = new Apint(s.toString().length());
-        Apint pw = new Apint(p.toString().length());
-        Apint ow = new Apint(o.toString().length());
+        String gs = SemanticElement.removePrefix(g);
+        String ss = SemanticElement.removePrefix(s);
+        String ps = SemanticElement.removePrefix(p);
+        String os = SemanticElement.removePrefix(o);
+
+        Apfloat gf = ApfloatUtils.toFloatRadix10(gs);
+        Apfloat sf = ApfloatUtils.toFloatRadix10(ss);
+        Apfloat pf = ApfloatUtils.toFloatRadix10(ps);
+        Apfloat of = ApfloatUtils.toFloatRadix10(os);
+
+        Apint gw = new Apint(gs.length());
+        Apint sw = new Apint(ss.length());
+        Apint pw = new Apint(ps.length());
+        Apint ow = new Apint(os.length());
 
         this.gsum = this.gsum.add(gf.multiply(gw));
         this.ssum = this.ssum.add(sf.multiply(sw));
@@ -80,15 +89,20 @@ public class CentroidStatsRecorder extends StatsRecorder {
     @Override
     protected synchronized void quadrupleRemovedComputeStats(Node g, Node s,
                                                              Node p, Node o) {
-        Apfloat gf = toRadix10(g);
-        Apfloat sf = toRadix10(s);
-        Apfloat pf = toRadix10(p);
-        Apfloat of = toRadix10(o);
+        String gs = SemanticElement.removePrefix(g);
+        String ss = SemanticElement.removePrefix(s);
+        String ps = SemanticElement.removePrefix(p);
+        String os = SemanticElement.removePrefix(o);
 
-        Apint gw = new Apint(g.toString().length());
-        Apint sw = new Apint(s.toString().length());
-        Apint pw = new Apint(p.toString().length());
-        Apint ow = new Apint(o.toString().length());
+        Apfloat gf = ApfloatUtils.toFloatRadix10(gs);
+        Apfloat sf = ApfloatUtils.toFloatRadix10(ss);
+        Apfloat pf = ApfloatUtils.toFloatRadix10(ps);
+        Apfloat of = ApfloatUtils.toFloatRadix10(os);
+
+        Apint gw = new Apint(gs.length());
+        Apint sw = new Apint(ss.length());
+        Apint pw = new Apint(ps.length());
+        Apint ow = new Apint(os.length());
 
         this.gsum = this.gsum.subtract(gf.multiply(gw));
         this.ssum = this.ssum.subtract(sf.multiply(sw));
