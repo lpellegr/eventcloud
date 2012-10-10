@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 import org.openjena.riot.Lang;
 import org.openjena.riot.RiotReader;
@@ -40,7 +40,7 @@ import com.hp.hpl.jena.sparql.core.Quad;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
- * A simple benchmark to test the impact of the precision on execution time.
+ * A simple benchmark to test the influence of the precision on execution time.
  * 
  * @author lpellegr
  */
@@ -105,10 +105,9 @@ public class Radix10ConversionBenchmark {
 
             it = RiotReader.createIteratorQuads(fis, Lang.TRIG, null);
 
-            DescriptiveStatistics statsWithoutPrefixRemoval =
-                    new DescriptiveStatistics();
-            DescriptiveStatistics statsWithPrefixRemoval =
-                    new DescriptiveStatistics();
+            SummaryStatistics statsWithoutPrefixRemoval =
+                    new SummaryStatistics();
+            SummaryStatistics statsWithPrefixRemoval = new SummaryStatistics();
 
             Stopwatch stopwatch = new Stopwatch();
 
@@ -161,10 +160,6 @@ public class Radix10ConversionBenchmark {
                         + statsWithoutPrefixRemoval.getMax());
                 System.out.println("  RDF term average size before prefix removal is "
                         + statsWithoutPrefixRemoval.getMean());
-                System.out.println("  RDF term median before prefix removal is "
-                        + statsWithoutPrefixRemoval.getPercentile(50));
-                System.out.println("  RDF term third quartile before prefix removal is "
-                        + statsWithoutPrefixRemoval.getPercentile(75));
 
                 System.out.println("  RDF term min size after prefix removal is "
                         + statsWithPrefixRemoval.getMin());
@@ -172,10 +167,6 @@ public class Radix10ConversionBenchmark {
                         + statsWithPrefixRemoval.getMax());
                 System.out.println("  RDF term average size after prefix removal is "
                         + statsWithPrefixRemoval.getMean());
-                System.out.println("  RDF term median after prefix removal is "
-                        + statsWithPrefixRemoval.getPercentile(50));
-                System.out.println("  RDF term third quartile after prefix removal is "
-                        + statsWithPrefixRemoval.getPercentile(75));
             }
 
             System.out.println("Time to perform radix 10 conversion for " + i
