@@ -23,8 +23,11 @@ import org.apfloat.ApfloatContext;
 import org.apfloat.spi.BuilderFactory;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -32,6 +35,7 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.converters.FileConverter;
 
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
+import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
 import fr.inria.eventcloud.overlay.can.StaticLoadBalancingTestBuilder;
 
 /**
@@ -58,7 +62,9 @@ public class LoadBalancingPrecisionBenchmark {
     private boolean help;
 
     public static void main(String[] args) {
-        LoggerUtils.disableLoggers();
+        Logger root =
+                (Logger) LoggerFactory.getLogger(AddQuadrupleRequest.class);
+        root.setLevel(Level.OFF);
 
         // TODO: find why it is not called automatically through
         // AbstractComponent#initComponentActivity or why it must be defined
@@ -93,6 +99,8 @@ public class LoadBalancingPrecisionBenchmark {
         }
 
         benchmark.execute();
+
+        System.exit(0);
     }
 
     public void execute() {
