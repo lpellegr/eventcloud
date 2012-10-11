@@ -105,6 +105,7 @@ public class StaticLoadBalancingTest {
     public void testStaticLoadBalancing7() {
         new StaticLoadBalancingTestBuilder(900, 10).enableLoadBalancing(
                 CentroidStatsRecorder.class)
+                .insertSkewedData(true)
                 .setNbPeersToInject(1)
                 .build()
                 .execute();
