@@ -52,6 +52,8 @@ public class StaticLoadBalancingTestBuilder {
 
     private boolean enableStatsRecording = false;
 
+    private boolean insertSkewedData = false;
+
     private int nbLookupsAfterJoinOperations = -1;
 
     private int nbPeersToInject = 0;
@@ -81,6 +83,11 @@ public class StaticLoadBalancingTestBuilder {
 
         this.nbQuadsToInsert = nbQuadsToInsert;
         this.rdfTermSize = rdfTermSize;
+    }
+
+    public StaticLoadBalancingTestBuilder insertSkewedData(boolean value) {
+        this.insertSkewedData = value;
+        return this;
     }
 
     public StaticLoadBalancingTestBuilder setNbLookupAfterJoinOperations(int n) {
@@ -223,7 +230,8 @@ public class StaticLoadBalancingTestBuilder {
                             });
                 }
 
-                if (this.isCentroidStatsRecorderUsed()
+                if (StaticLoadBalancingTestBuilder.this.insertSkewedData
+                        && this.isCentroidStatsRecorderUsed()
                         && StaticLoadBalancingTestBuilder.this.nbPeersToInject > 0) {
                     // add 1/3 of the data which are 10 times longer
                     int longRdfTermSize =
