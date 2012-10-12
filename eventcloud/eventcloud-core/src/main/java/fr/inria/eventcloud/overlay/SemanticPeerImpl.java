@@ -19,6 +19,7 @@ package fr.inria.eventcloud.overlay;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.slf4j.Logger;
@@ -132,15 +134,26 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         return true;
     }
 
+    @MemberOf("parallel")
+    private BooleanWrapper addAsync(Quadruple quad) {
+        PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
+
+        return new BooleanWrapper(true);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     @MemberOf("parallel")
     public boolean add(Collection<Quadruple> quads) {
+        List<BooleanWrapper> results = new ArrayList<BooleanWrapper>();
+
         for (final Quadruple quad : quads) {
-            SemanticPeerImpl.this.add(quad);
+            results.add(this.addAsync(quad));
         }
+
+        PAFuture.waitForAll(results);
 
         return true;
     }
@@ -152,16 +165,19 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @MemberOf("parallel")
     public boolean add(URL url, SerializationFormat format) {
         try {
+            final List<BooleanWrapper> results =
+                    new ArrayList<BooleanWrapper>();
             InputStream in = url.openConnection().getInputStream();
 
             RdfParser.parse(in, format, new Callback<Quadruple>() {
                 @Override
                 public void execute(Quadruple quad) {
-                    SemanticPeerImpl.this.add(quad);
+                    results.add(SemanticPeerImpl.this.addAsync(quad));
                 }
             });
 
             in.close();
+            PAFuture.waitForAll(results);
 
             return true;
         } catch (IOException ioe) {
@@ -191,15 +207,26 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         return true;
     }
 
+    @MemberOf("parallel")
+    public BooleanWrapper deleteAsync(Quadruple quad) {
+        PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
+
+        return new BooleanWrapper(true);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     @MemberOf("parallel")
     public boolean delete(Collection<Quadruple> quads) {
+        List<BooleanWrapper> results = new ArrayList<BooleanWrapper>();
+
         for (final Quadruple quad : quads) {
-            SemanticPeerImpl.this.delete(quad);
+            results.add(this.deleteAsync(quad));
         }
+
+        PAFuture.waitForAll(results);
 
         return true;
     }
