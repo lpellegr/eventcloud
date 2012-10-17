@@ -38,13 +38,13 @@ public interface CompoundEventSubscriberWsApi {
     /**
      * Notifies that a compound event matching a subscription has been received.
      * 
-     * @param id
-     *            the subscription identifier.
-     * @param event
+     * @param subscriptionId
+     *            the subscription identifier which has been matched.
+     * @param compoundEvent
      *            a compound event that matches the subscription.
      */
     @WebMethod(operationName = "notifyCompoundEvent")
-    public void notifyCompoundEvent(@WebParam(name = "id") String id,
-                                    @WebParam(name = "event") @XmlJavaTypeAdapter(CompoundEventAdapter.class) CompoundEvent event);
+    public void notifyCompoundEvent(@WebParam(name = "id") String subscriptionId,
+                                    @WebParam(name = "event") @XmlJavaTypeAdapter(CompoundEventAdapter.class) CompoundEvent compoundEvent);
 
 }

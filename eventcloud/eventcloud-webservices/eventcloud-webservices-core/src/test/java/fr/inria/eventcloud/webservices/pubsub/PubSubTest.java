@@ -97,12 +97,13 @@ public class PubSubTest extends WsTest {
         this.publishWsClient.publishCompoundEvent(event);
 
         synchronized (this.subscriberService.signalsReceived) {
-            while (this.subscriberService.signalsReceived.getValue() != event.size()) {
+            // event.size() + 1 because the meta quadruple is no longer
+            // contained by the compound event but added automatically during
+            // the publication
+            while (this.subscriberService.signalsReceived.getValue() != event.size() + 1) {
                 this.subscriberService.signalsReceived.wait();
             }
         }
-
-        log.info("Signal received!");
 
         // Unsubscribes
         this.subscribeWsClient.unsubscribe(subscriptionId);
@@ -114,7 +115,7 @@ public class PubSubTest extends WsTest {
         // Checks that no more events are received
         synchronized (this.subscriberService.signalsReceived) {
             this.subscriberService.signalsReceived.wait(4000);
-            Assert.assertTrue(this.subscriberService.signalsReceived.getValue() == event.size());
+            Assert.assertTrue(this.subscriberService.signalsReceived.getValue() == event.size() + 1);
         }
     }
 

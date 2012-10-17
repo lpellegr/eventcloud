@@ -64,33 +64,33 @@ public class BasicSubscriberWs implements SignalSubscriberWsApi,
      * {@inheritDoc}
      */
     @Override
-    public void notifySignal(String id) {
+    public void notifySignal(String subscriptionId) {
         synchronized (this.signalsReceived) {
             this.signalsReceived.add(1);
             this.signalsReceived.notifyAll();
         }
 
-        log.info("New signal received");
+        log.info("New signal received for subscription " + subscriptionId);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void notifyBinding(String id, BindingWrapper binding) {
+    public void notifyBinding(String subscriptionId, BindingWrapper binding) {
         synchronized (this.bindingsReceived) {
             this.bindingsReceived.add(binding);
             this.bindingsReceived.notifyAll();
         }
 
-        log.info("New signal received");
+        log.info("New binding received");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void notifyCompoundEvent(String id, CompoundEvent event) {
+    public void notifyCompoundEvent(String subscriptionId, CompoundEvent event) {
         synchronized (this.eventsReceived) {
             this.eventsReceived.add(event);
             this.eventsReceived.notifyAll();

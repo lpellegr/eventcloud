@@ -39,13 +39,13 @@ public interface BindingWrapperSubscriberWsApi {
     /**
      * Notifies that a binding matching a subscription has been received.
      * 
-     * @param id
-     *            the subscription identifier.
+     * @param subscriptionId
+     *            the subscription identifier which has been matched.
      * @param binding
      *            a binding that matches the subscription.
      */
     @WebMethod(operationName = "notifyBinding")
-    public void notifyBinding(@WebParam(name = "id") String id,
+    public void notifyBinding(@WebParam(name = "id") String subscriptionId,
                               @WebParam(name = "binding") @XmlJavaTypeAdapter(BindingWrapperAdapter.class) BindingWrapper binding);
 
 }
