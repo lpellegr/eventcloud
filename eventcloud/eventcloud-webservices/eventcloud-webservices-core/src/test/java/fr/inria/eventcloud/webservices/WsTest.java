@@ -23,7 +23,16 @@ package fr.inria.eventcloud.webservices;
  */
 public abstract class WsTest {
 
-    protected static final int WEBSERVICES_PORT =
-            Integer.parseInt(System.getProperty("eventcloud.webservices.port"));
+    protected static final int WEBSERVICES_PORT = getWebservicesPort();
+
+    private static final int getWebservicesPort() {
+        String port = System.getProperty("eventcloud.webservices.port");
+
+        if (port != null) {
+            return Integer.parseInt(port);
+        }
+
+        return 42999;
+    }
 
 }
