@@ -110,15 +110,20 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
      */
     @Override
     @MemberOf("parallel")
-    public void publish(CompoundEvent event) {
+    public void publish(CompoundEvent compoundEvent) {
         long publicationTime = System.currentTimeMillis();
 
         if (EventCloudProperties.INTEGRATION_LOG.getValue()) {
             // log information for integration test purposes
-            log.info("EventCloud Entry {}", event.getGraph());
+            log.info("EventCloud Entry {}", compoundEvent.getGraph());
         }
 
-        for (Quadruple quad : event) {
+        Quadruple metaQuadruple =
+                CompoundEvent.createMetaQuadruple(compoundEvent);
+        metaQuadruple.setPublicationTime(publicationTime);
+        this.publish(metaQuadruple);
+
+        for (Quadruple quad : compoundEvent) {
             quad.setPublicationTime(publicationTime);
             this.publish(quad);
         }

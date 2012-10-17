@@ -16,30 +16,25 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 /**
- * A compound event is a collection of {@link Quadruple}s where each quadruple
- * is assumed to share the same graph value. The graph value is kept separated
- * from the Triple value for backward compatibility with linked data tools.
- * Please note that when a compound event is constructed, a new quadruple
- * (indicating the number of quadruples associated to the compound event) is
- * added to the list of quadruples.
+ * A compound event is a collection of {@link Quadruple}s such that each
+ * quadruple share the same graph value. The graph value could be kept separated
+ * from the triple value for backward compatibility with linked data tools.
  * <p>
- * Also, it is assumed that a compound event is not alterable. Hence, if you try
- * to update the content of a compound event by calling {@link #getQuadruples()}
- * or {@link #getTriples()} followed by {@link Collection#add(Object)}, you will
- * get an {@link UnsupportedOperationException}.
+ * Please note that a compound event is not alterable. Any attempt to update the
+ * content of a compound event by calling {@link #getQuadruples()} or
+ * {@link #getTriples()} followed by {@link Collection#add(Object)} will result
+ * in a {@link UnsupportedOperationException}.
  * 
  * @author lpellegr
  */
@@ -47,6 +42,8 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
 
     private static final long serialVersionUID = 1L;
 
+    // this internal list does not contain the meta quadruple
+    // it is automatically added during a publish operation from a proxy
     private final List<Quadruple> quadruples;
 
     private transient List<Triple> triples;
@@ -54,45 +51,44 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
     private transient Node graph;
 
     /**
-     * Creates a new compound event from the specified list of quadruples.
+     * Creates a new compound event from the specified list of quadruples. No
+     * check is performed against the quadruples that are passed to the
+     * constructor. It is up to you to ensure that all quadruples share the same
+     * graph value, if not the behavior is unpredictable.
      * 
      * @param quads
-     *            the quadruples to put into the Event.
+     *            the quadruples to put in the compound event.
      */
     public CompoundEvent(Quadruple... quads) {
-        this(Lists.newArrayList(quads));
-    }
+        checkDataStructureSize(quads.length);
 
-    /**
-     * Creates a new compound event from the specified collection of quadruples.
-     * 
-     * @param quads
-     *            the quadruples to put into the Event.
-     */
-    public CompoundEvent(List<Quadruple> quads) {
-        this(quads, true);
+        this.quadruples = ImmutableList.copyOf(quads);
     }
 
     /**
      * Creates a new compound event from the specified collection of
-     * {@code quadruples} by offering the possibility to choose whether meta
-     * information should be added or not (e.g. a quadruple indicating the
-     * number of quadruples contained by the Event).
+     * {@code quadruples}. No check is performed against the quadruples that are
+     * passed to the constructor. It is up to you to ensure that all quadruples
+     * share the same graph value, if not the behavior is unpredictable.
      * 
      * @param quadruples
-     *            the quadruples to put into the compound event.
-     * @param addMetaInformation
-     *            indicates whether meta information should be added or not.
+     *            the quadruples to put in the compound event.
      */
-    public CompoundEvent(List<Quadruple> quadruples, boolean addMetaInformation) {
-        if (quadruples.size() == 0) {
-            throw new IllegalArgumentException("Quadruples list is empty");
+    public CompoundEvent(List<Quadruple> quadruples) {
+        checkDataStructureSize(quadruples.size());
+
+        if (quadruples instanceof ImmutableList) {
+            this.quadruples = quadruples;
+        } else {
+            this.quadruples = ImmutableList.copyOf(quadruples);
         }
 
-        this.quadruples = quadruples;
+    }
 
-        if (addMetaInformation) {
-            this.addMetaInformation();
+    private static final void checkDataStructureSize(int size) {
+        if (size < 1) {
+            throw new IllegalArgumentException(
+                    "The specified list or array must contain at least one quadruple");
         }
     }
 
@@ -103,77 +99,63 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * @param graph
      *            the graph value associated to each triple.
      * @param triples
-     *            the triples to put into the Event.
+     *            the triples to put in the compound event.
      */
     public CompoundEvent(Node graph, List<Triple> triples) {
-        this.triples = triples;
-        this.quadruples = new ArrayList<Quadruple>(triples.size());
-        for (Triple triple : triples) {
-            this.quadruples.add(new Quadruple(graph, triple));
-        }
-        this.addMetaInformation();
-    }
+        this.triples = ImmutableList.copyOf(triples);
 
-    private void addMetaInformation() {
-        // adds a quadruple indicating what is the number
-        // of quadruples contained by the event
-        Quadruple quad =
-                new Quadruple(
-                        this.getGraph(), this.getGraph(),
-                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                        Node.createLiteral(
-                                Integer.toString(this.quadruples.size() + 1),
-                                XSDDatatype.XSDint));
-
-        String publicationSource =
-                this.quadruples.get(0).getPublicationSource();
-        if (publicationSource != null) {
-            quad.setPublicationSource(publicationSource);
+        Builder<Quadruple> builder = new ImmutableList.Builder<Quadruple>();
+        for (Triple triple : this.triples) {
+            builder.add(new Quadruple(graph, triple));
         }
 
-        this.quadruples.add(quad);
+        this.quadruples = builder.build();
     }
 
     /**
-     * Returns an unmodifiable list of quadruples that belong to the compound
+     * Returns an unmodifiable list of the quadruples contained by the compound
      * event.
      * 
-     * @return the list of quadruples that belong to the compound event.
+     * @return an unmodifiable list of the quadruples contained by the compound
+     *         event.
      */
     public List<Quadruple> getQuadruples() {
-        return Collections.unmodifiableList(this.quadruples);
+        return this.quadruples;
     }
 
     /**
      * Returns the graph value which is assumed to be the same for each
-     * quadruple or triple that is contained by the compound event.
+     * quadruple that is contained by the compound event.
      * 
      * @return the graph value which is assumed to be the same for each
-     *         quadruple or triple that is contained by the compound event.
+     *         quadruple that is contained by the compound event.
      */
-    public Node getGraph() {
+    public synchronized Node getGraph() {
         if (this.graph == null) {
-            this.graph = this.quadruples.iterator().next().getGraph();
+            this.graph = this.quadruples.get(0).getGraph();
         }
 
         return this.graph;
     }
 
     /**
-     * Returns an unmodifiable list of triples that belong to the compound
-     * event. This method is a convenient method for backward compatibility with
-     * the linked data tools.
+     * Returns an unmodifiable list of triples contained by the compound event.
+     * This method is a convenient method for backward compatibility with the
+     * linked data tools.
      * 
-     * @return the list of triples that belong to the compound event.
+     * @return the list of triples contained by the compound event.
      */
     public synchronized List<Triple> getTriples() {
         if (this.triples == null) {
-            this.triples = new ArrayList<Triple>();
+            Builder<Triple> builder = new ImmutableList.Builder<Triple>();
+
             for (Quadruple quad : this.quadruples) {
-                this.triples.add(new Triple(
+                builder.add(new Triple(
                         quad.getSubject(), quad.getPredicate(),
                         quad.getObject()));
             }
+
+            this.triples = builder.build();
         }
 
         return this.triples;
@@ -192,19 +174,8 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof CompoundEvent) {
-            CompoundEvent other = (CompoundEvent) obj;
-
-            for (Quadruple quad : this.quadruples) {
-                if (!other.getQuadruples().contains(quad)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
+        return obj instanceof CompoundEvent
+                && this.quadruples.containsAll(((CompoundEvent) obj).quadruples);
     }
 
     /**
@@ -212,7 +183,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      */
     @Override
     public Iterator<Quadruple> iterator() {
-        return Iterators.unmodifiableIterator(this.quadruples.iterator());
+        return this.quadruples.iterator();
     }
 
     /**
@@ -246,9 +217,60 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
     }
 
     /**
+     * Creates a meta quadruple for the specified compound event. The meta
+     * quadruple is a quadruple that indicates the number of quadruples embed by
+     * the compound event.
+     * 
+     * @param compoundEvent
+     *            the compound event for which the meta quadruple is created.
+     * 
+     * @return a meta quadruple.
+     */
+    public static final Quadruple createMetaQuadruple(CompoundEvent compoundEvent) {
+        Quadruple metaQuadruple =
+                createMetaQuadruple(
+                        compoundEvent.getGraph(),
+                        compoundEvent.quadruples.size());
+
+        String publicationSource =
+                compoundEvent.quadruples.get(0).getPublicationSource();
+
+        if (publicationSource != null) {
+            metaQuadruple.setPublicationSource(publicationSource);
+        }
+
+        return metaQuadruple;
+    }
+
+    /**
+     * Creates a meta quadruple for the specified graph value and compound event
+     * size. The meta quadruple is a quadruple that indicates the number of
+     * quadruples embed by the compound event.
+     * 
+     * @param graph
+     *            the event id.
+     * @param compoundEventSize
+     *            the number of quadruples contained by the compound event.
+     * 
+     * @return a meta quadruple.
+     */
+    public static final Quadruple createMetaQuadruple(Node graph,
+                                                      int compoundEventSize) {
+        Quadruple metaQuadruple =
+                new Quadruple(
+                        graph, graph,
+                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
+                        Node.createLiteral(
+                                Integer.toString(compoundEventSize),
+                                XSDDatatype.XSDint));
+
+        return metaQuadruple;
+    }
+
+    /**
      * Checks whether the specified {@link CompoundEvent} is valid or not (i.e.
-     * if all the quadruples that are contained by the compound event share the
-     * same graph value).
+     * whether all the quadruples that are contained by the compound event share
+     * the same graph value or not).
      * 
      * @param e
      *            the compound event to check.
@@ -256,11 +278,14 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * @return {@code true} if the event is valid, {@code false} otherwise.
      */
     public static final boolean isValid(CompoundEvent e) {
-        Iterator<Quadruple> it = e.getQuadruples().iterator();
+        Node graph = e.quadruples.get(0).getGraph();
+        Iterator<Quadruple> it = e.quadruples.iterator();
 
-        Node ref = it.next().getGraph();
+        // skip the first one because we know it is equals
+        it.next();
+
         while (it.hasNext()) {
-            if (!it.next().getGraph().equals(ref)) {
+            if (!it.next().getGraph().equals(graph)) {
                 return false;
             }
         }

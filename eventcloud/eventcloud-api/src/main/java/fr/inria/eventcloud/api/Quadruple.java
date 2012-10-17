@@ -288,8 +288,8 @@ public class Quadruple implements Event {
      */
     public void setPublicationSource(String source) {
         if (source == null) {
-            throw new IllegalArgumentException(
-                    "Publication source cannot be null");
+            throw new IllegalArgumentException("Invalid specified source: "
+                    + source);
         }
 
         this.addMetaInformation(MetaInformationType.PUBLICATION_SOURCE, source);
