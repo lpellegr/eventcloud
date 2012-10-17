@@ -18,8 +18,10 @@ package fr.inria.eventcloud.messages.request.can;
 
 import java.util.List;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -36,6 +38,7 @@ import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponseProvide
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
+import fr.inria.eventcloud.validator.AtomicQueryConstraintsValidator;
 
 /**
  * Retrieves all the {@link Quadruple}s that match the {@link AtomicQuery} that
@@ -51,14 +54,14 @@ public class SparqlAtomicRequest extends
         StatefulQuadruplePatternRequest<List<Quadruple>> {
 
     private static final long serialVersionUID = 1L;
-
+    
     private final AtomicQuery atomicQuery;
 
     public SparqlAtomicRequest(AtomicQuery atomicQuery) {
         // TODO offer the possibility to use a constraints validator that will
         // use the filter constraints contained by the quadruple pattern to
         // route the request
-        super(atomicQuery.getQuadruplePattern(),
+        super(new AtomicQueryConstraintsValidator(atomicQuery), atomicQuery.getQuadruplePattern(),
                 new QuadruplePatternResponseProvider());
 
         this.atomicQuery = atomicQuery;
@@ -87,6 +90,12 @@ public class SparqlAtomicRequest extends
         } finally {
             txnGraph.end();
         }
+    }
+    
+    @Override
+    public AnycastRequestRouter<StatelessQuadruplePatternRequest> getRouter() {
+        // TODO Auto-generated method stub
+        return super.getRouter();
     }
 
     private static List<Quadruple> toQuadruples(QueryIterator it,
@@ -117,6 +126,10 @@ public class SparqlAtomicRequest extends
 
     public String getQuery() {
         return this.atomicQuery.toString();
+    }
+
+    public AtomicQuery getAtomicQuery() {
+        return atomicQuery;
     }
 
 }

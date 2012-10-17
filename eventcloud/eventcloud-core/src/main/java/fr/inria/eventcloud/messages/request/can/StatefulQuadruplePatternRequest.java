@@ -29,7 +29,12 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.can.StatefulQuadruplePatternResponse;
 import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
+<<<<<<< local
+import fr.inria.eventcloud.reasoner.AtomicQuery;
+import fr.inria.eventcloud.validator.AtomicQueryConstraintsValidator;
+=======
 import fr.inria.eventcloud.overlay.can.SemanticElement;
+>>>>>>> other
 
 /**
  * StatelessQuadruplePatternRequest is a {@link QuadruplePattern} query that is
@@ -54,6 +59,12 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
             QuadruplePattern quadPattern,
             ResponseProvider<? extends StatefulQuadruplePatternResponse<T>, Coordinate<SemanticElement>> responseProvider) {
         super(quadPattern, responseProvider);
+    }
+
+    public StatefulQuadruplePatternRequest(AtomicQueryConstraintsValidator validator,
+            QuadruplePattern quadPattern,
+            ResponseProvider<? extends StatefulQuadruplePatternResponse<T>, StringCoordinate> responseProvider) {
+        super(validator, quadPattern, responseProvider);
     }
 
     /**

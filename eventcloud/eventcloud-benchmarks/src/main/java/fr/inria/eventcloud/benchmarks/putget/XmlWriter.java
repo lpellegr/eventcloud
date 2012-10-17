@@ -53,12 +53,13 @@ public class XmlWriter {
     }
 
     public Element addQuery(int queryNumber, long elapsedTime,
-                            long queryDatastoreTime, long latency) {
+                            long queryDatastoreTime, long latency, long inboundHopCount) {
         Element child = this.doc.createElement("Query");
         child.setAttribute("number", "" + queryNumber);
         child.setAttribute("elapsedTimeInMillis", "" + elapsedTime);
         child.setAttribute("queryDatastoreTime", "" + queryDatastoreTime);
         child.setAttribute("latency", "" + latency);
+        child.setAttribute("inboundHopCount", "" + inboundHopCount);
         this.root.appendChild(child);
         return child;
     }

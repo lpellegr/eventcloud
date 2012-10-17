@@ -91,6 +91,11 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
     public CanOverlay() {
         this(new CanRequestResponseManager());
     }
+    
+    public CanOverlay(Zone zone) {
+        this(new CanRequestResponseManager(), null);
+        this.zone = zone;
+    }
 
     /**
      * Constructs a new overlay with the specified

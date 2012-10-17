@@ -55,9 +55,9 @@ public class BenchmarkLauncher {
                     + "SELECT DISTINCT ?product ?label "
                     + "WHERE { GRAPH ?g  { "
                     + " ?product rdfs:label ?label ."
-                    + " ?product a bsbm-inst:ProductType1 ."
-                    + " ?product bsbm:productFeature bsbm-inst:ProductFeature25 . "
-                    + " ?product bsbm:productFeature bsbm-inst:ProductFeature29 . "
+                    + " ?product a bsbm-inst:ProductType145 ."
+                    + " ?product bsbm:productFeature bsbm-inst:ProductFeature4504 . "
+                    + " ?product bsbm:productFeature bsbm-inst:ProductFeature4511 . "
                     + " ?product bsbm:productPropertyNumeric1 ?value1 . "
                     + " FILTER (?value1 > 15) }}"
                     + " ORDER BY ?label "
@@ -214,7 +214,7 @@ public class BenchmarkLauncher {
                     xmlWriter.addQuery(j + 1, this.responses.get(j)
                             .getTimeToGetResult(), this.responses.get(j)
                             .getQueryDatastoreTime(), this.responses.get(j)
-                            .getLatency());
+                            .getLatency(), this.responses.get(j).getInboundHopCount());
             xmlWriter.addElement(query, "finalResults", "" + nbResults);
             xmlWriter.addElement(query, "intermediateResults", ""
                     + this.responses.get(j).getNbIntermediateResults());

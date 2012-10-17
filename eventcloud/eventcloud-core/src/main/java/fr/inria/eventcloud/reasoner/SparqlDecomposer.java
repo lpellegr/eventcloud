@@ -19,6 +19,8 @@ package fr.inria.eventcloud.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
+import arq.query;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
@@ -32,11 +34,30 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprAggregator;
+import com.hp.hpl.jena.sparql.expr.ExprFunction0;
+import com.hp.hpl.jena.sparql.expr.ExprFunction1;
+import com.hp.hpl.jena.sparql.expr.ExprFunction2;
+import com.hp.hpl.jena.sparql.expr.ExprFunction3;
+import com.hp.hpl.jena.sparql.expr.ExprFunctionN;
+import com.hp.hpl.jena.sparql.expr.ExprFunctionOp;
 import com.hp.hpl.jena.sparql.expr.ExprList;
+import com.hp.hpl.jena.sparql.expr.ExprTransform;
+import com.hp.hpl.jena.sparql.expr.ExprTransformBase;
+import com.hp.hpl.jena.sparql.expr.ExprTransformCopy;
+import com.hp.hpl.jena.sparql.expr.ExprTransformer;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.ExprVisitorBase;
 import com.hp.hpl.jena.sparql.expr.ExprWalker;
+<<<<<<< local
+import com.hp.hpl.jena.sparql.expr.NodeValue;
+import com.hp.hpl.jena.sparql.function.FunctionEnv;
+import com.hp.hpl.jena.sparql.util.ExprUtils;
+import com.hp.hpl.jena.vocabulary.RDF;
+=======
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
+>>>>>>> other
 
 import fr.inria.eventcloud.exceptions.DecompositionException;
 
@@ -48,7 +69,7 @@ import fr.inria.eventcloud.exceptions.DecompositionException;
  * @author lpellegr
  */
 public final class SparqlDecomposer {
-
+    
     private static class Singleton {
         private static final SparqlDecomposer INSTANCE = new SparqlDecomposer();
     }
@@ -131,7 +152,17 @@ public final class SparqlDecomposer {
             atomicQuery.setOrderBy(this.filterSortConditions(
                     atomicQuery, query.getOrderBy()));
         }
-
+        if (!(visitor.getFilterConstraints().isEmpty()))
+        {
+            FilterTransformer transformer = new FilterTransformer(atomicQuery);
+            List<ExprList> filterConstraints = new ArrayList<ExprList>();
+            for (ExprList el : visitor.getFilterConstraints()) {
+                ExprList exprList = ExprTransformer.transform(transformer, el);
+                filterConstraints.add(exprList);
+                System.out.println(ExprUtils.fmtSPARQL(exprList));
+            }
+            atomicQuery.setFilterConstraints(filterConstraints);
+        }
         return atomicQuery;
     }
 
@@ -222,7 +253,87 @@ public final class SparqlDecomposer {
 
             this.filterConstraints.add(opFilter.getExprs());
         }
+        
+        public List<ExprList> getFilterConstraints()
+        {
+            return this.filterConstraints;
+        }
+        
+    }
+    
+    
+    private static class FilterTransformer extends ExprTransformCopy {
+       
+        private AtomicQuery query;
+        
+        public FilterTransformer(AtomicQuery query) {
+            super();
+            this.query = query;
+        }
+        
+        @Override
+        public Expr transform(ExprVar exprVar) {
+            System.out.println("ExprTransformBase.transform(ExprVar)");
+            // supprime les conditions qui portent sur la variable o
+            if (query.containsVariable(exprVar.getVarName())) {
+                return exprVar;
+            }
+            
+            return NodeValue.nvNothing;
+        }
+        
+        @Override
+        public Expr transform(ExprFunction2 func, Expr expr1, Expr expr2) {
+            System.out.println("ExprTransformBase.transform(ExprFunction2, Expr, Expr)");
+            if (expr1 == null) {
+                return new E_Null();
+            }
 
+            if (expr2 == null) {
+                return new E_Null();
+            }
+
+            if (expr1 instanceof E_Null) {
+                return expr2;
+            }
+
+            if (expr2 instanceof E_Null) {
+                return expr1;
+            }
+
+            return super.transform(func, expr1, expr2);
+        }
+        
+    }
+    
+    private static class E_Null extends ExprFunction0 {
+        private static final String symbol = "null";
+
+        public E_Null() {
+            super(symbol);
+        }
+
+        @Override
+        public NodeValue eval(FunctionEnv env) {
+            return NodeValue.nvNothing;
+        }
+
+        @Override
+        public Expr copy() {
+            return new E_Null();
+        }
+
+    }
+    
+    public static void main(String[] args) throws DecompositionException {
+        List<AtomicQuery> atomicQueries =
+               SparqlDecomposer.getInstance().decompose(
+                       "SELECT ?s ?p ?o ?s1 { GRAPH ?g { ?s ?p ?o . FILTER(?s > 10 && ?j < 2) . ?s1 ?p ?o ." +
+                       "FILTER(?s1 > 5)}} ");
+
+
+      
+        
     }
 
 }

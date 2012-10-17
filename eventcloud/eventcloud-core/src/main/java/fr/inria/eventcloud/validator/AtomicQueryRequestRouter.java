@@ -1,3 +1,5 @@
+package fr.inria.eventcloud.validator;
+
 /**
  * Copyright (c) 2011-2012 INRIA.
  * 
@@ -14,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.router.can;
 
 import java.util.Iterator;
 
@@ -30,31 +31,30 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
 
 /**
  * This router is used to route the messages of type {@link AnycastRequest}. The
  * request is supposed to reach one or more peers depending of the key
  * associated to the request to route.
  * 
+ * @author lpellegr
+ * 
  * @param <T>
  *            the request type to route.
- * @param <E>
- *            the {@link Element}s type manipulated.
- * 
- * @author lpellegr
  */
-public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element>
-        extends Router<AnycastRequest<E>, Coordinate<E>> {
+public class AtomicQueryRequestRouter<T extends AnycastRequest> extends
+        Router<AnycastRequest, StringCoordinate> {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(AnycastRequestRouter.class);
+            LoggerFactory.getLogger(AtomicQueryRequestRouter.class);
 
-    public AnycastRequestRouter() {
+    public AtomicQueryRequestRouter() {
         super();
     }
 
@@ -70,8 +70,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
      * @param request
      *            the message which is handled.
      */
-    public void onPeerValidatingKeyConstraints(CanOverlay<E> overlay,
-                                               AnycastRequest<E> request) {
+    public void onPeerValidatingKeyConstraints(CanOverlay overlay,
+                                               AnycastRequest request) {
         // to be override if necessary
     }
 
@@ -79,19 +79,16 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public void makeDecision(StructuredOverlay overlay,
-                             AnycastRequest<E> request) {
-        CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
+    public void makeDecision(StructuredOverlay overlay, AnycastRequest request) {
+        CanOverlay canOverlay = ((CanOverlay) overlay);
         CanRequestResponseManager messagingManager =
                 (CanRequestResponseManager) canOverlay.getRequestResponseManager();
 
         // the current overlay has already received the request
-        if (!messagingManager.receiveRequest(request.getId())) {
-            logger.debug(
-                    "Request {} reached peer {} which has already received it",
-                    request.getId(), canOverlay.getZone().toString());
+        if (messagingManager.hasReceivedRequest(request.getId())) {
             if (request.getResponseProvider() != null) {
+                request.markAsAlreadyReceived();
+
                 // send back an empty response
                 request.getAnycastRoutingList()
                         .removeLast()
@@ -99,6 +96,10 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                         .route(
                                 request.getResponseProvider().get(
                                         request, overlay));
+
+                logger.debug(
+                        "Request {} reached peer {} which has already received it",
+                        request.getId(), canOverlay);
             }
         } else {
             // the current overlay validates the constraints
@@ -109,6 +110,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             + request.getKey());
                 }
 
+                messagingManager.markRequestAsReceived(request.getId());
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
 
                 // sends the message to the other neighbors which validates the
@@ -127,9 +129,9 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
      */
     @Override
     protected void handle(final StructuredOverlay overlay,
-                          final AnycastRequest<E> request) {
-        @SuppressWarnings("unchecked")
-        CanOverlay<E> canOverlay = (CanOverlay<E>) overlay;
+                          final AnycastRequest request) {
+
+        CanOverlay canOverlay = ((CanOverlay) overlay);
 
         // the current peer has no neighbor: this means that the query can
         // only be handled by itself
@@ -139,15 +141,15 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             if (request.getResponseProvider() != null) {
                 overlay.getResponseEntries().put(
                         request.getId(), new ResponseEntry(1));
-                AnycastResponse<E> response =
-                        (AnycastResponse<E>) request.getResponseProvider().get(
+                AnycastResponse response =
+                        (AnycastResponse) request.getResponseProvider().get(
                                 request, overlay);
                 response.incrementHopCount(1);
                 response.route(overlay);
             }
         } else {
-            NeighborTable<E> neighborsToSendTo =
-                    this.getNeighborsToSendTo(canOverlay, request);
+            NeighborTable neighborsToSendTo =
+                    this.getNeighborsToSendTo(overlay, request);
 
             // neighborsToSendTo equals 0 means that we don't have to route the
             // query anymore: we are on a leaf and the response must be
@@ -156,8 +158,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 super.onDestinationReached(overlay, request);
 
                 if (request.getResponseProvider() != null) {
-                    AnycastResponse<E> response =
-                            (AnycastResponse<E>) request.getResponseProvider()
+                    AnycastResponse response =
+                            (AnycastResponse) request.getResponseProvider()
                                     .get(request, overlay);
                     response.incrementHopCount(1);
                     overlay.getResponseEntries().put(
@@ -169,12 +171,6 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             // operation and the current peer must await for the number
             // of responses sent.
             else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Sending request " + request.getId() + " to "
-                            + neighborsToSendTo.size() + " neighbor(s) from "
-                            + overlay);
-                }
-
                 // adds entry containing the number of responses awaited
                 final ResponseEntry entry =
                         new ResponseEntry(neighborsToSendTo.size());
@@ -188,36 +184,51 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             new AnycastRoutingEntry(
                                     overlay.getId(), overlay.getStub()));
                 }
-                
-                for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-                    for (byte direction = 0; direction < 2; direction++) {
-                        Iterator<NeighborEntry<E>> it =
-                                neighborsToSendTo.get(dim, direction)
-                                        .values()
-                                        .iterator();
-                        while (it.hasNext()) {
-                            Peer p = it.next().getStub();
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Sending request "
-                                        + request.getId() + " from " + overlay
-                                        + " -> " + p);
+
+                else {
+                    for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+                        for (byte direction = 0; direction < 2; direction++) {
+                            Iterator<NeighborEntry> it =
+                                    neighborsToSendTo.get(dim, direction)
+                                            .values()
+                                            .iterator();
+                            while (it.hasNext()) {
+                                if (request instanceof SparqlAtomicRequest) {
+
+                                    if (((AtomicQueryConstraintsValidator) request.getConstraintsValidator()).validatesKeyConstraints(it.next()
+                                            .getZone())) {
+                                        it.next().getStub().route(request);
+                                    }
+
+                                } else {
+                                    it.next().getStub().route(request);
+
+                                }
+
                             }
-                            p.route(request);
                         }
                     }
                 }
             }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Request " + request.getId() + " sent to "
+                        + neighborsToSendTo.size() + " neighbor(s) from "
+                        + overlay);
+            }
         }
+
     }
 
-    private NeighborTable<E> getNeighborsToSendTo(final CanOverlay<E> overlay,
-                                                  final AnycastRequest<E> msg) {
-        NeighborTable<E> neighborsToSendTo = new NeighborTable<E>();
+    private NeighborTable getNeighborsToSendTo(final StructuredOverlay overlay,
+                                               final AnycastRequest msg) {
+        NeighborTable neighborsToSendTo = new NeighborTable();
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry<E> entry : overlay.getNeighborTable().get(
-                        dimension, direction).values()) {
+                for (NeighborEntry entry : ((CanOverlay) overlay).getNeighborTable()
+                        .get(dimension, direction)
+                        .values()) {
                     AnycastRoutingEntry entryCommingFromSender =
                             msg.getAnycastRoutingList()
                                     .getRoutingResponseEntryBy(entry.getId());
@@ -250,9 +261,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
      *            the message to route.
      */
     @Override
-    protected void route(StructuredOverlay overlay, AnycastRequest<E> request) {
-        @SuppressWarnings("unchecked")
-        CanOverlay<E> overlayCAN = (CanOverlay<E>) overlay;
+    protected void route(StructuredOverlay overlay, AnycastRequest request) {
+        CanOverlay overlayCAN = ((CanOverlay) overlay);
 
         byte dimension = 0;
         byte direction = NeighborTable.DIRECTION_ANY;
@@ -260,8 +270,11 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
         // finds the dimension on which the key to reach is not contained
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction =
-                    overlayCAN.getZone().contains(
-                            dimension, request.getKey().getElement(dimension));
+                    overlayCAN.getZone()
+                            .getUnicodeView()
+                            .containsLexicographically(
+                                    dimension,
+                                    request.getKey().getElement(dimension));
 
             if (direction == -1) {
                 direction = NeighborTable.DIRECTION_INFERIOR;
@@ -274,7 +287,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
 
         // selects one neighbor in the dimension and the direction previously
         // affected
-        NeighborEntry<E> neighborChosen =
+        NeighborEntry neighborChosen =
                 overlayCAN.nearestNeighbor(
                         request.getKey(), dimension, direction);
 

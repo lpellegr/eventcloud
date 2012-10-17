@@ -26,8 +26,14 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.can.StatelessQuadruplePatternResponse;
+<<<<<<< local
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
+import fr.inria.eventcloud.reasoner.AtomicQuery;
+import fr.inria.eventcloud.validator.AtomicQueryConstraintsValidator;
+=======
 import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
+>>>>>>> other
 
 /**
  * StatelessQuadruplePatternRequest is a {@link QuadruplePattern} that is
@@ -65,6 +71,13 @@ public abstract class StatelessQuadruplePatternRequest extends
         super(new DefaultAnycastConstraintsValidator<SemanticElement>(
                 SemanticCoordinateFactory.newSemanticCoordinate(quadPattern)),
                 responseProvider);
+        this.quadruplePattern = SerializedValue.create(quadPattern);
+    }
+
+    public StatelessQuadruplePatternRequest(AtomicQueryConstraintsValidator validator,
+            QuadruplePattern quadPattern, 
+            ResponseProvider<? extends StatelessQuadruplePatternResponse, StringCoordinate> responseProvider) {
+        super(validator, responseProvider);
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 

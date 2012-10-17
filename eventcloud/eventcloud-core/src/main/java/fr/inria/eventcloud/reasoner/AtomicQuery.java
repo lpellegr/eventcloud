@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.reasoner;
 
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,13 +24,21 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.mortbay.log.Log;
 
 import org.openjena.riot.out.OutputLangUtils;
 import org.openjena.riot.tokens.Token;
 import org.openjena.riot.tokens.TokenType;
 import org.openjena.riot.tokens.Tokenizer;
 import org.openjena.riot.tokens.TokenizerFactory;
+
 
 import com.google.common.base.Function;
 import com.google.common.collect.BiMap;
@@ -52,6 +61,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.sse.writers.WriterExpr;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 
@@ -71,10 +81,12 @@ public final class AtomicQuery implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private transient Node nodes[];
-
+    
     private transient BiMap<String, Integer> vars;
 
     private transient Op opRepresentation;
+    
+    private transient List<ExprList> filterConstraints;
 
     /* 
      * Sequence modifiers 
@@ -102,6 +114,10 @@ public final class AtomicQuery implements Serializable {
     public AtomicQuery(Node graph, Node subject, Node predicate, Node object) {
         this.nodes = new Node[] {graph, subject, predicate, object};
     }
+    
+    public AtomicQuery(){
+        this.nodes = null;
+    };
 
     public boolean hasLiteralObject() {
         return this.nodes[2] != null && this.nodes[2].isLiteral();
@@ -400,6 +416,14 @@ public final class AtomicQuery implements Serializable {
         }
 
         outWriter.flush();
+    }
+
+    public List<ExprList> getFilterConstraints() {
+        return filterConstraints;
+    }
+
+    public void setFilterConstraints(List<ExprList> filterConstraints) {
+        this.filterConstraints = filterConstraints;
     }
 
 }
