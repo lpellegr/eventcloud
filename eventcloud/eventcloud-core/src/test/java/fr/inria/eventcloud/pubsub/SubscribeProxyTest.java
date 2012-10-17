@@ -42,7 +42,6 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
-import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
@@ -120,7 +119,8 @@ public class SubscribeProxyTest {
                 this.createPublishProxies(NB_PRODUCERS);
 
         ScheduledExecutorService threadPool =
-                Executors.newScheduledThreadPool(NB_PRODUCERS);
+                Executors.newScheduledThreadPool(Runtime.getRuntime()
+                        .availableProcessors());
 
         final AtomicInteger nbEventsPublished = new AtomicInteger();
 
@@ -466,19 +466,15 @@ public class SubscribeProxyTest {
 
         long publicationTime = System.currentTimeMillis();
 
-        Quadruple quadToPublish =
-                new Quadruple(
-                        eventId, eventId,
-                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                        Node.createLiteral("9", XSDDatatype.XSDint));
-        quadToPublish.setPublicationTime(publicationTime);
-        this.publishProxy.publish(quadToPublish);
+        Quadruple metaQuadruple = CompoundEvent.createMetaQuadruple(eventId, 8);
+        metaQuadruple.setPublicationTime(publicationTime);
+        this.publishProxy.publish(metaQuadruple);
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            quadToPublish = QuadrupleGenerator.random(eventId);
-            quadToPublish.setPublicationTime(publicationTime);
-            this.publishProxy.publish(quadToPublish);
+            metaQuadruple = QuadrupleGenerator.random(eventId);
+            metaQuadruple.setPublicationTime(publicationTime);
+            this.publishProxy.publish(metaQuadruple);
         }
 
         // waits some time to simulate a network congestion
@@ -490,9 +486,9 @@ public class SubscribeProxyTest {
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            quadToPublish = QuadrupleGenerator.random(eventId);
-            quadToPublish.setPublicationTime(publicationTime);
-            this.publishProxy.publish(quadToPublish);
+            metaQuadruple = QuadrupleGenerator.random(eventId);
+            metaQuadruple.setPublicationTime(publicationTime);
+            this.publishProxy.publish(metaQuadruple);
         }
 
         synchronized (events) {
