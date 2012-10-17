@@ -33,10 +33,10 @@ public interface SignalSubscriberWsApi {
     /**
      * Notifies that a solution matching a subscription has been received.
      * 
-     * @param id
-     *            the subscription identifier.
+     * @param subscriptionId
+     *            the subscription identifier which has been matched.
      */
     @WebMethod(operationName = "notifySignal")
-    public void notifySignal(@WebParam(name = "id") String id);
+    public void notifySignal(@WebParam(name = "id") String subscriptionId);
 
 }
