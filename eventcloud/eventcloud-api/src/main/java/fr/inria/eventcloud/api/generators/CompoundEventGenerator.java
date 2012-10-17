@@ -16,9 +16,8 @@
  **/
 package fr.inria.eventcloud.api.generators;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -33,38 +32,40 @@ import fr.inria.eventcloud.api.Quadruple;
 public class CompoundEventGenerator {
 
     /**
-     * Creates a random node composed of the specified number of quadruples plus
-     * one for specifying the streamUrl it belongs to.
+     * Creates a random compound event composed of the specified number of
+     * quadruples.
      * 
      * @param nbQuadruples
      *            the number of quadruples to generate randomly.
      * 
-     * @return a random node composed of the specified number of quadruples plus
-     *         one for specifying the streamUrl it belongs to.
+     * @return a random compound event composed of the specified number of
+     *         quadruples.
      */
     public static CompoundEvent random(int nbQuadruples) {
         return random(null, nbQuadruples);
     }
 
     /**
-     * Creates a random node composed of the specified number of quadruples plus
-     * one for specifying the streamUrl it belongs to.
+     * Creates a random node composed of the specified number of quadruples. It
+     * uses the specified {@code streamUrl} for the graph value shared by all
+     * the quadruples.
      * 
      * @param streamUrl
      *            the streamUrl to set.
      * @param nbQuadruples
      *            the number of quadruples to generate randomly.
      * 
-     * @return a random node composed of the specified number of quadruples plus
-     *         one for specifying the streamUrl it belongs to.
+     * @return a random compound event composed of the specified number of
+     *         quadruples.
      */
     public static CompoundEvent random(String streamUrl, int nbQuadruples) {
         return random(streamUrl, nbQuadruples, Generator.DEFAULT_LENGTH);
     }
 
     /**
-     * Creates a random node composed of the specified number of quadruples plus
-     * one for specifying the streamUrl it belongs to.
+     * Creates a random node composed of the specified number of quadruples. It
+     * uses the specified {@code streamUrl} for the graph value shared by all
+     * the quadruples.
      * 
      * @param streamUrl
      *            the streamUrl to set.
@@ -73,27 +74,31 @@ public class CompoundEventGenerator {
      * @param nodeSize
      *            the number of characters used for each node generated.
      * 
-     * @return a random node composed of the specified number of quadruples plus
-     *         one for specifying the streamUrl it belongs to.
+     * @return a random compound event composed of the specified number of
+     *         quadruples.
      */
     public static CompoundEvent random(String streamUrl, int nbQuadruples,
                                        int nodeSize) {
         Node graphNode = NodeGenerator.randomUri();
 
-        List<Quadruple> quadruples = new ArrayList<Quadruple>(nbQuadruples);
+        if (streamUrl != null) {
+            nbQuadruples = nbQuadruples - 1;
+        }
+
+        Builder<Quadruple> builder = new ImmutableList.Builder<Quadruple>();
         for (int i = 0; i < nbQuadruples; i++) {
-            quadruples.add(QuadrupleGenerator.random(graphNode, nodeSize));
+            builder.add(QuadrupleGenerator.random(graphNode, nodeSize));
         }
 
         if (streamUrl != null) {
-            quadruples.add(new Quadruple(
+            builder.add(new Quadruple(
                     graphNode,
                     Node.createURI(graphNode.getURI() + "#event"),
                     Node.createURI("http://events.event-processing.org/types/stream"),
                     Node.createURI(streamUrl + "#stream")));
         }
 
-        return new CompoundEvent(quadruples);
+        return new CompoundEvent(builder.build());
     }
 
 }
