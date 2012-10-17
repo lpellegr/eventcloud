@@ -361,8 +361,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                         PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
                     expectedNumberOfQuadruples =
                             (Integer) quad.getObject().getLiteralValue();
+                } else {
+                    quadsReceived.add(quad);
                 }
-                quadsReceived.add(quad);
+
                 quadHashesReceived.add(quad.hashValue());
             }
 
@@ -378,9 +380,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             return null;
         }
 
-        // we create an event from quadruples which comes from a previous event.
-        // Hence we do not need to add new meta information
-        return new CompoundEvent(quadsReceived, false);
+        return new CompoundEvent(quadsReceived);
     }
 
     /**

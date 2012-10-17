@@ -51,7 +51,7 @@ public class Rdf2GoCompoundEventNotificationListenerTest {
             quadruples.add(QuadrupleGenerator.random(graph));
         }
 
-        CompoundEvent ce = new CompoundEvent(quadruples, false);
+        CompoundEvent ce = new CompoundEvent(quadruples);
 
         final MutableInt nbCalls = new MutableInt();
 

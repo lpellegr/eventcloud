@@ -24,6 +24,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.hp.hpl.jena.graph.Triple;
+
+import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
+import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 
 /**
@@ -33,6 +39,51 @@ import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
  */
 public class CompoundEventTest {
 
+    @Test
+    public void testCompoundEventValidity1() {
+        CompoundEvent compoundEvent = CompoundEventGenerator.random(10);
+
+        Assert.assertTrue(CompoundEvent.isValid(compoundEvent));
+    }
+
+    @Test
+    public void testCompoundEventValidity2() {
+        Builder<Quadruple> quadruples = new ImmutableList.Builder<Quadruple>();
+        for (int i = 0; i < 10; i++) {
+            quadruples.add(QuadrupleGenerator.random());
+        }
+
+        Assert.assertFalse(CompoundEvent.isValid(new CompoundEvent(
+                quadruples.build())));
+    }
+
+    @Test
+    public void testCreateMetaQuadruple() {
+        CompoundEvent compoundEvent = CompoundEventGenerator.random(10);
+
+        int metaQuadrupleValue =
+                (Integer) CompoundEvent.createMetaQuadruple(compoundEvent)
+                        .getObject()
+                        .getLiteralValue();
+
+        Assert.assertEquals(10, metaQuadrupleValue);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testImmutability1() {
+        CompoundEvent compoundEvent = CompoundEventGenerator.random(10);
+        compoundEvent.getQuadruples().add(QuadrupleGenerator.random());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testImmutability2() {
+        CompoundEvent compoundEvent = CompoundEventGenerator.random(10);
+        compoundEvent.getTriples().add(
+                new Triple(
+                        NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                        NodeGenerator.randomUri()));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testInstanciationWithEmptyCollection() {
         new CompoundEvent(new ArrayList<Quadruple>());
@@ -40,13 +91,13 @@ public class CompoundEventTest {
 
     @Test
     public void testInstanciation() {
-        List<Quadruple> quads = new ArrayList<Quadruple>();
+        List<Quadruple> quadruples = new ArrayList<Quadruple>(10);
         for (int i = 0; i < 10; i++) {
-            quads.add(QuadrupleGenerator.random());
+            quadruples.add(QuadrupleGenerator.random());
         }
 
-        CompoundEvent e1 = new CompoundEvent(quads);
-        Assert.assertEquals(11, e1.getQuadruples().size());
+        CompoundEvent e1 = new CompoundEvent(quadruples);
+        Assert.assertEquals(quadruples.size(), e1.getQuadruples().size());
 
         CompoundEvent e2 = null;
         try {
