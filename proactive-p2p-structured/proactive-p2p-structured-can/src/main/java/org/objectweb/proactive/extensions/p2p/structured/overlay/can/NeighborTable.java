@@ -80,9 +80,15 @@ public class NeighborTable<E extends Element> implements Serializable {
             // we over provision the number of neighbors per dimension but not
             // too much: 2*d per dimension for a total of 2*d^2
             this.entries[i][NeighborTable.DIRECTION_INFERIOR] =
-                    new ConcurrentHashMap<UUID, NeighborEntry<E>>(nbNeighbors);
+                    new ConcurrentHashMap<UUID, NeighborEntry<E>>(
+                            nbNeighbors,
+                            0.75f,
+                            P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
             this.entries[i][NeighborTable.DIRECTION_SUPERIOR] =
-                    new ConcurrentHashMap<UUID, NeighborEntry<E>>(nbNeighbors);
+                    new ConcurrentHashMap<UUID, NeighborEntry<E>>(
+                            nbNeighbors,
+                            0.75f,
+                            P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
         }
     }
 

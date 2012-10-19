@@ -16,14 +16,11 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
 import com.hp.hpl.jena.graph.Node;
 
@@ -37,53 +34,16 @@ public class QuadruplePatternTest {
     private static final String DEFAULT_URI = "http://www.inria.fr";
 
     @Test
-    public void testSerialization() {
+    public void testSerialization() throws IOException, ClassNotFoundException {
         QuadruplePattern quadPattern =
                 new QuadruplePattern(
                         Node.ANY, Node.ANY, Node.createURI(DEFAULT_URI),
                         Node.createLiteral("Literal Value"));
 
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        QuadruplePattern quadPatternDeepCopy =
+                (QuadruplePattern) MakeDeepCopy.makeDeepCopy(quadPattern);
 
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(buffer);
-            oos.writeObject(quadPattern);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (oos != null) {
-                    oos.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        ObjectInputStream ois = null;
-        QuadruplePattern newQuad = null;
-
-        try {
-            ois =
-                    new ObjectInputStream(new ByteArrayInputStream(
-                            buffer.toByteArray()));
-            newQuad = (QuadruplePattern) ois.readObject();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (ois != null) {
-                    ois.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Assert.assertEquals(quadPattern, newQuad);
+        Assert.assertEquals(quadPattern, quadPatternDeepCopy);
     }
 
 }

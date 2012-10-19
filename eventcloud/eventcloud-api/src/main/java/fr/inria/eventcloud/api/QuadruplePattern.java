@@ -42,44 +42,13 @@ public class QuadruplePattern extends Quadruple {
             Node.ANY, Node.ANY, Node.ANY, Node.ANY);
 
     public QuadruplePattern(Node g, Node s, Node p, Node o) {
-        super(g, s, p, o, false, true);
+        super(g, s, p, o, false, false);
 
         if (g instanceof Node_Variable || s instanceof Node_Variable
                 || p instanceof Node_Variable || o instanceof Node_Variable) {
             throw new IllegalArgumentException(
                     "Node_Var is not allowed inside a quadruple pattern, only Node.ANY and null can be used");
         }
-    }
-
-    /**
-     * Removes the timetamp value associated to the specified quadruple pattern
-     * that contains an URI graph value which is timestamped.
-     * 
-     * @param quadruplePattern
-     *            the quadruple pattern to parse.
-     * 
-     * @return a new quadruple pattern with no timestamp value.
-     */
-    public static QuadruplePattern removeTimestampFromGraphValue(QuadruplePattern quadruplePattern) {
-        if (!quadruplePattern.getGraph().isURI()) {
-            return quadruplePattern;
-        }
-
-        int timestampSeparatorIndex =
-                quadruplePattern.getGraph().getURI().indexOf(
-                        Quadruple.META_INFORMATION_SEPARATOR);
-
-        if (timestampSeparatorIndex != -1) {
-            return new QuadruplePattern(
-                    Node.createURI(quadruplePattern.getGraph()
-                            .getURI()
-                            .substring(0, timestampSeparatorIndex)),
-                    quadruplePattern.getSubject(),
-                    quadruplePattern.getPredicate(),
-                    quadruplePattern.getObject());
-        }
-
-        return quadruplePattern;
     }
 
 }

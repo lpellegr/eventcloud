@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -48,7 +49,10 @@ public abstract class RequestResponseManager implements Closeable, Serializable 
     public MultiActiveService multiActiveService;
 
     protected RequestResponseManager() {
-        this.repliesReceived = new ConcurrentHashMap<UUID, ResponseEntry>();
+        this.repliesReceived =
+                new ConcurrentHashMap<UUID, ResponseEntry>(
+                        16, 0.75f,
+                        P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
     }
 
     /**

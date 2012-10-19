@@ -55,7 +55,7 @@ public class SkolemizatorTest {
         Assert.assertFalse(containsBlankNodes(skolemizedQuadruples));
     }
 
-    private static boolean containsBlankNodes(List<Quadruple> quadruples) {
+    private static <T extends Quadruple> boolean containsBlankNodes(List<T> quadruples) {
         for (Quadruple q : quadruples) {
             if (q.getSubject().isBlank() || q.getObject().isBlank()) {
                 return true;

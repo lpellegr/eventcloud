@@ -100,6 +100,7 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
             log.info("About to publish quad : " + quad.getSubject() + " "
                     + quad.getPredicate() + " " + quad.getObject());
         }
+
         // the quadruple is routed without taking into account the publication
         // datetime (neither the other meta information)
         super.sendv(new PublishQuadrupleRequest(quad));

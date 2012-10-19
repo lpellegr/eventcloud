@@ -16,13 +16,14 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.hp.hpl.jena.graph.Node;
@@ -75,7 +76,7 @@ public class Skolemizator {
      */
     public static List<Quadruple> skolemize(Collection<Quadruple> quads) {
 
-        List<Quadruple> result = new ArrayList<Quadruple>();
+        Builder<Quadruple> result = new ImmutableList.Builder<Quadruple>();
 
         Map<Node, Node> assignedSkolems = new HashMap<Node, Node>();
 
@@ -93,13 +94,14 @@ public class Skolemizator {
                 }
 
                 result.add(new Quadruple(
-                        q.getGraph(), subject, q.getPredicate(), object));
+                        q.createMetaGraphNode(), subject, q.getPredicate(),
+                        object, false, true));
             } else {
                 result.add(q);
             }
         }
 
-        return result;
+        return result.build();
     }
 
     private static Node getOrCreateSkolemUri(Node subjectOrObject,

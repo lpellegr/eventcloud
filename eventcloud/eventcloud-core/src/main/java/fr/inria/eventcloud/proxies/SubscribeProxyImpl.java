@@ -209,11 +209,31 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
 
             this.componentUri = componentUri;
+
+            // even if we could have
+            // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
+            // threads handling subscriptions in parallel, the subscribe method
+            // is not supposed to be called very often. We may allow some
+            // contention at the price of less memory to be used
             this.subscriptions =
-                    new ConcurrentHashMap<SubscriptionId, Subscription>();
+                    new ConcurrentHashMap<SubscriptionId, Subscription>(
+                            100, 0.90f, 2);
             this.listeners =
-                    new ConcurrentHashMap<SubscriptionId, NotificationListener<?>>();
-            this.solutions = new ConcurrentHashMap<NotificationId, Solution>();
+                    new ConcurrentHashMap<SubscriptionId, NotificationListener<?>>(
+                            100, 0.90f, 2);
+            this.solutions =
+                    new ConcurrentHashMap<NotificationId, Solution>(
+                            // At most
+                            // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
+                            // threads can update the map in parallel. Each of
+                            // them can add part of a solution. The solution is
+                            // eventually removed when all the sub solutions are
+                            // received. Thus if we suppose that the average
+                            // number of sub solutions that compose a solution
+                            // is 30 we get the following formula
+                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue() * 30,
+                            0.75f,
+                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
             // TODO: use the properties field to initialize ELA properties
 
