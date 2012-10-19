@@ -202,19 +202,21 @@ public class PubSubBenchmarkBSBM {
                             Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
                             Node.createURI("http://www.w3.org/2000/01/rdf-schema#label"),
-                            Node.createURI("manner gatemen")));
+                            Node.createURI("manner gatemen"), false, false));
 
                     quadsForCompoundEvent1.add(new Quadruple(
                             Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature142")));
+                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature142"),
+                            false, false));
 
                     quadsForCompoundEvent1.add(new Quadruple(
                             Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature144")));
+                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature144"),
+                            false, false));
 
                     this.compoundEvent =
                             new CompoundEvent(quadsForCompoundEvent1);

@@ -33,7 +33,12 @@ public class Observable<T> {
     private final ConcurrentHashMap<T, Long> observers;
 
     public Observable() {
-        this.observers = new ConcurrentHashMap<T, Long>();
+        this(16);
+    }
+
+    public Observable(int initialCapacity) {
+        this.observers =
+                new ConcurrentHashMap<T, Long>(initialCapacity, 0.75f, 2);
     }
 
     /**

@@ -73,7 +73,9 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
         this.colander = new SparqlColander(colanderDatastore);
 
         this.pendingResults =
-                new ConcurrentHashMap<UUID, Future<? extends Object>>();
+                new ConcurrentHashMap<UUID, Future<? extends Object>>(
+                        16, 0.75f,
+                        P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
 
         // TODO choose the optimal size to use for the thread-pool
         this.threadPool = Executors.newFixedThreadPool(30);

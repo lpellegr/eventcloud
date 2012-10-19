@@ -18,7 +18,6 @@ package fr.inria.eventcloud.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -91,10 +90,12 @@ public class CompoundEventTest {
 
     @Test
     public void testInstanciation() {
-        List<Quadruple> quadruples = new ArrayList<Quadruple>(10);
+        Builder<Quadruple> builder = new ImmutableList.Builder<Quadruple>();
         for (int i = 0; i < 10; i++) {
-            quadruples.add(QuadrupleGenerator.random());
+            builder.add(QuadrupleGenerator.random());
         }
+
+        ImmutableList<Quadruple> quadruples = builder.build();
 
         CompoundEvent e1 = new CompoundEvent(quadruples);
         Assert.assertEquals(quadruples.size(), e1.getQuadruples().size());

@@ -163,30 +163,6 @@ public class QuadrupleTest {
     }
 
     @Test
-    public void testSerialization() throws IOException, ClassNotFoundException {
-        Quadruple q1 = QuadrupleGenerator.randomWithLiteral();
-        q1.setPublicationSource("publisher1");
-        q1.setPublicationTime(System.currentTimeMillis());
-
-        Quadruple q2 = (Quadruple) MakeDeepCopy.makeDeepCopy(q1);
-
-        Assert.assertEquals(
-                "Quadruples are not equals after serialization", q1, q2);
-
-        Quadruple q3 = (Quadruple) MakeDeepCopy.makeDeepCopy(q2);
-
-        Assert.assertEquals(q2, q3);
-        Assert.assertEquals(q1, q3);
-
-        Quadruple q4 =
-                new Quadruple(
-                        q3.createMetaGraphNode(), q3.getSubject(),
-                        q3.getPredicate(), q3.getObject());
-
-        Assert.assertEquals(q3, q4);
-    }
-
-    @Test
     public void testGetPublicationTime() {
         Quadruple q1 = QuadrupleGenerator.random();
 
@@ -207,6 +183,7 @@ public class QuadrupleTest {
 
         Assert.assertNull(Quadruple.getPublicationSource(q1.createMetaGraphNode()));
 
+        q1.setPublicationTime();
         q1.setPublicationSource("publisher1");
 
         Assert.assertEquals(
@@ -223,7 +200,34 @@ public class QuadrupleTest {
         Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getPredicate()));
         Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getObject()));
 
+        Assert.assertFalse(Quadruple.isMetaGraphNode(q1.createMetaGraphNode()));
+
+        q1.setPublicationTime();
         Assert.assertTrue(Quadruple.isMetaGraphNode(q1.createMetaGraphNode()));
+    }
+
+    @Test
+    public void testSerialization() throws IOException, ClassNotFoundException {
+        Quadruple q1 = QuadrupleGenerator.randomWithLiteral();
+        q1.setPublicationSource("publisher1");
+        q1.setPublicationTime(System.currentTimeMillis());
+
+        Quadruple q2 = (Quadruple) MakeDeepCopy.makeDeepCopy(q1);
+
+        Assert.assertEquals(
+                "Quadruples are not equals after serialization", q1, q2);
+
+        Quadruple q3 = (Quadruple) MakeDeepCopy.makeDeepCopy(q2);
+
+        Assert.assertEquals(q2, q3);
+        Assert.assertEquals(q1, q3);
+
+        Quadruple q4 =
+                new Quadruple(
+                        q3.createMetaGraphNode(), q3.getSubject(),
+                        q3.getPredicate(), q3.getObject(), false, true);
+
+        Assert.assertEquals(q3, q4);
     }
 
 }

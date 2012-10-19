@@ -95,7 +95,7 @@ public class CompoundEventGenerator {
                     graphNode,
                     Node.createURI(graphNode.getURI() + "#event"),
                     Node.createURI("http://events.event-processing.org/types/stream"),
-                    Node.createURI(streamUrl + "#stream")));
+                    Node.createURI(streamUrl + "#stream"), false, true));
         }
 
         return new CompoundEvent(builder.build());

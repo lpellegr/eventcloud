@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.adapters.rdf2go.listeners;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -28,6 +27,8 @@ import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.Statement;
 import org.ontoware.rdf2go.model.node.Variable;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -46,11 +47,13 @@ public class Rdf2GoCompoundEventNotificationListenerTest {
     public void test() {
         Node graph = Node.createURI("http://example.org/graph");
 
-        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
+        Builder<Quadruple> builder = new ImmutableList.Builder<Quadruple>();
+
         for (int i = 0; i < 10; i++) {
-            quadruples.add(QuadrupleGenerator.random(graph));
+            builder.add(QuadrupleGenerator.random(graph));
         }
 
+        final List<Quadruple> quadruples = builder.build();
         CompoundEvent ce = new CompoundEvent(quadruples);
 
         final MutableInt nbCalls = new MutableInt();
