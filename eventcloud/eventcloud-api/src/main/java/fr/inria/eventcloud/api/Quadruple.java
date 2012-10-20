@@ -55,8 +55,7 @@ import com.hp.hpl.jena.graph.Triple;
  * <p>
  * Such a quadruple can be published and handled as an event. It embeds some
  * meta information such as the publication time that indicates when the event
- * has been published and optionally the source. We suppose that once the source
- * identity is set, it is compulsory to have the publication datetime set.
+ * has been published and optionally the source.
  * 
  * @author lpellegr
  */
@@ -66,11 +65,13 @@ public class Quadruple implements Event {
 
     private static final Logger log = LoggerFactory.getLogger(Quadruple.class);
 
+    public static final String PUBLICATION_TIME_SEPARATOR = "/$";
+
+    public static final String PUBLICATION_SOURCE_SEPARATOR = "/@";
+
     // contains respectively the graph, the subject, the predicate
     // and the object value of the quadruple
     protected transient Node[] nodes;
-
-    public static final String META_INFORMATION_SEPARATOR = "/$";
 
     private transient long publicationTime;
 
@@ -349,20 +350,14 @@ public class Quadruple implements Event {
             boolean isPublicationTimeSet = this.publicationTime != -1;
             boolean isPublicationSourceSet = this.publicationSource != null;
 
-            if (!isPublicationTimeSet && isPublicationSourceSet) {
-                throw new IllegalStateException(
-                        "Publication source set but publication time undefined: "
-                                + this.toString());
-            }
-
             if (isPublicationTimeSet) {
-                uri.append(META_INFORMATION_SEPARATOR);
+                uri.append(PUBLICATION_TIME_SEPARATOR);
                 // adds the publication time in the first position
                 uri.append(this.publicationTime);
             }
 
             if (isPublicationSourceSet) {
-                uri.append(META_INFORMATION_SEPARATOR);
+                uri.append(PUBLICATION_SOURCE_SEPARATOR);
                 // adds the publication source in the second position
                 uri.append(this.publicationSource);
             }
@@ -458,58 +453,103 @@ public class Quadruple implements Event {
     }
 
     private final Node extractAndSetMetaInformation(Node graph) {
-        Object[] metaInformation = parseMetaInformation(graph);
+        MetaGraph metaGraph = parse(graph);
 
-        if (metaInformation != null) {
-            long publicationTime = (Long) metaInformation[1];
-
-            if (publicationTime != -1) {
-                this.setPublicationTime(publicationTime);
+        if (metaGraph != null) {
+            if (metaGraph.publicationTime != -1) {
+                this.setPublicationTime(metaGraph.publicationTime);
             }
 
-            if (metaInformation[2] != null) {
-                this.setPublicationSource((String) metaInformation[2]);
+            if (metaGraph.publicationSource != null) {
+                this.setPublicationSource(metaGraph.publicationSource);
             }
 
             // returns a graph value without any meta information
-            return Node.createURI((String) metaInformation[0]);
+            return Node.createURI(metaGraph.graph);
         }
 
         return graph;
 
     }
 
-    private static Object[] parseMetaInformation(Node graph) {
+    private static MetaGraph parse(Node graph) {
         if (graph.isURI()) {
-            String[] splits =
-                    graph.getURI().split(
-                            Pattern.quote(META_INFORMATION_SEPARATOR));
+            String uri = graph.getURI();
 
-            if (splits.length < 2) {
-                // the specified graph value does not contain any meta
-                // information
+            int publicationTimeSeparatorIndex =
+                    uri.lastIndexOf(PUBLICATION_TIME_SEPARATOR);
+            int publicationSourceSeparatorIndex =
+                    uri.lastIndexOf(PUBLICATION_SOURCE_SEPARATOR);
+
+            if (publicationTimeSeparatorIndex == -1
+                    && publicationSourceSeparatorIndex == -1) {
                 return null;
+            } else if (publicationTimeSeparatorIndex >= 0
+                    && publicationSourceSeparatorIndex == -1) {
+                String publicationTime =
+                        uri.substring(publicationTimeSeparatorIndex
+                                + PUBLICATION_TIME_SEPARATOR.length());
+
+                try {
+                    return new MetaGraph(
+                            uri.substring(0, publicationTimeSeparatorIndex),
+                            Long.parseLong(publicationTime), null);
+
+                } catch (NumberFormatException e) {
+                    throw new IllegalStateException(
+                            "Invalid publication time: " + publicationTime);
+                }
+            } else if (publicationTimeSeparatorIndex == -1
+                    && publicationSourceSeparatorIndex >= 0) {
+                return new MetaGraph(
+                        uri.substring(0, publicationSourceSeparatorIndex), -1,
+                        uri.substring(publicationSourceSeparatorIndex
+                                + PUBLICATION_SOURCE_SEPARATOR.length()));
+            } else {
+                String publicationTime =
+                        uri.substring(
+                                publicationTimeSeparatorIndex
+                                        + PUBLICATION_TIME_SEPARATOR.length(),
+                                publicationSourceSeparatorIndex);
+
+                // if publication time and source are specified, they are
+                // necessarily in the order publicationTime, publicationSource
+                try {
+                    return new MetaGraph(
+                            uri.substring(0, publicationTimeSeparatorIndex),
+                            Long.parseLong(publicationTime),
+                            uri.substring(publicationSourceSeparatorIndex
+                                    + PUBLICATION_SOURCE_SEPARATOR.length()));
+                } catch (NumberFormatException e) {
+                    throw new IllegalStateException(
+                            "Invalid publication time: " + publicationTime);
+                }
             }
-
-            long publicationTime = -1;
-
-            try {
-                publicationTime = Long.parseLong(splits[1]);
-            } catch (NumberFormatException e) {
-                throw new IllegalStateException("Invalid publication time: "
-                        + splits[1]);
-            }
-
-            return new Object[] {splits[0], publicationTime, splits.length == 3
-                    ? splits[2] : null};
         }
 
         return null;
     }
 
+    private static class MetaGraph {
+
+        protected final String graph;
+
+        protected final long publicationTime;
+
+        protected final String publicationSource;
+
+        public MetaGraph(String graph, long publicationTime,
+                String publicationSource) {
+            this.graph = graph;
+            this.publicationTime = publicationTime;
+            this.publicationSource = publicationSource;
+        }
+
+    }
+
     public static Node removeMetaInformation(Node graph) {
         String[] splits =
-                graph.getURI().split(Pattern.quote(META_INFORMATION_SEPARATOR));
+                graph.getURI().split(Pattern.quote(PUBLICATION_TIME_SEPARATOR));
 
         if (splits.length == 1) {
             return graph;
@@ -533,10 +573,10 @@ public class Quadruple implements Event {
     public static final long getPublicationTime(Node metaGraphNode) {
         checkGraphType(metaGraphNode);
 
-        Object[] metaInformation = parseMetaInformation(metaGraphNode);
+        MetaGraph metaGraph = parse(metaGraphNode);
 
-        if (metaInformation != null) {
-            return (Long) metaInformation[1];
+        if (metaGraph != null) {
+            return metaGraph.publicationTime;
         }
 
         return -1;
@@ -557,10 +597,10 @@ public class Quadruple implements Event {
     public static final String getPublicationSource(Node metaGraphNode) {
         checkGraphType(metaGraphNode);
 
-        Object[] metaInformation = parseMetaInformation(metaGraphNode);
+        MetaGraph metaGraph = parse(metaGraphNode);
 
-        if (metaInformation != null) {
-            return (String) metaInformation[2];
+        if (metaGraph != null) {
+            return metaGraph.publicationSource;
         }
 
         return null;
@@ -578,7 +618,7 @@ public class Quadruple implements Event {
      *         or not.
      */
     public static boolean isMetaGraphNode(Node node) {
-        return parseMetaInformation(node) != null;
+        return parse(node) != null;
     }
 
     private static final void checkGraphType(Node graph) {

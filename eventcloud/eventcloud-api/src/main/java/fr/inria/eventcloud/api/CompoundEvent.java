@@ -248,7 +248,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * quadruples embed by the compound event.
      * 
      * @param graph
-     *            the event id.`
+     *            the event id.
      * @param compoundEventSize
      *            the number of quadruples contained by the compound event.
      * 
