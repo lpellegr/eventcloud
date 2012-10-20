@@ -16,10 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils.converters;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-
-import org.eclipse.jetty.util.ByteArrayOutputStream2;
 
 /**
  * This class is used to convert an object to a byte array using a regular
@@ -44,15 +43,15 @@ public class ObjectToByteConverter {
      * @throws IOException
      */
     public static byte[] convert(Object obj) throws IOException {
-        final ByteArrayOutputStream2 byteArrayOutputStream =
-                new ByteArrayOutputStream2();
+        final ByteArrayOutputStream byteArrayOutputStream =
+                new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream =
                 new ObjectOutputStream(byteArrayOutputStream);
 
         try {
             objectOutputStream.writeObject(obj);
             objectOutputStream.flush();
-            return byteArrayOutputStream.getBuf();
+            return byteArrayOutputStream.toByteArray();
         } finally {
             if (objectOutputStream != null) {
                 objectOutputStream.close();
