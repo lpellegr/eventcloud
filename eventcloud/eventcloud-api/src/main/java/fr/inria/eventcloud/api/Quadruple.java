@@ -702,7 +702,8 @@ public class Quadruple implements Event {
             }
         }
 
-        outWriter.close();
+        outWriter.flush();
+        // do not close outWriter
     }
 
 }
