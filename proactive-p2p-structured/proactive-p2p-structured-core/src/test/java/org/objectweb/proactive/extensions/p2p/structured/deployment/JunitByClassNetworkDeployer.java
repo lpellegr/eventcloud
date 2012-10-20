@@ -37,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  */
 public abstract class JunitByClassNetworkDeployer {
 
-    private final NetworkDeployer deployer;
+    protected final NetworkDeployer deployer;
 
     private final int nbTrackers;
 

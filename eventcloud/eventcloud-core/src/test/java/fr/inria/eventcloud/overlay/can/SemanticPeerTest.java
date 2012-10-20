@@ -16,9 +16,7 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +25,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.core.ProActiveException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +37,19 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
+import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
+import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -302,9 +307,22 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect3() throws MalformedSparqlQueryException {
+    public void testExecuteSparqlSelect3()
+            throws MalformedSparqlQueryException, ProActiveException,
+            EventCloudIdNotManaged, IOException {
+        EventCloudsRegistry registry =
+                EventCloudsRegistryFactory.newEventCloudsRegistry();
+        EventCloudDeployer deployer = (EventCloudDeployer) super.deployer;
+        String registryUrl = registry.register("registry");
+        registry.register(deployer);
+
+        PublishApi publishProxy =
+                ProxyFactory.newPublishProxy(
+                        registryUrl, deployer.getEventCloudDescription()
+                                .getId());
+
         for (int i = 0; i < 10; i++) {
-            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+            publishProxy.publish(QuadrupleGenerator.random());
         }
 
         ResultSet resultSet =
@@ -315,8 +333,8 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         while (resultSet.hasNext()) {
             QuerySolution binding = resultSet.next();
-            assertTrue(binding.get("g").asNode().getURI().contains(
-                    Quadruple.META_INFORMATION_SEPARATOR));
+            Assert.assertTrue(binding.get("g").asNode().getURI().contains(
+                    Quadruple.PUBLICATION_TIME_SEPARATOR));
         }
 
         resultSet =
@@ -327,8 +345,10 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         while (resultSet.hasNext()) {
             QuerySolution binding = resultSet.next();
-            assertFalse(binding.get("shortGraph").asNode().getURI().contains(
-                    Quadruple.META_INFORMATION_SEPARATOR));
+            Assert.assertFalse(binding.get("shortGraph")
+                    .asNode()
+                    .getURI()
+                    .contains(Quadruple.PUBLICATION_TIME_SEPARATOR));
         }
     }
 
