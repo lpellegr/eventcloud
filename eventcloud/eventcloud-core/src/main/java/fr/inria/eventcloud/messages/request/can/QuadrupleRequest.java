@@ -16,6 +16,10 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
@@ -23,7 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
@@ -40,7 +44,7 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
 
     private static final long serialVersionUID = 1L;
 
-    private SerializedValue<Quadruple> quadruple;
+    private Quadruple quadruple;
 
     public QuadrupleRequest(Quadruple quad) {
         this(
@@ -60,7 +64,7 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
             ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>> responseProvider) {
         super(SemanticCoordinateFactory.newSemanticCoordinate(quad),
                 responseProvider);
-        this.quadruple = SerializedValue.create(quad);
+        this.quadruple = quad;
     }
 
     public void onDestinationReached(StructuredOverlay overlay, Quadruple quad) {
@@ -83,7 +87,36 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
     }
 
     public Quadruple getQuadruple() {
-        return this.quadruple.getValue();
+        return this.quadruple;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void customReadObject(ObjectInputStream stream)
+            throws ClassNotFoundException, IOException {
+        // do nothing because #customWriteObject do nothing
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void customWriteObject(ObjectOutputStream stream)
+            throws IOException {
+        // do not serialize the constraints validator to avoid to serialize and
+        // convey two times the same the data. The constraint validator can be
+        // reconstructed from the quadruple which is embeded
+    }
+
+    private void readObject(java.io.ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+
+        super.constraintsValidator =
+                new UnicastConstraintsValidator<SemanticElement>(
+                        SemanticCoordinateFactory.newSemanticCoordinate(this.quadruple));
     }
 
 }
