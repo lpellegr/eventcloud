@@ -16,6 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -42,7 +45,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     /**
      * Constraints validator used to make the routing decision possible.
      */
-    protected ConstraintsValidator<K> constraintsValidator;
+    protected transient ConstraintsValidator<K> constraintsValidator;
 
     /**
      * The number of hops between the source and the destination of the message.
@@ -124,7 +127,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     /**
      * Increments the hop count (i.e. the counter counting the number of hops
      * between the source and the destination of this message) by the specified
-     * <code>increment</code>.
+     * {@code increment}.
      * 
      * @param increment
      *            the size of the increment.
@@ -160,8 +163,8 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      * @param overlay
      *            the overlay on which the constraints are checked.
      * 
-     * @return <code>true</code> if the constraints are validated,
-     *         <code>false</code> otherwise.
+     * @return {@code true} if the constraints are validated, {@code false}
+     *         otherwise.
      */
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
         return this.constraintsValidator.validatesKeyConstraints(overlay);
@@ -175,6 +178,29 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
         return "RequestResponseMessage [id=" + this.uuid
                 + ", constraintsValidator=" + this.constraintsValidator
                 + ", hopCount=" + this.hopCount + "]";
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException,
+            ClassNotFoundException {
+        stream.defaultReadObject();
+        customReadObject(stream);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void customReadObject(ObjectInputStream stream)
+            throws ClassNotFoundException, IOException {
+        this.constraintsValidator =
+                (ConstraintsValidator<K>) stream.readObject();
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+        customWriteObject(stream);
+    }
+
+    protected void customWriteObject(ObjectOutputStream stream)
+            throws IOException {
+        stream.writeObject(this.constraintsValidator);
     }
 
 }
