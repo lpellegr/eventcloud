@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.ebmwebsourcing.easyesb</groupId>
 			<artifactId>ws-binding-rawreport</artifactId>
-			<version>v2012-09-05</version>
+			<version>v2012-10-18</version>
 		</dependency>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
@@ -66,7 +66,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>-Xmx2048m</argLine>
-<!-- 					<forkMode>always</forkMode> -->
 					<systemPropertyVariables>
 						<java.security.policy>${project.build.testOutputDirectory}/proactive.security.policy</java.security.policy>
 						<log4j.configuration>file:${project.build.testOutputDirectory}/log4j.xml</log4j.configuration>
