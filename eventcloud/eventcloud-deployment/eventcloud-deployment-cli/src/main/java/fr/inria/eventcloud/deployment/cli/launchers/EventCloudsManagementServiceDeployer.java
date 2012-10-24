@@ -49,7 +49,7 @@ public class EventCloudsManagementServiceDeployer {
 
     private static MutableBoolean servicesDeployed = new MutableBoolean(false);
 
-    private static Process eventCloudManagementWsProcess = null;
+    private static Process eventCloudsManagementServiceProcess = null;
 
     private static String libDirPath;
 
@@ -66,21 +66,19 @@ public class EventCloudsManagementServiceDeployer {
         });
     }
 
-    public static String deploy(boolean onRelease, int eventCloudWsPort,
-                                String eventCloudManagementWsUrlSuffix,
+    public static String deploy(boolean onRelease, int port, String urlSuffix,
                                 boolean activateLoggers) throws IOException {
         return deploy(
-                onRelease, eventCloudWsPort, eventCloudManagementWsUrlSuffix,
-                null, EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
+                onRelease, port, urlSuffix, null,
+                EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
                 activateLoggers);
     }
 
-    public static String deploy(boolean onRelease, int eventCloudWsPort,
-                                String eventCloudManagementWsUrlSuffix,
+    public static String deploy(boolean onRelease, int port, String urlSuffix,
                                 String socialFilterUrl,
                                 double socialFilterThreshold,
                                 boolean activateLoggers) throws IOException {
-        if (eventCloudManagementWsProcess == null) {
+        if (eventCloudsManagementServiceProcess == null) {
             String binariesBaseUrl = EVENTCLOUD_BINARIES_URL;
 
             if (onRelease) {
@@ -108,8 +106,8 @@ public class EventCloudsManagementServiceDeployer {
                     binariesBaseUrl + "resources/", activateLoggers));
 
             cmd.add(EventCloudsManagementServiceDeployer.class.getCanonicalName());
-            cmd.add(Integer.toString(eventCloudWsPort));
-            cmd.add(eventCloudManagementWsUrlSuffix);
+            cmd.add(Integer.toString(port));
+            cmd.add(urlSuffix);
             cmd.add(Double.toString(socialFilterThreshold));
 
             if (socialFilterUrl != null && !socialFilterUrl.isEmpty()) {
@@ -119,11 +117,12 @@ public class EventCloudsManagementServiceDeployer {
             final ProcessBuilder processBuilder =
                     new ProcessBuilder(cmd.toArray(new String[cmd.size()]));
             processBuilder.redirectErrorStream(true);
-            eventCloudManagementWsProcess = processBuilder.start();
+            eventCloudsManagementServiceProcess = processBuilder.start();
 
             final BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(
-                            eventCloudManagementWsProcess.getInputStream()));
+                    new BufferedReader(
+                            new InputStreamReader(
+                                    eventCloudsManagementServiceProcess.getInputStream()));
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -157,19 +156,19 @@ public class EventCloudsManagementServiceDeployer {
                 }
             }
 
-            StringBuilder eventCloudManagementWebServiceEndpoint =
+            StringBuilder eventCloudsManagementWsEndpoint =
                     new StringBuilder("http://");
             try {
-                eventCloudManagementWebServiceEndpoint.append(InetAddress.getLocalHost()
+                eventCloudsManagementWsEndpoint.append(InetAddress.getLocalHost()
                         .getHostAddress());
             } catch (UnknownHostException uhe) {
                 uhe.printStackTrace();
             }
-            eventCloudManagementWebServiceEndpoint.append(':');
-            eventCloudManagementWebServiceEndpoint.append(eventCloudWsPort);
-            eventCloudManagementWebServiceEndpoint.append('/');
-            eventCloudManagementWebServiceEndpoint.append(eventCloudManagementWsUrlSuffix);
-            return eventCloudManagementWebServiceEndpoint.toString();
+            eventCloudsManagementWsEndpoint.append(':');
+            eventCloudsManagementWsEndpoint.append(port);
+            eventCloudsManagementWsEndpoint.append('/');
+            eventCloudsManagementWsEndpoint.append(urlSuffix);
+            return eventCloudsManagementWsEndpoint.toString();
         } else {
             throw new IllegalStateException(
                     "EventCloud management process already deployed");
@@ -293,9 +292,9 @@ public class EventCloudsManagementServiceDeployer {
     }
 
     public static void destroy() {
-        if (eventCloudManagementWsProcess != null) {
-            eventCloudManagementWsProcess.destroy();
-            eventCloudManagementWsProcess = null;
+        if (eventCloudsManagementServiceProcess != null) {
+            eventCloudsManagementServiceProcess.destroy();
+            eventCloudsManagementServiceProcess = null;
 
             try {
                 FileUtils.deleteDirectory(new File(libDirPath));
@@ -342,12 +341,12 @@ public class EventCloudsManagementServiceDeployer {
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
 
         int port = Integer.parseInt(args[0]);
-        Server eventCloudManagementWebService =
-                WsDeployer.deployEventCloudManagementWebService(
+        Server eventCloudsManagementService =
+                WsDeployer.deployEventCloudsManagementService(
                         PAActiveObject.getUrl(registry), args[1], port);
 
         log.info(LOG_MANAGEMENT_WS_DEPLOYED
-                + eventCloudManagementWebService.getEndpoint()
+                + eventCloudsManagementService.getEndpoint()
                         .getEndpointInfo()
                         .getAddress());
     }

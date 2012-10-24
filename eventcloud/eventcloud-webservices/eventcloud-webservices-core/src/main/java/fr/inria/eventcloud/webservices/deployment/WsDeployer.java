@@ -62,7 +62,7 @@ public class WsDeployer {
     private static final String DEFAULT_IP = "0.0.0.0";
 
     /**
-     * Deploys a new {@link EventCloudsManagementWsnApi EventCloud Management
+     * Deploys a new {@link EventCloudsManagementWsnApi EventClouds Management
      * Service}.
      * 
      * @param registryUrl
@@ -77,9 +77,9 @@ public class WsDeployer {
      * 
      * @return the Server instance of the web service.
      */
-    public static Server deployEventCloudManagementWebService(String registryUrl,
-                                                              String urlSuffix,
-                                                              int port) {
+    public static Server deployEventCloudsManagementService(String registryUrl,
+                                                            String urlSuffix,
+                                                            int port) {
         return deployWebService(
                 EventCloudsManagementWsnApi.class,
                 new EventCloudsManagementServiceImpl(registryUrl, port),

@@ -29,7 +29,7 @@ import javax.jws.WebService;
  * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudManagement", portName = "EventCloudManagementPort", targetNamespace = "http://webservices.eventcloud.inria.fr/", name = "EventCloudManagementPortType")
+@WebService(serviceName = "EventCloudsManagement", portName = "EventCloudsManagementPort", targetNamespace = "http://webservices.eventcloud.inria.fr/", name = "EventCloudsManagementPortType")
 public interface EventCloudsManagementWsApi {
 
     /**
