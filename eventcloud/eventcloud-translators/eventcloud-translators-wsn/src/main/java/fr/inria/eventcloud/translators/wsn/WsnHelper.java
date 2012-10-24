@@ -34,6 +34,7 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.oasis_open.docs.wsn.b_2.Unsubscribe;
+import org.w3c.dom.Element;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -393,33 +394,47 @@ public class WsnHelper {
     protected static QName getTopic(TopicExpressionType topicExpressionType) {
         List<Object> content = topicExpressionType.getContent();
         if (content.size() > 0) {
-            String topic =
-                    ((String) content.get(0)).trim().replaceAll("\n", "");
-
-            String topicLocalPart =
-                    org.apache.xml.utils.QName.getLocalPart(topic);
-            String topicPrefix =
-                    org.apache.xml.utils.QName.getPrefixPart(topic);
+            String topicLocalPart = null;
+            String topicPrefix = null;
             String topicNamespace = null;
 
-            for (Entry<QName, String> entry : topicExpressionType.getOtherAttributes()
-                    .entrySet()) {
-                // TODO: compare by using prefix declaration and not
-                // local parts. It is possible to have two local part
-                // values that are the same but each one is using a
-                // different prefix. In such a case, the namespace
-                // extracted may be wrong. Before to fix this problem,
-                // issue #43 has to be resolved.
-                if (entry.getKey().getLocalPart().equals(topicLocalPart)
-                        || entry.getKey().getLocalPart().equals(topicPrefix)) {
-                    topicNamespace = entry.getValue();
+            if (content.get(0) instanceof String) {
+                String topic =
+                        ((String) content.get(0)).trim().replaceAll("\n", "");
 
-                    if (!topicNamespace.endsWith("/")) {
-                        topicNamespace = topicNamespace + "/";
+                topicLocalPart = org.apache.xml.utils.QName.getLocalPart(topic);
+                topicPrefix = org.apache.xml.utils.QName.getPrefixPart(topic);
+
+                for (Entry<QName, String> entry : topicExpressionType.getOtherAttributes()
+                        .entrySet()) {
+                    // TODO: compare by using prefix declaration and not
+                    // local parts. It is possible to have two local part
+                    // values that are the same but each one is using a
+                    // different prefix. In such a case, the namespace
+                    // extracted may be wrong. Before to fix this problem,
+                    // issue #43 has to be resolved.
+                    if (entry.getKey().getLocalPart().equals(topicLocalPart)
+                            || entry.getKey()
+                                    .getLocalPart()
+                                    .equals(topicPrefix)) {
+                        topicNamespace = entry.getValue();
+
+                        if (!topicNamespace.endsWith("/")) {
+                            topicNamespace = topicNamespace + "/";
+                        }
+
+                        break;
                     }
-
-                    break;
                 }
+            } else {
+                Element topicElement = (Element) content.get(0);
+                String topic =
+                        ((Element) content.get(0)).getTextContent()
+                                .trim()
+                                .replaceAll("\n", "");
+                topicLocalPart = org.apache.xml.utils.QName.getLocalPart(topic);
+                topicPrefix = org.apache.xml.utils.QName.getPrefixPart(topic);
+                topicNamespace = topicElement.lookupNamespaceURI(topicPrefix);
             }
 
             return new QName(topicNamespace, topicLocalPart, topicPrefix);
