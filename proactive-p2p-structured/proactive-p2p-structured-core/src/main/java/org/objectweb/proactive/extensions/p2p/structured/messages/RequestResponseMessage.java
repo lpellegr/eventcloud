@@ -183,7 +183,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     private void readObject(ObjectInputStream stream) throws IOException,
             ClassNotFoundException {
         stream.defaultReadObject();
-        customReadObject(stream);
+        this.customReadObject(stream);
     }
 
     @SuppressWarnings("unchecked")
@@ -195,7 +195,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
-        customWriteObject(stream);
+        this.customWriteObject(stream);
     }
 
     protected void customWriteObject(ObjectOutputStream stream)

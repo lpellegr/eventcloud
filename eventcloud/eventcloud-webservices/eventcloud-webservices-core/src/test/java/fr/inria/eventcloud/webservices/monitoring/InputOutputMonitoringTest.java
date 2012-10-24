@@ -162,7 +162,7 @@ public class InputOutputMonitoringTest extends WsTest {
         this.registryUrl = registry.register("registry");
 
         this.eventCloudsManagementServer =
-                WsDeployer.deployEventCloudManagementWebService(
+                WsDeployer.deployEventCloudsManagementService(
                         this.registryUrl, "management", WEBSERVICES_PORT);
         this.eventCloudsManagementWsnClient =
                 WsClientFactory.createWsClient(
