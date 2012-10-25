@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  */
 public class PeerNotActivatedException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private final UUID peerId;
 

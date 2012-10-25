@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
  */
 public final class SemanticZone extends UnicodeZone<SemanticElement> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     public SemanticZone() {
         super(

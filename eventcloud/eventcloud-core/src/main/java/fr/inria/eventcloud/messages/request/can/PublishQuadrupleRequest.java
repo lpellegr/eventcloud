@@ -66,7 +66,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
  */
 public class PublishQuadrupleRequest extends QuadrupleRequest {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private static final Logger log =
             LoggerFactory.getLogger(PublishQuadrupleRequest.class);

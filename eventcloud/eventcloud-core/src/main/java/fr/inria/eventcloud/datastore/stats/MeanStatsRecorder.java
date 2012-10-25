@@ -31,7 +31,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public class MeanStatsRecorder extends StatsRecorder {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private Apfloat gsum = Apfloat.ZERO;
 

@@ -30,7 +30,7 @@ import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
  */
 public class JunitEventCloudDeployer extends EventCloudDeployer {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     /**
      * Creates a new {@link JunitEventCloudDeployer} by using the specified

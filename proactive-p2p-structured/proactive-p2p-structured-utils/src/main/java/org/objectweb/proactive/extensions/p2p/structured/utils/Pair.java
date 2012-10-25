@@ -31,7 +31,7 @@ import java.io.Serializable;
  */
 public class Pair<A, B> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     protected final A first;
 

@@ -43,7 +43,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public abstract class StatsRecorder implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private AtomicLong nbQuads;
 

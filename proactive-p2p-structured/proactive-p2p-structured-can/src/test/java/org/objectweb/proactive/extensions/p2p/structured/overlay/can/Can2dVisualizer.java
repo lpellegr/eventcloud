@@ -66,7 +66,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
  */
 public class Can2dVisualizer extends JFrame {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private static final int CANVAS_HEIGHT = 800;
 
@@ -157,7 +157,7 @@ public class Can2dVisualizer extends JFrame {
 
     public class Canvas extends JComponent {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 130L;
 
         public Zone<StringElement> zoneClicked = null;
 

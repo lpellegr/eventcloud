@@ -30,7 +30,7 @@ import fr.inria.eventcloud.api.properties.UnalterableElaProperty;
  */
 public class EventCloudDescription implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private final EventCloudId id;
 

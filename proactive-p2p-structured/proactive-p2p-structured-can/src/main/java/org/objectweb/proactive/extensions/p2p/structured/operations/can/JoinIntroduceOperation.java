@@ -40,7 +40,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 public class JoinIntroduceOperation<E extends Element> implements
         CallableOperation {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private final UUID peerID;
 

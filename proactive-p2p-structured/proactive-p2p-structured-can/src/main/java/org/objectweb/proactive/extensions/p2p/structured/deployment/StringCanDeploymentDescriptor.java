@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 public class StringCanDeploymentDescriptor extends
         CanDeploymentDescriptor<StringElement> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     /**
      * Creates a new {@link CanDeploymentDescriptor} by using a
@@ -37,7 +37,7 @@ public class StringCanDeploymentDescriptor extends
      */
     public StringCanDeploymentDescriptor() {
         super(new SerializableProvider<StringCanOverlay>() {
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 130L;
 
             @Override
             public StringCanOverlay get() {

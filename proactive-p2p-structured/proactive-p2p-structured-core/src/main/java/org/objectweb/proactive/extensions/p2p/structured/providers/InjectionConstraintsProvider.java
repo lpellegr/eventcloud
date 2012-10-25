@@ -27,7 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.InjectionCon
  */
 public abstract class InjectionConstraintsProvider implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     public abstract InjectionConstraints get(int nbPeers);
 
@@ -44,7 +44,7 @@ public abstract class InjectionConstraintsProvider implements Serializable {
     public static InjectionConstraintsProvider newFractalInjectionConstraintsProvider() {
         return new InjectionConstraintsProvider() {
 
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 130L;
 
             @Override
             public InjectionConstraints get(int nbPeers) {

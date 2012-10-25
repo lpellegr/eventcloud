@@ -86,7 +86,7 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
 public class SubscribeProxyImpl extends AbstractProxy implements
         ComponentEndActive, SubscribeProxy, SubscribeProxyAttributeController {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private static final String EVENT_IDS_RECEIVED_MAP_NAME =
             "eventIdsReceived";
