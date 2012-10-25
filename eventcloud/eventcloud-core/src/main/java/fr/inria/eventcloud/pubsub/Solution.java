@@ -40,7 +40,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  */
 public final class Solution implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private final int expectedSubSolutions;
 

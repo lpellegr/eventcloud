@@ -37,14 +37,14 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastReque
  */
 public class LookupRequest<E extends Element> extends ForwardRequest<E> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     protected Peer remotePeerReached;
 
     public LookupRequest(Coordinate<E> coordinateToReach) {
         super(coordinateToReach,
                 new ResponseProvider<LookupResponse<E>, Coordinate<E>>() {
-                    private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 130L;
 
                     @Override
                     public LookupResponse<E> get() {

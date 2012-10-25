@@ -30,7 +30,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  */
 public class NotificationId implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     // original subscription identifier
     private final SubscriptionId subscriptionId;

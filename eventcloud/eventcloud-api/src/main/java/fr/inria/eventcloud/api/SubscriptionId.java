@@ -30,7 +30,7 @@ import fr.inria.eventcloud.utils.UniqueId;
  */
 public class SubscriptionId extends UniqueId {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     /**
      * Creates a unique subscription id .

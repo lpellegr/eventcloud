@@ -30,7 +30,7 @@ import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 public abstract class BindingWrapperNotificationListener extends
         NotificationListener<BindingWrapper> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     /**
      * {@inheritDoc}

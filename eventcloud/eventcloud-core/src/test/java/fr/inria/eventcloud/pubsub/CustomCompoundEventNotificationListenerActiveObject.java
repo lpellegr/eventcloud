@@ -29,7 +29,7 @@ import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 public class CustomCompoundEventNotificationListenerActiveObject extends
         CompoundEventNotificationListener {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private static final Logger log =
             LoggerFactory.getLogger(CustomCompoundEventNotificationListenerActiveObject.class);

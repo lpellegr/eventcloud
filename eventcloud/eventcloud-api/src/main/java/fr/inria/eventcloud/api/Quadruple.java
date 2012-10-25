@@ -61,7 +61,7 @@ import com.hp.hpl.jena.graph.Triple;
  */
 public class Quadruple implements Event {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private static final Logger log = LoggerFactory.getLogger(Quadruple.class);
 

@@ -38,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  */
 public class NeighborTable<E extends Element> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     /**
      * Any direction : inferior or superior.

@@ -35,7 +35,7 @@ public abstract class Rdf2GoCompoundEventNotificationListener extends
         fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener
         implements Rdf2goNotificationListener<Model> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     /**
      * {@inheritDoc}

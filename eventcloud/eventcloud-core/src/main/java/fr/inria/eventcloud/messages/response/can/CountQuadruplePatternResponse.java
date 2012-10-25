@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 public class CountQuadruplePatternResponse extends
         StatefulQuadruplePatternResponse<Long> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     public CountQuadruplePatternResponse() {
         super();

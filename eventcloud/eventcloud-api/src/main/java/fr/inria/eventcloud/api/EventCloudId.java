@@ -29,7 +29,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
  */
 public class EventCloudId implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private final String streamUrl;
 

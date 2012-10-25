@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 public abstract class Element implements Cloneable, Comparable<Element>,
         Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     /**
      * Computes and returns a new {@link Element} with a value being the middle

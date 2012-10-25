@@ -61,7 +61,7 @@ public class Rdf2GoCompoundEventNotificationListenerTest {
         Rdf2GoCompoundEventNotificationListener listener =
                 new Rdf2GoCompoundEventNotificationListener() {
 
-                    private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 130L;
 
                     @Override
                     public void handle(SubscriptionId id, Model solution) {

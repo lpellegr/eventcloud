@@ -30,7 +30,7 @@ import fr.inria.eventcloud.api.Quadruple;
  */
 public class SemanticData implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private final Collection<Quadruple> data;
 

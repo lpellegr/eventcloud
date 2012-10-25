@@ -82,7 +82,7 @@ public abstract class Striped64 extends Number {
      * needed again; and for short-lived ones, it does not matter.
      */
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     /**
      * Padded variant of AtomicLong supporting only raw accesses plus CAS. The

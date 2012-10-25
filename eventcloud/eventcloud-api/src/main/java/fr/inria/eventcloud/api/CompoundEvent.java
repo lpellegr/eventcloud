@@ -40,7 +40,7 @@ import com.hp.hpl.jena.graph.Triple;
  */
 public class CompoundEvent implements Event, Iterable<Quadruple> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     // this internal list does not contain the meta quadruple
     // it is automatically added during a publish operation from a proxy

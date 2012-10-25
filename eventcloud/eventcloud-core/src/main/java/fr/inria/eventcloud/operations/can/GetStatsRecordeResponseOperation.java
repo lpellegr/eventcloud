@@ -27,7 +27,7 @@ import fr.inria.eventcloud.datastore.stats.StatsRecorder;
  */
 public class GetStatsRecordeResponseOperation implements ResponseOperation {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private final StatsRecorder statsRecorder;
 

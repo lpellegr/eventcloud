@@ -35,7 +35,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 public class WsBindingWrapperNotificationListener extends
         BindingWrapperNotificationListener {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 130L;
 
     private static final Logger log =
             LoggerFactory.getLogger(WsBindingWrapperNotificationListener.class);
