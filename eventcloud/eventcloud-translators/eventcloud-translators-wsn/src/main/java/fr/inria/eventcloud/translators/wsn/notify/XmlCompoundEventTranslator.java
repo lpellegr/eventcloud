@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
@@ -72,13 +73,12 @@ public class XmlCompoundEventTranslator extends
     @Override
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
-        String subscriptionAddress = null;
+        String topic = null;
         String producerAddress = null;
         List<Element> metadatas = new ArrayList<Element>();
         Element messagePayload = null;
-
-        String topic = null;
         String eventId = null;
+        boolean hasSimpleExpressionType = false;
 
         for (Quadruple quad : event.getQuadruples()) {
             if (quad.getPredicate().equals(
@@ -89,9 +89,7 @@ public class XmlCompoundEventTranslator extends
 
             String predicateValue = quad.getPredicate().getURI();
 
-            if (predicateValue.equals(WsnTranslatorConstants.SUBSCRIPTION_ADDRESS_TEXT)) {
-                subscriptionAddress = quad.getObject().getLiteralLexicalForm();
-            } else if (predicateValue.equals(WsnTranslatorConstants.TOPIC_TEXT)) {
+            if (predicateValue.equals(WsnTranslatorConstants.TOPIC_TEXT)) {
                 String value = quad.getObject().getURI();
                 int start = value.lastIndexOf("/") + 1;
                 int end = value.lastIndexOf(Stream.STREAM_ID_SUFFIX);
@@ -111,6 +109,14 @@ public class XmlCompoundEventTranslator extends
             eventId = event.getGraph().getURI();
         }
 
+        if (eventId.endsWith(WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+            hasSimpleExpressionType = true;
+            eventId =
+                    eventId.substring(
+                            0,
+                            eventId.lastIndexOf(WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER));
+        }
+
         if (eventId.endsWith(WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
             eventId =
                     eventId.substring(
@@ -126,16 +132,17 @@ public class XmlCompoundEventTranslator extends
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
 
-        if (subscriptionAddress != null) {
-            W3CEndpointReferenceBuilder endPointReferenceBuilder =
-                    new W3CEndpointReferenceBuilder();
-            endPointReferenceBuilder.address(subscriptionAddress);
-            notificationMessage.setSubscriptionReference(endPointReferenceBuilder.build());
-        }
-
         if (topic != null) {
             TopicExpressionType topicExpression = new TopicExpressionType();
-            topicExpression.getContent().add(topic);
+            if (hasSimpleExpressionType) {
+                JAXBElement<QName> simpleTopicExpression =
+                        new JAXBElement<QName>(
+                                WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_QNAME,
+                                QName.class, null, new QName(topic));
+                topicExpression.getContent().add(simpleTopicExpression);
+            } else {
+                topicExpression.getContent().add(topic);
+            }
             notificationMessage.setTopic(topicExpression);
         }
 

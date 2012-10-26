@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.translators.wsn;
 
+import javax.xml.namespace.QName;
+
 import com.hp.hpl.jena.graph.Node;
 
 import eu.play_project.play_commons.constants.Namespace;
@@ -27,8 +29,6 @@ import eu.play_project.play_commons.constants.Namespace;
  */
 public class WsnTranslatorConstants {
 
-    public static final String XML_TRANSLATION_MARKER = "-wsn-xml";
-
     /**
      * Defines the value of the separator that is used to concatenate several
      * URIs into a new one.
@@ -36,12 +36,6 @@ public class WsnTranslatorConstants {
     public static final String URI_SEPARATOR = "$0$";
 
     public static final String SHARP_ESCAPE = "\\$1\\$";
-
-    public static final String SUBSCRIPTION_ADDRESS_TEXT =
-            "http://docs.oasis-open.org/wsn/b-2/SubscriptionReference/Address";
-
-    public static final Node SUBSCRIPTION_ADDRESS_NODE =
-            Node.createURI(SUBSCRIPTION_ADDRESS_TEXT);
 
     public static final String TOPIC_TEXT = Namespace.TYPES.getUri() + "stream";
 
@@ -64,5 +58,13 @@ public class WsnTranslatorConstants {
 
     public static final String PRODUCER_METADATA_EVENT_NAMESPACE =
             "http://eventcloud.inria.fr";
+
+    public static final String XML_TRANSLATION_MARKER = "-wsn-xml";
+
+    public static final String SIMPLE_TOPIC_EXPRESSION_MARKER = "-ste";
+
+    public final static QName SIMPLE_TOPIC_EXPRESSION_QNAME = new QName(
+            "http://www.ebmwebsourcing.com/wsn/t-1-extension",
+            "simpleTopicExpression");
 
 }
