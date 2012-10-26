@@ -27,7 +27,7 @@ import eu.play_project.play_commons.constants.Namespace;
  */
 public class WsnTranslatorConstants {
 
-    public static final String XML_TRANSLATION_MARKER = "wsn-xml";
+    public static final String XML_TRANSLATION_MARKER = "-wsn-xml";
 
     /**
      * Defines the value of the separator that is used to concatenate several
