@@ -282,7 +282,12 @@ public class WsnHelper {
         for (CompoundEvent event : compoundEvents) {
             NotificationMessageHolderType message = translator.translate(event);
             message.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
-            message.setTopic(createTopicExpressionType(topic));
+            if (event.getGraph().getURI().endsWith(
+                    WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+                message.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
+            } else {
+                message.setTopic(createTopicExpressionType(topic));
+            }
             notify.getNotificationMessage().add(message);
         }
 
@@ -327,6 +332,29 @@ public class WsnHelper {
     }
 
     /**
+     * Creates a topic expression type with a {@code simpleExpressionType}
+     * element from the specified topic information.
+     * 
+     * @param topic
+     *            the qname associated to the topic of the topic expression type
+     *            to build.
+     * 
+     * @return a topic expression type with a {@code simpleExpressionType}
+     *         element from the specified topic information.
+     */
+    public static TopicExpressionType createTopicExpressionTypeWithSimpleExpressionType(QName topic) {
+        TopicExpressionType topicExpressionType = new TopicExpressionType();
+        topicExpressionType.setDialect("http://www.w3.org/TR/1999/REC-xpath-19991116");
+        JAXBElement<QName> simpleTopicExpression =
+                new JAXBElement<QName>(
+                        WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_QNAME,
+                        QName.class, null, topic);
+        topicExpressionType.getContent().add(simpleTopicExpression);
+
+        return topicExpressionType;
+    }
+
+    /**
      * Returns the address declared in the specified
      * {@link W3CEndpointReference}.
      * 
@@ -348,6 +376,53 @@ public class WsnHelper {
     }
 
     /**
+     * Indicates whether the topic of the specified {@link Subscribe} message is
+     * defined by a {@code simpleTopicExpression} element or not.
+     * 
+     * @param subscribe
+     *            the subscribe message to analyze.
+     * 
+     * @return true if the topic of the specified {@link Subscribe} message is
+     *         defined by a {@code simpleTopicExpression} element, false
+     *         otherwise.
+     */
+    public static boolean hasSimpleTopicExpression(Subscribe subscribe) {
+        return hasSimpleTopicExpression(getTopicExpressionType(subscribe));
+    }
+
+    /**
+     * Indicates whether the topic of the specified
+     * {@link NotificationMessageHolderType} is defined by a
+     * {@code simpleTopicExpression} element or not.
+     * 
+     * @param notificationMessage
+     *            the {@link NotificationMessageHolderType} to analyze.
+     * 
+     * @return true if the topic of the specified
+     *         {@link NotificationMessageHolderType} is defined by a
+     *         {@code simpleTopicExpression} element, false otherwise.
+     */
+    public static boolean hasSimpleTopicExpression(NotificationMessageHolderType notificationMessage) {
+        return hasSimpleTopicExpression(notificationMessage.getTopic());
+    }
+
+    private static boolean hasSimpleTopicExpression(TopicExpressionType topicExpressionType) {
+        List<Object> content = topicExpressionType.getContent();
+        if (content.size() > 0) {
+            try {
+                Element topicElement = (Element) content.get(0);
+                return topicElement.getLocalName()
+                        .equals(
+                                WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_QNAME.getLocalPart());
+            } catch (ClassCastException cce) {
+                return false;
+            }
+        } else {
+            throw new IllegalArgumentException("No topic content set");
+        }
+    }
+
+    /**
      * Extracts and returns the topic qname contained by the specified
      * {@link Subscribe} message.
      * 
@@ -358,23 +433,7 @@ public class WsnHelper {
      *         message.
      */
     public static QName getTopic(Subscribe subscribe) {
-        FilterType filterType = subscribe.getFilter();
-        if (filterType != null) {
-            List<Object> any = filterType.getAny();
-            if (any.size() > 0) {
-                @SuppressWarnings("unchecked")
-                TopicExpressionType topicExpressionType =
-                        ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
-
-                return getTopic(topicExpressionType);
-            } else {
-                throw new IllegalArgumentException(
-                        "No any object set in the subscribe message");
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "No filter set in the subscribe message");
-        }
+        return getTopic(getTopicExpressionType(subscribe));
     }
 
     /**
@@ -391,7 +450,7 @@ public class WsnHelper {
         return getTopic(notificationMessage.getTopic());
     }
 
-    protected static QName getTopic(TopicExpressionType topicExpressionType) {
+    private static QName getTopic(TopicExpressionType topicExpressionType) {
         List<Object> content = topicExpressionType.getContent();
         if (content.size() > 0) {
             String topicLocalPart = null;
@@ -428,17 +487,45 @@ public class WsnHelper {
                 }
             } else {
                 Element topicElement = (Element) content.get(0);
-                String topic =
-                        topicElement.getTextContent().trim().replaceAll(
-                                "\n", "");
-                topicLocalPart = org.apache.xml.utils.QName.getLocalPart(topic);
-                topicPrefix = org.apache.xml.utils.QName.getPrefixPart(topic);
-                topicNamespace = topicElement.lookupNamespaceURI(topicPrefix);
+
+                if (topicElement.getLocalName()
+                        .equals(
+                                WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_QNAME.getLocalPart())) {
+                    String topic =
+                            topicElement.getTextContent().trim().replaceAll(
+                                    "\n", "");
+                    topicLocalPart =
+                            org.apache.xml.utils.QName.getLocalPart(topic);
+                    topicPrefix =
+                            org.apache.xml.utils.QName.getPrefixPart(topic);
+                    topicNamespace =
+                            topicElement.lookupNamespaceURI(topicPrefix);
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unable to extract topic content");
+                }
             }
 
             return new QName(topicNamespace, topicLocalPart, topicPrefix);
         } else {
             throw new IllegalArgumentException("No topic content set");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static TopicExpressionType getTopicExpressionType(Subscribe subscribe) {
+        FilterType filterType = subscribe.getFilter();
+        if (filterType != null) {
+            List<Object> any = filterType.getAny();
+            if (any.size() > 0) {
+                return ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
+            } else {
+                throw new IllegalArgumentException(
+                        "No any object set in the subscribe message");
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "No filter set in the subscribe message");
         }
     }
 

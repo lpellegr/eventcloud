@@ -146,37 +146,10 @@ public class XmlNotificationTranslator extends
         String eventId = null;
         Node eventIdNode = null;
         Node subjectNode = null;
-        Node subscriptionAddressNode = null;
         Node topicNode = null;
         Node producerAddressNode = null;
         Map<Node, Node> producerMetadataNodes = new HashMap<Node, Node>();
         Map<Node, Node> messageNodes = new HashMap<Node, Node>();
-
-        W3CEndpointReference subscriptionReference =
-                notificationMessage.getSubscriptionReference();
-        if (subscriptionReference != null) {
-            Object subscriptionAddress =
-                    ReflectionUtils.getFieldValue(
-                            subscriptionReference, "address");
-            if (subscriptionAddress != null) {
-                String subscriptionAddressUri =
-                        (String) ReflectionUtils.getFieldValue(
-                                subscriptionAddress, "uri");
-                if (subscriptionAddressUri != null) {
-                    subscriptionAddressNode =
-                            Node.createLiteral(subscriptionAddressUri);
-                } else {
-                    throw new TranslationException(
-                            "No subscription uri specified");
-                }
-            } else {
-                throw new TranslationException(
-                        "No subscription address specified");
-            }
-        } else {
-            throw new TranslationException(
-                    "No subscription reference specified");
-        }
 
         if (notificationMessage.getTopic() != null) {
             QName topic = WsnHelper.getTopic(notificationMessage);
@@ -244,10 +217,6 @@ public class XmlNotificationTranslator extends
                             .contains(
                                     WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
                         eventId = entry.getValue().getLiteralLexicalForm();
-                        if (!eventId.endsWith(WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
-                            eventId +=
-                                    WsnTranslatorConstants.XML_TRANSLATION_MARKER;
-                        }
                         break;
                     }
                 }
@@ -262,8 +231,14 @@ public class XmlNotificationTranslator extends
                     UriGenerator.randomPrefixed(
                             10,
                             EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue())
-                            .toString()
-                            + WsnTranslatorConstants.XML_TRANSLATION_MARKER;
+                            .toString();
+        }
+        if (!eventId.contains(WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
+            eventId += WsnTranslatorConstants.XML_TRANSLATION_MARKER;
+        }
+        if (WsnHelper.hasSimpleTopicExpression(notificationMessage)
+                && !eventId.endsWith(WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+            eventId += WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER;
         }
         eventIdNode = Node.createURI(eventId);
         subjectNode = Node.createURI(eventId + "#event");
@@ -278,11 +253,6 @@ public class XmlNotificationTranslator extends
             throw new TranslationException(
                     "No any content specified in the notify message");
         }
-
-        quads.add(new Quadruple(
-                eventIdNode, subjectNode,
-                WsnTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
-                subscriptionAddressNode, false, true));
 
         quads.add(new Quadruple(
                 eventIdNode, subjectNode, WsnTranslatorConstants.TOPIC_NODE,
