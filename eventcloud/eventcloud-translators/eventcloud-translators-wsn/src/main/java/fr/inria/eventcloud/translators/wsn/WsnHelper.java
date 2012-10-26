@@ -429,9 +429,8 @@ public class WsnHelper {
             } else {
                 Element topicElement = (Element) content.get(0);
                 String topic =
-                        ((Element) content.get(0)).getTextContent()
-                                .trim()
-                                .replaceAll("\n", "");
+                        topicElement.getTextContent().trim().replaceAll(
+                                "\n", "");
                 topicLocalPart = org.apache.xml.utils.QName.getLocalPart(topic);
                 topicPrefix = org.apache.xml.utils.QName.getPrefixPart(topic);
                 topicNamespace = topicElement.lookupNamespaceURI(topicPrefix);
