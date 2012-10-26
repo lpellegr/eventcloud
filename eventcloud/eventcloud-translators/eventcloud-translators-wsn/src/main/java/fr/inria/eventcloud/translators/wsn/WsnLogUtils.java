@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -52,6 +53,7 @@ public class WsnLogUtils {
 
     private static Logger log = LoggerFactory.getLogger(WsnLogUtils.class);
 
+    @SuppressWarnings("unchecked")
     public static void logSubscribe(Subscribe subscribe) {
         if (log.isInfoEnabled()) {
             log.info("-- Subscribe message to process (start) ------");
@@ -60,10 +62,10 @@ public class WsnLogUtils {
                     subscribe.getConsumerReference(), "consumer");
 
             List<Object> any = subscribe.getAny();
-            if (any != null) {
+            if ((any != null) && (any.size() != 0)) {
                 log.info("any values are:");
                 for (Object obj : any) {
-                    log.info("  {} (class {})", obj, obj.getClass().getName());
+                    log.info("  * {} (class {})", obj, obj.getClass().getName());
                 }
             } else {
                 log.info("any is null");
@@ -73,38 +75,12 @@ public class WsnLogUtils {
 
             if (filterType != null) {
                 any = filterType.getAny();
-                if (any != null) {
+                if ((any != null) && (any.size() != 0)) {
                     log.info("filter type any values are:");
                     for (Object obj : any) {
-                        if (obj != null) {
-                            if (obj instanceof TopicExpressionType) {
-                                TopicExpressionType topicType =
-                                        (TopicExpressionType) obj;
-                                List<Object> topicContent =
-                                        topicType.getContent();
-                                if (topicContent != null) {
-                                    log.info(
-                                            "filter type topicContent(dialect={}) :",
-                                            topicType.getDialect());
-                                    for (Object obj2 : topicContent) {
-                                        log.info(
-                                                "  {} (class {})", obj2,
-                                                obj2.getClass().getName());
-                                    }
-
-                                    logAttributes(
-                                            "filter type topicAttribute",
-                                            topicType, "otherAttributes");
-                                } else {
-                                    log.info("filter type topicContent is null");
-                                }
-                            } else {
-                                log.info("  {} (class {})", obj, obj.getClass()
-                                        .getName());
-                            }
-                        } else {
-                            log.info("filter type topicType is null");
-                        }
+                        logTopic(
+                                ((JAXBElement<TopicExpressionType>) obj).getValue(),
+                                "  ");
                     }
                 } else {
                     log.info("filter type any is null");
@@ -124,26 +100,7 @@ public class WsnLogUtils {
             logW3CEndpointReference(
                     msg.getSubscriptionReference(), "subscriber");
 
-            TopicExpressionType topicType = msg.getTopic();
-            if (topicType != null) {
-                List<Object> topicContent = topicType.getContent();
-                if (topicContent != null) {
-                    log.info(
-                            "topicContent(dialect={}) :",
-                            topicType.getDialect());
-                    for (Object obj : topicContent) {
-                        log.info("  {} (class {})", obj, obj.getClass()
-                                .getName());
-                    }
-
-                    logAttributes(
-                            "topicAttribute", topicType, "otherAttributes");
-                } else {
-                    log.info("topicContent is null");
-                }
-            } else {
-                log.info("topicExpressionType is null");
-            }
+            logTopic(msg.getTopic(), "");
 
             logW3CEndpointReference(msg.getProducerReference(), "producer");
 
@@ -196,7 +153,7 @@ public class WsnLogUtils {
                 if (metadataElts != null) {
                     log.info("type={}, metadata=", type);
                     for (Element elt : (List<Element>) metadataElts) {
-                        log.info("  {} ", asString(elt));
+                        log.info("  * {} ", asString(elt));
                     }
                 } else {
                     log.info("type={}, metadata elements is null", type);
@@ -215,13 +172,45 @@ public class WsnLogUtils {
             if (elements != null) {
                 log.info("type={}, elements=", type);
                 for (Element elt : (List<Element>) elements) {
-                    log.info("  {} ", asString(elt));
+                    log.info("  * {} ", asString(elt));
                 }
             } else {
                 log.info("type={}, elements is null", type);
             }
         } else {
             log.info("type={} is null", type);
+        }
+    }
+
+    private static void logTopic(TopicExpressionType topicExpressionType,
+                                 String indentation) {
+        List<Object> topicContent = topicExpressionType.getContent();
+        if (topicContent != null) {
+            log.info(
+                    indentation + "topicContent(dialect={}):",
+                    topicExpressionType.getDialect());
+            for (Object obj2 : topicContent) {
+                if (obj2 instanceof String) {
+                    log.info(indentation + "  * " + obj2 + " (class "
+                            + obj2.getClass().getName() + ")");
+                } else {
+                    Element topicElement = (Element) obj2;
+                    String topic =
+                            topicElement.getTextContent().trim().replaceAll(
+                                    "\n", "");
+                    log.info(indentation
+                            + "  * "
+                            + topic
+                            + " (namespace "
+                            + topicElement.lookupNamespaceURI(org.apache.xml.utils.QName.getPrefixPart(topic))
+                            + ") (class " + obj2.getClass().getName() + ")");
+                }
+            }
+
+            logAttributes(
+                    "  topicAttribute", topicExpressionType, "otherAttributes");
+        } else {
+            log.info("  topicContent is null");
         }
     }
 
@@ -233,7 +222,7 @@ public class WsnLogUtils {
 
         if (attributes != null) {
             for (Entry<QName, String> entry : attributes.entrySet()) {
-                log.info("type={}, attributes=<{}, {}>", new Object[] {
+                log.info("* type={}, attributes=<{}, {}>", new Object[] {
                         type, entry.getKey(), entry.getValue()});
             }
         } else {
