@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.proxies;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +47,6 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.BindingWrapperNotificationListener;
@@ -663,28 +660,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @MemberOf("parallel")
     public String getComponentUri() {
         return this.componentUri;
-    }
-
-    /**
-     * Lookups a subscribe proxy component on the specified {@code componentUri}
-     * .
-     * 
-     * @param componentUri
-     *            the URL of the subscribe proxy component.
-     * 
-     * @return the reference on the {@link SubscribeApi} interface of the
-     *         subscribe proxy component.
-     * 
-     * @throws IOException
-     *             if an error occurs during the construction of the stub.
-     * 
-     * @deprecated This method will be removed for the next release. Please use
-     *             {@link ProxyFactory#lookupSubscribeProxy(String)} instead.
-     */
-    @Deprecated
-    public static SubscribeProxy lookup(String componentUri) throws IOException {
-        return ComponentUtils.lookupFcInterface(
-                componentUri, SUBSCRIBE_SERVICES_ITF, SubscribeProxy.class);
     }
 
 }

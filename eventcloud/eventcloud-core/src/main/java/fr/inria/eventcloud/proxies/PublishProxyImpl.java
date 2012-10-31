@@ -27,13 +27,11 @@ import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -171,27 +169,6 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
         new MultiActiveService(body).multiActiveServing(
                 EventCloudProperties.MAO_SOFT_LIMIT_PUBLISH_PROXIES.getValue(),
                 false, false);
-    }
-
-    /**
-     * Lookups a publish proxy component on the specified {@code componentUri}.
-     * 
-     * @param componentUri
-     *            the URL of the publish proxy component.
-     * 
-     * @return the reference on the {@link PublishApi} interface of the publish
-     *         proxy component.
-     * 
-     * @throws IOException
-     *             if an error occurs during the construction of the stub.
-     * 
-     * @deprecated This method will be removed for the next release. Please use
-     *             {@link ProxyFactory#lookupPublishProxy(String)} instead.
-     */
-    @Deprecated
-    public static PublishProxy lookup(String componentUri) throws IOException {
-        return ComponentUtils.lookupFcInterface(
-                componentUri, PUBLISH_SERVICES_ITF, PublishProxy.class);
     }
 
 }
