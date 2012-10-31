@@ -27,12 +27,17 @@ public class PropertyString extends Property<String> {
         super(name, defaultValue);
     }
 
+    public PropertyString(String name, String defaultValue,
+            Validator<String> validator) {
+        super(name, defaultValue, validator);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void setValueAsString(String value) {
-        super.value = value;
+        super.setValue(value);
     }
 
 }

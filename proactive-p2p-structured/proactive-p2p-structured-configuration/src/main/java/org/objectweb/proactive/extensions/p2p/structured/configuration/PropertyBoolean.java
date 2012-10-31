@@ -27,12 +27,17 @@ public class PropertyBoolean extends Property<Boolean> {
         super(name, defaultValue);
     }
 
+    public PropertyBoolean(String name, Boolean defaultValue,
+            Validator<Boolean> validator) {
+        super(name, defaultValue, validator);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void setValueAsString(String value) {
-        super.value = Boolean.valueOf(value);
+        super.setValue(Boolean.valueOf(value));
     }
 
 }
