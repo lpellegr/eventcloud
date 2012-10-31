@@ -27,6 +27,11 @@ public class PropertyCharacter extends Property<Character> {
         super(name, defaultValue);
     }
 
+    public PropertyCharacter(String name, Character defaultValue,
+            Validator<Character> validator) {
+        super(name, defaultValue, validator);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -36,7 +41,7 @@ public class PropertyCharacter extends Property<Character> {
             throw new IllegalArgumentException();
         }
 
-        super.value = value.charAt(0);
+        super.setValue(value.charAt(0));
     }
 
 }

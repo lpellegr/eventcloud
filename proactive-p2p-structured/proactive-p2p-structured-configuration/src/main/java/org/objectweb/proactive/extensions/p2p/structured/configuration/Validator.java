@@ -17,27 +17,24 @@
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
 /**
- * A {@link Byte} property.
+ * Used to check whether an illegal value is provided for a {@link Property} or
+ * not.
  * 
  * @author lpellegr
+ * 
+ * @param <T>
+ *            property value type.
  */
-public class PropertyByte extends Property<Byte> {
+public abstract class Validator<T> {
 
-    public PropertyByte(String name, Byte defaultValue) {
-        super(name, defaultValue);
+    public void checkValidity(String propertyName, T propertyValue) {
+        if (!this.isLegalValue(propertyValue)) {
+            throw new IllegalArgumentException(
+                    "Invalid value specified for property '" + propertyName
+                            + "': " + propertyValue);
+        }
     }
 
-    public PropertyByte(String name, Byte defaultValue,
-            Validator<Byte> validator) {
-        super(name, defaultValue, validator);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValueAsString(String value) {
-        super.setValue(Byte.valueOf(value));
-    }
+    public abstract boolean isLegalValue(T propertyValue);
 
 }

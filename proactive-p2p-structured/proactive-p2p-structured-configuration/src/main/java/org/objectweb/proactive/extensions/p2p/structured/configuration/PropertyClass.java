@@ -31,12 +31,17 @@ public class PropertyClass extends Property<Class<?>> {
         super(name, transform(className));
     }
 
+    public PropertyClass(String name, Class<?> defaultValue,
+            Validator<Class<?>> validator) {
+        super(name, defaultValue, validator);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void setValueAsString(String className) {
-        super.value = transform(className);
+        super.setValue(transform(className));
     }
 
     private static Class<?> transform(String className) {

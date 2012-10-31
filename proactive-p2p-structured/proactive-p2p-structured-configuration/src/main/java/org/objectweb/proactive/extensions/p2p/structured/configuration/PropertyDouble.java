@@ -27,12 +27,17 @@ public class PropertyDouble extends Property<Double> {
         super(name, defaultValue);
     }
 
+    public PropertyDouble(String name, Double defaultValue,
+            Validator<Double> validator) {
+        super(name, defaultValue, validator);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void setValueAsString(String value) {
-        super.value = Double.valueOf(value);
+        super.setValue(Double.valueOf(value));
     }
 
 }
