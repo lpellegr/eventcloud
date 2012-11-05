@@ -44,7 +44,15 @@ public abstract class Property<T> {
 
         this.name = name;
         this.defaultValue = defaultValue;
-        this.value = defaultValue;
+
+        String javaProperty = System.getProperty(this.name);
+
+        if (javaProperty != null) {
+            this.setValueAsString(javaProperty);
+        } else {
+            this.value = defaultValue;
+        }
+
         this.validator = validator;
     }
 
