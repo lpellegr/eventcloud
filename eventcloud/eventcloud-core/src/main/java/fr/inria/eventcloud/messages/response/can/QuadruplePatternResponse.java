@@ -44,7 +44,7 @@ public class QuadruplePatternResponse extends
      * {@inheritDoc}
      */
     @Override
-    public List<Quadruple> merge(List<SerializedValue<List<Quadruple>>> intermediateResults) {
+    public synchronized List<Quadruple> merge(List<SerializedValue<List<Quadruple>>> intermediateResults) {
         List<Quadruple> result = new ArrayList<Quadruple>();
 
         for (SerializedValue<List<Quadruple>> intermediateResult : intermediateResults) {

@@ -38,7 +38,7 @@ public class CountQuadruplePatternResponse extends
      * {@inheritDoc}
      */
     @Override
-    public Long merge(List<SerializedValue<Long>> intermediateResults) {
+    public synchronized Long merge(List<SerializedValue<Long>> intermediateResults) {
         long result = 0;
 
         for (SerializedValue<Long> subResult : intermediateResults) {
