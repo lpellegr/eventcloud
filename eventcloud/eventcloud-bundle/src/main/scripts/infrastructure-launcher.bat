@@ -102,25 +102,25 @@ goto:eof
   for /F %%i in ("%REGISTRY_INSTANCE_FILE%") do set BASENAME_REGISTRY_INSTANCE_FILE=%%~ni
   start "EventCloudsRegistry" /b javaw -Xms128m -Xmx256m ^
      -server ^
-     -Djava.security.policy=%PATH_TO_RESOURCES%/proactive.security.policy ^
-     -Deventcloud.bundle.home=%BUNDLE_HOME% ^
-     -Deventcloud.configuration=%PATH_TO_RESOURCES%/eventcloud.properties ^
-     -Deventcloud.instance.file=%REGISTRY_INSTANCE_FILE% ^
-     -Dlog4j.configuration=file:%PATH_TO_RESOURCES%/log4j.properties ^
-     -Dlogback.configurationFile=file:%PATH_TO_RESOURCES%/logback.xml ^
-     -Dlogging.output.filename=%BASENAME_REGISTRY_INSTANCE_FILE% ^
+     -Djava.security.policy="%PATH_TO_RESOURCES%/proactive.security.policy" ^
+     -Deventcloud.bundle.home="%BUNDLE_HOME%" ^
+     -Deventcloud.configuration="%PATH_TO_RESOURCES%/eventcloud.properties" ^
+     -Deventcloud.instance.file="%REGISTRY_INSTANCE_FILE%" ^
+     -Dlog4j.configuration="file:%PATH_TO_RESOURCES%/log4j.properties" ^
+     -Dlogback.configurationFile="file:%PATH_TO_RESOURCES%/logback.xml" ^
+     -Dlogging.output.filename="%BASENAME_REGISTRY_INSTANCE_FILE%" ^
      -Dproactive.communication.protocol=pnp ^
      -Dproactive.pnp.port=%EVENTCLOUDS_REGISTRY_PORT% ^
-     -cp %CLASSPATH% ^
-     fr.inria.eventcloud.deployment.cli.launchers.EventCloudsRegistryLauncher > %REGISTRY_OUTPUT_FILE% 2>&1
+     -cp "%CLASSPATH%" ^
+     fr.inria.eventcloud.deployment.cli.launchers.EventCloudsRegistryLauncher > "%REGISTRY_OUTPUT_FILE%" 2>&1
 
-  if not exist %REGISTRY_INSTANCE_FILE% (
+  if not exist "%REGISTRY_INSTANCE_FILE%" (
     start "EventCloudsRegistry Watchdog" /w ^
-       python %BUNDLE_HOME%/scripts/filename-watchdog.py %INSTANCES_DIR% ^
-       %BASENAME_REGISTRY_INSTANCE_FILE% > nul 2>&1  
+       python "%BUNDLE_HOME%/scripts/filename-watchdog.py" "%INSTANCES_DIR%" ^
+       "%BASENAME_REGISTRY_INSTANCE_FILE%" > nul 2>&1  
   )
   
-  set /p EVENTCLOUDS_REGISTRY_URL= < %REGISTRY_INSTANCE_FILE%
+  set /p EVENTCLOUDS_REGISTRY_URL= < "%REGISTRY_INSTANCE_FILE%"
   echo EventClouds registry deployed at:
   echo     %EVENTCLOUDS_REGISTRY_URL%
 goto:eof
@@ -129,27 +129,27 @@ goto:eof
   for /F %%i in ("%WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%") do set BASENAME_WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE=%%~ni
   start "EventCloudsManagementWebservice" /b javaw -Xms256m -Xmx10240m ^
      -server ^
-     -Djava.security.policy=%PATH_TO_RESOURCES%/proactive.security.policy ^
-     -Deventcloud.bundle.home=%BUNDLE_HOME% ^
-     -Deventcloud.configuration=%PATH_TO_RESOURCES%/eventcloud.properties ^
-     -Deventcloud.instance.file=%WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE% ^
-     -Dlog4j.configuration=file:%PATH_TO_RESOURCES%/log4j.properties ^
-     -Dlogback.configurationFile=file:%PATH_TO_RESOURCES%/logback.xml ^
-     -Dlogging.output.filename=%BASENAME_WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE% ^
+     -Djava.security.policy="%PATH_TO_RESOURCES%/proactive.security.policy" ^
+     -Deventcloud.bundle.home="%BUNDLE_HOME%" ^
+     -Deventcloud.configuration="%PATH_TO_RESOURCES%/eventcloud.properties" ^
+     -Deventcloud.instance.file="%WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%" ^
+     -Dlog4j.configuration="file:%PATH_TO_RESOURCES%/log4j.properties" ^
+     -Dlogback.configurationFile="file:%PATH_TO_RESOURCES%/logback.xml" ^
+     -Dlogging.output.filename="%BASENAME_WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%" ^
      -Dproactive.communication.protocol=pnp ^
      -Dproactive.pnp.port=%WS_EVENTCLOUDS_MANAGEMENT_PNP_PORT% ^
      -Dproactive.http.port=%WS_EVENTCLOUDS_HTTP_PORT% ^
-     -cp %CLASSPATH% fr.inria.eventcloud.deployment.cli.launchers.EventCloudsManagementServiceLauncher ^
+     -cp "%CLASSPATH%" fr.inria.eventcloud.deployment.cli.launchers.EventCloudsManagementServiceLauncher ^
      -r %EVENTCLOUDS_REGISTRY_URL% ^
-     -p %WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT% > %WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE% 2>&1
+     -p %WS_EVENTCLOUDS_MANAGEMENT_HTTP_PORT% > "%WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE%" 2>&1
 	 
-     if not exist %WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE% (
+     if not exist "%WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%" (
        start "EventCloudsManagementWebservice Watchdog" /w ^
-	      python %BUNDLE_HOME%/scripts/filename-watchdog.py %INSTANCES_DIR% ^
-          %BASENAME_WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE% > nul 2>&1  
+	      python "%BUNDLE_HOME%/scripts/filename-watchdog.py" "%INSTANCES_DIR%" ^
+          "%BASENAME_WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%" > nul 2>&1  
      )
 	 
-     set /p WS_EVENTCLOUDS_MANAGEMENT_URL= < %WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%
+     set /p WS_EVENTCLOUDS_MANAGEMENT_URL= < "%WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%"
 	 SET WS_EVENTCLOUDS_MANAGEMENT_URL=%WS_EVENTCLOUDS_MANAGEMENT_URL:0.0.0.0=localhost%
      echo EventClouds management web service deployed at:
      echo     %WS_EVENTCLOUDS_MANAGEMENT_URL%
@@ -159,5 +159,5 @@ goto:eof
   rem TODO(laurent) try to improve termination by killing only the java 
   rem processes which have been started from the script
   taskkill /f /fi "imagename eq javaw.exe" > nul 2>&1
-  rmdir /s /q %INSTANCES_DIR% 2> nul
+  rmdir /s /q "%INSTANCES_DIR%" 2> nul
 goto:eof
