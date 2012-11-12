@@ -31,19 +31,22 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.pubsub.Notification;
-import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.pubsub.notifications.BindingNotification;
+import fr.inria.eventcloud.pubsub.notifications.NotificationId;
 
 /**
- * The class RetrieveSubSolutionOperation is used to retrieve the sub-solutions
- * associated to a {@link Notification}.
+ * This class is used to retrieve the remaining sub solutions associated to a
+ * solution matching a subscription register by a subscriber along with a
+ * {@link BindingNotificationListener}.
  * 
  * @author lpellegr
  */
@@ -59,7 +62,6 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
     private final HashCode hash;
 
     public RetrieveSubSolutionOperation(NotificationId id, HashCode hash) {
-        super();
         this.notificationId = id;
         this.hash = hash;
     }
@@ -113,12 +115,6 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
         Pair<Quadruple, SubscriptionId> extractedMetaInfo =
                 PublishSubscribeUtils.extractMetaInformation(metaQuad);
 
-        // Subsubscription subSubscription =
-        // Subsubscription.parseFrom(
-        // datastore,
-        // PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()),
-        // extractedMetaInfo.getSecond());
-
         // extracts only the variables that are declared as result variables in
         // the original subscription
         Subscription subscription =
@@ -130,14 +126,12 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
                         subscription.getResultVars(),
                         subscription.getSubSubscriptions()[0].getAtomicQuery());
 
-        // TODO: replace PAActiveObject.getUrl(overlay.getStub()) by the
-        // component URL? (same in PublishQuadrupleRequest and
-        // IndexSubscriptionRequest)
         try {
             subscription.getSubscriberProxy().receive(
-                    new Notification(
-                            this.notificationId,
-                            PAActiveObject.getUrl(overlay.getStub()), binding));
+                    new BindingNotification(
+                            this.notificationId, extractedMetaInfo.getSecond(),
+                            PAActiveObject.getUrl(overlay.getStub()),
+                            new BindingWrapper(binding)));
         } catch (ExecutionException e) {
             log.error("No SubscribeProxy found under the given URL: "
                     + subscription.getSubscriberUrl(), e);

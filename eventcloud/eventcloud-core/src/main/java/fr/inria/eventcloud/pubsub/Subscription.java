@@ -263,7 +263,7 @@ public class Subscription implements Quadruplable, Serializable {
                         basicInfo.get(SUBSCRIPTION_SPARQL_QUERY_PROPERTY)
                                 .getLiteralLexicalForm(),
                         basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
-                                .getLiteralLexicalForm(),
+                                .getURI(),
                         subscriptionDestination,
                         NotificationListenerType.UNKNOWN.convert(((Integer) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
@@ -495,7 +495,7 @@ public class Subscription implements Quadruplable, Serializable {
         quads.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SUBSCRIBER_NODE,
-                Node.createLiteral(this.subscriberUrl), false, false));
+                Node.createURI(this.subscriberUrl), false, false));
 
         if (this.subscriptionDestination != null) {
             quads.add(new Quadruple(
@@ -524,7 +524,6 @@ public class Subscription implements Quadruplable, Serializable {
                     subscriptionOriginalURI,
                     subscriptionURI,
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
-                    // Node.createLiteral(ssubscription.getId().toString()),
                     PublishSubscribeUtils.createSubSubscriptionIdUri(ssubscription.getId()),
                     false, false));
             quads.addAll(ssubscription.toQuadruples());
@@ -579,6 +578,11 @@ public class Subscription implements Quadruplable, Serializable {
             this.quadrupleHash = quadrupleHashValue;
         }
 
+        @Override
+        public String toString() {
+            return this.peerUrl;
+        }
+
     }
 
     public static void main(String[] args) {
@@ -587,7 +591,7 @@ public class Subscription implements Quadruplable, Serializable {
                 new Subscription(
                         id, null, id, System.currentTimeMillis(),
                         "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o }}",
-                        "http://dummy.com", NotificationListenerType.BINDINGS);
+                        "http://dummy.com", NotificationListenerType.BINDING);
 
         System.out.println(subscription.toQuadruples());
     }

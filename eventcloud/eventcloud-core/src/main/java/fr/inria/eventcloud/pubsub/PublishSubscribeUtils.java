@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
@@ -70,17 +71,23 @@ import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
+import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.Vars;
+import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.pubsub.notifications.BindingNotification;
+import fr.inria.eventcloud.pubsub.notifications.PollingSignalNotification;
+import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
+import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -546,36 +553,71 @@ public final class PublishSubscribeUtils {
         }
 
         try {
-            final SubscribeProxy subscriber = subscription.getSubscriberProxy();
+            SubscribeProxy subscriber = subscription.getSubscriberProxy();
 
-            final NotificationId notificationId =
-                    new NotificationId(subscription.getOriginalId());
+            String source = PAActiveObject.getUrl(semanticCanOverlay.getStub());
 
-            final Notification n =
-                    new Notification(
-                            notificationId,
-                            PAActiveObject.getUrl(semanticCanOverlay.getStub()),
-                            createBindingSolution(subscription, quadruple));
+            switch (subscription.getType()) {
+                case BINDING:
+                    BindingNotification notification =
+                            new BindingNotification(
+                                    subscription.getOriginalId(),
+                                    quadruple.getGraph(), source,
+                                    new BindingWrapper(createBindingSolution(
+                                            subscription, quadruple)));
 
-            subscriber.receive(n);
+                    // sends part of the solution to the subscriber
+                    subscriber.receive(notification);
 
-            if (subscription.getType() == NotificationListenerType.BINDINGS) {
-                // broadcasts a message to all the stubs contained by
-                // the subscription to say to these peers to send their
-                // sub-solutions to the subscriber
-                for (final Subscription.Stub stub : subscription.getStubs()) {
-                    final SemanticPeer peerStub =
-                            semanticCanOverlay.findPeerStub(stub.peerUrl);
+                    // broadcasts a message to all the stubs contained by
+                    // the subscription to say to these peers to send the
+                    // missing sub solutions to the subscriber
+                    for (final Subscription.Stub stub : subscription.getStubs()) {
+                        final SemanticPeer peerStub =
+                                semanticCanOverlay.findPeerStub(stub.peerUrl);
 
-                    if (peerStub != null) {
-                        peerStub.receive(new RetrieveSubSolutionOperation(
-                                notificationId, stub.quadrupleHash));
-                    } else {
-                        log.error(
-                                "Error while retrieving peer stub for url: {}",
-                                stub.peerUrl);
+                        if (peerStub != null) {
+                            peerStub.receive(new RetrieveSubSolutionOperation(
+                                    notification.getId(), stub.quadrupleHash));
+                        } else {
+                            log.error(
+                                    "Error while retrieving peer stub for url: {}",
+                                    stub.peerUrl);
+                        }
                     }
-                }
+                    break;
+                case COMPOUND_EVENT:
+                    if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
+                        subscriber.receive(new PollingSignalNotification(
+                                subscription.getOriginalId(),
+                                quadruple.getGraph(), source,
+                                quadruple.createMetaGraphNode()));
+                    } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
+                        QuadruplesNotification quadruplesNotification =
+                                new QuadruplesNotification(
+                                        subscription.getOriginalId(),
+                                        quadruple.getGraph(), source,
+                                        ImmutableList.of(quadruple));
+
+                        if (semanticCanOverlay.markAsSent(
+                                quadruplesNotification.getId(), quadruple)) {
+                            subscriber.receive(quadruplesNotification);
+                        }
+
+                        semanticCanOverlay.getStub().sendv(
+                                new IndexEphemeralSubscriptionRequest(
+                                        quadruple.createMetaGraphNode(),
+                                        subscription.getOriginalId(),
+                                        subscription.getSubscriberUrl()));
+                    }
+                    break;
+                case SIGNAL:
+                    subscriber.receive(new SignalNotification(
+                            subscription.getOriginalId(), quadruple.getGraph(),
+                            source));
+                    break;
+                case UNKNOWN:
+                    throw new IllegalStateException();
             }
         } catch (ExecutionException e) {
             log.warn("Notification cannot be sent because no SubscribeProxy found under URL: "
@@ -619,7 +661,7 @@ public final class PublishSubscribeUtils {
                                     new UnsubscribeRequest(
                                             subscription.getOriginalId(),
                                             subSubscription.getAtomicQuery(),
-                                            subscription.getType() == NotificationListenerType.BINDINGS)));
+                                            subscription.getType() == NotificationListenerType.BINDING)));
 
                     semanticCanOverlay.getSubscriberConnectionFailures()
                             .remove(subscription.getOriginalId());
@@ -636,15 +678,17 @@ public final class PublishSubscribeUtils {
     private static void logSocialFilterAnswer(final Subscription subscription,
                                               final Quadruple quadruple,
                                               double relationshipStrength) {
-        log.debug(
-                "SocialFilterAnswer[source={}, destination={}, threshold={}, relationship_strengh={}, quadruple={}|{}|{}|{}]",
-                new Object[] {
-                        quadruple.getPublicationSource(),
-                        subscription.getSubscriptionDestination(),
-                        EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
-                        relationshipStrength, quadruple.getGraph(),
-                        quadruple.getSubject(), quadruple.getPredicate(),
-                        quadruple.getObject(),});
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "SocialFilterAnswer[source={}, destination={}, threshold={}, relationship_strengh={}, quadruple={}|{}|{}|{}]",
+                    new Object[] {
+                            quadruple.getPublicationSource(),
+                            subscription.getSubscriptionDestination(),
+                            EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
+                            relationshipStrength, quadruple.getGraph(),
+                            quadruple.getSubject(), quadruple.getPredicate(),
+                            quadruple.getObject(),});
+        }
     }
 
     /**
@@ -656,7 +700,7 @@ public final class PublishSubscribeUtils {
      *            the subscription which is partially matched by the given
      *            quadruple.
      * @param quadruple
-     *            the quadruple matching the first subsubscription of the
+     *            the quadruple matching the first sub subscription of the
      *            specified subscription.
      * 
      * @return a binding containing variables and their solution according to
@@ -664,27 +708,13 @@ public final class PublishSubscribeUtils {
      *         listener used for the specified subscription.
      */
     private static Binding createBindingSolution(final Subscription subscription,
-                                                 Quadruple quadruple) {
-        Binding binding = null;
-
-        if (subscription.getType() == NotificationListenerType.BINDINGS) {
-            // only the solutions for the result variables from the
-            // original SPARQL query have to be returned to the
-            // subscriber
-            binding =
-                    PublishSubscribeUtils.filter(
-                            quadruple,
-                            subscription.getResultVars(),
-                            subscription.getSubSubscriptions()[0].getAtomicQuery());
-        } else if (subscription.getType() == NotificationListenerType.COMPOUND_EVENT
-                || subscription.getType() == NotificationListenerType.SIGNAL) {
-            // only the graph value has to be returned to the subscriber
-            binding =
-                    BindingFactory.binding(
-                            Var.alloc("g"), quadruple.createMetaGraphNode());
-        }
-
-        return binding;
+                                                 final Quadruple quadruple) {
+        // only the solutions for the result variables from the
+        // original SPARQL query have to be returned to the
+        // subscriber
+        return PublishSubscribeUtils.filter(
+                quadruple, subscription.getResultVars(),
+                subscription.getSubSubscriptions()[0].getAtomicQuery());
     }
 
     /**
@@ -704,7 +734,7 @@ public final class PublishSubscribeUtils {
     private static void rewriteAndIndexSubscription(final SemanticCanOverlay overlay,
                                                     final Subscription subscription,
                                                     final Quadruple quadrupleMatching) {
-        if (subscription.getType() == NotificationListenerType.BINDINGS) {
+        if (subscription.getType() == NotificationListenerType.BINDING) {
             // stores a quadruple that contains the information about the
             // subscription that is matched and the quadruple that matches the
             // subscription. This is useful to create the notification later.

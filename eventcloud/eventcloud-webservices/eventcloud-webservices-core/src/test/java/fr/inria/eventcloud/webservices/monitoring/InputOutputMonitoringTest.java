@@ -128,10 +128,11 @@ public class InputOutputMonitoringTest extends WsTest {
         // Publishes a compound event through a java publish proxy
         this.publishProxy.publish(CompoundEventGenerator.random(STREAM_URL, 10));
 
-        // We must receive one report for each subscribe proxy times the number
-        // of publications matching the subscriptions
+        // We must receive one report for each subscription registered along
+        // with a compound event notification listener, times the number of
+        // publications matching the subscriptions
         synchronized (this.monitoringService.notificationsReceived) {
-            while (this.monitoringService.notificationsReceived.size() != 4) {
+            while (this.monitoringService.notificationsReceived.size() != 2) {
                 this.monitoringService.notificationsReceived.wait();
             }
         }
@@ -151,7 +152,7 @@ public class InputOutputMonitoringTest extends WsTest {
         // Checks that no more reports are received
         synchronized (this.monitoringService.notificationsReceived) {
             this.monitoringService.notificationsReceived.wait(4000);
-            Assert.assertTrue(this.monitoringService.notificationsReceived.size() == 4);
+            Assert.assertTrue(this.monitoringService.notificationsReceived.size() == 2);
         }
     }
 

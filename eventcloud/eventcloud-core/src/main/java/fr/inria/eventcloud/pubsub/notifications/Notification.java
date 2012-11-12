@@ -14,38 +14,58 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.pubsub;
+package fr.inria.eventcloud.pubsub.notifications;
 
 import java.io.Serializable;
 
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.wrappers.BindingWrapper;
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * Defines a notification that is received by a {@link SubscribeProxy}. A
- * notification contains the smallest entity which can be received (i.e. a
- * {@link Binding}) as a sub-solution for a given subscription.
- * 
+ * notification contains one or more chunks associated to a solution that
+ * matches a subscription. It depends on the notification listener used by the
+ * subscriber and the publish/subscribe algorithm used.
+ * <p>
  * Two notifications with the same {@link NotificationId} are complementary:
- * they contain independent sub-solutions which belong to the same solution.
+ * they contain independent sub-solutions (chunks) which belong to the same
+ * solution.
+ * 
+ * @param T
+ *            the type of the chunks contained by the notification.
  * 
  * @author lpellegr
  */
-public class Notification implements Serializable {
+public abstract class Notification<T> implements Serializable {
 
     private static final long serialVersionUID = 130L;
 
     private final NotificationId id;
 
-    private final BindingWrapper binding;
+    private final SubscriptionId subscriptionId;
+
+    private final T content;
 
     private final String source;
 
-    public Notification(NotificationId id, String source, Binding binding) {
+    public Notification(SubscriptionId subscriptionId, Node eventId,
+            String source, T binding) {
+        this(subscriptionId, eventId.getURI(), source, binding);
+    }
+
+    public Notification(SubscriptionId subscriptionId, String eventId,
+            String source, T binding) {
+        this(new NotificationId(subscriptionId, eventId), subscriptionId,
+                source, binding);
+    }
+
+    public Notification(NotificationId id, SubscriptionId subscriptionId,
+            String source, T binding) {
         this.id = id;
-        this.binding = new BindingWrapper(binding);
+        this.subscriptionId = subscriptionId;
+        this.content = binding;
         this.source = source;
     }
 
@@ -53,8 +73,12 @@ public class Notification implements Serializable {
         return this.id;
     }
 
-    public Binding getBinding() {
-        return this.binding;
+    public SubscriptionId getSubscriptionId() {
+        return this.subscriptionId;
+    }
+
+    public T getContent() {
+        return this.content;
     }
 
     /**
@@ -71,21 +95,17 @@ public class Notification implements Serializable {
      */
     @Override
     public int hashCode() {
-        return 31 * (31 + this.id.hashCode()) + this.binding.hashCode();
+        return this.id.hashCode();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
-        if (obj instanceof Notification) {
-            Notification notif = (Notification) obj;
-
-            return this.id.equals(notif.id) && this.binding == notif.binding;
-        }
-
-        return false;
+        return obj instanceof Notification
+                && this.id.equals(((Notification<T>) obj).id);
     }
 
     /**
@@ -93,8 +113,7 @@ public class Notification implements Serializable {
      */
     @Override
     public String toString() {
-        return "Notification[id=" + this.id + ", binding=" + this.binding
-                + ", source=" + this.source + "]";
+        return this.id.toString();
     }
 
 }

@@ -83,7 +83,7 @@ public class UniqueId implements Serializable {
         return encode(this.value);
     }
 
-    private static String encode(UUID uuid) {
+    public static String encode(UUID uuid) {
         ByteBuffer buffer = ByteBuffer.allocate(16);
         buffer.putLong(uuid.getMostSignificantBits());
         buffer.putLong(uuid.getLeastSignificantBits());
@@ -91,7 +91,7 @@ public class UniqueId implements Serializable {
         return DatatypeConverter.printHexBinary(buffer.array());
     }
 
-    protected static UUID decode(String uuid) {
+    public static UUID decode(String uuid) {
         ByteBuffer buffer =
                 ByteBuffer.wrap(DatatypeConverter.parseHexBinary(uuid));
 

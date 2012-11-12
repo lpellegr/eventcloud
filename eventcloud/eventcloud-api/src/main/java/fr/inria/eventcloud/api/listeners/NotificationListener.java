@@ -43,7 +43,7 @@ public abstract class NotificationListener<T> implements Serializable,
      * Handles a notification that has been received.
      * 
      * @param id
-     *            the subscription identifier that identified which subscription
+     *            the subscription identifier that identifies which subscription
      *            is matched by the solution which is received.
      * @param solution
      *            a solution that matches the subscription.
@@ -69,6 +69,9 @@ public abstract class NotificationListener<T> implements Serializable,
     @MemberOf("parallel")
     public abstract String getSubscriberUrl();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void runActivity(Body body) {
         (new MultiActiveService(body)).multiActiveServing();

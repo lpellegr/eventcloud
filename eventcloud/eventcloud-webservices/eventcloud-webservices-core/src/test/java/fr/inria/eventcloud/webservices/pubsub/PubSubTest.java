@@ -199,7 +199,7 @@ public class PubSubTest extends WsTest {
         // Unsubscribes
         this.subscribeWsClient.unsubscribe(subscriptionId);
 
-        // TODO Remove sleep
+        // TODO Remove sleep?
         Thread.sleep(4000);
 
         // Publishes a 7th quadruple
@@ -220,7 +220,8 @@ public class PubSubTest extends WsTest {
     }
 
     @Test(timeout = 180000)
-    public void testSubscribeEventNotificationListener() throws Exception {
+    public void testSubscribeCompoundEventNotificationListener()
+            throws Exception {
         // Subscribes for any quadruples
         String subscriptionId =
                 this.subscribeWsClient.subscribeCompoundEvent(

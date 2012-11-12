@@ -23,9 +23,6 @@ import java.io.Serializable;
  * is based on a subset of the SPARQL query language. The subscription takes
  * effect when it is created (i.e. all the events which are published after this
  * creation time and that are matching your constraints will be delivered).
- * Finally, each subscription can be submitted through a call to
- * {@link SubscribeApi#subscribe(Subscription, fr.inria.eventcloud.api.listeners.NotificationListener)}
- * on a subscribe proxy but once.
  * 
  * @author lpellegr
  */
