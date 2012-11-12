@@ -34,13 +34,13 @@ public final class PublishSubscribeConstants {
 
     public static final String EVENT_NS = EVENTCLOUD_NS + "event:";
 
-    public static final String SUBSCRIPTION_NS = EVENTCLOUD_NS + "s:";
-
-    public static final String SUBSUBSCRIPTION_NS = EVENTCLOUD_NS + "ss:";
-
     public static final String PUBLICATION_NS = EVENTCLOUD_NS + "pub:";
 
     public static final String QUADRUPLE_NS = EVENTCLOUD_NS + "quad:";
+
+    public static final String SUBSCRIPTION_NS = EVENTCLOUD_NS + "s:";
+
+    public static final String SUBSUBSCRIPTION_NS = EVENTCLOUD_NS + "ss:";
 
     /*
      * Nodes associated to namespaces
@@ -48,16 +48,16 @@ public final class PublishSubscribeConstants {
 
     public static final Node EVENT_NS_NODE = Node.createURI(EVENT_NS);
 
+    public static final Node PUBLICATION_NS_NODE =
+            Node.createURI(PUBLICATION_NS);
+
+    public static final Node QUADRUPLE_NS_NODE = Node.createURI(QUADRUPLE_NS);
+
     public static final Node SUBSCRIPTION_NS_NODE =
             Node.createURI(SUBSCRIPTION_NS);
 
     public static final Node SUBSUBSCRIPTION_NS_NODE =
             Node.createURI(SUBSUBSCRIPTION_NS);
-
-    public static final Node PUBLICATION_NS_NODE =
-            Node.createURI(PUBLICATION_NS);
-
-    public static final Node QUADRUPLE_NS_NODE = Node.createURI(QUADRUPLE_NS);
 
     /*
      * Properties

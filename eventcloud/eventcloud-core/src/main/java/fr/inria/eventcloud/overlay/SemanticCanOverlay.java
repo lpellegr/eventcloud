@@ -38,8 +38,12 @@ import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEn
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
+import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -63,6 +67,7 @@ import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.SubscriberConnectionFailure;
 import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.pubsub.notifications.NotificationId;
 import fr.inria.eventcloud.reasoner.SparqlColander;
 
 /**
@@ -83,6 +88,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     private final TransactionalTdbDatastore miscDatastore;
 
     private final TransactionalTdbDatastore subscriptionsDatastore;
+
+    // this collection is used only when SCBE2 is enabled.
+    // its purpose is to maintain temporarily a trace of the quadruples which
+    // have already been sent for a given notification in order to avoid
+    // duplicates
+    private SetMultimap<NotificationId, HashCode> sentQuadrupleHashValues;
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -150,6 +161,22 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         this.subscriberConnectionFailures =
                 new MapMaker().softValues().makeMap();
+
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
+            this.sentQuadrupleHashValues =
+                    Multimaps.synchronizedSetMultimap(HashMultimap.<NotificationId, HashCode> create(
+                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
+                            EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue()));
+        }
+    }
+
+    public boolean markAsSent(NotificationId notificationId, Quadruple quadruple) {
+        return this.sentQuadrupleHashValues.put(
+                notificationId, quadruple.hashValue());
+    }
+
+    public void dropAsSent(NotificationId notificationId) {
+        this.sentQuadrupleHashValues.removeAll(notificationId);
     }
 
     /**
@@ -353,6 +380,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append('\n');
         }
 
+        if (this.sentQuadrupleHashValues != null) {
+            result.append("Nb entries contained by sentQuadrupleHashValues datastructure: ");
+            result.append(this.sentQuadrupleHashValues.size());
+            result.append('\n');
+        }
         // TransactionalDatasetGraph txnGraph =
         // this.miscDatastore.begin(AccessMode.READ_ONLY);
         //

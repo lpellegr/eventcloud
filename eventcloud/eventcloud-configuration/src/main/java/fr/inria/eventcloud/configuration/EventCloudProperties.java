@@ -26,6 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyC
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyDouble;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyInteger;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.Validator;
 
 /**
  * Contains default values for EventCloud properties.
@@ -40,6 +41,14 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyS
  * @author lpellegr
  */
 public class EventCloudProperties {
+
+    /**
+     * Defines approximatively the average number of quadruples per compound
+     * events handled by the system. This value is used to approximate the
+     * expected number of entries in the various map that are used.
+     */
+    public static final PropertyInteger AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT =
+            new PropertyInteger("average.nb.quadruples.per.compound.event", 30);
 
     /**
      * Defines whether the EventCloud has to compress the data which are
@@ -89,6 +98,33 @@ public class EventCloudProperties {
             new PropertyString(
                     "filter.functions.ns",
                     "http://eventcloud.inria.fr/function#");
+
+    /**
+     * Constant used to identify the SBCE publish/subscribe algorithm in version
+     * 1.
+     */
+    public static final String PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1 = "SBCE1";
+
+    /**
+     * Constant used to identify the SBCE publish/subscribe algorithm in version
+     * 2.
+     */
+    public static final String PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2 = "SBCE2";
+
+    /**
+     * Constant used to identify the SBCE publish/subscribe algorithm in version
+     * 3.
+     */
+    public static final String PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3 = "SBCE3";
+
+    /**
+     * Defines the publish/subscribe algorithm and version used by the system.
+     */
+    public static final PropertyString PUBLISH_SUBSCRIBE_ALGORITHM =
+            new PropertyString(
+                    "publish.subscribe.algorithm",
+                    PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1,
+                    new PubSubAlgorithmPropertyValidator());
 
     /**
      * Defines whether static load balancing must be enabled or not. When it is
@@ -179,8 +215,8 @@ public class EventCloudProperties {
 
     /**
      * Defines if statistics recording must be enabled or not for the misc
-     * datastore. When it is enabled, some stats like the number of quadruples
-     * added, etc. are recorded during each data insertion.
+     * datastore. When it is enabled, some statistics like the number of
+     * quadruples added, etc. are recorded during each data insertion.
      */
     public static final PropertyBoolean RECORD_STATS_MISC_DATASTORE =
             new PropertyBoolean("record.stats.misc.datastore", false);
@@ -356,6 +392,36 @@ public class EventCloudProperties {
         return System.getProperty("java.io.tmpdir") + File.separatorChar
                 + "eventcloud-" + System.getProperty("user.name")
                 + File.separatorChar;
+    }
+
+    public static final boolean isSbce1PubSubAlgorithmUsed() {
+        return isPubSubAlgorithmUsedEqualsTo(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1);
+    }
+
+    public static final boolean isSbce2PubSubAlgorithmUsed() {
+        return isPubSubAlgorithmUsedEqualsTo(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2);
+    }
+
+    public static final boolean isSbce3PubSubAlgorithmUsed() {
+        return isPubSubAlgorithmUsedEqualsTo(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3);
+    }
+
+    private static final boolean isPubSubAlgorithmUsedEqualsTo(String name) {
+        return PUBLISH_SUBSCRIBE_ALGORITHM.getValue().equals(name);
+    }
+
+    private static final class PubSubAlgorithmPropertyValidator extends
+            Validator<String> {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isLegalValue(String propertyValue) {
+            return propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1)
+                    || propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2)
+                    || propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3);
+        }
     }
 
 }

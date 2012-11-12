@@ -44,8 +44,8 @@ import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
  * that have a {@link Quadruple#hashValue()} which is not equals to a value
  * contained by the list of {@code quadHashesReceived}.
  * 
- * @see SubscribeProxyImpl#reconstructCompoundEvent(fr.inria.eventcloud.pubsub.Subscription,
- *      com.hp.hpl.jena.sparql.engine.binding.Binding)
+ * @see SubscribeProxyImpl#reconstructCompoundEvent(fr.inria.eventcloud.api.SubscriptionId,
+ *      Node)
  * 
  * @author lpellegr
  */

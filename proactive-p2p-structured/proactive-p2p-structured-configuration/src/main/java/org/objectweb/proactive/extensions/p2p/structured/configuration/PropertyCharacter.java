@@ -27,16 +27,21 @@ public class PropertyCharacter extends Property<Character> {
         super(name, defaultValue);
     }
 
+    public PropertyCharacter(String name, Character defaultValue,
+            Validator<Character> validator) {
+        super(name, defaultValue, validator);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
+    public Character parse(String value) {
         if (value.length() > 1) {
             throw new IllegalArgumentException();
         }
 
-        super.value = value.charAt(0);
+        return value.charAt(0);
     }
 
 }

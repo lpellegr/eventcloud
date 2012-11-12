@@ -17,27 +17,24 @@
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
 /**
- * An {@link Integer} property.
+ * Used to check whether an illegal value is provided for a {@link Property} or
+ * not.
  * 
  * @author lpellegr
+ * 
+ * @param <T>
+ *            property value type.
  */
-public class PropertyInteger extends Property<Integer> {
+public abstract class Validator<T> {
 
-    public PropertyInteger(String name, Integer defaultValue) {
-        super(name, defaultValue);
+    public void checkValidity(String propertyName, T propertyValue) {
+        if (!this.isLegalValue(propertyValue)) {
+            throw new IllegalArgumentException(
+                    "Invalid value specified for property '" + propertyName
+                            + "': " + propertyValue);
+        }
     }
 
-    public PropertyInteger(String name, Integer defaultValue,
-            Validator<Integer> validator) {
-        super(name, defaultValue, validator);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Integer parse(String value) {
-        return Integer.valueOf(value);
-    }
+    public abstract boolean isLegalValue(T propertyValue);
 
 }

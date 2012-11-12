@@ -44,7 +44,8 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  * is possible to have received some quadruples that match the rewritten
  * subscription. That's why an algorithm similar to the one from
  * {@link PublishQuadrupleRequest} is used to rewrite the rewritten subscription
- * for the quadruples that match it.
+ * for the quadruples that match it. This type of request is used for SBCE1 and
+ * SBCE2.
  * 
  * @see PublishQuadrupleRequest
  * 
@@ -80,19 +81,19 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
     @Override
     public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
                                                QuadruplePattern quadruplePattern) {
-
         SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
+        Subscription subscription = this.subscription.getValue();
 
-        // writes the subscription into the cache and the local datastore
-        final Subscription subscription = this.subscription.getValue();
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
             log.info("It took "
                     + (System.currentTimeMillis() - subscription.getCreationTime())
                     + "ms to receive subscription : "
                     + subscription.getSparqlQuery());
         }
+
         log.debug("Indexing subscription {} on peer {}", subscription, overlay);
 
+        // writes the subscription into the cache and the local datastore
         semanticOverlay.storeSubscription(subscription);
 
         Subsubscription firstSubsubscription =
@@ -145,6 +146,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
             if (quadrupleMatching.getPublicationTime() < subscription.getIndexationTime()) {
                 continue;
             }
+
             PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
                     semanticOverlay, subscription, quadrupleMatching);
         }

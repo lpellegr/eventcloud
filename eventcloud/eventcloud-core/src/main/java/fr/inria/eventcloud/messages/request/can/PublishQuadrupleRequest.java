@@ -20,11 +20,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
@@ -48,13 +50,17 @@ import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.Vars;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 
 /**
  * Publishes a quadruple into the network. The publish operation consists in
@@ -71,10 +77,6 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     private static final Logger log =
             LoggerFactory.getLogger(PublishQuadrupleRequest.class);
 
-    /*
-     * Jena variables used to build the algebra
-     */
-
     public PublishQuadrupleRequest(Quadruple quad) {
         super(quad, null);
     }
@@ -84,25 +86,23 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
      */
     @Override
     public void onDestinationReached(final StructuredOverlay overlay,
-                                     final Quadruple quadrupleMatching) {
+                                     final Quadruple quadruple) {
+        SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
+
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
             log.info("Peer " + overlay + " is about to store quadruple "
-                    + quadrupleMatching.getSubject() + " "
-                    + quadrupleMatching.getPredicate() + " "
-                    + quadrupleMatching.getObject());
+                    + quadruple.getSubject() + " " + quadruple.getPredicate()
+                    + " " + quadruple.getObject());
         }
 
         TransactionalDatasetGraph txnGraph =
-                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
-                        AccessMode.WRITE);
+                semanticOverlay.getMiscDatastore().begin(AccessMode.WRITE);
 
         try {
             // the quadruple is stored by using its meta graph value
             txnGraph.add(
-                    quadrupleMatching.createMetaGraphNode(),
-                    quadrupleMatching.getSubject(),
-                    quadrupleMatching.getPredicate(),
-                    quadrupleMatching.getObject());
+                    quadruple.createMetaGraphNode(), quadruple.getSubject(),
+                    quadruple.getPredicate(), quadruple.getObject());
             txnGraph.commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -114,8 +114,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         // matching the quadruple which have been just inserted into the
         // local datastore
         txnGraph =
-                ((SemanticCanOverlay) overlay).getSubscriptionsDatastore()
-                        .begin(AccessMode.READ_ONLY);
+                semanticOverlay.getSubscriptionsDatastore().begin(
+                        AccessMode.READ_ONLY);
 
         Set<Subscription> subscriptionsMatching = new HashSet<Subscription>();
 
@@ -124,14 +124,14 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             Optimize.noOptimizer();
             it =
                     Algebra.exec(
-                            createAlgebraRetrievingSubscriptionsMatching(quadrupleMatching),
+                            createAlgebraRetrievingSubscriptionsMatching(quadruple),
                             txnGraph.getUnderlyingDataset());
 
             while (it.hasNext()) {
                 final Binding binding = it.nextBinding();
                 log.debug(
-                        "Peer {} has a sub-subscription that matches the quadruple {} ",
-                        overlay, quadrupleMatching);
+                        "Peer {} has a sub subscription that matches the quadruple {} ",
+                        overlay, quadruple);
 
                 // the identifier of the sub subscription that is matched is
                 // available from the result of the query which has been
@@ -141,7 +141,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 Vars.SUBSCRIPTION_ID).getLiteralLexicalForm());
 
                 Subscription subscription =
-                        ((SemanticCanOverlay) overlay).findSubscription(
+                        semanticOverlay.findSubscription(
                                 txnGraph, subscriptionId);
 
                 // We have to use an intermediate collection because nested
@@ -167,8 +167,46 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             // a subscription with only one sub subscription (that matches
             // the quadruple which has been inserted) has been detected
             PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
-                    (SemanticCanOverlay) overlay, subscriptionMatching,
-                    quadrupleMatching);
+                    semanticOverlay, subscriptionMatching, quadruple);
+        }
+
+        // finds the ephemeral subscriptions to resolve
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
+            txnGraph =
+                    semanticOverlay.getSubscriptionsDatastore().begin(
+                            AccessMode.READ_ONLY);
+
+            try {
+                QuadrupleIterator qit =
+                        txnGraph.find(new QuadruplePattern(
+                                quadruple.getGraph(), null, null, null));
+
+                while (qit.hasNext()) {
+                    Quadruple q = qit.next();
+
+                    SubscriptionId subscriptionId =
+                            PublishSubscribeUtils.extractSubscriptionId(q.getSubject());
+
+                    String subscriberUrl = q.getObject().getURI();
+
+                    final QuadruplesNotification n =
+                            new QuadruplesNotification(
+                                    subscriptionId,
+                                    quadruple.getGraph(),
+                                    PAActiveObject.getUrl(semanticOverlay.getStub()),
+                                    ImmutableList.of(quadruple));
+
+                    if (semanticOverlay.markAsSent(n.getId(), quadruple)) {
+                        Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
+                                .receive(n);
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                txnGraph.end();
+            }
         }
     }
 

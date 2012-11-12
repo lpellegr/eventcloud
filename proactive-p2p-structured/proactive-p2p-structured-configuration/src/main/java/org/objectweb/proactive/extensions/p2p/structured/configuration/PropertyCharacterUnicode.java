@@ -27,12 +27,17 @@ public class PropertyCharacterUnicode extends Property<Integer> {
         super(name, computeScalarValue(defaultValue));
     }
 
+    public PropertyCharacterUnicode(String name, String defaultValue,
+            Validator<Integer> validator) {
+        super(name, computeScalarValue(defaultValue), validator);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.value = computeScalarValue(value);
+    public Integer parse(String value) {
+        return computeScalarValue(value);
     }
 
     public String getValueAsString() {
@@ -60,7 +65,6 @@ public class PropertyCharacterUnicode extends Property<Integer> {
         } else {
             throw new IllegalArgumentException("Empty string is not allowed");
         }
-
     }
 
 }
