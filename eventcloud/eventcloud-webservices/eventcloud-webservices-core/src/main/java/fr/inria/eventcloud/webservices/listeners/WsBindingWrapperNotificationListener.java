@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.webservices.listeners;
 
-import java.io.Serializable;
-
 import javax.xml.ws.WebServiceException;
 
 import org.slf4j.Logger;
@@ -71,7 +69,7 @@ public class WsBindingWrapperNotificationListener extends
      */
     @Override
     public void onNotification(SubscriptionId id, Binding binding) {
-        if (!(binding instanceof Serializable)) {
+        if (!(binding instanceof BindingWrapper)) {
             binding = new BindingWrapper(binding);
         }
 
