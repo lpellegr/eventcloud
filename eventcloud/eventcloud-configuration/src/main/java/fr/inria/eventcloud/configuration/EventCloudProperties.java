@@ -43,6 +43,14 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.Validator
 public class EventCloudProperties {
 
     /**
+     * Defines approximatively the average number of quadruples per compound
+     * events handled by the system. This value is used to approximate the
+     * expected number of entries in the various map that are used.
+     */
+    public static final PropertyInteger AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT =
+            new PropertyInteger("average.nb.quadruples.per.compound.event", 30);
+
+    /**
      * Defines whether the EventCloud has to compress the data which are
      * transfered between the peers and the users when it is possible. When this
      * property is enabled, all the entities communicating with the EventCloud
@@ -384,6 +392,22 @@ public class EventCloudProperties {
         return System.getProperty("java.io.tmpdir") + File.separatorChar
                 + "eventcloud-" + System.getProperty("user.name")
                 + File.separatorChar;
+    }
+
+    public static final boolean isSbce1PubSubAlgorithmUsed() {
+        return isPubSubAlgorithmUsedEqualsTo(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1);
+    }
+
+    public static final boolean isSbce2PubSubAlgorithmUsed() {
+        return isPubSubAlgorithmUsedEqualsTo(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2);
+    }
+
+    public static final boolean isSbce3PubSubAlgorithmUsed() {
+        return isPubSubAlgorithmUsedEqualsTo(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3);
+    }
+
+    private static final boolean isPubSubAlgorithmUsedEqualsTo(String name) {
+        return PUBLISH_SUBSCRIBE_ALGORITHM.getValue().equals(name);
     }
 
     private static final class PubSubAlgorithmPropertyValidator extends
