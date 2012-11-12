@@ -47,7 +47,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.generators.NodeGenerator;
+import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.generators.UuidGenerator;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
@@ -80,8 +80,10 @@ public class SubscribeProxyTest {
 
     private static MutableInteger signals = new MutableInteger();
 
-    private static Node eventId =
-            NodeGenerator.randomUri(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue());
+    private static String eventId =
+            EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue();
+
+    private static Node eventIdNode = Node.createURI(eventId);
 
     private EventCloudId eventCloudId;
 
@@ -200,7 +202,7 @@ public class SubscribeProxyTest {
 
         long publicationTime = System.currentTimeMillis();
 
-        // From the publish proxy it is possible to publish quadruples (events)
+        // from the publish proxy it is possible to publish quadruples (events)
         Quadruple q1 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/825349613"),
@@ -284,12 +286,7 @@ public class SubscribeProxyTest {
         this.subscribeProxy.subscribe(
                 subscription, new CustomSignalNotificationListener());
 
-        List<Quadruple> quads = new ArrayList<Quadruple>();
-        for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.random(eventId));
-        }
-
-        CompoundEvent event = new CompoundEvent(quads);
+        CompoundEvent event = CompoundEventGenerator.random(eventId, 10);
 
         this.publishProxy.publish(event);
 
@@ -309,7 +306,7 @@ public class SubscribeProxyTest {
      * {@link CompoundEventNotificationListener}.
      */
     @Test(timeout = 60000)
-    public void testSubscribeEventNotificationListener() {
+    public void testSubscribeCompoundEventNotificationListener() {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
@@ -318,12 +315,7 @@ public class SubscribeProxyTest {
         this.subscribeProxy.subscribe(
                 subscription, new CustomCompoundEventNotificationListener());
 
-        List<Quadruple> quads = new ArrayList<Quadruple>();
-        for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.random(eventId));
-        }
-
-        CompoundEvent ce = new CompoundEvent(quads);
+        CompoundEvent ce = CompoundEventGenerator.random(eventId, 10);
 
         this.publishProxy.publish(ce);
 
@@ -370,12 +362,7 @@ public class SubscribeProxyTest {
                         new Object[0]);
         this.subscribeProxy.subscribe(subscription, notificationListener);
 
-        List<Quadruple> quads = new ArrayList<Quadruple>(4);
-        for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.random(eventId));
-        }
-
-        CompoundEvent ce = new CompoundEvent(quads);
+        CompoundEvent ce = CompoundEventGenerator.random(eventId, 10);
 
         this.publishProxy.publish(ce);
 
@@ -466,13 +453,14 @@ public class SubscribeProxyTest {
 
         long publicationTime = System.currentTimeMillis();
 
-        Quadruple metaQuadruple = CompoundEvent.createMetaQuadruple(eventId, 8);
+        Quadruple metaQuadruple =
+                CompoundEvent.createMetaQuadruple(eventIdNode, 8);
         metaQuadruple.setPublicationTime(publicationTime);
         this.publishProxy.publish(metaQuadruple);
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            metaQuadruple = QuadrupleGenerator.random(eventId);
+            metaQuadruple = QuadrupleGenerator.random(eventIdNode);
             metaQuadruple.setPublicationTime(publicationTime);
             this.publishProxy.publish(metaQuadruple);
         }
@@ -486,7 +474,7 @@ public class SubscribeProxyTest {
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            metaQuadruple = QuadrupleGenerator.random(eventId);
+            metaQuadruple = QuadrupleGenerator.random(eventIdNode);
             metaQuadruple.setPublicationTime(publicationTime);
             this.publishProxy.publish(metaQuadruple);
         }
@@ -517,7 +505,7 @@ public class SubscribeProxyTest {
 
         List<Quadruple> quads = new ArrayList<Quadruple>(4);
         for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.random(eventId));
+            quads.add(QuadrupleGenerator.random(eventIdNode));
         }
 
         CompoundEvent ce = new CompoundEvent(quads);
@@ -554,7 +542,7 @@ public class SubscribeProxyTest {
 
         quads = new ArrayList<Quadruple>();
         for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.random(eventId));
+            quads.add(QuadrupleGenerator.random(eventIdNode));
         }
 
         ce = new CompoundEvent(quads);
@@ -588,6 +576,14 @@ public class SubscribeProxyTest {
     public void tearDown() {
         ComponentUtils.terminateComponent(this.publishProxy);
         ComponentUtils.terminateComponent(this.subscribeProxy);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Peers dump:");
+            for (Peer p : this.deployer.getRandomSemanticTracker(
+                    this.eventCloudId).getPeers()) {
+                log.debug(p.dump());
+            }
+        }
 
         this.deployer.undeploy();
 
