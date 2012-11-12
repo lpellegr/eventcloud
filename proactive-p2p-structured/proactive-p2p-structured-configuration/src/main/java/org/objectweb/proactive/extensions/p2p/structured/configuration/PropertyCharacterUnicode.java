@@ -36,8 +36,8 @@ public class PropertyCharacterUnicode extends Property<Integer> {
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.setValue(computeScalarValue(value));
+    public Integer parse(String value) {
+        return computeScalarValue(value);
     }
 
     public String getValueAsString() {

@@ -36,8 +36,8 @@ public class PropertyDouble extends Property<Double> {
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.setValue(Double.valueOf(value));
+    public Double parse(String value) {
+        return Double.valueOf(value);
     }
 
 }

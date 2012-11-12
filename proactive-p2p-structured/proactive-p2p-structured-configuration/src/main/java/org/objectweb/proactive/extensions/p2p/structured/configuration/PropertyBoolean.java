@@ -36,8 +36,8 @@ public class PropertyBoolean extends Property<Boolean> {
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.setValue(Boolean.valueOf(value));
+    public Boolean parse(String value) {
+        return Boolean.valueOf(value);
     }
 
 }
