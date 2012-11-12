@@ -36,8 +36,8 @@ public class PropertyInteger extends Property<Integer> {
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.setValue(Integer.valueOf(value));
+    public Integer parse(String value) {
+        return Integer.valueOf(value);
     }
 
 }

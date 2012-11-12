@@ -36,8 +36,8 @@ public class PropertyString extends Property<String> {
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.setValue(value);
+    public String parse(String value) {
+        return value;
     }
 
 }

@@ -44,6 +44,7 @@ public abstract class Property<T> {
 
         this.name = name;
         this.defaultValue = defaultValue;
+        this.validator = validator;
 
         String javaProperty = System.getProperty(this.name);
 
@@ -52,8 +53,6 @@ public abstract class Property<T> {
         } else {
             this.value = defaultValue;
         }
-
-        this.validator = validator;
     }
 
     /**
@@ -106,7 +105,11 @@ public abstract class Property<T> {
      * @param value
      *            new value of the property.
      */
-    public abstract void setValueAsString(String value);
+    public void setValueAsString(String value) {
+        this.setValue(this.parse(value));
+    }
+
+    protected abstract T parse(String value);
 
     /**
      * {@inheritDoc}

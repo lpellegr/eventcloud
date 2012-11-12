@@ -36,8 +36,8 @@ public class PropertyByte extends Property<Byte> {
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.setValue(Byte.valueOf(value));
+    public Byte parse(String value) {
+        return Byte.valueOf(value);
     }
 
 }

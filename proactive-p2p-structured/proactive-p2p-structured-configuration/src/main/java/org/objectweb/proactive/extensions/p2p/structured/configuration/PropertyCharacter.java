@@ -36,12 +36,12 @@ public class PropertyCharacter extends Property<Character> {
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
+    public Character parse(String value) {
         if (value.length() > 1) {
             throw new IllegalArgumentException();
         }
 
-        super.setValue(value.charAt(0));
+        return value.charAt(0);
     }
 
 }

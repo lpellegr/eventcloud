@@ -40,8 +40,8 @@ public class PropertyClass extends Property<Class<?>> {
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String className) {
-        super.setValue(transform(className));
+    public Class<?> parse(String className) {
+        return transform(className);
     }
 
     private static Class<?> transform(String className) {
