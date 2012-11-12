@@ -14,35 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.api.listeners;
+package fr.inria.eventcloud.pubsub.notifications;
 
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.graph.Node;
+
+import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
- * This kind of notification listener will only receive a binding (i.e. the
- * variables and their associated values) that matches the subscription.
+ * Defines a notification that embeds the id of the compound event which is
+ * matching as value.
  * 
  * @author lpellegr
  */
-public abstract class BindingNotificationListener extends
-        NotificationListener<Binding> {
+public class PollingSignalNotification extends Notification<String> {
 
     private static final long serialVersionUID = 130L;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NotificationListenerType getType() {
-        return NotificationListenerType.BINDING;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getSubscriberUrl() {
-        return null;
+    public PollingSignalNotification(SubscriptionId subscriptionId,
+            Node eventId, String source, Node eventIdWithMetaInformation) {
+        super(subscriptionId, eventId, source,
+                eventIdWithMetaInformation.getURI());
     }
 
 }

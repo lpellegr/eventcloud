@@ -14,35 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.api.listeners;
+package fr.inria.eventcloud.pubsub.notifications;
 
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import java.util.List;
+
+import com.hp.hpl.jena.graph.Node;
+
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
- * This kind of notification listener will only receive a binding (i.e. the
- * variables and their associated values) that matches the subscription.
+ * Defines a notification that embeds a list of quadruples as value.
  * 
  * @author lpellegr
  */
-public abstract class BindingNotificationListener extends
-        NotificationListener<Binding> {
+public class QuadruplesNotification extends Notification<List<Quadruple>> {
 
     private static final long serialVersionUID = 130L;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NotificationListenerType getType() {
-        return NotificationListenerType.BINDING;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getSubscriberUrl() {
-        return null;
+    public QuadruplesNotification(SubscriptionId subscriptionId, Node eventId,
+            String source, List<Quadruple> binding) {
+        super(subscriptionId, eventId, source, binding);
     }
 
 }

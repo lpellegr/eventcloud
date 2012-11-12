@@ -637,9 +637,6 @@ public class Quadruple implements Event {
         return this.toString(StringRepresentation.STRING);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String toString(StringRepresentation representation) {
         StringBuilder result = new StringBuilder('(');
 

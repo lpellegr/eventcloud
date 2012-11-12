@@ -18,7 +18,6 @@ package fr.inria.eventcloud.webservices.proxies;
 
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.listeners.WsBindingWrapperNotificationListener;
@@ -62,8 +61,12 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public String subscribeSignal(String sparqlQuery,
                                   String subscriberWsEndpointUrl) {
-        return this.subscribe(sparqlQuery, new WsSignalNotificationListener(
+        Subscription subscription = new Subscription(sparqlQuery);
+
+        super.subscribe(subscription, new WsSignalNotificationListener(
                 subscriberWsEndpointUrl));
+
+        return subscription.getId().toString();
     }
 
     /**
@@ -72,9 +75,12 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public String subscribeBinding(String sparqlQuery,
                                    String subscriberWsEndpointUrl) {
-        return this.subscribe(
-                sparqlQuery, new WsBindingWrapperNotificationListener(
-                        subscriberWsEndpointUrl));
+        Subscription subscription = new Subscription(sparqlQuery);
+
+        super.subscribe(subscription, new WsBindingWrapperNotificationListener(
+                subscriberWsEndpointUrl));
+
+        return subscription.getId().toString();
     }
 
     /**
@@ -83,16 +89,11 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public String subscribeCompoundEvent(String sparqlQuery,
                                          String subscriberWsEndpointUrl) {
-        return this.subscribe(
-                sparqlQuery, new WsCompoundEventNotificationListener(
-                        subscriberWsEndpointUrl));
-    }
 
-    private <T> String subscribe(String sparqlQuery,
-                                 NotificationListener<T> listener) {
         Subscription subscription = new Subscription(sparqlQuery);
 
-        this.subscribe(subscription, listener);
+        super.subscribe(subscription, new WsCompoundEventNotificationListener(
+                subscriberWsEndpointUrl));
 
         return subscription.getId().toString();
     }

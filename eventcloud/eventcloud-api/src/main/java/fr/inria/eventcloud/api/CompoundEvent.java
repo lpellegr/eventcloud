@@ -74,11 +74,11 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * @param quadruples
      *            the quadruples to put in the compound event.
      */
-    public CompoundEvent(List<Quadruple> quadruples) {
+    public CompoundEvent(Collection<Quadruple> quadruples) {
         checkDataStructureSize(quadruples.size());
 
         if (quadruples instanceof ImmutableList) {
-            this.quadruples = quadruples;
+            this.quadruples = (List<Quadruple>) quadruples;
         } else {
             this.quadruples = ImmutableList.copyOf(quadruples);
         }
@@ -262,7 +262,7 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
                         PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
                         Node.createLiteral(
                                 Integer.toString(compoundEventSize),
-                                XSDDatatype.XSDint));
+                                XSDDatatype.XSDinteger));
 
         return metaQuadruple;
     }

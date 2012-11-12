@@ -19,15 +19,17 @@ package fr.inria.eventcloud.proxies;
 import java.io.Serializable;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
-import fr.inria.eventcloud.pubsub.Notification;
 import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.pubsub.notifications.BindingNotification;
+import fr.inria.eventcloud.pubsub.notifications.PollingSignalNotification;
+import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
+import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
 
 /**
  * A SubscribeProxy is a proxy that implements the {@link SubscribeApi}. It has
@@ -36,23 +38,21 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * <p>
  * This proxy offers the possibility to reconstruct an Event from the binding
  * which has matched a subscription by a call to
- * {@link SubscribeProxy#reconstructCompoundEvent(Subscription, Binding)} or
  * {@link SubscribeProxy#reconstructCompoundEvent(SubscriptionId, Node)} and
- * also by an using an {@link CompoundEventNotificationListener} when you
- * subscribe with
- * {@link #subscribe(fr.inria.eventcloud.api.Subscription, fr.inria.eventcloud.api.listeners.NotificationListener)}
- * . The reconstruction is an heavy operation that may be used carefully.
- * Indeed, to reconstruct an {@link CompoundEvent} from its identifier, a
- * {@link QuadruplePattern} query must be sent to all the peers matching the
- * graph value corresponding to the event identifier. Because three dimensions
- * among four are not fixed, a lot of peers are contacted. Moreover, due to the
- * fact that the proxies and the EventCloud infrastructure are decoupled (and
- * because each quadruple that belongs to an Event is published asynchronously),
- * it is not possible to guarantee that all the quadruples that belong to the
- * event identifier have been retrieved after the execution of the first
- * {@link QuadruplePattern}. That's why the reconstruction consists in polling
- * periodically the network with a {@link QuadruplePattern} while all the
- * quadruples that belong to the event identifier are not retrieved.
+ * also by an using a {@link CompoundEventNotificationListener} when you
+ * subscribe. The reconstruction is an heavy operation that may be used
+ * carefully. Indeed, to reconstruct an {@link CompoundEvent} from its
+ * identifier, a {@link QuadruplePattern} query must be sent to all the peers
+ * matching the graph value corresponding to the event identifier. Because three
+ * dimensions among four are not fixed, a lot of peers are contacted. Moreover,
+ * due to the fact that the proxies and the EventCloud infrastructure are
+ * decoupled (and because each quadruple that belongs to an Event is published
+ * asynchronously), it is not possible to guarantee that all the quadruples that
+ * belong to the event identifier have been retrieved after the execution of the
+ * first {@link QuadruplePattern}. That's why a solution for the reconstruction
+ * consists to poll periodically the network with a {@link QuadruplePattern}
+ * while all the quadruples that belong to the event identifier are not
+ * retrieved.
  * <p>
  * To avoid the reception of replica during the polling, a list of hashes (where
  * each hash correspond to the hash of the subject, predicate and object values
@@ -81,27 +81,6 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
     public Subscription find(SubscriptionId id);
 
     /**
-     * Reconstructs a {@link CompoundEvent} from the specified
-     * {@code subscription} and {@code binding}. A call to this method block
-     * until the whole event has been retrieved. <strong>This operation must be
-     * used carefully</strong>. It is the invoker responsability to parallelize
-     * several calls to this method.
-     * 
-     * @param subscription
-     *            the subscription that is used to retrieve the name of the
-     *            graph variable.
-     * 
-     * @param binding
-     *            the binding containing the value associated to the graph
-     *            variable extracted from the subscription. The value which is
-     *            read from the binding is the event identifier.
-     * 
-     * @return the compound event which has been reconstructed.
-     */
-    public CompoundEvent reconstructCompoundEvent(Subscription subscription,
-                                                  Binding binding);
-
-    /**
      * Reconstructs a {@link CompoundEvent} from the specified {@code eventId}.
      * A call to this method block until the whole compound event has been
      * retrieved. <strong>This operation must be used carefully</strong>. It is
@@ -121,11 +100,35 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
                                                   Node eventId);
 
     /**
-     * Used internally to send back a notification.
+     * Used internally to send back a {@link BindingNotification}.
      * 
      * @param notification
      *            the notification that is received.
      */
-    public void receive(Notification notification);
+    public void receive(BindingNotification notification);
+
+    /**
+     * Used internally to send back a {@link QuadruplesNotification}.
+     * 
+     * @param notification
+     *            the notification that is received.
+     */
+    public void receive(QuadruplesNotification notification);
+
+    /**
+     * Used internally to send back a {@link SignalNotification}.
+     * 
+     * @param notification
+     *            the notification that is received.
+     */
+    public void receive(SignalNotification notification);
+
+    /**
+     * Used internally to send back a {@link PollingSignalNotification}.
+     * 
+     * @param notification
+     *            the notification that is received.
+     */
+    public void receive(PollingSignalNotification notification);
 
 }
