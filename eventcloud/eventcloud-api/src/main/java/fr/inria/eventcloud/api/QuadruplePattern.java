@@ -42,7 +42,12 @@ public class QuadruplePattern extends Quadruple {
             Node.ANY, Node.ANY, Node.ANY, Node.ANY);
 
     public QuadruplePattern(Node g, Node s, Node p, Node o) {
-        super(g, s, p, o, false, false);
+        this(g, s, p, o, false);
+    }
+
+    public QuadruplePattern(Node g, Node s, Node p, Node o,
+            boolean parseMetaInformation) {
+        super(g, s, p, o, false, parseMetaInformation);
 
         if (g instanceof Node_Variable || s instanceof Node_Variable
                 || p instanceof Node_Variable || o instanceof Node_Variable) {

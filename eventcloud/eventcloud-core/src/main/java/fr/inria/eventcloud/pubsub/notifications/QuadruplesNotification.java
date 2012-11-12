@@ -14,30 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.configuration;
+package fr.inria.eventcloud.pubsub.notifications;
+
+import java.util.List;
+
+import com.hp.hpl.jena.graph.Node;
+
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
- * An {@link Integer} property.
+ * Defines a notification that embeds a list of quadruples as value.
  * 
  * @author lpellegr
  */
-public class PropertyInteger extends Property<Integer> {
+public class QuadruplesNotification extends Notification<List<Quadruple>> {
 
-    public PropertyInteger(String name, Integer defaultValue) {
-        super(name, defaultValue);
-    }
+    private static final long serialVersionUID = 130L;
 
-    public PropertyInteger(String name, Integer defaultValue,
-            Validator<Integer> validator) {
-        super(name, defaultValue, validator);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Integer parse(String value) {
-        return Integer.valueOf(value);
+    public QuadruplesNotification(SubscriptionId subscriptionId, Node eventId,
+            String source, List<Quadruple> binding) {
+        super(subscriptionId, eventId, source, binding);
     }
 
 }

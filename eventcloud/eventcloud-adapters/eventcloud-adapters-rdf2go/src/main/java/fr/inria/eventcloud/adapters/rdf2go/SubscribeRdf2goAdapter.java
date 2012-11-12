@@ -19,7 +19,9 @@ package fr.inria.eventcloud.adapters.rdf2go;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.NotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
+import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 
 /**
  * This class is used as an adapter for any object that implements the
@@ -41,8 +43,18 @@ public final class SubscribeRdf2goAdapter extends Rdf2goAdapter<SubscribeApi> {
         super(delegate);
     }
 
-    public <T> void subscribe(Subscription subscription,
-                              NotificationListener<T> listener) {
+    public void subscribe(Subscription subscription,
+                          BindingNotificationListener listener) {
+        super.delegate.subscribe(subscription, listener);
+    }
+
+    public void subscribe(Subscription subscription,
+                          CompoundEventNotificationListener listener) {
+        super.delegate.subscribe(subscription, listener);
+    }
+
+    public void subscribe(Subscription subscription,
+                          SignalNotificationListener listener) {
         super.delegate.subscribe(subscription, listener);
     }
 

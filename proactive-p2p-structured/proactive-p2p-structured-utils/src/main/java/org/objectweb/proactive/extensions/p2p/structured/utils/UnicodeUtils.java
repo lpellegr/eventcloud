@@ -143,7 +143,7 @@ public final class UnicodeUtils {
     }
 
     /*
-     * The following two methods have been copied from JDK7
+     * The next two methods have been copied from JDK7
      */
 
     /**
@@ -155,12 +155,6 @@ public final class UnicodeUtils {
      * point) in the UTF-16 encoding. If the specified character is not a <a
      * href="Character.html#supplementary">supplementary character</a>, an
      * unspecified {@code char} is returned.
-     * <p>
-     * If {@link #isSupplementaryCodePoint isSupplementaryCodePoint(x)} is
-     * {@code true}, then {@link #isHighSurrogate isHighSurrogate}
-     * {@code (highSurrogate(x))} and {@link #toCodePoint toCodePoint}
-     * {@code (highSurrogate(x), }{@link #lowSurrogate lowSurrogate}
-     * {@code (x)) == x} are also always {@code true}.
      * 
      * @param codePoint
      *            a supplementary character (Unicode code point)
@@ -180,12 +174,6 @@ public final class UnicodeUtils {
      * point) in the UTF-16 encoding. If the specified character is not a <a
      * href="Character.html#supplementary">supplementary character</a>, an
      * unspecified {@code char} is returned.
-     * <p>
-     * If {@link #isSupplementaryCodePoint isSupplementaryCodePoint(x)} is
-     * {@code true}, then {@link #isLowSurrogate isLowSurrogate}
-     * {@code (lowSurrogate(x))} and {@link #toCodePoint toCodePoint}{@code (}
-     * {@link #highSurrogate highSurrogate}{@code (x), lowSurrogate(x)) == x}
-     * are also always {@code true}.
      * 
      * @param codePoint
      *            a supplementary character (Unicode code point)

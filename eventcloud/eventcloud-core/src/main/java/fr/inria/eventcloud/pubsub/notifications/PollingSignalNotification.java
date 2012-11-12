@@ -14,30 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.configuration;
+package fr.inria.eventcloud.pubsub.notifications;
+
+import com.hp.hpl.jena.graph.Node;
+
+import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
- * An {@link Integer} property.
+ * Defines a notification that embeds the id of the compound event which is
+ * matching as value.
  * 
  * @author lpellegr
  */
-public class PropertyInteger extends Property<Integer> {
+public class PollingSignalNotification extends Notification<String> {
 
-    public PropertyInteger(String name, Integer defaultValue) {
-        super(name, defaultValue);
-    }
+    private static final long serialVersionUID = 130L;
 
-    public PropertyInteger(String name, Integer defaultValue,
-            Validator<Integer> validator) {
-        super(name, defaultValue, validator);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Integer parse(String value) {
-        return Integer.valueOf(value);
+    public PollingSignalNotification(SubscriptionId subscriptionId,
+            Node eventId, String source, Node eventIdWithMetaInformation) {
+        super(subscriptionId, eventId, source,
+                eventIdWithMetaInformation.getURI());
     }
 
 }

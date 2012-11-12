@@ -21,7 +21,10 @@ import javax.xml.ws.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.BindingWrapperNotificationListener;
 import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.webservices.api.subscribers.BindingWrapperSubscriberWsApi;
@@ -33,7 +36,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
  * @author bsauvan
  */
 public class WsBindingWrapperNotificationListener extends
-        BindingWrapperNotificationListener {
+        BindingNotificationListener {
 
     private static final long serialVersionUID = 130L;
 
@@ -65,9 +68,14 @@ public class WsBindingWrapperNotificationListener extends
      * {@inheritDoc}
      */
     @Override
-    public void onNotification(SubscriptionId id, BindingWrapper binding) {
+    public void onNotification(SubscriptionId id, Binding binding) {
+        if (!(binding instanceof BindingWrapper)) {
+            binding = new BindingWrapper(binding);
+        }
+
         try {
-            this.subscriberWsClient.notifyBinding(id.toString(), binding);
+            this.subscriberWsClient.notifyBinding(
+                    id.toString(), (BindingWrapper) binding);
 
             log.info(
                     "Subscriber {} notified about:\n {}",

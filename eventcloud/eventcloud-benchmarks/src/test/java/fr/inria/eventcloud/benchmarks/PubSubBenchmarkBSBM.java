@@ -183,9 +183,8 @@ public class PubSubBenchmarkBSBM {
             nbEventsReceivedBySubscriber.put(
                     subscription.getId(), new AtomicLong());
 
-            subscribeProxy.subscribe(
-                    subscription,
-                    createNotificationListener(this.notificationListenerType));
+            subscribe(
+                    subscribeProxy, subscription, this.notificationListenerType);
         }
 
         this.receiveExpectedEventsStopwatch.start();
@@ -312,13 +311,15 @@ public class PubSubBenchmarkBSBM {
         return true;
     }
 
-    private static NotificationListener<?> createNotificationListener(Class<? extends NotificationListener<?>> listenerType) {
+    private static void subscribe(SubscribeApi subscribeProxy,
+                                  Subscription subscription,
+                                  Class<? extends NotificationListener<?>> listenerType) {
         if (listenerType.equals(BindingNotificationListener.class)) {
-            return new CustomBindingListener();
+            subscribeProxy.subscribe(subscription, new CustomBindingListener());
         } else if (listenerType.equals(CompoundEventNotificationListener.class)) {
-            return new CustomEventListener();
+            subscribeProxy.subscribe(subscription, new CustomEventListener());
         } else if (listenerType.equals(SignalNotificationListener.class)) {
-            return new CustomSignalListener();
+            subscribeProxy.subscribe(subscription, new CustomSignalListener());
         } else {
             throw new IllegalArgumentException("Unknown listener type: "
                     + listenerType.getName());

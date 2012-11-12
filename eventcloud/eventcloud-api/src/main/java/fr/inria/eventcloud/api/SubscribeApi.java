@@ -16,7 +16,9 @@
  **/
 package fr.inria.eventcloud.api;
 
-import fr.inria.eventcloud.api.listeners.NotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
+import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 
 /**
  * Defines the subscribe operations that can be executed on an EventCloud.
@@ -27,7 +29,7 @@ public interface SubscribeApi {
 
     /**
      * Subscribes to interest with the specified SPARQL query and the given
-     * {@link NotificationListener}.
+     * {@link BindingNotificationListener}.
      * 
      * @param subscription
      *            the subscription object.
@@ -36,8 +38,36 @@ public interface SubscribeApi {
      *            the listener that defines the type of notifications and the
      *            action to execute when a notification is received.
      */
-    public <T> void subscribe(Subscription subscription,
-                              NotificationListener<T> listener);
+    public void subscribe(Subscription subscription,
+                          BindingNotificationListener listener);
+
+    /**
+     * Subscribes to interest with the specified SPARQL query and the given
+     * {@link CompoundEventNotificationListener}.
+     * 
+     * @param subscription
+     *            the subscription object.
+     * 
+     * @param listener
+     *            the listener that defines the type of notifications and the
+     *            action to execute when a notification is received.
+     */
+    public void subscribe(Subscription subscription,
+                          CompoundEventNotificationListener listener);
+
+    /**
+     * Subscribes to interest with the specified SPARQL query and the given
+     * {@link SignalNotificationListener}.
+     * 
+     * @param subscription
+     *            the subscription object.
+     * 
+     * @param listener
+     *            the listener that defines the type of notifications and the
+     *            action to execute when a notification is received.
+     */
+    public void subscribe(Subscription subscription,
+                          SignalNotificationListener listener);
 
     /**
      * Unsubscribes by using the specified subscription identifier.

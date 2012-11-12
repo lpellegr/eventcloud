@@ -27,12 +27,17 @@ public class PropertyByte extends Property<Byte> {
         super(name, defaultValue);
     }
 
+    public PropertyByte(String name, Byte defaultValue,
+            Validator<Byte> validator) {
+        super(name, defaultValue, validator);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setValueAsString(String value) {
-        super.value = Byte.valueOf(value);
+    public Byte parse(String value) {
+        return Byte.valueOf(value);
     }
 
 }
