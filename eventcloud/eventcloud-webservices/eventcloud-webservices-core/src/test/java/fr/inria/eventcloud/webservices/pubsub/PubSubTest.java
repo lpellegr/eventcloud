@@ -127,7 +127,7 @@ public class PubSubTest extends WsTest {
                         "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
                         this.bindingSubscriberEndpointUrl);
 
-        // Publishes 6 events
+        // Publishes 5 events
         long publicationTime = System.currentTimeMillis();
 
         Quadruple q1 =
@@ -148,48 +148,37 @@ public class PubSubTest extends WsTest {
         q2.setPublicationTime(publicationTime);
         this.publishWsClient.publishQuadruple(q2);
 
-        // This quadruple shows chronicle context property because it is
-        // delivered by reconsuming the first quadruple which was published
-        Quadruple q3 =
-                new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user1.new.email@company.com"));
-        q3.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q3);
-
         publicationTime = System.currentTimeMillis();
 
-        Quadruple q4 =
+        Quadruple q3 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
                         Node.createURI("https://plus.google.com/107545688688906540962"),
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user2@company.com"));
-        q4.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q4);
+        q3.setPublicationTime(publicationTime);
+        this.publishWsClient.publishQuadruple(q3);
 
-        Quadruple q5 =
+        Quadruple q4 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
                         Node.createURI("https://plus.google.com/14023231238123495031/"),
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 3"));
-        q5.setPublicationTime();
-        this.publishWsClient.publishQuadruple(q5);
+        q4.setPublicationTime();
+        this.publishWsClient.publishQuadruple(q4);
 
-        Quadruple q6 =
+        Quadruple q5 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
                         Node.createURI("https://plus.google.com/107545688688906540962"),
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 2"));
-        q6.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q6);
+        q5.setPublicationTime(publicationTime);
+        this.publishWsClient.publishQuadruple(q5);
 
         synchronized (this.subscriberService.bindingsReceived) {
-            while (this.subscriberService.bindingsReceived.size() != 3) {
+            while (this.subscriberService.bindingsReceived.size() != 2) {
                 this.subscriberService.bindingsReceived.wait();
             }
         }
@@ -209,13 +198,13 @@ public class PubSubTest extends WsTest {
                         Node.createURI("https://plus.google.com/14023231238123495031/"),
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user3@company.com"));
-        q6.setPublicationTime(publicationTime);
+        q5.setPublicationTime(publicationTime);
         this.publishWsClient.publishQuadruple(q7);
 
         // Checks that no more events are received
         synchronized (this.subscriberService.bindingsReceived) {
             this.subscriberService.bindingsReceived.wait(4000);
-            Assert.assertTrue(this.subscriberService.bindingsReceived.size() == 3);
+            Assert.assertTrue(this.subscriberService.bindingsReceived.size() == 2);
         }
     }
 
