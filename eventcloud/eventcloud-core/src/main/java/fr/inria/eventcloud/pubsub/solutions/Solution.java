@@ -24,12 +24,13 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * that are received by a {@link SubscribeProxy} asynchronously for a given
  * subscription.
  * 
- * @param C
+ * @param <C>
  *            The type of the collection used to store the chunks that are
  *            received.
  * 
  * @author lpellegr
  */
+
 public abstract class Solution<C> {
 
     protected final C chunks;

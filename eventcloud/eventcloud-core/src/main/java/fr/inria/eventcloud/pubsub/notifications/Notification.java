@@ -33,7 +33,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * they contain independent sub-solutions (chunks) which belong to the same
  * solution.
  * 
- * @param T
+ * @param <T>
  *            the type of the chunks contained by the notification.
  * 
  * @author lpellegr
