@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
@@ -189,6 +190,32 @@ public class BindingSolution extends Solution<Binding> {
                 Var var = varsIt.next();
                 this.content.put(var, binding.get(var));
             }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder("(");
+
+            Iterator<Entry<Var, Node>> it = this.content.entrySet().iterator();
+
+            while (it.hasNext()) {
+                Entry<Var, Node> entry = it.next();
+
+                result.append(entry.getKey());
+                result.append('=');
+                result.append(entry.getValue());
+
+                if (it.hasNext()) {
+                    result.append(", ");
+                }
+            }
+
+            result.append(')');
+
+            return result.toString();
         }
 
         private void writeObject(ObjectOutputStream out) throws IOException {
