@@ -21,19 +21,18 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
- * Defines a notification that embeds the id of the compound event which is
- * matching as value.
+ * Defines a notification that is used to reconstruct a compound event that has
+ * matched a subscription with polling.
  * 
  * @author lpellegr
  */
-public class PollingSignalNotification extends Notification<String> {
+public class PollingSignalNotification extends Notification<Object> {
 
     private static final long serialVersionUID = 130L;
 
     public PollingSignalNotification(SubscriptionId subscriptionId,
-            Node eventId, String source, Node eventIdWithMetaInformation) {
-        super(subscriptionId, eventId, source,
-                eventIdWithMetaInformation.getURI());
+            Node eventId, String source) {
+        super(subscriptionId, eventId, source, null);
     }
 
 }

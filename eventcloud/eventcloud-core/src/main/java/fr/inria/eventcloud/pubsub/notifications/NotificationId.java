@@ -16,11 +16,12 @@
  **/
 package fr.inria.eventcloud.pubsub.notifications;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.Serializable;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
+import com.google.common.base.Objects;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -35,9 +36,9 @@ public class NotificationId implements Serializable {
 
     private static final long serialVersionUID = 130L;
 
-    // hash value computed from the identifier of the subscription which is
-    // matched and the event identifier (without meta information) matching it
-    private final HashCode value;
+    protected final SubscriptionId subscriptionId;
+
+    protected final String eventId;
 
     public NotificationId(SubscriptionId subscriptionId, Node eventId) {
         this(subscriptionId, eventId.getURI());
@@ -55,11 +56,8 @@ public class NotificationId implements Serializable {
      *            triggers a notification.
      */
     protected NotificationId(SubscriptionId subscriptionId, String eventId) {
-        Hasher hasher = Hashing.murmur3_128().newHasher();
-        hasher.putString(subscriptionId.toString());
-        hasher.putString(eventId);
-
-        this.value = hasher.hash();
+        this.subscriptionId = subscriptionId;
+        this.eventId = eventId;
     }
 
     /**
@@ -67,7 +65,7 @@ public class NotificationId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return this.value.hashCode();
+        return Objects.hashCode(this.subscriptionId, this.eventId);
     }
 
     /**
@@ -75,8 +73,14 @@ public class NotificationId implements Serializable {
      */
     @Override
     public boolean equals(Object that) {
-        return that instanceof NotificationId
-                && this.value.equals(((NotificationId) that).value);
+        if (that instanceof NotificationId) {
+            NotificationId other = (NotificationId) that;
+
+            return this.subscriptionId.equals(other.subscriptionId)
+                    && this.eventId.equals(other.eventId);
+        }
+
+        return false;
     }
 
     /**
@@ -84,7 +88,40 @@ public class NotificationId implements Serializable {
      */
     @Override
     public String toString() {
-        return this.value.toString();
+        return this.eventId + this.subscriptionId.toString();
+    }
+
+    public static final class Serializer implements
+            org.mapdb.Serializer<NotificationId>, Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void serialize(DataOutput out, NotificationId notificationId)
+                throws IOException {
+            out.writeUTF(notificationId.eventId);
+
+            SubscriptionId.SERIALIZER.serialize(
+                    out, notificationId.subscriptionId);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public NotificationId deserialize(DataInput in, int available)
+                throws IOException {
+            String eventId = in.readUTF();
+
+            SubscriptionId subscriptionId =
+                    SubscriptionId.SERIALIZER.deserialize(in, available);
+
+            return new NotificationId(subscriptionId, eventId);
+        }
+
     }
 
 }
