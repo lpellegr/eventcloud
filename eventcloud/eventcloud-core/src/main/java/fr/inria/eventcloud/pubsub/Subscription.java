@@ -52,6 +52,8 @@ import javax.xml.bind.DatatypeConverter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashCodes;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -437,7 +439,7 @@ public class Subscription implements Quadruplable, Serializable {
      */
     @Override
     public List<Quadruple> toQuadruples() {
-        List<Quadruple> quads = new ArrayList<Quadruple>();
+        Builder<Quadruple> result = new ImmutableList.Builder<Quadruple>();
 
         Node subscriptionURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.id);
@@ -445,19 +447,19 @@ public class Subscription implements Quadruplable, Serializable {
         Node subscriptionOriginalURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.originalId);
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI, SUBSCRIPTION_ID_NODE,
                 Node.createLiteral(this.id.toString()), false, false));
 
         if (this.parentId != null) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_PARENT_ID_NODE,
                     Node.createLiteral(this.parentId.toString()), false, false));
         }
 
         if (this.originalId != null) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI,
                     subscriptionURI,
                     SUBSCRIPTION_ORIGINAL_ID_NODE,
@@ -465,20 +467,20 @@ public class Subscription implements Quadruplable, Serializable {
                     false, false));
         }
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SERIALIZED_VALUE_NODE,
                 Node.createLiteral(this.sparqlQuery), false, false));
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(this.creationTime);
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_CREATION_DATETIME_NODE, Node.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime), false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 PublishSubscribeConstants.SUBSCRIPTION_TYPE_NODE,
                 Node.createLiteral(
@@ -486,33 +488,33 @@ public class Subscription implements Quadruplable, Serializable {
                         XSDDatatype.XSDshort), false, false));
 
         calendar.setTimeInMillis(this.indexationTime);
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_INDEXATION_DATETIME_NODE, Node.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime), false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SUBSCRIBER_NODE,
                 Node.createURI(this.subscriberUrl), false, false));
 
         if (this.subscriptionDestination != null) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_DESTINATION_NODE,
                     Node.createLiteral(this.subscriptionDestination), false,
                     false));
         }
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_INDEXED_WITH_NODE,
                 Node.createLiteral(this.getSubSubscriptions()[0].getId()
                         .toString()), false, false));
 
         for (Stub stub : this.stubs) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_STUB_NODE,
                     Node.createLiteral(stub.quadrupleHash.toString() + " "
@@ -520,16 +522,16 @@ public class Subscription implements Quadruplable, Serializable {
         }
 
         for (Subsubscription ssubscription : this.getSubSubscriptions()) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI,
                     subscriptionURI,
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
                     PublishSubscribeUtils.createSubSubscriptionIdUri(ssubscription.getId()),
                     false, false));
-            quads.addAll(ssubscription.toQuadruples());
+            result.addAll(ssubscription.toQuadruples());
         }
 
-        return quads;
+        return result.build();
     }
 
     /**
