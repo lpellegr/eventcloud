@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
@@ -89,6 +90,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                      final Quadruple quadruple) {
         SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
 
+        Node metaGraphNode = quadruple.createMetaGraphNode();
+
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
             log.info("Peer " + overlay + " is about to store quadruple "
                     + quadruple.getSubject() + " " + quadruple.getPredicate()
@@ -101,7 +104,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         try {
             // the quadruple is stored by using its meta graph value
             txnGraph.add(
-                    quadruple.createMetaGraphNode(), quadruple.getSubject(),
+                    metaGraphNode, quadruple.getSubject(),
                     quadruple.getPredicate(), quadruple.getObject());
             txnGraph.commit();
         } catch (Exception e) {
@@ -170,7 +173,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                     semanticOverlay, subscriptionMatching, quadruple);
         }
 
-        // finds the ephemeral subscriptions to resolve
+        // finds the ephemeral subscriptions that are resolved
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
             txnGraph =
                     semanticOverlay.getSubscriptionsDatastore().begin(
@@ -179,7 +182,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
             try {
                 QuadrupleIterator qit =
                         txnGraph.find(new QuadruplePattern(
-                                quadruple.getGraph(), null, null, null));
+                                metaGraphNode,
+                                null,
+                                PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
+                                null));
 
                 while (qit.hasNext()) {
                     Quadruple q = qit.next();
@@ -192,7 +198,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                     final QuadruplesNotification n =
                             new QuadruplesNotification(
                                     subscriptionId,
-                                    quadruple.getGraph(),
+                                    metaGraphNode,
                                     PAActiveObject.getUrl(semanticOverlay.getStub()),
                                     ImmutableList.of(quadruple));
 
@@ -201,7 +207,6 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 .receive(n);
                     }
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

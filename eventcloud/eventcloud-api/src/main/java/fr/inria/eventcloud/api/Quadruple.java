@@ -65,9 +65,9 @@ public class Quadruple implements Event {
 
     private static final Logger log = LoggerFactory.getLogger(Quadruple.class);
 
-    public static final String PUBLICATION_TIME_SEPARATOR = "/$";
+    public static final String PUBLICATION_TIME_SEPARATOR = "$$";
 
-    public static final String PUBLICATION_SOURCE_SEPARATOR = "/@";
+    public static final String PUBLICATION_SOURCE_SEPARATOR = "@@";
 
     // contains respectively the graph, the subject, the predicate
     // and the object value of the quadruple
@@ -475,59 +475,66 @@ public class Quadruple implements Event {
     private static MetaGraph parse(Node graph) {
         if (graph.isURI()) {
             String uri = graph.getURI();
-
-            int publicationTimeSeparatorIndex =
-                    uri.lastIndexOf(PUBLICATION_TIME_SEPARATOR);
-            int publicationSourceSeparatorIndex =
-                    uri.lastIndexOf(PUBLICATION_SOURCE_SEPARATOR);
-
-            if (publicationTimeSeparatorIndex == -1
-                    && publicationSourceSeparatorIndex == -1) {
-                return null;
-            } else if (publicationTimeSeparatorIndex >= 0
-                    && publicationSourceSeparatorIndex == -1) {
-                String publicationTime =
-                        uri.substring(publicationTimeSeparatorIndex
-                                + PUBLICATION_TIME_SEPARATOR.length());
-
-                try {
-                    return new MetaGraph(
-                            uri.substring(0, publicationTimeSeparatorIndex),
-                            Long.parseLong(publicationTime), null);
-
-                } catch (NumberFormatException e) {
-                    throw new IllegalStateException(
-                            "Invalid publication time: " + publicationTime);
-                }
-            } else if (publicationTimeSeparatorIndex == -1
-                    && publicationSourceSeparatorIndex >= 0) {
-                return new MetaGraph(
-                        uri.substring(0, publicationSourceSeparatorIndex), -1,
-                        uri.substring(publicationSourceSeparatorIndex
-                                + PUBLICATION_SOURCE_SEPARATOR.length()));
-            } else {
-                String publicationTime =
-                        uri.substring(
-                                publicationTimeSeparatorIndex
-                                        + PUBLICATION_TIME_SEPARATOR.length(),
-                                publicationSourceSeparatorIndex);
-
-                // if publication time and source are specified, they are
-                // necessarily in the order publicationTime, publicationSource
-                try {
-                    return new MetaGraph(
-                            uri.substring(0, publicationTimeSeparatorIndex),
-                            Long.parseLong(publicationTime),
-                            uri.substring(publicationSourceSeparatorIndex
-                                    + PUBLICATION_SOURCE_SEPARATOR.length()));
-                } catch (NumberFormatException e) {
-                    throw new IllegalStateException(
-                            "Invalid publication time: " + publicationTime);
-                }
-            }
+            return parse(uri);
         }
 
+        // return null and do not thrown an exception because this method may be
+        // invoked during the deserialization of a QuadruplePattern. In such a
+        // case the graph may not be an URI and the null value is useful on high
+        // level to detect that no meta information has been parsed
         return null;
+    }
+
+    private static MetaGraph parse(String graph) {
+        int publicationTimeSeparatorIndex =
+                graph.lastIndexOf(PUBLICATION_TIME_SEPARATOR);
+        int publicationSourceSeparatorIndex =
+                graph.lastIndexOf(PUBLICATION_SOURCE_SEPARATOR);
+
+        if (publicationTimeSeparatorIndex == -1
+                && publicationSourceSeparatorIndex == -1) {
+            return null;
+        } else if (publicationTimeSeparatorIndex >= 0
+                && publicationSourceSeparatorIndex == -1) {
+            String publicationTime =
+                    graph.substring(publicationTimeSeparatorIndex
+                            + PUBLICATION_TIME_SEPARATOR.length());
+
+            try {
+                return new MetaGraph(
+                        graph.substring(0, publicationTimeSeparatorIndex),
+                        Long.parseLong(publicationTime), null);
+
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("Invalid publication time: "
+                        + publicationTime);
+            }
+        } else if (publicationTimeSeparatorIndex == -1
+                && publicationSourceSeparatorIndex >= 0) {
+            return new MetaGraph(
+                    graph.substring(0, publicationSourceSeparatorIndex), -1,
+                    graph.substring(publicationSourceSeparatorIndex
+                            + PUBLICATION_SOURCE_SEPARATOR.length()));
+        } else {
+            String publicationTime =
+                    graph.substring(
+                            publicationTimeSeparatorIndex
+                                    + PUBLICATION_TIME_SEPARATOR.length(),
+                            publicationSourceSeparatorIndex);
+
+            // if publication time and source are specified, they are
+            // necessarily in the order publicationTime, publicationSource
+            try {
+                return new MetaGraph(
+                        graph.substring(0, publicationTimeSeparatorIndex),
+                        Long.parseLong(publicationTime),
+                        graph.substring(publicationSourceSeparatorIndex
+                                + PUBLICATION_SOURCE_SEPARATOR.length()));
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("Invalid publication time: "
+                        + publicationTime);
+            }
+        }
     }
 
     private static class MetaGraph {
@@ -571,9 +578,29 @@ public class Quadruple implements Event {
      *         not defined or if the specified node is not a meta graph node.
      */
     public static final long getPublicationTime(Node metaGraphNode) {
-        checkGraphType(metaGraphNode);
-
         MetaGraph metaGraph = parse(metaGraphNode);
+
+        if (metaGraph != null) {
+            return metaGraph.publicationTime;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Returns the publication time associated to the specified
+     * {@code metaGraphNode} or {@code -1} if the publication time is not
+     * defined or if the specified node is not a meta graph node.
+     * 
+     * @param metaGraph
+     *            the meta graph value to parse.
+     * 
+     * @return the publication time associated to the specified
+     *         {@code metaGraphNode} or {@code -1} if the publication time is
+     *         not defined or if the specified node is not a meta graph node.
+     */
+    public static final long getPublicationTime(String metaGraphValue) {
+        MetaGraph metaGraph = parse(metaGraphValue);
 
         if (metaGraph != null) {
             return metaGraph.publicationTime;
@@ -595,9 +622,29 @@ public class Quadruple implements Event {
      *         is not defined or if the specified node is not a meta graph node.
      */
     public static final String getPublicationSource(Node metaGraphNode) {
-        checkGraphType(metaGraphNode);
-
         MetaGraph metaGraph = parse(metaGraphNode);
+
+        if (metaGraph != null) {
+            return metaGraph.publicationSource;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the publication source associated to the specified
+     * {@code metaGraphNode} or {@code null} if the publication source is not
+     * defined or if the specified node is not a meta graph node.
+     * 
+     * @param metaGraphNode
+     *            the meta graph value to parse.
+     * 
+     * @return the publication source associated to the specified
+     *         {@code metaGraphNode} or {@code null} if the publication source
+     *         is not defined or if the specified node is not a meta graph node.
+     */
+    public static final String getPublicationSource(String metaGraphValue) {
+        MetaGraph metaGraph = parse(metaGraphValue);
 
         if (metaGraph != null) {
             return metaGraph.publicationSource;
@@ -619,14 +666,6 @@ public class Quadruple implements Event {
      */
     public static boolean isMetaGraphNode(Node node) {
         return parse(node) != null;
-    }
-
-    private static final void checkGraphType(Node graph) {
-        if (!graph.isURI()) {
-            throw new IllegalArgumentException(
-                    "The specified graph value is not an URI: "
-                            + graph.toString());
-        }
     }
 
     /**

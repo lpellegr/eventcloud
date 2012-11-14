@@ -16,6 +16,10 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.UUID;
 
 import com.hp.hpl.jena.graph.Node;
@@ -31,6 +35,8 @@ import fr.inria.eventcloud.utils.UniqueId;
 public class SubscriptionId extends UniqueId {
 
     private static final long serialVersionUID = 130L;
+
+    public static final Serializer SERIALIZER = new Serializer();
 
     /**
      * Creates a unique subscription id .
@@ -54,6 +60,32 @@ public class SubscriptionId extends UniqueId {
 
     public static SubscriptionId parseSubscriptionId(String subscriptionId) {
         return new SubscriptionId(decode(subscriptionId));
+    }
+
+    public static final class Serializer implements
+            org.mapdb.Serializer<SubscriptionId>, Serializable {
+
+        private static final long serialVersionUID = 130L;
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void serialize(DataOutput out, SubscriptionId value)
+                throws IOException {
+            out.writeLong(value.value.getMostSignificantBits());
+            out.writeLong(value.value.getLeastSignificantBits());
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public SubscriptionId deserialize(DataInput in, int available)
+                throws IOException {
+            return new SubscriptionId(new UUID(in.readLong(), in.readLong()));
+        }
+
     }
 
 }

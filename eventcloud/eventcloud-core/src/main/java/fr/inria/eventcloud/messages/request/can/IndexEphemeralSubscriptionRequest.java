@@ -41,7 +41,9 @@ import fr.inria.eventcloud.pubsub.notifications.NotificationId;
 import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 
 /**
- * 
+ * A subscription that is used to reconstruct asynchronously a compound event
+ * for some of its quadruples that have matched a subscription. This type of
+ * subscription is used when SBCE2 is enabled.
  * 
  * @author lpellegr
  */
@@ -54,11 +56,15 @@ public class IndexEphemeralSubscriptionRequest extends
 
     private final SerializedValue<String> subscriberUrl;
 
+    private final SerializedValue<String> metaGraph;
+
     public IndexEphemeralSubscriptionRequest(Node graph,
             SubscriptionId subscriptionId, String subscriberUrl) {
-        super(new QuadruplePattern(graph, Node.ANY, Node.ANY, Node.ANY, true),
-                null);
+        super(new QuadruplePattern(
+                Quadruple.removeMetaInformation(graph), Node.ANY, Node.ANY,
+                Node.ANY, true), null);
 
+        this.metaGraph = SerializedValue.create(graph.getURI());
         this.subscriptionId = SerializedValue.create(subscriptionId);
         this.subscriberUrl = SerializedValue.create(subscriberUrl);
     }
@@ -75,21 +81,20 @@ public class IndexEphemeralSubscriptionRequest extends
             return;
         }
 
+        Node metaGraphNode = Node.createURI(this.metaGraph.getValue());
+
         TransactionalDatasetGraph txnGraph =
                 semanticOverlay.getMiscDatastore().begin(AccessMode.READ_ONLY);
         try {
             // we use the meta graph node because the quadruples are stored
             // along with meta information
             QuadrupleIterator it =
-                    txnGraph.find(
-                            quadruplePattern.createMetaGraphNode(), Node.ANY,
-                            Node.ANY, Node.ANY);
+                    txnGraph.find(metaGraphNode, Node.ANY, Node.ANY, Node.ANY);
 
             if (it.hasNext()) {
                 NotificationId notificationId =
                         new NotificationId(
-                                this.subscriptionId.getValue(),
-                                super.quadruplePattern.getValue().getGraph());
+                                this.subscriptionId.getValue(), metaGraphNode);
 
                 Builder<Quadruple> builder = ImmutableList.builder();
                 while (it.hasNext()) {
@@ -106,8 +111,7 @@ public class IndexEphemeralSubscriptionRequest extends
                     final QuadruplesNotification n =
                             new QuadruplesNotification(
                                     this.subscriptionId.getValue(),
-                                    super.quadruplePattern.getValue()
-                                            .getGraph(),
+                                    metaGraphNode,
                                     PAActiveObject.getUrl(semanticOverlay.getStub()),
                                     quadruples);
 
@@ -127,16 +131,16 @@ public class IndexEphemeralSubscriptionRequest extends
                 overlay.getSubscriptionsDatastore().begin(AccessMode.WRITE);
 
         try {
-            QuadrupleIterator it =
-                    txnGraph.find(
-                            this.quadruplePattern.getValue().getGraph(),
-                            Node.ANY,
-                            PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
-                            Node.ANY);
+            // QuadrupleIterator it =
+            // txnGraph.find(
+            // Node.createURI(this.metaGraph.getValue()),
+            // Node.ANY,
+            // PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
+            // Node.ANY);
 
-            if (it.hasNext()) {
-                return false;
-            }
+            // if (it.hasNext()) {
+            // return false;
+            // }
 
             txnGraph.add(this.createEphemeralSubscriptionQuadruple());
             txnGraph.commit();
@@ -151,7 +155,7 @@ public class IndexEphemeralSubscriptionRequest extends
 
     private final Quadruple createEphemeralSubscriptionQuadruple() {
         return new Quadruple(
-                this.quadruplePattern.getValue().getGraph(),
+                Node.createURI(this.metaGraph.getValue()),
                 PublishSubscribeUtils.createSubscriptionIdUri(this.subscriptionId.getValue()),
                 PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
                 Node.createURI(this.subscriberUrl.getValue()));
