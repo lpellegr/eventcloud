@@ -36,7 +36,6 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
 
@@ -90,18 +89,12 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
     @Override
     @MemberOf("parallel")
     public void publish(Quadruple quad) {
-        if (quad.getPublicationTime() == -1) {
-            quad.setPublicationTime();
-        }
-
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
             log.info("About to publish quad : " + quad.getSubject() + " "
                     + quad.getPredicate() + " " + quad.getObject());
         }
 
-        // the quadruple is routed without taking into account the publication
-        // datetime (neither the other meta information)
-        super.sendv(new PublishQuadrupleRequest(quad));
+        this.selectPeer().publish(quad);
     }
 
     /**
@@ -109,23 +102,13 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
      */
     @Override
     @MemberOf("parallel")
-    public void publish(CompoundEvent compoundEvent) {
-        long publicationTime = System.currentTimeMillis();
-
+    public void publish(CompoundEvent event) {
         if (EventCloudProperties.INTEGRATION_LOG.getValue()) {
             // log information for integration test purposes
-            log.info("EventCloud Entry {}", compoundEvent.getGraph());
+            log.info("EventCloud Entry {}", event.getGraph());
         }
 
-        Quadruple metaQuadruple =
-                CompoundEvent.createMetaQuadruple(compoundEvent);
-        metaQuadruple.setPublicationTime(publicationTime);
-        this.publish(metaQuadruple);
-
-        for (Quadruple quad : compoundEvent) {
-            quad.setPublicationTime(publicationTime);
-            this.publish(quad);
-        }
+        this.selectPeer().publish(event);
     }
 
     /**

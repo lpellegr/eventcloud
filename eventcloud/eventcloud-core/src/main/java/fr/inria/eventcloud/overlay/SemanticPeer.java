@@ -18,7 +18,9 @@ package fr.inria.eventcloud.overlay;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PutGetApi;
+import fr.inria.eventcloud.api.Quadruple;
 
 /**
  * The SemanticPeer interface is used to merge the {@link Peer} interface and
@@ -27,5 +29,21 @@ import fr.inria.eventcloud.api.PutGetApi;
  * @author bsauvan
  */
 public interface SemanticPeer extends Peer, PutGetApi {
+
+    /**
+     * Publishes the specified quadruple.
+     * 
+     * @param quad
+     *            the quadruple to publish.
+     */
+    public void publish(Quadruple quad);
+
+    /**
+     * Publishes the specified compound event.
+     * 
+     * @param event
+     *            the compound event to publish.
+     */
+    public void publish(CompoundEvent event);
 
 }

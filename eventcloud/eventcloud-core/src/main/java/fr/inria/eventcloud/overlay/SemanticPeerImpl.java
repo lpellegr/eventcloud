@@ -37,6 +37,7 @@ import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEn
 
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -56,6 +57,7 @@ import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
+import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
@@ -114,6 +116,39 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         this.configurationProperty = "eventcloud.configuration";
         this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void publish(Quadruple quad) {
+        if (quad.getPublicationTime() == -1) {
+            quad.setPublicationTime();
+        }
+
+        // the quadruple is routed without taking into account the publication
+        // datetime (neither the other meta information)
+        super.sendv(new PublishQuadrupleRequest(quad));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void publish(CompoundEvent event) {
+        long publicationTime = System.currentTimeMillis();
+
+        Quadruple metaQuadruple = CompoundEvent.createMetaQuadruple(event);
+        metaQuadruple.setPublicationTime(publicationTime);
+        this.publish(metaQuadruple);
+
+        for (Quadruple quad : event) {
+            quad.setPublicationTime(publicationTime);
+            this.publish(quad);
+        }
     }
 
     /*
