@@ -27,6 +27,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.notifications.BindingNotification;
+import fr.inria.eventcloud.pubsub.notifications.NotificationId;
 import fr.inria.eventcloud.pubsub.notifications.PollingSignalNotification;
 import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
@@ -86,7 +87,10 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * retrieved. <strong>This operation must be used carefully</strong>. It is
      * the invoker responsibility to parallelize several calls to this method.
      * 
-     * @param id
+     * @param notificationId
+     *            the notification identifier.
+     * 
+     * @param subscriptionId
      *            the subscription identifier that identifies which subscription
      *            is matched.
      * 
@@ -96,7 +100,8 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * 
      * @return the event which has been reconstructed.
      */
-    public CompoundEvent reconstructCompoundEvent(SubscriptionId id,
+    public CompoundEvent reconstructCompoundEvent(NotificationId notificationId,
+                                                  SubscriptionId subscriptionId,
                                                   Node eventId);
 
     /**

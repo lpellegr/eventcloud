@@ -29,11 +29,12 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
@@ -114,53 +115,53 @@ public class Subsubscription implements Quadruplable {
      */
     @Override
     public List<Quadruple> toQuadruples() {
-        List<Quadruple> quads = new ArrayList<Quadruple>();
+        Builder<Quadruple> result = new ImmutableList.Builder<Quadruple>();
 
         Node originalSubscriptionURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.originalId);
         Node subSubscriptionURI =
                 Node.createURI(SUBSUBSCRIPTION_NS + this.id.toString());
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_ID_NODE,
                 Node.createLiteral(this.id.toString()), false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_INDEX_NODE, Node.createLiteral(
                         Integer.toString(this.index), XSDDatatype.XSDint),
                 false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 originalSubscriptionURI,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_GRAPH_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getGraph()),
                 false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 originalSubscriptionURI,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_SUBJECT_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getSubject()),
                 false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 originalSubscriptionURI,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_PREDICATE_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getPredicate()),
                 false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 originalSubscriptionURI,
                 subSubscriptionURI,
                 SUBSUBSCRIPTION_OBJECT_VALUE_NODE,
                 replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getObject()),
                 false, false));
 
-        return quads;
+        return result.build();
     }
 
     /**
