@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyS
 import org.objectweb.proactive.extensions.p2p.structured.configuration.Validator;
 
 /**
- * Contains default values for Eventcloud properties.
+ * Contains default values for EventCloud properties.
  * <p>
  * The first time a property is retrieved, before it, the class will try to load
  * properties from a preferences file. The location of this file is by default
@@ -52,16 +52,16 @@ public class EventCloudProperties {
             new PropertyInteger("eventcloud.compound.events.average.size", 30);
 
     /**
-     * Defines whether the Eventcloud has to compress the data which are
+     * Defines whether the EventCloud has to compress the data which are
      * transfered between the peers and the users when it is possible. When this
-     * property is enabled, all the entities communicating with the Eventcloud
+     * property is enabled, all the entities communicating with the EventCloud
      * must also enable the compression.
      */
     public static final PropertyBoolean COMPRESSION = new PropertyBoolean(
             "eventcloud.compression", false);
 
     /**
-     * Defines the prefix that is used for transforming an Eventcloud identifier
+     * Defines the prefix that is used for transforming an EventCloud identifier
      * to an URL.
      */
     public static final PropertyString EVENTCLOUD_ID_PREFIX =
