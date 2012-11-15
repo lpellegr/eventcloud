@@ -562,7 +562,7 @@ public final class PublishSubscribeUtils {
                     BindingNotification notification =
                             new BindingNotification(
                                     subscription.getOriginalId(),
-                                    quadruple.getGraph(), source,
+                                    quadruple.createMetaGraphNode(), source,
                                     new BindingWrapper(createBindingSolution(
                                             subscription, quadruple)));
 
@@ -590,14 +590,13 @@ public final class PublishSubscribeUtils {
                     if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
                         subscriber.receive(new PollingSignalNotification(
                                 subscription.getOriginalId(),
-                                quadruple.getGraph(), source,
-                                quadruple.createMetaGraphNode()));
+                                quadruple.createMetaGraphNode(), source));
                     } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
                         QuadruplesNotification quadruplesNotification =
                                 new QuadruplesNotification(
                                         subscription.getOriginalId(),
-                                        quadruple.getGraph(), source,
-                                        ImmutableList.of(quadruple));
+                                        quadruple.createMetaGraphNode(),
+                                        source, ImmutableList.of(quadruple));
 
                         if (semanticCanOverlay.markAsSent(
                                 quadruplesNotification.getId(), quadruple)) {
@@ -613,8 +612,8 @@ public final class PublishSubscribeUtils {
                     break;
                 case SIGNAL:
                     subscriber.receive(new SignalNotification(
-                            subscription.getOriginalId(), quadruple.getGraph(),
-                            source));
+                            subscription.getOriginalId(),
+                            quadruple.createMetaGraphNode(), source));
                     break;
                 case UNKNOWN:
                     throw new IllegalStateException();

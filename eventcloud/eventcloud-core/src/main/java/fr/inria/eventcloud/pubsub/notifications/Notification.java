@@ -44,8 +44,6 @@ public abstract class Notification<T> implements Serializable {
 
     private final NotificationId id;
 
-    private final SubscriptionId subscriptionId;
-
     private final T content;
 
     private final String source;
@@ -64,7 +62,6 @@ public abstract class Notification<T> implements Serializable {
     public Notification(NotificationId id, SubscriptionId subscriptionId,
             String source, T binding) {
         this.id = id;
-        this.subscriptionId = subscriptionId;
         this.content = binding;
         this.source = source;
     }
@@ -74,11 +71,15 @@ public abstract class Notification<T> implements Serializable {
     }
 
     public SubscriptionId getSubscriptionId() {
-        return this.subscriptionId;
+        return this.id.subscriptionId;
     }
 
     public T getContent() {
         return this.content;
+    }
+
+    public String getMetaEventId() {
+        return this.id.eventId;
     }
 
     /**

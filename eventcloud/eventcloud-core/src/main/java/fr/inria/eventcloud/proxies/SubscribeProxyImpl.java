@@ -24,8 +24,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.jdbm.DB;
-import org.apache.jdbm.DBMaker;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
@@ -87,8 +87,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private static final long serialVersionUID = 130L;
 
-    private static final String EVENT_IDS_RECEIVED_MAP_NAME =
-            "eventIdsReceived";
+    private static final String NOTIFICATIONS_DELIVERED_MAP_NAME =
+            "notificationsDelivered";
 
     /**
      * ADL name of the subscribe proxy component.
@@ -113,7 +113,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     // contains the quadruples solutions that are being received
     private ConcurrentMap<NotificationId, QuadruplesSolution> quadruplesSolutions;
 
-    private DB eventIdsReceivedDB;
+    private DB notificationsDeliveredDB;
 
     private String componentUri;
 
@@ -137,7 +137,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         body.setImmediateService("setImmediateServices", false);
         body.setImmediateService("setAttributes", false);
 
-        this.createAndRegisterEventIdsReceivedDB(body);
+        this.createAndRegisterNotificationsDeliveredDB(body);
     }
 
     /**
@@ -155,10 +155,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     public void endComponentActivity(Body body) {
-        this.closeEventIdsReceivedDb();
+        this.closeNotificationsDeliveredDb();
     }
 
-    private void createAndRegisterEventIdsReceivedDB(Body body) {
+    private void createAndRegisterNotificationsDeliveredDB(Body body) {
         String dbPath =
                 EventCloudProperties.getDefaultTemporaryPath() + "jdbm"
                         + File.separatorChar;
@@ -184,15 +184,18 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // the disk but not necessary when the put/commit operation is executed
         // Optional (i.e. could be implemented ourself):
         // - database deletion after close
-        this.eventIdsReceivedDB =
-                DBMaker.openFile(dbFilename)
+        this.notificationsDeliveredDB =
+                DBMaker.newFileDB(new File(dbFilename))
+                        .cacheSoftRefEnable()
+                        .closeOnJvmShutdown()
                         .deleteFilesAfterClose()
-                        .disableLocking()
-                        .disableTransactions()
-                        .enableSoftCache()
+                        .transactionDisable()
                         .make();
 
-        this.eventIdsReceivedDB.createHashMap(EVENT_IDS_RECEIVED_MAP_NAME);
+        this.notificationsDeliveredDB.createHashMap(
+                NOTIFICATIONS_DELIVERED_MAP_NAME,
+                new NotificationId.Serializer(),
+                new SubscriptionId.Serializer());
     }
 
     /**
@@ -242,15 +245,15 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    SubscribeProxyImpl.this.closeEventIdsReceivedDb();
+                    SubscribeProxyImpl.this.closeNotificationsDeliveredDb();
                 }
             }));
         }
     }
 
-    private synchronized void closeEventIdsReceivedDb() {
-        if (!this.eventIdsReceivedDB.isClosed()) {
-            this.eventIdsReceivedDB.close();
+    private synchronized void closeNotificationsDeliveredDb() {
+        if (this.notificationsDeliveredDB != null) {
+            this.notificationsDeliveredDB.close();
         }
     }
 
@@ -360,8 +363,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             + id);
         }
 
-        this.getEventIdsReceivedDB().values().remove(id);
-
         Subscription subscription = entry.subscription;
 
         // updates the network to stop sending notifications
@@ -373,6 +374,12 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                                     subSubscription.getAtomicQuery(),
                                     subscription.getType() == NotificationListenerType.BINDING));
         }
+
+        // remove entries marked as delivered for the specified subscription
+        this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(
+                NOTIFICATIONS_DELIVERED_MAP_NAME)
+                .values()
+                .remove(id);
     }
 
     /**
@@ -416,7 +423,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             solution.merge(notification.getContent());
         }
 
-        // checks whether all the sub solutions have been received
+        // checks that all the sub solutions have been received and that a
+        // notification has not been yet delivered for the eventId associated to
+        // this notification
         if (solution.isReady()) {
             this.deliver(subscriptionEntry, solution);
             this.bindingSolutions.remove(notification.getId());
@@ -441,10 +450,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     public void receive(QuadruplesNotification notification) {
         Node eventId = notification.getContent().get(0).getGraph();
         SubscriptionId subscriptionId = notification.getSubscriptionId();
-        String eventIdsReceivedKey =
-                createEventIdsReceivedKey(subscriptionId, eventId);
 
-        if (this.getEventIdsReceivedDB().containsKey(eventIdsReceivedKey)) {
+        if (this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(
+                NOTIFICATIONS_DELIVERED_MAP_NAME)
+                .containsKey(notification.getId())) {
             log.warn(
                     "Received some quadruple duplicates for a CE that has already been delivered:\n{}",
                     notification);
@@ -500,8 +509,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             // received some quadruple duplicates for a CE which has already be
             // delivered. In such a case we have to ignore these duplicates and
             // send a RemoveEphemeralSubscription to avoid a memory leak
-            if (this.getEventIdsReceivedDB().putIfAbsent(
-                    eventIdsReceivedKey, subscriptionId) != null) {
+            if (this.markAsDelivered(notification.getId(), subscriptionId) != null) {
                 log.warn(
                         "Received some quadruple duplicates for a CE that has already been delivered:\n{}",
                         notification);
@@ -570,8 +578,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         CompoundEvent compoundEvent =
                 this.reconstructCompoundEvent(
-                        subscriptionId,
-                        Node.createURI(notification.getContent()));
+                        notification.getId(), subscriptionId,
+                        Node.createURI(notification.getMetaEventId()));
 
         this.logNotificationReception(notification);
 
@@ -580,7 +588,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         if (compoundEvent != null
                 && ((entry =
                         (SubscriptionEntry<CompoundEventNotificationListener>) this.subscriptions.get(subscriptionId)) != null)) {
-            this.deliver(entry, notification.getContent(), compoundEvent);
+            this.deliver(entry, notification.getMetaEventId(), compoundEvent);
         }
     };
 
@@ -591,7 +599,11 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         listener.onNotification(subscriptionId, compoundEvent);
 
-        this.sendInputOutputMonitoringReport(graph, listener.getSubscriberUrl());
+        this.sendInputOutputMonitoringReport(
+                Quadruple.getPublicationSource(graph),
+                listener.getSubscriberUrl(),
+                Quadruple.getPublicationTime(graph));
+
         this.logIntegrationInformation(graph);
     }
 
@@ -600,7 +612,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     @MemberOf("parallel")
-    public final CompoundEvent reconstructCompoundEvent(SubscriptionId id,
+    public final CompoundEvent reconstructCompoundEvent(NotificationId notificationId,
+                                                        SubscriptionId subscriptionId,
                                                         Node eventId) {
         // the reconstruction operation for an event (quadruple) which has
         // already started is cancelled. This is to avoid duplicates in the case
@@ -609,8 +622,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // solution. Thus, the subscribe proxy receives a notification for each
         // quadruple even if all these quadruples are part of the same compound
         // event.
-        if (this.getEventIdsReceivedDB().putIfAbsent(
-                id.toString() + eventId.getURI(), id) != null) {
+        if (this.markAsDelivered(notificationId, subscriptionId) != null) {
             return null;
         }
 
@@ -628,7 +640,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                 log.info(
                         "Reconstructing compound event for subscription {} and graph value {} ({}/{})",
                         new Object[] {
-                                id, eventId, quadsReceived.size(),
+                                subscriptionId, eventId, quadsReceived.size(),
                                 expectedNbQuadruples});
             }
 
@@ -661,21 +673,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         return new CompoundEvent(quadsReceived);
     }
 
-    private void sendInputOutputMonitoringReport(String graph,
-                                                 String subscriberUrl) {
-        this.sendInputOutputMonitoringReport(
-                Node.createURI(graph), subscriberUrl);
-    }
-
-    private void sendInputOutputMonitoringReport(Node eventId,
-                                                 String subscriberUrl) {
-        if (super.monitoringManager != null) {
-            this.sendInputOutputMonitoringReport(
-                    Quadruple.getPublicationSource(eventId), subscriberUrl,
-                    Quadruple.getPublicationTime(eventId));
-        }
-    }
-
     private void sendInputOutputMonitoringReport(String source,
                                                  String destination,
                                                  long eventPublicationTimestamp) {
@@ -687,8 +684,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             destination = this.componentUri;
         }
 
-        super.monitoringManager.sendInputOutputMonitoringReport(
-                source, destination, eventPublicationTimestamp);
+        if (super.monitoringManager != null) {
+            super.monitoringManager.sendInputOutputMonitoringReport(
+                    source, destination, eventPublicationTimestamp);
+        }
     }
 
     private void logIntegrationInformation(String graph) {
@@ -713,15 +712,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             notification.getId(), this.componentUri,
                             notification.getSubscriptionId()});
         }
-    }
-
-    private ConcurrentMap<Object, Object> getEventIdsReceivedDB() {
-        return this.eventIdsReceivedDB.getHashMap(EVENT_IDS_RECEIVED_MAP_NAME);
-    }
-
-    private static final String createEventIdsReceivedKey(SubscriptionId id,
-                                                          Node eventId) {
-        return id.toString() + eventId.getURI();
     }
 
     /**
@@ -754,6 +744,13 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             this.listener = listener;
         }
 
+    }
+
+    private SubscriptionId markAsDelivered(NotificationId notificationId,
+                                           SubscriptionId subscriptionId) {
+        return this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(
+                NOTIFICATIONS_DELIVERED_MAP_NAME)
+                .putIfAbsent(notificationId, subscriptionId);
     }
 
 }

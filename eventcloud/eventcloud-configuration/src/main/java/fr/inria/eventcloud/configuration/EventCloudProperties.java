@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyS
 import org.objectweb.proactive.extensions.p2p.structured.configuration.Validator;
 
 /**
- * Contains default values for EventCloud properties.
+ * Contains default values for Eventcloud properties.
  * <p>
  * The first time a property is retrieved, before it, the class will try to load
  * properties from a preferences file. The location of this file is by default
@@ -43,24 +43,25 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.Validator
 public class EventCloudProperties {
 
     /**
-     * Defines approximatively the average number of quadruples per compound
-     * events handled by the system. This value is used to approximate the
-     * expected number of entries in the various map that are used.
+     * Defines approximatively the average number of quadruples contained for
+     * each compound event handled by the system. This value is used to
+     * approximate the expected number of entries in the various map that are
+     * initialized.
      */
     public static final PropertyInteger AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT =
-            new PropertyInteger("average.nb.quadruples.per.compound.event", 30);
+            new PropertyInteger("eventcloud.compound.events.average.size", 30);
 
     /**
-     * Defines whether the EventCloud has to compress the data which are
+     * Defines whether the Eventcloud has to compress the data which are
      * transfered between the peers and the users when it is possible. When this
-     * property is enabled, all the entities communicating with the EventCloud
+     * property is enabled, all the entities communicating with the Eventcloud
      * must also enable the compression.
      */
     public static final PropertyBoolean COMPRESSION = new PropertyBoolean(
-            "compression", false);
+            "eventcloud.compression", false);
 
     /**
-     * Defines the prefix that is used for transforming an EventCloud identifier
+     * Defines the prefix that is used for transforming an Eventcloud identifier
      * to an URL.
      */
     public static final PropertyString EVENTCLOUD_ID_PREFIX =
@@ -72,31 +73,33 @@ public class EventCloudProperties {
      * Specifies where the repositories that store the RDF data are created.
      */
     public static final PropertyString REPOSITORIES_PATH = new PropertyString(
-            "repositories.path", getDefaultRepositoriesPath());
+            "eventcloud.repositories.path", getDefaultRepositoriesPath());
 
     /**
      * Defines whether the colander (c.f. SparqlColander) uses an in-memory or a
-     * persistent datastore for filtering results.
+     * persistent datastore for filtering results or not.
      */
     public static final PropertyBoolean COLANDER_IN_MEMORY =
-            new PropertyBoolean("colander.inmemory", false);
+            new PropertyBoolean("eventcloud.colander.inmemory", false);
 
     /**
      * Defines where the repositories associated to the colanders (c.f.
-     * SparqlColander) are created. This property is used in conjunction to
-     * {@link #COLANDER_IN_MEMORY} when it is set to {@code true}.
+     * SparqlColander) are created. This property has to be used in conjunction
+     * with {@link #COLANDER_IN_MEMORY} when it is set to {@code true}.
      */
     public static final PropertyString COLANDER_REPOSITORIES_PATH =
             new PropertyString(
-                    "colander.repositories.path", getDefaultTemporaryPath()
-                            + "colanders" + File.separatorChar);
+                    "eventcloud.colander.repositories.path",
+                    getDefaultTemporaryPath() + "colanders"
+                            + File.separatorChar);
 
     /**
-     * 
+     * Defines the namespace associated to extra function imported and used
+     * during the evaluation of SPARQL requests.
      */
     public static final PropertyString FILTER_FUNCTIONS_NS =
             new PropertyString(
-                    "filter.functions.ns",
+                    "eventcloud.filter.functions.ns",
                     "http://eventcloud.inria.fr/function#");
 
     /**
@@ -122,7 +125,7 @@ public class EventCloudProperties {
      */
     public static final PropertyString PUBLISH_SUBSCRIBE_ALGORITHM =
             new PropertyString(
-                    "publish.subscribe.algorithm",
+                    "eventcloud.publish.subscribe.algorithm",
                     PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1,
                     new PubSubAlgorithmPropertyValidator());
 
@@ -131,11 +134,11 @@ public class EventCloudProperties {
      * enabled, a join operation use the statistics wich have been recorded
      * during data insertion to compute a value that indicates where to split
      * the zone managed by the landmark peer. By default this property is
-     * disabled. This property must be enabled in conjunction to
+     * disabled. This property must be enabled in conjunction with
      * {@link #RECORD_STATS_MISC_DATASTORE} in order to work.
      */
     public static final PropertyBoolean STATIC_LOAD_BALANCING =
-            new PropertyBoolean("static.load.balancing", false);
+            new PropertyBoolean("eventcloud.static.load.balancing", false);
 
     /**
      * This property is used to have the possibility to restore a repository
@@ -145,7 +148,7 @@ public class EventCloudProperties {
      * {@link EventCloudProperties#REPOSITORIES_AUTO_REMOVE}, it has no effect.
      */
     public static final PropertyBoolean REPOSITORIES_RESTORE =
-            new PropertyBoolean("repositories.restore", false);
+            new PropertyBoolean("eventcloud.repositories.restore", false);
 
     /**
      * Defines whether the repositories that are instantiated must be removed
@@ -166,9 +169,10 @@ public class EventCloudProperties {
             new PropertyInteger("eventcloud.peer.stubs.cache.maximum.size", 100);
 
     /**
-     * Defines the time to wait in milliseconds before to re-execute the query
-     * for retrieving the quadruples that belongs to the specified event id when
-     * the mode to reconstruct compound events is based on polling.
+     * Defines the time to wait in milliseconds before to execute again the
+     * query used to reconstruct a compound event based on polling. This
+     * property is used only when {@link #PUBLISH_SUBSCRIBE_ALGORITHM} is set to
+     * SBCE1.
      */
     public static final PropertyInteger RECONSTRUCTION_RETRY_THRESHOLD =
             new PropertyInteger(
@@ -195,7 +199,9 @@ public class EventCloudProperties {
                     "eventcloud.subscribe.proxies.cache.maximum.size", 1000);
 
     /**
-     * Specifies the URL of the social filter component.
+     * Specifies the URL of a socialfilter to filter notifications before
+     * delivery. A {@code null} value indicates that no socialfilter has to be
+     * used.
      */
     public static final PropertyString SOCIAL_FILTER_URL = new PropertyString(
             "eventcloud.socialfilter.url", null);
@@ -208,30 +214,49 @@ public class EventCloudProperties {
             new PropertyDouble("eventcloud.socialfilter.threshold", 0.5);
 
     /**
-     * Specifies if the integration information must be logged or not.
+     * Specifies whether the integration information must be logged or not.
      */
     public static final PropertyBoolean INTEGRATION_LOG = new PropertyBoolean(
             "eventcloud.integration.log", false);
 
     /**
-     * Defines if statistics recording must be enabled or not for the misc
+     * Defines whether statistics recording must be enabled or not for the misc
      * datastore. When it is enabled, some statistics like the number of
      * quadruples added, etc. are recorded during each data insertion.
      */
     public static final PropertyBoolean RECORD_STATS_MISC_DATASTORE =
-            new PropertyBoolean("record.stats.misc.datastore", false);
+            new PropertyBoolean("eventcloud.record.stats.misc.datastore", false);
 
+    /**
+     * Defines whether statistics recording must be enabled or not for the peer
+     * stubs put in cache.
+     */
     public static final PropertyBoolean RECORD_STATS_PEER_STUBS_CACHE =
-            new PropertyBoolean("record.stats.peer.stubs.cache", false);
+            new PropertyBoolean(
+                    "eventcloud.record.stats.peer.stubs.cache", false);
 
+    /**
+     * Defines whether statistics recording must be enabled or not for the
+     * subscriptions put in cache.
+     */
     public static final PropertyBoolean RECORD_STATS_SUBSCRIPTIONS_CACHE =
-            new PropertyBoolean("record.stats.subscriptions.cache", false);
+            new PropertyBoolean(
+                    "eventcloud.record.stats.subscriptions.cache", false);
 
+    /**
+     * Defines whether statistics recording must be enabled or not for the
+     * subscribe proxy stubs put in cache.
+     */
     public static final PropertyBoolean RECORD_STATS_SUBSCRIBE_PROXIES_CACHE =
-            new PropertyBoolean("record.stats.subscribe.proxies.cache", false);
+            new PropertyBoolean(
+                    "eventcloud.record.stats.subscribe.proxies.cache", false);
 
+    /**
+     * Defines which type of statistics recorder to use when
+     * {@link #RECORD_STATS_MISC_DATASTORE} is set to {@code true}.
+     */
     public static final PropertyClass STATS_RECORDER_CLASS = new PropertyClass(
-            "stats.recorder.class",
+            "eventcloud.stats.recorder.class",
             "fr.inria.eventcloud.datastore.stats.MeanStatsRecorder");
 
     private static int DEFAULT_THREADS_LIMIT = Runtime.getRuntime()
@@ -243,7 +268,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY =
             new PropertyInteger(
-                    "mao.soft.limit.eventclouds.registry",
+                    "eventcloud.mao.soft.limit.eventclouds.registry",
                     DEFAULT_THREADS_LIMIT);
 
     /**
@@ -252,7 +277,8 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger MAO_SOFT_LIMIT_PUBLISH_PROXIES =
             new PropertyInteger(
-                    "mao.soft.limit.publish.proxies", DEFAULT_THREADS_LIMIT);
+                    "eventcloud.mao.soft.limit.publish.proxies",
+                    DEFAULT_THREADS_LIMIT);
 
     /**
      * Defines the soft limit used by each putget proxy that runs with multi
@@ -260,7 +286,8 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger MAO_SOFT_LIMIT_PUTGET_PROXIES =
             new PropertyInteger(
-                    "mao.soft.limit.putget.proxies", DEFAULT_THREADS_LIMIT);
+                    "eventcloud.mao.soft.limit.putget.proxies",
+                    DEFAULT_THREADS_LIMIT);
 
     /**
      * Defines the soft limit used by each subscribe proxy that runs with multi
@@ -268,8 +295,8 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES =
             new PropertyInteger(
-                    "mao.soft.limit.subscribe.proxies", Runtime.getRuntime()
-                            .availableProcessors() * 2 + 1);
+                    "eventcloud.mao.soft.limit.subscribe.proxies",
+                    Runtime.getRuntime().availableProcessors() * 2 + 1);
 
     /**
      * Specifies the number maximum of attempts to lookup a proxy that is not
@@ -277,7 +304,7 @@ public class EventCloudProperties {
      * proxies which have left without unsubscribing.
      */
     public static final PropertyInteger PROXY_MAX_LOOKUP_ATTEMPTS =
-            new PropertyInteger("proxy.max.lookup.attempts", 3);
+            new PropertyInteger("eventcloud.proxy.max.lookup.attempts", 3);
 
     private static File configurationFileLoaded;
 
