@@ -16,11 +16,7 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -263,63 +259,6 @@ public class QuadrupleTest {
 
         Assert.assertEquals(
                 "Quadruples are not equals after deep copy", q, deepCopy);
-    }
-
-    public static void main(String[] args) {
-        File outputDir = new File("/Users/lpellegr/Desktop/serialization/");
-
-        if (!outputDir.exists()) {
-            outputDir.mkdirs();
-        }
-
-        Node n = Node.createURI("http://www.inria.fr/");
-
-        // case 1
-
-        QuadrupleOld quadrupleOld =
-                new QuadrupleOld(n, n, n, Node.createLiteral(
-                        "1", "en", XSDDatatype.XSDinteger));
-
-        Quadruple quadrupleNew =
-                new Quadruple(n, n, n, Node.createLiteral(
-                        "1", "en", XSDDatatype.XSDinteger));
-
-        QuadruplePatternOld quadruplePatternOld =
-                new QuadruplePatternOld(n, Node.ANY, n, Node.ANY);
-
-        QuadruplePattern quadruplePatternNew =
-                new QuadruplePattern(n, Node.ANY, n, Node.ANY);
-
-        QuadruplePattern q = new QuadruplePattern(n, Node.ANY, n, Node.ANY);
-
-        serialize(new File(outputDir, "quadruple-old"), quadrupleOld);
-        serialize(new File(outputDir, "quadruple-new"), quadrupleNew);
-        serialize(
-                new File(outputDir, "quadruplepattern-old"),
-                quadruplePatternOld);
-        serialize(
-                new File(outputDir, "quadruplepattern-new"),
-                quadruplePatternNew);
-    }
-
-    private static final void serialize(File file, Object q) {
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(new FileOutputStream(file));
-            oos.writeObject(q);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (oos != null) {
-                    oos.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
 }

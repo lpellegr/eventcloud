@@ -94,20 +94,40 @@ public class QuadruplePattern extends Quadruple {
 
         out.writeByte(bitmap);
 
-        // outputs nodes that are not null
-        if (super.nodes[0] != Node.ANY) {
-            super.writeGraph(out);
+        boolean isGraphSet = super.nodes[0] != Node.ANY;
+        boolean isSubjectSet = super.nodes[1] != Node.ANY;
+        boolean isPredicateSet = super.nodes[2] != Node.ANY;
+        boolean isObjectSet = super.nodes[3] != Node.ANY;
+
+        StringBuilder gsp = new StringBuilder();
+
+        if (isGraphSet || isSubjectSet || isPredicateSet) {
+            // outputs nodes that are not null
+            if (isGraphSet) {
+                gsp.append(super.createMetaGraphNode().getURI());
+            }
+
+            if (isSubjectSet) {
+                if (isGraphSet) {
+                    gsp.append(' ');
+                }
+
+                gsp.append(super.nodes[1].getURI());
+            }
+
+            if (isPredicateSet) {
+                if (isGraphSet || isSubjectSet) {
+                    gsp.append(' ');
+                }
+
+                gsp.append(super.nodes[2].getURI());
+            }
+
+            out.writeInt(gsp.length());
+            out.writeBytes(gsp.toString());
         }
 
-        if (super.nodes[1] != Node.ANY) {
-            super.writeSubject(out);
-        }
-
-        if (super.nodes[2] != Node.ANY) {
-            super.writePredicate(out);
-        }
-
-        if (super.nodes[3] != Node.ANY) {
+        if (isObjectSet) {
             super.writeObject(out);
         }
     }
@@ -120,23 +140,37 @@ public class QuadruplePattern extends Quadruple {
             ClassNotFoundException {
         byte bitmap = in.readByte();
 
-        for (int i = 0; i < 4; i++) {
-            if ((1 & (bitmap >> i)) == 1) {
-                switch (i) {
-                    case 0:
-                        super.readGraph(in);
-                        break;
-                    case 1:
-                        super.readSubject(in);
-                        break;
-                    case 2:
-                        super.readPredicate(in);
-                        break;
-                    case 3:
-                        super.readObject(in);
-                        break;
-                }
+        boolean isGraphSet = (1 & (bitmap >> 0)) == 1;
+        boolean isSubjectSet = (1 & (bitmap >> 1)) == 1;
+        boolean isPredicateSet = (1 & (bitmap >> 2)) == 1;
+        boolean isObjectSet = (1 & (bitmap >> 3)) == 1;
+
+        if (isGraphSet || isSubjectSet || isPredicateSet) {
+            int gspLength = in.readInt();
+            byte[] gsp = new byte[gspLength];
+
+            in.read(gsp);
+            String[] chunks = new String(gsp).split(" ");
+
+            int i = 0;
+
+            if (isGraphSet) {
+                super.nodes[0] = Node.createURI(chunks[i]);
+                i++;
             }
+
+            if (isSubjectSet) {
+                super.nodes[1] = Node.createURI(chunks[i]);
+                i++;
+            }
+
+            if (isPredicateSet) {
+                super.nodes[2] = Node.createURI(chunks[i]);
+            }
+        }
+
+        if (isObjectSet) {
+            super.readObject(in);
         }
     }
 
