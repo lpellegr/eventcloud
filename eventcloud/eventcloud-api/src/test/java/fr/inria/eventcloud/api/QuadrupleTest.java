@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.generators.NodeGenerator;
@@ -214,8 +215,7 @@ public class QuadrupleTest {
 
         Quadruple q2 = (Quadruple) MakeDeepCopy.makeDeepCopy(q1);
 
-        Assert.assertEquals(
-                "Quadruples are not equals after serialization", q1, q2);
+        Assert.assertEquals("Quadruples are not equals after deep copy", q1, q2);
 
         Quadruple q3 = (Quadruple) MakeDeepCopy.makeDeepCopy(q2);
 
@@ -228,6 +228,37 @@ public class QuadrupleTest {
                         q3.getPredicate(), q3.getObject(), false, true);
 
         Assert.assertEquals(q3, q4);
+    }
+
+    @Test
+    public void testSerializationObjectLiteralLanguageTag() throws IOException,
+            ClassNotFoundException {
+        testQuadrupleSerialization(new Quadruple(
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), Node.createLiteral(
+                        "hello", "en", null)));
+    }
+
+    @Test
+    public void testSerializationObjectLiteralDatatype() throws IOException,
+            ClassNotFoundException {
+        testQuadrupleSerialization(new Quadruple(
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), Node.createLiteral(
+                        "true", null, XSDDatatype.XSDboolean)));
+    }
+
+    @Test
+    public void testSerializationObjectLiteralLanguageTagDatatype()
+            throws IOException, ClassNotFoundException, InterruptedException {
+    }
+
+    private static void testQuadrupleSerialization(Quadruple q)
+            throws ClassNotFoundException, IOException {
+        Quadruple deepCopy = (Quadruple) MakeDeepCopy.makeDeepCopy(q);
+
+        Assert.assertEquals(
+                "Quadruples are not equals after deep copy", q, deepCopy);
     }
 
 }
