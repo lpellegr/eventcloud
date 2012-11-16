@@ -34,6 +34,11 @@ public class QuadruplePatternTest {
     private static final String DEFAULT_URI = "http://www.inria.fr";
 
     @Test
+    public void testNullValues() {
+        new QuadruplePattern(null, null, null, null);
+    }
+
+    @Test
     public void testSerialization() throws IOException, ClassNotFoundException {
         QuadruplePattern quadPattern =
                 new QuadruplePattern(
