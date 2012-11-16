@@ -120,6 +120,15 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
         Subscription subscription =
                 ((SemanticCanOverlay) overlay).findSubscription(PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()));
 
+        // an unsubscribe request has been sent after that a notification has
+        // been triggered because a publication matches the current
+        // subscription. However, the unsubscribe request has been handled
+        // before we send back to the subscriber all the intermediate binding
+        // values to the subscriber
+        if (subscription == null) {
+            return;
+        }
+
         Binding binding =
                 PublishSubscribeUtils.filter(
                         extractedMetaInfo.getFirst(),

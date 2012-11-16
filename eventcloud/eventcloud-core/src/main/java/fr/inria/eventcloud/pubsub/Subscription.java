@@ -209,6 +209,11 @@ public class Subscription implements Quadruplable, Serializable {
                         PublishSubscribeUtils.createSubscriptionIdUri(id),
                         Node.ANY, Node.ANY);
 
+        // no subscription found for the specified subscription id
+        if (!it.hasNext()) {
+            return null;
+        }
+
         while (it.hasNext()) {
             Quadruple quad = it.next();
 

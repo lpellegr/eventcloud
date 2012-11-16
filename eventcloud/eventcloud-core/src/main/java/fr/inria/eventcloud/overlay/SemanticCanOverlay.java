@@ -153,9 +153,17 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         this.subscriptionsCache =
                 cacheBuilder.build(new CacheLoader<SubscriptionId, Subscription>() {
                     @Override
-                    public Subscription load(SubscriptionId key) {
-                        return Subscription.parseFrom(
-                                subscriptionsDatastore, key);
+                    public Subscription load(SubscriptionId key)
+                            throws SubscriptionNotFoundException {
+                        Subscription subscription =
+                                Subscription.parseFrom(
+                                        subscriptionsDatastore, key);
+
+                        if (subscription == null) {
+                            throw new SubscriptionNotFoundException();
+                        }
+
+                        return subscription;
                     }
                 });
 
@@ -223,8 +231,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         try {
             return this.subscriptionsCache.get(id);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("Subscription " + id
-                    + " not found in cache and datastore");
+            // subscription not found in the cache nor in the datastore
+            return null;
         }
     }
 
@@ -744,6 +752,16 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                 throw new IllegalStateException(e);
             }
         }
+    }
+
+    private static final class SubscriptionNotFoundException extends Exception {
+
+        private static final long serialVersionUID = 1L;
+
+        public SubscriptionNotFoundException() {
+            super();
+        }
+
     }
 
 }
