@@ -197,7 +197,7 @@ public class PubSubTest extends WsTest {
                         Node.createURI("https://plus.google.com/14023231238123495031/"),
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user3@company.com"));
-        q5.setPublicationTime(publicationTime);
+        q6.setPublicationTime(publicationTime);
         this.publishWsClient.publishQuadruple(q6);
 
         // Checks that no more events are received
