@@ -188,18 +188,17 @@ public class PubSubTest extends WsTest {
         // Unsubscribes
         this.subscribeWsClient.unsubscribe(subscriptionId);
 
-        // TODO Remove sleep?
         Thread.sleep(4000);
 
-        // Publishes a 7th quadruple
-        Quadruple q7 =
+        // Publishes a 6th quadruple
+        Quadruple q6 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
                         Node.createURI("https://plus.google.com/14023231238123495031/"),
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user3@company.com"));
         q5.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q7);
+        this.publishWsClient.publishQuadruple(q6);
 
         // Checks that no more events are received
         synchronized (this.subscriberService.bindingsReceived) {
