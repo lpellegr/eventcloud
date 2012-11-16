@@ -721,23 +721,20 @@ public class Quadruple implements Externalizable, Event {
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         // graph, subject and predicate are necessarily IRI values
-        this.writeGraph(out);
-        this.writeSubject(out);
-        this.writePredicate(out);
+        String graph = this.createMetaGraphNode().getURI();
+        String subject = this.nodes[1].toString();
+        String predicate = this.nodes[2].toString();
+
+        StringBuilder gsp = new StringBuilder(graph);
+        gsp.append(' ');
+        gsp.append(subject);
+        gsp.append(' ');
+        gsp.append(predicate);
+
+        out.writeInt(gsp.length());
+        out.writeBytes(gsp.toString());
 
         this.writeObject(out);
-    }
-
-    protected void writeGraph(ObjectOutput out) throws IOException {
-        writeString(out, this.createMetaGraphNode().toString());
-    }
-
-    protected void writeSubject(ObjectOutput out) throws IOException {
-        writeString(out, this.nodes[1].toString());
-    }
-
-    protected void writePredicate(ObjectOutput out) throws IOException {
-        writeString(out, this.nodes[2].toString());
     }
 
     protected void writeObject(ObjectOutput out) throws IOException {
@@ -750,10 +747,12 @@ public class Quadruple implements Externalizable, Event {
             hasDatatype = this.nodes[3].getLiteralDatatypeURI() != null;
         }
 
+        byte bitmap =
+                createObjectBitmap(hasLiteral, hasLanguageTag, hasDatatype);
+
         // writes a boolean to indicates whether the object value is a literal
         // and if it embeds a language tag and/or a datatype
-        out.writeByte(createObjectBitmap(
-                hasLiteral, hasLanguageTag, hasDatatype));
+        out.writeByte(bitmap);
 
         if (hasLiteral) {
             // a literal may contain unicode characters
@@ -803,9 +802,18 @@ public class Quadruple implements Externalizable, Event {
     @Override
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
-        this.readGraph(in);
-        this.readSubject(in);
-        this.readPredicate(in);
+        int gspLength = in.readInt();
+        byte[] gsp = new byte[gspLength];
+
+        in.read(gsp);
+
+        String[] chunks = new String(gsp).split(" ");
+
+        this.nodes[0] =
+                this.extractAndSetMetaInformation(Node.createURI(chunks[0]));
+        this.nodes[1] = Node.createURI(chunks[1]);
+        this.nodes[2] = Node.createURI(chunks[2]);
+
         this.readObject(in);
     }
 
