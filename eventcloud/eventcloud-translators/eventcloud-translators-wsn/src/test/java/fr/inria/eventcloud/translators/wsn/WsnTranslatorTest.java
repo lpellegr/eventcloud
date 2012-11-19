@@ -104,26 +104,26 @@ public class WsnTranslatorTest {
     private static String asString(Element elt) {
         TransformerFactory transfac = TransformerFactory.newInstance();
         Transformer trans = null;
+
         try {
             trans = transfac.newTransformer();
-        } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
-        }
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        trans.setOutputProperty(OutputKeys.INDENT, "yes");
-        trans.setOutputProperty(
-                "{http://xml.apache.org/xslt}indent-amount", "4");
+            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            trans.setOutputProperty(
+                    "{http://xml.apache.org/xslt}indent-amount", "4");
 
-        StringWriter sw = new StringWriter();
-        StreamResult result = new StreamResult(sw);
-        DOMSource source = new DOMSource(elt);
-        try {
+            StringWriter sw = new StringWriter();
+            StreamResult result = new StreamResult(sw);
+            DOMSource source = new DOMSource(elt);
+
             trans.transform(source, result);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
 
-        return sw.toString();
+            return sw.toString();
+        } catch (TransformerConfigurationException e) {
+            throw new IllegalStateException(e);
+        } catch (TransformerException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static void logInfo(CompoundEvent event) {

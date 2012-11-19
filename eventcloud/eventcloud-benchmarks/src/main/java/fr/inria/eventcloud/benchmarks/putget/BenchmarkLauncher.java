@@ -111,7 +111,7 @@ public class BenchmarkLauncher {
 
     private List<SparqlSelectResponse> responses;
     private List<String> queries;
-    private int nbPeers, nbQuadruplesAdded;
+    private int nbPeers, nbQuadruplesAdded = 0;
     private long startTime, elapsedTime, testTime, timeToInsertQuads,
             sizeOfQuadsInsertedInBytes;
     private String fileToParse, datastoreType;
