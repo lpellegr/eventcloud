@@ -594,7 +594,7 @@ public class Quadruple implements Externalizable, Event {
      * {@code metaGraphNode} or {@code -1} if the publication time is not
      * defined or if the specified node is not a meta graph node.
      * 
-     * @param metaGraph
+     * @param metaGraphValue
      *            the meta graph value to parse.
      * 
      * @return the publication time associated to the specified
@@ -638,7 +638,7 @@ public class Quadruple implements Externalizable, Event {
      * {@code metaGraphNode} or {@code null} if the publication source is not
      * defined or if the specified node is not a meta graph node.
      * 
-     * @param metaGraphNode
+     * @param metaGraphValue
      *            the meta graph value to parse.
      * 
      * @return the publication source associated to the specified
