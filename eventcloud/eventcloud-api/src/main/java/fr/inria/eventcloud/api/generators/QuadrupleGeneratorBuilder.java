@@ -48,6 +48,11 @@ public final class QuadrupleGeneratorBuilder {
         return this;
     }
 
+    public QuadrupleGeneratorBuilder setGraph(Node graph) {
+        this.graph = graph;
+        return this;
+    }
+
     public QuadrupleGeneratorBuilder setGraphSize(int length) {
         this.graphSize = length;
         return this;
