@@ -39,8 +39,8 @@ import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
  * <p>
  * This proxy offers the possibility to reconstruct an Event from the binding
  * which has matched a subscription by a call to
- * {@link SubscribeProxy#reconstructCompoundEvent(SubscriptionId, Node)} and
- * also by an using a {@link CompoundEventNotificationListener} when you
+ * {@link SubscribeProxy#reconstructCompoundEvent(NotificationId, SubscriptionId, Node)}
+ * and also by an using a {@link CompoundEventNotificationListener} when you
  * subscribe. The reconstruction is an heavy operation that may be used
  * carefully. Indeed, to reconstruct an {@link CompoundEvent} from its
  * identifier, a {@link QuadruplePattern} query must be sent to all the peers
