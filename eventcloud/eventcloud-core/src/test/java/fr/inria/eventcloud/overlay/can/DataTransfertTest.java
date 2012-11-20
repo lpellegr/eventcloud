@@ -53,6 +53,7 @@ import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 
 /**
  * Test the data transfer during a join operation with a {@link CanOverlay}.
@@ -173,8 +174,7 @@ public class DataTransfertTest {
 
     @Test
     public void testSubscriptionsTransfert() throws EventCloudIdNotManaged,
-            InterruptedException, NetworkAlreadyJoinedException,
-            PeerNotActivatedException {
+            NetworkAlreadyJoinedException, PeerNotActivatedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 2);
 
         SemanticPeer firstPeer =
@@ -233,6 +233,8 @@ public class DataTransfertTest {
         subscribeProxy.subscribe(s1, new CustomNotificationListener());
         subscribeProxy.subscribe(s2, new CustomNotificationListener());
 
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         SemanticPeer thirdPeer =
                 SemanticFactory.newSemanticPeer(new SemanticInMemoryOverlayProvider());
 
@@ -243,9 +245,6 @@ public class DataTransfertTest {
                 uri1, uri1, uri1, uri1)));
         publishProxy.publish(new CompoundEvent(new Quadruple(
                 uri2, uri2, uri2, uri2)));
-
-        // to ensure that the subscriptions have been indexed
-        Thread.sleep(3000);
 
         List<Quadruple> subscriptions =
                 Operations.findQuadruplesOperation(

@@ -36,6 +36,7 @@ import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.CompoundEventNotificationConsumer;
 import fr.inria.eventcloud.webservices.WsTest;
@@ -119,6 +120,8 @@ public class InputOutputMonitoringTest extends WsTest {
         // Subscribes with a WSN proxy
         this.subscribeWsnClient.subscribe(WsnHelper.createSubscribeMessage(
                 this.notificationConsumerWsEndpointUrl, STREAM_QNAME));
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Publishes a compound event through a ws publish proxy
         this.publishWsnClient.notify(WsnHelper.createNotifyMessage(

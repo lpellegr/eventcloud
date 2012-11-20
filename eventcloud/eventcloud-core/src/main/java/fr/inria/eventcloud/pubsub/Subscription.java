@@ -123,7 +123,7 @@ public class Subscription implements Quadruplable, Serializable {
 
     private final long creationTime;
 
-    private final long indexationTime;
+    private long indexationTime;
 
     private final String sparqlQuery;
 
@@ -145,23 +145,14 @@ public class Subscription implements Quadruplable, Serializable {
     private transient Node graphNode;
 
     public Subscription(SubscriptionId originalId, SubscriptionId parentId,
-            SubscriptionId id, long indexationTime, String sparqlQuery,
-            String subscribeProxyUrl, NotificationListenerType listenerType) {
-        this(originalId, parentId, id, System.currentTimeMillis(),
-                indexationTime, sparqlQuery, subscribeProxyUrl, null,
-                listenerType);
+            SubscriptionId id, long creationTime, String sparqlQuery,
+            String subscriberUrl, String subscriptionDestination,
+            NotificationListenerType listenerType) {
+        this(originalId, parentId, id, creationTime, -1, sparqlQuery,
+                subscriberUrl, subscriptionDestination, listenerType);
     }
 
     public Subscription(SubscriptionId originalId, SubscriptionId parentId,
-            SubscriptionId id, long indexationTime, String sparqlQuery,
-            String subscribeProxyUrl, String subscriptionDestination,
-            NotificationListenerType listenerType) {
-        this(originalId, parentId, id, System.currentTimeMillis(),
-                indexationTime, sparqlQuery, subscribeProxyUrl,
-                subscriptionDestination, listenerType);
-    }
-
-    private Subscription(SubscriptionId originalId, SubscriptionId parentId,
             SubscriptionId id, long creationTime, long indexationTime,
             String sparqlQuery, String subscriberUrl,
             String subscriptionDestination,
@@ -335,12 +326,32 @@ public class Subscription implements Quadruplable, Serializable {
         return this.id;
     }
 
+    /**
+     * Returns the creation time of the subscription.
+     * 
+     * @return the creation time of the subscription.
+     */
     public long getCreationTime() {
         return this.creationTime;
     }
 
+    /**
+     * Returns the indexation time of the subscription.
+     * 
+     * @return the indexation time of the subscription.
+     */
     public long getIndexationTime() {
         return this.indexationTime;
+    }
+
+    /**
+     * Sets the indexation time of the subscription to the current time if it
+     * has not already been set.
+     */
+    public void setIndexationTime() {
+        if (this.indexationTime == -1) {
+            this.indexationTime = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -597,8 +608,10 @@ public class Subscription implements Quadruplable, Serializable {
         Subscription subscription =
                 new Subscription(
                         id, null, id, System.currentTimeMillis(),
+                        System.currentTimeMillis(),
                         "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o }}",
-                        "http://dummy.com", NotificationListenerType.BINDING);
+                        "http://dummy.com", null,
+                        NotificationListenerType.BINDING);
 
         System.out.println(subscription.toQuadruples());
     }

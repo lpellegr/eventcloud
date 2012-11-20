@@ -50,6 +50,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.CompoundEventNotificationConsumer;
@@ -123,6 +124,8 @@ public class WsnPubSubTest extends WsTest {
                 WsnHelper.getSubcriptionId(subscribeResponse);
 
         log.info("Subscription submitted, ID is " + subscriptionId);
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Creates the notify request
         Notify notifyRequest =
@@ -204,6 +207,8 @@ public class WsnPubSubTest extends WsTest {
 
         // Subscribes for any events with topic TaxiUc
         this.subscribeWsnClient.subscribe(subscribeRequest);
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Creates the notify request emitted by source1
         Notify notifyRequest =

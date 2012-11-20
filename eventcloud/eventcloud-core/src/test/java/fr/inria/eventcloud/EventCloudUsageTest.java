@@ -43,6 +43,7 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 
 /**
  * The purpose of this test is just to show how to instantiate and to use an
@@ -155,6 +156,8 @@ public class EventCloudUsageTest implements Serializable {
         log.info(
                 "Subscription with id {} has been registered",
                 subscription.getId());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Finally, we can simulate an event source by creating a PublishProxy
         PublishApi publishProxy =

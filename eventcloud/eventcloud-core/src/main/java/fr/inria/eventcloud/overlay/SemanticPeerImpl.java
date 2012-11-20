@@ -57,12 +57,14 @@ import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
+import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
 import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.utils.Callback;
 
 /**
@@ -149,6 +151,17 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
             quad.setPublicationTime(publicationTime);
             this.publish(quad);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void indexSubscription(Subscription subscription) {
+        subscription.setIndexationTime();
+
+        super.sendv(new IndexSubscriptionRequest(subscription));
     }
 
     /*

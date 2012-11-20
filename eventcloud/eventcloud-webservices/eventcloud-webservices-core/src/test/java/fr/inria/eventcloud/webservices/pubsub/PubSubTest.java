@@ -32,6 +32,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.webservices.WsTest;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
@@ -92,6 +93,8 @@ public class PubSubTest extends WsTest {
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
                         this.signalSubscriberEndpointUrl);
 
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         // Publishes an event
         CompoundEvent event = CompoundEventGenerator.random(1);
         this.publishWsClient.publishCompoundEvent(event);
@@ -126,6 +129,8 @@ public class PubSubTest extends WsTest {
                 this.subscribeWsClient.subscribeBinding(
                         "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email ?g WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email } }",
                         this.bindingSubscriberEndpointUrl);
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Publishes 5 events
         long publicationTime = System.currentTimeMillis();
@@ -188,7 +193,7 @@ public class PubSubTest extends WsTest {
         // Unsubscribes
         this.subscribeWsClient.unsubscribe(subscriptionId);
 
-        Thread.sleep(4000);
+        Thread.sleep(2000);
 
         // Publishes a 6th quadruple
         Quadruple q6 =
@@ -215,6 +220,8 @@ public class PubSubTest extends WsTest {
                 this.subscribeWsClient.subscribeCompoundEvent(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }",
                         this.eventSubscriberEndpointUrl);
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Publishes an event
         this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(4));
