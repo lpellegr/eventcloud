@@ -249,8 +249,7 @@ public class QuadrupleTest {
     }
 
     @Test
-    public void testSerializationObjectLiteralLanguageTagDatatype()
-            throws IOException, ClassNotFoundException, InterruptedException {
+    public void testSerializationObjectLiteralLanguageTagDatatype() {
     }
 
     private static void testQuadrupleSerialization(Quadruple q)
