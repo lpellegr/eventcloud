@@ -112,6 +112,7 @@ public final class SubscriptionRewriter {
                 subscription.getOriginalId(),
                 subscription.getId(),
                 new SubscriptionId(),
+                subscription.getCreationTime(),
                 subscription.getIndexationTime(),
                 OpAsQuery.asQuery(
                         Transformer.transform(

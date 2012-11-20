@@ -221,8 +221,9 @@ public class SubscriptionRewriterTest {
     private static Subscription createSubscription(String sparqlQuery) {
         return new Subscription(
                 new SubscriptionId(), new SubscriptionId(),
-                new SubscriptionId(), System.currentTimeMillis(), sparqlQuery,
-                source, NotificationListenerType.UNKNOWN);
+                new SubscriptionId(), System.currentTimeMillis(),
+                System.currentTimeMillis(), sparqlQuery, source, null,
+                NotificationListenerType.UNKNOWN);
     }
 
 }

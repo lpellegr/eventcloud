@@ -161,6 +161,8 @@ public class SubscribeProxyTest {
         this.subscribeProxy.subscribe(
                 subscription, new CustomCompoundEventNotificationListener());
 
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         synchronized (events) {
             while (events.size() < NB_EVENTS_TO_WAIT) {
                 try {
@@ -199,6 +201,8 @@ public class SubscribeProxyTest {
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
                 subscription, new CustomBindingNotificationListener());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         long publicationTime = System.currentTimeMillis();
 
@@ -286,6 +290,8 @@ public class SubscribeProxyTest {
         this.subscribeProxy.subscribe(
                 subscription, new CustomSignalNotificationListener());
 
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         CompoundEvent event = CompoundEventGenerator.random(eventId, 10);
 
         this.publishProxy.publish(event);
@@ -314,6 +320,8 @@ public class SubscribeProxyTest {
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
                 subscription, new CustomCompoundEventNotificationListener());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         CompoundEvent ce = CompoundEventGenerator.random(eventId, 10);
 
@@ -362,6 +370,8 @@ public class SubscribeProxyTest {
                         new Object[0]);
         this.subscribeProxy.subscribe(subscription, notificationListener);
 
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         CompoundEvent ce = CompoundEventGenerator.random(eventId, 10);
 
         this.publishProxy.publish(ce);
@@ -391,6 +401,8 @@ public class SubscribeProxyTest {
 
         this.subscribeProxy.subscribe(
                 subscription, new CustomCompoundEventNotificationListener());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         Node subject = Node.createURI("urn:city:Nice");
 
@@ -448,8 +460,7 @@ public class SubscribeProxyTest {
         this.subscribeProxy.subscribe(
                 subscription, new CustomCompoundEventNotificationListener());
 
-        // waits a little to make sure the subscription has been indexed
-        Thread.sleep(500);
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         long publicationTime = System.currentTimeMillis();
 
@@ -502,6 +513,8 @@ public class SubscribeProxyTest {
         // subscribes for any quadruples
         this.subscribeProxy.subscribe(
                 subscription, new CustomCompoundEventNotificationListener());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         List<Quadruple> quads = new ArrayList<Quadruple>(4);
         for (int i = 0; i < 4; i++) {

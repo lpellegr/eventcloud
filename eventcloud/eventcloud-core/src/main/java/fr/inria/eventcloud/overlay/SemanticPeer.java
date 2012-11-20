@@ -21,6 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
  * The SemanticPeer interface is used to merge the {@link Peer} interface and
@@ -45,5 +46,13 @@ public interface SemanticPeer extends Peer, PutGetApi {
      *            the compound event to publish.
      */
     public void publish(CompoundEvent event);
+
+    /**
+     * Indexes the specified subscription.
+     * 
+     * @param subscription
+     *            the subscription to index.
+     */
+    public void indexSubscription(Subscription subscription);
 
 }

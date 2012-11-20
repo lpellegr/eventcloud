@@ -94,7 +94,7 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
                     + quad.getPredicate() + " " + quad.getObject());
         }
 
-        this.selectPeer().publish(quad);
+        super.selectPeer().publish(quad);
     }
 
     /**
@@ -108,7 +108,7 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
             log.info("EventCloud Entry {}", event.getGraph());
         }
 
-        this.selectPeer().publish(event);
+        super.selectPeer().publish(event);
     }
 
     /**

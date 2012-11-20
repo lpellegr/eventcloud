@@ -60,6 +60,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 
 /**
  * Functional test case to have the possibility to test the pub/sub layer in
@@ -202,6 +203,8 @@ public class PublishSubscribeBenchmarkTest {
             subscribe(
                     subscribeProxy, subscription, this.notificationListenerType);
         }
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         this.receiveExpectedEventsStopwatch.start();
 

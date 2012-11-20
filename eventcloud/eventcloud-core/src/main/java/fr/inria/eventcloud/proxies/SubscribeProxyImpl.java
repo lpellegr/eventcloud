@@ -55,7 +55,6 @@ import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.formatters.QuadruplesFormatter;
-import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.RemoveEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
@@ -327,7 +326,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             + internalSubscription.getId());
         }
 
-        super.sendv(new IndexSubscriptionRequest(internalSubscription));
+        super.selectPeer().indexSubscription(internalSubscription);
 
         log.info(
                 "New subscription has been registered from {} with id {}",
