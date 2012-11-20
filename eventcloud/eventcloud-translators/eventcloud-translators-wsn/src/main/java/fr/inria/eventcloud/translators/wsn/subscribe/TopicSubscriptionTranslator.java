@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
+import fr.inria.eventcloud.translators.wsn.WsnConstants;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
 
 /**
  * This class defines a method to translate a WS-Notification {@link Subscribe}
@@ -82,7 +82,7 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
         }
 
         return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <"
-                + WsnTranslatorConstants.TOPIC_TEXT + "> <" + topicNamespace
+                + WsnConstants.TOPIC_TEXT + "> <" + topicNamespace
                 + topic.getLocalPart() + Stream.STREAM_ID_SUFFIX + "> . } }";
     }
 

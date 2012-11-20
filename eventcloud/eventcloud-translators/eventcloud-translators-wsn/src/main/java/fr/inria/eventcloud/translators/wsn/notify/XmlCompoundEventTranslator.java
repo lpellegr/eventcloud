@@ -42,7 +42,7 @@ import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
-import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
+import fr.inria.eventcloud.translators.wsn.WsnConstants;
 
 /**
  * Translator for {@link CompoundEvent events} to
@@ -89,18 +89,18 @@ public class XmlCompoundEventTranslator extends
 
             String predicateValue = quad.getPredicate().getURI();
 
-            if (predicateValue.equals(WsnTranslatorConstants.TOPIC_TEXT)) {
+            if (predicateValue.equals(WsnConstants.TOPIC_TEXT)) {
                 String value = quad.getObject().getURI();
                 int start = value.lastIndexOf("/") + 1;
                 int end = value.lastIndexOf(Stream.STREAM_ID_SUFFIX);
                 topic = value.substring(start, end);
-            } else if (predicateValue.equals(WsnTranslatorConstants.PRODUCER_ADDRESS_TEXT)) {
+            } else if (predicateValue.equals(WsnConstants.PRODUCER_ADDRESS_TEXT)) {
                 producerAddress = quad.getObject().getLiteralLexicalForm();
-            } else if (predicateValue.startsWith(WsnTranslatorConstants.PRODUCER_METADATA_TEXT)) {
+            } else if (predicateValue.startsWith(WsnConstants.PRODUCER_METADATA_TEXT)) {
                 metadatas.add(this.getMetadataElement(quad));
-            } else if (predicateValue.startsWith(WsnTranslatorConstants.MESSAGE_TEXT)) {
+            } else if (predicateValue.startsWith(WsnConstants.MESSAGE_TEXT)) {
                 messagePayload = this.createElement(quad, messagePayload);
-            } else if (predicateValue.contains(WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+            } else if (predicateValue.contains(WsnConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
                 eventId = quad.getObject().getLiteralLexicalForm();
             }
         }
@@ -109,25 +109,23 @@ public class XmlCompoundEventTranslator extends
             eventId = event.getGraph().getURI();
         }
 
-        if (eventId.endsWith(WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+        if (eventId.endsWith(WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
             hasSimpleExpressionType = true;
             eventId =
                     eventId.substring(
                             0,
-                            eventId.lastIndexOf(WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER));
+                            eventId.lastIndexOf(WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER));
         }
 
-        if (eventId.endsWith(WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
+        if (eventId.endsWith(WsnConstants.XML_TRANSLATION_MARKER)) {
             eventId =
                     eventId.substring(
                             0,
-                            eventId.lastIndexOf(WsnTranslatorConstants.XML_TRANSLATION_MARKER));
+                            eventId.lastIndexOf(WsnConstants.XML_TRANSLATION_MARKER));
         }
 
-        metadatas.add(this.createMetadataElement(
-                new QName(
-                        WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE,
-                        "id"), eventId));
+        metadatas.add(this.createMetadataElement(new QName(
+                WsnConstants.PRODUCER_METADATA_EVENT_NAMESPACE, "id"), eventId));
 
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
@@ -137,7 +135,7 @@ public class XmlCompoundEventTranslator extends
             if (hasSimpleExpressionType) {
                 JAXBElement<QName> simpleTopicExpression =
                         new JAXBElement<QName>(
-                                WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_QNAME,
+                                WsnConstants.SIMPLE_TOPIC_EXPRESSION_QNAME,
                                 QName.class, null, new QName(topic));
                 topicExpression.getContent().add(simpleTopicExpression);
             } else {
@@ -168,8 +166,7 @@ public class XmlCompoundEventTranslator extends
     private Element createMetadataElement(QName qname, String value) {
         Element metadataElt =
                 DOCUMENT.createElementNS(
-                        WsnTranslatorConstants.PRODUCER_METADATA_NAMESPACE,
-                        "Metadata");
+                        WsnConstants.PRODUCER_METADATA_NAMESPACE, "Metadata");
         Element childElt =
                 DOCUMENT.createElementNS(
                         qname.getNamespaceURI(), qname.getLocalPart());
@@ -283,9 +280,7 @@ public class XmlCompoundEventTranslator extends
                     if (i == elements.length - 1) {
                         lastElt.appendChild(DOCUMENT.createTextNode(quadruple.getObject()
                                 .getLiteralLexicalForm()
-                                .replaceAll(
-                                        WsnTranslatorConstants.SHARP_ESCAPE,
-                                        "#")));
+                                .replaceAll(WsnConstants.SHARP_ESCAPE, "#")));
                     }
                 } else {
                     lastElt = eltFound;
@@ -342,7 +337,7 @@ public class XmlCompoundEventTranslator extends
             if (i == elements.length - 1) {
                 lastElt.appendChild(DOCUMENT.createTextNode(quadruple.getObject()
                         .getLiteralLexicalForm()
-                        .replaceAll(WsnTranslatorConstants.SHARP_ESCAPE, "#")));
+                        .replaceAll(WsnConstants.SHARP_ESCAPE, "#")));
             }
         }
 
@@ -352,10 +347,10 @@ public class XmlCompoundEventTranslator extends
     private static String[] getXmlElements(Quadruple quadruple) {
         String[] elements =
                 quadruple.getPredicate().getURI().replaceAll(
-                        WsnTranslatorConstants.SHARP_ESCAPE, "#").split(
-                        Pattern.quote(WsnTranslatorConstants.URI_SEPARATOR));
+                        WsnConstants.SHARP_ESCAPE, "#").split(
+                        Pattern.quote(WsnConstants.URI_SEPARATOR));
 
-        if (elements[0].startsWith(WsnTranslatorConstants.MESSAGE_TEXT)) {
+        if (elements[0].startsWith(WsnConstants.MESSAGE_TEXT)) {
             elements = Arrays.copyOfRange(elements, 1, elements.length);
         }
 

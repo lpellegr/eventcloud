@@ -25,7 +25,6 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.apache.cxf.wsn.util.WSNHelper;
-import org.apache.xerces.dom.ElementNSImpl;
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
@@ -34,8 +33,10 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.oasis_open.docs.wsn.b_2.Unsubscribe;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import eu.play_project.play_commons.eventformat.xml.DocumentBuilder;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.utils.ReflectionUtils;
@@ -71,9 +72,8 @@ public class WsnHelper {
 
         JAXBElement<TopicExpressionType> jaxbElement =
                 new JAXBElement<TopicExpressionType>(
-                        new QName(
-                                "http://docs.oasis-open.org/wsn/b-2",
-                                "TopicExpression"), TopicExpressionType.class,
+                        WsnConstants.TOPIC_EXPRESSION_QNAME,
+                        TopicExpressionType.class,
                         createTopicExpressionType(topic));
         filterType.getAny().add(jaxbElement);
         subscribeRequest.setFilter(filterType);
@@ -99,9 +99,22 @@ public class WsnHelper {
      */
     public static SubscribeResponse createSubscribeResponse(SubscriptionId subscriptionId,
                                                             String subscriptionReferenceAddress) {
-        SubscribeResponse subscribeResponse =
-                createSubscribeResponse(subscriptionReferenceAddress);
-        subscribeResponse.getAny().add(createJaxbElement(subscriptionId));
+        SubscribeResponse subscribeResponse = new SubscribeResponse();
+        ClassLoader classLoader =
+                Thread.currentThread().getContextClassLoader();
+
+        try {
+            Thread.currentThread().setContextClassLoader(
+                    WsnHelper.class.getClassLoader());
+            W3CEndpointReference subscriptionReference =
+                    new W3CEndpointReferenceBuilder().address(
+                            subscriptionReferenceAddress).referenceParameter(
+                            createElement(subscriptionId)).build();
+            subscribeResponse.setSubscriptionReference(subscriptionReference);
+        } finally {
+            Thread.currentThread().setContextClassLoader(classLoader);
+        }
+
         return subscribeResponse;
     }
 
@@ -132,12 +145,28 @@ public class WsnHelper {
      * @return the {@link SubscriptionId subscription identifier} contained into
      *         the specified {@link SubscribeResponse}.
      */
+    @SuppressWarnings("unchecked")
     public static SubscriptionId getSubcriptionId(SubscribeResponse subscribeResponse) {
-        if (subscribeResponse.getAny().size() > 0) {
-            return getSubcriptionId(subscribeResponse.getAny().get(0));
-        } else {
-            return null;
+        W3CEndpointReference subscriptionReference =
+                subscribeResponse.getSubscriptionReference();
+
+        if (subscriptionReference != null) {
+            Object referenceParameters =
+                    ReflectionUtils.getFieldValue(
+                            subscriptionReference, "referenceParameters");
+
+            if (referenceParameters != null) {
+                List<Element> elements =
+                        (List<Element>) ReflectionUtils.getFieldValue(
+                                referenceParameters, "elements");
+
+                if (elements.size() > 0) {
+                    return getSubcriptionId(elements.get(0));
+                }
+            }
         }
+
+        return null;
     }
 
     /**
@@ -152,7 +181,7 @@ public class WsnHelper {
      */
     public static Unsubscribe createUnsubscribeRequest(SubscriptionId subscriptionId) {
         Unsubscribe unsubscribeRequest = new Unsubscribe();
-        unsubscribeRequest.getAny().add(createJaxbElement(subscriptionId));
+        unsubscribeRequest.getAny().add(createElement(subscriptionId));
         return unsubscribeRequest;
     }
 
@@ -176,38 +205,40 @@ public class WsnHelper {
     }
 
     /**
-     * Creates a {@link JAXBElement} with the specified {@link SubscriptionId
+     * Creates an {@link Element} with the specified {@link SubscriptionId
      * subscription identifier}.
      * 
      * @param subscriptionId
      *            the {@link SubscriptionId subscription identifier}.
      * 
-     * @return a {@link JAXBElement} with the specified {@link SubscriptionId
+     * @return an {@link Element} with the specified {@link SubscriptionId
      *         subscription identifier}.
      */
-    public static JAXBElement<String> createJaxbElement(SubscriptionId subscriptionId) {
-        return new JAXBElement<String>(
-                new QName("http://evencloud.inria.fr", "SubscriptionId"),
-                String.class, subscriptionId.toString());
+    public static Element createElement(SubscriptionId subscriptionId) {
+        Document document = DocumentBuilder.createDocument();
+        Element element =
+                document.createElementNS(
+                        WsnConstants.SUBSCRIPTION_ID_NAMESPACE,
+                        WsnConstants.SUBSCRIPTION_ID_QUALIFIED_NAME);
+        element.setTextContent(subscriptionId.toString());
+
+        return element;
     }
 
     /**
      * Returns the {@link SubscriptionId subscription identifier} contained into
      * the specified object.
      * 
-     * @param any
+     * @param object
      *            the object containing the {@link SubscriptionId subscription
      *            identifier}.
      * 
      * @return the {@link SubscriptionId subscription identifier} contained into
      *         the specified object.
      */
-    @SuppressWarnings("unchecked")
-    public static SubscriptionId getSubcriptionId(Object any) {
-        if (any instanceof JAXBElement<?>) {
-            return SubscriptionId.parseSubscriptionId(((JAXBElement<String>) any).getValue());
-        } else if (any instanceof ElementNSImpl) {
-            return SubscriptionId.parseSubscriptionId(((ElementNSImpl) any).getTextContent());
+    public static SubscriptionId getSubcriptionId(Object object) {
+        if (object instanceof Element) {
+            return SubscriptionId.parseSubscriptionId(((Element) object).getTextContent());
         } else {
             return null;
         }
@@ -283,7 +314,7 @@ public class WsnHelper {
             NotificationMessageHolderType message = translator.translate(event);
             message.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
             if (event.getGraph().getURI().endsWith(
-                    WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+                    WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
                 message.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
             } else {
                 message.setTopic(createTopicExpressionType(topic));
@@ -324,7 +355,7 @@ public class WsnHelper {
         TopicExpressionType topicExpressionType = new TopicExpressionType();
         topicExpressionType.getOtherAttributes().put(
                 topic, topic.getNamespaceURI());
-        topicExpressionType.setDialect("http://docs.oasis-open.org/wsn/t-1/TopicExpression/Concrete");
+        topicExpressionType.setDialect(WsnConstants.TOPIC_EXPRESSION_DIALECT);
         topicExpressionType.getContent().add(
                 topic.getPrefix() + ":" + topic.getLocalPart());
 
@@ -344,10 +375,10 @@ public class WsnHelper {
      */
     public static TopicExpressionType createTopicExpressionTypeWithSimpleExpressionType(QName topic) {
         TopicExpressionType topicExpressionType = new TopicExpressionType();
-        topicExpressionType.setDialect("http://www.w3.org/TR/1999/REC-xpath-19991116");
+        topicExpressionType.setDialect(WsnConstants.SIMPLE_TOPIC_EXPRESSION_DIALECT);
         JAXBElement<QName> simpleTopicExpression =
                 new JAXBElement<QName>(
-                        WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_QNAME,
+                        WsnConstants.SIMPLE_TOPIC_EXPRESSION_QNAME,
                         QName.class, null, topic);
         topicExpressionType.getContent().add(simpleTopicExpression);
 
@@ -413,7 +444,7 @@ public class WsnHelper {
                 Element topicElement = (Element) content.get(0);
                 return topicElement.getLocalName()
                         .equals(
-                                WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_QNAME.getLocalPart());
+                                WsnConstants.SIMPLE_TOPIC_EXPRESSION_QNAME.getLocalPart());
             } catch (ClassCastException cce) {
                 return false;
             }
@@ -490,7 +521,7 @@ public class WsnHelper {
 
                 if (topicElement.getLocalName()
                         .equals(
-                                WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_QNAME.getLocalPart())) {
+                                WsnConstants.SIMPLE_TOPIC_EXPRESSION_QNAME.getLocalPart())) {
                     String topic =
                             topicElement.getTextContent().trim().replaceAll(
                                     "\n", "");
