@@ -59,8 +59,8 @@ import fr.inria.eventcloud.api.generators.UriGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
+import fr.inria.eventcloud.translators.wsn.WsnConstants;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
@@ -94,9 +94,7 @@ public class XmlNotificationTranslator extends
             byte[] nodeBytes = xmlNodeToByteArray(incomingNode);
             String nodeString = new String(nodeBytes, "UTF-8");
             nodeString = nodeString.replaceAll(">\\s*<", "><");
-            nodeString =
-                    nodeString.replaceAll(
-                            "#", WsnTranslatorConstants.SHARP_ESCAPE);
+            nodeString = nodeString.replaceAll("#", WsnConstants.SHARP_ESCAPE);
             incomingNode = byteArrayToXmlNode(nodeString.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,10 +210,8 @@ public class XmlNotificationTranslator extends
 
                 // Map<predicate, object
                 for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
-                    if (entry.getKey()
-                            .getURI()
-                            .contains(
-                                    WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+                    if (entry.getKey().getURI().contains(
+                            WsnConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
                         eventId = entry.getValue().getLiteralLexicalForm();
                         break;
                     }
@@ -233,12 +229,12 @@ public class XmlNotificationTranslator extends
                             EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue())
                             .toString();
         }
-        if (!eventId.contains(WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
-            eventId += WsnTranslatorConstants.XML_TRANSLATION_MARKER;
+        if (!eventId.contains(WsnConstants.XML_TRANSLATION_MARKER)) {
+            eventId += WsnConstants.XML_TRANSLATION_MARKER;
         }
         if (WsnHelper.hasSimpleTopicExpression(notificationMessage)
-                && !eventId.endsWith(WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
-            eventId += WsnTranslatorConstants.SIMPLE_TOPIC_EXPRESSION_MARKER;
+                && !eventId.endsWith(WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+            eventId += WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER;
         }
         eventIdNode = Node.createURI(eventId);
         subjectNode = Node.createURI(eventId + "#event");
@@ -255,12 +251,11 @@ public class XmlNotificationTranslator extends
         }
 
         quads.add(new Quadruple(
-                eventIdNode, subjectNode, WsnTranslatorConstants.TOPIC_NODE,
-                topicNode, false, true));
+                eventIdNode, subjectNode, WsnConstants.TOPIC_NODE, topicNode,
+                false, true));
 
         quads.add(new Quadruple(
-                eventIdNode, subjectNode,
-                WsnTranslatorConstants.PRODUCER_ADDRESS_NODE,
+                eventIdNode, subjectNode, WsnConstants.PRODUCER_ADDRESS_NODE,
                 producerAddressNode, false, true));
 
         for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
@@ -325,8 +320,8 @@ public class XmlNotificationTranslator extends
             Node predicateNode = null;
             if (!metadata) {
                 predicateNode =
-                        Node.createURI(WsnTranslatorConstants.MESSAGE_TEXT
-                                + WsnTranslatorConstants.URI_SEPARATOR
+                        Node.createURI(WsnConstants.MESSAGE_TEXT
+                                + WsnConstants.URI_SEPARATOR
                                 + predicate.toString());
             } else {
                 predicateNode = Node.createURI(predicate.toString());
@@ -336,7 +331,7 @@ public class XmlNotificationTranslator extends
                     literalValue, findDatatype(literalValue)));
         } else {
             if (predicate.length() > 0) {
-                predicate.append(WsnTranslatorConstants.URI_SEPARATOR);
+                predicate.append(WsnConstants.URI_SEPARATOR);
             }
 
             if (node.getNamespaceURI() != null) {
