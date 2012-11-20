@@ -127,7 +127,7 @@ public class WsnTranslator {
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
         if (event.getGraph().getURI().contains(
-                WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
+                WsnConstants.XML_TRANSLATION_MARKER)) {
             return this.translateXmlCompoundEvent(event);
         } else {
             return this.translateSemanticCompoundEvent(event);

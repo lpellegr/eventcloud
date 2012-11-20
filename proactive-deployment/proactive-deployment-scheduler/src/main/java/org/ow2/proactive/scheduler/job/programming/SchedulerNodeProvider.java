@@ -323,7 +323,7 @@ public class SchedulerNodeProvider {
             throws NodeProviderException {
         return this.submitNodeRequest(
                 schedulerURL, credentialsPath, numberNodes, dataFolder,
-                jvmArguments);
+                jvmArguments, new String[0]);
     }
 
     /**
