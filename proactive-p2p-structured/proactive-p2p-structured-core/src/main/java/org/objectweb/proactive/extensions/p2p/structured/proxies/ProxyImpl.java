@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +30,6 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 
 /**
@@ -49,13 +47,9 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
     // timer that updates peer stubs periodically
     private ScheduledExecutorService updateStubsService;
 
-    private ExecutorService threadPool;
-
     protected ProxyImpl(List<? extends Tracker> trackers) {
         this.trackers = trackers;
         this.peerStubs = new ArrayList<Peer>();
-        this.threadPool =
-                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads() * 2);
     }
 
     /**
@@ -63,7 +57,7 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
      */
     @Override
     public void runComponentActivity(Body body) {
-        (new MultiActiveService(body)).multiActiveServing();
+        new MultiActiveService(body).multiActiveServing();
     }
 
     /**
@@ -171,8 +165,6 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
         if (this.updateStubsService != null) {
             this.updateStubsService.shutdownNow();
         }
-
-        this.threadPool.shutdown();
     }
 
 }
