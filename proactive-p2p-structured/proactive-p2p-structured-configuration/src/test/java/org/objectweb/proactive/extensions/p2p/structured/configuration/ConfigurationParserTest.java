@@ -33,11 +33,11 @@ import org.junit.rules.TemporaryFolder;
 public class ConfigurationParserTest {
 
     @Rule
-    public static final TemporaryFolder folder = new TemporaryFolder();
+    public final TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void testLoadWithJavaProperty() throws IOException {
-        File file = folder.newFile();
+        File file = this.folder.newFile();
 
         PrintWriter pw = new PrintWriter(file);
         pw.write("property1");
@@ -48,9 +48,13 @@ public class ConfigurationParserTest {
 
         System.setProperty("test.configuration", file.toString());
 
+        File fileLoaded =
+                ConfigurationParser.load(
+                        ConfigurationParserTest.Properties.class,
+                        "test.configuration", file.getAbsolutePath());
+
         Assert.assertEquals(
-                file.getAbsolutePath(),
-                ConfigurationParserTest.Properties.configurationFileLoaded.getAbsolutePath());
+                file.getAbsolutePath(), fileLoaded.getAbsolutePath());
 
         Assert.assertTrue(Properties.PROPERTY_1.getValue() != Properties.PROPERTY_1.getDefaultValue());
         Assert.assertTrue(Properties.PROPERTY_1.getValue());
@@ -64,20 +68,6 @@ public class ConfigurationParserTest {
 
         public static final PropertyString PROPERTY_2 = new PropertyString(
                 "property2", "value");
-
-        private static File configurationFileLoaded = null;
-
-        static {
-            try {
-                configurationFileLoaded =
-                        ConfigurationParser.load(
-                                ConfigurationParserTest.Properties.class,
-                                "test.configuration", folder.newFile()
-                                        .toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
     }
 
