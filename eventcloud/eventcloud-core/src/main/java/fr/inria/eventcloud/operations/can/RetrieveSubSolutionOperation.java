@@ -103,43 +103,58 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
             txnGraph.end();
         }
 
-        txnGraph = datastore.begin(AccessMode.WRITE);
-        try {
-            txnGraph.delete(metaQuad);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            txnGraph.end();
-        }
+        if (metaQuad != null) {
+            Pair<Quadruple, SubscriptionId> extractedMetaInfo =
+                    PublishSubscribeUtils.extractMetaInformation(metaQuad);
 
-        Pair<Quadruple, SubscriptionId> extractedMetaInfo =
-                PublishSubscribeUtils.extractMetaInformation(metaQuad);
+            // extracts only the variables that are declared as result variables
+            // in
+            // the original subscription
+            Subscription subscription =
+                    ((SemanticCanOverlay) overlay).findSubscription(PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()));
 
-        // extracts only the variables that are declared as result variables in
-        // the original subscription
-        Subscription subscription =
-                ((SemanticCanOverlay) overlay).findSubscription(PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()));
+            // an unsubscribe request has been sent after that a notification
+            // has
+            // been triggered because a publication matches the current
+            // subscription. However, the unsubscribe request has been handled
+            // before we send back to the subscriber all the intermediate
+            // binding
+            // values to the subscriber
+            if (subscription == null) {
+                return;
+            }
 
-        Binding binding =
-                PublishSubscribeUtils.filter(
-                        extractedMetaInfo.getFirst(),
-                        subscription.getResultVars(),
-                        subscription.getSubSubscriptions()[0].getAtomicQuery());
+            Binding binding =
+                    PublishSubscribeUtils.filter(
+                            extractedMetaInfo.getFirst(),
+                            subscription.getResultVars(),
+                            subscription.getSubSubscriptions()[0].getAtomicQuery());
 
-        try {
-            subscription.getSubscriberProxy().receive(
-                    new BindingNotification(
-                            this.notificationId, extractedMetaInfo.getSecond(),
-                            PAActiveObject.getUrl(overlay.getStub()),
-                            new BindingWrapper(binding)));
-        } catch (ExecutionException e) {
-            log.error("No SubscribeProxy found under the given URL: "
-                    + subscription.getSubscriberUrl(), e);
+            try {
+                subscription.getSubscriberProxy().receive(
+                        new BindingNotification(
+                                this.notificationId,
+                                extractedMetaInfo.getSecond(),
+                                PAActiveObject.getUrl(overlay.getStub()),
+                                new BindingWrapper(binding)));
+            } catch (ExecutionException e) {
+                log.error("No SubscribeProxy found under the given URL: "
+                        + subscription.getSubscriberUrl(), e);
 
-            // TODO: this could be due to a subscriber which has left
-            // without unsubscribing. In that case we can remove the
-            // subscription information associated to this subscriber
-            // and also send a message
+                // TODO: this could be due to a subscriber which has left
+                // without unsubscribing. In that case we can remove the
+                // subscription information associated to this subscriber
+                // and also send a message
+            }
+
+            txnGraph = datastore.begin(AccessMode.WRITE);
+            try {
+                txnGraph.delete(metaQuad);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                txnGraph.end();
+            }
         }
     }
 

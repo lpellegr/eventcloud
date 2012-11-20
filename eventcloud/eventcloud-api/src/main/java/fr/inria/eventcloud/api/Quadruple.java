@@ -16,18 +16,15 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
 import org.openjena.riot.Lang;
-import org.openjena.riot.out.OutputLangUtils;
-import org.openjena.riot.tokens.Tokenizer;
-import org.openjena.riot.tokens.TokenizerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +32,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.primitives.Longs;
+import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_ANY;
 import com.hp.hpl.jena.graph.Node_Blank;
@@ -59,7 +57,7 @@ import com.hp.hpl.jena.graph.Triple;
  * 
  * @author lpellegr
  */
-public class Quadruple implements Event {
+public class Quadruple implements Externalizable, Event {
 
     private static final long serialVersionUID = 130L;
 
@@ -73,9 +71,9 @@ public class Quadruple implements Event {
     // and the object value of the quadruple
     protected transient Node[] nodes;
 
-    private transient long publicationTime;
+    protected transient long publicationTime;
 
-    private transient String publicationSource;
+    protected transient String publicationSource;
 
     /**
      * Defines the different formats that are allowed to read quadruples or to
@@ -159,8 +157,7 @@ public class Quadruple implements Event {
      */
     public Quadruple(Node graph, Node subject, Node predicate, Node object,
             boolean checkType, boolean parseMetaInformation) {
-        this.nodes = new Node[4];
-        this.publicationTime = -1;
+        this();
 
         if (checkType) {
             isAllowed(graph);
@@ -178,6 +175,11 @@ public class Quadruple implements Event {
         this.nodes[1] = subject;
         this.nodes[2] = predicate;
         this.nodes[3] = object;
+    }
+
+    public Quadruple() {
+        this.nodes = new Node[4];
+        this.publicationTime = -1;
     }
 
     private static final void isAllowed(Node node) {
@@ -452,7 +454,7 @@ public class Quadruple implements Event {
         return this.publicationTime > 0 || this.publicationSource != null;
     }
 
-    private final Node extractAndSetMetaInformation(Node graph) {
+    protected final Node extractAndSetMetaInformation(Node graph) {
         MetaGraph metaGraph = parse(graph);
 
         if (metaGraph != null) {
@@ -592,7 +594,7 @@ public class Quadruple implements Event {
      * {@code metaGraphNode} or {@code -1} if the publication time is not
      * defined or if the specified node is not a meta graph node.
      * 
-     * @param metaGraph
+     * @param metaGraphValue
      *            the meta graph value to parse.
      * 
      * @return the publication time associated to the specified
@@ -636,7 +638,7 @@ public class Quadruple implements Event {
      * {@code metaGraphNode} or {@code null} if the publication source is not
      * defined or if the specified node is not a meta graph node.
      * 
-     * @param metaGraphNode
+     * @param metaGraphValue
      *            the meta graph value to parse.
      * 
      * @return the publication source associated to the specified
@@ -677,10 +679,10 @@ public class Quadruple implements Event {
     }
 
     public String toString(StringRepresentation representation) {
-        StringBuilder result = new StringBuilder('(');
+        StringBuilder result = new StringBuilder("(");
 
         for (int i = 0; i < this.nodes.length; i++) {
-            result.append(representation.apply(this.nodes[i].toString()));
+            result.append(format(this.nodes[i], representation));
             if (i < this.nodes.length - 1) {
                 result.append(", ");
             }
@@ -705,41 +707,168 @@ public class Quadruple implements Event {
         return result.toString();
     }
 
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-        in.defaultReadObject();
-
-        this.nodes = new Node[4];
-        this.publicationTime = -1;
-
-        Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
-
-        this.nodes[0] =
-                this.extractAndSetMetaInformation(tokenizer.next().asNode());
-
-        for (int i = 1; i < this.nodes.length; i++) {
-            this.nodes[i] = tokenizer.next().asNode();
+    private static String format(Node node, StringRepresentation representation) {
+        if (node == Node.ANY) {
+            return "?";
         }
 
-        tokenizer.close();
+        return representation.apply(node.toString());
     }
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        // graph, subject and predicate are necessarily IRI values
+        String graph = this.createMetaGraphNode().getURI();
+        String subject = this.nodes[1].toString();
+        String predicate = this.nodes[2].toString();
 
-        OutputStreamWriter outWriter = new OutputStreamWriter(out);
-        OutputLangUtils.output(outWriter, this.createMetaGraphNode(), null);
-        outWriter.write(' ');
+        StringBuilder gsp = new StringBuilder(graph);
+        gsp.append(' ');
+        gsp.append(subject);
+        gsp.append(' ');
+        gsp.append(predicate);
 
-        for (int i = 1; i < this.nodes.length; i++) {
-            OutputLangUtils.output(outWriter, this.nodes[i], null);
-            if (i < this.nodes.length - 1) {
-                outWriter.write(' ');
-            }
+        out.writeInt(gsp.length());
+        out.writeBytes(gsp.toString());
+
+        this.writeObject(out);
+    }
+
+    protected void writeObject(ObjectOutput out) throws IOException {
+        boolean hasLiteral = this.nodes[3].isLiteral();
+        boolean hasLanguageTag = false;
+        boolean hasDatatype = false;
+
+        if (hasLiteral) {
+            hasLanguageTag = !this.nodes[3].getLiteralLanguage().isEmpty();
+            hasDatatype = this.nodes[3].getLiteralDatatypeURI() != null;
         }
 
-        outWriter.flush();
-        // do not close outWriter
+        byte bitmap =
+                createObjectBitmap(hasLiteral, hasLanguageTag, hasDatatype);
+
+        // writes a boolean to indicates whether the object value is a literal
+        // and if it embeds a language tag and/or a datatype
+        out.writeByte(bitmap);
+
+        if (hasLiteral) {
+            // a literal may contain unicode characters
+            out.writeUTF(this.nodes[3].getLiteralLexicalForm());
+
+            if (hasLanguageTag) {
+                writeString(out, this.nodes[3].getLiteralLanguage());
+            }
+
+            if (hasDatatype) {
+                writeString(out, this.nodes[3].getLiteralDatatypeURI());
+            }
+        } else {
+            writeString(out, this.nodes[3].toString());
+        }
+    }
+
+    private static byte createObjectBitmap(boolean hasLiteral,
+                                           boolean hasLanguageTag,
+                                           boolean hasDatatype) {
+        byte bitmap = 0;
+
+        if (hasLiteral) {
+            bitmap += 4;
+        }
+
+        if (hasLanguageTag) {
+            bitmap += 2;
+        }
+
+        if (hasDatatype) {
+            bitmap += 1;
+        }
+
+        return bitmap;
+    }
+
+    protected static void writeString(ObjectOutput out, String s)
+            throws IOException {
+        out.writeInt(s.length());
+        out.writeBytes(s);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void readExternal(ObjectInput in) throws IOException,
+            ClassNotFoundException {
+        int gspLength = in.readInt();
+        byte[] gsp = new byte[gspLength];
+
+        in.read(gsp);
+
+        String[] chunks = new String(gsp).split(" ");
+
+        this.nodes[0] =
+                this.extractAndSetMetaInformation(Node.createURI(chunks[0]));
+        this.nodes[1] = Node.createURI(chunks[1]);
+        this.nodes[2] = Node.createURI(chunks[2]);
+
+        this.readObject(in);
+    }
+
+    protected void readGraph(ObjectInput in) throws IOException {
+        this.nodes[0] = this.extractAndSetMetaInformation(readIRI(in));
+    }
+
+    protected void readSubject(ObjectInput in) throws IOException {
+        this.nodes[1] = readIRI(in);
+    }
+
+    protected void readPredicate(ObjectInput in) throws IOException {
+        this.nodes[2] = readIRI(in);
+    }
+
+    protected void readObject(ObjectInput in) throws IOException {
+        byte bitmap = in.readByte();
+
+        boolean hasLiteral = (1 & (bitmap >> 2)) == 1;
+        boolean hasLanguageTag = (1 & (bitmap >> 1)) == 1;
+        boolean hasDatatype = (1 & bitmap) == 1;
+
+        if (hasLiteral) {
+            String literalValue = in.readUTF();
+            String languageTag = null;
+            String datatypeURI = null;
+
+            if (hasLanguageTag) {
+                languageTag = readString(in);
+            }
+
+            if (hasDatatype) {
+                datatypeURI = readString(in);
+            }
+
+            this.nodes[3] =
+                    Node.createLiteral(literalValue, languageTag, hasDatatype
+                            ? TypeMapper.getInstance().getSafeTypeByName(
+                                    datatypeURI) : null);
+        } else {
+            this.nodes[3] = readIRI(in);
+        }
+    }
+
+    private static Node readIRI(ObjectInput in) throws IOException {
+        return Node.createURI(readString(in));
+    }
+
+    private static String readString(ObjectInput in) throws IOException {
+        int stringLength = in.readInt();
+        byte[] data = new byte[stringLength];
+
+        in.read(data);
+
+        return new String(data);
     }
 
 }

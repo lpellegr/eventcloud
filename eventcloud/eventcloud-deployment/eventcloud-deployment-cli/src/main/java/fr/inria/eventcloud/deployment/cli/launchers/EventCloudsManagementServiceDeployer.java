@@ -74,10 +74,12 @@ public class EventCloudsManagementServiceDeployer {
                 activateLoggers);
     }
 
-    public static String deploy(boolean onRelease, int port, String urlSuffix,
-                                String socialFilterUrl,
-                                double socialFilterThreshold,
-                                boolean activateLoggers) throws IOException {
+    public synchronized static String deploy(boolean onRelease, int port,
+                                             String urlSuffix,
+                                             String socialFilterUrl,
+                                             double socialFilterThreshold,
+                                             boolean activateLoggers)
+            throws IOException {
         if (eventCloudsManagementServiceProcess == null) {
             String binariesBaseUrl = EVENTCLOUD_BINARIES_URL;
 
@@ -291,7 +293,7 @@ public class EventCloudsManagementServiceDeployer {
         }
     }
 
-    public static void destroy() {
+    public synchronized static void destroy() {
         if (eventCloudsManagementServiceProcess != null) {
             eventCloudsManagementServiceProcess.destroy();
             eventCloudsManagementServiceProcess = null;

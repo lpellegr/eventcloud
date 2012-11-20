@@ -18,21 +18,16 @@ package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.objectweb.proactive.Body;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
-import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
-import org.objectweb.proactive.multiactivity.MultiActiveService;
 
 /**
  * This concrete implementation maintains a list of the peer stubs which are
@@ -40,7 +35,7 @@ import org.objectweb.proactive.multiactivity.MultiActiveService;
  * 
  * @author lpellegr
  */
-public class ProxyImpl extends AbstractComponent implements Proxy {
+public class ProxyImpl implements Proxy {
 
     private List<? extends Tracker> trackers;
 
@@ -49,21 +44,22 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
     // timer that updates peer stubs periodically
     private ScheduledExecutorService updateStubsService;
 
-    private ExecutorService threadPool;
-
     protected ProxyImpl(List<? extends Tracker> trackers) {
         this.trackers = trackers;
         this.peerStubs = new ArrayList<Peer>();
-        this.threadPool =
-                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads() * 2);
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void runComponentActivity(Body body) {
-        (new MultiActiveService(body)).multiActiveServing();
+        this.updateStubsService = Executors.newSingleThreadScheduledExecutor();
+        this.updateStubsService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                List<Peer> peers = ProxyImpl.this.selectTracker().getPeers();
+
+                synchronized (ProxyImpl.this.peerStubs) {
+                    ProxyImpl.this.peerStubs.clear();
+                    ProxyImpl.this.peerStubs.addAll(peers);
+                }
+            }
+        }, 600, 600, TimeUnit.SECONDS);
     }
 
     /**
@@ -123,41 +119,27 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
      */
     @Override
     public Peer selectPeer() {
-        synchronized (this.peerStubs) {
-            if (this.peerStubs.isEmpty()) {
-                this.peerStubs.addAll(this.selectTracker().getPeers());
+        if (this.peerStubs.isEmpty()) {
+            List<Peer> newStubs = this.selectTracker().getPeers();
 
-                if (this.updateStubsService == null) {
-                    this.updateStubsService =
-                            Executors.newSingleThreadScheduledExecutor();
-                    this.updateStubsService.scheduleAtFixedRate(new Runnable() {
-                        @Override
-                        public void run() {
-                            List<Peer> peers =
-                                    ProxyImpl.this.selectTracker().getPeers();
-
-                            synchronized (ProxyImpl.this.peerStubs) {
-                                ProxyImpl.this.peerStubs.clear();
-                                ProxyImpl.this.peerStubs.addAll(peers);
-                            }
-                        }
-                    }, 600, 600, TimeUnit.SECONDS);
-                }
-            }
-
-            if (this.peerStubs.isEmpty()) {
+            if (newStubs.isEmpty()) {
                 return null;
             }
 
-            return this.peerStubs.get(RandomUtils.nextInt(this.peerStubs.size()));
+            synchronized (this.peerStubs) {
+                this.peerStubs.clear();
+                this.peerStubs.addAll(newStubs);
+            }
         }
+
+        return this.peerStubs.get(RandomUtils.nextInt(this.peerStubs.size()));
     }
 
     private Tracker selectTracker() {
         return this.trackers.get(RandomUtils.nextInt(this.trackers.size()));
     }
 
-    private synchronized void evictPeer(Peer peer) {
+    private void evictPeer(Peer peer) {
         synchronized (this.peerStubs) {
             this.peerStubs.remove(peer);
         }
@@ -171,8 +153,6 @@ public class ProxyImpl extends AbstractComponent implements Proxy {
         if (this.updateStubsService != null) {
             this.updateStubsService.shutdownNow();
         }
-
-        this.threadPool.shutdown();
     }
 
 }

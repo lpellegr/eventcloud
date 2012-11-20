@@ -16,6 +16,10 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Variable;
 
@@ -41,18 +45,132 @@ public class QuadruplePattern extends Quadruple {
     public static final QuadruplePattern ANY = new QuadruplePattern(
             Node.ANY, Node.ANY, Node.ANY, Node.ANY);
 
+    public QuadruplePattern() {
+        super();
+
+        for (int i = 0; i < super.nodes.length; i++) {
+            super.nodes[i] = Node.ANY;
+        }
+    }
+
     public QuadruplePattern(Node g, Node s, Node p, Node o) {
         this(g, s, p, o, false);
     }
 
     public QuadruplePattern(Node g, Node s, Node p, Node o,
             boolean parseMetaInformation) {
-        super(g, s, p, o, false, parseMetaInformation);
+        super(replaceNullByNodeAny(g), replaceNullByNodeAny(s),
+                replaceNullByNodeAny(p), replaceNullByNodeAny(o), false,
+                parseMetaInformation);
 
         if (g instanceof Node_Variable || s instanceof Node_Variable
                 || p instanceof Node_Variable || o instanceof Node_Variable) {
             throw new IllegalArgumentException(
                     "Node_Var is not allowed inside a quadruple pattern, only Node.ANY and null can be used");
+        }
+    }
+
+    protected static final Node replaceNullByNodeAny(Node node) {
+        if (node == null) {
+            return Node.ANY;
+        }
+
+        return node;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        // indicates what are the nodes that are outputted
+        byte bitmap = 0;
+
+        for (int i = 0; i < super.nodes.length; i++) {
+            if (super.nodes[i] != Node.ANY) {
+                bitmap |= (1 << i);
+            }
+        }
+
+        out.writeByte(bitmap);
+
+        boolean isGraphSet = super.nodes[0] != Node.ANY;
+        boolean isSubjectSet = super.nodes[1] != Node.ANY;
+        boolean isPredicateSet = super.nodes[2] != Node.ANY;
+        boolean isObjectSet = super.nodes[3] != Node.ANY;
+
+        StringBuilder gsp = new StringBuilder();
+
+        if (isGraphSet || isSubjectSet || isPredicateSet) {
+            // outputs nodes that are not null
+            if (isGraphSet) {
+                gsp.append(super.createMetaGraphNode().getURI());
+            }
+
+            if (isSubjectSet) {
+                if (isGraphSet) {
+                    gsp.append(' ');
+                }
+
+                gsp.append(super.nodes[1].getURI());
+            }
+
+            if (isPredicateSet) {
+                if (isGraphSet || isSubjectSet) {
+                    gsp.append(' ');
+                }
+
+                gsp.append(super.nodes[2].getURI());
+            }
+
+            out.writeInt(gsp.length());
+            out.writeBytes(gsp.toString());
+        }
+
+        if (isObjectSet) {
+            super.writeObject(out);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void readExternal(ObjectInput in) throws IOException,
+            ClassNotFoundException {
+        byte bitmap = in.readByte();
+
+        boolean isGraphSet = (1 & (bitmap >> 0)) == 1;
+        boolean isSubjectSet = (1 & (bitmap >> 1)) == 1;
+        boolean isPredicateSet = (1 & (bitmap >> 2)) == 1;
+        boolean isObjectSet = (1 & (bitmap >> 3)) == 1;
+
+        if (isGraphSet || isSubjectSet || isPredicateSet) {
+            int gspLength = in.readInt();
+            byte[] gsp = new byte[gspLength];
+
+            in.read(gsp);
+            String[] chunks = new String(gsp).split(" ");
+
+            int i = 0;
+
+            if (isGraphSet) {
+                super.nodes[0] = Node.createURI(chunks[i]);
+                i++;
+            }
+
+            if (isSubjectSet) {
+                super.nodes[1] = Node.createURI(chunks[i]);
+                i++;
+            }
+
+            if (isPredicateSet) {
+                super.nodes[2] = Node.createURI(chunks[i]);
+            }
+        }
+
+        if (isObjectSet) {
+            super.readObject(in);
         }
     }
 

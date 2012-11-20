@@ -16,8 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 /**

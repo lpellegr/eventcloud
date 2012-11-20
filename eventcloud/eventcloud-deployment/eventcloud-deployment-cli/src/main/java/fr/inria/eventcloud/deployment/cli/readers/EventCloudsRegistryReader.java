@@ -76,6 +76,7 @@ public class EventCloudsRegistryReader {
 
         System.out.println("Type 'help' to know what are the possible actions");
 
+        @SuppressWarnings("unchecked")
         CommandLineReader<EventCloudsRegistry> reader =
                 new CommandLineReader<EventCloudsRegistry>(Arrays.asList(
                         new CreateEventCloudCommand(),
