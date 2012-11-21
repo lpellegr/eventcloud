@@ -37,7 +37,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  * 
  * @author lpellegr
  */
-public final class FindQuadruplesOperation implements CallableOperation {
+public final class FindQuadruplesOperation extends CallableOperation {
 
     private static final long serialVersionUID = 130L;
 
