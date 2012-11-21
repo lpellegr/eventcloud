@@ -20,7 +20,6 @@ import java.util.concurrent.Callable;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
@@ -36,8 +35,8 @@ import fr.inria.eventcloud.datastore.stats.MeanStatsRecorder;
 public class StaticLoadBalancingTest {
 
     @Rule
-    public TestRule globalTimeout = new Timeout(300000); // 5 min max per method
-                                                         // tested
+    public Timeout globalTimeout = new Timeout(300000); // 5 min max per
+                                                        // method tested
 
     /*
      * Two peers, load-balancing and stats recording disabled. Short RDF terms length.
