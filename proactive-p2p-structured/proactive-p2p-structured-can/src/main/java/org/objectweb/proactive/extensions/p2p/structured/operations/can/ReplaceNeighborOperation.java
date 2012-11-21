@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  * 
  * @author lpellegr
  */
-public class ReplaceNeighborOperation<E extends Element> implements
+public class ReplaceNeighborOperation<E extends Element> extends
         CallableOperation {
 
     private static final long serialVersionUID = 130L;
