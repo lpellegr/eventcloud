@@ -35,8 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @see CanOverlay#hasNeighbor(UUID)
  */
-public class HasNeighborOperation<E extends Element> implements
-        CallableOperation {
+public class HasNeighborOperation<E extends Element> extends CallableOperation {
 
     private static final long serialVersionUID = 130L;
 

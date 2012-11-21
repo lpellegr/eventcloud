@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations;
 
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 /**
@@ -23,7 +24,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  * 
  * @author lpellegr
  */
-public interface CallableOperation extends Operation {
+public abstract class CallableOperation implements Operation {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Handles the operation by using the specified {@code overlay}
@@ -33,6 +36,50 @@ public interface CallableOperation extends Operation {
      * 
      * @return a response associated to the operation handled.
      */
-    ResponseOperation handle(StructuredOverlay overlay);
+    public abstract ResponseOperation handle(StructuredOverlay overlay);
+
+    /*
+     * The following methods are used to check the method compatibilities in PeerImpl
+     */
+
+    /**
+     * Indicates whether the operation is used to transfer some information
+     * between {@link Peer}s during a join operation.
+     * 
+     * @return {@code true} if the operation is used to transfer some
+     *         information between {@link Peer}s during a join operation,
+     *         {@code false} otherwise.
+     */
+    public boolean isJoinOperation() {
+        return false;
+    }
+
+    /**
+     * Indicates whether the operation is used to transfer some information
+     * between {@link Peer}s during a leave operation.
+     * 
+     * @return {@code true} if the operation is used to transfer some
+     *         information between {@link Peer}s during a leave operation,
+     *         {@code false} otherwise.
+     */
+    public boolean isLeaveOperation() {
+        return false;
+    }
+
+    public boolean isCompatible(CallableOperation op) {
+        /* Truth table
+        /* ----------------------
+        /* First request   Second Request   Compatible?
+        /* isJoinOrLeave   !isJoinOrLeave   no
+        /* isJoinOrLeave   isJoinOrLeave    no
+        /* !isJoinOrLeave  !isJoinOrLeave   yes
+        /* !isJoinOrLeave  isJoinOrLeave    no
+        */
+        return !this.isJoinOrLeaveOperation() && !op.isJoinOrLeaveOperation();
+    }
+
+    private boolean isJoinOrLeaveOperation() {
+        return this.isJoinOperation() || this.isLeaveOperation();
+    }
 
 }
