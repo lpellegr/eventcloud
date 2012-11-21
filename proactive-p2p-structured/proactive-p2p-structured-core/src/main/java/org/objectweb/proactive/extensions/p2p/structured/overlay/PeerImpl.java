@@ -26,7 +26,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.Compatible;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.DefineRules;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
@@ -62,7 +64,15 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
+@DefineGroups({
+        @Group(name = "join", selfCompatible = false),
+        @Group(name = "leave", selfCompatible = false),
+        @Group(name = "parallel", selfCompatible = true),
+        @Group(name = "receiveCallableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation", condition = "isCompatible")})
+@DefineRules({
+        @Compatible(value = {"receiveCallableOperation", "join"}, condition = "!this.isJoinOperation"),
+        @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "!this.isLeaveOperation"),
+        @Compatible(value = {"receiveCallableOperation", "parallel"}),})
 public class PeerImpl extends AbstractComponent implements Peer,
         PeerAttributeController, ComponentEndActive, Serializable {
 
@@ -257,6 +267,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("join")
     public void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
             PeerNotActivatedException {
         // the update to the internal variables do not have to be synchronized
@@ -278,6 +289,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("leave")
     public void leave() throws NetworkNotJoinedException {
         // same as the join this method should be handled in FIFO order
         // regarding other methods
@@ -293,7 +305,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("receiveCallableOperation")
     public ResponseOperation receive(CallableOperation operation) {
         return operation.handle(this.overlay);
     }
@@ -338,7 +350,6 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
     public String dump() {
         return this.overlay.dump();
     }

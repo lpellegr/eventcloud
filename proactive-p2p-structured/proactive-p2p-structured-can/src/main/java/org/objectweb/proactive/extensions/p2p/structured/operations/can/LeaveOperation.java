@@ -37,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class LeaveOperation<E extends Element> implements CallableOperation {
+public class LeaveOperation<E extends Element> extends CallableOperation {
 
     private static final long serialVersionUID = 130L;
 
@@ -80,6 +80,14 @@ public class LeaveOperation<E extends Element> implements CallableOperation {
     @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         return ((CanOverlay<E>) overlay).processLeave(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isLeaveOperation() {
+        return true;
     }
 
 }

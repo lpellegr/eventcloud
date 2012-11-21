@@ -27,7 +27,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 /**
  * This operation is used to performed the join introduce phase: it consists in
  * retrieving the information (i.e. the zone, the neighbors and the data) the
- * peer which join the network have to set.
+ * peer which join the network have to set. It also update the neighbors on the
+ * landmark peer.
  * 
  * @param <E>
  *            the {@link Element}s type manipulated.
@@ -37,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @see CanOverlay#join(Peer)
  * @see CanOverlay#handleJoinIntroduceMessage(JoinIntroduceOperation)
  */
-public class JoinIntroduceOperation<E extends Element> implements
+public class JoinIntroduceOperation<E extends Element> extends
         CallableOperation {
 
     private static final long serialVersionUID = 130L;
@@ -67,6 +68,14 @@ public class JoinIntroduceOperation<E extends Element> implements
     @SuppressWarnings("unchecked")
     public JoinIntroduceResponseOperation<E> handle(StructuredOverlay overlay) {
         return ((CanOverlay<E>) overlay).handleJoinIntroduceMessage(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isJoinOperation() {
+        return true;
     }
 
 }

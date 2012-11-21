@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  * 
  * @author lpellegr
  */
-public class IsActivatedOperation implements CallableOperation {
+public class IsActivatedOperation extends CallableOperation {
 
     private static final long serialVersionUID = 130L;
 
@@ -43,4 +43,5 @@ public class IsActivatedOperation implements CallableOperation {
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
         return new BooleanResponseOperation(overlay.isActivated());
     }
+
 }

@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,10 @@ public class AddQuadrupleRequest extends QuadrupleRequest {
         try {
             txnGraph.add(quad);
             txnGraph.commit();
-            logger.info("Quadruple {} added on {}", quad, overlay);
+
+            logger.info(
+                    "Quadruple {} added on {}",
+                    quad.toString(StringRepresentation.CODE_POINTS), overlay);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
