@@ -123,8 +123,7 @@ public class QuadruplePattern extends Quadruple {
                 gsp.append(super.nodes[2].getURI());
             }
 
-            out.writeInt(gsp.length());
-            out.writeBytes(gsp.toString());
+            out.writeUTF(gsp.toString());
         }
 
         if (isObjectSet) {
@@ -146,11 +145,7 @@ public class QuadruplePattern extends Quadruple {
         boolean isObjectSet = (1 & (bitmap >> 3)) == 1;
 
         if (isGraphSet || isSubjectSet || isPredicateSet) {
-            int gspLength = in.readInt();
-            byte[] gsp = new byte[gspLength];
-
-            in.read(gsp);
-            String[] chunks = new String(gsp).split(" ");
+            String[] chunks = new String(in.readUTF()).split(" ");
 
             int i = 0;
 
