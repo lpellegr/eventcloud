@@ -132,8 +132,8 @@ public class EventCloudUsageTest implements Serializable {
                 ProxyFactory.newSubscribeProxy(
                         deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
-        // Once a subscription is created, a SubscriptionId can be retrived from
-        // the subscription object to have the possibility to perform an
+        // Once a subscription is created, a SubscriptionId can be retrieved
+        // from the subscription object to have the possibility to perform an
         // unsubscribe operation
         Subscription subscription =
                 new Subscription(
