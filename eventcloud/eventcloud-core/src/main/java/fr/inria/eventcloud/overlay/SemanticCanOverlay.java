@@ -24,7 +24,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
@@ -50,6 +49,7 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -61,7 +61,6 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.datastore.WithoutPrefixFunction;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -92,7 +91,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     // this collection is used only when SCBE2 is enabled.
     // its purpose is to maintain temporarily a trace of the quadruples which
     // have already been sent for a given notification in order to avoid
-    // duplicates
+    // to send duplicates
     private SetMultimap<NotificationId, HashCode> sentQuadrupleHashValues;
 
     /**
@@ -581,6 +580,126 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private List<Quadruple> retrieveSubscriptionsIn(Zone<SemanticElement> zone,
                                                     boolean remove) {
+        TransactionalDatasetGraph txnGraph =
+                this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);
+
+        String q = createFindSubscriptionsQuery();
+
+        QueryExecution qexec =
+                QueryExecutionFactory.create(
+                        QueryFactory.create(q), txnGraph.getUnderlyingDataset());
+
+        List<Node> subscriptionIdsToCopy = new ArrayList<Node>();
+        List<Node> subscriptionIdsToDelete = new ArrayList<Node>();
+
+        try {
+            ResultSet results = qexec.execSelect();
+
+            while (results.hasNext()) {
+                Binding binding = results.nextBinding();
+                Node oid = binding.get(Var.alloc("oid"));
+                Node g = binding.get(Var.alloc("g"));
+                Node s = binding.get(Var.alloc("s"));
+                Node p = binding.get(Var.alloc("p"));
+                Node o = binding.get(Var.alloc("o"));
+
+                // nodes after prefix removal
+                String gwp = SemanticElement.removePrefix(g);
+                String swp = SemanticElement.removePrefix(s);
+                String pwp = SemanticElement.removePrefix(p);
+                String owp = SemanticElement.removePrefix(o);
+
+                boolean gIsVar = isVariable(g);
+                boolean sIsVar = isVariable(s);
+                boolean pIsVar = isVariable(p);
+                boolean oIsVar = isVariable(o);
+
+                // tests whether the nodes associated to the sub subscription
+                // used to index the subscription is managed by the zone of the
+                // peer that joins. If yes, the subscription has to be copied to
+                // the new peer
+                if (isSubscriptionManagedByZone(
+                        zone, gwp, swp, pwp, owp, gIsVar, sIsVar, pIsVar,
+                        oIsVar)) {
+                    subscriptionIdsToCopy.add(oid);
+                }
+
+                // tests whether the nodes associated to the sub subscription
+                // used to index the subscription is managed by the zone of the
+                // current peer (i.e. the landmark peer that is joined). If yes,
+                // the subscription has to be removed
+                if (remove
+                        && !isSubscriptionManagedByZone(
+                                super.zone, gwp, swp, pwp, owp, gIsVar, sIsVar,
+                                pIsVar, oIsVar)) {
+                    subscriptionIdsToDelete.add(oid);
+                }
+            }
+        } finally {
+            qexec.close();
+            txnGraph.end();
+        }
+
+        txnGraph = this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);
+
+        List<Quadruple> result = new ArrayList<Quadruple>();
+
+        try {
+            for (Node graph : subscriptionIdsToCopy) {
+                QuadrupleIterator it =
+                        txnGraph.find(graph, Node.ANY, Node.ANY, Node.ANY);
+                while (it.hasNext()) {
+                    result.add(it.next());
+                }
+
+                it =
+                        txnGraph.find(
+                                Node.ANY,
+                                graph,
+                                PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
+                                Node.ANY);
+                while (it.hasNext()) {
+                    result.add(it.next());
+                }
+            }
+        } finally {
+            txnGraph.end();
+        }
+
+        if (remove) {
+            txnGraph = this.subscriptionsDatastore.begin(AccessMode.WRITE);
+
+            try {
+                for (Node graph : subscriptionIdsToDelete) {
+                    txnGraph.delete(graph, Node.ANY, Node.ANY, Node.ANY);
+                    txnGraph.delete(
+                            Node.ANY,
+                            graph,
+                            PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
+                            Node.ANY);
+                }
+            } finally {
+                txnGraph.end();
+            }
+        }
+
+        return result;
+    }
+
+    private static boolean isVariable(Node n) {
+        return n.isLiteral()
+                && n.getLiteralDatatypeURI().equals(
+                        PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
+    }
+
+    private static boolean isSubscriptionManagedByZone(Zone<SemanticElement> zone,
+                                                       String gwp, String swp,
+                                                       String pwp, String owp,
+                                                       boolean gIsVar,
+                                                       boolean sIsVar,
+                                                       boolean pIsVar,
+                                                       boolean oIsVar) {
+
         String graphLowerBound = zone.getLowerBound((byte) 0).getValue();
         String graphUpperBound = zone.getUpperBound((byte) 0).getValue();
         String subjectLowerBound = zone.getLowerBound((byte) 1).getValue();
@@ -590,58 +709,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         String objectLowerBound = zone.getLowerBound((byte) 3).getValue();
         String objectUpperBound = zone.getUpperBound((byte) 3).getValue();
 
-        TransactionalDatasetGraph txnGraph =
-                this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);
-
-        QueryExecution qexec =
-                QueryExecutionFactory.create(
-                        QueryFactory.create(createSparqlQueryRetrievingSubscriptionsToCopy(new String[] {
-                                graphLowerBound, graphUpperBound,
-                                subjectLowerBound, subjectUpperBound,
-                                predicateLowerBound, predicateUpperBound,
-                                objectLowerBound, objectUpperBound})),
-                        txnGraph.getUnderlyingDataset());
-
-        List<Quadruple> result = new ArrayList<Quadruple>();
-
-        try {
-            ResultSet results = qexec.execSelect();
-
-            while (results.hasNext()) {
-                Node oid = results.nextBinding().get(Var.alloc("oid"));
-
-                QuadrupleIterator it =
-                        txnGraph.find(new QuadruplePattern(
-                                oid, Node.ANY, Node.ANY, Node.ANY));
-
-                while (it.hasNext()) {
-                    result.add(it.next());
-                }
-
-                // intermediate results also have to be retrieved
-                it =
-                        txnGraph.find(new QuadruplePattern(
-                                Node.ANY,
-                                oid,
-                                PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
-                                Node.ANY));
-
-                while (it.hasNext()) {
-                    result.add(it.next());
-                }
-            }
-        } finally {
-            qexec.close();
-            txnGraph.end();
-        }
-
-        if (remove) {
-            // TODO warning some subscriptions have to be copied but not deleted
-            // from the original peer whereas some others have to be transfered
-            // and thus deleted. The former case is not handled.
-        }
-
-        return result;
+        return (gIsVar || ((gwp.compareTo(graphLowerBound) >= 0) && (gwp.compareTo(graphUpperBound) < 0)))
+                && (sIsVar || ((swp.compareTo(subjectLowerBound) >= 0) && (swp.compareTo(subjectUpperBound) < 0)))
+                && (pIsVar || ((pwp.compareTo(predicateLowerBound) >= 0) && (pwp.compareTo(predicateUpperBound) < 0)))
+                && (oIsVar || ((owp.compareTo(objectLowerBound) >= 0) && (owp.compareTo(objectUpperBound) < 0)));
     }
 
     private static void delete(TransactionalTdbDatastore datastore,
@@ -659,14 +730,21 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         }
     }
 
-    private static String createSparqlQueryRetrievingSubscriptionsToCopy(String[] bounds) {
+    /**
+     * Creates an returns a SPARQL query that finds the RDF terms of the sub
+     * subcription used to index each subscription.
+     * 
+     * @return a SPARQL query that finds the RDF terms of the sub subcription
+     *         used to index each subscription.
+     */
+    private static String createFindSubscriptionsQuery() {
         char[] vars = {'g', 's', 'p', 'o'};
 
         StringBuilder result = new StringBuilder();
         result.append("PREFIX ec: <");
         result.append(EventCloudProperties.FILTER_FUNCTIONS_NS.getValue());
         result.append(">\n");
-        result.append("SELECT ?oid WHERE {\n  GRAPH ?oid {\n");
+        result.append("SELECT ?oid ?g ?s ?p ?o WHERE {\n  GRAPH ?oid {\n");
         result.append("    ?oid <");
         result.append(PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_PROPERTY);
         result.append("> ?iref .\n");
@@ -682,41 +760,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append(vars[i]);
             result.append(" .\n");
         }
-        result.append("  }\n");
 
-        for (int i = 0; i < vars.length; i++) {
-            result.append("  BIND (ec:");
-            result.append(WithoutPrefixFunction.NAME);
-            result.append("(str(?");
-            result.append(vars[i]);
-            result.append(")) as ?s");
-            result.append(vars[i]);
-            result.append(") .\n");
-        }
-        result.append("  FILTER (\n    ");
-
-        for (int i = 0, j = 0; i < vars.length; i++, j += 2) {
-            result.append("(datatype(?");
-            result.append(vars[i]);
-            result.append(") = <");
-            result.append(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
-            result.append("> || (?s");
-            result.append(vars[i]);
-            result.append(" >= \"");
-            result.append(StringEscapeUtils.escapeJava(bounds[j]));
-            result.append("\" && ?s");
-            result.append(vars[i]);
-            result.append(" < \"");
-            result.append(StringEscapeUtils.escapeJava(bounds[j + 1]));
-            result.append("\"))");
-
-            if (i < vars.length - 1) {
-                result.append(" &&\n    ");
-            } else {
-                result.append(")");
-            }
-        }
-        result.append("\n}");
+        result.append("  }\n\n}");
 
         return result.toString();
     }
