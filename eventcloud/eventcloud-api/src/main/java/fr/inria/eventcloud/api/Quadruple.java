@@ -731,8 +731,7 @@ public class Quadruple implements Externalizable, Event {
         gsp.append(' ');
         gsp.append(predicate);
 
-        out.writeInt(gsp.length());
-        out.writeBytes(gsp.toString());
+        out.writeUTF(gsp.toString());
 
         this.writeObject(out);
     }
@@ -802,12 +801,7 @@ public class Quadruple implements Externalizable, Event {
     @Override
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
-        int gspLength = in.readInt();
-        byte[] gsp = new byte[gspLength];
-
-        in.read(gsp);
-
-        String[] chunks = new String(gsp).split(" ");
+        String[] chunks = new String(in.readUTF()).split(" ");
 
         this.nodes[0] =
                 this.extractAndSetMetaInformation(Node.createURI(chunks[0]));

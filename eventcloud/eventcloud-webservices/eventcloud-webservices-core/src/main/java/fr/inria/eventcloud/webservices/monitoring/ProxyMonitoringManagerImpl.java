@@ -219,13 +219,18 @@ public class ProxyMonitoringManagerImpl extends AbstractComponent implements
         } catch (DatatypeConfigurationException e) {
             throw new IllegalStateException(e);
         }
+
         reportType.setConsumerEndpointAddress(destination);
         reportType.setOperationName("http://com.petalslink.esstar/service/management/user/1.0/Notify");
         reportType.setInterfaceQName(INTERFACE_QNAME);
         reportType.setProviderEndpointAddress(source);
+
+        // TODO the following field should contain the size in bytes of the
+        // event that is notified to a subscriber. However, to compute this
+        // value is costly and should be done only if this is really required
         reportType.setContentLength(-1);
         reportType.setDoesThisResponseIsAnException(false);
-        reportType.setEndpointName("");
+        reportType.setEndpointName("Eventcloud");
 
         EJaxbReportListType reportTypeList =
                 factory.createEJaxbReportListType();
