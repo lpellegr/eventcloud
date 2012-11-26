@@ -174,7 +174,8 @@ public class DataTransfertTest {
 
     @Test
     public void testSubscriptionsTransfert() throws EventCloudIdNotManaged,
-            NetworkAlreadyJoinedException, PeerNotActivatedException {
+            NetworkAlreadyJoinedException, PeerNotActivatedException,
+            InterruptedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 2);
 
         SemanticPeer firstPeer =
@@ -252,7 +253,8 @@ public class DataTransfertTest {
         int nbSubscriptionQuadsFirstPeerBeforeJoin = subscriptions.size();
 
         log.debug(
-                "Subscriptions for first peer before join:\n{}",
+                "{} quadruples for first peer before join:\n{}",
+                nbSubscriptionQuadsFirstPeerBeforeJoin,
                 QuadruplesFormatter.toString(subscriptions));
 
         thirdPeer.join(firstPeer);
@@ -260,10 +262,11 @@ public class DataTransfertTest {
         subscriptions =
                 Operations.findQuadruplesOperation(
                         firstPeer, QuadruplePattern.ANY, true);
-        // int nbSubscriptionQuadsFirstPeerAfterJoin = subscriptions.size();
+        int nbSubscriptionQuadsFirstPeerAfterJoin = subscriptions.size();
 
         log.debug(
-                "Subscriptions for first peer after join:\n{}",
+                "{} quadruples for first peer after join:\n{}",
+                nbSubscriptionQuadsFirstPeerAfterJoin,
                 QuadruplesFormatter.toString(subscriptions));
 
         subscriptions =
@@ -271,7 +274,8 @@ public class DataTransfertTest {
                         thirdPeer, QuadruplePattern.ANY, true);
 
         log.debug(
-                "Subscriptions for third peer after join:\n{}",
+                "{} quadruples for third peer after join:\n{}",
+                subscriptions.size(),
                 QuadruplesFormatter.toString(subscriptions));
 
         // Assert.assertTrue(nbSubscriptionQuadsFirstPeerBeforeJoin >

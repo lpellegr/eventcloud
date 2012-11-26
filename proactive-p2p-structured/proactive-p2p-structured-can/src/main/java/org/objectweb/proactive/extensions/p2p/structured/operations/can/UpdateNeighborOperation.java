@@ -34,7 +34,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class UpdateNeighborOperation<E extends Element> implements
+public class UpdateNeighborOperation<E extends Element> extends
         CallableOperation {
 
     private static final long serialVersionUID = 130L;

@@ -30,8 +30,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class GetIdAndZoneOperation<E extends Element> implements
-        CallableOperation {
+public class GetIdAndZoneOperation<E extends Element> extends CallableOperation {
 
     private static final long serialVersionUID = 130L;
 

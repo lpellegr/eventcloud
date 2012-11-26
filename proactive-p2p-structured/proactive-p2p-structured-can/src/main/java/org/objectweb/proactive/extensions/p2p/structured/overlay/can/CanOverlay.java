@@ -19,7 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -36,7 +34,6 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperation
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinWelcomeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.ReplaceNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
@@ -76,12 +73,6 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
     private LinkedList<SplitEntry> splitHistory;
 
-    private AtomicReference<UUID> peerJoiningId;
-
-    private AtomicReference<UUID> peerLeavingId;
-
-    private JoinInformation<E> tmpJoinInformation;
-
     protected Zone<E> zone;
 
     /**
@@ -103,8 +94,6 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         super(requestResponseManager);
 
         this.neighborTable = new NeighborTable<E>();
-        this.peerJoiningId = new AtomicReference<UUID>();
-        this.peerLeavingId = new AtomicReference<UUID>();
         this.splitHistory = new LinkedList<SplitEntry>();
     }
 
@@ -424,37 +413,9 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             e.printStackTrace();
         }
 
-        this.tmpJoinInformation =
-                new JoinInformation<E>(
-                        dimension, direction, newZones.get(direction),
-                        new NeighborEntry<E>(
-                                msg.getPeerID(), msg.getRemotePeer(),
-                                newZones.get(directionInv)));
-
-        return new JoinIntroduceResponseOperation<E>(
-                super.id, newZones.get(directionInv), historyToTransfert,
-                pendingNewNeighborhood,
-                this.retrieveDataIn(newZones.get(directionInv)));
-    }
-
-    protected HomogenousPair<? extends Zone<E>> splitZones(byte dimension) {
-        return this.zone.split(dimension);
-    }
-
-    public EmptyResponseOperation handleJoinWelcomeMessage(JoinWelcomeOperation<E> operation) {
-        byte directionInv =
-                getOppositeDirection(this.tmpJoinInformation.getDirection());
-
         // updates overlay information due to the split
-        this.zone = this.tmpJoinInformation.getZone();
-        this.splitHistory.add(new SplitEntry(
-                this.tmpJoinInformation.getDimension(),
-                this.tmpJoinInformation.getDirection()));
-
-        // TODO: do it in background (i.e. in another thread). We don't have to
-        // wait for the termination of this operation in order to complete the
-        // join operation
-        this.removeDataIn(this.tmpJoinInformation.getEntry().getZone());
+        this.zone = newZones.get(direction);
+        this.splitHistory.add(new SplitEntry(dimension, direction));
 
         // removes the current peer from the neighbors that are back
         // the new peer which join and updates the zone maintained by
@@ -468,8 +429,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                     entry = it.next();
                     // we get a neighbor reference which is back the new peer
                     // which joins
-                    if (dim == this.tmpJoinInformation.getDimension()
-                            && dir == directionInv) {
+                    if (dim == dimension && dir == directionInv) {
                         CanOperations.removeNeighbor(
                                 entry.getStub(), super.id, dim,
                                 getOppositeDirection(dir));
@@ -491,14 +451,19 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                 }
             }
         }
-        this.neighborTable.add(
-                this.tmpJoinInformation.getEntry(),
-                this.tmpJoinInformation.getDimension(), directionInv);
 
-        this.tmpJoinInformation = null;
-        this.peerJoiningId.set(null);
+        this.neighborTable.add(new NeighborEntry<E>(
+                msg.getPeerID(), msg.getRemotePeer(),
+                newZones.get(directionInv)), dimension, directionInv);
 
-        return new EmptyResponseOperation();
+        return new JoinIntroduceResponseOperation<E>(
+                super.id, newZones.get(directionInv), historyToTransfert,
+                pendingNewNeighborhood,
+                this.removeDataIn(newZones.get(directionInv)));
+    }
+
+    protected HomogenousPair<? extends Zone<E>> splitZones(byte dimension) {
+        return this.zone.split(dimension);
     }
 
     /**
@@ -530,9 +495,8 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
     protected abstract Zone<E> newZone();
 
     /**
-     * Returns {@code true} when the join operation succeed and {@code false}
-     * when the peer receiving the operation is already handling an another
-     * operation.
+     * Forces the current peer to join a peer that is already member of a
+     * network.
      * 
      * @param landmarkPeer
      *            the landmark node to join.
@@ -544,13 +508,11 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                 (JoinIntroduceResponseOperation<E>) PAFuture.getFutureValue(landmarkPeer.receive(new JoinIntroduceOperation<E>(
                         super.id, super.stub)));
 
+        this.assignDataReceived(response.getData());
+
         this.zone = response.getZone();
         this.splitHistory = response.getSplitHistory();
         this.neighborTable = response.getNeighbors();
-
-        this.assignDataReceived(response.getData());
-
-        PAFuture.waitFor(landmarkPeer.receive(new JoinWelcomeOperation<E>()));
 
         // notify the neighbors that the current peer has joined
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -616,7 +578,6 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             log.info(
                     "Peer {} has left the network and the zone has been taken over by {}",
                     this, suitableNeighbor.getZone());
-            this.peerLeavingId.set(null);
         }
     }
 
@@ -640,28 +601,20 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
     }
 
     public EmptyResponseOperation processLeave(LeaveOperation<E> operation) {
-        if (this.peerJoiningId.get() != null
-                || this.peerLeavingId.compareAndSet(
-                        null, operation.getPeerLeavingId())) {
-            byte dim =
-                    this.neighborTable.findDimension(operation.getPeerLeavingId());
-            byte dir =
-                    this.neighborTable.findDirection(operation.getPeerLeavingId());
+        byte dim =
+                this.neighborTable.findDimension(operation.getPeerLeavingId());
+        byte dir =
+                this.neighborTable.findDirection(operation.getPeerLeavingId());
 
-            this.zone = this.zone.merge(operation.getPeerLeavingZone());
+        this.zone = this.zone.merge(operation.getPeerLeavingZone());
 
-            if (operation.getData() != null) {
-                this.assignDataReceived(operation.getData());
-            }
+        if (operation.getData() != null) {
+            this.assignDataReceived(operation.getData());
+        }
 
-            this.neighborTable.removeAll(dim, dir);
-            for (NeighborEntry<E> entry : operation.getNewNeighborsToSet()) {
-                this.neighborTable.add(entry, dim, dir);
-            }
-
-            this.peerLeavingId.set(null);
-        } else {
-            throw new ConcurrentModificationException();
+        this.neighborTable.removeAll(dim, dir);
+        for (NeighborEntry<E> entry : operation.getNewNeighborsToSet()) {
+            this.neighborTable.add(entry, dim, dir);
         }
 
         return new EmptyResponseOperation();
