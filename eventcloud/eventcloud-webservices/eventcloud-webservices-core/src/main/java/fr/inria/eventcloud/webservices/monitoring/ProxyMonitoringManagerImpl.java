@@ -230,7 +230,7 @@ public class ProxyMonitoringManagerImpl extends AbstractComponent implements
         // value is costly and should be done only if this is really required
         reportType.setContentLength(-1);
         reportType.setDoesThisResponseIsAnException(false);
-        reportType.setEndpointName("Eventcloud");
+        reportType.setEndpointName("EventCloud");
 
         EJaxbReportListType reportTypeList =
                 factory.createEJaxbReportListType();
