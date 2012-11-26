@@ -174,8 +174,7 @@ public class DataTransfertTest {
 
     @Test
     public void testSubscriptionsTransfert() throws EventCloudIdNotManaged,
-            NetworkAlreadyJoinedException, PeerNotActivatedException,
-            InterruptedException {
+            NetworkAlreadyJoinedException, PeerNotActivatedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 2);
 
         SemanticPeer firstPeer =
