@@ -47,11 +47,13 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.BindingWrapperNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
+import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.formatters.QuadruplesFormatter;
@@ -433,8 +435,14 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private void deliver(SubscriptionEntry<BindingNotificationListener> entry,
                          BindingSolution solution) {
-        entry.listener.onNotification(
-                entry.subscription.getId(), solution.getChunks());
+        if (!(entry.listener instanceof BindingWrapperNotificationListener)) {
+            entry.listener.onNotification(
+                    entry.subscription.getId(), solution.getChunks());
+        } else {
+            ((BindingWrapperNotificationListener) entry.listener).onNotification(
+                    entry.subscription.getId(), new BindingWrapper(
+                            solution.getChunks()));
+        }
 
         // do not output integration message and do not send monitoring
         // information for binding listener
