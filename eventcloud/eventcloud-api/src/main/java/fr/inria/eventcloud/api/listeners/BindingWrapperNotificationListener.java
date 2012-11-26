@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.api.listeners;
 
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+
+import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 
 /**
@@ -28,7 +31,7 @@ import fr.inria.eventcloud.api.wrappers.BindingWrapper;
  * @author bsauvan
  */
 public abstract class BindingWrapperNotificationListener extends
-        NotificationListener<BindingWrapper> {
+        BindingNotificationListener {
 
     private static final long serialVersionUID = 130L;
 
@@ -36,16 +39,18 @@ public abstract class BindingWrapperNotificationListener extends
      * {@inheritDoc}
      */
     @Override
-    public NotificationListenerType getType() {
-        return NotificationListenerType.BINDING;
+    public void onNotification(SubscriptionId id, Binding solution) {
+        try {
+            // the solution is supposed to be an instance of BindingWrapper
+            this.onNotification(id, (BindingWrapper) solution);
+        } catch (ClassCastException cce) {
+            throw new IllegalArgumentException(
+                    "Solution is not an instance of BindingWrapper: "
+                            + solution.getClass().getName());
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getSubscriberUrl() {
-        return null;
-    }
+    public abstract void onNotification(SubscriptionId id,
+                                        BindingWrapper solution);
 
 }

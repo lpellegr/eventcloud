@@ -354,6 +354,43 @@ public class SubscribeProxyTest {
     }
 
     /**
+     * Test a basic subscription with a binding wrapper listener deployed as an
+     * active object.
+     */
+    @Test(timeout = 60000)
+    public void testSubscribeBindingWrapperNotificationListenerActiveObject() {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
+        // subscribes for any quadruples
+        CustomBindingWrapperNotificationListenerActiveObject notificationListener =
+                NotificationListenerFactory.newNotificationListener(
+                        CustomBindingWrapperNotificationListenerActiveObject.class,
+                        new Object[0]);
+        this.subscribeProxy.subscribe(subscription, notificationListener);
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
+        Quadruple q =
+                new Quadruple(
+                        Node.createURI("https://plus.google.com/825349613"),
+                        Node.createURI("https://plus.google.com/107234124364605485774"),
+                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                        Node.createLiteral("user1@company.com"));
+        q.setPublicationTime(System.currentTimeMillis());
+        this.publishProxy.publish(q);
+
+        while (notificationListener.getBindings().size() != 1) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
      * Test a basic subscription with a compound event listener deployed as an
      * active object.
      */
