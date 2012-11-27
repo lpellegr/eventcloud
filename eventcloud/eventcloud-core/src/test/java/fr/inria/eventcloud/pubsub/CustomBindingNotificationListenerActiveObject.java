@@ -25,20 +25,19 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingWrapperNotificationListener;
-import fr.inria.eventcloud.api.wrappers.BindingWrapper;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 
-public class CustomBindingWrapperNotificationListenerActiveObject extends
-        BindingWrapperNotificationListener {
+public class CustomBindingNotificationListenerActiveObject extends
+        BindingNotificationListener {
 
     private static final long serialVersionUID = 130L;
 
     private static final Logger log =
-            LoggerFactory.getLogger(CustomBindingWrapperNotificationListenerActiveObject.class);
+            LoggerFactory.getLogger(CustomBindingNotificationListenerActiveObject.class);
 
     private List<Binding> bindings = new ArrayList<Binding>();
 
-    public CustomBindingWrapperNotificationListenerActiveObject() {
+    public CustomBindingNotificationListenerActiveObject() {
     }
 
     public List<Binding> getBindings() {
@@ -49,7 +48,7 @@ public class CustomBindingWrapperNotificationListenerActiveObject extends
      * {@inheritDoc}
      */
     @Override
-    public void onNotification(SubscriptionId id, BindingWrapper solution) {
+    public void onNotification(SubscriptionId id, Binding solution) {
         synchronized (this.bindings) {
             this.bindings.add(solution);
         }
