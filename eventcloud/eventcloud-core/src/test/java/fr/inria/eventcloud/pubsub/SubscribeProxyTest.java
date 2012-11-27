@@ -378,7 +378,6 @@ public class SubscribeProxyTest {
                         Node.createURI("https://plus.google.com/107234124364605485774"),
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user1@company.com"));
-        q.setPublicationTime(System.currentTimeMillis());
         this.publishProxy.publish(q);
 
         while (notificationListener.getBindings().size() != 1) {
