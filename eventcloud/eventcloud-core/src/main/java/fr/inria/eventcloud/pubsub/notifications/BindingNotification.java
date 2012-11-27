@@ -20,24 +20,23 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 
 /**
  * Defines a notification that embeds a {@link Binding} as value.
  * 
  * @author lpellegr
  */
-public class BindingNotification extends Notification<BindingWrapper> {
+public class BindingNotification extends Notification<Binding> {
 
     private static final long serialVersionUID = 130L;
 
     public BindingNotification(SubscriptionId subscriptionId, Node eventId,
-            String source, BindingWrapper binding) {
+            String source, Binding binding) {
         super(subscriptionId, eventId, source, binding);
     }
 
     public BindingNotification(NotificationId id,
-            SubscriptionId subscriptionId, String source, BindingWrapper binding) {
+            SubscriptionId subscriptionId, String source, Binding binding) {
         super(id, subscriptionId, source, binding);
     }
 

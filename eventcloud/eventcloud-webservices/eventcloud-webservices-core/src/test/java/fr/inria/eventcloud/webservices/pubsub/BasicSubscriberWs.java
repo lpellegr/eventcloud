@@ -26,21 +26,20 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.webservices.CompoundEventNotificationConsumer;
-import fr.inria.eventcloud.webservices.api.subscribers.BindingWrapperSubscriberWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.BindingSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.CompoundEventSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.SignalSubscriberWsApi;
 
 /**
  * Provides a basic implementation of {@link SignalSubscriberWsApi},
- * {@link BindingWrapperSubscriberWsApi} and
- * {@link CompoundEventSubscriberWsApi} by storing all incoming signals,
- * bindings and events into in-memory lists. These lists can be retrieved at any
- * time for any purpose.
+ * {@link BindingSubscriberWsApi} and {@link CompoundEventSubscriberWsApi} by
+ * storing all incoming signals, bindings and events into in-memory lists. These
+ * lists can be retrieved at any time for any purpose.
  * 
  * @author bsauvan
  */
 public class BasicSubscriberWs implements SignalSubscriberWsApi,
-        BindingWrapperSubscriberWsApi, CompoundEventSubscriberWsApi {
+        BindingSubscriberWsApi, CompoundEventSubscriberWsApi {
 
     private static Logger log =
             LoggerFactory.getLogger(CompoundEventNotificationConsumer.class);

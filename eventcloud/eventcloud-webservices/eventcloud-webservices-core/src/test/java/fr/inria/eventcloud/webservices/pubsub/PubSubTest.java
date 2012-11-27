@@ -36,7 +36,7 @@ import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.webservices.WsTest;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
-import fr.inria.eventcloud.webservices.api.subscribers.BindingWrapperSubscriberWsApi;
+import fr.inria.eventcloud.webservices.api.subscribers.BindingSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.CompoundEventSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.SignalSubscriberWsApi;
 import fr.inria.eventcloud.webservices.deployment.WsDeployer;
@@ -282,9 +282,8 @@ public class PubSubTest extends WsTest {
                         .getAddress();
         this.bindingSubscriberServer =
                 WsDeployer.deployWebService(
-                        BindingWrapperSubscriberWsApi.class,
-                        this.subscriberService, "binding-subscriber",
-                        WEBSERVICES_PORT);
+                        BindingSubscriberWsApi.class, this.subscriberService,
+                        "binding-subscriber", WEBSERVICES_PORT);
         this.bindingSubscriberEndpointUrl =
                 this.bindingSubscriberServer.getEndpoint()
                         .getEndpointInfo()
