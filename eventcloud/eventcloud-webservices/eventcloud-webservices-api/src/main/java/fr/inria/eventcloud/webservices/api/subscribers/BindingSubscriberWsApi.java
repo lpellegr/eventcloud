@@ -34,7 +34,7 @@ import fr.inria.eventcloud.webservices.api.adapters.BindingWrapperAdapter;
  * @author bsauvan
  */
 @WebService(serviceName = "EventCloudBindingSubscriber", portName = "EventCloudBindingSubscriberPort", name = "EventCloudBindingSubscriberPortType", targetNamespace = "http://webservices.eventcloud.inria.fr/")
-public interface BindingWrapperSubscriberWsApi {
+public interface BindingSubscriberWsApi {
 
     /**
      * Notifies that a binding matching a subscription has been received.
@@ -46,6 +46,8 @@ public interface BindingWrapperSubscriberWsApi {
      */
     @WebMethod(operationName = "notifyBinding")
     public void notifyBinding(@WebParam(name = "id") String subscriptionId,
+    // Here, we have to use BindingWrapper and not Binding because
+    // jaxb does not allow interface
                               @WebParam(name = "binding") @XmlJavaTypeAdapter(BindingWrapperAdapter.class) BindingWrapper binding);
 
 }
