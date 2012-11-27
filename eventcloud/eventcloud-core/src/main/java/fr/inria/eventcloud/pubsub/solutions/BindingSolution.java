@@ -16,24 +16,12 @@
  **/
 package fr.inria.eventcloud.pubsub.solutions;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.utils.SparqlResultSerializer;
+import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 
 /**
  * A solution that embeds a {@link Binding} as the chunks associated to the
@@ -58,7 +46,7 @@ public class BindingSolution extends Solution<Binding> {
      *            the first sub-solution that is received.
      */
     public BindingSolution(int nbSubSolutionsExpected, Binding chunk) {
-        super(new SimpleBindingMap());
+        super(new PublishSubscribeUtils.BindingMap());
 
         this.add(chunk);
 
@@ -119,129 +107,6 @@ public class BindingSolution extends Solution<Binding> {
     @Override
     public Binding getChunks() {
         return super.chunks;
-    }
-
-    private static class SimpleBindingMap implements BindingMap, Serializable {
-
-        private static final long serialVersionUID = 130L;
-
-        private Map<Var, Node> content = new HashMap<Var, Node>();
-
-        public SimpleBindingMap() {
-
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Iterator<Var> vars() {
-            return this.content.keySet().iterator();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean contains(Var var) {
-            return this.content.containsKey(var);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Node get(Var var) {
-            return this.content.get(var);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public int size() {
-            return this.content.size();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isEmpty() {
-            return this.content.isEmpty();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void add(Var var, Node node) {
-            this.content.put(var, node);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void addAll(Binding binding) {
-            Iterator<Var> varsIt = binding.vars();
-
-            while (varsIt.hasNext()) {
-                Var var = varsIt.next();
-                this.content.put(var, binding.get(var));
-            }
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String toString() {
-            StringBuilder result = new StringBuilder("(");
-
-            Iterator<Entry<Var, Node>> it = this.content.entrySet().iterator();
-
-            while (it.hasNext()) {
-                Entry<Var, Node> entry = it.next();
-
-                result.append(entry.getKey());
-                result.append('=');
-                result.append(entry.getValue());
-
-                if (it.hasNext()) {
-                    result.append(", ");
-                }
-            }
-
-            result.append(')');
-
-            return result.toString();
-        }
-
-        private void writeObject(ObjectOutputStream out) throws IOException {
-            out.defaultWriteObject();
-
-            SparqlResultSerializer.serialize(
-                    out, this, EventCloudProperties.COMPRESSION.getValue());
-        }
-
-        private void readObject(ObjectInputStream in) throws IOException,
-                ClassNotFoundException {
-            in.defaultReadObject();
-
-            Binding binding =
-                    SparqlResultSerializer.deserializeBinding(
-                            in, EventCloudProperties.COMPRESSION.getValue());
-
-            this.content = new HashMap<Var, Node>();
-            Iterator<Var> it = binding.vars();
-
-            while (it.hasNext()) {
-                Var var = it.next();
-                this.content.put(var, binding.get(var));
-            }
-        }
-
     }
 
 }

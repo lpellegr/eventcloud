@@ -22,9 +22,16 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -61,8 +68,6 @@ import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
-import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
 import com.hp.hpl.jena.sparql.syntax.ElementWalker;
@@ -89,6 +94,7 @@ import fr.inria.eventcloud.pubsub.notifications.PollingSignalNotification;
 import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
+import fr.inria.eventcloud.utils.SparqlResultSerializer;
 
 /**
  * Some utility methods for the publish/subscribe algorithm.
@@ -432,7 +438,7 @@ public final class PublishSubscribeUtils {
         Set<Var> vars =
                 Sets.intersection(resultVars, FluentIterable.from(
                         atomicQuery.getVars()).toImmutableSet());
-        BindingMap binding = BindingFactory.create();
+        BindingMap binding = new BindingMap();
         Node[] quadNodes = quad.toArray();
 
         int i = 0;
@@ -785,6 +791,130 @@ public final class PublishSubscribeUtils {
         }
 
         overlay.dispatchv(new IndexSubscriptionRequest(rewrittenSubscription));
+    }
+
+    public static final class BindingMap implements
+            com.hp.hpl.jena.sparql.engine.binding.BindingMap, Serializable {
+
+        private static final long serialVersionUID = 130L;
+
+        private transient Map<Var, Node> content = new HashMap<Var, Node>();
+
+        public BindingMap() {
+
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Iterator<Var> vars() {
+            return this.content.keySet().iterator();
+
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean contains(Var var) {
+            return this.content.containsKey(var);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Node get(Var var) {
+            return this.content.get(var);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int size() {
+            return this.content.size();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isEmpty() {
+            return this.content.isEmpty();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void add(Var var, Node node) {
+            this.content.put(var, node);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void addAll(Binding binding) {
+            Iterator<Var> varsIt = binding.vars();
+
+            while (varsIt.hasNext()) {
+                Var var = varsIt.next();
+                this.content.put(var, binding.get(var));
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder("(");
+
+            Iterator<Entry<Var, Node>> it = this.content.entrySet().iterator();
+
+            while (it.hasNext()) {
+                Entry<Var, Node> entry = it.next();
+
+                result.append(entry.getKey());
+                result.append('=');
+                result.append(entry.getValue());
+
+                if (it.hasNext()) {
+                    result.append(", ");
+                }
+            }
+
+            result.append(')');
+
+            return result.toString();
+        }
+
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            out.defaultWriteObject();
+
+            SparqlResultSerializer.serialize(
+                    out, this, EventCloudProperties.COMPRESSION.getValue());
+        }
+
+        private void readObject(ObjectInputStream in) throws IOException,
+                ClassNotFoundException {
+            in.defaultReadObject();
+
+            Binding binding =
+                    SparqlResultSerializer.deserializeBinding(
+                            in, EventCloudProperties.COMPRESSION.getValue());
+
+            this.content = new HashMap<Var, Node>();
+            Iterator<Var> it = binding.vars();
+
+            while (it.hasNext()) {
+                Var var = it.next();
+                this.content.put(var, binding.get(var));
+            }
+        }
     }
 
 }

@@ -32,7 +32,6 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
@@ -108,18 +107,15 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
                     PublishSubscribeUtils.extractMetaInformation(metaQuad);
 
             // extracts only the variables that are declared as result variables
-            // in
-            // the original subscription
+            // in the original subscription
             Subscription subscription =
                     ((SemanticCanOverlay) overlay).findSubscription(PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()));
 
             // an unsubscribe request has been sent after that a notification
-            // has
-            // been triggered because a publication matches the current
+            // has been triggered because a publication matches the current
             // subscription. However, the unsubscribe request has been handled
             // before we send back to the subscriber all the intermediate
-            // binding
-            // values to the subscriber
+            // binding values to the subscriber
             if (subscription == null) {
                 return;
             }
@@ -136,7 +132,7 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
                                 this.notificationId,
                                 extractedMetaInfo.getSecond(),
                                 PAActiveObject.getUrl(overlay.getStub()),
-                                new BindingWrapper(binding)));
+                                binding));
             } catch (ExecutionException e) {
                 log.error("No SubscribeProxy found under the given URL: "
                         + subscription.getSubscriberUrl(), e);

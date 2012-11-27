@@ -358,15 +358,15 @@ public class SubscribeProxyTest {
      * active object.
      */
     @Test(timeout = 60000)
-    public void testSubscribeBindingWrapperNotificationListenerActiveObject() {
+    public void testSubscribeBindingNotificationListenerActiveObject() {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
 
         // subscribes for any quadruples
-        CustomBindingWrapperNotificationListenerActiveObject notificationListener =
+        CustomBindingNotificationListenerActiveObject notificationListener =
                 NotificationListenerFactory.newNotificationListener(
-                        CustomBindingWrapperNotificationListenerActiveObject.class,
+                        CustomBindingNotificationListenerActiveObject.class,
                         new Object[0]);
         this.subscribeProxy.subscribe(subscription, notificationListener);
 
