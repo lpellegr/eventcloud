@@ -699,6 +699,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                 msg += Quadruple.removeMetaInformation(Node.createURI(graph));
             }
 
+            msg += " ";
+            msg += super.eventCloudCache.getId().getStreamUrl();
+            
             log.info(msg);
         }
     }

@@ -105,7 +105,9 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
     public void publish(CompoundEvent event) {
         if (EventCloudProperties.INTEGRATION_LOG.getValue()) {
             // log information for integration test purposes
-            log.info("EventCloud Entry {}", event.getGraph());
+            log.info(
+                    "EventCloud Entry {} {}", event.getGraph(),
+                    super.eventCloudCache.getId().getStreamUrl());
         }
 
         super.selectPeer().publish(event);
