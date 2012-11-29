@@ -604,8 +604,12 @@ public final class PublishSubscribeUtils {
                                         quadruple.createMetaGraphNode(),
                                         source, ImmutableList.of(quadruple));
 
-                        if (semanticCanOverlay.markAsSent(
-                                quadruplesNotification.getId(), quadruple)) {
+                        if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
+                                && semanticCanOverlay.markAsSent(
+                                        quadruplesNotification.getId(),
+                                        quadruple)) {
+                            subscriber.receive(quadruplesNotification);
+                        } else if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
                             subscriber.receive(quadruplesNotification);
                         }
 

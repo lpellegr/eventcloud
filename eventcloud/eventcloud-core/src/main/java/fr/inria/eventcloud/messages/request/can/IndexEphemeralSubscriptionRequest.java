@@ -24,12 +24,14 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
@@ -77,6 +79,8 @@ public class IndexEphemeralSubscriptionRequest extends
                                                QuadruplePattern quadruplePattern) {
         SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
 
+        // skips this IndexEphemeralSubscription if one has already been handled
+        // for the graph value
         if (!this.storeEphemeralSubscription(semanticOverlay)) {
             return;
         }
@@ -100,7 +104,11 @@ public class IndexEphemeralSubscriptionRequest extends
                 while (it.hasNext()) {
                     Quadruple quadruple = it.next();
 
-                    if (semanticOverlay.markAsSent(notificationId, quadruple)) {
+                    if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
+                            && semanticOverlay.markAsSent(
+                                    notificationId, quadruple)) {
+                        builder.add(quadruple);
+                    } else if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
                         builder.add(quadruple);
                     }
                 }
@@ -129,20 +137,24 @@ public class IndexEphemeralSubscriptionRequest extends
     private final boolean storeEphemeralSubscription(SemanticCanOverlay overlay) {
         TransactionalDatasetGraph txnGraph =
                 overlay.getSubscriptionsDatastore().begin(AccessMode.WRITE);
-
         try {
-            // QuadrupleIterator it =
-            // txnGraph.find(
-            // Node.createURI(this.metaGraph.getValue()),
-            // Node.ANY,
-            // PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
-            // Node.ANY);
+            // checks whether there is an ES for the same graph value that is
+            // already indexed
+            QuadrupleIterator it =
+                    txnGraph.find(
+                            Node.createURI(this.metaGraph.getValue()),
+                            Node.ANY,
+                            PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                            Node.ANY);
 
-            // if (it.hasNext()) {
-            // return false;
-            // }
+            if (it.hasNext()) {
+                return false;
+            }
 
-            txnGraph.add(this.createEphemeralSubscriptionQuadruple());
+            for (Quadruple q : this.createEphemeralSubscriptionQuadruples()) {
+                txnGraph.add(q);
+            }
+
             txnGraph.commit();
 
             return true;
@@ -153,12 +165,25 @@ public class IndexEphemeralSubscriptionRequest extends
         }
     }
 
-    private final Quadruple createEphemeralSubscriptionQuadruple() {
-        return new Quadruple(
-                Node.createURI(this.metaGraph.getValue()),
-                PublishSubscribeUtils.createSubscriptionIdUri(this.subscriptionId.getValue()),
-                PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
-                Node.createURI(this.subscriberUrl.getValue()));
+    private final List<Quadruple> createEphemeralSubscriptionQuadruples() {
+        Node graph = Node.createURI(this.metaGraph.getValue());
+        Node sId =
+                PublishSubscribeUtils.createSubscriptionIdUri(this.subscriptionId.getValue());
+
+        return ImmutableList.of(
+                new Quadruple(
+                        graph,
+                        sId,
+                        PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                        Node.createURI(this.subscriberUrl.getValue()), false,
+                        false),
+                new Quadruple(
+                        graph,
+                        sId,
+                        PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE,
+                        Node.createLiteral(
+                                Long.toString(System.currentTimeMillis()),
+                                XSDDatatype.XSDlong), false, false));
     }
 
 }

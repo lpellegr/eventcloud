@@ -42,6 +42,9 @@ public final class PublishSubscribeConstants {
 
     public static final String SUBSUBSCRIPTION_NS = EVENTCLOUD_NS + "ss:";
 
+    public static final String EPHEMERAL_SUBSCRIPTION_NS = EVENTCLOUD_NS
+            + "es:";
+
     /*
      * Nodes associated to namespaces
      */
@@ -62,6 +65,12 @@ public final class PublishSubscribeConstants {
     /*
      * Properties
      */
+
+    public static final String EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY =
+            EPHEMERAL_SUBSCRIPTION_NS + "itime";
+
+    public static final String EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_PROPERTY =
+            EPHEMERAL_SUBSCRIPTION_NS + "subscriber";
 
     public static final String EVENT_NB_QUADRUPLES = EVENT_NS + "nbquads";
 
@@ -122,6 +131,12 @@ public final class PublishSubscribeConstants {
     /*
      *  Nodes associated to the properties
      */
+
+    public static final Node EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE =
+            Node.createURI(EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY);
+
+    public static final Node EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE =
+            Node.createURI(EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_PROPERTY);
 
     public static final Node EVENT_NB_QUADRUPLES_NODE =
             Node.createURI(EVENT_NB_QUADRUPLES);

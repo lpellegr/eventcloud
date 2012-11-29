@@ -589,12 +589,7 @@ public class SubscribeProxyTest {
         // are asynchronous.
         Thread.sleep(1000);
 
-        quads = new ArrayList<Quadruple>();
-        for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.random(eventIdNode));
-        }
-
-        ce = new CompoundEvent(quads);
+        ce = CompoundEventGenerator.random(eventId, 4);
 
         // publishes a new event
         this.publishProxy.publish(ce);
@@ -608,6 +603,12 @@ public class SubscribeProxyTest {
             }
         }
 
+        if (!EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
+            // wait for 2 garbage collection to ensure that outdated things are
+            // removed
+            Thread.sleep(EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue() * 2);
+        }
+
         for (Peer p : this.deployer.getRandomSemanticTracker(this.eventCloudId)
                 .getPeers()) {
             List<Quadruple> subscriptionData =
@@ -616,7 +617,7 @@ public class SubscribeProxyTest {
 
             log.info(
                     "After unsubscribe peer {} contains the following subscriptions:\n{}",
-                    p, QuadruplesFormatter.toString(subscriptionData));
+                    p, QuadruplesFormatter.toString(subscriptionData, true));
             Assert.assertEquals(0, subscriptionData.size());
         }
     }
