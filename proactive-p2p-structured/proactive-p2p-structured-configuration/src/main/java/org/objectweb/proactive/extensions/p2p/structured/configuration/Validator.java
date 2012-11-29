@@ -29,10 +29,14 @@ public abstract class Validator<T> {
 
     public void checkValidity(String propertyName, T propertyValue) {
         if (!this.isLegalValue(propertyValue)) {
-            throw new IllegalArgumentException(
-                    "Invalid value specified for property '" + propertyName
-                            + "': " + propertyValue);
+            throw new IllegalArgumentException(this.getErrorMessage(
+                    propertyName, propertyValue));
         }
+    }
+
+    protected String getErrorMessage(String propertyName, T propertyValue) {
+        return "Invalid value specified for property '" + propertyName + "': "
+                + propertyValue;
     }
 
     public abstract boolean isLegalValue(T propertyValue);
