@@ -30,7 +30,7 @@ import fr.inria.eventcloud.webservices.api.subscribers.BindingSubscriberWsApi;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
 /**
- * A {@link BindingWrapperNotificationListener} which invokes a web service.
+ * A {@link BindingNotificationListener} which invokes a web service.
  * 
  * @author bsauvan
  */
