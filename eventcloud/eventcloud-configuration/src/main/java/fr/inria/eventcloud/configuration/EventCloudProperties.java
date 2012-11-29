@@ -130,6 +130,32 @@ public class EventCloudProperties {
                     new PubSubAlgorithmPropertyValidator());
 
     /**
+     * Defines whether an intermediate datastructure must be used on the peers
+     * to prevent them to send back to a subscribe proxy some chunks that may
+     * already be sent. This property must be enabled only when SBCE2 or SBCE3
+     * is used.
+     */
+    public static final PropertyBoolean PREVENT_CHUNK_DUPLICATES =
+            new PropertyBoolean(
+                    "eventcloud.prevent.chunk.duplicates", false,
+                    new Sbce2PreventChunkDuplicates());
+
+    /**
+     * Defines at which frequence the garbage collection timeout for ephemeral
+     * subscriptions must be triggered.
+     */
+    public static final PropertyInteger EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT =
+            new PropertyInteger(
+                    "eventcloud.ephemeral.subscriptions.gc.timeout", 10000);
+
+    /**
+     * Defines the expiration time of an ephemeral subscription (in ms).
+     */
+    public static final PropertyInteger EPHEMERAL_SUBSCRIPTION_EXPIRATION_TIME =
+            new PropertyInteger(
+                    "eventcloud.ephemeral.subscription.expiration.time", 3000);
+
+    /**
      * Defines whether static load balancing must be enabled or not. When it is
      * enabled, a join operation use the statistics wich have been recorded
      * during data insertion to compute a value that indicates where to split
@@ -449,6 +475,35 @@ public class EventCloudProperties {
                     || propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2)
                     || propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3);
         }
+    }
+
+    private static final class Sbce2PreventChunkDuplicates extends
+            Validator<Boolean> {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isLegalValue(Boolean propertyValue) {
+            return !(propertyValue && EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.getValue()
+                    .equalsIgnoreCase(
+                            EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected String getErrorMessage(String propertyName,
+                                         Boolean propertyValue) {
+            return "Property "
+                    + propertyName
+                    + " can only be used in conjunction with property "
+                    + EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.getName()
+                    + " set to " + PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2 + " or "
+                    + PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3;
+        }
+
     }
 
 }

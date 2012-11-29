@@ -24,6 +24,7 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
@@ -63,20 +64,27 @@ public class RemoveEphemeralSubscriptionRequest extends
                 semanticOverlay.getSubscriptionsDatastore().begin(
                         AccessMode.WRITE);
         try {
-            txnGraph.delete(new QuadruplePattern(
+            txnGraph.delete(
                     super.quadruplePattern.getValue().getGraph(),
                     PublishSubscribeUtils.createSubscriptionIdUri(this.subscriptionId.getValue()),
-                    PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
-                    Node.ANY));
+                    PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                    Node.ANY);
+            txnGraph.delete(
+                    super.quadruplePattern.getValue().getGraph(),
+                    PublishSubscribeUtils.createSubscriptionIdUri(this.subscriptionId.getValue()),
+                    PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE,
+                    Node.ANY);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             txnGraph.end();
         }
 
-        semanticOverlay.dropAsSent(new NotificationId(
-                this.subscriptionId.getValue(),
-                super.quadruplePattern.getValue().getGraph()));
+        if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
+            semanticOverlay.dropAsSent(new NotificationId(
+                    this.subscriptionId.getValue(),
+                    super.quadruplePattern.getValue().getGraph()));
+        }
     }
 
 }

@@ -88,7 +88,8 @@ public class NotificationId implements Serializable {
      */
     @Override
     public String toString() {
-        return this.eventId + this.subscriptionId.toString();
+        return this.getClass().getSimpleName() + "{eventId=" + this.eventId
+                + ", subscriptionId=" + this.subscriptionId.toString() + "}";
     }
 
     public static final class Serializer implements

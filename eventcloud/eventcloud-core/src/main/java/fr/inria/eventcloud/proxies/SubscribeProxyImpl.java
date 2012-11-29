@@ -701,7 +701,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
             msg += " ";
             msg += super.eventCloudCache.getId().getStreamUrl();
-            
+
             log.info(msg);
         }
     }

@@ -184,7 +184,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                         txnGraph.find(new QuadruplePattern(
                                 metaGraphNode,
                                 null,
-                                PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
+                                PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
                                 null));
 
                 while (qit.hasNext()) {
@@ -202,7 +202,11 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                     PAActiveObject.getUrl(semanticOverlay.getStub()),
                                     ImmutableList.of(quadruple));
 
-                    if (semanticOverlay.markAsSent(n.getId(), quadruple)) {
+                    if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
+                            && semanticOverlay.markAsSent(n.getId(), quadruple)) {
+                        Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
+                                .receive(n);
+                    } else if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
                         Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
                                 .receive(n);
                     }
