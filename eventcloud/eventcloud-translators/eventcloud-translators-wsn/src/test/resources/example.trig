@@ -1,0 +1,20 @@
+@prefix :        <http://events.event-processing.org/types/> .
+@prefix e:       <http://events.event-processing.org/ids/> .
+@prefix dsb:     <http://www.petalslink.org/dsb/topicsns/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix uctelco: <http://events.event-processing.org/uc/telco/> .
+@prefix geo:     <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+ 
+e:ava-13 {
+    e:ava-13#event uctelco:sequenceNumber "13"^^xsd:integer ;
+        # some properties in the domain-specific namespace for FT:
+        uctelco:uniqueId "taxiUC:ava-13" ;
+        uctelco:phoneNumber "33600000011" ;
+        uctelco:status "WORKING" ;
+        uctelco:userType "Driver" ;
+        # but also some other data according to event format
+        a :TaxiUCAvailability ;
+        :endTime "2011-12-06T18:33:36.681"^^xsd:dateTime ;
+        :source <http://sources.event-processing.org/ids/%NAME%#source> ;
+        :stream <http://streams.event-processing.org/ids/%TOPIC_NAME%#stream> ;
+}
