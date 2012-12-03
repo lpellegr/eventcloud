@@ -50,7 +50,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
 public class SparqlAtomicRequest extends
         StatefulQuadruplePatternRequest<List<Quadruple>> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private final AtomicQuery atomicQuery;
 

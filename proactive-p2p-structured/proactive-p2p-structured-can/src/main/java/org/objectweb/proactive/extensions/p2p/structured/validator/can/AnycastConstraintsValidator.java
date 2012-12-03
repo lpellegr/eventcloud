@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
 public abstract class AnycastConstraintsValidator<E extends Element> extends
         ConstraintsValidator<Coordinate<E>> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Constructs a new {@link AnycastConstraintsValidator} with the specified

@@ -51,7 +51,7 @@ import fr.inria.eventcloud.pubsub.notifications.NotificationId;
  */
 public class RetrieveSubSolutionOperation implements RunnableOperation {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(RetrieveSubSolutionOperation.class);

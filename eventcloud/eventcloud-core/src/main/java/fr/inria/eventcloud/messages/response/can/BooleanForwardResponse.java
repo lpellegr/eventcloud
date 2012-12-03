@@ -29,7 +29,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public class BooleanForwardResponse extends ForwardResponse<SemanticElement> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private boolean result;
 

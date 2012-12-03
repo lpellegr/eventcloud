@@ -27,7 +27,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  */
 public class SignalNotification extends Notification<Object> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     public SignalNotification(SubscriptionId subscriptionId, Node eventId,
             String source) {

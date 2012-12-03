@@ -342,7 +342,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomBindingListener extends
             BindingNotificationListener {
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id, Binding solution) {
@@ -355,7 +355,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomEventListener extends
             CompoundEventNotificationListener {
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id, CompoundEvent solution) {
@@ -368,7 +368,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomSignalListener extends
             SignalNotificationListener {
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id) {

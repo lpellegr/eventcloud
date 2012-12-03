@@ -47,7 +47,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class EventCloudDeployer extends NetworkDeployer {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private final EventCloudDescription eventCloudDescription;
 

@@ -86,7 +86,7 @@ import fr.inria.eventcloud.reasoner.SparqlDecomposer;
  */
 public class Subscription implements Quadruplable, Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     public static final LoadingCache<String, SubscribeProxy> SUBSCRIBE_PROXIES_CACHE;
 
@@ -583,7 +583,7 @@ public class Subscription implements Quadruplable, Serializable {
 
     public static final class Stub implements Serializable {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         // the url which identifies the peer to visit
         public final String peerUrl;

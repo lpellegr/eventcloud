@@ -37,7 +37,7 @@ import com.hp.hpl.jena.graph.Node_Variable;
  */
 public class QuadruplePattern extends Quadruple {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * QuadruplePattern that may be used to retrieve all the quadruples.

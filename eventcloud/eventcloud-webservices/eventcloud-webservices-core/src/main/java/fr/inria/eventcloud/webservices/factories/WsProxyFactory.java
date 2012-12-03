@@ -42,7 +42,7 @@ import fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyImpl;
  */
 public final class WsProxyFactory extends ProxyFactory {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     static {
         publishProxyAdl = PublishWsProxyImpl.PUBLISH_WEBSERVICE_PROXY_ADL;

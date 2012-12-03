@@ -15,7 +15,7 @@ public class GcmNodeProviderImpl implements NodeProvider, Serializable {
     /**
      * 
      */
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
     private GCMApplication gcmad;
     private File pathToGCMADescriptor = null;
     private boolean started = false;

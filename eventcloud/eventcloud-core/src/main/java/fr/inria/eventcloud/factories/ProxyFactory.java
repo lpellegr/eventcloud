@@ -63,7 +63,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
  */
 public class ProxyFactory extends AbstractFactory implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log;
 

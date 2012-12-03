@@ -40,7 +40,7 @@
 //
 //    private final static Logger logger = LoggerFactory.getLogger(RangeQueryRequest.class);
 //
-//    private static final long serialVersionUID = 130L;
+//    private static final long serialVersionUID = 140L;
 //
 //    private List<RangeQueryCondition> conditions;
 //

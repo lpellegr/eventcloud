@@ -34,7 +34,7 @@ import fr.inria.eventcloud.utils.UniqueId;
  */
 public class SubscriptionId extends UniqueId {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     public static final Serializer SERIALIZER = new Serializer();
 
@@ -65,7 +65,7 @@ public class SubscriptionId extends UniqueId {
     public static final class Serializer implements
             org.mapdb.Serializer<SubscriptionId>, Serializable {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         /**
          * {@inheritDoc}

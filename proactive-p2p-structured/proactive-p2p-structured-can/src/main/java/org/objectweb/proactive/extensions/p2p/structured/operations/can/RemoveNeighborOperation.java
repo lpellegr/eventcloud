@@ -39,7 +39,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 public class RemoveNeighborOperation<E extends Element> extends
         CallableOperation {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * The identifier pointing to the neighbor to remove.

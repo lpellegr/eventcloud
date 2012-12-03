@@ -90,7 +90,7 @@ public class PeerTest {
 
     private static final class CustomOperation extends CallableOperation {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public ResponseOperation handle(StructuredOverlay overlay) {
@@ -120,7 +120,7 @@ public class PeerTest {
     private static final class CanMockOverlayProvider extends
             SerializableProvider<CanMockOverlay> {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public CanMockOverlay get() {
@@ -135,7 +135,7 @@ public class PeerTest {
 
         public CanMockOverlay() {
             super(new RequestResponseManager() {
-                private static final long serialVersionUID = 130L;
+                private static final long serialVersionUID = 140L;
 
                 @Override
                 public void close() throws IOException {

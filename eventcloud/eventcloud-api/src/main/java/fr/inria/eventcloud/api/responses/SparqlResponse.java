@@ -29,7 +29,7 @@ import java.io.Serializable;
  */
 public abstract class SparqlResponse<T> implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private final long inboundHopCount;
 

@@ -35,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastReque
 public class DefaultAnycastConstraintsValidator<E extends StringElement>
         extends AnycastConstraintsValidator<E> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Creates a new {@code DefaultAnycastConstraintsValidator} with the
