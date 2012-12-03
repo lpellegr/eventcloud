@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
  */
 public class SplitEntry implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private byte dimension = 0;
 

@@ -34,7 +34,7 @@ import fr.inria.eventcloud.webservices.listeners.WsSignalNotificationListener;
 public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
         SubscribeWsApi {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * ADL name of the subscribe web service proxy component.

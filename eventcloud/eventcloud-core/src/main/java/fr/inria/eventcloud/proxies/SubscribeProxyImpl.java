@@ -84,7 +84,7 @@ import fr.inria.eventcloud.pubsub.solutions.QuadruplesSolution;
 public class SubscribeProxyImpl extends AbstractProxy implements
         ComponentEndActive, SubscribeProxy, SubscribeProxyAttributeController {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private static final String NOTIFICATIONS_DELIVERED_MAP_NAME =
             "notificationsDelivered";

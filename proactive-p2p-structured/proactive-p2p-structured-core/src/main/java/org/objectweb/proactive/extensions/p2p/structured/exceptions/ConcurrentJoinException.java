@@ -27,7 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  */
 public class ConcurrentJoinException extends ProActiveRuntimeException {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     public ConcurrentJoinException() {
         super();

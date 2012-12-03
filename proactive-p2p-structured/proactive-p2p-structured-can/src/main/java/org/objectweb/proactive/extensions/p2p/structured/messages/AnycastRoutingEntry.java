@@ -30,7 +30,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  */
 public class AnycastRoutingEntry implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private UUID peerId;
 

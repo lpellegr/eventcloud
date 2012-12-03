@@ -40,7 +40,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRespo
  */
 public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private AnycastRoutingList anycastRoutingList = new AnycastRoutingList();
 

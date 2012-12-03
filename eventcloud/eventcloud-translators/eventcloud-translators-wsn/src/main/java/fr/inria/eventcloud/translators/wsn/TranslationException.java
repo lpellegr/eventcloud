@@ -23,7 +23,7 @@ package fr.inria.eventcloud.translators.wsn;
  */
 public class TranslationException extends Exception {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Constructs a {@code TranslationException} with no specified detail

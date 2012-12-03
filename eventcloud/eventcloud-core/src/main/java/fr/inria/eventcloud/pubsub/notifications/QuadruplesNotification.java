@@ -30,7 +30,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  */
 public class QuadruplesNotification extends Notification<List<Quadruple>> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     public QuadruplesNotification(SubscriptionId subscriptionId, Node eventId,
             String source, List<Quadruple> binding) {

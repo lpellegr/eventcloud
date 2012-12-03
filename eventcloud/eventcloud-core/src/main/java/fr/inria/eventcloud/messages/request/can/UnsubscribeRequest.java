@@ -34,7 +34,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  */
 public class UnsubscribeRequest extends StatelessQuadruplePatternRequest {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private final SerializedValue<SubscriptionId> originalSubscriptionId;
 

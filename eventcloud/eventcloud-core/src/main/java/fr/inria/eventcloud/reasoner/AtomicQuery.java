@@ -68,7 +68,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
  */
 public final class AtomicQuery implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private transient Node nodes[];
 

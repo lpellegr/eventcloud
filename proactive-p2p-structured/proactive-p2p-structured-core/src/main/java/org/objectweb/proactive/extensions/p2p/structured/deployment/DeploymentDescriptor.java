@@ -31,7 +31,7 @@ import com.google.common.base.Preconditions;
  */
 public class DeploymentDescriptor implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private final SerializableProvider<? extends StructuredOverlay> overlayProvider;
 

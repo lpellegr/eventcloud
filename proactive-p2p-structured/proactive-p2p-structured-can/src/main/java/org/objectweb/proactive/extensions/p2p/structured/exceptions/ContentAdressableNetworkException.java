@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  */
 public class ContentAdressableNetworkException extends StructuredP2PException {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Constructs a {@code ContentAdressableNetworkException} with no specified

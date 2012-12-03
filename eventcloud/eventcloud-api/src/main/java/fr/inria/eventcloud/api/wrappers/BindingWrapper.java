@@ -36,7 +36,7 @@ import fr.inria.eventcloud.utils.SparqlResultSerializer;
 public class BindingWrapper extends SparqlResultWrapper<Binding> implements
         Binding {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Creates a {@link BindingWrapper} from the specified {@link Binding}.

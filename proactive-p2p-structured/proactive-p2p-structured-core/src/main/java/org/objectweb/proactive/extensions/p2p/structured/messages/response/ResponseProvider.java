@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 public abstract class ResponseProvider<T extends Response<K>, K> extends
         SerializableProvider<T> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Returns a new response whose its attributes have been initialized with a

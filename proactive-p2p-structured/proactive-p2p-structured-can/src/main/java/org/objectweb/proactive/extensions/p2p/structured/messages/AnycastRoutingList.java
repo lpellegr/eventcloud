@@ -32,7 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  */
 public class AnycastRoutingList extends LinkedList<AnycastRoutingEntry> {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Search the specified {@link UUID} which is associated to a {@link Peer}

@@ -224,7 +224,7 @@ public class InputOutputMonitoringTest extends WsTest {
     private static class CustomSignalNotificationListener extends
             SignalNotificationListener {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id) {

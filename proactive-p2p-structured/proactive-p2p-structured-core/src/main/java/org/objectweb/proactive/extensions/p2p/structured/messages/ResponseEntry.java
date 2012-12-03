@@ -35,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
  */
 public class ResponseEntry implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     public enum Status {
         /**
