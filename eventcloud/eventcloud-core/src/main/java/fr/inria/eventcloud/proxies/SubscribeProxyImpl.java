@@ -159,7 +159,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private void createAndRegisterNotificationsDeliveredDB(Body body) {
         String dbPath =
-                EventCloudProperties.getDefaultTemporaryPath() + "jdbm"
+                EventCloudProperties.getDefaultTemporaryPath() + "mapdb"
                         + File.separatorChar;
 
         new File(dbPath).mkdirs();
