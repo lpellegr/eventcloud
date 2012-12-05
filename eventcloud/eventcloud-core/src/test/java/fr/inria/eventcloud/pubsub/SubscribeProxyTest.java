@@ -281,7 +281,8 @@ public class SubscribeProxyTest {
      * Test a basic subscription with a {@link SignalNotificationListener}.
      */
     @Test(timeout = 60000)
-    public void testSubscribeSignalNotificationListener() {
+    public void testSubscribeSignalNotificationListener()
+            throws InterruptedException {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
@@ -297,7 +298,7 @@ public class SubscribeProxyTest {
         this.publishProxy.publish(event);
 
         synchronized (signals) {
-            while (signals.getValue() != event.getQuadruples().size()) {
+            while (signals.getValue() != 1) {
                 try {
                     signals.wait();
                 } catch (InterruptedException e) {
@@ -305,6 +306,12 @@ public class SubscribeProxyTest {
                 }
             }
         }
+
+        // waits a little to have the opportunity to detect duplicate
+        // notifications
+        Thread.sleep(2000);
+
+        Assert.assertEquals(1, signals.getValue());
     }
 
     /**

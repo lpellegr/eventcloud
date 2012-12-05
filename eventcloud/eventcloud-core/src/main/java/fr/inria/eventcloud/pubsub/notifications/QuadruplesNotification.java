@@ -33,8 +33,8 @@ public class QuadruplesNotification extends Notification<List<Quadruple>> {
     private static final long serialVersionUID = 140L;
 
     public QuadruplesNotification(SubscriptionId subscriptionId, Node eventId,
-            String source, List<Quadruple> binding) {
-        super(subscriptionId, eventId, source, binding);
+            String source, List<Quadruple> quadruples) {
+        super(subscriptionId, eventId, source, quadruples);
     }
 
 }

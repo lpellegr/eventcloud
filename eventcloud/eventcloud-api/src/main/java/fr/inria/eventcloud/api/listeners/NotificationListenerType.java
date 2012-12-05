@@ -28,8 +28,7 @@ public enum NotificationListenerType
         implements
         EnumConverter<NotificationListenerType> {
 
-    UNKNOWN((short) -1), BINDING((short) 0), COMPOUND_EVENT((short) 1), SIGNAL(
-            (short) 2);
+    BINDING((short) 0), COMPOUND_EVENT((short) 1), SIGNAL((short) 2);
 
     private static ReverseEnumMap<NotificationListenerType> map =
             new ReverseEnumMap<NotificationListenerType>(
