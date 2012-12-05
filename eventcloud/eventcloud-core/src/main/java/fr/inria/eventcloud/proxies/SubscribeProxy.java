@@ -105,28 +105,55 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
                                                   Node eventId);
 
     /**
-     * Used internally to send back a {@link BindingNotification}.
+     * Used internally to send back a {@link BindingNotification} with SBCE1 or
+     * SBCE2.
      * 
      * @param notification
      *            the notification that is received.
      */
-    public void receive(BindingNotification notification);
+    public void receiveSbce1Or2(BindingNotification notification);
 
     /**
-     * Used internally to send back a {@link QuadruplesNotification}.
+     * Used internally to send back a {@link BindingNotification} with SBCE3.
      * 
      * @param notification
      *            the notification that is received.
      */
-    public void receive(QuadruplesNotification notification);
+    public void receiveSbce3(BindingNotification notification);
 
     /**
-     * Used internally to send back a {@link SignalNotification}.
+     * Used internally to send back a {@link QuadruplesNotification} with SBCE1
+     * or SBCE2.
      * 
      * @param notification
      *            the notification that is received.
      */
-    public void receive(SignalNotification notification);
+    public void receiveSbce1Or2(QuadruplesNotification notification);
+
+    /**
+     * Used internally to send back a {@link CompoundEvent} with SBCE3.
+     * 
+     * @param notification
+     *            the notification that is received.
+     */
+    public void receiveSbce3(QuadruplesNotification notification);
+
+    /**
+     * Used internally to send back a {@link SignalNotification} with SBCE1 or
+     * SBCE2.
+     * 
+     * @param notification
+     *            the notification that is received.
+     */
+    public void receiveSbce1Or2(SignalNotification notification);
+
+    /**
+     * Used internally to send back a {@link SignalNotification} with SBCE3.
+     * 
+     * @param notification
+     *            the notification that is received.
+     */
+    public void receiveSbce3(SignalNotification notification);
 
     /**
      * Used internally to send back a {@link PollingSignalNotification}.
@@ -134,6 +161,6 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receive(PollingSignalNotification notification);
+    public void receiveSbce1Or2(PollingSignalNotification notification);
 
 }

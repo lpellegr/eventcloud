@@ -127,12 +127,13 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
                             subscription.getSubSubscriptions()[0].getAtomicQuery());
 
             try {
-                subscription.getSubscriberProxy().receive(
-                        new BindingNotification(
-                                this.notificationId,
-                                extractedMetaInfo.getSecond(),
-                                PAActiveObject.getUrl(overlay.getStub()),
-                                binding));
+                subscription.getSubscriberProxy()
+                        .receiveSbce1Or2(
+                                new BindingNotification(
+                                        this.notificationId,
+                                        extractedMetaInfo.getSecond(),
+                                        PAActiveObject.getUrl(semanticOverlay.getStub()),
+                                        binding));
             } catch (ExecutionException e) {
                 log.error("No SubscribeProxy found under the given URL: "
                         + subscription.getSubscriberUrl(), e);
