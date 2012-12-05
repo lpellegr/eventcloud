@@ -152,8 +152,8 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
     @Override
     public void runComponentActivity(Body body) {
         new MultiActiveService(body).multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_PUBLISH_PROXIES.getValue(),
-                false, false);
+                EventCloudProperties.MAO_HARD_LIMIT_PUBLISH_PROXIES.getValue(),
+                true, false);
     }
 
 }
