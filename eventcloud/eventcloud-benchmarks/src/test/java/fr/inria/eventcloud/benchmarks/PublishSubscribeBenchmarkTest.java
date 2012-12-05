@@ -120,11 +120,11 @@ public class PublishSubscribeBenchmarkTest {
         // scenarios
         return Arrays.asList(new Object[][] {
                 {
-                        10, 1, 1, 1000, new QuadrupleSupplier(),
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
                         SignalNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
-                        10, 1, 1, 1000, new QuadrupleSupplier(),
+                        1, 1, 1, 1000, new QuadrupleSupplier(),
                         SignalNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
@@ -136,11 +136,11 @@ public class PublishSubscribeBenchmarkTest {
                         BindingNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
-                        1, 1, 1, 100, new CompoundEventSupplier(10),
+                        1, 1, 1, 1000, new CompoundEventSupplier(10),
                         CompoundEventNotificationListener.class,
                         DatastoreType.PERSISTENT},
                 {
-                        1, 1, 1, 100, new CompoundEventSupplier(10),
+                        1, 1, 1, 1000, new CompoundEventSupplier(10),
                         CompoundEventNotificationListener.class,
                         DatastoreType.PERSISTENT}});
     }

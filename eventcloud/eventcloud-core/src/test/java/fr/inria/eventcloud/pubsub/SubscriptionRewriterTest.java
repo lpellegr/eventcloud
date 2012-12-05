@@ -223,7 +223,7 @@ public class SubscriptionRewriterTest {
                 new SubscriptionId(), new SubscriptionId(),
                 new SubscriptionId(), System.currentTimeMillis(),
                 System.currentTimeMillis(), sparqlQuery, source, null,
-                NotificationListenerType.UNKNOWN);
+                NotificationListenerType.BINDING);
     }
 
 }

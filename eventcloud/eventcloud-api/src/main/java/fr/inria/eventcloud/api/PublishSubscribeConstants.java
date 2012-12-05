@@ -17,6 +17,9 @@
 package fr.inria.eventcloud.api;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 /**
  * Defines constants that are regularly used by the publish/subscribe
@@ -218,5 +221,54 @@ public final class PublishSubscribeConstants {
     private PublishSubscribeConstants() {
 
     }
+
+    /*
+     * Some constants regarding variables allocation
+     */
+
+    public static final Var GRAPH = Var.alloc("g");
+
+    // sId
+    public static final Var SUBSCRIPTION_ID = Var.alloc("a");
+
+    // sSrc
+    public static final Var SUBSCRIPTION_SOURCE = Var.alloc("b");
+
+    // ssId
+    public static final Var SUBSUBSCRIPTION_ID = Var.alloc("c");
+
+    // ssSrc
+    public static final Var SUBSUBSCRIPTION_SOURCE = Var.alloc("d");
+
+    // ssGraph
+    public static final Var SUBSUBSCRIPTION_GRAPH = Var.alloc("e");
+
+    // ssSubject
+    public static final Var SUBSUBSCRIPTION_SUBJECT = Var.alloc("f");
+
+    // ssPredicate
+    public static final Var SUBSUBSCRIPTION_PREDICATE = Var.alloc("h");
+
+    // ssObject
+    public static final Var SUBSUBSCRIPTION_OBJECT = Var.alloc("i");
+
+    /*
+     * Some constants used in PublishQuadrupleRequest
+     */
+
+    public static final ExprVar SS_GRAPH_EXPR_VAR = new ExprVar(
+            SUBSUBSCRIPTION_GRAPH);
+
+    public static final NodeValue SS_VARIABLE_EXPR =
+            NodeValue.makeNode(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE);
+
+    public static final ExprVar SS_SUBJECT_EXPR_VAR = new ExprVar(
+            SUBSUBSCRIPTION_SUBJECT);
+
+    public static final ExprVar SS_PREDICATE_EXPR_VAR = new ExprVar(
+            SUBSUBSCRIPTION_PREDICATE);
+
+    public static final ExprVar SS_OBJECT_EXPR_VAR = new ExprVar(
+            SUBSUBSCRIPTION_OBJECT);
 
 }

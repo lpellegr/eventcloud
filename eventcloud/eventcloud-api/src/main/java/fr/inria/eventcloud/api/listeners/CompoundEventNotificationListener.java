@@ -19,11 +19,15 @@ package fr.inria.eventcloud.api.listeners;
 import fr.inria.eventcloud.api.CompoundEvent;
 
 /**
- * This kind of notification listener will receive the notification in the form
- * of a {@link CompoundEvent}. To have the possibility to retrieve a
- * {@link CompoundEvent}, the method reconstructs internally the
- * {@link CompoundEvent} from the event identifier which matches the
- * subscription. <strong>This listener must be used carefully</strong>.
+ * When a subscription is registered along with this type of notification
+ * listener, the subscriber will receive notifications as {@link CompoundEvent}
+ * s. The matching of the compound event is performed in a distributed manner on
+ * the brokering network. When a compound event is detected as matching a
+ * subscription, the component in charge of sending a notification to the
+ * subscriber may not have all the quadruples that composes the compound event
+ * due to some network and threads issues. In that case the compound event is
+ * reconstructed little by little. The reconstruct operation depends on the
+ * version of the publish/subscribe algorithm used (SBCE1, SBCE2 or SBCE3).
  * 
  * @author lpellegr
  */

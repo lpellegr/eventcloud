@@ -263,7 +263,7 @@ public class Subscription implements Quadruplable, Serializable {
                         basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
                                 .getURI(),
                         subscriptionDestination,
-                        NotificationListenerType.UNKNOWN.convert(((Integer) basicInfo.get(
+                        NotificationListenerType.BINDING.convert(((Integer) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
                                 .getLiteralValue()).shortValue()));
 

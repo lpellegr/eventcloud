@@ -124,7 +124,7 @@ public class IndexEphemeralSubscriptionRequest extends
                                     quadruples);
 
                     Subscription.SUBSCRIBE_PROXIES_CACHE.get(
-                            this.subscriberUrl.getValue()).receive(n);
+                            this.subscriberUrl.getValue()).receiveSbce1Or2(n);
                 }
             }
         } catch (Exception e) {

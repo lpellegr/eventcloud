@@ -47,7 +47,7 @@ public class SubscriptionTest {
                         new SubscriptionId(), System.currentTimeMillis(),
                         System.currentTimeMillis(), sparqlQuery,
                         "rmi://oops:1099", null,
-                        NotificationListenerType.UNKNOWN);
+                        NotificationListenerType.BINDING);
 
         List<Quadruple> quads = subscription.toQuadruples();
 
