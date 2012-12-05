@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
@@ -145,8 +146,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @Override
     public void runComponentActivity(Body body) {
         new MultiActiveService(body).multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
-                false, false);
+                EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue(),
+                true, false);
     }
 
     /**
@@ -159,7 +160,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private void createAndRegisterNotificationsDeliveredDB(Body body) {
         String dbPath =
-                EventCloudProperties.getDefaultTemporaryPath() + "jdbm"
+                EventCloudProperties.getDefaultTemporaryPath() + "mapdb"
                         + File.separatorChar;
 
         new File(dbPath).mkdirs();
@@ -230,16 +231,16 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             // is
                             // EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT
                             // we get the following formula
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
+                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue()
                                     * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
                             0.75f,
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
+                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue());
             this.quadruplesSolutions =
                     new ConcurrentHashMap<NotificationId, QuadruplesSolution>(
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
+                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue()
                                     * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
                             0.75f,
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
+                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
@@ -386,7 +387,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     @MemberOf("parallel")
-    public void receive(BindingNotification notification) {
+    public void receiveSbce1Or2(BindingNotification notification) {
         SubscriptionId subscriptionId = notification.getSubscriptionId();
         @SuppressWarnings("unchecked")
         SubscriptionEntry<BindingNotificationListener> subscriptionEntry =
@@ -426,15 +427,37 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // notification has not been yet delivered for the eventId associated to
         // this notification
         if (solution.isReady()) {
-            this.deliver(subscriptionEntry, solution);
+            this.deliver(subscriptionEntry, solution.getChunks());
             this.bindingSolutions.remove(notification.getId());
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void receiveSbce3(BindingNotification notification) {
+        SubscriptionId subscriptionId = notification.getSubscriptionId();
+
+        @SuppressWarnings("unchecked")
+        SubscriptionEntry<BindingNotificationListener> subscriptionEntry =
+                (SubscriptionEntry<BindingNotificationListener>) this.subscriptions.get(subscriptionId);
+
+        // ignore the notifications which may be received after an unsubscribe
+        // operation because the unsubscribe operation is not atomic
+        if (subscriptionEntry == null) {
+            return;
+        }
+
+        if (this.markAsDelivered(notification.getId(), subscriptionId) == null) {
+            this.deliver(subscriptionEntry, notification.getContent());
+        }
+    }
+
     private void deliver(SubscriptionEntry<BindingNotificationListener> entry,
-                         BindingSolution solution) {
-        entry.listener.onNotification(
-                entry.subscription.getId(), solution.getChunks());
+                         Binding solution) {
+        entry.listener.onNotification(entry.subscription.getId(), solution);
 
         // do not output integration message and do not send monitoring
         // information for binding listener
@@ -446,7 +469,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @Override
     @MemberOf("parallel")
     @SuppressWarnings("unchecked")
-    public void receive(QuadruplesNotification notification) {
+    public void receiveSbce1Or2(QuadruplesNotification notification) {
         Node eventId = notification.getContent().get(0).getGraph();
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
@@ -524,7 +547,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
             this.deliver(
                     (SubscriptionEntry<CompoundEventNotificationListener>) subscriptionEntry,
-                    compoundEvent.getGraph().toString(), compoundEvent);
+                    compoundEvent.getGraph().getURI(), compoundEvent);
             this.quadruplesSolutions.remove(notification.getId());
 
             super.selectPeer().sendv(
@@ -538,7 +561,39 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     @MemberOf("parallel")
-    public void receive(SignalNotification notification) {
+    @SuppressWarnings("unchecked")
+    public void receiveSbce3(QuadruplesNotification notification) {
+        if (this.markAsDelivered(
+                notification.getId(), notification.getSubscriptionId()) == null) {
+
+            CompoundEvent compoundEvent =
+                    new CompoundEvent(notification.getContent());
+
+            this.deliver(
+                    (SubscriptionEntry<CompoundEventNotificationListener>) this.subscriptions.get(notification.getSubscriptionId()),
+                    compoundEvent.getGraph().getURI(), compoundEvent);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void receiveSbce1Or2(SignalNotification notification) {
+        this.receive(notification);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void receiveSbce3(SignalNotification notification) {
+        this.receive(notification);
+    }
+
+    private void receive(SignalNotification notification) {
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
         @SuppressWarnings("unchecked")
@@ -551,9 +606,11 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             return;
         }
 
-        this.logNotificationReception(notification);
-
-        this.deliver(subscriptionEntry);
+        if (this.markAsDelivered(
+                notification.getId(), notification.getSubscriptionId()) == null) {
+            this.logNotificationReception(notification);
+            this.deliver(subscriptionEntry);
+        }
     }
 
     private void deliver(SubscriptionEntry<SignalNotificationListener> entry) {
@@ -564,15 +621,15 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     }
 
     /**
-     * This method is invoked remotely by a peer when algorithm SBCE1 is used
-     * and when a solution matching a subscription is found for a subscriber
-     * that has registered a subscription along with a
+     * This method is invoked remotely by a peer when algorithm SBCE1 or SBCE2
+     * is used and when a solution matching a subscription is found for a
+     * subscriber that has registered a subscription along with a
      * {@link CompoundEventNotificationListener}.
      */
     @Override
     @MemberOf("parallel")
     @SuppressWarnings("unchecked")
-    public void receive(PollingSignalNotification notification) {
+    public void receiveSbce1Or2(PollingSignalNotification notification) {
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
         CompoundEvent compoundEvent =

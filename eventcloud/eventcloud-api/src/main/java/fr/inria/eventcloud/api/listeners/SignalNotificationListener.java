@@ -19,9 +19,12 @@ package fr.inria.eventcloud.api.listeners;
 import fr.inria.eventcloud.api.SubscriptionId;
 
 /**
- * This notification listener is used to report to the subscriber that an event
- * (quadruple) matching its subscription has been detected. However, the event
- * value is not conveyed to the subscriber.
+ * This notification listener is used to report to a subscriber a signal
+ * indicating that an event (quadruple) or compound event has matched a
+ * subscription. However, the event value is not conveyed to the subscriber.
+ * <p>
+ * It is worth to note that a subscriber will receive exactly one signal and no
+ * more for a subscription that is matched by an event or a compound event.
  * 
  * @author lpellegr
  */

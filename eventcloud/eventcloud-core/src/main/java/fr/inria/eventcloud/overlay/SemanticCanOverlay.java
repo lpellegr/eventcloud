@@ -184,7 +184,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
             this.sentQuadrupleHashValues =
                     Multimaps.synchronizedSetMultimap(HashMultimap.<NotificationId, HashCode> create(
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
+                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue(),
                             EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue()));
         }
 

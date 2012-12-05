@@ -226,8 +226,8 @@ public class PutGetProxyImpl extends AbstractProxy implements PutGetProxy,
     @Override
     public void runComponentActivity(Body body) {
         new MultiActiveService(body).multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_PUTGET_PROXIES.getValue(),
-                false, false);
+                EventCloudProperties.MAO_HARD_LIMIT_PUTGET_PROXIES.getValue(),
+                true, false);
     }
 
 }

@@ -58,6 +58,7 @@ import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
@@ -140,16 +141,34 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     @MemberOf("parallel")
-    public void publish(CompoundEvent event) {
+    public void publish(CompoundEvent compoundEvent) {
         long publicationTime = System.currentTimeMillis();
 
-        Quadruple metaQuadruple = CompoundEvent.createMetaQuadruple(event);
-        metaQuadruple.setPublicationTime(publicationTime);
-        this.publish(metaQuadruple);
+        // SBCE3
+        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            // the timestamp must be set to all the quadruples before to send
+            // the full CE to each peer managing one of the quadruples contained
+            // by the compound event
+            for (Quadruple q : compoundEvent) {
+                q.setPublicationTime(publicationTime);
+            }
 
-        for (Quadruple quad : event) {
-            quad.setPublicationTime(publicationTime);
-            this.publish(quad);
+            for (Quadruple q : compoundEvent) {
+                // sends the whole compound event
+                super.sendv(new PublishCompoundEventRequest(compoundEvent, q));
+            }
+        } else {
+            // SBCE1 or SBCE2
+            Quadruple metaQuadruple =
+                    CompoundEvent.createMetaQuadruple(compoundEvent);
+            metaQuadruple.setPublicationTime(publicationTime);
+
+            this.publish(metaQuadruple);
+
+            for (Quadruple quad : compoundEvent) {
+                quad.setPublicationTime(publicationTime);
+                this.publish(quad);
+            }
         }
     }
 

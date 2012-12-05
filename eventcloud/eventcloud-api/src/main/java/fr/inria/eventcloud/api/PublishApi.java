@@ -29,11 +29,14 @@ import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 public interface PublishApi {
 
     /**
-     * Publishes the specified quadruple.
+     * Publishes the specified quadruple. This method must be used with care
+     * because it is not intended to be used for publishing the quadruples from
+     * a compound event but separate events represented as a quadruple.
      * 
      * @param quad
      *            the quadruple to publish.
      */
+    // TODO: should be removed or refactored to prevent bad uses
     public void publish(Quadruple quad);
 
     /**
