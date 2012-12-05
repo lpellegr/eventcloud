@@ -258,51 +258,56 @@ public class PublishCompoundEventRequest extends QuadrupleRequest {
 
     private static E_LogicalOr createGraphConditions(NodeValue graphExpr) {
         return new E_LogicalOr(
-                new E_StrStartsWith(new E_Str(
-                        PublishSubscribeConstants.SS_GRAPH_EXPR_VAR), graphExpr),
-                new E_LogicalOr(new E_Equals(
-                        new E_Datatype(
-                                PublishSubscribeConstants.SS_GRAPH_EXPR_VAR),
-                        PublishSubscribeConstants.SS_VARIABLE_EXPR),
-                // the following condition is here for finding
-                // subscriptions which have been rewritten by
-                // using the graph value (but not the meta graph value)
-                // associated to the quadruple which is matching the
-                // subscription
+                new E_StrStartsWith(
+                        new E_Str(
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_EXPR_VAR),
+                        graphExpr),
+                new E_LogicalOr(
                         new E_Equals(
-                                PublishSubscribeConstants.SS_GRAPH_EXPR_VAR,
+                                new E_Datatype(
+                                        PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_EXPR_VAR),
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR),
+                        // the following condition is here for finding
+                        // subscriptions which have been rewritten by
+                        // using the graph value (but not the meta graph value)
+                        // associated to the quadruple which is matching the
+                        // subscription
+                        new E_Equals(
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_EXPR_VAR,
                                 graphExpr)));
     }
 
     private static E_LogicalOr createSubjectConditions(NodeValue subjectExpr) {
         return new E_LogicalOr(
                 new E_SameTerm(
-                        PublishSubscribeConstants.SS_SUBJECT_EXPR_VAR,
-                        subjectExpr), new E_Equals(
+                        PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_EXPR_VAR,
+                        subjectExpr),
+                new E_Equals(
                         new E_Datatype(
-                                PublishSubscribeConstants.SS_SUBJECT_EXPR_VAR),
-                        PublishSubscribeConstants.SS_VARIABLE_EXPR));
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_EXPR_VAR),
+                        PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
     }
 
     private static E_LogicalOr createPredicateConditions(NodeValue predicateExpr) {
         return new E_LogicalOr(
                 new E_SameTerm(
-                        PublishSubscribeConstants.SS_PREDICATE_EXPR_VAR,
+                        PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_EXPR_VAR,
                         predicateExpr),
                 new E_Equals(
                         new E_Datatype(
-                                PublishSubscribeConstants.SS_PREDICATE_EXPR_VAR),
-                        PublishSubscribeConstants.SS_VARIABLE_EXPR));
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_EXPR_VAR),
+                        PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
     }
 
     private static E_LogicalOr createObjectConditions(NodeValue objectExpr) {
         return new E_LogicalOr(
                 new E_SameTerm(
-                        PublishSubscribeConstants.SS_OBJECT_EXPR_VAR,
-                        objectExpr), new E_Equals(
+                        PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR,
+                        objectExpr),
+                new E_Equals(
                         new E_Datatype(
-                                PublishSubscribeConstants.SS_OBJECT_EXPR_VAR),
-                        PublishSubscribeConstants.SS_VARIABLE_EXPR));
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR),
+                        PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
     }
 
 }

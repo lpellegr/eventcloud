@@ -46,7 +46,6 @@ import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
 import com.hp.hpl.jena.sparql.expr.E_SameTerm;
 import com.hp.hpl.jena.sparql.expr.E_Str;
 import com.hp.hpl.jena.sparql.expr.E_StrStartsWith;
-import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
@@ -240,52 +239,57 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 PublishSubscribeConstants.SUBSCRIPTION_ID));
 
         // Conditions
-        NodeValue ssVariableExpr =
-                NodeValue.makeNode(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE);
-        ExprVar ssGraphExprVar =
-                new ExprVar(PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH);
         NodeValue graphExpr = NodeValue.makeNode(quad.getGraph());
 
         E_LogicalOr graphConditions =
                 new E_LogicalOr(
                         new E_StrStartsWith(
-                                new E_Str(ssGraphExprVar), graphExpr),
-                        new E_LogicalOr(new E_Equals(new E_Datatype(
-                                ssGraphExprVar), ssVariableExpr),
-                        // the following condition is here for finding
-                        // subscriptions which have been rewritten by using the
-                        // graph value (but not the meta graph value) associated
-                        // to the quadruple which is matching the subscription
-                                new E_Equals(ssGraphExprVar, graphExpr)));
+                                new E_Str(
+                                        PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_EXPR_VAR),
+                                graphExpr),
+                        new E_LogicalOr(
+                                new E_Equals(
+                                        new E_Datatype(
+                                                PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_EXPR_VAR),
+                                        PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR),
+                                // the following condition is here for finding
+                                // subscriptions which have been rewritten by
+                                // using the graph value (but not the meta graph
+                                // value) associated to the quadruple which is
+                                // matching the subscription
+                                new E_Equals(
+                                        PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_EXPR_VAR,
+                                        graphExpr)));
 
-        ExprVar ssSubjectExprVar =
-                new ExprVar(PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT);
         E_LogicalOr subjectConditions =
                 new E_LogicalOr(
                         new E_SameTerm(
-                                ssSubjectExprVar,
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_EXPR_VAR,
                                 NodeValue.makeNode(quad.getSubject())),
                         new E_Equals(
-                                new E_Datatype(ssSubjectExprVar),
-                                ssVariableExpr));
+                                new E_Datatype(
+                                        PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_EXPR_VAR),
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
 
-        ExprVar ssPredicateExprVar =
-                new ExprVar(PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE);
         E_LogicalOr predicateConditions =
-                new E_LogicalOr(new E_SameTerm(
-                        ssPredicateExprVar,
-                        NodeValue.makeNode(quad.getPredicate())), new E_Equals(
-                        new E_Datatype(ssPredicateExprVar), ssVariableExpr));
+                new E_LogicalOr(
+                        new E_SameTerm(
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_EXPR_VAR,
+                                NodeValue.makeNode(quad.getPredicate())),
+                        new E_Equals(
+                                new E_Datatype(
+                                        PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_EXPR_VAR),
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
 
-        ExprVar ssObjectExprVar =
-                new ExprVar(PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT);
         E_LogicalOr objectConditions =
                 new E_LogicalOr(
                         new E_SameTerm(
-                                ssObjectExprVar,
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR,
                                 NodeValue.makeNode(quad.getObject())),
                         new E_Equals(
-                                new E_Datatype(ssObjectExprVar), ssVariableExpr));
+                                new E_Datatype(
+                                        PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR),
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
 
         // Filter based on conditions
         Op filter =
