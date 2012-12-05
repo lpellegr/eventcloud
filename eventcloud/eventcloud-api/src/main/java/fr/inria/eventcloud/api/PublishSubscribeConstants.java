@@ -253,22 +253,22 @@ public final class PublishSubscribeConstants {
     public static final Var SUBSUBSCRIPTION_OBJECT = Var.alloc("i");
 
     /*
-     * Some constants used in PublishQuadrupleRequest
+     * Some constants encapsulated as ExprVar regarding variables allocation
      */
 
-    public static final ExprVar SS_GRAPH_EXPR_VAR = new ExprVar(
+    public static final ExprVar SUBSUBSCRIPTION_GRAPH_EXPR_VAR = new ExprVar(
             SUBSUBSCRIPTION_GRAPH);
 
-    public static final NodeValue SS_VARIABLE_EXPR =
+    public static final NodeValue SUBSUBSCRIPTION_VARIABLE_EXPR =
             NodeValue.makeNode(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE);
 
-    public static final ExprVar SS_SUBJECT_EXPR_VAR = new ExprVar(
+    public static final ExprVar SUBSUBSCRIPTION_SUBJECT_EXPR_VAR = new ExprVar(
             SUBSUBSCRIPTION_SUBJECT);
 
-    public static final ExprVar SS_PREDICATE_EXPR_VAR = new ExprVar(
-            SUBSUBSCRIPTION_PREDICATE);
+    public static final ExprVar SUBSUBSCRIPTION_PREDICATE_EXPR_VAR =
+            new ExprVar(SUBSUBSCRIPTION_PREDICATE);
 
-    public static final ExprVar SS_OBJECT_EXPR_VAR = new ExprVar(
+    public static final ExprVar SUBSUBSCRIPTION_OBJECT_EXPR_VAR = new ExprVar(
             SUBSUBSCRIPTION_OBJECT);
 
 }
