@@ -119,20 +119,20 @@ public class ProxyImpl implements Proxy {
      */
     @Override
     public Peer selectPeer() {
-        if (this.peerStubs.isEmpty()) {
-            List<Peer> newStubs = this.selectTracker().getPeers();
+        synchronized (this.peerStubs) {
+            if (this.peerStubs.isEmpty()) {
+                List<Peer> newStubs = this.selectTracker().getPeers();
 
-            if (newStubs.isEmpty()) {
-                return null;
-            }
+                if (newStubs.isEmpty()) {
+                    return null;
+                }
 
-            synchronized (this.peerStubs) {
                 this.peerStubs.clear();
                 this.peerStubs.addAll(newStubs);
             }
-        }
 
-        return this.peerStubs.get(RandomUtils.nextInt(this.peerStubs.size()));
+            return this.peerStubs.get(RandomUtils.nextInt(this.peerStubs.size()));
+        }
     }
 
     private Tracker selectTracker() {
