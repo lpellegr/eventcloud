@@ -16,17 +16,15 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
@@ -50,16 +48,13 @@ import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
-import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
-import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 
 /**
  * Publishes a quadruple into the network. The publish operation consists in
@@ -106,7 +101,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 semanticOverlay.getSubscriptionsDatastore().begin(
                         AccessMode.READ_ONLY);
 
-        Set<Subscription> subscriptionsMatching = new HashSet<Subscription>();
+        List<Subscription> subscriptionsMatching =
+                new ArrayList<Subscription>();
 
         QueryIterator it = null;
         try {
@@ -141,7 +137,25 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 // txnGraph variable to the
                 // PublishSubscribeUtils.rewriteSubscriptionOrNotifySender
                 // method. However this implies more contention).
-                subscriptionsMatching.add(subscription);
+
+                boolean mustIgnoreQuadrupleMatching =
+                        quadruple.getPublicationTime() < subscription.getIndexationTime();
+
+                // if s sent before q but q indexed before s then q must not be
+                // notified
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
+                            new Object[] {
+                                    subscription.getIndexationTime(),
+                                    quadruple.getPublicationTime(),
+                                    quadruple.getGraph(),
+                                    mustIgnoreQuadrupleMatching});
+                }
+
+                if (!mustIgnoreQuadrupleMatching) {
+                    subscriptionsMatching.add(subscription);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,48 +175,10 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         }
 
         // finds the ephemeral subscriptions that are resolved
-        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
-            txnGraph =
-                    semanticOverlay.getSubscriptionsDatastore().begin(
-                            AccessMode.READ_ONLY);
-
-            try {
-                QuadrupleIterator qit =
-                        txnGraph.find(new QuadruplePattern(
-                                metaGraphNode,
-                                null,
-                                PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
-                                null));
-
-                while (qit.hasNext()) {
-                    Quadruple q = qit.next();
-
-                    SubscriptionId subscriptionId =
-                            PublishSubscribeUtils.extractSubscriptionId(q.getSubject());
-
-                    String subscriberUrl = q.getObject().getURI();
-
-                    final QuadruplesNotification n =
-                            new QuadruplesNotification(
-                                    subscriptionId,
-                                    metaGraphNode,
-                                    PAActiveObject.getUrl(semanticOverlay.getStub()),
-                                    ImmutableList.of(quadruple));
-
-                    if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
-                            && semanticOverlay.markAsSent(n.getId(), quadruple)) {
-                        Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
-                                .receiveSbce1Or2(n);
-                    } else if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
-                        Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
-                                .receiveSbce1Or2(n);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                txnGraph.end();
-            }
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            PublishSubscribeUtils.findAndHandleEphemeralSubscriptions(
+                    semanticOverlay, quadruple, metaGraphNode);
         }
     }
 

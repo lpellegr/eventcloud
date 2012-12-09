@@ -134,16 +134,22 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         }
 
         for (Quadruple quadrupleMatching : quadruplesMatching) {
-            if (log.isDebugEnabled()
-                    && quadrupleMatching.getPublicationTime() != -1) {
+            boolean mustIgnoreQuadrupleMatching =
+                    quadrupleMatching.getPublicationTime() < subscription.getIndexationTime();
+
+            if (log.isDebugEnabled()) {
                 log.debug(
-                        "Comparing the timestamps between the quadruple and the subscription matching the quadruple:\n{}\n{}",
-                        quadrupleMatching, subscription);
+                        "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
+                        new Object[] {
+                                subscription.getIndexationTime(),
+                                quadrupleMatching.getPublicationTime(),
+                                quadrupleMatching.getGraph(),
+                                mustIgnoreQuadrupleMatching});
             }
 
-            // skips the quadruples which have been published before the
-            // subscription indexation time
-            if (quadrupleMatching.getPublicationTime() < subscription.getIndexationTime()) {
+            // if q sent before s but s indexed before q then q must not be
+            // notified
+            if (mustIgnoreQuadrupleMatching) {
                 continue;
             }
 
@@ -151,5 +157,4 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                     semanticOverlay, subscription, quadrupleMatching);
         }
     }
-
 }

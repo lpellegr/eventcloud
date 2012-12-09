@@ -113,7 +113,7 @@ public class SubscribeProxyTest {
      */
     @Test(timeout = 60000)
     public void testSubscribeWithConcurrentPublications()
-            throws EventCloudIdNotManaged {
+            throws EventCloudIdNotManaged, InterruptedException {
         final int NB_PRODUCERS = 10;
         final int NB_EVENTS_TO_WAIT = 100;
 
@@ -126,6 +126,15 @@ public class SubscribeProxyTest {
 
         final AtomicInteger nbEventsPublished = new AtomicInteger();
 
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
+        this.subscribeProxy.subscribe(
+                subscription, new CustomCompoundEventNotificationListener());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         // simulates producers publishing at different rates
         for (int i = 0; i < NB_PRODUCERS; i++) {
             final PublishApi publishProxy = publishProxies.get(i);
@@ -136,12 +145,14 @@ public class SubscribeProxyTest {
                 public void run() {
                     if (nbEventsPublished.incrementAndGet() <= NB_EVENTS_TO_WAIT) {
                         List<Quadruple> quadruples = new ArrayList<Quadruple>();
+
                         Node graphValue =
                                 Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
-                                        + "/" + UuidGenerator.randomUuid());
+                                        + UuidGenerator.randomUuid());
 
                         for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
-                            quadruples.add(QuadrupleGenerator.random(graphValue));
+                            Quadruple q = QuadrupleGenerator.random(graphValue);
+                            quadruples.add(q);
                         }
 
                         log.debug(
@@ -153,15 +164,6 @@ public class SubscribeProxyTest {
                 }
             }, 0, (i + 1) * 200, TimeUnit.MILLISECONDS);
         }
-
-        Subscription subscription =
-                new Subscription(
-                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
-
-        this.subscribeProxy.subscribe(
-                subscription, new CustomCompoundEventNotificationListener());
-
-        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         synchronized (events) {
             while (events.size() < NB_EVENTS_TO_WAIT) {
@@ -507,16 +509,15 @@ public class SubscribeProxyTest {
 
         long publicationTime = System.currentTimeMillis();
 
-        Quadruple metaQuadruple =
-                CompoundEvent.createMetaQuadruple(eventIdNode, 8);
-        metaQuadruple.setPublicationTime(publicationTime);
-        this.publishProxy.publish(metaQuadruple);
+        Quadruple quadruple = CompoundEvent.createMetaQuadruple(eventIdNode, 8);
+        quadruple.setPublicationTime(publicationTime);
+        this.publishProxy.publish(quadruple);
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            metaQuadruple = QuadrupleGenerator.random(eventIdNode);
-            metaQuadruple.setPublicationTime(publicationTime);
-            this.publishProxy.publish(metaQuadruple);
+            quadruple = QuadrupleGenerator.random(eventIdNode);
+            quadruple.setPublicationTime(publicationTime);
+            this.publishProxy.publish(quadruple);
         }
 
         // waits some time to simulate a network congestion
@@ -528,9 +529,9 @@ public class SubscribeProxyTest {
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            metaQuadruple = QuadrupleGenerator.random(eventIdNode);
-            metaQuadruple.setPublicationTime(publicationTime);
-            this.publishProxy.publish(metaQuadruple);
+            quadruple = QuadrupleGenerator.random(eventIdNode);
+            quadruple.setPublicationTime(publicationTime);
+            this.publishProxy.publish(quadruple);
         }
 
         synchronized (events) {
@@ -610,7 +611,8 @@ public class SubscribeProxyTest {
             }
         }
 
-        if (!EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             // wait for 2 garbage collection to ensure that outdated things are
             // removed
             Thread.sleep(EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue() * 2);
@@ -663,6 +665,7 @@ public class SubscribeProxyTest {
                 bindings.add(solution);
                 bindings.notifyAll();
             }
+
             log.info("New binding received:\n{}", solution);
         }
 
@@ -682,6 +685,7 @@ public class SubscribeProxyTest {
                 events.add(solution);
                 events.notifyAll();
             }
+
             log.info("New event received:\n{}", solution);
         }
     }
@@ -700,6 +704,7 @@ public class SubscribeProxyTest {
                 signals.add(1);
                 signals.notifyAll();
             }
+
             log.info("New signal received");
         }
     }

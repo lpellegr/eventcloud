@@ -62,8 +62,9 @@ public class QuadruplesSolution extends Solution<Collection<Quadruple>> {
                 this.nbQuadruplesExpected =
                         (Integer) quadruple.getObject().getLiteralValue();
             } else {
-                super.chunks.add(quadruple);
-                this.nbQuadruplesReceived++;
+                if (super.chunks.add(quadruple)) {
+                    this.nbQuadruplesReceived++;
+                }
             }
         }
     }

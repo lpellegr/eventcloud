@@ -376,10 +376,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         }
 
         // remove entries marked as delivered for the specified subscription
-        this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(
-                NOTIFICATIONS_DELIVERED_MAP_NAME)
-                .values()
-                .remove(id);
+        this.getNotificationsDeliveredMap().values().remove(id);
     }
 
     /**
@@ -470,19 +467,12 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @MemberOf("parallel")
     @SuppressWarnings("unchecked")
     public void receiveSbce1Or2(QuadruplesNotification notification) {
-        Node eventId = notification.getContent().get(0).getGraph();
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
-        if (this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(
-                NOTIFICATIONS_DELIVERED_MAP_NAME)
-                .containsKey(notification.getId())) {
-            log.warn(
-                    "Received some quadruple duplicates for a CE that has already been delivered:\n{}",
-                    notification);
-
-            super.selectPeer().sendv(
-                    new RemoveEphemeralSubscriptionRequest(
-                            eventId, notification.getSubscriptionId()));
+        if (this.getNotificationsDeliveredMap().containsKey(
+                notification.getId())) {
+            this.handleReceiveDuplicateSolution(notification);
+            return;
         }
 
         if (log.isDebugEnabled()) {
@@ -532,28 +522,38 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             // delivered. In such a case we have to ignore these duplicates and
             // send a RemoveEphemeralSubscription to avoid a memory leak
             if (this.markAsDelivered(notification.getId(), subscriptionId) != null) {
-                log.warn(
-                        "Received some quadruple duplicates for a CE that has already been delivered:\n{}",
-                        notification);
+                this.handleReceiveDuplicateSolution(notification);
+            } else {
+                CompoundEvent compoundEvent =
+                        new CompoundEvent(solution.getChunks());
+
+                this.deliver(
+                        (SubscriptionEntry<CompoundEventNotificationListener>) subscriptionEntry,
+                        compoundEvent.getGraph().getURI(), compoundEvent);
+
+                this.sendRemoveEphemeralSubscription(
+                        compoundEvent.getGraph(), subscriptionId);
                 this.quadruplesSolutions.remove(notification.getId());
-
-                super.selectPeer().sendv(
-                        new RemoveEphemeralSubscriptionRequest(
-                                eventId, subscriptionId));
             }
-
-            CompoundEvent compoundEvent =
-                    new CompoundEvent(solution.getChunks());
-
-            this.deliver(
-                    (SubscriptionEntry<CompoundEventNotificationListener>) subscriptionEntry,
-                    compoundEvent.getGraph().getURI(), compoundEvent);
-            this.quadruplesSolutions.remove(notification.getId());
-
-            super.selectPeer().sendv(
-                    new RemoveEphemeralSubscriptionRequest(
-                            compoundEvent.getGraph(), subscriptionId));
         }
+    }
+
+    private void handleReceiveDuplicateSolution(QuadruplesNotification notification) {
+        log.info(
+                "Received some quadruple duplicates for a CE that has already been delivered. They will be ignored:\n{}",
+                notification);
+
+        this.sendRemoveEphemeralSubscription(notification.getContent()
+                .get(0)
+                .getGraph(), notification.getSubscriptionId());
+
+        this.quadruplesSolutions.remove(notification.getId());
+    }
+
+    private void sendRemoveEphemeralSubscription(Node graph,
+                                                 SubscriptionId subscriptionId) {
+        super.selectPeer().sendv(
+                new RemoveEphemeralSubscriptionRequest(graph, subscriptionId));
     }
 
     /**
@@ -773,6 +773,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         }
     }
 
+    private ConcurrentMap<NotificationId, SubscriptionId> getNotificationsDeliveredMap() {
+        return this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(NOTIFICATIONS_DELIVERED_MAP_NAME);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -807,9 +811,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private SubscriptionId markAsDelivered(NotificationId notificationId,
                                            SubscriptionId subscriptionId) {
-        return this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(
-                NOTIFICATIONS_DELIVERED_MAP_NAME)
-                .putIfAbsent(notificationId, subscriptionId);
+        return this.getNotificationsDeliveredMap().putIfAbsent(
+                notificationId, subscriptionId);
     }
 
 }

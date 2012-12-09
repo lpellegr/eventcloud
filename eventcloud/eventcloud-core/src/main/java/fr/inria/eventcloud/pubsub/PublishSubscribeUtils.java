@@ -75,10 +75,12 @@ import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
@@ -597,27 +599,25 @@ public final class PublishSubscribeUtils {
                         subscriber.receiveSbce1Or2(new PollingSignalNotification(
                                 subscription.getOriginalId(),
                                 quadruple.createMetaGraphNode(), source));
-                    } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
+                    } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                            || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
                         QuadruplesNotification quadruplesNotification =
                                 new QuadruplesNotification(
                                         subscription.getOriginalId(),
                                         quadruple.createMetaGraphNode(),
                                         source, ImmutableList.of(quadruple));
 
-                        if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
-                                && semanticCanOverlay.markAsSent(
+                        if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
+                                || (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue() && semanticCanOverlay.markAsSent(
                                         quadruplesNotification.getId(),
-                                        quadruple)) {
+                                        quadruple))) {
                             subscriber.receiveSbce1Or2(quadruplesNotification);
-                        } else if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
-                            subscriber.receiveSbce1Or2(quadruplesNotification);
+                            semanticCanOverlay.getStub().sendv(
+                                    new IndexEphemeralSubscriptionRequest(
+                                            quadruple.createMetaGraphNode(),
+                                            subscription.getOriginalId(),
+                                            subscription.getSubscriberUrl()));
                         }
-
-                        semanticCanOverlay.getStub().sendv(
-                                new IndexEphemeralSubscriptionRequest(
-                                        quadruple.createMetaGraphNode(),
-                                        subscription.getOriginalId(),
-                                        subscription.getSubscriberUrl()));
                     }
                     break;
                 case SIGNAL:
@@ -793,6 +793,63 @@ public final class PublishSubscribeUtils {
         }
 
         overlay.dispatchv(new IndexSubscriptionRequest(rewrittenSubscription));
+    }
+
+    /**
+     * Finds the ephemeral subscriptions contained by the peer represented by
+     * the specified {@code overlay}. For each ephemeral that is verified the
+     * given {@code quadruple} is notified to the subscriber associated to the
+     * ephemeral subscription.
+     * 
+     * @param overlay
+     *            the overlay representing the peer where we have to check for
+     *            the ephemeral subscriptions.
+     * @param quadruple
+     *            the quadruple to notify when an ephemeral subscription is
+     *            verified.
+     * @param metaGraphNode
+     *            the meta graph node associated to the quadruple.
+     */
+    public static void findAndHandleEphemeralSubscriptions(SemanticCanOverlay overlay,
+                                                           final Quadruple quadruple,
+                                                           Node metaGraphNode) {
+        TransactionalDatasetGraph txnGraph =
+                overlay.getSubscriptionsDatastore().begin(AccessMode.READ_ONLY);
+
+        try {
+            QuadrupleIterator qit =
+                    txnGraph.find(new QuadruplePattern(
+                            metaGraphNode,
+                            null,
+                            PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                            null));
+
+            while (qit.hasNext()) {
+                Quadruple q = qit.next();
+
+                SubscriptionId subscriptionId =
+                        PublishSubscribeUtils.extractSubscriptionId(q.getSubject());
+
+                String subscriberUrl = q.getObject().getURI();
+
+                final QuadruplesNotification n =
+                        new QuadruplesNotification(
+                                subscriptionId, metaGraphNode,
+                                PAActiveObject.getUrl(overlay.getStub()),
+                                ImmutableList.of(quadruple));
+
+                if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
+                        || (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue() && overlay.markAsSent(
+                                n.getId(), quadruple))) {
+                    Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
+                            .receiveSbce1Or2(n);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
     }
 
     /**

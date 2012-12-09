@@ -162,7 +162,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
             Quadruple metaQuadruple =
                     CompoundEvent.createMetaQuadruple(compoundEvent);
             metaQuadruple.setPublicationTime(publicationTime);
-
             this.publish(metaQuadruple);
 
             for (Quadruple quad : compoundEvent) {
