@@ -131,6 +131,9 @@ public final class PublishSubscribeConstants {
     public static final String SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY =
             SUBSUBSCRIPTION_NS + "o";
 
+    public static final String SUBSUBSCRIPTION_VAR_NAMES_PROPERTY =
+            SUBSUBSCRIPTION_NS + "varnames";
+
     /*
      *  Nodes associated to the properties
      */
@@ -197,6 +200,9 @@ public final class PublishSubscribeConstants {
 
     public static final Node SUBSUBSCRIPTION_OBJECT_VALUE_NODE =
             Node.createURI(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY);
+
+    public static final Node SUBSUBSCRIPTION_VAR_NAMES_NODE =
+            Node.createURI(SUBSUBSCRIPTION_VAR_NAMES_PROPERTY);
 
     /*
      * Values
