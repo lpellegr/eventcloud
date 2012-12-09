@@ -31,12 +31,8 @@ import org.openjena.riot.tokens.TokenType;
 import org.openjena.riot.tokens.Tokenizer;
 import org.openjena.riot.tokens.TokenizerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableBiMap.Builder;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.SortCondition;
@@ -70,9 +66,11 @@ public final class AtomicQuery implements Serializable {
 
     private static final long serialVersionUID = 140L;
 
+    private static final char[] posNames = {'g', 's', 'p', 'o'};
+
     private transient Node nodes[];
 
-    private transient BiMap<String, Integer> vars;
+    private transient VarDetails[] varDetails;
 
     private transient Op opRepresentation;
 
@@ -108,21 +106,84 @@ public final class AtomicQuery implements Serializable {
     }
 
     public String getVarName(int index) {
-        return this.getVarDetails().inverse().get(index);
+        for (VarDetails varDetail : this.getVarDetails()) {
+            if (varDetail.index == index) {
+                return varDetail.name;
+            }
+        }
+
+        return null;
     }
 
-    public int getVarIndex(String varName) {
-        Integer result = this.getVarDetails().get(varName);
+    public String[] getVarNames() {
+        String[] result = new String[this.getVarDetails().length];
 
-        if (result == null) {
-            return -1;
+        for (int i = 0; i < result.length; i++) {
+            result[i] = this.getVarDetails()[i].name;
         }
 
         return result;
     }
 
+    public String getVarNamesAsString() {
+        StringBuilder buf = new StringBuilder();
+
+        for (int i = 0; i < this.getVarDetails().length; i++) {
+            buf.append(posNames[this.getVarDetails()[i].index]);
+            buf.append('=');
+            buf.append(this.getVarDetails()[i].name);
+
+            if (i < this.getVarDetails().length - 1) {
+                buf.append(',');
+            }
+        }
+
+        return buf.toString();
+    }
+
+    public static Node[] parseVarNamesFromString(String varNames) {
+        String[] tokens = varNames.split(",");
+
+        Node[] result = new Node[4];
+
+        for (int i = 0; i < tokens.length; i++) {
+            String posName = tokens[i].substring(0, 1);
+            Node var =
+                    Node.createVariable(tokens[i].substring(
+                            2, tokens[i].length()));
+
+            if (posName.equals("g")) {
+                result[0] = var;
+            } else if (posName.equals("s")) {
+                result[1] = var;
+            } else if (posName.equals("p")) {
+                result[2] = var;
+            } else if (posName.equals("o")) {
+                result[3] = var;
+            }
+        }
+
+        return result;
+    }
+
+    public int getVarIndex(String varName) {
+        for (VarDetails varDetail : this.getVarDetails()) {
+            if (varDetail.name.equals(varName)) {
+                return varDetail.index;
+            }
+        }
+
+        return -1;
+    }
+
     public boolean containsVariable(String varName) {
-        return this.getVarDetails().containsKey(varName);
+        for (VarDetails varDetail : this.getVarDetails()) {
+            if (varDetail.name.equals(varName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public synchronized Op getOpRepresentation() {
@@ -172,20 +233,29 @@ public final class AtomicQuery implements Serializable {
         }
     }
 
-    private synchronized BiMap<String, Integer> getVarDetails() {
-        if (this.vars == null) {
-            Builder<String, Integer> bimapBuilder = ImmutableBiMap.builder();
+    private synchronized VarDetails[] getVarDetails() {
+        if (this.varDetails == null) {
+            int nbVars = 0;
 
             for (int i = 0; i < this.nodes.length; i++) {
                 if (this.nodes[i].isVariable()) {
-                    bimapBuilder.put(this.nodes[i].getName(), i);
+                    nbVars++;
                 }
             }
 
-            this.vars = bimapBuilder.build();
+            this.varDetails = new VarDetails[nbVars];
+
+            int j = 0;
+            for (int i = 0; i < this.nodes.length; i++) {
+                if (this.nodes[i].isVariable()) {
+                    this.varDetails[j] =
+                            new VarDetails(this.nodes[i].getName(), i);
+                    j++;
+                }
+            }
         }
 
-        return this.vars;
+        return this.varDetails;
     }
 
     private static final Node replaceVarNodeByNodeAny(Node node) {
@@ -225,17 +295,17 @@ public final class AtomicQuery implements Serializable {
     }
 
     public List<Var> getVars() {
-        return FluentIterable.from(this.getVarDetails().keySet()).transform(
-                new Function<String, Var>() {
-                    @Override
-                    public Var apply(String varName) {
-                        return Var.alloc(varName);
-                    }
-                }).toImmutableList();
+        Builder<Var> result = new ImmutableList.Builder<Var>();
+
+        for (VarDetails varDetail : this.getVarDetails()) {
+            result.add(Var.alloc(varDetail.name));
+        }
+
+        return result.build();
     }
 
     public int getNbVars() {
-        return this.getVarDetails().size();
+        return this.getVarDetails().length;
     }
 
     public boolean isDistinct() {
@@ -400,6 +470,20 @@ public final class AtomicQuery implements Serializable {
         }
 
         outWriter.flush();
+    }
+
+    private static final class VarDetails {
+
+        public final String name;
+
+        public final int index;
+
+        public VarDetails(String name, int index) {
+            super();
+            this.name = name;
+            this.index = index;
+        }
+
     }
 
 }
