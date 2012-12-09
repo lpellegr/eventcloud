@@ -37,7 +37,6 @@ import com.hp.hpl.jena.sparql.algebra.optimize.Optimize;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.sparql.expr.E_Datatype;
 import com.hp.hpl.jena.sparql.expr.E_Equals;
 import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
@@ -225,8 +224,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 graphExpr),
                         new E_LogicalOr(
                                 new E_Equals(
-                                        new E_Datatype(
-                                                PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_EXPR_VAR),
+                                        PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_EXPR_VAR,
                                         PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR),
                                 // the following condition is here for finding
                                 // subscriptions which have been rewritten by
@@ -243,8 +241,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_EXPR_VAR,
                                 NodeValue.makeNode(quad.getSubject())),
                         new E_Equals(
-                                new E_Datatype(
-                                        PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_EXPR_VAR),
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_EXPR_VAR,
                                 PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
 
         E_LogicalOr predicateConditions =
@@ -253,8 +250,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_EXPR_VAR,
                                 NodeValue.makeNode(quad.getPredicate())),
                         new E_Equals(
-                                new E_Datatype(
-                                        PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_EXPR_VAR),
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_EXPR_VAR,
                                 PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
 
         E_LogicalOr objectConditions =
@@ -263,8 +259,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                 PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR,
                                 NodeValue.makeNode(quad.getObject())),
                         new E_Equals(
-                                new E_Datatype(
-                                        PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR),
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR,
                                 PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
 
         // Filter based on conditions
