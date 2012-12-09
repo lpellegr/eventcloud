@@ -183,6 +183,8 @@ public class PublishCompoundEventRequest extends QuadrupleRequest {
             Optimize.setFactory(Optimize.stdOptimizationFactory);
         }
 
+        PublishSubscribeUtils.findAndHandleEphemeralSubscriptions(
+                semanticOverlay, quadruple, metaGraphNode);
     }
 
     private static Op createAlgebraRetrievingSubscriptionsMatching(CompoundEvent compoundEvent) {

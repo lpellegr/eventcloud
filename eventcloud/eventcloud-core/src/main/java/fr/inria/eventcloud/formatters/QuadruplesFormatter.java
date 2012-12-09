@@ -64,6 +64,10 @@ public class QuadruplesFormatter {
         output(System.out, quadruples, showMetaGraphValue);
     }
 
+    public static void output(OutputStream out, Collection<Quadruple> quadruples) {
+        output(out, quadruples, false);
+    }
+
     public static void output(OutputStream out,
                               Collection<Quadruple> quadruples,
                               boolean showMetaGraphValue) {
@@ -128,6 +132,7 @@ public class QuadruplesFormatter {
 
         try {
             out.write(result.toString().getBytes());
+            out.write('\n');
         } catch (IOException e) {
             throw new IllegalArgumentException();
         }

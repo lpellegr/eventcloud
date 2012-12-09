@@ -73,6 +73,7 @@ import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
@@ -610,10 +611,10 @@ public class Subscription implements Quadruplable, Serializable {
                         id, null, id, System.currentTimeMillis(),
                         System.currentTimeMillis(),
                         "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o }}",
-                        "http://dummy.com", null,
+                        "subscriberURI", "destinationURI",
                         NotificationListenerType.BINDING);
 
-        System.out.println(subscription.toQuadruples());
+        QuadruplesFormatter.output(System.out, subscription.toQuadruples());
     }
 
 }
