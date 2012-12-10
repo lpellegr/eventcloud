@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
+import org.objectweb.proactive.extensions.webservices.WSConstants;
+
 import fr.inria.eventcloud.webservices.api.PublishWsnApi;
 import fr.inria.eventcloud.webservices.deployment.WsDeployer;
 
@@ -42,7 +44,7 @@ public final class PublishWsnServiceLauncher extends WsnServiceLauncher {
         return WsDeployer.deployPublishWsnService(
                 super.registryUrl,
                 super.eventCloudUrl,
-                "proactive/services/eventclouds/"
+                WSConstants.SERVICES_PATH + "eventclouds/"
                         + this.getTopicName(super.eventCloudUrl)
                         + "/wsn-service-" + this.numberId
                         + "_publish-webservices", this.port).getWsEndpointUrl();
