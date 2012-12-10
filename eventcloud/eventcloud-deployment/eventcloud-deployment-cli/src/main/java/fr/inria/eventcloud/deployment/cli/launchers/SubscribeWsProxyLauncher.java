@@ -42,9 +42,8 @@ public final class SubscribeWsProxyLauncher extends WsLauncher {
         return WsDeployer.deploySubscribeWsProxy(
                 super.registryUrl,
                 super.eventCloudUrl,
-                "proactive/services/eventclouds/"
-                        + this.getTopicName(super.eventCloudUrl) + "/ws-proxy-"
-                        + this.numberId).getWsEndpointUrl();
+                "eventclouds/" + this.getTopicName(super.eventCloudUrl)
+                        + "/ws-proxy-" + this.numberId).getWsEndpointUrl();
     }
 
 }
