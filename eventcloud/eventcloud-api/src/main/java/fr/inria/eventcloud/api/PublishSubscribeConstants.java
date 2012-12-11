@@ -232,49 +232,49 @@ public final class PublishSubscribeConstants {
      * Some constants regarding variables allocation
      */
 
-    public static final Var GRAPH = Var.alloc("g");
+    public static final Var GRAPH_VAR = Var.alloc("g");
 
     // sId
-    public static final Var SUBSCRIPTION_ID = Var.alloc("a");
+    public static final Var SUBSCRIPTION_ID_VAR = Var.alloc("a");
 
     // sSrc
-    public static final Var SUBSCRIPTION_SOURCE = Var.alloc("b");
+    public static final Var SUBSCRIPTION_SOURCE_VAR = Var.alloc("b");
 
     // ssId
-    public static final Var SUBSUBSCRIPTION_ID = Var.alloc("c");
+    public static final Var SUBSUBSCRIPTION_ID_VAR = Var.alloc("c");
 
     // ssSrc
-    public static final Var SUBSUBSCRIPTION_SOURCE = Var.alloc("d");
+    public static final Var SUBSUBSCRIPTION_SOURCE_VAR = Var.alloc("d");
 
     // ssGraph
-    public static final Var SUBSUBSCRIPTION_GRAPH = Var.alloc("e");
+    public static final Var SUBSUBSCRIPTION_GRAPH_VAR = Var.alloc("e");
 
     // ssSubject
-    public static final Var SUBSUBSCRIPTION_SUBJECT = Var.alloc("f");
+    public static final Var SUBSUBSCRIPTION_SUBJECT_VAR = Var.alloc("f");
 
     // ssPredicate
-    public static final Var SUBSUBSCRIPTION_PREDICATE = Var.alloc("h");
+    public static final Var SUBSUBSCRIPTION_PREDICATE_VAR = Var.alloc("h");
 
     // ssObject
-    public static final Var SUBSUBSCRIPTION_OBJECT = Var.alloc("i");
+    public static final Var SUBSUBSCRIPTION_OBJECT_VAR = Var.alloc("i");
 
     /*
      * Some constants encapsulated as ExprVar regarding variables allocation
      */
 
     public static final ExprVar SUBSUBSCRIPTION_GRAPH_EXPR_VAR = new ExprVar(
-            SUBSUBSCRIPTION_GRAPH);
+            SUBSUBSCRIPTION_GRAPH_VAR);
 
     public static final NodeValue SUBSUBSCRIPTION_VARIABLE_EXPR =
             NodeValue.makeNode(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE);
 
     public static final ExprVar SUBSUBSCRIPTION_SUBJECT_EXPR_VAR = new ExprVar(
-            SUBSUBSCRIPTION_SUBJECT);
+            SUBSUBSCRIPTION_SUBJECT_VAR);
 
     public static final ExprVar SUBSUBSCRIPTION_PREDICATE_EXPR_VAR =
-            new ExprVar(SUBSUBSCRIPTION_PREDICATE);
+            new ExprVar(SUBSUBSCRIPTION_PREDICATE_VAR);
 
     public static final ExprVar SUBSUBSCRIPTION_OBJECT_EXPR_VAR = new ExprVar(
-            SUBSUBSCRIPTION_OBJECT);
+            SUBSUBSCRIPTION_OBJECT_VAR);
 
 }
