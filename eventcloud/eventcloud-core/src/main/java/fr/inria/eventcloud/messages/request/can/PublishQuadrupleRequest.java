@@ -122,7 +122,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                 // executed
                 SubscriptionId subscriptionId =
                         SubscriptionId.parseSubscriptionId(binding.get(
-                                PublishSubscribeConstants.SUBSCRIPTION_ID)
+                                PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
                                 .getLiteralLexicalForm());
 
                 Subscription subscription =
@@ -185,33 +185,33 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
         // Basic Graph Pattern
         BasicPattern bp = new BasicPattern();
         bp.add(Triple.create(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE_VAR,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VALUE_NODE,
-                PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH));
+                PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VAR));
         bp.add(Triple.create(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE_VAR,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE,
-                PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT));
+                PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VAR));
         bp.add(Triple.create(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE_VAR,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_NODE,
-                PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE));
+                PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VAR));
         bp.add(Triple.create(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE_VAR,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VALUE_NODE,
-                PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT));
+                PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VAR));
         bp.add(Triple.create(
-                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE,
+                PublishSubscribeConstants.SUBSUBSCRIPTION_SOURCE_VAR,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_ID_NODE,
-                PublishSubscribeConstants.SUBSUBSCRIPTION_ID));
+                PublishSubscribeConstants.SUBSUBSCRIPTION_ID_VAR));
         bp.add(Triple.create(
-                PublishSubscribeConstants.SUBSCRIPTION_SOURCE,
+                PublishSubscribeConstants.SUBSCRIPTION_SOURCE_VAR,
                 PublishSubscribeConstants.SUBSCRIPTION_INDEXED_WITH_NODE,
-                PublishSubscribeConstants.SUBSUBSCRIPTION_ID));
+                PublishSubscribeConstants.SUBSUBSCRIPTION_ID_VAR));
         bp.add(Triple.create(
-                PublishSubscribeConstants.SUBSCRIPTION_SOURCE,
+                PublishSubscribeConstants.SUBSCRIPTION_SOURCE_VAR,
                 PublishSubscribeConstants.SUBSCRIPTION_ID_NODE,
-                PublishSubscribeConstants.SUBSCRIPTION_ID));
+                PublishSubscribeConstants.SUBSCRIPTION_ID_VAR));
 
         // Conditions
         NodeValue graphExpr = NodeValue.makeNode(quad.getGraph());
@@ -272,8 +272,8 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
 
         // Named Graph + Projection
         return new OpProject(
-                new OpGraph(PublishSubscribeConstants.GRAPH, filter),
-                Arrays.asList(PublishSubscribeConstants.SUBSCRIPTION_ID));
+                new OpGraph(PublishSubscribeConstants.GRAPH_VAR, filter),
+                Arrays.asList(PublishSubscribeConstants.SUBSCRIPTION_ID_VAR));
     }
 
 }

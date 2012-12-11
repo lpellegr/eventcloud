@@ -170,7 +170,7 @@ public final class PublishSubscribeUtils {
                                                                  SubscriptionId originalSubscriptionId) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT ");
-        query.append(PublishSubscribeConstants.SUBSCRIPTION_ID.toString());
+        query.append(PublishSubscribeConstants.SUBSCRIPTION_ID_VAR.toString());
         query.append(" WHERE {\n    GRAPH ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
         query.append(" {\n        ");
@@ -181,7 +181,7 @@ public final class PublishSubscribeUtils {
         query.append(" .\n        ?sIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
         query.append(' ');
-        query.append(PublishSubscribeConstants.SUBSCRIPTION_ID.toString());
+        query.append(PublishSubscribeConstants.SUBSCRIPTION_ID_VAR.toString());
         query.append(" .\n    }\n}");
 
         List<SubscriptionId> ids = new ArrayList<SubscriptionId>();
@@ -201,7 +201,7 @@ public final class PublishSubscribeUtils {
 
                 SubscriptionId subscriptionId =
                         SubscriptionId.parseSubscriptionId(binding.get(
-                                PublishSubscribeConstants.SUBSCRIPTION_ID)
+                                PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
                                 .getLiteralLexicalForm());
                 ids.add(subscriptionId);
             }
