@@ -67,9 +67,12 @@ public abstract class StatsRecorder implements Serializable {
                     public void run() {
                         StatsRecorder.this.quadrupleAddedComputeStats(
                                 g, s, p, o);
+                        StatsRecorder.this.nbQuads.incrementAndGet();
                     }
                 });
+
         this.futures.add(future);
+
         future.addListener(new Runnable() {
 
             @Override
@@ -77,8 +80,6 @@ public abstract class StatsRecorder implements Serializable {
                 StatsRecorder.this.futures.remove(future);
             }
         }, MoreExecutors.sameThreadExecutor());
-
-        this.nbQuads.incrementAndGet();
     }
 
     protected abstract void quadrupleAddedComputeStats(final Node g,
@@ -97,16 +98,17 @@ public abstract class StatsRecorder implements Serializable {
                                 g, s, p, o);
                     }
                 });
+
         this.futures.add(future);
+
         future.addListener(new Runnable() {
 
             @Override
             public void run() {
                 StatsRecorder.this.futures.remove(future);
+                StatsRecorder.this.nbQuads.decrementAndGet();
             }
         }, MoreExecutors.sameThreadExecutor());
-
-        this.nbQuads.decrementAndGet();
     }
 
     protected abstract void quadrupleRemovedComputeStats(Node g, Node s,
