@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -105,6 +106,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     private SetMultimap<NotificationId, HashCode> sentQuadrupleHashValues;
 
     private ScheduledExecutorService ephemeralSubscriptionsGarbageColletor;
+
+    // this cache is used to prevent compound events to be handled multi-times
+    // on a same peer
+    private Cache<Node, Boolean> alreadyHandledCompoundEvent;
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -188,7 +193,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                             EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue()));
         }
 
-        if (!EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             this.ephemeralSubscriptionsGarbageColletor =
                     Executors.newSingleThreadScheduledExecutor();
             this.ephemeralSubscriptionsGarbageColletor.scheduleWithFixedDelay(
@@ -205,6 +211,14 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                     EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
                     EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
                     TimeUnit.MILLISECONDS);
+        }
+
+        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.alreadyHandledCompoundEvent =
+                    CacheBuilder.newBuilder()
+                            .maximumSize(13000)
+                            .expireAfterWrite(10, TimeUnit.MINUTES)
+                            .build();
         }
     }
 
@@ -239,6 +253,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                 Node sId = s.get("sId").asNode();
                 solutions.add(new Node[] {graph, sId});
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             txnGraph.end();
         }
@@ -292,6 +308,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
             log.debug(msg.toString());
         }
+    }
+
+    public boolean markAsHandled(Node eventId) {
+        return this.alreadyHandledCompoundEvent.asMap().putIfAbsent(
+                eventId, Boolean.TRUE) == null;
     }
 
     public boolean markAsSent(NotificationId notificationId, Quadruple quadruple) {

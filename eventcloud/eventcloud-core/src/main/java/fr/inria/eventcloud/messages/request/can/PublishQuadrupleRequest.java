@@ -129,19 +129,9 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                         semanticOverlay.findSubscription(
                                 txnGraph, subscriptionId);
 
-                // We have to use an intermediate collection because nested
-                // transactions are currently not allowed (i.e. a write
-                // transaction inside a read) with Jena (or we have to force the
-                // overall transaction to be a write transaction and to pass the
-                // txnGraph variable to the
-                // PublishSubscribeUtils.rewriteSubscriptionOrNotifySender
-                // method. However this implies more contention).
-
                 boolean mustIgnoreQuadrupleMatching =
                         quadruple.getPublicationTime() < subscription.getIndexationTime();
 
-                // if s sent before q but q indexed before s then q must not be
-                // notified
                 if (log.isDebugEnabled()) {
                     log.debug(
                             "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
@@ -152,7 +142,16 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
                                     mustIgnoreQuadrupleMatching});
                 }
 
+                // if s sent before q but q indexed before s then q must not be
+                // notified
                 if (!mustIgnoreQuadrupleMatching) {
+                    // We have to use an intermediate collection because nested
+                    // transactions are currently not allowed (i.e. a write
+                    // transaction inside a read) with Jena (or we have to force
+                    // the overall transaction to be a write transaction and to
+                    // pass the txnGraph variable to the
+                    // PublishSubscribeUtils.rewriteSubscriptionOrNotifySender
+                    // method. However this implies more contention).
                     subscriptionsMatching.add(subscription);
                 }
             }
