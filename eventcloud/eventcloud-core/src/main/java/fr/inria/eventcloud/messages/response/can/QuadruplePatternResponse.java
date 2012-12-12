@@ -47,8 +47,10 @@ public class QuadruplePatternResponse extends
     public synchronized List<Quadruple> merge(List<SerializedValue<List<Quadruple>>> intermediateResults) {
         List<Quadruple> result = new ArrayList<Quadruple>();
 
-        for (SerializedValue<List<Quadruple>> intermediateResult : intermediateResults) {
-            result.addAll(intermediateResult.getValue());
+        synchronized (intermediateResults) {
+            for (SerializedValue<List<Quadruple>> intermediateResult : intermediateResults) {
+                result.addAll(intermediateResult.getValue());
+            }
         }
 
         return result;
