@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
@@ -80,12 +79,6 @@ public class CanRequestResponseManager extends RequestResponseManager {
      */
     public boolean receiveRequest(UUID requestId) {
         return this.requestsAlreadyReceived.add(requestId);
-    }
-
-    @Override
-    public void close() throws IOException {
-        // TODO Auto-generated method stub
-
     }
 
 }
