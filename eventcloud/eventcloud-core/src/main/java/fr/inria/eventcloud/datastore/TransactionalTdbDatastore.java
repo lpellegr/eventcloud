@@ -24,7 +24,6 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.tdb.StoreConnection;
@@ -101,8 +100,8 @@ public class TransactionalTdbDatastore extends Datastore {
     }
 
     private void registerPlugins() {
-        TypeMapper.getInstance().registerDatatype(
-                VariableDatatype.getInstance());
+        // TypeMapper.getInstance().registerDatatype(
+        // VariableDatatype.getInstance());
 
         FunctionRegistry.get().put(
                 WithoutPrefixFunction.URI, WithoutPrefixFunction.class);
