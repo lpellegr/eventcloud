@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
 
+import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
@@ -184,6 +185,16 @@ public abstract class StructuredOverlay implements DataHandler {
     @Override
     public Serializable removeDataIn(Object interval) {
         return null;
+    }
+
+    /**
+     * This method should be overridden to close resources after a peer has
+     * terminated its activity (i.e. when
+     * {@link ComponentEndActive#endComponentActivity(org.objectweb.proactive.Body)}
+     * is called).
+     */
+    public void close() {
+        // to be overridden if necessary
     }
 
 }

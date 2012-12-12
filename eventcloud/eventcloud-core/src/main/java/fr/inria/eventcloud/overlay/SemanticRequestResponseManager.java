@@ -286,8 +286,15 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      * {@inheritDoc}
      */
     @Override
-    public void close() throws IOException {
-        this.colander.close();
+    public void close() {
+        super.close();
+
+        try {
+            this.colander.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         this.threadPool.shutdown();
     }
 

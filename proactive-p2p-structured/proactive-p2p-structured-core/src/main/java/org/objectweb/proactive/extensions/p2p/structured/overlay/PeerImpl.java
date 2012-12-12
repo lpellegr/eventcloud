@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -137,11 +136,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     public void endComponentActivity(Body body) {
-        try {
-            this.overlay.getRequestResponseManager().close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.overlay.close();
     }
 
     @SuppressWarnings("unused")

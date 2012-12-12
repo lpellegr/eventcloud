@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.tracker;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import org.junit.Assert;
@@ -105,10 +104,6 @@ public class TrackerTest implements Serializable {
         public MockOverlay() {
             super(new RequestResponseManager() {
                 private static final long serialVersionUID = 140L;
-
-                @Override
-                public void close() throws IOException {
-                }
             });
         }
 

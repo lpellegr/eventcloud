@@ -16,13 +16,10 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
-import java.io.IOException;
-
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.can.StatelessQuadruplePatternResponse;
-import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
@@ -47,15 +44,7 @@ public class ShutdownRequest extends StatelessQuadruplePatternRequest {
     @Override
     public void onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
                                                QuadruplePattern quadruplePattern) {
-        // close the datastore associated to the peer
-        ((SemanticCanOverlay) overlay).getMiscDatastore().close();
-        ((SemanticCanOverlay) overlay).getSubscriptionsDatastore().close();
-
-        try {
-            overlay.getRequestResponseManager().close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        overlay.close();
     }
 
 }

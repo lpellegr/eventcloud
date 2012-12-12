@@ -965,6 +965,24 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() {
+        super.close();
+
+        this.messageManager.close();
+
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.ephemeralSubscriptionsGarbageColletor.shutdownNow();
+        }
+
+        this.miscDatastore.close();
+        this.subscriptionsDatastore.close();
+    }
+
     private static final class SubscriptionNotFoundException extends Exception {
 
         private static final long serialVersionUID = 1L;

@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -136,10 +135,6 @@ public class PeerTest {
         public CanMockOverlay() {
             super(new RequestResponseManager() {
                 private static final long serialVersionUID = 140L;
-
-                @Override
-                public void close() throws IOException {
-                }
             });
         }
 
