@@ -530,6 +530,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append(this.sentQuadrupleHashValues.size());
             result.append('\n');
         }
+
         // TransactionalDatasetGraph txnGraph =
         // this.miscDatastore.begin(AccessMode.READ_ONLY);
         //
@@ -620,13 +621,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     public void join(Peer landmarkPeer) {
-        // Stats are computed in background. Thus, to have an accurate or at
-        // least a not too bad estimation of the coordinate to use for splitting
-        // the zone we have to sync
-        if (this.miscDatastore.getStatsRecorder() != null) {
-            this.miscDatastore.getStatsRecorder().sync();
-        }
-
         super.join(landmarkPeer);
     }
 
@@ -635,13 +629,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     public JoinIntroduceResponseOperation<SemanticElement> handleJoinIntroduceMessage(JoinIntroduceOperation<SemanticElement> msg) {
-        // Stats are computed in background. Thus, to have an accurate or at
-        // least a not too bad estimation of the coordinate to use for splitting
-        // the zone we have to sync
-        if (this.miscDatastore.getStatsRecorder() != null) {
-            this.miscDatastore.getStatsRecorder().sync();
-        }
-
         return super.handleJoinIntroduceMessage(msg);
     }
 
@@ -944,6 +931,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             SemanticElement estimatedMiddle =
                     this.miscDatastore.getStatsRecorder()
                             .computeSplitEstimation(dimension);
+
+            // no estimation can performed because no quadruple has
+            // been recorded, thus we performe a traditional split
+            if (estimatedMiddle == null) {
+                return super.splitZones(dimension);
+            }
 
             try {
                 Coordinate<SemanticElement> lowerBoundCopy =

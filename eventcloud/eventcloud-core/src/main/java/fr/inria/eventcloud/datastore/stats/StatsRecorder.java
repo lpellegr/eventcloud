@@ -96,17 +96,16 @@ public abstract class StatsRecorder implements Serializable {
                     public void run() {
                         StatsRecorder.this.quadrupleRemovedComputeStats(
                                 g, s, p, o);
+                        StatsRecorder.this.nbQuads.decrementAndGet();
                     }
                 });
 
         this.futures.add(future);
 
         future.addListener(new Runnable() {
-
             @Override
             public void run() {
                 StatsRecorder.this.futures.remove(future);
-                StatsRecorder.this.nbQuads.decrementAndGet();
             }
         }, MoreExecutors.sameThreadExecutor());
     }
@@ -124,6 +123,11 @@ public abstract class StatsRecorder implements Serializable {
 
     public SemanticElement computeSplitEstimation(byte dimension) {
         Apfloat estimatedSplitValue = null;
+
+        if (this.nbQuads.get() == 0) {
+            // no quadruple has been recorded, no estimation can be computed
+            return null;
+        }
 
         switch (dimension) {
             case 0:
