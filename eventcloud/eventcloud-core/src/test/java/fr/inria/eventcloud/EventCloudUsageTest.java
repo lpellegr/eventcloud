@@ -236,27 +236,6 @@ public class EventCloudUsageTest implements Serializable {
             }
         }
 
-        // try {
-        // deployer.getRandomSemanticPeer(eventCloudId).send(
-        // new StatelessQuadruplePatternRequest(QuadruplePattern.ANY) {
-        //
-        // private static final long serialVersionUID = 140L;
-        //
-        // @Override
-        // public void onPeerValidatingKeyConstraints(CanOverlay overlay,
-        // QuadruplePattern quadruplePattern) {
-        // System.err.println("$A$A$ Peer " + overlay
-        // + " contains:");
-        // for (Quadruple quad : ((SynchronizedJenaDatasetGraph)
-        // overlay.getDatastore()).find(QuadruplePattern.ANY)) {
-        // log.debug(quad.toString());
-        // }
-        // }
-        // });
-        // } catch (DispatchException e) {
-        // e.printStackTrace();
-        // }
-
         // Unsubscribes. Once this step is done no notification related to the
         // subscription must be received.
         subscribeProxy.unsubscribe(subscription.getId());
