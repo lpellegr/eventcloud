@@ -28,6 +28,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.objectweb.proactive.core.util.MutableInteger;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -62,6 +63,7 @@ import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.runners.EachPublishSubscribeAlgorithm;
 
 /**
  * Tests cases for operations in {@link SubscribeProxy} and {@link PublishProxy}
@@ -69,6 +71,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * 
  * @author lpellegr
  */
+@RunWith(EachPublishSubscribeAlgorithm.class)
 public class SubscribeProxyTest {
 
     private static final Logger log =

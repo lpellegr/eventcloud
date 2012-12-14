@@ -21,6 +21,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
+import fr.inria.eventcloud.runners.EachPublishSubscribeAlgorithm;
 import fr.inria.eventcloud.webservices.WsTest;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
@@ -50,6 +52,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
  * @author bsauvan
  * @author lpellegr
  */
+@RunWith(EachPublishSubscribeAlgorithm.class)
 public class PubSubTest extends WsTest {
 
     private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
