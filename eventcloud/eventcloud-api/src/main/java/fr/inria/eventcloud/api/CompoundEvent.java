@@ -16,6 +16,10 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +29,8 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+
+import fr.inria.eventcloud.utils.NodeSerializer;
 
 /**
  * A compound event is a collection of {@link Quadruple}s such that each
@@ -38,17 +44,16 @@ import com.hp.hpl.jena.graph.Triple;
  * 
  * @author lpellegr
  */
-public class CompoundEvent implements Event, Iterable<Quadruple> {
+public class CompoundEvent implements Event, Externalizable,
+        Iterable<Quadruple> {
 
     private static final long serialVersionUID = 140L;
 
     // this internal list does not contain the meta quadruple
     // it is automatically added during a publish operation from a proxy
-    private final List<Quadruple> quadruples;
+    private List<Quadruple> quadruples;
 
     private transient List<Triple> triples;
-
-    private transient Node graph;
 
     /**
      * Creates a new compound event from the specified list of quadruples. No
@@ -82,7 +87,10 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
         } else {
             this.quadruples = ImmutableList.copyOf(quadruples);
         }
+    }
 
+    public CompoundEvent() {
+        // do nothing
     }
 
     private static final void checkDataStructureSize(int size) {
@@ -130,12 +138,8 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
      * @return the graph value which is assumed to be the same for each
      *         quadruple that is contained by the compound event.
      */
-    public synchronized Node getGraph() {
-        if (this.graph == null) {
-            this.graph = this.quadruples.get(0).getGraph();
-        }
-
-        return this.graph;
+    public Node getGraph() {
+        return this.quadruples.get(0).getGraph();
     }
 
     /**
@@ -291,6 +295,84 @@ public class CompoundEvent implements Event, Iterable<Quadruple> {
         }
 
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        int nbQuads = this.quadruples.size();
+
+        // writes the meta graph value
+        NodeSerializer.writeUri(out, this.quadruples.get(0)
+                .createMetaGraphNode());
+
+        // writes the number of quadruples contained by the CE
+        out.writeInt(nbQuads);
+
+        StringBuilder buffer = new StringBuilder();
+        // prepare to write subject and predicate values
+        for (int i = 1; i < 3; i++) {
+            this.appendRdfTerms(buffer, i);
+
+            if (i == 1) {
+                buffer.append(' ');
+            }
+        }
+
+        // TODO: the serialization could be improved by using compression or
+        // common terms aggregation. However, these methods will increase the
+        // serialization time. When such changes will be performed, they have to
+        // be evaluated accurately
+
+        // writes the subject and predicate values of each quadruple
+        NodeSerializer.writeString(out, buffer.toString());
+
+        // writes the object values
+        for (int i = 0; i < nbQuads; i++) {
+            NodeSerializer.writeLiteralOrUri(out, this.quadruples.get(i)
+                    .getObject());
+        }
+    }
+
+    private void appendRdfTerms(StringBuilder buffer, int rdfTermsIndex) {
+        for (int i = 0; i < this.quadruples.size(); i++) {
+            buffer.append(this.quadruples.get(i)
+                    .getTermByIndex(rdfTermsIndex)
+                    .getURI());
+
+            if (i < this.quadruples.size() - 1) {
+                buffer.append(' ');
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void readExternal(ObjectInput in) throws IOException,
+            ClassNotFoundException {
+        Node metaGraphNode = NodeSerializer.readUri(in);
+
+        int nbQuads = in.readInt();
+
+        String subjectPredicateString = NodeSerializer.readString(in);
+        String[] subjectPredicateValues = subjectPredicateString.split(" ");
+
+        Builder<Quadruple> quadruples = new ImmutableList.Builder<Quadruple>();
+
+        for (int i = 0; i < nbQuads; i++) {
+            Node object = NodeSerializer.readLiteralOrUri(in);
+
+            quadruples.add(new Quadruple(
+                    metaGraphNode, Node.createURI(subjectPredicateValues[i]),
+                    Node.createURI(subjectPredicateValues[i + nbQuads]),
+                    object, false, true));
+        }
+
+        this.quadruples = quadruples.build();
     }
 
 }

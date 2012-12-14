@@ -72,7 +72,6 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 .getQuadruplePattern(), null);
 
         this.subscription = SerializedValue.create(subscription);
-
     }
 
     /**
