@@ -23,6 +23,8 @@ import java.io.ObjectOutput;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Variable;
 
+import fr.inria.eventcloud.utils.NodeSerializer;
+
 /**
  * A QuadruplePattern is {@link Quadruple} where each component value may be
  * either a regular value (the same as a Quadruple) or a variable. A variable is
@@ -127,7 +129,7 @@ public class QuadruplePattern extends Quadruple {
         }
 
         if (isObjectSet) {
-            super.writeObject(out);
+            NodeSerializer.writeLiteralOrUri(out, super.nodes[3]);
         }
     }
 
@@ -165,7 +167,7 @@ public class QuadruplePattern extends Quadruple {
         }
 
         if (isObjectSet) {
-            super.readObject(in);
+            super.nodes[3] = NodeSerializer.readLiteralOrUri(in);
         }
     }
 
