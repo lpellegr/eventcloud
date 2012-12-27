@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.Precision;
@@ -284,7 +285,7 @@ public class StaticLoadBalancingTestBuilder {
                         stopwatch.toString(),
                         StaticLoadBalancingTestBuilder.this.nbQuadsToInsert);
 
-                this.executionTime = stopwatch.elapsedMillis();
+                this.executionTime = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 
                 if (StaticLoadBalancingTestBuilder.this.nbPeersToInject > 0) {
                     log.info("Before join, first peer dump:\n"

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
@@ -260,7 +261,7 @@ public class PubSubBenchmarkBSBM {
                 new Object[] {
                         this.receiveExpectedEventsStopwatch,
                         this.expectedNbEvents,
-                        ((this.expectedNbEvents * 10e2) / this.receiveExpectedEventsStopwatch.elapsedMillis()),
+                        ((this.expectedNbEvents * 10e2) / this.receiveExpectedEventsStopwatch.elapsed(TimeUnit.MILLISECONDS)),
                         this.nbPeers, this.nbPublishers, this.nbSubscribers,
                         this.notificationListenerType.getSimpleName()});
 

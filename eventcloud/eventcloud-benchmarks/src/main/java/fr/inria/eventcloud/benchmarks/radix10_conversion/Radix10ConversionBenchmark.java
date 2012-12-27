@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
@@ -172,7 +173,7 @@ public class Radix10ConversionBenchmark {
             System.out.println("Time to perform radix 10 conversion for " + i
                     + " with precision set to " + run.getPrecision() + " is "
                     + stopwatch.toString() + " --> "
-                    + stopwatch.elapsedMillis() + " ms");
+                    + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
             System.out.println();
         } catch (FileNotFoundException e) {
             e.printStackTrace();

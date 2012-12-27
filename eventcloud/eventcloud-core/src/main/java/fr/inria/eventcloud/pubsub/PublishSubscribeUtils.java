@@ -439,7 +439,7 @@ public final class PublishSubscribeUtils {
                                        AtomicQuery atomicQuery) {
         Set<Var> vars =
                 Sets.intersection(resultVars, FluentIterable.from(
-                        atomicQuery.getVars()).toImmutableSet());
+                        atomicQuery.getVars()).toSet());
         BindingMap binding = new BindingMap();
         Node[] quadNodes = quad.toArray();
 

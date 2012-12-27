@@ -54,7 +54,7 @@ public class SparqlReasoner {
                                     return new SparqlAtomicRequest(input);
                                 };
                             })
-                            .toImmutableList();
+                            .toList();
 
             return sparqlAtomicRequests;
         } catch (DecompositionException e) {
