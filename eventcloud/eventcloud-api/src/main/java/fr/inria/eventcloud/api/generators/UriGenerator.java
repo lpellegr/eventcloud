@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.api.generators;
 
 import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 
 /**
  * Provides static methods to generate random Uniform Resource Identifiers
@@ -35,11 +34,11 @@ public class UriGenerator extends Generator {
             StringGenerator.ALPHABETIC_UPPERCASE_RANGE,
             StringGenerator.NUMERIC_RANGE,
             // - and . characters
-            Ranges.closed('\u002D', '\u002E'),
+            Range.closed('\u002D', '\u002E'),
             // _ character
-            Ranges.closed('\u005F', '\u005F'),
+            Range.closed('\u005F', '\u005F'),
             // ~ character
-            Ranges.closed('\u007E', '\u007E')};
+            Range.closed('\u007E', '\u007E')};
 
     /**
      * Creates a random URI with the specified schemeName and whose length for

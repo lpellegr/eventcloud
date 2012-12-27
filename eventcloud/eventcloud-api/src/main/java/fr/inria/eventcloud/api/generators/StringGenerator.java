@@ -20,7 +20,6 @@ import java.util.Random;
 
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 
 /**
  * Utility class that defines some convenient methods to create random Strings.
@@ -30,25 +29,25 @@ import com.google.common.collect.Ranges;
 public final class StringGenerator extends Generator {
 
     public static final Range<Character> ALPHABETIC_LOWERCASE_RANGE =
-            Ranges.closed('\u0061', '\u007A');
+            Range.closed('\u0061', '\u007A');
 
     public static final Range<Character> ALPHABETIC_UPPERCASE_RANGE =
-            Ranges.closed('\u0041', '\u005A');
+            Range.closed('\u0041', '\u005A');
 
-    public static final Range<Character> NUMERIC_RANGE = Ranges.closed(
+    public static final Range<Character> NUMERIC_RANGE = Range.closed(
             '\u0030', '\u0039');
 
     @SuppressWarnings("unchecked")
     public static final Range<Character>[] BMP_RANGES =
-            new Range[] {Ranges.closed('\u0000', '\uFFFF')};
+            new Range[] {Range.closed('\u0000', '\uFFFF')};
 
     @SuppressWarnings("unchecked")
     public static final Range<Character>[] ASCII_RANGES =
-            new Range[] {Ranges.closed('\u0000', '\u007E')};
+            new Range[] {Range.closed('\u0000', '\u007E')};
 
     @SuppressWarnings("unchecked")
     public static final Range<Character>[] PRINTABLE_ASCII_RANGES =
-            new Range[] {Ranges.closed('\u0020', '\u007E')};
+            new Range[] {Range.closed('\u0020', '\u007E')};
 
     @SuppressWarnings("unchecked")
     public static final Range<Character>[] ALPHABETIC_RANGES = new Range[] {

@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.objectweb.proactive.core.ProActiveException;
@@ -256,7 +257,8 @@ public class PublishSubscribeBenchmark {
 
         deployer.undeploy();
 
-        long result = this.receiveExpectedEventsStopwatch.elapsedMillis();
+        long result =
+                this.receiveExpectedEventsStopwatch.elapsed(TimeUnit.MILLISECONDS);
 
         this.receiveExpectedEventsStopwatch.reset();
 
