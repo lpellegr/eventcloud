@@ -76,7 +76,7 @@ public class MicroBenchmark {
                 if (this.discardFirstRun && i == 0) {
                     System.out.println(" (ignored)");
                 } else {
-                    System.out.println();
+                    System.out.println(" (" + executionTime + ")");
                 }
             }
         }
