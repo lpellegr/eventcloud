@@ -935,21 +935,11 @@ public final class PublishSubscribeUtils {
                         || graph.getURI().startsWith(
                                 quadruple.getGraph().getURI());
         boolean subjectVerified =
-                subjectIsVar
-                        || subject.getURI().equals(
-                                quadruple.getSubject().getURI());
+                subjectIsVar || subject.equals(quadruple.getSubject());
         boolean predicateVerified =
-                predicateIsVar
-                        || predicate.getURI().equals(
-                                quadruple.getPredicate().getURI());
+                predicateIsVar || predicate.equals(quadruple.getPredicate());
         boolean objectVerified =
-                objectIsVar
-                        || (object.isURI()
-                                ? object.getURI().equals(
-                                        quadruple.getObject().getURI())
-                                : object.getLiteral().equals(
-                                        quadruple.getObject()
-                                                .getLiteralLexicalForm()));
+                objectIsVar || object.equals(quadruple.getObject());
 
         if (graphVerified && subjectVerified && predicateVerified
                 && objectVerified) {
