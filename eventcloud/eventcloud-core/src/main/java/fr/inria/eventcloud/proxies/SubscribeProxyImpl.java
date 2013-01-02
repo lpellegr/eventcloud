@@ -543,9 +543,11 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                 "Received some quadruple duplicates for a CE that has already been delivered. They will be ignored:\n{}",
                 notification);
 
-        this.sendRemoveEphemeralSubscription(notification.getContent()
-                .get(0)
-                .getGraph(), notification.getSubscriptionId());
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.sendRemoveEphemeralSubscription(notification.getContent().get(
+                    0).getGraph(), notification.getSubscriptionId());
+        }
 
         this.quadruplesSolutions.remove(notification.getId());
     }
