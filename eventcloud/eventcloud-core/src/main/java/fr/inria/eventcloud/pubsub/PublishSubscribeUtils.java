@@ -596,7 +596,7 @@ public final class PublishSubscribeUtils {
                     break;
                 case COMPOUND_EVENT:
                     if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
-                        subscriber.receiveSbce1Or2(new PollingSignalNotification(
+                        subscriber.receiveSbce1(new PollingSignalNotification(
                                 subscription.getOriginalId(),
                                 quadruple.createMetaGraphNode(), source));
                     } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
@@ -611,7 +611,7 @@ public final class PublishSubscribeUtils {
                                 || (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue() && semanticCanOverlay.markAsSent(
                                         quadruplesNotification.getId(),
                                         quadruple))) {
-                            subscriber.receiveSbce1Or2(quadruplesNotification);
+                            subscriber.receiveSbce2(quadruplesNotification);
                             semanticCanOverlay.getStub().sendv(
                                     new IndexEphemeralSubscriptionRequest(
                                             quadruple.createMetaGraphNode(),
@@ -842,7 +842,7 @@ public final class PublishSubscribeUtils {
                         || (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue() && overlay.markAsSent(
                                 n.getId(), quadruple))) {
                     Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
-                            .receiveSbce1Or2(n);
+                            .receiveSbce2(n);
                 }
             }
         } catch (Exception e) {

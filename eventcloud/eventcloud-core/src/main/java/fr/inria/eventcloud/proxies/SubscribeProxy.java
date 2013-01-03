@@ -128,7 +128,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce1Or2(QuadruplesNotification notification);
+    public void receiveSbce2(QuadruplesNotification notification);
 
     /**
      * Used internally to send back a {@link CompoundEvent} with SBCE3.
@@ -161,6 +161,6 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce1Or2(PollingSignalNotification notification);
+    public void receiveSbce1(PollingSignalNotification notification);
 
 }
