@@ -466,7 +466,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @Override
     @MemberOf("parallel")
     @SuppressWarnings("unchecked")
-    public void receiveSbce1Or2(QuadruplesNotification notification) {
+    public void receiveSbce2(QuadruplesNotification notification) {
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
         if (this.getNotificationsDeliveredMap().containsKey(
@@ -543,11 +543,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                 "Received some quadruple duplicates for a CE that has already been delivered. They will be ignored:\n{}",
                 notification);
 
-        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
-                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-            this.sendRemoveEphemeralSubscription(notification.getContent().get(
-                    0).getGraph(), notification.getSubscriptionId());
-        }
+        this.sendRemoveEphemeralSubscription(notification.getContent()
+                .get(0)
+                .getGraph(), notification.getSubscriptionId());
 
         this.quadruplesSolutions.remove(notification.getId());
     }
@@ -623,15 +621,15 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     }
 
     /**
-     * This method is invoked remotely by a peer when algorithm SBCE1 or SBCE2
-     * is used and when a solution matching a subscription is found for a
-     * subscriber that has registered a subscription along with a
+     * This method is invoked remotely by a peer when algorithm SBCE1 is used
+     * and when a solution matching a subscription is found for a subscriber
+     * that has registered a subscription along with a
      * {@link CompoundEventNotificationListener}.
      */
     @Override
     @MemberOf("parallel")
     @SuppressWarnings("unchecked")
-    public void receiveSbce1Or2(PollingSignalNotification notification) {
+    public void receiveSbce1(PollingSignalNotification notification) {
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
         CompoundEvent compoundEvent =
