@@ -95,7 +95,7 @@ public class NotificationId implements Serializable {
     public static final class Serializer implements
             org.mapdb.Serializer<NotificationId>, Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         /**
          * {@inheritDoc}

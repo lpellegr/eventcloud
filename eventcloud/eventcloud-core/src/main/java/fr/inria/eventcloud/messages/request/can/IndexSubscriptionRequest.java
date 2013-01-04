@@ -39,13 +39,13 @@ import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.Subsubscription;
 
 /**
- * Request used to index a subscription that have been rewritten after the
+ * Request used to index a subscription or a rewritten subscription after the
  * publication of a quadruple. While the rewritten subscription is indexed, it
  * is possible to have received some quadruples that match the rewritten
  * subscription. That's why an algorithm similar to the one from
- * {@link PublishQuadrupleRequest} is used to rewrite the rewritten subscription
- * for the quadruples that match it. This type of request is used for SBCE1 and
- * SBCE2.
+ * {@link PublishQuadrupleRequest} is applied to rewrite the subscription for
+ * each quadruple that matches it. This type of request is used for SBCE1, SBCE2
+ * and SBCE3.
  * 
  * @see PublishQuadrupleRequest
  * 
@@ -156,4 +156,5 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                     semanticOverlay, subscription, quadrupleMatching);
         }
     }
+
 }
