@@ -327,7 +327,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             + internalSubscription.getId());
         }
 
-        super.selectPeer().indexSubscription(internalSubscription);
+        super.selectPeer().subscribe(internalSubscription);
 
         log.info(
                 "New subscription has been registered from {} with id {}",
@@ -376,6 +376,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         }
 
         // remove entries marked as delivered for the specified subscription
+        // TODO: the call to values() is really not efficient because it will
+        // iterate on all the entries to remove the correct ones. A better
+        // solution, such as a hashmultimap backed on disk should be found.
         this.getNotificationsDeliveredMap().values().remove(id);
     }
 

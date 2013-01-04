@@ -53,6 +53,6 @@ public interface SemanticPeer extends Peer, PutGetApi {
      * @param subscription
      *            the subscription to index.
      */
-    public void indexSubscription(Subscription subscription);
+    public void subscribe(Subscription subscription);
 
 }

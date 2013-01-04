@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  */
 public abstract class CallableOperation implements Operation {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Handles the operation by using the specified {@code overlay}
@@ -69,7 +69,7 @@ public abstract class CallableOperation implements Operation {
     public boolean isCompatible(CallableOperation op) {
         /* Truth table
         /* ----------------------
-        /* First request   Second Request   Compatible?
+        /* First request   Second request   Compatible?
         /* isJoinOrLeave   !isJoinOrLeave   no
         /* isJoinOrLeave   isJoinOrLeave    no
         /* !isJoinOrLeave  !isJoinOrLeave   yes

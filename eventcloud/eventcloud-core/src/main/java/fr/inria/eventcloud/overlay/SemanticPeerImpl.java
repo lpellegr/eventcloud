@@ -183,7 +183,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     @MemberOf("parallel")
-    public void indexSubscription(Subscription subscription) {
+    public void subscribe(Subscription subscription) {
         subscription.setIndexationTime();
 
         super.sendv(new IndexSubscriptionRequest(subscription));

@@ -60,16 +60,17 @@ import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
 
 /**
- * Publishes a quadruple into the network. The publish operation consists in
- * storing the quadruple which is published on the peer managing the constraints
- * constituted by the quadruple. After that, an algorithm is triggered to detect
- * whether some subscriptions are matched or not.
+ * Publishes a full CompoundEvent into the network. The publish operation
+ * consists in storing only one quadruple from the CE which is published, the
+ * quadruple that is used to route the request. After that, an algorithm is
+ * triggered by using the full CE to detect whether some subscriptions are
+ * matched or not. This request is used by SBCE3.
  * 
  * @author lpellegr
  */
 public class PublishCompoundEventRequest extends QuadrupleRequest {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(PublishCompoundEventRequest.class);
