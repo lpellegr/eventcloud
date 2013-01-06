@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.mapdb.HTreeMap;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
@@ -355,15 +356,15 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // once the subscription id is removed from the list of the
         // subscriptions which are matched, the notifications which are received
         // for this subscription are ignored
-        SubscriptionEntry<?> entry = this.subscriptions.remove(id);
+        SubscriptionEntry<?> subscriptionEntry = this.subscriptions.remove(id);
 
-        if (entry == null) {
+        if (subscriptionEntry == null) {
             throw new IllegalArgumentException(
                     "No subscription registered with the specified subscription id: "
                             + id);
         }
 
-        Subscription subscription = entry.subscription;
+        Subscription subscription = subscriptionEntry.subscription;
 
         // updates the network to stop sending notifications
         for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
@@ -376,10 +377,16 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         }
 
         // remove entries marked as delivered for the specified subscription
-        // TODO: the call to values() is really not efficient because it will
+        // TODO: the following method is really not efficient because it will
         // iterate on all the entries to remove the correct ones. A better
         // solution, such as a hashmultimap backed on disk should be found.
-        this.getNotificationsDeliveredMap().values().remove(id);
+        for (java.util.Map.Entry<NotificationId, SubscriptionId> entry : this.getNotificationsDeliveredMap()
+                .snapshot()
+                .entrySet()) {
+            if (entry.getValue().equals(id)) {
+                this.getNotificationsDeliveredMap().remove(entry.getKey());
+            }
+        }
     }
 
     /**
@@ -776,7 +783,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         }
     }
 
-    private ConcurrentMap<NotificationId, SubscriptionId> getNotificationsDeliveredMap() {
+    private HTreeMap<NotificationId, SubscriptionId> getNotificationsDeliveredMap() {
         return this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(NOTIFICATIONS_DELIVERED_MAP_NAME);
     }
 
