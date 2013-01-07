@@ -1,11 +1,16 @@
 package org.objectweb.proactive.extensions.p2p.structured.logger;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
@@ -19,32 +24,42 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  * duplicate messages in the broadcast request routing.
  * 
  * @author acraciun
+ * 
  */
 public class JobLogger {
 
 	private static Hashtable<String, Logger> m_loggers = new Hashtable<String, Logger>();
-	private static Set<String> hostnames = new HashSet<String>();
 
-	public static final int NB_PEERS = 20;
-	public static final String DIRECTORY = "/user/jrochas/home/Documents/jrochas/tmp/logs/";
-	public static final String PREFIX = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() + "D_" + NB_PEERS + "P_";
-	public static final boolean BCAST_DEBUG_MODE = true ;	
+	// These values have to be set in a test that uses the JobLogger
+	private static int nbPeers = 0;
+	public static final String logDirectory = "/user/jrochas/home/Documents/jrochas/tmp/logs/";	
+	public static final boolean bcastDebugMode = true ;
+	public static String PREFIX;	
+
 	public static final String RETURN = System.getProperty("line.separator");
 	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
 
+	/**
+	 * Retrieves a job logger with the given name.
+	 * @param jobName
+	 * @return
+	 */
 	private static synchronized Logger getJobLogger(String jobName) {
 		Logger logger = m_loggers.get(jobName);
 		if (logger == null) {
-			Layout layout = new PatternLayout("%m ");
+			Layout layout = new PatternLayout("%m");
 			logger = Logger.getLogger(jobName);
 			m_loggers.put(jobName, logger);
 			logger.setLevel(Level.INFO);
 			try {
-				File file = new File(DIRECTORY);
+				File file = new File(logDirectory);
 				file.mkdirs();
-				file = new File(DIRECTORY + jobName);
+				UUID id = UUID.randomUUID();
+				file = new File(logDirectory + jobName + id.toString() + ".log");
 				FileAppender appender = new FileAppender(layout,
 						file.getAbsolutePath(), false);
+				appender.setImmediateFlush(true);
+				appender.activateOptions();
 				logger.removeAllAppenders();
 				logger.addAppender(appender);
 			} catch (Exception e) {
@@ -54,36 +69,92 @@ public class JobLogger {
 		}
 		return logger;
 	}
+	
+	/**
+	 * Sets the number of peers currently in the network (useful for file names)
+	 * @param newNbPeers
+	 */
+	public static void setNbPeers(int newNbPeers) {
+		nbPeers = newNbPeers;
+		PREFIX  = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() + "D_" + nbPeers + "P_";
+	}
 
+	/**
+	 * Logs an exception.
+	 * @param jobName
+	 * @param e
+	 */
 	public static synchronized void logException(String jobName, Exception e) {
 		Logger l = getJobLogger(jobName);
 		l.info(e.getMessage(), e);
 	}
 
+	/**
+	 * Logs a message.
+	 * @param jobName
+	 * @param message
+	 */
 	public static synchronized void logMessage(String jobName, String message) {
 		Logger l = getJobLogger(jobName);
 		l.info(message);
 	}
-	
-	public static synchronized int logResults(String loggerName, int nbPeers, String filename) {
-		LogReader reader = new LogReader(JobLogger.DIRECTORY + filename);
+
+	/**
+	 * Logs the results of a broadcast execution.
+	 * @param loggerName
+	 * @param nbPeers
+	 * @param filename
+	 * @param runNumber
+	 * @param id
+	 * @return
+	 */
+	public static synchronized int logResults(String loggerName, int nbPeers, String filename, String runNumber, String id) {
+		LogReader reader = new LogReader(logDirectory + filename);
 		reader.setAttributes(loggerName, nbPeers);
-        int nbPeersReached = reader.scanNprintResults();
-        return nbPeersReached;
-	}
-	
-	public static synchronized void recordTime(String filename) {
-		Date startingTime = new Date();
-		String timestamp = DATE_FORMAT.format(startingTime);
-    	JobLogger.logMessage(filename, timestamp);
-	}
-	
-	public static synchronized void appendHostVisited(String hostname) {
-		hostnames.add(hostname);
-	}
-	
-	public static synchronized Set<String> retrieveHostsVisited() {
-		return hostnames;
+		int nbPeersReached = reader.scanNprintResults(loggerName, runNumber, id);
+		return nbPeersReached;
 	}
 
+	/** 
+	 * Timestamps the beginning of a broadcast execution.
+	 * @param name
+	 * @param id
+	 */
+	public static synchronized void recordTime(String name, UUID id) {
+		Date startingDate = new Date();
+		String timestamp = DATE_FORMAT.format(startingDate);
+		try {
+			BufferedWriter logFile = new BufferedWriter(
+					new FileWriter(logDirectory + id.toString() + PREFIX + name + ".logs"));
+			logFile.write(timestamp);
+			logFile.newLine();
+			logFile.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Lists the hosts where the broadcast was received.
+	 * @param name
+	 * @param id
+	 * @return
+	 */
+	public static synchronized Set<String> retrieveHostsVisited(String name, String id) {
+		HashSet<String> hostnames = new HashSet<String>();
+		File directory = new File(logDirectory);
+		String[] files = directory.list();
+		for (String file : files) {
+			try {
+				FileReader f = new FileReader(JobLogger.logDirectory + file);
+				f.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}	
+			if (file.endsWith(".log") && file.contains(name) && file.contains(id)) { 
+				hostnames.add(file);
+			}
+		}
+		return hostnames;
+	}
 }

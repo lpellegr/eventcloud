@@ -91,10 +91,9 @@ extends Router<AnycastRequest<E>, Coordinate<E>> {
 				(CanRequestResponseManager) canOverlay.getRequestResponseManager();
 		// retrieves the hostname for debugging purpose
 		String hostname = "";
-		if (JobLogger.BCAST_DEBUG_MODE) {
+		if (JobLogger.bcastDebugMode) {
 			try {
 				hostname = InetAddress.getLocalHost().getHostName() ;
-				JobLogger.appendHostVisited(hostname);
 			} catch (UnknownHostException e) {
 				logger.error("Cannot log broadcast algorithm : " + 
 						"hostname couldn't be retrieved");
@@ -106,11 +105,11 @@ extends Router<AnycastRequest<E>, Coordinate<E>> {
 			logger.debug(
 					"Request {} reached peer {} which has already received it",
 					request.getId(), canOverlay.getZone().toString());
-			if (JobLogger.BCAST_DEBUG_MODE) {
+			if (JobLogger.bcastDebugMode) {
 				Date receiveTime = new Date();
 				String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
-				JobLogger.logMessage(
-						"FloodingBroadcast_" + hostname + ".log", 
+				JobLogger.logMessage(request.getId().toString() + "_" +
+						"FloodingBroadcast_" + hostname, 
 						"1 " + timestamp + JobLogger.RETURN);
 			}
 			if (request.getResponseProvider() != null) {
@@ -123,11 +122,11 @@ extends Router<AnycastRequest<E>, Coordinate<E>> {
 								request, overlay));
 			}
 		} else {
-			if (JobLogger.BCAST_DEBUG_MODE) {
+			if (JobLogger.bcastDebugMode) {
 				Date receiveTime = new Date();
 				String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
-				JobLogger.logMessage(
-						"FloodingBroadcast_" + hostname + ".log", 
+				JobLogger.logMessage(request.getId().toString() + "_" +
+						"FloodingBroadcast_" + hostname, 
 						"0 " + timestamp + JobLogger.RETURN);
 			}
 			// the current overlay validates the constraints
