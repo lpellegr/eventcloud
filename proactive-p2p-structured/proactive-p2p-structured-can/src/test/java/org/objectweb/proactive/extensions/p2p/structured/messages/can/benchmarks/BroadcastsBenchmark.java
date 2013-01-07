@@ -21,34 +21,51 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmark
  * can be used when a message needs to be disseminated
  * accross all peers (i.e. with no particular constraints).
  * 
+ * If parameters are given to the main, it sets these parameters :
+ * <ol>
+ * <li> The number of peers in the network </li>
+ * <li> The directory where the logs are going to be written </li>
+ * </ol>
+ * Otherwise, the default parameters are going to be used.
+ * 
  * @author jrochas
  */
 public class BroadcastsBenchmark {
+	
+	private static int nbPeers = 25;
+	private static String logDirectory = "/user/jrochas/home/Documents/jrochas/tmp/logs/";
 
 	public static void main (String[] args) throws InterruptedException {
-
+		
+		if (args.length > 0) {
+			nbPeers = Integer.parseInt(args[0]);
+			if (args.length > 1) {
+				logDirectory = args[1];
+			}
+		}
+		
 		try {
 			// Running an EfficientBroadcast
-			FloodingBroadcast floodingBcast = new FloodingBroadcast();
-			floodingBcast.setUp();
+			FloodingBroadcast floodingBcast = new FloodingBroadcast(nbPeers, logDirectory);
+			floodingBcast.initialize();
 			floodingBcast.measureFloodingBroadcast();
-			floodingBcast.tearDown();
+			floodingBcast.terminate();
 
 			Thread.sleep(2000);
 			
 			// Running an EfficientBroadcast
-			EfficientBroadcast efficientBcast = new EfficientBroadcast();
-			efficientBcast.setUp();
+			EfficientBroadcast efficientBcast = new EfficientBroadcast(nbPeers, logDirectory);
+			efficientBcast.initialize();
 			efficientBcast.measureEfficientBroadcast();
-			efficientBcast.tearDown();
+			efficientBcast.terminate();
 			
 			Thread.sleep(2000);
 			
 			// Running an OptimalBroadcast
-			OptimalBroadcast optimalBcast = new OptimalBroadcast();
-			optimalBcast.setUp();
+			OptimalBroadcast optimalBcast = new OptimalBroadcast(nbPeers, logDirectory);
+			optimalBcast.initialize();
 			optimalBcast.measureOptimalBroadcast();
-			optimalBcast.tearDown();
+			optimalBcast.terminate();
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();

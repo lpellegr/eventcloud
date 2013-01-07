@@ -95,10 +95,9 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 				(CanRequestResponseManager) canOverlay.getRequestResponseManager();
 		// retrieves the hostname for debugging purpose
 		String hostname = "";
-		if (JobLogger.BCAST_DEBUG_MODE) {
+		if (JobLogger.bcastDebugMode) {
 			try {
 				hostname = InetAddress.getLocalHost().getHostName() ;
-				JobLogger.appendHostVisited(hostname);
 			} catch (UnknownHostException e) {
 				logger.error("Cannot log broadcast algorithm : " + 
 						"hostname couldn't be retrieved");
@@ -110,11 +109,11 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 			logger.debug(
 					"Request {} reached peer {} which has already received it",
 					request.getId(), canOverlay.getZone().toString());
-			if (JobLogger.BCAST_DEBUG_MODE) {
+			if (JobLogger.bcastDebugMode) {
 				Date receiveTime = new Date();
 				String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
-				JobLogger.logMessage(
-						"EfficientBroadcast_" + hostname + ".log", 
+				JobLogger.logMessage(request.getId().toString() + "_" +
+						"EfficientBroadcast_" + hostname, 
 						"1 " + timestamp + JobLogger.RETURN);
 			}
 			if (request.getResponseProvider() != null) {
@@ -126,11 +125,11 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 						request, overlay));
 			}
 		} else {
-			if (JobLogger.BCAST_DEBUG_MODE) {
+			if (JobLogger.bcastDebugMode) {
 				Date receiveTime = new Date();
 				String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
-				JobLogger.logMessage(
-						"EfficientBroadcast_" + hostname + ".log", 
+				JobLogger.logMessage(request.getId().toString() + "_" +
+						"EfficientBroadcast_" + hostname, 
 						"0 " + timestamp + JobLogger.RETURN);
 			}
 			// the current overlay validates the constraints
@@ -294,25 +293,6 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 						// by the plane array.
 						for (byte coordinate = 0; coordinate < P2PStructuredProperties.CAN_NB_DIMENSIONS
 								.getValue(); coordinate++) {
-							// If plane has the null value on a certain
-							// dimension( that is not the dimension on which the
-							// sender and peer are neighbors) then in order for
-							// the neighbor to receive the broadcast message its
-							// zone has to verify a certain inequality: the	
-							// sender's lower bound coordinate on the given
-							// dimension has to be smaller or equal to the
-							// neighbor's lower bound coordinate on the same
-							// dimension.
-							/* ORIGINAL CODE
-							 * if (plane[coordinate] == null
-									&& coordinate != dimension) {
-								if (contains(overlay.getZone(), neighbor
-										.getNeighborEntry().getZone(),
-										coordinate) == false) {
-									contains = false;
-								}
-							}*/
-
 							// MCAN Strategy : If the dimension considered is lower than the 
 							// dimension of the reception, then check the corner constraint
 							// to determine whether the message must be sent to this neighbor.
@@ -323,18 +303,7 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 									contains = false;
 								}
 							}
-							// If the plan has on a certain dimension a value
-							// that is not null, then in order for the peer to
-							// receive the broadcast message it has to contain
-							// that value in its zone (on the given dimension).
-							/* ORIGINAL CODE
-							 * else if (containsCoordinate(neighbor
-									.getNeighborEntry().getZone(),
-									plane[coordinate], coordinate) == false) {
-								contains = false;
-							}*/
 						}
-
 						// If the neighbor validates all the above constraints
 						// it will receive the broadcast request.
 						if (contains == true) {

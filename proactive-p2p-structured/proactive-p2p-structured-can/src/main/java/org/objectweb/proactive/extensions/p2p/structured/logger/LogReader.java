@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Utility class that provides some metrics
@@ -17,6 +18,8 @@ import java.util.List;
  *
  */
 public class LogReader {
+	
+	public static final String separator = "\t";
 
 	private String filePath;
 	private String loggerName;
@@ -34,28 +37,26 @@ public class LogReader {
 	/**
 	 * Read the log file and count how many duplicated the broadcast generated
 	 */
-	public int scanNprintResults() {
-		Date startingDate = null; 
+	public int scanNprintResults(String name, String runNumber, String id) {
+		Date startingDate = null;
 		int nbDuplicates = 0;
 		int nbPeersReached = 0;
 		List<Date> firstReceptionTimestamps = new LinkedList<Date>();
 		List<Date> receptionTimestamps = new LinkedList<Date>();
-		appendAllLogs();
+		appendAllLogs(name, id);
 		try {
 			String line;
 			Date receptionDate;
 			Date firstReceptionDate;
-			BufferedReader buff = new BufferedReader(new FileReader(this.filePath));
-			// The first line is the timestamp of the broadcast starting
-			line = buff.readLine();
-			if (line != null) { 
-				try {
-					startingDate = JobLogger.DATE_FORMAT.parse(line);
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-			}
+			BufferedReader buff = new BufferedReader(new FileReader(this.filePath + ".logs"));
 			try {
+				if ((line = buff.readLine()) != null) {
+					try {
+						startingDate = JobLogger.DATE_FORMAT.parse(line);
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+				}
 				// The other lines contain the metrics
 				while ((line = buff.readLine()) != null) {
 					try {
@@ -117,51 +118,79 @@ public class LogReader {
 		// Deducing the broadcast delays
 		long receptionDelay = maxFirstReceptionDate.getTime() - startingDate.getTime();
 		long waveDelay = maxReceptionDate.getTime() - startingDate.getTime();
-		System.out.println("Broadcast algorithm used : \t\t\t\t" + this.loggerName);
-		System.out.println("Number of peers in the network : \t\t\t" + this.nbPeers); 
-		System.out.println("Number of peers reached by the broadcast : \t\t" + nbPeersReached);
-		System.out.println("Number of duplicates listed : \t\t\t\t" + nbDuplicates);
-		System.out.println("Time needed to reach all the peers (ms) : \t\t" + receptionDelay);
-		System.out.println("Time needed for the broadcast wave to die (ms) : \t" + waveDelay);
+		logRunData(nbDuplicates, nbPeersReached, receptionDelay, waveDelay, runNumber);
 		return nbPeersReached;
 	}
 
 	/**
 	 * Gather all the logs produced by each machine reached by the broadcast.
 	 */
-	public void appendAllLogs() {
+	private void appendAllLogs(String name, String id) {
 		BufferedReader source = null;
 		BufferedWriter destination = null;
 		String[] path = this.filePath.split("/");
-		String simpleFileName = path[path.length - 1].substring(JobLogger.PREFIX.length(), path[path.length - 1].length() - ".log".length()) + "_";
 		StringBuilder completeFileName = new StringBuilder();
 		for (int i = 0 ; i < path.length - 1 ; i++) {
 			completeFileName.append(path[i]);
 			completeFileName.append("/");
 		}
-		completeFileName.append(simpleFileName);
-		for (String hostname : JobLogger.retrieveHostsVisited()) {
-			try {
-				String line;
-				source = new BufferedReader(new FileReader(completeFileName + hostname + ".log"));
-				destination = new BufferedWriter(new FileWriter(this.filePath, true));
-				destination.newLine();
-				try {
-					while ((line = source.readLine()) != null) {
-						if (line != null) { 
+		Set<String> hostnames = JobLogger.retrieveHostsVisited(name, id);
+		try {
+
+			for (String hostname : hostnames) {
+				if (hostname != null && hostname != "" && hostname != " ") {
+					String line;
+					source = new BufferedReader(new FileReader(completeFileName + hostname));
+					destination = new BufferedWriter(new FileWriter(this.filePath + ".logs", true));
+					try {
+						line = source.readLine();
+						while (line != null) { 
 							destination.write(line);
 							destination.newLine();
+							line = source.readLine();
 						}
 					}
-				}
-				finally {
-					source.close();
-					destination.close();
+					finally {
+						source.close();
+						destination.close();
+					}
 				}
 			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Writes the extracted metrics in a file.
+	 * @param nbDuplicates
+	 * @param nbPeersReached
+	 * @param receptionDelay
+	 * @param waveDelay
+	 * @param runNumber
+	 */
+	private void logRunData(int nbDuplicates, int nbPeersReached,
+			long receptionDelay, long waveDelay, String runNumber) {
+		try {
+			BufferedWriter dataWriter = new BufferedWriter(new FileWriter(JobLogger.logDirectory + JobLogger.PREFIX + this.loggerName + "_" + runNumber + ".data"));
+			dataWriter.write("peers" +  separator + nbPeersReached);
+			dataWriter.newLine();
+			dataWriter.write("duplicates" + separator + nbDuplicates);
+			dataWriter.newLine();
+			dataWriter.write("reception" + separator + receptionDelay);
+			dataWriter.newLine();
+			dataWriter.write("wave" + separator + waveDelay);
+			dataWriter.newLine();
+			dataWriter.close();
+			System.out.println("Broadcast algorithm used : \t\t\t\t" + this.loggerName);
+			System.out.println("Number of peers in the network : \t\t\t" + this.nbPeers); 
+			System.out.println("Number of peers reached by the broadcast : \t\t" + nbPeersReached);
+			System.out.println("Number of duplicates listed : \t\t\t\t" + nbDuplicates);
+			System.out.println("Time needed to reach all the peers (ms) : \t\t" + receptionDelay);
+			System.out.println("Time needed for the broadcast wave to die (ms) : \t" + waveDelay);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

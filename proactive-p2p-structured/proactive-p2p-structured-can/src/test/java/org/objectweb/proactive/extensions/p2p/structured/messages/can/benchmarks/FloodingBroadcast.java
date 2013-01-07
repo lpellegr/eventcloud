@@ -16,22 +16,15 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmarks;
 
-import java.io.IOException;
-
 import org.junit.Assert;
-import org.junit.Test;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
-import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
+
 
 /**
  * This class is suppose to provide measurements of the dissemination of
@@ -42,45 +35,23 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
  * 
  * @author jrochas
  */
-public class FloodingBroadcast extends JunitByClassCanNetworkDeployer {
+public class FloodingBroadcast extends AbstractBroadcast {
 
-    private static final String LOG_FILENAME = JobLogger.PREFIX + "FloodingBroadcast.log";
+    private static final String LOG_FILENAME = "FloodingBroadcast";
 
-    private Proxy proxy;
-
-    public FloodingBroadcast() {
-        super(new CanDeploymentDescriptor<StringElement>(
-                        new SerializableProvider<StringCanOverlay>() {
-                            private static final long serialVersionUID = 130L;
-
-                            @Override
-                            public StringCanOverlay get() {
-                                return new StringCanOverlay();
-                            }
-                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider()),
-                1, JobLogger.NB_PEERS);
+    public FloodingBroadcast(int nbPeers, String logDirectory) {
+        super(nbPeers, logDirectory);
     }
     
-    public void setProxy(Proxy proxy) {
-		this.proxy = proxy;
-	}
-
-    @Override
-    public void setUp() {
-        super.setUp();
-        this.proxy = Proxies.newProxy(super.getRandomTracker()); 
-    }
-
-    @Test
     public void measureFloodingBroadcast() throws InterruptedException {
     	
-    	// Timestamp the beginning of the broadcast
-    	JobLogger.recordTime(LOG_FILENAME);
-    	
     	// Sending the broadcast via an AnycastRequest (= flood)
-        this.proxy.sendv(new AnycastRequest<StringElement>(
+    	Request<Coordinate<StringElement>> request = new AnycastRequest<StringElement>(
 				new DefaultAnycastConstraintsValidator<StringElement>(
-						CoordinateFactory.newStringCoordinate())));
+						CoordinateFactory.newStringCoordinate()));
+    	// Timestamp the beginning of the broadcast
+    	JobLogger.recordTime("FloodingBroadcast", request.getId());
+        this.proxy.sendv(request);
 
         // The previous call is asynchronous, so
      	// it is preferable to wait a little bit
@@ -89,19 +60,9 @@ public class FloodingBroadcast extends JunitByClassCanNetworkDeployer {
         // This is going to log all the interesting metrics for a benchmark
      	// in the LOG_FILENAME at the root of the logs directory (see JobLogger)
         int nbPeerReached = JobLogger.logResults(this.getClass().getSimpleName(), 
-        		JobLogger.NB_PEERS, LOG_FILENAME);
+        		this.nbPeers, request.getId().toString() + JobLogger.PREFIX + LOG_FILENAME, "1", "");
         
         // Checking the correctness of the run
-     	Assert.assertEquals(JobLogger.NB_PEERS, nbPeerReached);
-    }
-
-    @Override
-    public void tearDown() {
-        super.tearDown();
-        try {
-            this.proxy.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } 
+     	Assert.assertEquals(this.nbPeers, nbPeerReached);
     }
 }
