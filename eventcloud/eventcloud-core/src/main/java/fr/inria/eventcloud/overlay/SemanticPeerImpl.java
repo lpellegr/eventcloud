@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.overlay;
@@ -58,6 +58,7 @@ import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
@@ -84,7 +85,7 @@ import fr.inria.eventcloud.utils.Callback;
 public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(SemanticPeerImpl.class);
@@ -140,16 +141,40 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     @MemberOf("parallel")
-    public void publish(CompoundEvent event) {
+    public void publish(CompoundEvent compoundEvent) {
         long publicationTime = System.currentTimeMillis();
 
-        Quadruple metaQuadruple = CompoundEvent.createMetaQuadruple(event);
-        metaQuadruple.setPublicationTime(publicationTime);
-        this.publish(metaQuadruple);
+        // SBCE3
+        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            // the timestamp must be set to all the quadruples before to send
+            // the full CE to each peer managing one of the quadruples contained
+            // by the compound event
+            for (Quadruple q : compoundEvent) {
+                q.setPublicationTime(publicationTime);
+            }
 
-        for (Quadruple quad : event) {
-            quad.setPublicationTime(publicationTime);
-            this.publish(quad);
+            for (Quadruple q : compoundEvent) {
+                // sends the whole compound event
+                super.sendv(new PublishCompoundEventRequest(compoundEvent, q));
+            }
+
+            // the meta quadruple is necessary when we use the fallback scheme
+            // (SBCE2)
+            Quadruple metaQuadruple =
+                    CompoundEvent.createMetaQuadruple(compoundEvent);
+            metaQuadruple.setPublicationTime(publicationTime);
+            this.publish(metaQuadruple);
+        } else {
+            // SBCE1 or SBCE2
+            Quadruple metaQuadruple =
+                    CompoundEvent.createMetaQuadruple(compoundEvent);
+            metaQuadruple.setPublicationTime(publicationTime);
+            this.publish(metaQuadruple);
+
+            for (Quadruple quad : compoundEvent) {
+                quad.setPublicationTime(publicationTime);
+                this.publish(quad);
+            }
         }
     }
 
@@ -158,7 +183,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     @MemberOf("parallel")
-    public void indexSubscription(Subscription subscription) {
+    public void subscribe(Subscription subscription) {
         subscription.setIndexationTime();
 
         super.sendv(new IndexSubscriptionRequest(subscription));

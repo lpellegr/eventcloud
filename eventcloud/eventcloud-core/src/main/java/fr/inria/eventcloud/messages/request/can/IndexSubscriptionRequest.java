@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.messages.request.can;
@@ -39,13 +39,13 @@ import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.Subsubscription;
 
 /**
- * Request used to index a subscription that have been rewritten after the
+ * Request used to index a subscription or a rewritten subscription after the
  * publication of a quadruple. While the rewritten subscription is indexed, it
  * is possible to have received some quadruples that match the rewritten
  * subscription. That's why an algorithm similar to the one from
- * {@link PublishQuadrupleRequest} is used to rewrite the rewritten subscription
- * for the quadruples that match it. This type of request is used for SBCE1 and
- * SBCE2.
+ * {@link PublishQuadrupleRequest} is applied to rewrite the subscription for
+ * each quadruple that matches it. This type of request is used for SBCE1, SBCE2
+ * and SBCE3.
  * 
  * @see PublishQuadrupleRequest
  * 
@@ -53,7 +53,7 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  */
 public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(IndexSubscriptionRequest.class);
@@ -72,7 +72,6 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 .getQuadruplePattern(), null);
 
         this.subscription = SerializedValue.create(subscription);
-
     }
 
     /**
@@ -134,16 +133,22 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         }
 
         for (Quadruple quadrupleMatching : quadruplesMatching) {
-            if (log.isDebugEnabled()
-                    && quadrupleMatching.getPublicationTime() != -1) {
+            boolean mustIgnoreQuadrupleMatching =
+                    quadrupleMatching.getPublicationTime() < subscription.getIndexationTime();
+
+            if (log.isDebugEnabled()) {
                 log.debug(
-                        "Comparing the timestamps between the quadruple and the subscription matching the quadruple:\n{}\n{}",
-                        quadrupleMatching, subscription);
+                        "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
+                        new Object[] {
+                                subscription.getIndexationTime(),
+                                quadrupleMatching.getPublicationTime(),
+                                quadrupleMatching.getGraph(),
+                                mustIgnoreQuadrupleMatching});
             }
 
-            // skips the quadruples which have been published before the
-            // subscription indexation time
-            if (quadrupleMatching.getPublicationTime() < subscription.getIndexationTime()) {
+            // if q sent before s but s indexed before q then q must not be
+            // notified
+            if (mustIgnoreQuadrupleMatching) {
                 continue;
             }
 

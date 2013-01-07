@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.benchmarks;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
@@ -53,6 +54,7 @@ import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
+import fr.inria.eventcloud.benchmarks.pubsub.CompoundEventSupplier;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
@@ -259,7 +261,7 @@ public class PubSubBenchmarkBSBM {
                 new Object[] {
                         this.receiveExpectedEventsStopwatch,
                         this.expectedNbEvents,
-                        ((this.expectedNbEvents * 10e2) / this.receiveExpectedEventsStopwatch.elapsedMillis()),
+                        ((this.expectedNbEvents * 10e2) / this.receiveExpectedEventsStopwatch.elapsed(TimeUnit.MILLISECONDS)),
                         this.nbPeers, this.nbPublishers, this.nbSubscribers,
                         this.notificationListenerType.getSimpleName()});
 
@@ -342,7 +344,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomBindingListener extends
             BindingNotificationListener {
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id, Binding solution) {
@@ -355,7 +357,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomEventListener extends
             CompoundEventNotificationListener {
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id, CompoundEvent solution) {
@@ -368,7 +370,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomSignalListener extends
             SignalNotificationListener {
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id) {

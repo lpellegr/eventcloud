@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.benchmarks.radix10_conversion;
@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
@@ -61,7 +62,7 @@ public class Radix10ConversionBenchmark {
     /**
      * Usage example once the jar with dependencies is generated:
      * 
-     * {@code  java -server -Xms4G -Xmx4G -cp $PWD/target/eventcloud-benchmarks-1.3.0-SNAPSHOT-jar-with-dependencies.jar:$PWD/target/eventcloud-benchmarks-1.3.0-SNAPSHOT.jar fr.inria.eventcloud.benchmarks.radix10_conversion.Radix10ConversionBenchmark --input-file $HOME/Desktop/twitter.trig --statistics -run 1000000,7 -run 1000000,14 -run 1000000,340 -run 10000000,7 -run 10000000,14 -run 10000000,340}
+     * {@code  java -server -Xms4G -Xmx4G -cp $PWD/target/eventcloud-benchmarks-1.4.0-SNAPSHOT-jar-with-dependencies.jar:$PWD/target/eventcloud-benchmarks-1.4.0-SNAPSHOT.jar fr.inria.eventcloud.benchmarks.radix10_conversion.Radix10ConversionBenchmark --input-file $HOME/Desktop/twitter.trig --statistics -run 1000000,7 -run 1000000,14 -run 1000000,340 -run 10000000,7 -run 10000000,14 -run 10000000,340}
      */
     public static void main(String[] args) {
         Radix10ConversionBenchmark benchmark = new Radix10ConversionBenchmark();
@@ -172,7 +173,7 @@ public class Radix10ConversionBenchmark {
             System.out.println("Time to perform radix 10 conversion for " + i
                     + " with precision set to " + run.getPrecision() + " is "
                     + stopwatch.toString() + " --> "
-                    + stopwatch.elapsedMillis() + " ms");
+                    + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
             System.out.println();
         } catch (FileNotFoundException e) {
             e.printStackTrace();

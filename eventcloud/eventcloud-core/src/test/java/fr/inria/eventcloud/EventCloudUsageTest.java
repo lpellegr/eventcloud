@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud;
@@ -53,7 +53,7 @@ import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
  */
 public class EventCloudUsageTest implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudUsageTest.class);
@@ -141,7 +141,7 @@ public class EventCloudUsageTest implements Serializable {
 
         subscribeProxy.subscribe(
                 subscription, new BindingNotificationListener() {
-                    private static final long serialVersionUID = 130L;
+                    private static final long serialVersionUID = 140L;
 
                     @Override
                     public void onNotification(SubscriptionId id,
@@ -235,27 +235,6 @@ public class EventCloudUsageTest implements Serializable {
                 }
             }
         }
-
-        // try {
-        // deployer.getRandomSemanticPeer(eventCloudId).send(
-        // new StatelessQuadruplePatternRequest(QuadruplePattern.ANY) {
-        //
-        // private static final long serialVersionUID = 130L;
-        //
-        // @Override
-        // public void onPeerValidatingKeyConstraints(CanOverlay overlay,
-        // QuadruplePattern quadruplePattern) {
-        // System.err.println("$A$A$ Peer " + overlay
-        // + " contains:");
-        // for (Quadruple quad : ((SynchronizedJenaDatasetGraph)
-        // overlay.getDatastore()).find(QuadruplePattern.ANY)) {
-        // log.debug(quad.toString());
-        // }
-        // }
-        // });
-        // } catch (DispatchException e) {
-        // e.printStackTrace();
-        // }
 
         // Unsubscribes. Once this step is done no notification related to the
         // subscription must be received.

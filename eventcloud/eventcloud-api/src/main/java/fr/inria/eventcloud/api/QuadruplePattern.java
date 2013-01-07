@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.api;
@@ -22,6 +22,8 @@ import java.io.ObjectOutput;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Variable;
+
+import fr.inria.eventcloud.utils.NodeSerializer;
 
 /**
  * A QuadruplePattern is {@link Quadruple} where each component value may be
@@ -37,7 +39,7 @@ import com.hp.hpl.jena.graph.Node_Variable;
  */
 public class QuadruplePattern extends Quadruple {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * QuadruplePattern that may be used to retrieve all the quadruples.
@@ -127,7 +129,7 @@ public class QuadruplePattern extends Quadruple {
         }
 
         if (isObjectSet) {
-            super.writeObject(out);
+            NodeSerializer.writeLiteralOrUri(out, super.nodes[3]);
         }
     }
 
@@ -165,7 +167,7 @@ public class QuadruplePattern extends Quadruple {
         }
 
         if (isObjectSet) {
-            super.readObject(in);
+            super.nodes[3] = NodeSerializer.readLiteralOrUri(in);
         }
     }
 

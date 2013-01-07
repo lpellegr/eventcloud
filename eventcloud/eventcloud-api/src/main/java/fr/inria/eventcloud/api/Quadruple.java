@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.api;
@@ -32,11 +32,12 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.primitives.Longs;
-import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_ANY;
 import com.hp.hpl.jena.graph.Node_Blank;
 import com.hp.hpl.jena.graph.Triple;
+
+import fr.inria.eventcloud.utils.NodeSerializer;
 
 /**
  * A quadruple is a 4-tuple containing respectively a graph, a subject, a
@@ -59,7 +60,7 @@ import com.hp.hpl.jena.graph.Triple;
  */
 public class Quadruple implements Externalizable, Event {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log = LoggerFactory.getLogger(Quadruple.class);
 
@@ -234,6 +235,25 @@ public class Quadruple implements Externalizable, Event {
      */
     public final Node getObject() {
         return this.nodes[3];
+    }
+
+    /**
+     * Returns the RDF term found at the specified {@code index}. A quadruple
+     * embeds only four RDF terms. The index value starts at 0. The terms are
+     * stored in the following order: graph, subject, predicate and object.
+     * 
+     * @param index
+     *            the index to use for retrieving an RDF term contained by the
+     *            quadruple.
+     * 
+     * @return the RDF term found at the specified {@code index}.
+     */
+    public final Node getTermByIndex(int index) {
+        if (index < 0 || index > 3) {
+            throw new IllegalArgumentException("Invalid index: " + index);
+        }
+
+        return this.nodes[index];
     }
 
     /**
@@ -733,66 +753,7 @@ public class Quadruple implements Externalizable, Event {
 
         out.writeUTF(gsp.toString());
 
-        this.writeObject(out);
-    }
-
-    protected void writeObject(ObjectOutput out) throws IOException {
-        boolean hasLiteral = this.nodes[3].isLiteral();
-        boolean hasLanguageTag = false;
-        boolean hasDatatype = false;
-
-        if (hasLiteral) {
-            hasLanguageTag = !this.nodes[3].getLiteralLanguage().isEmpty();
-            hasDatatype = this.nodes[3].getLiteralDatatypeURI() != null;
-        }
-
-        byte bitmap =
-                createObjectBitmap(hasLiteral, hasLanguageTag, hasDatatype);
-
-        // writes a boolean to indicates whether the object value is a literal
-        // and if it embeds a language tag and/or a datatype
-        out.writeByte(bitmap);
-
-        if (hasLiteral) {
-            // a literal may contain unicode characters
-            out.writeUTF(this.nodes[3].getLiteralLexicalForm());
-
-            if (hasLanguageTag) {
-                writeString(out, this.nodes[3].getLiteralLanguage());
-            }
-
-            if (hasDatatype) {
-                writeString(out, this.nodes[3].getLiteralDatatypeURI());
-            }
-        } else {
-            writeString(out, this.nodes[3].toString());
-        }
-    }
-
-    private static byte createObjectBitmap(boolean hasLiteral,
-                                           boolean hasLanguageTag,
-                                           boolean hasDatatype) {
-        byte bitmap = 0;
-
-        if (hasLiteral) {
-            bitmap += 4;
-        }
-
-        if (hasLanguageTag) {
-            bitmap += 2;
-        }
-
-        if (hasDatatype) {
-            bitmap += 1;
-        }
-
-        return bitmap;
-    }
-
-    protected static void writeString(ObjectOutput out, String s)
-            throws IOException {
-        out.writeInt(s.length());
-        out.writeBytes(s);
+        NodeSerializer.writeLiteralOrUri(out, this.nodes[3]);
     }
 
     /**
@@ -807,62 +768,7 @@ public class Quadruple implements Externalizable, Event {
                 this.extractAndSetMetaInformation(Node.createURI(chunks[0]));
         this.nodes[1] = Node.createURI(chunks[1]);
         this.nodes[2] = Node.createURI(chunks[2]);
-
-        this.readObject(in);
-    }
-
-    protected void readGraph(ObjectInput in) throws IOException {
-        this.nodes[0] = this.extractAndSetMetaInformation(readIRI(in));
-    }
-
-    protected void readSubject(ObjectInput in) throws IOException {
-        this.nodes[1] = readIRI(in);
-    }
-
-    protected void readPredicate(ObjectInput in) throws IOException {
-        this.nodes[2] = readIRI(in);
-    }
-
-    protected void readObject(ObjectInput in) throws IOException {
-        byte bitmap = in.readByte();
-
-        boolean hasLiteral = (1 & (bitmap >> 2)) == 1;
-        boolean hasLanguageTag = (1 & (bitmap >> 1)) == 1;
-        boolean hasDatatype = (1 & bitmap) == 1;
-
-        if (hasLiteral) {
-            String literalValue = in.readUTF();
-            String languageTag = null;
-            String datatypeURI = null;
-
-            if (hasLanguageTag) {
-                languageTag = readString(in);
-            }
-
-            if (hasDatatype) {
-                datatypeURI = readString(in);
-            }
-
-            this.nodes[3] =
-                    Node.createLiteral(literalValue, languageTag, hasDatatype
-                            ? TypeMapper.getInstance().getSafeTypeByName(
-                                    datatypeURI) : null);
-        } else {
-            this.nodes[3] = readIRI(in);
-        }
-    }
-
-    private static Node readIRI(ObjectInput in) throws IOException {
-        return Node.createURI(readString(in));
-    }
-
-    private static String readString(ObjectInput in) throws IOException {
-        int stringLength = in.readInt();
-        byte[] data = new byte[stringLength];
-
-        in.read(data);
-
-        return new String(data);
+        this.nodes[3] = NodeSerializer.readLiteralOrUri(in);
     }
 
 }

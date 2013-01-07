@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.pubsub;
@@ -72,16 +72,17 @@ import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
 import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
-import fr.inria.eventcloud.api.wrappers.BindingWrapper;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.datastore.Vars;
 import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
@@ -169,7 +170,7 @@ public final class PublishSubscribeUtils {
                                                                  SubscriptionId originalSubscriptionId) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT ");
-        query.append(Vars.SUBSCRIPTION_ID.toString());
+        query.append(PublishSubscribeConstants.SUBSCRIPTION_ID_VAR.toString());
         query.append(" WHERE {\n    GRAPH ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_NS_NODE));
         query.append(" {\n        ");
@@ -180,7 +181,7 @@ public final class PublishSubscribeUtils {
         query.append(" .\n        ?sIdUri ");
         query.append(NodeFmtLib.str(PublishSubscribeConstants.SUBSCRIPTION_ID_NODE));
         query.append(' ');
-        query.append(Vars.SUBSCRIPTION_ID.toString());
+        query.append(PublishSubscribeConstants.SUBSCRIPTION_ID_VAR.toString());
         query.append(" .\n    }\n}");
 
         List<SubscriptionId> ids = new ArrayList<SubscriptionId>();
@@ -200,7 +201,8 @@ public final class PublishSubscribeUtils {
 
                 SubscriptionId subscriptionId =
                         SubscriptionId.parseSubscriptionId(binding.get(
-                                Vars.SUBSCRIPTION_ID).getLiteralLexicalForm());
+                                PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
+                                .getLiteralLexicalForm());
                 ids.add(subscriptionId);
             }
         } finally {
@@ -437,7 +439,7 @@ public final class PublishSubscribeUtils {
                                        AtomicQuery atomicQuery) {
         Set<Var> vars =
                 Sets.intersection(resultVars, FluentIterable.from(
-                        atomicQuery.getVars()).toImmutableSet());
+                        atomicQuery.getVars()).toSet());
         BindingMap binding = new BindingMap();
         Node[] quadNodes = quad.toArray();
 
@@ -561,7 +563,7 @@ public final class PublishSubscribeUtils {
         try {
             SubscribeProxy subscriber = subscription.getSubscriberProxy();
 
-            String source = PAActiveObject.getUrl(semanticCanOverlay.getStub());
+            String source = PAActiveObject.getUrl(semanticCanOverlay.getStub());;
 
             switch (subscription.getType()) {
                 case BINDING:
@@ -569,11 +571,11 @@ public final class PublishSubscribeUtils {
                             new BindingNotification(
                                     subscription.getOriginalId(),
                                     quadruple.createMetaGraphNode(), source,
-                                    new BindingWrapper(createBindingSolution(
-                                            subscription, quadruple)));
+                                    createBindingSolution(
+                                            subscription, quadruple));
 
                     // sends part of the solution to the subscriber
-                    subscriber.receive(notification);
+                    subscriber.receiveSbce1Or2(notification);
 
                     // broadcasts a message to all the stubs contained by
                     // the subscription to say to these peers to send the
@@ -594,35 +596,35 @@ public final class PublishSubscribeUtils {
                     break;
                 case COMPOUND_EVENT:
                     if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
-                        subscriber.receive(new PollingSignalNotification(
+                        subscriber.receiveSbce1(new PollingSignalNotification(
                                 subscription.getOriginalId(),
                                 quadruple.createMetaGraphNode(), source));
-                    } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
+                    } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                            || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
                         QuadruplesNotification quadruplesNotification =
                                 new QuadruplesNotification(
                                         subscription.getOriginalId(),
                                         quadruple.createMetaGraphNode(),
                                         source, ImmutableList.of(quadruple));
 
-                        if (semanticCanOverlay.markAsSent(
-                                quadruplesNotification.getId(), quadruple)) {
-                            subscriber.receive(quadruplesNotification);
+                        if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
+                                || (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue() && semanticCanOverlay.markAsSent(
+                                        quadruplesNotification.getId(),
+                                        quadruple))) {
+                            subscriber.receiveSbce2(quadruplesNotification);
+                            semanticCanOverlay.getStub().sendv(
+                                    new IndexEphemeralSubscriptionRequest(
+                                            quadruple.createMetaGraphNode(),
+                                            subscription.getOriginalId(),
+                                            subscription.getSubscriberUrl()));
                         }
-
-                        semanticCanOverlay.getStub().sendv(
-                                new IndexEphemeralSubscriptionRequest(
-                                        quadruple.createMetaGraphNode(),
-                                        subscription.getOriginalId(),
-                                        subscription.getSubscriberUrl()));
                     }
                     break;
                 case SIGNAL:
-                    subscriber.receive(new SignalNotification(
+                    subscriber.receiveSbce1Or2(new SignalNotification(
                             subscription.getOriginalId(),
                             quadruple.createMetaGraphNode(), source));
                     break;
-                case UNKNOWN:
-                    throw new IllegalStateException();
             }
         } catch (ExecutionException e) {
             log.warn("Notification cannot be sent because no SubscribeProxy found under URL: "
@@ -793,10 +795,216 @@ public final class PublishSubscribeUtils {
         overlay.dispatchv(new IndexSubscriptionRequest(rewrittenSubscription));
     }
 
+    /**
+     * Finds the ephemeral subscriptions contained by the peer represented by
+     * the specified {@code overlay}. For each ephemeral that is verified the
+     * given {@code quadruple} is notified to the subscriber associated to the
+     * ephemeral subscription.
+     * 
+     * @param overlay
+     *            the overlay representing the peer where we have to check for
+     *            the ephemeral subscriptions.
+     * @param quadruple
+     *            the quadruple to notify when an ephemeral subscription is
+     *            verified.
+     * @param metaGraphNode
+     *            the meta graph node associated to the quadruple.
+     */
+    public static void findAndHandleEphemeralSubscriptions(SemanticCanOverlay overlay,
+                                                           final Quadruple quadruple,
+                                                           Node metaGraphNode) {
+        TransactionalDatasetGraph txnGraph =
+                overlay.getSubscriptionsDatastore().begin(AccessMode.READ_ONLY);
+
+        try {
+            QuadrupleIterator qit =
+                    txnGraph.find(new QuadruplePattern(
+                            metaGraphNode,
+                            null,
+                            PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                            null));
+
+            while (qit.hasNext()) {
+                Quadruple q = qit.next();
+
+                SubscriptionId subscriptionId =
+                        PublishSubscribeUtils.extractSubscriptionId(q.getSubject());
+
+                String subscriberUrl = q.getObject().getURI();
+
+                final QuadruplesNotification n =
+                        new QuadruplesNotification(
+                                subscriptionId, metaGraphNode,
+                                PAActiveObject.getUrl(overlay.getStub()),
+                                ImmutableList.of(quadruple));
+
+                if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
+                        || (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue() && overlay.markAsSent(
+                                n.getId(), quadruple))) {
+                    Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
+                            .receiveSbce2(n);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
+    }
+
+    /**
+     * Try to rewrite the specified {@code subscription} with the given
+     * {@code compoundEvent} to know whether the subscription matched or not.
+     * 
+     * @param compoundEvent
+     *            the compound event to test against the subscription.
+     * @param subscription
+     *            the subscription to rewrite.
+     * 
+     * @return {@code true} if the specified subscription is matched by the
+     *         given compound event, {@code false} otherwise.
+     */
+    public static final Binding matches(CompoundEvent compoundEvent,
+                                        Subscription subscription) {
+        if (compoundEvent.size() < subscription.getSubSubscriptions().length) {
+            return null;
+        }
+
+        List<Quadruple> quadruples =
+                new ArrayList<Quadruple>(compoundEvent.getQuadruples());
+
+        BindingMap binding = new BindingMap();
+        int nbSubSubscriptions = subscription.getSubSubscriptions().length;
+
+        for (int i = 0; i < nbSubSubscriptions; i++) {
+            AtomicQuery aq =
+                    subscription.getSubSubscriptions()[0].getAtomicQuery();
+
+            for (Quadruple quadruple : quadruples) {
+                BindingMap tmpBinding;
+
+                if ((tmpBinding = matches(quadruple, aq)) == null) {
+                    continue;
+                }
+
+                binding.addAll(tmpBinding);
+
+                if (i < nbSubSubscriptions - 1) {
+                    subscription =
+                            SubscriptionRewriter.rewrite(
+                                    subscription, quadruple);
+                }
+
+                // once a quadruple has matched it can not match again
+                quadruples.remove(quadruple);
+                break;
+            }
+        }
+
+        return binding;
+    }
+
+    /**
+     * This method returns a list of vars and associated values if the specified
+     * {@code quadruple} matches the given {@code atomicQuery}, otherwise
+     * {@code null} is returned.
+     * 
+     * @param quadruple
+     *            the quadruple to test.
+     * @param atomicQuery
+     *            the subscription to match with.
+     * 
+     * @return a list of vars and associated values if the specified
+     *         {@code quadruple} matches the given {@code atomicQuery},
+     *         otherwise {@code null} is returned.
+     */
+    public static final BindingMap matches(Quadruple quadruple,
+                                           AtomicQuery atomicQuery) {
+        Node graph = atomicQuery.getGraph();
+        Node subject = atomicQuery.getSubject();
+        Node predicate = atomicQuery.getPredicate();
+        Node object = atomicQuery.getObject();
+
+        boolean graphIsVar = graph.isVariable();
+        boolean subjectIsVar = subject.isVariable();
+        boolean predicateIsVar = predicate.isVariable();
+        boolean objectIsVar = object.isVariable();
+
+        boolean graphVerified =
+                graphIsVar
+                        || graph.getURI().startsWith(
+                                quadruple.getGraph().getURI());
+        boolean subjectVerified =
+                subjectIsVar || subject.equals(quadruple.getSubject());
+        boolean predicateVerified =
+                predicateIsVar || predicate.equals(quadruple.getPredicate());
+        boolean objectVerified =
+                objectIsVar || object.equals(quadruple.getObject());
+
+        if (graphVerified && subjectVerified && predicateVerified
+                && objectVerified) {
+            BindingMap binding = new PublishSubscribeUtils.BindingMap();
+
+            if (graphIsVar) {
+                binding.add(Var.alloc(graph.getName()), quadruple.getGraph());
+            }
+
+            if (subjectIsVar) {
+                binding.add(
+                        Var.alloc(subject.getName()), quadruple.getSubject());
+            }
+
+            if (predicateIsVar) {
+                binding.add(
+                        Var.alloc(predicate.getName()),
+                        quadruple.getPredicate());
+            }
+
+            if (objectIsVar) {
+                binding.add(Var.alloc(object.getName()), quadruple.getObject());
+            }
+
+            return binding;
+        }
+
+        return null;
+    }
+
+    /**
+     * Stores the specified {@code quadruple} on the misc datastore contained by
+     * the peer represented by the given {@code semanticOverlay}.
+     * 
+     * @param semanticOverlay
+     *            the overlay representing the peer where the quadruple will be
+     *            stored.
+     * @param quadruple
+     *            the quadruple to store.
+     * @param metaGraphNode
+     *            the meta graph node associated to the quadruple to store.
+     */
+    public static void storeQuadruple(SemanticCanOverlay semanticOverlay,
+                                      final Quadruple quadruple,
+                                      Node metaGraphNode) {
+        TransactionalDatasetGraph txnGraph =
+                semanticOverlay.getMiscDatastore().begin(AccessMode.WRITE);
+
+        try {
+            // the quadruple is stored by using its meta graph value
+            txnGraph.add(
+                    metaGraphNode, quadruple.getSubject(),
+                    quadruple.getPredicate(), quadruple.getObject());
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
+    }
+
     public static final class BindingMap implements
             com.hp.hpl.jena.sparql.engine.binding.BindingMap, Serializable {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         private transient Map<Var, Node> content = new HashMap<Var, Node>();
 

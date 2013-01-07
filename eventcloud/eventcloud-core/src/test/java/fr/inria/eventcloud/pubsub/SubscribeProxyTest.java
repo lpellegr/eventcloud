@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.pubsub;
@@ -28,6 +28,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.objectweb.proactive.core.util.MutableInteger;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -62,6 +63,7 @@ import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
+import fr.inria.eventcloud.runners.EachPublishSubscribeAlgorithm;
 
 /**
  * Tests cases for operations in {@link SubscribeProxy} and {@link PublishProxy}
@@ -69,6 +71,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  * 
  * @author lpellegr
  */
+@RunWith(EachPublishSubscribeAlgorithm.class)
 public class SubscribeProxyTest {
 
     private static final Logger log =
@@ -113,7 +116,7 @@ public class SubscribeProxyTest {
      */
     @Test(timeout = 60000)
     public void testSubscribeWithConcurrentPublications()
-            throws EventCloudIdNotManaged {
+            throws EventCloudIdNotManaged, InterruptedException {
         final int NB_PRODUCERS = 10;
         final int NB_EVENTS_TO_WAIT = 100;
 
@@ -126,6 +129,15 @@ public class SubscribeProxyTest {
 
         final AtomicInteger nbEventsPublished = new AtomicInteger();
 
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+
+        this.subscribeProxy.subscribe(
+                subscription, new CustomCompoundEventNotificationListener());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         // simulates producers publishing at different rates
         for (int i = 0; i < NB_PRODUCERS; i++) {
             final PublishApi publishProxy = publishProxies.get(i);
@@ -136,12 +148,14 @@ public class SubscribeProxyTest {
                 public void run() {
                     if (nbEventsPublished.incrementAndGet() <= NB_EVENTS_TO_WAIT) {
                         List<Quadruple> quadruples = new ArrayList<Quadruple>();
+
                         Node graphValue =
                                 Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
-                                        + "/" + UuidGenerator.randomUuid());
+                                        + UuidGenerator.randomUuid());
 
                         for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
-                            quadruples.add(QuadrupleGenerator.random(graphValue));
+                            Quadruple q = QuadrupleGenerator.random(graphValue);
+                            quadruples.add(q);
                         }
 
                         log.debug(
@@ -153,15 +167,6 @@ public class SubscribeProxyTest {
                 }
             }, 0, (i + 1) * 200, TimeUnit.MILLISECONDS);
         }
-
-        Subscription subscription =
-                new Subscription(
-                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
-
-        this.subscribeProxy.subscribe(
-                subscription, new CustomCompoundEventNotificationListener());
-
-        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         synchronized (events) {
             while (events.size() < NB_EVENTS_TO_WAIT) {
@@ -281,7 +286,8 @@ public class SubscribeProxyTest {
      * Test a basic subscription with a {@link SignalNotificationListener}.
      */
     @Test(timeout = 60000)
-    public void testSubscribeSignalNotificationListener() {
+    public void testSubscribeSignalNotificationListener()
+            throws InterruptedException {
         Subscription subscription =
                 new Subscription(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
@@ -297,7 +303,7 @@ public class SubscribeProxyTest {
         this.publishProxy.publish(event);
 
         synchronized (signals) {
-            while (signals.getValue() != event.getQuadruples().size()) {
+            while (signals.getValue() != 1) {
                 try {
                     signals.wait();
                 } catch (InterruptedException e) {
@@ -305,6 +311,12 @@ public class SubscribeProxyTest {
                 }
             }
         }
+
+        // waits a little to have the opportunity to detect duplicate
+        // notifications
+        Thread.sleep(2000);
+
+        Assert.assertEquals(1, signals.getValue());
     }
 
     /**
@@ -500,16 +512,15 @@ public class SubscribeProxyTest {
 
         long publicationTime = System.currentTimeMillis();
 
-        Quadruple metaQuadruple =
-                CompoundEvent.createMetaQuadruple(eventIdNode, 8);
-        metaQuadruple.setPublicationTime(publicationTime);
-        this.publishProxy.publish(metaQuadruple);
+        Quadruple quadruple = CompoundEvent.createMetaQuadruple(eventIdNode, 8);
+        quadruple.setPublicationTime(publicationTime);
+        this.publishProxy.publish(quadruple);
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            metaQuadruple = QuadrupleGenerator.random(eventIdNode);
-            metaQuadruple.setPublicationTime(publicationTime);
-            this.publishProxy.publish(metaQuadruple);
+            quadruple = QuadrupleGenerator.random(eventIdNode);
+            quadruple.setPublicationTime(publicationTime);
+            this.publishProxy.publish(quadruple);
         }
 
         // waits some time to simulate a network congestion
@@ -521,9 +532,9 @@ public class SubscribeProxyTest {
 
         // inserts 4 quadruples that belongs to the same event
         for (int i = 0; i < 4; i++) {
-            metaQuadruple = QuadrupleGenerator.random(eventIdNode);
-            metaQuadruple.setPublicationTime(publicationTime);
-            this.publishProxy.publish(metaQuadruple);
+            quadruple = QuadrupleGenerator.random(eventIdNode);
+            quadruple.setPublicationTime(publicationTime);
+            this.publishProxy.publish(quadruple);
         }
 
         synchronized (events) {
@@ -589,12 +600,7 @@ public class SubscribeProxyTest {
         // are asynchronous.
         Thread.sleep(1000);
 
-        quads = new ArrayList<Quadruple>();
-        for (int i = 0; i < 4; i++) {
-            quads.add(QuadrupleGenerator.random(eventIdNode));
-        }
-
-        ce = new CompoundEvent(quads);
+        ce = CompoundEventGenerator.random(eventId, 4);
 
         // publishes a new event
         this.publishProxy.publish(ce);
@@ -608,6 +614,13 @@ public class SubscribeProxyTest {
             }
         }
 
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            // wait for 2 garbage collection to ensure that outdated things are
+            // removed
+            Thread.sleep(EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue() * 2);
+        }
+
         for (Peer p : this.deployer.getRandomSemanticTracker(this.eventCloudId)
                 .getPeers()) {
             List<Quadruple> subscriptionData =
@@ -616,7 +629,7 @@ public class SubscribeProxyTest {
 
             log.info(
                     "After unsubscribe peer {} contains the following subscriptions:\n{}",
-                    p, QuadruplesFormatter.toString(subscriptionData));
+                    p, QuadruplesFormatter.toString(subscriptionData, true));
             Assert.assertEquals(0, subscriptionData.size());
         }
     }
@@ -644,7 +657,7 @@ public class SubscribeProxyTest {
     private static class CustomBindingNotificationListener extends
             BindingNotificationListener {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         /**
          * {@inheritDoc}
@@ -655,6 +668,7 @@ public class SubscribeProxyTest {
                 bindings.add(solution);
                 bindings.notifyAll();
             }
+
             log.info("New binding received:\n{}", solution);
         }
 
@@ -663,7 +677,7 @@ public class SubscribeProxyTest {
     private static class CustomCompoundEventNotificationListener extends
             CompoundEventNotificationListener {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         /**
          * {@inheritDoc}
@@ -674,6 +688,7 @@ public class SubscribeProxyTest {
                 events.add(solution);
                 events.notifyAll();
             }
+
             log.info("New event received:\n{}", solution);
         }
     }
@@ -681,7 +696,7 @@ public class SubscribeProxyTest {
     private static class CustomSignalNotificationListener extends
             SignalNotificationListener {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         /**
          * {@inheritDoc}
@@ -692,6 +707,7 @@ public class SubscribeProxyTest {
                 signals.add(1);
                 signals.notifyAll();
             }
+
             log.info("New signal received");
         }
     }

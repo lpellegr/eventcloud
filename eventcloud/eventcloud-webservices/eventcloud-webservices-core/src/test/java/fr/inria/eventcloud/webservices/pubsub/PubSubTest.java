@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.pubsub;
@@ -21,6 +21,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
+import fr.inria.eventcloud.runners.EachPublishSubscribeAlgorithm;
 import fr.inria.eventcloud.webservices.WsTest;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
@@ -50,6 +52,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
  * @author bsauvan
  * @author lpellegr
  */
+@RunWith(EachPublishSubscribeAlgorithm.class)
 public class PubSubTest extends WsTest {
 
     private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
@@ -100,10 +103,7 @@ public class PubSubTest extends WsTest {
         this.publishWsClient.publishCompoundEvent(event);
 
         synchronized (this.subscriberService.signalsReceived) {
-            // event.size() + 1 because the meta quadruple is no longer
-            // contained by the compound event but added automatically during
-            // the publication
-            while (this.subscriberService.signalsReceived.getValue() != event.size() + 1) {
+            while (this.subscriberService.signalsReceived.getValue() != 1) {
                 this.subscriberService.signalsReceived.wait();
             }
         }
@@ -118,7 +118,7 @@ public class PubSubTest extends WsTest {
         // Checks that no more events are received
         synchronized (this.subscriberService.signalsReceived) {
             this.subscriberService.signalsReceived.wait(4000);
-            Assert.assertTrue(this.subscriberService.signalsReceived.getValue() == event.size() + 1);
+            Assert.assertTrue(this.subscriberService.signalsReceived.getValue() == 1);
         }
     }
 

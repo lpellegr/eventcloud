@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.pubsub;
@@ -73,6 +73,7 @@ import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
@@ -86,7 +87,7 @@ import fr.inria.eventcloud.reasoner.SparqlDecomposer;
  */
 public class Subscription implements Quadruplable, Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     public static final LoadingCache<String, SubscribeProxy> SUBSCRIBE_PROXIES_CACHE;
 
@@ -263,7 +264,7 @@ public class Subscription implements Quadruplable, Serializable {
                         basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
                                 .getURI(),
                         subscriptionDestination,
-                        NotificationListenerType.UNKNOWN.convert(((Integer) basicInfo.get(
+                        NotificationListenerType.BINDING.convert(((Integer) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
                                 .getLiteralValue()).shortValue()));
 
@@ -583,7 +584,7 @@ public class Subscription implements Quadruplable, Serializable {
 
     public static final class Stub implements Serializable {
 
-        private static final long serialVersionUID = 130L;
+        private static final long serialVersionUID = 140L;
 
         // the url which identifies the peer to visit
         public final String peerUrl;
@@ -610,10 +611,10 @@ public class Subscription implements Quadruplable, Serializable {
                         id, null, id, System.currentTimeMillis(),
                         System.currentTimeMillis(),
                         "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o }}",
-                        "http://dummy.com", null,
+                        "subscriberURI", "destinationURI",
                         NotificationListenerType.BINDING);
 
-        System.out.println(subscription.toQuadruples());
+        QuadruplesFormatter.output(System.out, subscription.toQuadruples());
     }
 
 }

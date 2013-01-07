@@ -1,22 +1,21 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponse
  */
 public class CanRequestResponseManager extends RequestResponseManager {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     /*
      * Used to maintain the list of requests which have already been 
@@ -80,12 +79,6 @@ public class CanRequestResponseManager extends RequestResponseManager {
      */
     public boolean receiveRequest(UUID requestId) {
         return this.requestsAlreadyReceived.add(requestId);
-    }
-
-    @Override
-    public void close() throws IOException {
-        // TODO Auto-generated method stub
-
     }
 
 }

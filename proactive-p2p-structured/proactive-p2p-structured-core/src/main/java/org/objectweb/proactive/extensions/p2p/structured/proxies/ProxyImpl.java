@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.proxies;
@@ -119,20 +119,20 @@ public class ProxyImpl implements Proxy {
      */
     @Override
     public Peer selectPeer() {
-        if (this.peerStubs.isEmpty()) {
-            List<Peer> newStubs = this.selectTracker().getPeers();
+        synchronized (this.peerStubs) {
+            if (this.peerStubs.isEmpty()) {
+                List<Peer> newStubs = this.selectTracker().getPeers();
 
-            if (newStubs.isEmpty()) {
-                return null;
-            }
+                if (newStubs.isEmpty()) {
+                    return null;
+                }
 
-            synchronized (this.peerStubs) {
                 this.peerStubs.clear();
                 this.peerStubs.addAll(newStubs);
             }
-        }
 
-        return this.peerStubs.get(RandomUtils.nextInt(this.peerStubs.size()));
+            return this.peerStubs.get(RandomUtils.nextInt(this.peerStubs.size()));
+        }
     }
 
     private Tracker selectTracker() {

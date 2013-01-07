@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.overlay;
@@ -20,9 +20,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
@@ -32,8 +36,11 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -47,6 +54,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -76,6 +84,9 @@ import fr.inria.eventcloud.reasoner.SparqlColander;
  */
 public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(SemanticCanOverlay.class);
+
     private RelationshipStrengthEngineManager socialFilter;
 
     private final LoadingCache<String, SemanticPeer> peerStubsCache;
@@ -88,11 +99,17 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private final TransactionalTdbDatastore subscriptionsDatastore;
 
-    // this collection is used only when SCBE2 is enabled.
+    // this collection is used only when SCBE2 or SBCE3 is enabled.
     // its purpose is to maintain temporarily a trace of the quadruples which
     // have already been sent for a given notification in order to avoid
-    // to send duplicates
+    // to send duplicates and thus saving some bandwidth
     private SetMultimap<NotificationId, HashCode> sentQuadrupleHashValues;
+
+    private ScheduledExecutorService ephemeralSubscriptionsGarbageColletor;
+
+    // this cache is used to prevent compound events to be handled multi-times
+    // on a same peer
+    private Cache<Node, Boolean> alreadyHandledCompoundEvent;
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -169,12 +186,133 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         this.subscriberConnectionFailures =
                 new MapMaker().softValues().makeMap();
 
-        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
+        if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
             this.sentQuadrupleHashValues =
                     Multimaps.synchronizedSetMultimap(HashMultimap.<NotificationId, HashCode> create(
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
+                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue(),
                             EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue()));
         }
+
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.ephemeralSubscriptionsGarbageColletor =
+                    Executors.newSingleThreadScheduledExecutor();
+            this.ephemeralSubscriptionsGarbageColletor.scheduleWithFixedDelay(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                SemanticCanOverlay.this.removeOutdatedEphemeralSubscriptions();
+                            } catch (Throwable t) {
+                                t.printStackTrace();
+                            }
+                        }
+                    },
+                    EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
+                    EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
+                    TimeUnit.MILLISECONDS);
+        }
+
+        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.alreadyHandledCompoundEvent =
+                    CacheBuilder.newBuilder()
+                            .maximumSize(13000)
+                            .expireAfterWrite(10, TimeUnit.MINUTES)
+                            .build();
+        }
+    }
+
+    private void removeOutdatedEphemeralSubscriptions() {
+        TransactionalDatasetGraph txnGraph =
+                this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);
+
+        String findSubscriptionsSparql =
+                "SELECT ?g ?sId WHERE { GRAPH ?g { ?sId <"
+                        + PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY
+                        + "> ?itime } FILTER( "
+                        + System.currentTimeMillis()
+                        + " - ?itime > "
+                        + EventCloudProperties.EPHEMERAL_SUBSCRIPTION_EXPIRATION_TIME.getValue()
+                        + " ) }";
+
+        QueryExecution qexec =
+                QueryExecutionFactory.create(
+                        findSubscriptionsSparql,
+                        txnGraph.getUnderlyingDataset());
+
+        List<Node[]> solutions = null;
+        try {
+            ResultSet r = qexec.execSelect();
+
+            solutions = new ArrayList<Node[]>();
+
+            while (r.hasNext()) {
+                QuerySolution s = r.next();
+
+                Node graph = s.get("g").asNode();
+                Node sId = s.get("sId").asNode();
+                solutions.add(new Node[] {graph, sId});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
+
+        txnGraph = this.subscriptionsDatastore.begin(AccessMode.WRITE);
+
+        Set<HashCode> sentQuadrupleHashValuesResult = null;
+        try {
+            for (Node[] solution : solutions) {
+                Node graph = solution[0];
+                Node sId = solution[1];
+
+                if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
+                    sentQuadrupleHashValuesResult =
+                            this.sentQuadrupleHashValues.removeAll(new NotificationId(
+                                    PublishSubscribeUtils.extractSubscriptionId(sId),
+                                    graph));
+                }
+
+                txnGraph.delete(
+                        graph,
+                        sId,
+                        PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                        Node.ANY);
+                txnGraph.delete(
+                        graph,
+                        sId,
+                        PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE,
+                        Node.ANY);
+            }
+
+            txnGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
+
+        if (log.isDebugEnabled()) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("New ephemeral garbage collection performed, ");
+            msg.append(solutions.size());
+            msg.append(" quadruple(s) removed");
+
+            if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
+                msg.append(" and ");
+                msg.append(sentQuadrupleHashValuesResult == null
+                        ? 0 : sentQuadrupleHashValuesResult.size());
+                msg.append(" removed from the sentQuadrupleHashValues datastructure");
+            }
+
+            log.debug(msg.toString());
+        }
+    }
+
+    public boolean markAsHandled(Node eventId) {
+        return this.alreadyHandledCompoundEvent.asMap().putIfAbsent(
+                eventId, Boolean.TRUE) == null;
     }
 
     public boolean markAsSent(NotificationId notificationId, Quadruple quadruple) {
@@ -392,6 +530,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append(this.sentQuadrupleHashValues.size());
             result.append('\n');
         }
+
         // TransactionalDatasetGraph txnGraph =
         // this.miscDatastore.begin(AccessMode.READ_ONLY);
         //
@@ -482,13 +621,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     public void join(Peer landmarkPeer) {
-        // Stats are computed in background. Thus, to have an accurate or at
-        // least a not too bad estimation of the coordinate to use for splitting
-        // the zone we have to sync
-        if (this.miscDatastore.getStatsRecorder() != null) {
-            this.miscDatastore.getStatsRecorder().sync();
-        }
-
         super.join(landmarkPeer);
     }
 
@@ -497,13 +629,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     public JoinIntroduceResponseOperation<SemanticElement> handleJoinIntroduceMessage(JoinIntroduceOperation<SemanticElement> msg) {
-        // Stats are computed in background. Thus, to have an accurate or at
-        // least a not too bad estimation of the coordinate to use for splitting
-        // the zone we have to sync
-        if (this.miscDatastore.getStatsRecorder() != null) {
-            this.miscDatastore.getStatsRecorder().sync();
-        }
-
         return super.handleJoinIntroduceMessage(msg);
     }
 
@@ -645,9 +770,13 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         List<Quadruple> result = new ArrayList<Quadruple>();
 
         try {
+            QuadrupleIterator it = null;
+
+            // transfers intermediate chunks for each subscription matched and
+            // created with a binding notification listener
             for (Node graph : subscriptionIdsToCopy) {
-                QuadrupleIterator it =
-                        txnGraph.find(graph, Node.ANY, Node.ANY, Node.ANY);
+                it = txnGraph.find(graph, Node.ANY, Node.ANY, Node.ANY);
+
                 while (it.hasNext()) {
                     result.add(it.next());
                 }
@@ -661,6 +790,30 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                 while (it.hasNext()) {
                     result.add(it.next());
                 }
+            }
+
+            // copy ephemeral subscriptions
+            // TODO: remove those that should no longer be on the peer
+            it =
+                    txnGraph.find(
+                            Node.ANY,
+                            Node.ANY,
+                            PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                            Node.ANY);
+
+            while (it.hasNext()) {
+                result.add(it.next());
+            }
+
+            it =
+                    txnGraph.find(
+                            Node.ANY,
+                            Node.ANY,
+                            PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE,
+                            Node.ANY);
+
+            while (it.hasNext()) {
+                result.add(it.next());
             }
         } finally {
             txnGraph.end();
@@ -779,6 +932,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                     this.miscDatastore.getStatsRecorder()
                             .computeSplitEstimation(dimension);
 
+            // no estimation can performed because no quadruple has
+            // been recorded, thus we performe a traditional split
+            if (estimatedMiddle == null) {
+                return super.splitZones(dimension);
+            }
+
             try {
                 Coordinate<SemanticElement> lowerBoundCopy =
                         super.zone.getLowerBound().clone();
@@ -799,9 +958,27 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() {
+        super.close();
+
+        this.messageManager.close();
+
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.ephemeralSubscriptionsGarbageColletor.shutdownNow();
+        }
+
+        this.miscDatastore.close();
+        this.subscriptionsDatastore.close();
+    }
+
     private static final class SubscriptionNotFoundException extends Exception {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         public SubscriptionNotFoundException() {
             super();

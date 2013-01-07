@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.messages.request.can;
@@ -24,12 +24,14 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
@@ -50,7 +52,7 @@ import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 public class IndexEphemeralSubscriptionRequest extends
         StatelessQuadruplePatternRequest {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
 
     private final SerializedValue<SubscriptionId> subscriptionId;
 
@@ -77,6 +79,8 @@ public class IndexEphemeralSubscriptionRequest extends
                                                QuadruplePattern quadruplePattern) {
         SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
 
+        // skips this IndexEphemeralSubscription if one has already been handled
+        // for the graph value
         if (!this.storeEphemeralSubscription(semanticOverlay)) {
             return;
         }
@@ -100,7 +104,11 @@ public class IndexEphemeralSubscriptionRequest extends
                 while (it.hasNext()) {
                     Quadruple quadruple = it.next();
 
-                    if (semanticOverlay.markAsSent(notificationId, quadruple)) {
+                    if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
+                            && semanticOverlay.markAsSent(
+                                    notificationId, quadruple)) {
+                        builder.add(quadruple);
+                    } else if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
                         builder.add(quadruple);
                     }
                 }
@@ -116,7 +124,7 @@ public class IndexEphemeralSubscriptionRequest extends
                                     quadruples);
 
                     Subscription.SUBSCRIBE_PROXIES_CACHE.get(
-                            this.subscriberUrl.getValue()).receive(n);
+                            this.subscriberUrl.getValue()).receiveSbce2(n);
                 }
             }
         } catch (Exception e) {
@@ -129,20 +137,24 @@ public class IndexEphemeralSubscriptionRequest extends
     private final boolean storeEphemeralSubscription(SemanticCanOverlay overlay) {
         TransactionalDatasetGraph txnGraph =
                 overlay.getSubscriptionsDatastore().begin(AccessMode.WRITE);
-
         try {
-            // QuadrupleIterator it =
-            // txnGraph.find(
-            // Node.createURI(this.metaGraph.getValue()),
-            // Node.ANY,
-            // PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
-            // Node.ANY);
+            // checks whether there is an ES for the same graph value that is
+            // already indexed
+            QuadrupleIterator it =
+                    txnGraph.find(
+                            Node.createURI(this.metaGraph.getValue()),
+                            Node.ANY,
+                            PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                            Node.ANY);
 
-            // if (it.hasNext()) {
-            // return false;
-            // }
+            if (it.hasNext()) {
+                return false;
+            }
 
-            txnGraph.add(this.createEphemeralSubscriptionQuadruple());
+            for (Quadruple q : this.createEphemeralSubscriptionQuadruples()) {
+                txnGraph.add(q);
+            }
+
             txnGraph.commit();
 
             return true;
@@ -153,12 +165,25 @@ public class IndexEphemeralSubscriptionRequest extends
         }
     }
 
-    private final Quadruple createEphemeralSubscriptionQuadruple() {
-        return new Quadruple(
-                Node.createURI(this.metaGraph.getValue()),
-                PublishSubscribeUtils.createSubscriptionIdUri(this.subscriptionId.getValue()),
-                PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE,
-                Node.createURI(this.subscriberUrl.getValue()));
+    private final List<Quadruple> createEphemeralSubscriptionQuadruples() {
+        Node graph = Node.createURI(this.metaGraph.getValue());
+        Node sId =
+                PublishSubscribeUtils.createSubscriptionIdUri(this.subscriptionId.getValue());
+
+        return ImmutableList.of(
+                new Quadruple(
+                        graph,
+                        sId,
+                        PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                        Node.createURI(this.subscriberUrl.getValue()), false,
+                        false),
+                new Quadruple(
+                        graph,
+                        sId,
+                        PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE,
+                        Node.createLiteral(
+                                Long.toString(System.currentTimeMillis()),
+                                XSDDatatype.XSDlong), false, false));
     }
 
 }

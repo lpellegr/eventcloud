@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.adapters.rdf2go;
@@ -111,7 +111,7 @@ public abstract class Rdf2goAdapter<T> {
 
     protected static QueryResultTable toQueryResultTable(final ResultSetWrapper resultSet) {
         return new QueryResultTable() {
-            private static final long serialVersionUID = 130L;
+            private static final long serialVersionUID = 140L;
 
             @Override
             public ClosableIterator<QueryRow> iterator() {
@@ -140,7 +140,7 @@ public abstract class Rdf2goAdapter<T> {
 
     private static final <T> ClosableIterable<T> generateClosableIterable(final List<T> statements) {
         return new ClosableIterable<T>() {
-            private static final long serialVersionUID = 130L;
+            private static final long serialVersionUID = 140L;
 
             @Override
             public ClosableIterator<T> iterator() {

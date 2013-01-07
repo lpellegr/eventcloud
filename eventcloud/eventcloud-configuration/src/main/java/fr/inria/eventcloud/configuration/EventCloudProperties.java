@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.configuration;
@@ -128,6 +128,32 @@ public class EventCloudProperties {
                     "eventcloud.publish.subscribe.algorithm",
                     PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1,
                     new PubSubAlgorithmPropertyValidator());
+
+    /**
+     * Defines whether an intermediate datastructure must be used on the peers
+     * to prevent them to send back to a subscribe proxy some chunks that may
+     * already be sent. This property must be enabled only when SBCE2 or SBCE3
+     * is used.
+     */
+    public static final PropertyBoolean PREVENT_CHUNK_DUPLICATES =
+            new PropertyBoolean(
+                    "eventcloud.prevent.chunk.duplicates", false,
+                    new Sbce2PreventChunkDuplicates());
+
+    /**
+     * Defines at which frequence the garbage collection timeout for ephemeral
+     * subscriptions must be triggered.
+     */
+    public static final PropertyInteger EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT =
+            new PropertyInteger(
+                    "eventcloud.ephemeral.subscriptions.gc.timeout", 10000);
+
+    /**
+     * Defines the expiration time of an ephemeral subscription (in ms).
+     */
+    public static final PropertyInteger EPHEMERAL_SUBSCRIPTION_EXPIRATION_TIME =
+            new PropertyInteger(
+                    "eventcloud.ephemeral.subscription.expiration.time", 3000);
 
     /**
      * Defines whether static load balancing must be enabled or not. When it is
@@ -259,9 +285,6 @@ public class EventCloudProperties {
             "eventcloud.stats.recorder.class",
             "fr.inria.eventcloud.datastore.stats.MeanStatsRecorder");
 
-    private static int DEFAULT_THREADS_LIMIT = Runtime.getRuntime()
-            .availableProcessors() + 1;
-
     /**
      * Defines the soft limit used by each EventClouds registry that runs with
      * multi active serving.
@@ -269,34 +292,34 @@ public class EventCloudProperties {
     public static final PropertyInteger MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY =
             new PropertyInteger(
                     "eventcloud.mao.soft.limit.eventclouds.registry",
-                    DEFAULT_THREADS_LIMIT);
+                    Runtime.getRuntime().availableProcessors() + 1);
 
     /**
-     * Defines the soft limit used by each publish proxy that runs with multi
+     * Defines the hard limit used by each publish proxy that runs with multi
      * active serving.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_PUBLISH_PROXIES =
+    public static final PropertyInteger MAO_HARD_LIMIT_PUBLISH_PROXIES =
             new PropertyInteger(
-                    "eventcloud.mao.soft.limit.publish.proxies",
-                    DEFAULT_THREADS_LIMIT);
+                    "eventcloud.mao.hard.limit.publish.proxies",
+                    Runtime.getRuntime().availableProcessors() + 1);
 
     /**
-     * Defines the soft limit used by each putget proxy that runs with multi
+     * Defines the hard limit used by each putget proxy that runs with multi
      * active serving.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_PUTGET_PROXIES =
+    public static final PropertyInteger MAO_HARD_LIMIT_PUTGET_PROXIES =
             new PropertyInteger(
-                    "eventcloud.mao.soft.limit.putget.proxies",
-                    DEFAULT_THREADS_LIMIT);
+                    "eventcloud.mao.hard.limit.putget.proxies",
+                    Runtime.getRuntime().availableProcessors() + 1);
 
     /**
-     * Defines the soft limit used by each subscribe proxy that runs with multi
+     * Defines the hard limit used by each subscribe proxy that runs with multi
      * active serving.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES =
+    public static final PropertyInteger MAO_HARD_LIMIT_SUBSCRIBE_PROXIES =
             new PropertyInteger(
-                    "eventcloud.mao.soft.limit.subscribe.proxies",
-                    Runtime.getRuntime().availableProcessors() * 2 + 1);
+                    "eventcloud.mao.hard.limit.subscribe.proxies",
+                    Runtime.getRuntime().availableProcessors() * 32);
 
     /**
      * Specifies the number maximum of attempts to lookup a proxy that is not
@@ -449,6 +472,35 @@ public class EventCloudProperties {
                     || propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2)
                     || propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3);
         }
+    }
+
+    private static final class Sbce2PreventChunkDuplicates extends
+            Validator<Boolean> {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isLegalValue(Boolean propertyValue) {
+            return !(propertyValue && EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.getValue()
+                    .equalsIgnoreCase(
+                            EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected String getErrorMessage(String propertyName,
+                                         Boolean propertyValue) {
+            return "Property "
+                    + propertyName
+                    + " can only be used in conjunction with property "
+                    + EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.getName()
+                    + " set to " + PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2 + " or "
+                    + PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3;
+        }
+
     }
 
 }
