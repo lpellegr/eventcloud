@@ -32,7 +32,7 @@ public class JobLogger {
 
 	// These values have to be set in a test that uses the JobLogger
 	private static int nbPeers = 0;
-	public static final String logDirectory = "/user/jrochas/home/Documents/jrochas/tmp/logs/";	
+	public static final String logDirectory = "/Users/Justine/broadcast_logs/";	
 	public static final boolean bcastDebugMode = true ;
 	public static String PREFIX;	
 

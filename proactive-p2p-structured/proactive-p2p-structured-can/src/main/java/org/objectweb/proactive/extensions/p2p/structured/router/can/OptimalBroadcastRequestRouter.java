@@ -21,7 +21,6 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
@@ -35,8 +34,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntryWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTableWrapper;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -121,24 +118,23 @@ extends Router<OptimalBroadcastRequest<E>, Coordinate<E>> {
 				request.getAnycastRoutingList()
 				.removeLast()
 				.getPeerStub()
-				.route(
-						request.getResponseProvider().get(
+				.route(request.getResponseProvider().get(
 								request, overlay));
 			}
 		} else {
-			if (JobLogger.bcastDebugMode) {
-				Date receiveTime = new Date();
-				String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
-				JobLogger.logMessage(request.getId().toString() + "_" +
-						"OptimalBroadcast_" + hostname, 
-						"0 " + timestamp + JobLogger.RETURN);
-			}
 			// the current overlay validates the constraints
 			if (request.validatesKeyConstraints(canOverlay)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Request " + request.getId() + " is on peer "
 							+ overlay + " which validates constraints "
 							+ request.getKey());
+				}
+				if (JobLogger.bcastDebugMode) {
+					Date receiveTime = new Date();
+					String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
+					JobLogger.logMessage(request.getId().toString() + "_" +
+							"OptimalBroadcast_" + hostname, 
+							"0 " + timestamp + JobLogger.RETURN);
 				}
 				this.onPeerValidatingKeyConstraints(canOverlay, request);
 				// sends the message to the other neighbors which validates the
@@ -364,59 +360,27 @@ extends Router<OptimalBroadcastRequest<E>, Coordinate<E>> {
 	@Override
 	protected void route(StructuredOverlay overlay, OptimalBroadcastRequest<E> request) {
 		@SuppressWarnings("unchecked")
-		CanOverlay<E> overlayCAN = (CanOverlay<E>) overlay;
-
-		byte dimension = 0;
-		byte direction = NeighborTable.DIRECTION_ANY;
-
-		// finds the dimension on which the key to reach is not contained
-		for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-			direction =
-					overlayCAN.getZone().contains(
-							dimension, request.getKey().getElement(dimension));
-
-			if (direction == -1) {
-				direction = NeighborTable.DIRECTION_INFERIOR;
-				break;
-			} else if (direction == 1) {
-				direction = NeighborTable.DIRECTION_SUPERIOR;
-				break;
+		NeighborTableWrapper<E> neighborsToSendTo =
+				this.getNeighborsToSendTo((CanOverlay<E>)overlay, (OptimalBroadcastRequest<E>) request);
+		
+		for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+			for (byte direction = 0; direction < 2; direction++) {
+				Iterator<NeighborEntryWrapper<E>> it =
+						neighborsToSendTo.get(dim, direction)
+						.iterator();
+				while (it.hasNext()) {
+					NeighborEntryWrapper<E> neighborEntry = it.next();
+					Peer p = neighborEntry.getNeighborEntry().getStub();
+					if (logger.isDebugEnabled()) {
+						logger.debug("Sending request "
+								+ request.getId() + " from " + overlay
+								+ " -> " + p);
+					}
+					request.setDirections(neighborEntry.getDirections());
+					request.setSplitPlans(neighborEntry.getSplitPlans());
+					p.route(request);
+				}
 			}
-		}
-
-		// selects one neighbor in the dimension and the direction previously
-		// affected
-		NeighborEntry<E> neighborChosen =
-				overlayCAN.nearestNeighbor(
-						request.getKey(), dimension, direction);
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("The message is routed to a neigbour because the current peer "
-					+ "managing "
-					+ overlay
-					+ " does not contains the key to reach ("
-					+ request.getKey()
-					+ "). Neighbor is selected from dimension "
-					+ dimension
-					+ " and direction " + direction + ": " + neighborChosen);
-		}
-
-		// sends the message to it
-		try {
-			if (request.getResponseProvider() != null) {
-				overlay.getResponseEntries().put(
-						request.getId(), new ResponseEntry(1));
-
-				request.getAnycastRoutingList().add(
-						new AnycastRoutingEntry(
-								overlay.getId(), overlay.getStub()));
-			}
-
-			neighborChosen.getStub().route(request);
-		} catch (ProActiveRuntimeException e) {
-			logger.error("Error while sending the message to the neighbor managing "
-					+ neighborChosen.getZone());
-			e.printStackTrace();
 		}
 	}
 

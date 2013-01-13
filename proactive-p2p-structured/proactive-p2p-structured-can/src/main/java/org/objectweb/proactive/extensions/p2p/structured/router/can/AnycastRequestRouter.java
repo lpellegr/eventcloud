@@ -122,13 +122,6 @@ extends Router<AnycastRequest<E>, Coordinate<E>> {
 								request, overlay));
 			}
 		} else {
-			if (JobLogger.bcastDebugMode) {
-				Date receiveTime = new Date();
-				String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
-				JobLogger.logMessage(request.getId().toString() + "_" +
-						"FloodingBroadcast_" + hostname, 
-						"0 " + timestamp + JobLogger.RETURN);
-			}
 			// the current overlay validates the constraints
 			if (request.validatesKeyConstraints(canOverlay)) {
 				if (logger.isDebugEnabled()) {
@@ -136,7 +129,13 @@ extends Router<AnycastRequest<E>, Coordinate<E>> {
 							+ overlay + " which validates constraints "
 							+ request.getKey());
 				}
-
+				if (JobLogger.bcastDebugMode) {
+					Date receiveTime = new Date();
+					String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
+					JobLogger.logMessage(request.getId().toString() + "_" +
+							"FloodingBroadcast_" + hostname, 
+							"0 " + timestamp + JobLogger.RETURN);
+				}
 				this.onPeerValidatingKeyConstraints(canOverlay, request);
 
 				// sends the message to the other neighbors which validates the
