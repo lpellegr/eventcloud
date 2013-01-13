@@ -17,9 +17,9 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmarks;
 
 /**
- * This class aims to compare different algorithm that
- * can be used when a message needs to be disseminated
- * accross all peers (i.e. with no particular constraints).
+ * This class runs a local experiment to compare different algorithms that
+ * can be used when a message needs to be disseminated across all peers.
+ * The results are given in files in the directory specified.
  * 
  * If parameters are given to the main, it sets these parameters :
  * <ol>
@@ -33,7 +33,7 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmark
 public class BroadcastsBenchmark {
 	
 	private static int nbPeers = 25;
-	private static String logDirectory = "/user/jrochas/home/Documents/jrochas/tmp/logs/";
+	private static String logDirectory = "/Users/Justine/broadcast_logs/";
 
 	public static void main (String[] args) throws InterruptedException {
 		
@@ -45,27 +45,24 @@ public class BroadcastsBenchmark {
 		}
 		
 		try {
-			// Running an EfficientBroadcast
-			FloodingBroadcast floodingBcast = new FloodingBroadcast(nbPeers, logDirectory);
-			floodingBcast.initialize();
-			floodingBcast.measureFloodingBroadcast();
-			floodingBcast.terminate();
-
+			// Building the CAN
+			BroadcastInfrastructure broadcastInfrastructure = 
+					new BroadcastInfrastructure(nbPeers, logDirectory);
+			broadcastInfrastructure.initialize();
+			
+			// Running a FloodingBroadcast
+			broadcastInfrastructure.measureFloodingBroadcast();
 			Thread.sleep(2000);
 			
 			// Running an EfficientBroadcast
-			EfficientBroadcast efficientBcast = new EfficientBroadcast(nbPeers, logDirectory);
-			efficientBcast.initialize();
-			efficientBcast.measureEfficientBroadcast();
-			efficientBcast.terminate();
-			
+			broadcastInfrastructure.measureEfficientBroadcast();
 			Thread.sleep(2000);
 			
 			// Running an OptimalBroadcast
-			OptimalBroadcast optimalBcast = new OptimalBroadcast(nbPeers, logDirectory);
-			optimalBcast.initialize();
-			optimalBcast.measureOptimalBroadcast();
-			optimalBcast.terminate();
+			broadcastInfrastructure.measureOptimalBroadcast();
+			Thread.sleep(2000);
+			
+			broadcastInfrastructure.terminate();	
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();
