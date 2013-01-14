@@ -20,19 +20,21 @@ import org.apache.log4j.PatternLayout;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 /**
- * Class used to write information in a log file. Used to check if there any
- * duplicate messages in the broadcast request routing.
+ * Class used to write information in a log file. Used to check if there is any
+ * duplicate messages in the broadcast request routing, and to log other metrics
+ * such as reception time of the message.
  * 
  * @author acraciun
  * 
  */
 public class JobLogger {
 
+	/** Collection of loggers created during the execution */
 	private static Hashtable<String, Logger> m_loggers = new Hashtable<String, Logger>();
 
-	// These values have to be set in a test that uses the JobLogger
+	// These values can be set in a test that uses the JobLogger
 	private static int nbPeers = 0;
-	public static final String logDirectory = "/Users/Justine/broadcast_logs/";	
+	public static String logDirectory = "/user/jrochas/home/Documents/jrochas/tmp/logs/";	
 	public static final boolean bcastDebugMode = true ;
 	public static String PREFIX;	
 
