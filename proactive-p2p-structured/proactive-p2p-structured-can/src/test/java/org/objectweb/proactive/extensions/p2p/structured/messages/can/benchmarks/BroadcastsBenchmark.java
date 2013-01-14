@@ -60,6 +60,9 @@ public class BroadcastsBenchmark {
 			}
 		}
 		
+		// Set the number of peers for the log files
+		JobLogger.setNbPeers(nbPeers);
+		
 		try {
 			// Building the CAN
 			BroadcastInfrastructure broadcastInfrastructure = 
