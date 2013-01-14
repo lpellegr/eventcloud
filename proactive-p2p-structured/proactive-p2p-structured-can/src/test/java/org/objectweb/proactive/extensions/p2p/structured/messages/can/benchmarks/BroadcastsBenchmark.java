@@ -16,6 +16,10 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmarks;
 
+import java.io.File;
+
+import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
+
 /**
  * This class runs a local experiment to compare different algorithms that
  * can be used when a message needs to be disseminated across all peers.
@@ -32,8 +36,10 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmark
  */
 public class BroadcastsBenchmark {
 	
+	/** Number of peers in the network (can be changed through first main method parameter) */
 	private static int nbPeers = 25;
-	private static String logDirectory = "/Users/Justine/broadcast_logs/";
+	/** Directory of feedback files (can be changed through second main method parameter) */
+	private static String logDirectory = "/user/jrochas/home/Documents/jrochas/tmp/logs/";
 
 	public static void main (String[] args) throws InterruptedException {
 		
@@ -41,6 +47,16 @@ public class BroadcastsBenchmark {
 			nbPeers = Integer.parseInt(args[0]);
 			if (args.length > 1) {
 				logDirectory = args[1];
+				JobLogger.logDirectory = args[1];
+			}
+		}
+		
+		// Removing all the previous logs
+		File directory = new  File(logDirectory);
+		if (directory.exists()) {
+			File[] files = directory.listFiles();
+			for (File file : files) {
+				file.delete();
 			}
 		}
 		
