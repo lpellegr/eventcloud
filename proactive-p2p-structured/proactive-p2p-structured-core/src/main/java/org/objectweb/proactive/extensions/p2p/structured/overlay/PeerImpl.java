@@ -69,8 +69,8 @@ import org.slf4j.LoggerFactory;
         @Group(name = "parallel", selfCompatible = true),
         @Group(name = "receiveCallableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation", condition = "isCompatible")})
 @DefineRules({
-        @Compatible(value = {"receiveCallableOperation", "join"}, condition = "!this.isJoinOperation"),
-        @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "!this.isLeaveOperation"),
+        @Compatible(value = {"receiveCallableOperation", "join"}, condition = "!isJoinOperation"),
+        @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "!isLeaveOperation"),
         @Compatible(value = {"receiveCallableOperation", "parallel"}),})
 public class PeerImpl extends AbstractComponent implements Peer,
         PeerAttributeController, ComponentEndActive, Serializable {
