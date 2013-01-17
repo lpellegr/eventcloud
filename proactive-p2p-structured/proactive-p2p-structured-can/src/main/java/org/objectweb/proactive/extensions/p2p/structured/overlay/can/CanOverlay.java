@@ -32,11 +32,15 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.EnlargeZoneOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.RefreshNeighborOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.RemoveNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.ReplaceNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation2;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
@@ -50,6 +54,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDe
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
 /**
@@ -296,7 +301,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      * 
      * @return the history of the splits.
      */
-    public List<SplitEntry> getSplitHistory() {
+    public LinkedList<SplitEntry> getSplitHistory() {
         return this.splitHistory;
     }
 
@@ -364,7 +369,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         // gets the next dimension to split into
         if (!this.splitHistory.isEmpty()) {
             dimension =
-                    CanOverlay.getNextDimension(this.splitHistory.removeLast()
+                    CanOverlay.getNextDimension(this.splitHistory.getLast()
                             .getDimension());
         }
 
@@ -540,6 +545,84 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             return;
         }
 
+        this.leaveBasedOnSplitHistory();
+    }
+
+    private void leaveBasedOnSplitHistory() {
+        SplitEntry lastSplitEntry = this.splitHistory.getLast();
+
+        byte reassignmentDimension = lastSplitEntry.getDimension();
+        byte reassignmentDirection =
+                getOppositeDirection(lastSplitEntry.getDirection());
+
+        E element =
+                reassignmentDirection > 0
+                        ? this.zone.getLowerBound(reassignmentDimension)
+                        : this.zone.getUpperBound(reassignmentDimension);
+
+        System.out.println("reassignmentDimension=" + reassignmentDimension
+                + ", reassignmentDirection=" + reassignmentDirection + ", e="
+                + element);
+
+        for (NeighborEntry<E> entry : this.neighborTable.get(
+                reassignmentDimension, reassignmentDirection).values()) {
+            System.out.println("ENTRY=" + entry);
+            // enlarges the local neighbors' zones that take over the leaving
+            // zone such that we can update neighbors' pointer with local
+            // knowledge
+            entry.getZone().enlarge(reassignmentDimension,
+            // opposite direction of reassignmentDirection
+            lastSplitEntry.getDirection(), element);
+
+            // enlarge the remote neighbor's zone
+            PAFuture.waitFor(entry.getStub()
+                    .receive(
+                            new EnlargeZoneOperation<E>(
+                                    this.splitHistory.size() - 1,
+                                    reassignmentDimension,
+                                    reassignmentDirection,
+                                    element,
+                                    ImmutableList.copyOf(this.neighborTable.get(
+                                            reassignmentDimension,
+                                            CanOverlay.getOppositeDirection(reassignmentDirection))
+                                            .values()))));
+        }
+
+        // updates neighbor's pointers of each neighbor in the opposite
+        // reassignment position that take over the leaving zone
+        for (NeighborEntry<E> entry : this.neighborTable.get(
+                reassignmentDimension,
+                CanOverlay.getOppositeDirection(reassignmentDirection))
+                .values()) {
+            PAFuture.waitFor(entry.getStub().receive(
+                    new UpdateNeighborOperation2<E>(
+                            ImmutableList.copyOf(this.neighborTable.get(
+                                    reassignmentDimension,
+                                    reassignmentDirection).values()),
+                            reassignmentDimension, reassignmentDirection)));
+        }
+
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                for (NeighborEntry<E> neighborEntry : this.neighborTable.get(
+                        dimension, direction).values()) {
+                    // removes the leaving peer from remote neighbors' tables
+                    PAFuture.waitFor(neighborEntry.getStub()
+                            .receive(
+                                    new RemoveNeighborOperation<E>(
+                                            this.getId(),
+                                            dimension,
+                                            CanOverlay.getOppositeDirection(direction))));
+
+                    PAFuture.waitFor(neighborEntry.getStub().receive(
+                            new RefreshNeighborOperation<E>()));
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void lazyLeave() {
         NeighborEntry<E> suitableNeighbor =
                 this.neighborTable.getMergeableNeighbor(this.zone);
 

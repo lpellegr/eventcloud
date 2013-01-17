@@ -323,6 +323,13 @@ public abstract class Zone<E extends Element> implements Serializable {
      */
     public abstract Zone<E> merge(Zone<E> zone);
 
+    public void enlarge(byte dimension, byte direction, E element) {
+        Coordinate<E> bound = direction > 0
+                ? this.upperBound : this.lowerBound;
+
+        bound.setElement(dimension, element);
+    }
+
     protected HomogenousPair<Coordinate<E>> mergeCoordinates(Zone<E> zone) {
         byte d = this.neighbors(zone);
 

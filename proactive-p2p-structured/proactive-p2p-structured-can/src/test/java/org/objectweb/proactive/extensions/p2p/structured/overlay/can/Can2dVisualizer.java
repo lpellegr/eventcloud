@@ -49,6 +49,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlrea
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
@@ -56,7 +57,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
 /**
  * This class is used to draw a canvas that shows a Content-Addressable Network
@@ -187,6 +190,10 @@ public class Can2dVisualizer extends JFrame {
 
                             Can2dVisualizer.this.cache.addEntry(newPeer);
                             Can2dVisualizer.this.cache.invalidate();
+
+                            System.out.println("--> JOIN");
+                            entry.getStub().sendv(
+                                    new PrintSplitHistoryRequest());
                         } else if (Can2dVisualizer.this.mode == Mode.LEAVE) {
                             try {
                                 entry.getStub().leave();
@@ -472,6 +479,34 @@ public class Can2dVisualizer extends JFrame {
 
     }
 
+    private static final class PrintSplitHistoryRequest extends
+            AnycastRequest<StringElement> {
+
+        private static final long serialVersionUID = 140L;
+
+        public PrintSplitHistoryRequest() {
+            super(new DefaultAnycastConstraintsValidator<StringElement>(
+                    new Coordinate<StringElement>(null, null)));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public AnycastRequestRouter<AnycastRequest<StringElement>, StringElement> getRouter() {
+            return new AnycastRequestRouter<AnycastRequest<StringElement>, StringElement>() {
+                @Override
+                public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
+                                                           org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest<StringElement> request) {
+                    System.err.println("Peer " + overlay.getZone());
+                    for (SplitEntry entry : ((CanOverlay<StringElement>) overlay).getSplitHistory()) {
+                        System.err.println("  " + entry);
+                    }
+                }
+            };
+        }
+    }
+
     public static void main(String[] args) {
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 2);
         P2PStructuredProperties.CAN_REFRESH_TASK_INTERVAL.setValue(1000);
@@ -485,7 +520,7 @@ public class Can2dVisualizer extends JFrame {
         CanNetworkDeployer deployer =
                 new CanNetworkDeployer(
                         new StringCanDeploymentDescriptor().setInjectionConstraintsProvider(injectionConstraintsProvider));
-        deployer.deploy(100);
+        deployer.deploy(15);
 
         final List<Peer> peers = deployer.getRandomTracker().getPeers();
 
@@ -498,4 +533,5 @@ public class Can2dVisualizer extends JFrame {
 
         deployer.undeploy();
     }
+
 }
