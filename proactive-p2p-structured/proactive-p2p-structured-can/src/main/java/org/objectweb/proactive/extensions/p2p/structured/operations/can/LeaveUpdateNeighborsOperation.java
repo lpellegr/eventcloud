@@ -16,57 +16,78 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import java.util.Map;
+import java.util.UUID;
+
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
+ * Operation used to update neighbors' zones of the peer that leaves the
+ * network.
+ * 
  * @param <E>
  *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */
-public class RefreshNeighborOperation<E extends Element> extends
+public class LeaveUpdateNeighborsOperation<E extends Element> extends
         CallableOperation {
 
     private static final long serialVersionUID = 140L;
 
-    private final byte dimension;
+    private final UUID peerIdToRemove;
 
-    private final byte direction;
+    private final Map<UUID, NeighborEntry<E>> entries;
 
-    public RefreshNeighborOperation() {
-        this.dimension = -1;
-        this.direction = -1;
+    public LeaveUpdateNeighborsOperation(NeighborEntry<E> entry) {
+        this.entries = ImmutableMap.of(entry.getId(), entry);
+        this.peerIdToRemove = null;
     }
 
-    public RefreshNeighborOperation(byte dimension, byte direction) {
-        this.dimension = dimension;
-        this.direction = direction;
+    public LeaveUpdateNeighborsOperation(Map<UUID, NeighborEntry<E>> entries) {
+        this.peerIdToRemove = null;
+        this.entries = entries;
     }
 
+    public LeaveUpdateNeighborsOperation(UUID peerIdToRemove,
+            Map<UUID, NeighborEntry<E>> entries) {
+        this.peerIdToRemove = peerIdToRemove;
+        this.entries = entries;
+    }
+
+    /**
+     * Handles a {@link LeaveUpdateNeighborsOperation}.
+     * 
+     * @param overlay
+     *            the overlay which handles the message.
+     */
     @Override
     @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         CanOverlay<E> canOverlay = (CanOverlay<E>) overlay;
 
-        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry<E> neighborEntry : canOverlay.getNeighborTable()
-                        .get(dimension, direction)
-                        .values()) {
-                    if (this.dimension != -1 && dimension == this.dimension
-                            && direction != -1 && direction == this.direction) {
-                        neighborEntry.setZone(CanOperations.<E> getIdAndZoneResponseOperation(
-                                neighborEntry.getStub())
-                                .getPeerZone());
-                    }
-                }
+        if (this.peerIdToRemove != null) {
+            canOverlay.getNeighborTable().remove(this.peerIdToRemove);
+        }
+
+        for (NeighborEntry<E> entry : this.entries.values()) {
+            if (entry.getId().equals(overlay.getId())) {
+                continue;
+            }
+
+            NeighborEntry<E> found =
+                    canOverlay.getNeighborTable().getNeighborEntry(
+                            entry.getId());
+
+            if (found != null) {
+                found.setZone(entry.getZone());
             }
         }
 
