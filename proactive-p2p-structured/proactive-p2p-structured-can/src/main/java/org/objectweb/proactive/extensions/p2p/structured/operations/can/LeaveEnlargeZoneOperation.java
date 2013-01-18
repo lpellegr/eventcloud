@@ -16,6 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
+import java.io.Serializable;
+
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
@@ -47,12 +49,16 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
 
     private final E element;
 
+    private final Serializable dataToTransfert;
+
     public LeaveEnlargeZoneOperation(int splitEntryIndex,
-            byte reassignmentDimension, byte reassignmentDirection, E element) {
+            byte reassignmentDimension, byte reassignmentDirection, E element,
+            Serializable dataToTransfert) {
         this.splitEntryIndex = splitEntryIndex;
         this.reassignmentDimension = reassignmentDimension;
         this.reassignmentDirection = reassignmentDirection;
         this.element = element;
+        this.dataToTransfert = dataToTransfert;
     }
 
     /**
@@ -62,6 +68,8 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
     @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
+
+        canOverlay.assignDataReceived(this.dataToTransfert);
 
         // enlarge the current zone
         canOverlay.getZone().enlarge(

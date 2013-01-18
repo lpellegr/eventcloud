@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -568,12 +569,14 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                     reassignmentDimension, oppositeReassignmentDirection,
                     element);
 
+            Serializable dataToTransfert = this.retrieveDataIn(entry.getZone());
+
             // enlarge the remote neighbor's zone
             PAFuture.waitFor(entry.getStub().receive(
                     new LeaveEnlargeZoneOperation<E>(
                             this.splitHistory.size() - 1,
                             reassignmentDimension, reassignmentDirection,
-                            element)));
+                            element, dataToTransfert)));
         }
 
         // updates neighbor's pointers of each neighbor in the opposite
