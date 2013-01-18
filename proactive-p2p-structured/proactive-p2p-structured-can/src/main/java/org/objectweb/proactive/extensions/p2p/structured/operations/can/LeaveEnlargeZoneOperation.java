@@ -49,7 +49,7 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
 
     private final E element;
 
-    private final Serializable dataToTransfert;
+    private final Serializable dataToTransfer;
 
     public LeaveEnlargeZoneOperation(int splitEntryIndex,
             byte reassignmentDimension, byte reassignmentDirection, E element,
@@ -58,7 +58,7 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
         this.reassignmentDimension = reassignmentDimension;
         this.reassignmentDirection = reassignmentDirection;
         this.element = element;
-        this.dataToTransfert = dataToTransfert;
+        this.dataToTransfer = dataToTransfert;
     }
 
     /**
@@ -69,7 +69,7 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
 
-        canOverlay.assignDataReceived(this.dataToTransfert);
+        canOverlay.assignDataReceived(this.dataToTransfer);
 
         // enlarge the current zone
         canOverlay.getZone().enlarge(
