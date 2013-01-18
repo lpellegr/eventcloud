@@ -26,33 +26,23 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEnt
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
+ * Piggyback peers that are potentially new neighbors of the peer that receive
+ * the operation.
  * 
  * @param <E>
  *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */
-public class EnlargeZoneOperation<E extends Element> extends CallableOperation {
+public class LeaveAddNeighborsOperation<E extends Element> extends
+        CallableOperation {
 
     private static final long serialVersionUID = 140L;
 
-    private final int splitEntryIndex;
-
-    private final byte reassignmentDimension;
-
-    private final byte reassignmentDirection;
-
-    private final E element;
-
     private final Collection<NeighborEntry<E>> possibleNewNeighbors;
 
-    public EnlargeZoneOperation(int splitEntryIndex,
-            byte reassignmentDimension, byte reassignmentDirection, E element,
+    public LeaveAddNeighborsOperation(
             Collection<NeighborEntry<E>> possibleNewNeighbors) {
-        this.splitEntryIndex = splitEntryIndex;
-        this.reassignmentDimension = reassignmentDimension;
-        this.reassignmentDirection = reassignmentDirection;
-        this.element = element;
         this.possibleNewNeighbors = possibleNewNeighbors;
     }
 
@@ -62,37 +52,23 @@ public class EnlargeZoneOperation<E extends Element> extends CallableOperation {
     @Override
     @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
-
-        // enlarge the current zone
-        canOverlay.getZone().enlarge(
-                this.reassignmentDimension,
-                CanOverlay.getOppositeDirection(this.reassignmentDirection),
-                this.element);
-
-        canOverlay.getSplitHistory().remove(this.splitEntryIndex);
+        CanOverlay<E> canOverlay = (CanOverlay<E>) overlay;
 
         for (NeighborEntry<E> entry : this.possibleNewNeighbors) {
-            if (canOverlay.getZone().neighbors(entry.getZone()) != -1) {
-                System.out.println("EnlargeZoneOperation.handle() ADDED ENTRY");
-                canOverlay.getNeighborTable().add(
-                        entry, this.reassignmentDimension,
-                        this.reassignmentDirection);
-            }
-        }
+            byte abutDimension =
+                    canOverlay.getZone().neighbors(entry.getZone());
 
-        // says to neighbor to update the view of the current peer zone that has
-        // changed
-        for (NeighborEntry<E> entry : canOverlay.getNeighborTable()
-                .get(
-                        this.reassignmentDimension,
-                        CanOverlay.getOppositeDirection(this.reassignmentDirection))
-                .values()) {
-            entry.getStub()
-                    .receive(
-                            new RefreshNeighborOperation<Element>(
-                                    reassignmentDimension,
-                                    CanOverlay.getOppositeDirection(this.reassignmentDirection)));
+            if (abutDimension != -1) {
+                byte abutDirection =
+                        canOverlay.getZone().neighbors(
+                                entry.getZone(), abutDimension);
+
+                if (!canOverlay.getNeighborTable().contains(
+                        entry.getId(), abutDimension, abutDirection)) {
+                    canOverlay.getNeighborTable().add(
+                            entry, abutDimension, abutDirection);
+                }
+            }
         }
 
         return new EmptyResponseOperation();
