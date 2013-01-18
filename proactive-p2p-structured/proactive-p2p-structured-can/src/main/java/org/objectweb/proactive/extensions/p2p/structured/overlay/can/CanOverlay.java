@@ -569,14 +569,14 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                     reassignmentDimension, oppositeReassignmentDirection,
                     element);
 
-            Serializable dataToTransfert = this.retrieveDataIn(entry.getZone());
+            Serializable dataToTransfer = this.retrieveDataIn(entry.getZone());
 
             // enlarge the remote neighbor's zone
             PAFuture.waitFor(entry.getStub().receive(
                     new LeaveEnlargeZoneOperation<E>(
                             this.splitHistory.size() - 1,
                             reassignmentDimension, reassignmentDirection,
-                            element, dataToTransfert)));
+                            element, dataToTransfer)));
         }
 
         // updates neighbor's pointers of each neighbor in the opposite
