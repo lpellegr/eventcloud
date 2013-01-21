@@ -139,11 +139,8 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 				this.onPeerValidatingKeyConstraints(canOverlay, request);
 				// sends the message to the other neighbors which validates the
 				// constraints
-				this.handle(overlay, request);
-			} else {
-				// We should only be in this case if the broadcast is not total
-				this.route(overlay, request);
 			}
+			this.handle(overlay, request);
 		}
 	}
 
@@ -239,6 +236,12 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 		}
 	}
 
+	/**
+	 * Apply the M-CAN broadcast algorithm to select the peers to forward the message.
+	 * @param overlay
+	 * @param request
+	 * @return
+	 */
 	private NeighborTableWrapper<E> getNeighborsToSendTo(final CanOverlay<E> overlay,
 			final EfficientBroadcastRequest<E> request) {
 		NeighborTableWrapper<E> extendedNeighbors = new NeighborTableWrapper<E>();
@@ -326,7 +329,6 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 				directions[direction][dimension] = -1;
 			}
 		}
-
 		return neighborsToSendTo;
 	}
 
@@ -342,29 +344,9 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 	 */
 	@Override
 	protected void route(StructuredOverlay overlay, EfficientBroadcastRequest<E> request) {
-		@SuppressWarnings("unchecked")
-		NeighborTableWrapper<E> neighborsToSendTo =
-		this.getNeighborsToSendTo((CanOverlay<E>)overlay, (EfficientBroadcastRequest<E>) request);
-
-		for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-			for (byte direction = 0; direction < 2; direction++) {
-				Iterator<NeighborEntryWrapper<E>> it =
-						neighborsToSendTo.get(dim, direction)
-						.iterator();
-				while (it.hasNext()) {
-					NeighborEntryWrapper<E> neighborEntry = it.next();
-					Peer p = neighborEntry.getNeighborEntry().getStub();
-					if (logger.isDebugEnabled()) {
-						logger.debug("Sending request "
-								+ request.getId() + " from " + overlay
-								+ " -> " + p);
-					}
-					request.setDirections(neighborEntry.getDirections());
-					request.setSplitPlans(neighborEntry.getSplitPlans());
-					p.route(request);
-				}
-			}
-		}
+		// This method is not used with the optimal broadcast because a message
+		// has to follow a unique path and no heuristics can be made to route the message
+		// to peers validating the constraint. Hence, the path followed is the as "handle".
 	}
 
 	/**
