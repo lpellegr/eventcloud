@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -34,7 +35,10 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperation
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveAddNeighborsOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveEnlargeZoneOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveUpdateNeighborsOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.ReplaceNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
@@ -296,7 +300,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      * 
      * @return the history of the splits.
      */
-    public List<SplitEntry> getSplitHistory() {
+    public LinkedList<SplitEntry> getSplitHistory() {
         return this.splitHistory;
     }
 
@@ -364,7 +368,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         // gets the next dimension to split into
         if (!this.splitHistory.isEmpty()) {
             dimension =
-                    CanOverlay.getNextDimension(this.splitHistory.removeLast()
+                    CanOverlay.getNextDimension(this.splitHistory.getLast()
                             .getDimension());
         }
 
@@ -540,6 +544,83 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             return;
         }
 
+        this.leaveBasedOnSplitHistory();
+    }
+
+    private void leaveBasedOnSplitHistory() {
+        SplitEntry lastSplitEntry = this.splitHistory.getLast();
+
+        byte oppositeReassignmentDirection = lastSplitEntry.getDirection();
+        byte reassignmentDimension = lastSplitEntry.getDimension();
+        byte reassignmentDirection =
+                getOppositeDirection(lastSplitEntry.getDirection());
+
+        E element =
+                reassignmentDirection > 0
+                        ? this.zone.getLowerBound(reassignmentDimension)
+                        : this.zone.getUpperBound(reassignmentDimension);
+
+        for (NeighborEntry<E> entry : this.neighborTable.get(
+                reassignmentDimension, reassignmentDirection).values()) {
+            // enlarges the local neighbors' zones that take over the leaving
+            // zone such that we can update neighbors' pointer with local
+            // knowledge
+            entry.getZone().enlarge(
+                    reassignmentDimension, oppositeReassignmentDirection,
+                    element);
+
+            Serializable dataToTransfer = this.retrieveDataIn(entry.getZone());
+
+            // enlarge the remote neighbor's zone
+            PAFuture.waitFor(entry.getStub().receive(
+                    new LeaveEnlargeZoneOperation<E>(
+                            this.splitHistory.size() - 1,
+                            reassignmentDimension, reassignmentDirection,
+                            element, dataToTransfer)));
+        }
+
+        // updates neighbor's pointers of each neighbor in the opposite
+        // reassignment position that take over the leaving zone and
+        // removes leaving peer from neighbors' tables
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                for (NeighborEntry<E> entry : this.neighborTable.get(
+                        dimension, direction).values()) {
+                    PAFuture.waitFor(entry.getStub().receive(
+                            new LeaveUpdateNeighborsOperation<E>(
+                                    this.getId(), this.neighborTable.get(
+                                            reassignmentDimension,
+                                            reassignmentDirection))));
+                }
+            }
+        }
+
+        List<NeighborEntry<E>> neighborsNotReassigned =
+                new ArrayList<NeighborEntry<E>>();
+
+        // add new neighbors to necessary peers
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                for (NeighborEntry<E> entry : this.neighborTable.get(
+                        dimension, direction).values()) {
+                    neighborsNotReassigned.add(entry);
+                }
+            }
+        }
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                for (NeighborEntry<E> entry : this.neighborTable.get(
+                        dimension, direction).values()) {
+                    PAFuture.waitFor(entry.getStub().receive(
+                            new LeaveAddNeighborsOperation<E>(
+                                    neighborsNotReassigned)));
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void lazyLeave() {
         NeighborEntry<E> suitableNeighbor =
                 this.neighborTable.getMergeableNeighbor(this.zone);
 

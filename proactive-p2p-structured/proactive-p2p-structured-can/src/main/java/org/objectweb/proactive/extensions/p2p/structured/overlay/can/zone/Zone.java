@@ -277,6 +277,27 @@ public abstract class Zone<E extends Element> implements Serializable {
     }
 
     /**
+     * Returns the direction on which the current zone neighbors the specified
+     * zone on the given dimension.
+     * 
+     * @param zone
+     *            the zone to compare with.
+     * @param dimension
+     *            the dimension on which the zones are neighbors.
+     * 
+     * @return the direction on which the current zone neighbors the specified
+     *         zone on the given dimension.
+     */
+    public byte neighbors(Zone<E> zone, byte dimension) {
+        if (zone.getUpperBound().getElement(dimension).compareTo(
+                this.upperBound.getElement(dimension)) > 0) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
      * Returns two zones representing the original one split into two following
      * the specified {@code dimension}.
      * 
@@ -322,6 +343,13 @@ public abstract class Zone<E extends Element> implements Serializable {
      *         specified one.
      */
     public abstract Zone<E> merge(Zone<E> zone);
+
+    public void enlarge(byte dimension, byte direction, E element) {
+        Coordinate<E> bound = direction > 0
+                ? this.upperBound : this.lowerBound;
+
+        bound.setElement(dimension, element);
+    }
 
     protected HomogenousPair<Coordinate<E>> mergeCoordinates(Zone<E> zone) {
         byte d = this.neighbors(zone);

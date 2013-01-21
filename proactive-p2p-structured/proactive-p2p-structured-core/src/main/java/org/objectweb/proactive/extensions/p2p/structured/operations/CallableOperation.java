@@ -67,14 +67,15 @@ public abstract class CallableOperation implements Operation {
     }
 
     public boolean isCompatible(CallableOperation op) {
-        /* Truth table
-        /* ----------------------
-        /* First request   Second request   Compatible?
-        /* isJoinOrLeave   !isJoinOrLeave   no
-        /* isJoinOrLeave   isJoinOrLeave    no
-        /* !isJoinOrLeave  !isJoinOrLeave   yes
-        /* !isJoinOrLeave  isJoinOrLeave    no
-        */
+        /* 
+         * Truth table
+         * ----------------------
+         * First request   Second request   Compatible?
+         * isJoinOrLeave   !isJoinOrLeave   no
+         * isJoinOrLeave   isJoinOrLeave    no
+         * !isJoinOrLeave  !isJoinOrLeave   yes
+         * !isJoinOrLeave  isJoinOrLeave    no
+         */
         return !this.isJoinOrLeaveOperation() && !op.isJoinOrLeaveOperation();
     }
 

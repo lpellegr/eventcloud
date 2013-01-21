@@ -49,6 +49,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlrea
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
@@ -56,7 +57,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
 /**
  * This class is used to draw a canvas that shows a Content-Addressable Network
@@ -82,6 +85,8 @@ public class Can2dVisualizer extends JFrame {
 
     private PeersCache cache;
 
+    private Map<UUID, Color> peerColors;
+
     private enum Mode {
         JOIN, LEAVE, SHOW_NEIGHBORS
     };
@@ -90,12 +95,26 @@ public class Can2dVisualizer extends JFrame {
 
     public Can2dVisualizer(List<Peer> peers) {
         this.cache = new PeersCache();
+        this.peerColors = new HashMap<UUID, Color>();
+
         for (Peer peer : peers) {
             this.cache.addEntry(peer);
+            this.peerColors.put(peer.getId(), getRandomColor());
         }
 
         this.mode = Mode.SHOW_NEIGHBORS;
         this.createAndShowGUI();
+    }
+
+    public Color getPeerColor(UUID peerId) {
+        Color color = this.peerColors.get(peerId);
+
+        if (color == null) {
+            color = getRandomColor();
+            this.peerColors.put(peerId, color);
+        }
+
+        return color;
     }
 
     private static Color getRandomColor() {
@@ -173,8 +192,14 @@ public class Can2dVisualizer extends JFrame {
                             Can2dVisualizer.this.cache.findBy(
                                     e.getX(), CANVAS_HEIGHT - e.getY());
 
+                    if (entry == null) {
+                        return;
+                    }
+
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         if (Can2dVisualizer.this.mode == Mode.JOIN) {
+                            Canvas.this.zoneClicked = null;
+
                             Peer newPeer =
                                     PeerFactory.newPeer(SerializableProvider.create(StringCanOverlay.class));
                             try {
@@ -187,15 +212,22 @@ public class Can2dVisualizer extends JFrame {
 
                             Can2dVisualizer.this.cache.addEntry(newPeer);
                             Can2dVisualizer.this.cache.invalidate();
+
+                            System.out.println("--> JOIN");
+                            entry.getStub().sendv(
+                                    new PrintSplitHistoryRequest());
                         } else if (Can2dVisualizer.this.mode == Mode.LEAVE) {
+                            Canvas.this.zoneClicked = null;
+
                             try {
                                 entry.getStub().leave();
-                            } catch (NetworkNotJoinedException e1) {
-                                e1.printStackTrace();
+                            } catch (NetworkNotJoinedException nnje) {
+                                nnje.printStackTrace();
                             }
 
                             Can2dVisualizer.this.cache.removeEntry(entry.getId());
                             Can2dVisualizer.this.cache.invalidate();
+                            Can2dVisualizer.this.peerColors.remove(entry.getId());
                         } else if (Can2dVisualizer.this.mode == Mode.SHOW_NEIGHBORS) {
                             Canvas.this.zoneClicked = entry.getZone();
                         }
@@ -206,9 +238,7 @@ public class Can2dVisualizer extends JFrame {
                                 + e.getY() + ") wich is contained by zone "
                                 + entry.getZone());
                     } else if (e.getButton() == MouseEvent.BUTTON3) {
-                        for (PeerEntry peerEntry : Can2dVisualizer.this.cache) {
-                            peerEntry.setZoneColor(getRandomColor());
-                        }
+                        Can2dVisualizer.this.peerColors.clear();
                         Canvas.this.repaint();
                     }
                 }
@@ -257,7 +287,7 @@ public class Can2dVisualizer extends JFrame {
                 yMin = this.getYmin(zone);
                 yMax = this.getYmax(zone);
 
-                g2d.setColor(entry.getZoneColor());
+                g2d.setColor(Can2dVisualizer.this.getPeerColor(entry.getId()));
                 height = yMax - yMin;
                 g2d.fillRect(
                         xMin, CANVAS_HEIGHT - yMin - height, xMax - xMin,
@@ -271,16 +301,18 @@ public class Can2dVisualizer extends JFrame {
                 yMin = this.getYmin(this.zoneClicked);
                 yMax = this.getYmax(this.zoneClicked);
 
-                g2d.drawLine(xMin, CANVAS_HEIGHT - yMin, xMax, CANVAS_HEIGHT
-                        - yMax);
-                g2d.drawLine(xMax, CANVAS_HEIGHT - yMin, xMin, CANVAS_HEIGHT
-                        - yMax);
+                // g2d.drawLine(xMin, CANVAS_HEIGHT - yMin, xMax, CANVAS_HEIGHT
+                // - yMax);
+                // g2d.drawLine(xMax, CANVAS_HEIGHT - yMin, xMin, CANVAS_HEIGHT
+                // - yMax);
+
+                g2d.drawOval(xMin + ((xMax - xMin) / 2) - 8, CANVAS_HEIGHT
+                        - (yMin + ((yMax - yMin) / 2)) - 8, 15, 15);
                 g2d.fillOval(xMin + ((xMax - xMin) / 2) - 5, CANVAS_HEIGHT
                         - (yMin + ((yMax - yMin) / 2)) - 5, 10, 10);
 
                 for (int i = 0; i < 2; i++) {
                     for (int j = 0; j < 2; j++) {
-
                         PeerEntry peerClicked =
                                 Can2dVisualizer.this.cache.findBy(this.zoneClicked);
 
@@ -320,8 +352,6 @@ public class Can2dVisualizer extends JFrame {
 
     private static class PeerEntry {
 
-        private Color zoneColor;
-
         private final Zone<StringElement> zone;
 
         private final UUID id;
@@ -331,25 +361,16 @@ public class Can2dVisualizer extends JFrame {
         private final List<Zone<StringElement>> neighbors;
 
         public PeerEntry(final UUID id, final Peer stub,
-                final Zone<StringElement> zone, final Color zoneColor,
+                final Zone<StringElement> zone,
                 final List<Zone<StringElement>> neighbors) {
             this.id = id;
             this.stub = stub;
             this.zone = zone;
-            this.zoneColor = zoneColor;
             this.neighbors = neighbors;
         }
 
         public UUID getId() {
             return this.id;
-        }
-
-        public Color getZoneColor() {
-            return this.zoneColor;
-        }
-
-        public void setZoneColor(Color zoneColor) {
-            this.zoneColor = zoneColor;
         }
 
         public Zone<StringElement> getZone() {
@@ -467,9 +488,37 @@ public class Can2dVisualizer extends JFrame {
                             peerStub,
                             CanOperations.<StringElement> getIdAndZoneResponseOperation(
                                     peerStub)
-                                    .getPeerZone(), getRandomColor(), neighbors));
+                                    .getPeerZone(), neighbors));
         }
 
+    }
+
+    private static final class PrintSplitHistoryRequest extends
+            AnycastRequest<StringElement> {
+
+        private static final long serialVersionUID = 140L;
+
+        public PrintSplitHistoryRequest() {
+            super(new DefaultAnycastConstraintsValidator<StringElement>(
+                    new Coordinate<StringElement>(null, null)));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public AnycastRequestRouter<AnycastRequest<StringElement>, StringElement> getRouter() {
+            return new AnycastRequestRouter<AnycastRequest<StringElement>, StringElement>() {
+                @Override
+                public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
+                                                           org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest<StringElement> request) {
+                    System.err.println("Peer " + overlay.getZone());
+                    for (SplitEntry entry : overlay.getSplitHistory()) {
+                        System.err.println("  " + entry);
+                    }
+                }
+            };
+        }
     }
 
     public static void main(String[] args) {
@@ -485,7 +534,7 @@ public class Can2dVisualizer extends JFrame {
         CanNetworkDeployer deployer =
                 new CanNetworkDeployer(
                         new StringCanDeploymentDescriptor().setInjectionConstraintsProvider(injectionConstraintsProvider));
-        deployer.deploy(100);
+        deployer.deploy(50);
 
         final List<Peer> peers = deployer.getRandomTracker().getPeers();
 
@@ -498,4 +547,5 @@ public class Can2dVisualizer extends JFrame {
 
         deployer.undeploy();
     }
+
 }
