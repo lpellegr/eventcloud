@@ -168,13 +168,16 @@ public class NeighborTable<E extends Element> implements Serializable {
      * @param peerIdentifier
      *            the identifier used for the lookup.
      * 
-     * @return the zone found or <code>null</code>.
+     * @return the {@link NeighborEntry} found or <code>null</code>.
      */
     public NeighborEntry<E> getNeighborEntry(UUID peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
-                if (this.entries[dim][direction].containsKey(peerIdentifier)) {
-                    return this.entries[dim][direction].get(peerIdentifier);
+                NeighborEntry<E> result =
+                        this.entries[dim][direction].get(peerIdentifier);
+
+                if (result != null) {
+                    return result;
                 }
             }
         }

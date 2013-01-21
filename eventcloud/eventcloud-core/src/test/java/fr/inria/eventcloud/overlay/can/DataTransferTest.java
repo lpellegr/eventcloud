@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
@@ -60,10 +61,10 @@ import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
  * 
  * @author lpellegr
  */
-public class DataTransfertTest {
+public class DataTransferTest {
 
     private static final Logger log =
-            LoggerFactory.getLogger(DataTransfertTest.class);
+            LoggerFactory.getLogger(DataTransferTest.class);
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
@@ -80,8 +81,8 @@ public class DataTransfertTest {
     }
 
     @Test
-    public void testMiscDataTransfert() throws NetworkAlreadyJoinedException,
-            PeerNotActivatedException {
+    public void testMiscDataTransfer() throws NetworkAlreadyJoinedException,
+            PeerNotActivatedException, NetworkNotJoinedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 1);
 
         SemanticPeer firstPeer =
@@ -170,10 +171,15 @@ public class DataTransfertTest {
 
         Assert.assertEquals(1, firstPeerResult.size());
         Assert.assertEquals(1, secondPeerResult.size());
+
+        firstPeer.leave();
+
+        Assert.assertEquals(2, Operations.findQuadruplesOperation(
+                secondPeer, QuadruplePattern.ANY).size());
     }
 
     @Test
-    public void testSubscriptionsTransfert() throws EventCloudIdNotManaged,
+    public void testSubscriptionsTransfer() throws EventCloudIdNotManaged,
             NetworkAlreadyJoinedException, PeerNotActivatedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 2);
 

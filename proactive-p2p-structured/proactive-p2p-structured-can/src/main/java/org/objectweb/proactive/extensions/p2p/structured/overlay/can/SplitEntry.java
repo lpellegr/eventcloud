@@ -21,6 +21,9 @@ import java.io.Serializable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Objects.ToStringHelper;
+
 /**
  * {@code SplitEntry} stores the dimension and the direction of a {@link Zone}
  * when a join operation is performed by a {@link Peer}.
@@ -67,6 +70,41 @@ public class SplitEntry implements Serializable {
      */
     public byte getDirection() {
         return this.direction;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof SplitEntry) {
+            SplitEntry that = (SplitEntry) other;
+
+            return this.dimension == that.dimension
+                    && this.direction == that.direction;
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return 31 * (31 + this.dimension) + this.direction;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        ToStringHelper toStringHelper = Objects.toStringHelper(this.getClass());
+        toStringHelper.add("dimension", this.dimension);
+        toStringHelper.add("direction", this.direction);
+
+        return toStringHelper.toString();
     }
 
 }
