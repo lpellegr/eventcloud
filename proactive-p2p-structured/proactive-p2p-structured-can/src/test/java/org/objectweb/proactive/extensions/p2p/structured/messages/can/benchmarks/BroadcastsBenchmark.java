@@ -39,7 +39,7 @@ public class BroadcastsBenchmark {
 	/** Number of peers in the network (can be changed through first main method parameter) */
 	private static int nbPeers = 25;
 	/** Directory of feedback files (can be changed through second main method parameter) */
-	private static String logDirectory = "/user/jrochas/home/Documents/jrochas/tmp/logs/";
+	private static String logDirectory = "/tmp/broadcast_logs/";
 
 	public static void main (String[] args) throws InterruptedException {
 		
