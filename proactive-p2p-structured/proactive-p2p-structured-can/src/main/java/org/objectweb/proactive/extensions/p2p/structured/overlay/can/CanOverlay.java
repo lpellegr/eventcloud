@@ -406,11 +406,14 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                         super.id, super.stub, newZones.get(direction)),
                 dimension, direction);
 
+        long timestamp = System.currentTimeMillis();
+
         LinkedList<SplitEntry> historyToTransfert = null;
         try {
             historyToTransfert =
                     (LinkedList<SplitEntry>) MakeDeepCopy.makeDeepCopy(this.splitHistory);
-            historyToTransfert.add(new SplitEntry(dimension, directionInv));
+            historyToTransfert.add(new SplitEntry(
+                    dimension, directionInv, timestamp));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -419,7 +422,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         // updates overlay information due to the split
         this.zone = newZones.get(direction);
-        this.splitHistory.add(new SplitEntry(dimension, direction));
+        this.splitHistory.add(new SplitEntry(dimension, direction, timestamp));
 
         // removes the current peer from the neighbors that are back
         // the new peer which join and updates the zone maintained by
@@ -560,8 +563,18 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                         ? this.zone.getLowerBound(reassignmentDimension)
                         : this.zone.getUpperBound(reassignmentDimension);
 
-        for (NeighborEntry<E> entry : this.neighborTable.get(
-                reassignmentDimension, reassignmentDirection).values()) {
+        Collection<NeighborEntry<E>> reassignmentNeighbors =
+                this.neighborTable.get(
+                        reassignmentDimension, reassignmentDirection).values();
+
+        if (reassignmentNeighbors.isEmpty()) {
+            throw new IllegalStateException(
+                    "No neighbor to merge with found on dimension "
+                            + reassignmentDimension + " and direction "
+                            + reassignmentDirection);
+        }
+
+        for (NeighborEntry<E> entry : reassignmentNeighbors) {
             // enlarges the local neighbors' zones that take over the leaving
             // zone such that we can update neighbors' pointer with local
             // knowledge
@@ -574,7 +587,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             // enlarge the remote neighbor's zone
             PAFuture.waitFor(entry.getStub().receive(
                     new LeaveEnlargeZoneOperation<E>(
-                            this.splitHistory.size() - 1,
+                            this.splitHistory.getLast().getTimestamp(),
                             reassignmentDimension, reassignmentDirection,
                             element, dataToTransfer)));
         }
