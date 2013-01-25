@@ -138,16 +138,17 @@ public class WsDeployer {
                                                            String streamUrl,
                                                            String urlSuffix,
                                                            int port) {
-        SubscribeWsnServiceImpl subscribeService =
+        SubscribeWsnServiceImpl subscribeWsnService =
                 new SubscribeWsnServiceImpl(registryUrl, streamUrl);
 
-        Server server =
+        Server subscribeWsnServer =
                 deployWebService(
-                        SubscribeWsnApi.class, subscribeService, urlSuffix,
+                        SubscribeWsnApi.class, subscribeWsnService, urlSuffix,
                         port);
 
         return new WsnServiceInfo(
-                streamUrl, getEndpointUrl(server), subscribeService, server);
+                streamUrl, getEndpointUrl(subscribeWsnServer),
+                subscribeWsnService, subscribeWsnServer);
     }
 
     public static String getEndpointUrl(Server server) {
