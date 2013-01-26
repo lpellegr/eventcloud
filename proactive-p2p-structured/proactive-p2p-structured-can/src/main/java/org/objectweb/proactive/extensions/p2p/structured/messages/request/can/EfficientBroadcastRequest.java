@@ -39,21 +39,22 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastCo
  * 
  * @author jrochas
  */
-public class  EfficientBroadcastRequest<E extends Element> extends AnycastRequest<E> {
+public class EfficientBroadcastRequest<E extends Element> extends
+        AnycastRequest<E> {
 
     private static final long serialVersionUID = 130L;
 
     private boolean alreadyReceived = false;
 
-	// The identifier of the broadcast request.
-	private UUID originalMessageId;
-	private AnycastRoutingList broadcastRoutingList = new AnycastRoutingList();
-	// The directions on which the broadcast request has to be propagated by the
-	// peer receiving it.
-	private byte[][] directions;
-	// The coordinates that describe the splitting plan (the coordinates that
-	// need to be contained by the neighbors that will receive the request).
-	private Element[] splitPlans;
+    // The identifier of the broadcast request.
+    private UUID originalMessageId;
+    private AnycastRoutingList broadcastRoutingList = new AnycastRoutingList();
+    // The directions on which the broadcast request has to be propagated by the
+    // peer receiving it.
+    private byte[][] directions;
+    // The coordinates that describe the splitting plan (the coordinates that
+    // need to be contained by the neighbors that will receive the request).
+    private Element[] splitPlans;
 
     /**
      * Constructs a new message with the specified {@code validator} but with no
@@ -81,28 +82,30 @@ public class  EfficientBroadcastRequest<E extends Element> extends AnycastReques
             ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> responseProvider) {
         super(validator, responseProvider);
     }
-    
+
     public EfficientBroadcastRequest(
-			AnycastConstraintsValidator<E> validator,
-			ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
-			UUID messageId, byte[][] directions, Element[] splitPlans) {
-		super(validator, provider);
-		// if messageId==null then this is the request received by the
-		// initiator.
-		if (messageId == null) {
-			this.originalMessageId = this.getId();
-		} else {
-			this.originalMessageId = messageId;
-		}
+            AnycastConstraintsValidator<E> validator,
+            ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
+            UUID messageId, byte[][] directions, Element[] splitPlans) {
+        super(validator, provider);
+        // if messageId==null then this is the request received by the
+        // initiator.
+        if (messageId == null) {
+            this.originalMessageId = this.getId();
+        } else {
+            this.originalMessageId = messageId;
+        }
 
-		this.splitPlans = splitPlans;
-		this.directions = directions;
-	}
+        this.splitPlans = splitPlans;
+        this.directions = directions;
+    }
 
+    @Override
     public void markAsAlreadyReceived() {
         this.alreadyReceived = true;
     }
 
+    @Override
     public boolean isAlreadyReceived() {
         return this.alreadyReceived;
     }
@@ -127,6 +130,7 @@ public class  EfficientBroadcastRequest<E extends Element> extends AnycastReques
         return new EfficientBroadcastRequestRouter<EfficientBroadcastRequest<E>, E>();
     }
 
+    @Override
     public boolean validatesKeyConstraints(Zone<E> zone) {
         return ((AnycastConstraintsValidator<E>) super.constraintsValidator).validatesKeyConstraints(zone);
     }
@@ -148,41 +152,41 @@ public class  EfficientBroadcastRequest<E extends Element> extends AnycastReques
 
         return buf.toString();
     }
-    
+
     public byte[][] getDirections() {
-		return directions;
-	}
+        return this.directions;
+    }
 
-	public byte getDirection(int i, int j) {
-		return directions[i][j];
-	}
+    public byte getDirection(int i, int j) {
+        return this.directions[i][j];
+    }
 
-	public Element[] getSplitPlans() {
-		return splitPlans;
-	}
+    public Element[] getSplitPlans() {
+        return this.splitPlans;
+    }
 
-	public Element getSplitPlan(int index) {
-		return splitPlans[index];
-	}
+    public Element getSplitPlan(int index) {
+        return this.splitPlans[index];
+    }
 
-	public void setDirections(byte[][] directions) {
-		this.directions = directions;
-	}
+    public void setDirections(byte[][] directions) {
+        this.directions = directions;
+    }
 
-	public void setSplitPlans(Element[] splitPlans) {
-		this.splitPlans = splitPlans;
-	}
+    public void setSplitPlans(Element[] splitPlans) {
+        this.splitPlans = splitPlans;
+    }
 
-	public void setSplitPlan(int index, Element splitPlan) {
-		this.splitPlans[index] = splitPlan;
-	}
+    public void setSplitPlan(int index, Element splitPlan) {
+        this.splitPlans[index] = splitPlan;
+    }
 
-	public UUID getOriginalMessageId() {
-		return originalMessageId;
-	}
+    public UUID getOriginalMessageId() {
+        return this.originalMessageId;
+    }
 
-	public void setOriginalMessageId(UUID originalMessageId) {
-		this.originalMessageId = originalMessageId;
-	}
+    public void setOriginalMessageId(UUID originalMessageId) {
+        this.originalMessageId = originalMessageId;
+    }
 
 }
