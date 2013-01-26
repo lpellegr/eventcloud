@@ -52,7 +52,7 @@ public class JobLogger {
     // These values can be set in a test that uses the JobLogger
     private static int nbPeers = 0;
     public static String logDirectory = "/tmp/broadcast_logs/";
-    public static final boolean bcastDebugMode = true;
+    public static final boolean bcastDebugMode = false;
     public static String PREFIX;
 
     public static final String RETURN = System.getProperty("line.separator");
