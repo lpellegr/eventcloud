@@ -41,7 +41,6 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  * such as reception time of the message.
  * 
  * @author acraciun
- * 
  */
 public class JobLogger {
 
@@ -51,7 +50,8 @@ public class JobLogger {
 
     // These values can be set in a test that uses the JobLogger
     private static int nbPeers = 0;
-    public static String logDirectory = "/tmp/broadcast_logs/";
+    public static String logDirectory = System.getProperty("java.io.tmpdir")
+            + File.separator + "broadcast_logs";
     public static final boolean bcastDebugMode = false;
     public static String PREFIX;
 
