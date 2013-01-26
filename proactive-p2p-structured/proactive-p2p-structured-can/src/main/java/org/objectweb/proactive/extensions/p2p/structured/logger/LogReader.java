@@ -31,7 +31,6 @@ import java.util.Set;
  * Utility class that provides some metrics about a type of broadcast algorithm.
  * 
  * @author jrochas
- * 
  */
 public class LogReader {
 
