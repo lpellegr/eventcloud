@@ -213,9 +213,9 @@ public class Can2dVisualizer extends JFrame {
                             Can2dVisualizer.this.cache.addEntry(newPeer);
                             Can2dVisualizer.this.cache.invalidate();
 
-                            System.out.println("--> JOIN");
-                            entry.getStub().sendv(
-                                    new PrintSplitHistoryRequest());
+                            // System.out.println("--> JOIN");
+                            // entry.getStub().sendv(
+                            // new PrintSplitHistoryRequest());
                         } else if (Can2dVisualizer.this.mode == Mode.LEAVE) {
                             Canvas.this.zoneClicked = null;
 
@@ -224,6 +224,10 @@ public class Can2dVisualizer extends JFrame {
                             } catch (NetworkNotJoinedException nnje) {
                                 nnje.printStackTrace();
                             }
+
+                            // System.out.println("--> LEAVE");
+                            // entry.getStub().sendv(
+                            // new PrintSplitHistoryRequest());
 
                             Can2dVisualizer.this.cache.removeEntry(entry.getId());
                             Can2dVisualizer.this.cache.invalidate();
@@ -493,6 +497,7 @@ public class Can2dVisualizer extends JFrame {
 
     }
 
+    @SuppressWarnings("unused")
     private static final class PrintSplitHistoryRequest extends
             AnycastRequest<StringElement> {
 
@@ -534,7 +539,7 @@ public class Can2dVisualizer extends JFrame {
         CanNetworkDeployer deployer =
                 new CanNetworkDeployer(
                         new StringCanDeploymentDescriptor().setInjectionConstraintsProvider(injectionConstraintsProvider));
-        deployer.deploy(50);
+        deployer.deploy(100);
 
         final List<Peer> peers = deployer.getRandomTracker().getPeers();
 

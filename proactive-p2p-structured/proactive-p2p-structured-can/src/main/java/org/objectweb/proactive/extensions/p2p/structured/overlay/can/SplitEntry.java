@@ -34,12 +34,11 @@ public class SplitEntry implements Serializable {
 
     private static final long serialVersionUID = 140L;
 
-    private byte dimension = 0;
+    private final byte dimension;
 
-    private byte direction = 0;
+    private final byte direction;
 
-    public SplitEntry() {
-    }
+    private final long timestamp;
 
     /**
      * Constructor.
@@ -48,10 +47,13 @@ public class SplitEntry implements Serializable {
      *            the dimension of the split.
      * @param direction
      *            the direction of the split.
+     * @param timestamp
+     *            a timestamp value that acts as an identifier.
      */
-    public SplitEntry(byte dimension, byte direction) {
+    public SplitEntry(byte dimension, byte direction, long timestamp) {
         this.dimension = dimension;
         this.direction = direction;
+        this.timestamp = timestamp;
     }
 
     /**
@@ -70,6 +72,16 @@ public class SplitEntry implements Serializable {
      */
     public byte getDirection() {
         return this.direction;
+    }
+
+    /**
+     * Returns a timestamp value that indicates when the split entry has been
+     * created. This value acts as an identifier.
+     * 
+     * @return the timestamp value.
+     */
+    public long getTimestamp() {
+        return this.timestamp;
     }
 
     /**
