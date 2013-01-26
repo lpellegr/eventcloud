@@ -1,3 +1,19 @@
+/**
+ * Copyright (c) 2011-2013 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmarks;
 
 import java.io.IOException;
@@ -21,150 +37,164 @@ import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
 /**
- * This class aims to build the necessary random CAN, to choose the 
- * initiator of the broadcast, and to perform different broadcasts in
- * the local experiment implemented in @link{BroadcastBenchmark}.
+ * This class aims to build the necessary random CAN, to choose the initiator of
+ * the broadcast, and to perform different broadcasts in the local experiment
+ * implemented in @link{BroadcastBenchmark}.
+ * 
  * @author jrochas
  */
 public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
-	private static final String LOG_EFFICIENT = "EfficientBroadcast";
-	private static final String LOG_FLOODING = "FloodingBroadcast";
-	private static final String LOG_OPTIMAL = "OptimalBroadcast";
-	
-	//private static final Coordinate<StringElement> constraint = 
-			//new Coordinate<StringElement>(new StringElement("j"), null, null);
+    private static final String LOG_EFFICIENT = "EfficientBroadcast";
+    private static final String LOG_FLOODING = "FloodingBroadcast";
+    private static final String LOG_OPTIMAL = "OptimalBroadcast";
 
-	protected int nbPeers;
-	protected String logDirectory;
+    // private static final Coordinate<StringElement> constraint =
+    // new Coordinate<StringElement>(new StringElement("j"), null, null);
 
-	protected Proxy proxy;
+    protected int nbPeers;
+    protected String logDirectory;
 
-	public BroadcastInfrastructure(int nbPeers, String logDirectory) {
-		super(
-				new CanDeploymentDescriptor<StringElement>(
-						new SerializableProvider<StringCanOverlay>() {
-							private static final long serialVersionUID = 130L;
-							@Override
-							public StringCanOverlay get() {
-								return new StringCanOverlay();
-							}
-						}).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider()),
-						1, nbPeers);
-		this.nbPeers = nbPeers;
-		this.logDirectory = logDirectory;
-	}
+    protected Proxy proxy;
 
-	public void setProxy(Proxy proxy) {
-		this.proxy = proxy;
-	}
+    public BroadcastInfrastructure(int nbPeers, String logDirectory) {
+        super(
+                new CanDeploymentDescriptor<StringElement>(
+                        new SerializableProvider<StringCanOverlay>() {
+                            private static final long serialVersionUID = 130L;
 
-	/**
-	 * Picks a random peer in the CAN to perform the broadcast.
-	 */
-	public void initialize() {
-		super.setUp();
-		this.proxy = Proxies.newProxy(super.getRandomTracker());
-	}
+                            @Override
+                            public StringCanOverlay get() {
+                                return new StringCanOverlay();
+                            }
+                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider()),
+                1, nbPeers);
+        this.nbPeers = nbPeers;
+        this.logDirectory = logDirectory;
+    }
 
-	/**
-	 * Shuts down the initiator of the broadcast.
-	 */
-	public void terminate() {
-		super.tearDown();
-		try {
-			this.proxy.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    public void setProxy(Proxy proxy) {
+        this.proxy = proxy;
+    }
 
-	/**
-	 * Log the metrics extracted from a FloodingBroadcast run in a file.
-	 * @throws InterruptedException
-	 */
-	public void measureFloodingBroadcast() throws InterruptedException {
+    /**
+     * Picks a random peer in the CAN to perform the broadcast.
+     */
+    public void initialize() {
+        super.setUp();
+        this.proxy = Proxies.newProxy(super.getRandomTracker());
+    }
 
-		// Sending the broadcast via an AnycastRequest (= flood)
-		Request<Coordinate<StringElement>> request = new AnycastRequest<StringElement>(
-				new DefaultAnycastConstraintsValidator<StringElement>(
-						CoordinateFactory.newStringCoordinate()));
-						//constraint));
+    /**
+     * Shuts down the initiator of the broadcast.
+     */
+    public void terminate() {
+        super.tearDown();
+        try {
+            this.proxy.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-		// Timestamp the beginning of the broadcast
-		JobLogger.recordTime("FloodingBroadcast", request.getId());
-		this.proxy.sendv(request);
+    /**
+     * Log the metrics extracted from a FloodingBroadcast run in a file.
+     * 
+     * @throws InterruptedException
+     */
+    public void measureFloodingBroadcast() throws InterruptedException {
 
-		// The previous call is asynchronous, so
-		// it is preferable to wait a little bit
-		Thread.sleep(2000);
+        // Sending the broadcast via an AnycastRequest (= flood)
+        Request<Coordinate<StringElement>> request =
+                new AnycastRequest<StringElement>(
+                        new DefaultAnycastConstraintsValidator<StringElement>(
+                                CoordinateFactory.newStringCoordinate()));
+        // constraint));
 
-		// This is going to log all the interesting metrics for a benchmark
-		// in the LOG_FLOODING at the root of the logs directory (see JobLogger)
-		int nbPeerReached = JobLogger.logResults(LOG_FLOODING, 
-				this.nbPeers, request.getId().toString() + JobLogger.PREFIX + LOG_FLOODING, "1", "");
+        // Timestamp the beginning of the broadcast
+        JobLogger.recordTime("FloodingBroadcast", request.getId());
+        this.proxy.sendv(request);
 
-		// Checking the correctness of the run
-		Assert.assertEquals(this.nbPeers, nbPeerReached);
-	}
-	
-	/**
-	 * Log the metrics extracted from an EfficientBroadcast run in a file.
-	 * @throws InterruptedException
-	 */
-	public void measureEfficientBroadcast() throws InterruptedException {
+        // The previous call is asynchronous, so
+        // it is preferable to wait a little bit
+        Thread.sleep(2000);
 
-		// Sending the broadcast via an EfficientBroadcastRequest
-		Request<Coordinate<StringElement>> request = new EfficientBroadcastRequest<StringElement>(
-				new DefaultAnycastConstraintsValidator<StringElement>(
-						CoordinateFactory.newStringCoordinate()));
-						//constraint));
-		
-		// Timestamp the beginning of the broadcast
-		JobLogger.recordTime("EfficientBroadcast", request.getId());
-		this.proxy.sendv(request);
+        // This is going to log all the interesting metrics for a benchmark
+        // in the LOG_FLOODING at the root of the logs directory (see JobLogger)
+        int nbPeerReached =
+                JobLogger.logResults(
+                        LOG_FLOODING, this.nbPeers, request.getId().toString()
+                                + JobLogger.PREFIX + LOG_FLOODING, "1", "");
 
-		// The previous call is asynchronous, so
-		// it is preferable to wait a little bit
-		Thread.sleep(2000);
+        // Checking the correctness of the run
+        Assert.assertEquals(this.nbPeers, nbPeerReached);
+    }
 
-		// This is going to log all the interesting metrics for a benchmark
-		// in the LOG_EFFICIENT at the root of the logs directory (see JobLogger)
-		int nbPeerReached = JobLogger.logResults(LOG_EFFICIENT, 
-				this.nbPeers, request.getId().toString() + JobLogger.PREFIX + LOG_EFFICIENT, "1", "");
+    /**
+     * Log the metrics extracted from an EfficientBroadcast run in a file.
+     * 
+     * @throws InterruptedException
+     */
+    public void measureEfficientBroadcast() throws InterruptedException {
 
-		// Checking the correctness of the run
-		Assert.assertEquals(this.nbPeers, nbPeerReached);
-	}
+        // Sending the broadcast via an EfficientBroadcastRequest
+        Request<Coordinate<StringElement>> request =
+                new EfficientBroadcastRequest<StringElement>(
+                        new DefaultAnycastConstraintsValidator<StringElement>(
+                                CoordinateFactory.newStringCoordinate()));
+        // constraint));
 
-	/**
-	 * Log the metrics extracted from an OptimalBroadcast run in a file.
-	 * @throws InterruptedException
-	 */
-	public void measureOptimalBroadcast() throws InterruptedException {
+        // Timestamp the beginning of the broadcast
+        JobLogger.recordTime("EfficientBroadcast", request.getId());
+        this.proxy.sendv(request);
 
-		// Sending the broadcast via an EfficientBroadcastRequest
-		Request<Coordinate<StringElement>> request = new OptimalBroadcastRequest<StringElement>(
-				new DefaultAnycastConstraintsValidator<StringElement>(
-						CoordinateFactory.newStringCoordinate()));
-						//constraint));
-						
-		// Timestamp the beginning of the broadcast
-		JobLogger.recordTime("OptimalBroadcast", request.getId());
-		this.proxy.sendv(request);
+        // The previous call is asynchronous, so
+        // it is preferable to wait a little bit
+        Thread.sleep(2000);
 
-		// The previous call is asynchronous, so
-		// it is preferable to wait a little bit
-		Thread.sleep(2000);
+        // This is going to log all the interesting metrics for a benchmark
+        // in the LOG_EFFICIENT at the root of the logs directory (see
+        // JobLogger)
+        int nbPeerReached =
+                JobLogger.logResults(
+                        LOG_EFFICIENT, this.nbPeers, request.getId().toString()
+                                + JobLogger.PREFIX + LOG_EFFICIENT, "1", "");
 
-		// This is going to log all the interesting metrics for a benchmark
-		// in the LOG_OPTIMAL at the root of the logs directory (see JobLogger)
-		int nbPeerReached = JobLogger.logResults(LOG_OPTIMAL, 
-				this.nbPeers, request.getId().toString() + JobLogger.PREFIX + LOG_OPTIMAL, "1", "");
+        // Checking the correctness of the run
+        Assert.assertEquals(this.nbPeers, nbPeerReached);
+    }
 
-		// Checking the correctness of the run
-		Assert.assertEquals(this.nbPeers, nbPeerReached);
-	}
+    /**
+     * Log the metrics extracted from an OptimalBroadcast run in a file.
+     * 
+     * @throws InterruptedException
+     */
+    public void measureOptimalBroadcast() throws InterruptedException {
 
+        // Sending the broadcast via an EfficientBroadcastRequest
+        Request<Coordinate<StringElement>> request =
+                new OptimalBroadcastRequest<StringElement>(
+                        new DefaultAnycastConstraintsValidator<StringElement>(
+                                CoordinateFactory.newStringCoordinate()));
+        // constraint));
+
+        // Timestamp the beginning of the broadcast
+        JobLogger.recordTime("OptimalBroadcast", request.getId());
+        this.proxy.sendv(request);
+
+        // The previous call is asynchronous, so
+        // it is preferable to wait a little bit
+        Thread.sleep(2000);
+
+        // This is going to log all the interesting metrics for a benchmark
+        // in the LOG_OPTIMAL at the root of the logs directory (see JobLogger)
+        int nbPeerReached =
+                JobLogger.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
+                        .toString()
+                        + JobLogger.PREFIX + LOG_OPTIMAL, "1", "");
+
+        // Checking the correctness of the run
+        Assert.assertEquals(this.nbPeers, nbPeerReached);
+    }
 
 }

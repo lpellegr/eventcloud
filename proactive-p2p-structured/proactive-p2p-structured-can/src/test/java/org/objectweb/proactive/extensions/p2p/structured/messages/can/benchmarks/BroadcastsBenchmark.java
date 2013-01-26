@@ -21,73 +21,78 @@ import java.io.File;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
 
 /**
- * This class runs a local experiment to compare different algorithms that
- * can be used when a message needs to be disseminated across all peers.
- * The results are given in files in the directory specified.
+ * This class runs a local experiment to compare different algorithms that can
+ * be used when a message needs to be disseminated across all peers. The results
+ * are given in files in the directory specified.
  * 
  * If parameters are given to the main, it sets these parameters :
  * <ol>
- * <li> The number of peers in the network </li>
- * <li> The directory where the logs are going to be written </li>
+ * <li>The number of peers in the network</li>
+ * <li>The directory where the logs are going to be written</li>
  * </ol>
  * Otherwise, the default parameters are going to be used.
  * 
  * @author jrochas
  */
 public class BroadcastsBenchmark {
-	
-	/** Number of peers in the network (can be changed through first main method parameter) */
-	private static int nbPeers = 25;
-	/** Directory of feedback files (can be changed through second main method parameter) */
-	private static String logDirectory = "/tmp/broadcast_logs/";
 
-	public static void main (String[] args) throws InterruptedException {
-		
-		if (args.length > 0) {
-			nbPeers = Integer.parseInt(args[0]);
-			if (args.length > 1) {
-				logDirectory = args[1];
-				JobLogger.logDirectory = args[1];
-			}
-		}
-		
-		// Removing all the previous logs
-		File directory = new  File(logDirectory);
-		if (directory.exists()) {
-			File[] files = directory.listFiles();
-			for (File file : files) {
-				file.delete();
-			}
-		}
-		
-		// Set the number of peers for the log files
-		JobLogger.setNbPeers(nbPeers);
-		
-		try {
-			// Building the CAN
-			BroadcastInfrastructure broadcastInfrastructure = 
-					new BroadcastInfrastructure(nbPeers, logDirectory);
-			broadcastInfrastructure.initialize();
-			
-			// Running a FloodingBroadcast
-			broadcastInfrastructure.measureFloodingBroadcast();
-			Thread.sleep(2000);
-			
-			// Running an EfficientBroadcast
-			broadcastInfrastructure.measureEfficientBroadcast();
-			Thread.sleep(2000);
-			
-			// Running an OptimalBroadcast
-			broadcastInfrastructure.measureOptimalBroadcast();
-			Thread.sleep(2000);
-			
-			broadcastInfrastructure.terminate();	
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+    /**
+     * Number of peers in the network (can be changed through first main method
+     * parameter)
+     */
+    private static int nbPeers = 25;
+    /**
+     * Directory of feedback files (can be changed through second main method
+     * parameter)
+     */
+    private static String logDirectory = "/tmp/broadcast_logs/";
 
-		System.exit(0);
-	}
+    public static void main(String[] args) throws InterruptedException {
+
+        if (args.length > 0) {
+            nbPeers = Integer.parseInt(args[0]);
+            if (args.length > 1) {
+                logDirectory = args[1];
+                JobLogger.logDirectory = args[1];
+            }
+        }
+
+        // Removing all the previous logs
+        File directory = new File(logDirectory);
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            for (File file : files) {
+                file.delete();
+            }
+        }
+
+        // Set the number of peers for the log files
+        JobLogger.setNbPeers(nbPeers);
+
+        try {
+            // Building the CAN
+            BroadcastInfrastructure broadcastInfrastructure =
+                    new BroadcastInfrastructure(nbPeers, logDirectory);
+            broadcastInfrastructure.initialize();
+
+            // Running a FloodingBroadcast
+            broadcastInfrastructure.measureFloodingBroadcast();
+            Thread.sleep(2000);
+
+            // Running an EfficientBroadcast
+            broadcastInfrastructure.measureEfficientBroadcast();
+            Thread.sleep(2000);
+
+            // Running an OptimalBroadcast
+            broadcastInfrastructure.measureOptimalBroadcast();
+            Thread.sleep(2000);
+
+            broadcastInfrastructure.terminate();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.exit(0);
+    }
 
 }
