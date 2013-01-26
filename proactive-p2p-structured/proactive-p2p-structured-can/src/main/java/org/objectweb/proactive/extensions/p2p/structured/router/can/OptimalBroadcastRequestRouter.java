@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.router.can;
@@ -258,7 +258,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
         // receive the message
         Element[] plane;
 
-        // If the request is received by the initiator(there are no given
+        // If the request is received by the initiator (there are no given
         // directions) then it has to compute the directions and coordinates
         // that need to be contained by the neighbors who will receive the
         // broadcast request.
@@ -270,7 +270,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
             plane = request.getSplitPlans();
         }
 
-        // Create an extended neighbor table(one that contains more
+        // Create an extended neighbor table (one that contains more
         // information regarding the neighbors than the ordinary neighbor
         // table) from the current neighbor table.
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -298,7 +298,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                         // by the plane array.
                         for (byte coordinate = 0; coordinate < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); coordinate++) {
                             // If plane has the null value on a certain
-                            // dimension( that is not the dimension on which the
+                            // dimension (that is not the dimension on which the
                             // sender and peer are neighbors) then in order for
                             // the neighbor to receive the broadcast message its
                             // zone has to verify a certain inequality: the
@@ -493,4 +493,5 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
         }
         return plan;
     }
+
 }
