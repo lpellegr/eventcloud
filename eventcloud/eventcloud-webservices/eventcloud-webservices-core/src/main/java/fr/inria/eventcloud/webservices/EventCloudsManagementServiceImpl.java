@@ -173,7 +173,14 @@ public class EventCloudsManagementServiceImpl implements
 
             deployer.deploy(1, 1);
 
-            return this.registry.register(deployer);
+            // an EventCloud with the specified streamUrl has already been
+            // registered into the registry
+            if (!this.registry.register(deployer)) {
+                deployer.undeploy();
+                return false;
+            }
+
+            return true;
         }
 
         return false;

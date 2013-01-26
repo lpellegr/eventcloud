@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -25,6 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyRespons
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.SplitEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
@@ -41,7 +43,7 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
 
     private static final long serialVersionUID = 140L;
 
-    private final int splitEntryIndex;
+    private final long splitEntryTimestamp;
 
     private final byte reassignmentDimension;
 
@@ -51,10 +53,10 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
 
     private final Serializable dataToTransfer;
 
-    public LeaveEnlargeZoneOperation(int splitEntryIndex,
+    public LeaveEnlargeZoneOperation(long splitEntryTimestamp,
             byte reassignmentDimension, byte reassignmentDirection, E element,
             Serializable dataToTransfert) {
-        this.splitEntryIndex = splitEntryIndex;
+        this.splitEntryTimestamp = splitEntryTimestamp;
         this.reassignmentDimension = reassignmentDimension;
         this.reassignmentDirection = reassignmentDirection;
         this.element = element;
@@ -77,7 +79,15 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
                 CanOverlay.getOppositeDirection(this.reassignmentDirection),
                 this.element);
 
-        canOverlay.getSplitHistory().remove(this.splitEntryIndex);
+        Iterator<SplitEntry> it = canOverlay.getSplitHistory().iterator();
+        while (it.hasNext()) {
+            if (it.next().getTimestamp() == this.splitEntryTimestamp) {
+                it.remove();
+                break;
+            }
+        }
+
+        canOverlay.getSplitHistory().remove(this.splitEntryTimestamp);
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {

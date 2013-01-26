@@ -168,8 +168,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         String dbFilename = dbPath + body.getID();
 
-        // TODO: find a lightweight key/value store to replace the current JDBM3
-        // alpha implementation which is unstable and no longer maintained.
+        // TODO: find a lightweight key/value store to replace the current MapDB
+        // implementation which is unstable.
         // Several alternatives exist such as BerkeleyDB (API is really
         // horrible), hawtdb (low level API and seems no longer maintained),
         // leveldb (really good but the original implementation is c++, some
