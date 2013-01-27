@@ -185,49 +185,38 @@ public class EventCloudUsageTest implements Serializable {
         q2.setPublicationTime(publicationTime);
         publishProxy.publish(q2);
 
-        // this quadruple shows chronicle context property because it is
-        // delivered by reconsuming the first quadruple which was published
-        Quadruple q3 =
-                new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user1.new.email@company.com"));
-        q3.setPublicationTime(publicationTime);
-        publishProxy.publish(q3);
-
         publicationTime = System.currentTimeMillis();
 
-        Quadruple q4 =
+        Quadruple q3 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
                         Node.createURI("https://plus.google.com/107545688688906540962"),
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user2@company.com"));
-        q4.setPublicationTime(publicationTime);
-        publishProxy.publish(q4);
+        q3.setPublicationTime(publicationTime);
+        publishProxy.publish(q3);
 
-        Quadruple q5 =
+        Quadruple q4 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
                         Node.createURI("https://plus.google.com/14023231238123495031/"),
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 3"));
-        q5.setPublicationTime();
-        publishProxy.publish(q5);
+        q4.setPublicationTime();
+        publishProxy.publish(q4);
 
-        Quadruple q6 =
+        Quadruple q5 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
                         Node.createURI("https://plus.google.com/107545688688906540962"),
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 2"));
-        q6.setPublicationTime(publicationTime);
-        publishProxy.publish(q6);
+        q5.setPublicationTime(publicationTime);
+        publishProxy.publish(q5);
 
         // 3 notifications are expected
         synchronized (bindingsReceived) {
-            while (bindingsReceived.size() != 3) {
+            while (bindingsReceived.size() != 2) {
                 try {
                     bindingsReceived.wait();
                 } catch (InterruptedException e) {
