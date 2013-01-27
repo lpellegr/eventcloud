@@ -415,8 +415,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         if (solution == null) {
             solution =
                     new BindingSolution(
-                            subscriptionEntry.subscription.getSubSubscriptions().length,
-                            notification.getContent());
+                            subscriptionEntry.subscription.getResultVars()
+                                    .size(), notification.getContent());
 
             BindingSolution tmpSolution = null;
             if ((tmpSolution =
@@ -434,7 +434,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // notification has not been yet delivered for the eventId associated to
         // this notification
         if (solution.isReady()) {
-            this.deliver(subscriptionEntry, solution.getChunks());
+            if (this.markAsDelivered(notification.getId(), subscriptionId) == null) {
+                this.deliver(subscriptionEntry, solution.getChunks());
+            }
+
             this.bindingSolutions.remove(notification.getId());
         }
     }
