@@ -1,3 +1,19 @@
+/**
+ * Copyright (c) 2011-2013 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.Serializable;
@@ -19,7 +35,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  */
 public class NeighborTableWrapper<E extends Element> implements Serializable {
 
-    private static final long serialVersionUID = 130L;
+    private static final long serialVersionUID = 140L;
+
     @SuppressWarnings("unchecked")
     private List<NeighborEntryWrapper<E>>[][] entries =
             new ArrayList[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()][2];
