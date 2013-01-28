@@ -63,7 +63,8 @@ public class JobLogger {
      * Retrieves a job logger with the given name.
      * 
      * @param jobName
-     * @return
+     * 
+     * @return job logger instance.
      */
     private static synchronized Logger getJobLogger(String jobName) {
         Logger logger = m_loggers.get(jobName);
@@ -135,7 +136,8 @@ public class JobLogger {
      * @param filename
      * @param runNumber
      * @param id
-     * @return
+     * 
+     * @return the number of peers reached.
      */
     public static synchronized int logResults(String loggerName, int nbPeers,
                                               String filename,
@@ -173,7 +175,8 @@ public class JobLogger {
      * 
      * @param name
      * @param id
-     * @return
+     * 
+     * @return the hosts visited.
      */
     public static synchronized Set<String> retrieveHostsVisited(String name,
                                                                 String id) {
