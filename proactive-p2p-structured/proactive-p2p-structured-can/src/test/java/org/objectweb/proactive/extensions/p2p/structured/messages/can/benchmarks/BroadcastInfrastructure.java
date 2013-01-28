@@ -61,7 +61,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         super(
                 new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<StringCanOverlay>() {
-                            private static final long serialVersionUID = 130L;
+                            private static final long serialVersionUID = 140L;
 
                             @Override
                             public StringCanOverlay get() {
