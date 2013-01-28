@@ -244,7 +244,8 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      * 
      * @param overlay
      * @param request
-     * @return
+     * 
+     * @return the neighbors to send the message to.
      */
     private NeighborTableWrapper<E> getNeighborsToSendTo(final CanOverlay<E> overlay,
                                                          final OptimalBroadcastRequest<E> request) {
