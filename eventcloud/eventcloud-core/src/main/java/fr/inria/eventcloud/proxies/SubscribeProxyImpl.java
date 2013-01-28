@@ -168,8 +168,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         String dbFilename = dbPath + body.getID();
 
-        // TODO: find a lightweight key/value store to replace the current JDBM3
-        // alpha implementation which is unstable and no longer maintained.
+        // TODO: find a lightweight key/value store to replace the current MapDB
+        // implementation which is unstable.
         // Several alternatives exist such as BerkeleyDB (API is really
         // horrible), hawtdb (low level API and seems no longer maintained),
         // leveldb (really good but the original implementation is c++, some
@@ -415,8 +415,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         if (solution == null) {
             solution =
                     new BindingSolution(
-                            subscriptionEntry.subscription.getSubSubscriptions().length,
-                            notification.getContent());
+                            subscriptionEntry.subscription.getResultVars()
+                                    .size(), notification.getContent());
 
             BindingSolution tmpSolution = null;
             if ((tmpSolution =
@@ -434,7 +434,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // notification has not been yet delivered for the eventId associated to
         // this notification
         if (solution.isReady()) {
-            this.deliver(subscriptionEntry, solution.getChunks());
+            if (this.markAsDelivered(notification.getId(), subscriptionId) == null) {
+                this.deliver(subscriptionEntry, solution.getChunks());
+            }
+
             this.bindingSolutions.remove(notification.getId());
         }
     }
