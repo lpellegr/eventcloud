@@ -259,12 +259,13 @@ public class EventCloudsManagementServiceImpl implements
     public String deployPublishWsnService(String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
-        int numberId = this.lockUnassignedNumberId(streamUrl);
+        String topicName = this.getTopicName(streamUrl);
+        int numberId = this.lockUnassignedNumberId(topicName);
         WsnServiceInfo publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
                         this.registryUrl, streamUrl, WSConstants.SERVICES_PATH
-                                + "eventclouds/" + this.getTopicName(streamUrl)
-                                + "/" + WSN_SERVICE_ID + numberId
+                                + "eventclouds/" + topicName + "/"
+                                + WSN_SERVICE_ID + numberId
                                 + "_publish-webservices", this.wsnServicePort);
 
         return this.storeAndReturnProxyAddress(
@@ -278,12 +279,13 @@ public class EventCloudsManagementServiceImpl implements
     public String deploySubscribeWsnService(String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
-        int numberId = this.lockUnassignedNumberId(streamUrl);
+        String topicName = this.getTopicName(streamUrl);
+        int numberId = this.lockUnassignedNumberId(topicName);
         WsnServiceInfo subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
                         this.registryUrl, streamUrl, WSConstants.SERVICES_PATH
-                                + "eventclouds/" + this.getTopicName(streamUrl)
-                                + "/" + WSN_SERVICE_ID + numberId
+                                + "eventclouds/" + topicName + "/"
+                                + WSN_SERVICE_ID + numberId
                                 + "_subscribe-webservices", this.wsnServicePort);
 
         return this.storeAndReturnProxyAddress(
@@ -297,12 +299,12 @@ public class EventCloudsManagementServiceImpl implements
     public String deployPublishWsProxy(String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
-        int numberId = this.lockUnassignedNumberId(streamUrl);
+        String topicName = this.getTopicName(streamUrl);
+        int numberId = this.lockUnassignedNumberId(topicName);
         WsProxyInfo publishWsProxyInfo =
                 WsDeployer.deployPublishWsProxy(
-                        this.registryUrl, streamUrl, "eventclouds/"
-                                + this.getTopicName(streamUrl) + "/"
-                                + WS_PROXY_ID + numberId);
+                        this.registryUrl, streamUrl, "eventclouds/" + topicName
+                                + "/" + WS_PROXY_ID + numberId);
 
         return this.storeAndReturnProxyAddress(
                 publishWsProxyInfo, this.publishWsProxyEndpointUrls);
@@ -315,12 +317,12 @@ public class EventCloudsManagementServiceImpl implements
     public String deploySubscribeWsProxy(String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
-        int numberId = this.lockUnassignedNumberId(streamUrl);
+        String topicName = this.getTopicName(streamUrl);
+        int numberId = this.lockUnassignedNumberId(topicName);
         WsProxyInfo subscribeWsProxyInfo =
                 WsDeployer.deploySubscribeWsProxy(
-                        this.registryUrl, streamUrl, "eventclouds/"
-                                + this.getTopicName(streamUrl) + "/"
-                                + WS_PROXY_ID + numberId);
+                        this.registryUrl, streamUrl, "eventclouds/" + topicName
+                                + "/" + WS_PROXY_ID + numberId);
 
         return this.storeAndReturnProxyAddress(
                 subscribeWsProxyInfo, this.subscribeWsProxyEndpointUrls);
@@ -333,12 +335,12 @@ public class EventCloudsManagementServiceImpl implements
     public String deployPutGetWsProxy(String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
-        int numberId = this.lockUnassignedNumberId(streamUrl);
+        String topicName = this.getTopicName(streamUrl);
+        int numberId = this.lockUnassignedNumberId(topicName);
         WsProxyInfo putgetWsProxyInfo =
                 WsDeployer.deployPutGetWsProxy(
-                        this.registryUrl, streamUrl, "eventclouds/"
-                                + this.getTopicName(streamUrl) + "/"
-                                + WS_PROXY_ID + numberId);
+                        this.registryUrl, streamUrl, "eventclouds/" + topicName
+                                + "/" + WS_PROXY_ID + numberId);
 
         return this.storeAndReturnProxyAddress(
                 putgetWsProxyInfo, this.putgetWsProxyEndpointUrls);
@@ -353,17 +355,13 @@ public class EventCloudsManagementServiceImpl implements
         }
     }
 
-    private String getTopicName(String streamUrl) {
-        return streamUrl.substring(streamUrl.lastIndexOf('/') + 1);
-    }
-
-    private int lockUnassignedNumberId(String streamUrl) {
+    private int lockUnassignedNumberId(String topicName) {
         int numberId = 1;
 
         synchronized (this.assignedNumberIds) {
             while (true) {
-                if (!this.assignedNumberIds.containsEntry(streamUrl, numberId)) {
-                    this.assignedNumberIds.put(streamUrl, numberId);
+                if (!this.assignedNumberIds.containsEntry(topicName, numberId)) {
+                    this.assignedNumberIds.put(topicName, numberId);
 
                     return numberId;
                 }
@@ -473,12 +471,17 @@ public class EventCloudsManagementServiceImpl implements
             wsInfo.destroy();
             wsEndpointUrls.remove(wsInfo.getStreamUrl(), wsEndpointUrl);
             this.assignedNumberIds.remove(
-                    wsInfo.getStreamUrl(), this.getNumberId(wsInfo));
+                    this.getTopicName(wsInfo.getStreamUrl()),
+                    this.getNumberId(wsInfo));
 
             return true;
         }
 
         return false;
+    }
+
+    private String getTopicName(String streamUrl) {
+        return streamUrl.substring(streamUrl.lastIndexOf('/') + 1);
     }
 
     private int getNumberId(WsInfo wsInfo) {
