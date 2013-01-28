@@ -16,10 +16,14 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.router.can;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.Iterator;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
@@ -85,12 +89,29 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
         CanRequestResponseManager messagingManager =
                 (CanRequestResponseManager) canOverlay.getRequestResponseManager();
-
+        // retrieves the hostname for debugging purpose
+        String hostname = "";
+        if (JobLogger.bcastDebugMode) {
+            try {
+                hostname = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                logger.error("Cannot log broadcast algorithm : "
+                        + "hostname couldn't be retrieved");
+                e.printStackTrace();
+            }
+        }
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
             logger.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
+            if (JobLogger.bcastDebugMode) {
+                Date receiveTime = new Date();
+                String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
+                JobLogger.logMessage(request.getId().toString() + "_"
+                        + "FloodingBroadcast_" + hostname, "1 " + timestamp
+                        + JobLogger.RETURN);
+            }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
                 request.getAnycastRoutingList()
@@ -108,7 +129,14 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
-
+                if (JobLogger.bcastDebugMode) {
+                    Date receiveTime = new Date();
+                    String timestamp =
+                            JobLogger.DATE_FORMAT.format(receiveTime);
+                    JobLogger.logMessage(request.getId().toString() + "_"
+                            + "FloodingBroadcast_" + hostname, "0 " + timestamp
+                            + JobLogger.RETURN);
+                }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
 
                 // sends the message to the other neighbors which validates the

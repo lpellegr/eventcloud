@@ -20,13 +20,12 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 
 /**
  * A solution that embeds a {@link Binding} as the chunks associated to the
  * solution. It is useful for solutions matching a subscription registered with
- * a {@link SignalNotificationListener} or {@link BindingNotificationListener}.
+ * a {@link BindingNotificationListener}.
  * 
  * @author lpellegr
  */
@@ -66,7 +65,7 @@ public class BindingSolution extends Solution<Binding> {
 
         // does not add null bindings but increment sub-solution counters to
         // manage signal notification listener
-        this.nbSubSolutionsReceived++;
+        this.nbSubSolutionsReceived += binding.size();
     }
 
     /**
