@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.UniqueID;
@@ -43,6 +44,8 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
 
     private static final Logger log =
             LoggerFactory.getLogger(SchedulerNodeProvider.class);
+
+    private final Random random;
 
     private final String schedulerUrl;
 
@@ -114,6 +117,7 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
     private SchedulerNodeProvider(String schedulerUrl, String username,
             String password, String credentialsPath, String dataFolder,
             List<String> jvmArguments, List<GcmVirtualNodeEntry> entries) {
+        this.random = new Random();
         this.schedulerUrl = schedulerUrl;
         this.username = username;
         this.password = password;
@@ -194,8 +198,21 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public synchronized Node getANode() {
-        // TODO implement
-        throw new UnsupportedOperationException();
+        if (this.isStarted()) {
+            try {
+                GcmVirtualNodeEntry virtualNodeEntry =
+                        this.virtualNodeEntries.get(this.random.nextInt(this.virtualNodeEntries.size()));
+                List<Node> nodes =
+                        this.schedulerNodeProvider.getNodes(virtualNodeEntry.nodeRequestId);
+
+                return nodes.get(this.random.nextInt(nodes.size()));
+            } catch (NodeProviderException npe) {
+                throw new IllegalStateException("Failed to get a node", npe);
+            }
+        } else {
+            throw new IllegalStateException(
+                    "Cannot get a node because the jobs have not yet been submitted");
+        }
     }
 
     /**
