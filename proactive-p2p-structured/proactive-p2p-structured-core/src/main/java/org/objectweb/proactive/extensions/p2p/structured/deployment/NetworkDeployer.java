@@ -26,6 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlrea
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Observable;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
@@ -237,7 +238,8 @@ public abstract class NetworkDeployer extends
     }
 
     protected void internalUndeploy() {
-        // to be overridden if necessary
+        ComponentUtils.terminateComponents(this.getRandomTracker().getPeers());
+        ComponentUtils.terminateComponents(this.getTrackers());
     }
 
     protected void reset() {

@@ -207,8 +207,7 @@ public class EventCloudDeployer extends NetworkDeployer {
         ComponentUtils.terminateComponents(this.publishProxies);
         ComponentUtils.terminateComponents(this.putgetProxies);
         ComponentUtils.terminateComponents(this.subscribeProxies);
-        ComponentUtils.terminateComponents(super.getRandomTracker().getPeers());
-        ComponentUtils.terminateComponents(this.getTrackers());
+        super.internalUndeploy();
     }
 
     /**
@@ -216,6 +215,7 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected void reset() {
+        super.reset();
         this.publishProxies = null;
         this.putgetProxies = null;
         this.subscribeProxies = null;
