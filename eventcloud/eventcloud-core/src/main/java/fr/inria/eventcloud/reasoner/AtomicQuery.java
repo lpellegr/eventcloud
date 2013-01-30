@@ -290,58 +290,40 @@ public final class AtomicQuery implements Serializable {
         this.orderBy = sortConditions;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.distinct
+        result = prime * result + (distinct
                 ? 1231 : 1237);
-        result = prime * result + (int) (this.limit ^ (this.limit >>> 32));
-        result = prime * result + Arrays.hashCode(this.nodes);
-        result = prime * result + ((this.orderBy == null)
-                ? 0 : this.orderBy.hashCode());
-        result = prime * result + (this.reduced
+        result = prime * result + ((filterConstraints == null)
+                ? 0 : filterConstraints.hashCode());
+        result = prime * result + (int) (limit ^ (limit >>> 32));
+        result = prime * result + (reduced
                 ? 1231 : 1237);
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (this.getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         AtomicQuery other = (AtomicQuery) obj;
-        if (this.distinct != other.distinct) {
+        if (distinct != other.distinct)
             return false;
-        }
-        if (this.limit != other.limit) {
-            return false;
-        }
-        if (!Arrays.equals(this.nodes, other.nodes)) {
-            return false;
-        }
-        if (this.orderBy == null) {
-            if (other.orderBy != null) {
+        if (filterConstraints == null) {
+            if (other.filterConstraints != null)
                 return false;
-            }
-        } else if (!this.orderBy.equals(other.orderBy)) {
+        } else if (!filterConstraints.equals(other.filterConstraints))
             return false;
-        }
-        if (this.reduced != other.reduced) {
+        if (limit != other.limit)
             return false;
-        }
+        if (reduced != other.reduced)
+            return false;
         return true;
     }
 
@@ -370,7 +352,26 @@ public final class AtomicQuery implements Serializable {
                 this.orderBy.add(new SortCondition(expr, direction));
             }
         }
+        
+        // read filter conditions
+        int nbFilterConditions = in.readInt();
+        System.out.println("AtomicQuery.readObject() nb filter condition read = " + nbFilterConditions);
+        if (nbFilterConditions > 0) {
+            this.filterConstraints = new ArrayList<ExprList>(nbFilterConditions);
+            
+            for (int i = 0; i < nbFilterConditions; i++) {
+//                String s  = in.readUTF();
+                String s  = (String) in.readObject();
+                System.out.println("AtomicQuery.readObject() deserialized expr = " + s);
+                Expr expr =  ExprUtils.parse(s);
+                
+                System.out.println("avant filterConstraints.add(exprList); " + new ExprList(expr).toString());
+                this.filterConstraints.add(new ExprList(expr));
+                System.out.println("filterconstraint lue et ajoutee");
+            }
+        }
 
+        System.out.println("AtomicQuery.readObject() before deserializing nodes");
         // read nodes
         this.nodes = new Node[4];
         Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
@@ -387,6 +388,9 @@ public final class AtomicQuery implements Serializable {
 
             this.nodes[i] = node;
         }
+        System.out.println("AtomicQuery.readObject() after deserializing nodes");
+       
+
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -403,7 +407,21 @@ public final class AtomicQuery implements Serializable {
         } else {
             out.writeInt(0);
         }
-
+        
+        // write filter conditions
+        if (this.filterConstraints != null)
+        {
+            out.writeInt(this.filterConstraints.size());
+            for (ExprList exprList : this.filterConstraints) {
+                String s  = ExprUtils.fmtSPARQL(exprList);
+                System.out.println("AtomicQuery.writeObject() serialized expr=" + s);
+//                out.writeUTF(s);
+                out.writeObject(s);
+                }
+        } else {
+            out.writeInt(0);
+        } 
+             
         OutputStreamWriter outWriter = new OutputStreamWriter(out);
 
         // write nodes
@@ -413,9 +431,9 @@ public final class AtomicQuery implements Serializable {
             if (i < this.nodes.length - 1) {
                 outWriter.write(' ');
             }
-        }
-
+        }   
         outWriter.flush();
+        
     }
 
     public List<ExprList> getFilterConstraints() {
@@ -425,5 +443,5 @@ public final class AtomicQuery implements Serializable {
     public void setFilterConstraints(List<ExprList> filterConstraints) {
         this.filterConstraints = filterConstraints;
     }
-
+    
 }

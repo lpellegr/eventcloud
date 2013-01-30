@@ -19,25 +19,34 @@ package fr.inria.eventcloud.validator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprFunction0;
 import com.hp.hpl.jena.sparql.expr.ExprFunction2;
+import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.ExprTransformCopy;
 import com.hp.hpl.jena.sparql.expr.ExprTransformer;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.function.FunctionEnv;
+import com.hp.hpl.jena.sparql.util.ExprUtils;
 
+import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -47,8 +56,8 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  * 
  * @author lpellegr
  */
-public final class AtomicQueryConstraintsValidator extends
-        AnycastConstraintsValidator<StringCoordinate> {
+public final class AtomicQueryConstraintsValidator<E extends StringElement>
+        extends AnycastConstraintsValidator<E> {
 
     private static final long serialVersionUID = 1L;
 
@@ -57,55 +66,62 @@ public final class AtomicQueryConstraintsValidator extends
     private FilterTransformer transformer;
 
     /**
-     * Creates a new {@code DefaultAnycastConstraintsValidator} which is a very
-     * permissive constraints validator (i.e. the valitor validates the
-     * constraints on any peer).
-     */
-    public AtomicQueryConstraintsValidator() {
-        super(
-                new StringCoordinate(
-                        new StringElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()]));
-    }
-
-    /**
-     * Creates a new {@code DefaultAnycastConstraintsValidator} with the
-     * specified {@code key} to reach.
+     * Creates a new {@code AtomicQueryConstraintsValidator} with the specified
+     * {@code key} to reach.
      * 
      * @param key
      *            the key to reach.
      */
-    public AtomicQueryConstraintsValidator(StringCoordinate key) {
-        super(checkNotNull(key));
-    }
-
-    public AtomicQueryConstraintsValidator(AtomicQuery atomicQuery) {
+    // renvoie un tab de 4 elements E > null si var ou node any sinon un new E
+    // de la string
+    // crée un coordonée a partir de ce tab à passer en param du super
+    public AtomicQueryConstraintsValidator(AtomicQuery query) {
         super(
-                new StringCoordinate(
-                        new StringElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()]));
-        this.atomicQuery = atomicQuery;
+                checkNotNull((Coordinate<E>) (AtomicQueryConstraintsValidator.replaceVariablesByNull(query))));
+        this.atomicQuery = query;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public final boolean validatesKeyConstraints(StructuredOverlay overlay) {
-        this.validatesKeyConstraints(((CanOverlay) overlay).getZone());
-        return this.transformer.finalDecision;
+        return this.validatesKeyConstraints(((CanOverlay<E>) overlay).getZone());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final boolean validatesKeyConstraints(Zone zone) {
+    public final boolean validatesKeyConstraints(Zone<E> zone) {
         this.transformer = new FilterTransformer(zone, this.atomicQuery);
+        // check fixed parts
+        for (byte i = 0; i < super.key.getValue().size(); i++) {
+            // if coordinate is null we skip the test
+            if (super.key.getValue().getElement(i) != null) {
+                // the specified overlay does not contains the key
+            if (zone.contains(i, super.key.getValue().getElement(i)) != 0) {             
+                return false;
+                }
+            }
+        }
+        
+        if (this.atomicQuery.getFilterConstraints() != null)
+        {
+            System.out.println("AtomicQueryConstraintsValidator il y a contrainte de filtre");
         for (int i = 0; i < this.atomicQuery.getFilterConstraints().size(); i++) {
             ExprTransformer.transform(
                     this.getTransformer(),
                     this.atomicQuery.getFilterConstraints().get(i));
         }
+        System.out.println("je retourne " + this.getTransformer().finalDecision);
         return this.getTransformer().finalDecision;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     public AtomicQuery getAtomicQuery() {
@@ -117,15 +133,20 @@ public final class AtomicQueryConstraintsValidator extends
         this.atomicQuery = atomicQuery;
     }
 
-    private static class FilterTransformer extends ExprTransformCopy {
+    private class FilterTransformer extends ExprTransformCopy implements Serializable {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
 
         private AtomicQuery atomicQuery;
 
-        private Zone zone;
+        private Zone<E> zone;
 
         private boolean finalDecision;
 
-        public FilterTransformer(Zone zone, AtomicQuery atomicQuery) {
+        public FilterTransformer(Zone<E> zone, AtomicQuery atomicQuery) {
             super();
             this.zone = zone;
             this.atomicQuery = atomicQuery;
@@ -134,11 +155,14 @@ public final class AtomicQueryConstraintsValidator extends
 
         @Override
         public Expr transform(ExprFunction2 func, Expr expr1, Expr expr2) {
+            System.out.println("func = " + ExprUtils.fmtSPARQL(func));
+            System.out.println("func instanceof = " + func.getClass().getSimpleName());
+            
             if (func != null) {
                 if (!(func instanceof E_LogicalAnd || func instanceof E_LogicalOr)) {
-                    Expr variable, constant;
-                    System.out.println("ExprTransformBase.transform(ExprFunction2, Expr, Expr)");
-
+                    Expr variable;
+                    String constant;
+                    
                     if (func.getArg1().isVariable()) {
                         variable = expr1;
                     } else {
@@ -146,24 +170,33 @@ public final class AtomicQueryConstraintsValidator extends
                     }
 
                     if (func.getArg1().isConstant()) {
-                        constant = expr1;
+                        constant =
+                                SemanticElement.removePrefix(Node.createURI(expr1.getConstant()
+                                        .asString()));
                     } else {
-                        constant = expr2;
+                        constant =
+                                SemanticElement.removePrefix(Node.createURI(expr2.getConstant()
+                                        .asString()));
                     }
 
                     int dimension =
                             this.atomicQuery.getVarIndex(variable.getVarName());
+
                     int compareToLowerBound =
                             this.zone.getLowerBound((byte) dimension)
-                                    .getStringValue()
-                                    .compareTo(
-                                            constant.getConstant().asString());
+                                    .getValue()
+                                    .compareTo(constant);
 
                     int compareToUpperBound =
                             this.zone.getUpperBound((byte) dimension)
-                                    .getStringValue()
-                                    .compareTo(
-                                            constant.getConstant().asString());
+                                    .getValue()
+                                    .compareTo(constant);
+                    
+                    System.out.println("dimension = " + dimension);
+                    System.out.println("borne inf = " + this.zone.getLowerBound((byte) dimension)
+                            .toString());
+                    System.out.println("borne sup = " + this.zone.getUpperBound((byte) dimension)
+                            .toString());
 
                     if (func.getArg1().isVariable()) {
                         if (func.getOpName().equals(">")
@@ -184,6 +217,7 @@ public final class AtomicQueryConstraintsValidator extends
                             return new E_Bool(false);
                         } else if (func.getOpName().equals("<")
                                 && compareToLowerBound < 0) {
+                            System.out.println("AtomicQueryConstraintsValidator.FilterTransformer.transform()");
                             this.finalDecision = true;
                             return new E_Bool(true);
                         } else if (func.getOpName().equals("<")
@@ -259,7 +293,14 @@ public final class AtomicQueryConstraintsValidator extends
                     }
                 } else if (func instanceof E_LogicalAnd
                         || func instanceof E_LogicalOr) {
-                    System.out.println("logical and " + func.toString());
+                    System.out.println("arg1 = " + func.getArg1().getVarName() + " ET arg2 = " +
+                            func.getArg2().getVarName());
+                    // or try/catch ClassCastException on (ExprFunction2) func.getArg1();
+                    if (func.getArg1().getVarName().equals(func.getArg2().getVarName()))
+                    {
+                        return new E_Bool(false);
+                    }
+                    System.out.println("classe = "+ func.getClass().getSimpleName() + "func = " + ExprUtils.fmtSPARQL(func));
                     ExprFunction2 exprfunc2_1 = (ExprFunction2) func.getArg1();
                     Expr exprfunc2_1_bool =
                             this.transform(
@@ -272,10 +313,7 @@ public final class AtomicQueryConstraintsValidator extends
                                     exprfunc2_2.getArg2());
                     E_Bool bool1 = (E_Bool) exprfunc2_1_bool;
                     E_Bool bool2 = (E_Bool) exprfunc2_2_bool;
-                    System.out.println("BOOL : " + bool1.toString() + " "
-                            + bool2.toString());
-                    if (func instanceof E_LogicalAnd) { // si op gauche faux
-                                                        // renvoyer faux
+                    if (func instanceof E_LogicalAnd) {
                         if (bool1.isBool() && bool2.isBool()) {
                             this.finalDecision = true;
                             return new E_Bool(true);
@@ -303,7 +341,7 @@ public final class AtomicQueryConstraintsValidator extends
 
     }
 
-    private static class E_Bool extends ExprFunction0 {
+    private class E_Bool extends ExprFunction0 {
 
         private boolean bool;
 
@@ -344,6 +382,24 @@ public final class AtomicQueryConstraintsValidator extends
 
     public void setTransformer(FilterTransformer transformer) {
         this.transformer = transformer;
+    }
+
+    private static Coordinate<SemanticElement> replaceVariablesByNull(AtomicQuery query) {
+        SemanticElement[] tab = new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+        
+        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++)
+        {
+            if (query.toArray()[i].isVariable() || query.toArray()[i].matches(Node.ANY))
+            {
+                query.toArray()[i] = null;
+            }
+            else
+            {
+                tab[i] = new SemanticElement(query.toArray()[i]);
+            }
+        }
+        
+        return new Coordinate<SemanticElement>(tab);
     }
 
 }
