@@ -19,7 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployme
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Random;
 
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.node.Node;
@@ -43,9 +42,11 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
     private static final Logger log =
             LoggerFactory.getLogger(GcmDeploymentNodeProvider.class);
 
-    private final Random random;
-
     private final GCMApplication gcma;
+
+    private List<Node> nodes;
+
+    private int nodeIndex;
 
     /**
      * Constructs a GcmDeploymentNodeProvider.
@@ -54,7 +55,6 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      *            the path to the GCM Application descriptor.
      */
     public GcmDeploymentNodeProvider(String gcmaPath) {
-        this.random = new Random();
         try {
             this.gcma =
                     PAGCMDeployment.loadApplicationDescriptor(new File(gcmaPath));
@@ -63,6 +63,8 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
                     "Failed to load GCM Application descriptor located at "
                             + gcmaPath, pe);
         }
+        this.nodes = null;
+        this.nodeIndex = 0;
     }
 
     /**
@@ -97,9 +99,19 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
     @Override
     public Node getANode() {
         if (this.gcma.isStarted()) {
-            List<Node> nodes = this.gcma.getAllNodes();
+            if (this.nodes == null) {
+                this.nodes = this.gcma.getAllNodes();
+            }
 
-            return nodes.get(this.random.nextInt(nodes.size()));
+            if (this.nodeIndex < this.nodes.size()) {
+                Node node = this.nodes.get(this.nodeIndex);
+
+                this.nodeIndex++;
+
+                return node;
+            } else {
+                throw new IllegalStateException("No node available");
+            }
         } else {
             throw new IllegalStateException(
                     "Cannot get a node because the GCM deployment has not yet been started");

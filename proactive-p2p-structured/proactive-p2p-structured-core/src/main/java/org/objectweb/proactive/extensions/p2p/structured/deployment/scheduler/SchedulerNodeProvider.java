@@ -17,10 +17,10 @@
 package org.objectweb.proactive.extensions.p2p.structured.deployment.scheduler;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.UniqueID;
@@ -45,8 +45,6 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
     private static final Logger log =
             LoggerFactory.getLogger(SchedulerNodeProvider.class);
 
-    private final Random random;
-
     private final String schedulerUrl;
 
     private final String username;
@@ -67,6 +65,10 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
     private boolean isStarted;
 
     private final Map<String, GCMVirtualNode> virtualNodes;
+
+    private List<Node> nodes;
+
+    private int nodeIndex;
 
     /**
      * Constructs a SchedulerNodeProvider.
@@ -117,7 +119,6 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
     private SchedulerNodeProvider(String schedulerUrl, String username,
             String password, String credentialsPath, String dataFolder,
             List<String> jvmArguments, List<GcmVirtualNodeEntry> entries) {
-        this.random = new Random();
         this.schedulerUrl = schedulerUrl;
         this.username = username;
         this.password = password;
@@ -134,6 +135,8 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
         }
         this.isStarted = false;
         this.virtualNodes = new HashMap<String, GCMVirtualNode>();
+        this.nodes = null;
+        this.nodeIndex = 0;
     }
 
     /**
@@ -200,12 +203,25 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
     public synchronized Node getANode() {
         if (this.isStarted()) {
             try {
-                GcmVirtualNodeEntry virtualNodeEntry =
-                        this.virtualNodeEntries.get(this.random.nextInt(this.virtualNodeEntries.size()));
-                List<Node> nodes =
-                        this.schedulerNodeProvider.getNodes(virtualNodeEntry.nodeRequestId);
+                if (this.nodes == null) {
+                    List<UniqueID> nodeRequestIds = new ArrayList<UniqueID>();
 
-                return nodes.get(this.random.nextInt(nodes.size()));
+                    for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
+                        nodeRequestIds.add(virtualNodeEntry.nodeRequestId);
+                    }
+                    this.nodes =
+                            this.schedulerNodeProvider.getNodes(nodeRequestIds.toArray(new UniqueID[] {}));
+                }
+
+                if (this.nodeIndex < this.nodes.size()) {
+                    Node node = this.nodes.get(this.nodeIndex);
+
+                    this.nodeIndex++;
+
+                    return node;
+                } else {
+                    throw new IllegalStateException("No node available");
+                }
             } catch (NodeProviderException npe) {
                 throw new IllegalStateException("Failed to get a node", npe);
             }
