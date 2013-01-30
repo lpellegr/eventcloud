@@ -22,18 +22,13 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.can.StatelessQuadruplePatternResponse;
-<<<<<<< local
-import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
-import fr.inria.eventcloud.reasoner.AtomicQuery;
-import fr.inria.eventcloud.validator.AtomicQueryConstraintsValidator;
-=======
 import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
->>>>>>> other
 
 /**
  * StatelessQuadruplePatternRequest is a {@link QuadruplePattern} that is
@@ -74,10 +69,12 @@ public abstract class StatelessQuadruplePatternRequest extends
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 
-    public StatelessQuadruplePatternRequest(AtomicQueryConstraintsValidator validator,
-            QuadruplePattern quadPattern, 
-            ResponseProvider<? extends StatelessQuadruplePatternResponse, StringCoordinate> responseProvider) {
-        super(validator, responseProvider);
+    public StatelessQuadruplePatternRequest(
+            AnycastConstraintsValidator<SemanticElement> validator,
+            QuadruplePattern quadPattern,
+            ResponseProvider<? extends StatelessQuadruplePatternResponse, Coordinate<SemanticElement>> responseProvider) {
+        super(validator,
+                responseProvider);
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 
@@ -110,5 +107,4 @@ public abstract class StatelessQuadruplePatternRequest extends
     public SerializedValue<QuadruplePattern> getQuadruplePattern() {
         return this.quadruplePattern;
     }
-
 }

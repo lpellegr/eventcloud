@@ -50,14 +50,11 @@ import com.hp.hpl.jena.sparql.expr.ExprTransformer;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.ExprVisitorBase;
 import com.hp.hpl.jena.sparql.expr.ExprWalker;
-<<<<<<< local
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.function.FunctionEnv;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
-=======
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
->>>>>>> other
 
 import fr.inria.eventcloud.exceptions.DecompositionException;
 
@@ -158,8 +155,11 @@ public final class SparqlDecomposer {
             List<ExprList> filterConstraints = new ArrayList<ExprList>();
             for (ExprList el : visitor.getFilterConstraints()) {
                 ExprList exprList = ExprTransformer.transform(transformer, el);
-                filterConstraints.add(exprList);
-                System.out.println(ExprUtils.fmtSPARQL(exprList));
+                if (!(ExprUtils.fmtSPARQL(exprList).equals("null()")))
+                {
+                    filterConstraints.add(exprList);
+                    System.out.println("SparqlDecomposer.createAtomicQuery " + ExprUtils.fmtSPARQL(exprList));
+                }
             }
             atomicQuery.setFilterConstraints(filterConstraints);
         }
@@ -325,15 +325,4 @@ public final class SparqlDecomposer {
 
     }
     
-    public static void main(String[] args) throws DecompositionException {
-        List<AtomicQuery> atomicQueries =
-               SparqlDecomposer.getInstance().decompose(
-                       "SELECT ?s ?p ?o ?s1 { GRAPH ?g { ?s ?p ?o . FILTER(?s > 10 && ?j < 2) . ?s1 ?p ?o ." +
-                       "FILTER(?s1 > 5)}} ");
-
-
-      
-        
-    }
-
-}
+   }
