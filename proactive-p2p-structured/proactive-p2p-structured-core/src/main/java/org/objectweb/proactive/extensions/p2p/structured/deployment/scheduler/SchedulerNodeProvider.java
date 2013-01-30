@@ -264,8 +264,7 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
                                         + virtualNodeName, npe);
                     }
                 } else {
-                    throw new IllegalArgumentException(
-                            "No such GCMVirtualNode: " + virtualNodeName);
+                    return null;
                 }
             }
 
