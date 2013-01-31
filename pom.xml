@@ -41,6 +41,16 @@
 	</issueManagement>
 
 	<repositories>
+	        <repository>
+			<id>mapdb-releases</id>
+			<url>http://eventcloud.bitbucket.org/maven/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 		<repository>
 			<id>soceda-releases</id>
 			<url>http://maven.petalslink.com/soceda-release</url>
@@ -208,7 +218,7 @@
 			<dependency>
 				<groupId>org.mapdb</groupId>
 				<artifactId>mapdb</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>20130131</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
