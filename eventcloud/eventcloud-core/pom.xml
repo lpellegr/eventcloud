@@ -42,7 +42,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.soceda</groupId>
+			<groupId>com.ebmwebsourcing.projects.soceda.wp2-federated-middleware-layer.social-components</groupId>
 			<artifactId>social-filter</artifactId>
 		</dependency>
 		<dependency>
