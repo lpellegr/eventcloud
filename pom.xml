@@ -41,7 +41,7 @@
 	</issueManagement>
 
 	<repositories>
-	        <repository>
+		<repository>
 			<id>mapdb-releases</id>
 			<url>http://eventcloud.bitbucket.org/maven/releases</url>
 			<releases>
@@ -299,12 +299,12 @@
 			<dependency>
 				<groupId>org.ow2.play</groupId>
 				<artifactId>play-commons-eventformat</artifactId>
-				<version>1.1-SNAPSHOT</version>
+				<version>1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ow2.play</groupId>
 				<artifactId>play-commons-constants</artifactId>
-				<version>1.1-SNAPSHOT</version>
+				<version>1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.ebmwebsourcing.projects.soceda.wp2-federated-middleware-layer.social-components</groupId>
