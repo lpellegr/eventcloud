@@ -116,7 +116,7 @@ public class SubscribeProxyTest {
      */
     @Test(timeout = 60000)
     public void testSubscribeWithConcurrentPublications()
-            throws EventCloudIdNotManaged, InterruptedException {
+            throws EventCloudIdNotManaged {
         final int NB_PRODUCERS = 10;
         final int NB_EVENTS_TO_WAIT = 100;
 
