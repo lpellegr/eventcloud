@@ -42,7 +42,27 @@
 
 	<repositories>
 		<repository>
-			<id>play-snapshot</id>
+			<id>mapdb-releases</id>
+			<url>http://eventcloud.bitbucket.org/maven/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>soceda-releases</id>
+			<url>http://maven.petalslink.com/soceda-release</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>ow2-snapshots</id>
 			<url>http://repository.ow2.org/nexus/content/repositories/snapshots</url>
 			<releases>
 				<enabled>false</enabled>
@@ -198,7 +218,7 @@
 			<dependency>
 				<groupId>org.mapdb</groupId>
 				<artifactId>mapdb</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>20130131</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -279,17 +299,17 @@
 			<dependency>
 				<groupId>org.ow2.play</groupId>
 				<artifactId>play-commons-eventformat</artifactId>
-				<version>1.1-SNAPSHOT</version>
+				<version>1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ow2.play</groupId>
 				<artifactId>play-commons-constants</artifactId>
-				<version>1.1-SNAPSHOT</version>
+				<version>1.0</version>
 			</dependency>
 			<dependency>
-				<groupId>org.soceda</groupId>
+				<groupId>com.ebmwebsourcing.projects.soceda.wp2-federated-middleware-layer.social-components</groupId>
 				<artifactId>social-filter</artifactId>
-				<version>1.0-SNAPSHOT</version>
+				<version>v0.3</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.objectweb.proactive</groupId>
