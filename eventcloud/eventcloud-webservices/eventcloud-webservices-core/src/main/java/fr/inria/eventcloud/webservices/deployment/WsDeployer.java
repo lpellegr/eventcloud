@@ -16,8 +16,6 @@
  **/
 package fr.inria.eventcloud.webservices.deployment;
 
-import java.net.UnknownHostException;
-
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
@@ -27,6 +25,7 @@ import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.core.node.NodeException;
+import org.objectweb.proactive.core.util.ProActiveInet;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 import org.objectweb.proactive.extensions.webservices.component.Utils;
 import org.objectweb.proactive.extensions.webservices.component.controller.PAWebServicesController;
@@ -58,8 +57,6 @@ import fr.inria.eventcloud.webservices.wsn.SubscribeWsnServiceImpl;
  * @author bsauvan
  */
 public class WsDeployer {
-
-    private static final String DEFAULT_IP = "0.0.0.0";
 
     /**
      * Deploys a new {@link EventCloudsManagementWsnApi EventClouds Management
@@ -114,8 +111,7 @@ public class WsDeployer {
                         PublishWsnApi.class, publishWsnService, urlSuffix, port);
 
         return new WsnServiceInfo(
-                streamUrl, getEndpointUrl(publishWsnServer), publishWsnService,
-                publishWsnServer);
+                streamUrl, publishWsnService, publishWsnServer);
     }
 
     /**
@@ -147,26 +143,7 @@ public class WsDeployer {
                         port);
 
         return new WsnServiceInfo(
-                streamUrl, getEndpointUrl(subscribeWsnServer),
-                subscribeWsnService, subscribeWsnServer);
-    }
-
-    public static String getEndpointUrl(Server server) {
-        String endpointUrl =
-                server.getEndpoint().getEndpointInfo().getAddress();
-
-        if (endpointUrl.contains(DEFAULT_IP)) {
-            try {
-                endpointUrl =
-                        endpointUrl.replaceFirst(
-                                DEFAULT_IP, java.net.InetAddress.getLocalHost()
-                                        .getHostAddress());
-            } catch (UnknownHostException uhe) {
-                // ignore the exception, the default ip will be used
-            }
-        }
-
-        return endpointUrl;
+                streamUrl, subscribeWsnService, subscribeWsnServer);
     }
 
     /**
@@ -207,7 +184,9 @@ public class WsDeployer {
                                           int port) {
         // binds the web service to all interfaces by default
         StringBuilder address = new StringBuilder("http://");
-        address.append(DEFAULT_IP);
+        address.append(ProActiveInet.getInstance()
+                .getInetAddress()
+                .getHostAddress());
         address.append(':');
         address.append(port);
         address.append('/');
@@ -424,7 +403,7 @@ public class WsDeployer {
             wsc.exposeComponentAsWebService(
                     proxyName, new String[] {interfaceName});
 
-            return wsc.getLocalUrl() + WSConstants.SERVICES_PATH + proxyName
+            return getUrl(wsc.getUrl()) + WSConstants.SERVICES_PATH + proxyName
                     + "_" + interfaceName;
         } catch (NoSuchInterfaceException e) {
             e.printStackTrace();
@@ -437,6 +416,22 @@ public class WsDeployer {
         }
 
         return null;
+    }
+
+    /*
+     * TODO: Remove when the new release of ProActive containing the fix for PROACTIVE-1239 will be deployed 
+     */
+    private static String getUrl(String localUrl) {
+        String url = localUrl;
+
+        if (url.contains("localhost")) {
+            url =
+                    url.replaceFirst("localhost", ProActiveInet.getInstance()
+                            .getInetAddress()
+                            .getHostAddress());
+        }
+
+        return url;
     }
 
     /**
