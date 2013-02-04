@@ -23,6 +23,7 @@ import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
@@ -97,6 +98,25 @@ public final class PeerFactory extends AbstractFactory {
                                                              GCMVirtualNode vn) {
         return PeerFactory.createPeer(
                 overlayProvider, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new peer component deployed on a node provided by the specified
+     * {@code node provider} by using the given {@code overlay} abstraction.
+     * 
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
+     */
+    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
+                                                             NodeProvider nodeProvider) {
+        return PeerFactory.createPeer(
+                overlayProvider, getContextFromNodeProvider(
+                        nodeProvider, PeerImpl.PEER_VN));
     }
 
     private static <T extends StructuredOverlay> Peer createPeer(SerializableProvider<T> overlayProvider,
