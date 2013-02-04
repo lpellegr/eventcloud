@@ -23,6 +23,7 @@ import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
@@ -102,6 +103,21 @@ public class TrackerFactory extends AbstractFactory {
     }
 
     /**
+     * Creates a new tracker component deployed on a node provided by the
+     * specified {@code node provider} and associates it to the network name
+     * "default".
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link Tracker} interface of the new tracker
+     *         component created.
+     */
+    public static Tracker newTracker(NodeProvider nodeProvider) {
+        return TrackerFactory.newTracker("default", nodeProvider);
+    }
+
+    /**
      * Creates a new tracker component deployed on the specified {@code node}
      * and associates it to the given {@code networkName}.
      * 
@@ -134,6 +150,26 @@ public class TrackerFactory extends AbstractFactory {
     public static Tracker newTracker(String networkName, GCMVirtualNode vn) {
         return TrackerFactory.createTracker(
                 networkName, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new tracker component deployed on a node provided by the
+     * specified {@code node provider} and associates it to the given
+     * {@code networkName}.
+     * 
+     * @param networkName
+     *            the name of the network the tracker manages.
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link Tracker} interface of the new tracker
+     *         component created.
+     */
+    public static Tracker newTracker(String networkName,
+                                     NodeProvider nodeProvider) {
+        return TrackerFactory.createTracker(
+                networkName, getContextFromNodeProvider(
+                        nodeProvider, TrackerImpl.TRACKER_VN));
     }
 
     private static Tracker createTracker(String networkName,

@@ -23,9 +23,7 @@ import java.util.List;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
-import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudDescription;
@@ -84,8 +82,7 @@ public class EventCloudDeployer extends NetworkDeployer {
         if (super.descriptor.getNodeProvider() != null) {
             return SemanticFactory.newSemanticPeer(
                     super.descriptor.getOverlayProvider(),
-                    super.descriptor.getNodeProvider().getGcmVirtualNode(
-                            PeerImpl.PEER_VN));
+                    super.descriptor.getNodeProvider());
         } else {
             return SemanticFactory.newSemanticPeer(super.descriptor.getOverlayProvider());
         }
@@ -98,8 +95,7 @@ public class EventCloudDeployer extends NetworkDeployer {
     protected synchronized Tracker createTracker(String networkName) {
         if (super.descriptor.getNodeProvider() != null) {
             return SemanticFactory.newSemanticTracker(
-                    networkName, super.descriptor.getNodeProvider()
-                            .getGcmVirtualNode(TrackerImpl.TRACKER_VN));
+                    networkName, super.descriptor.getNodeProvider());
         } else {
             return SemanticFactory.newSemanticTracker(networkName);
         }

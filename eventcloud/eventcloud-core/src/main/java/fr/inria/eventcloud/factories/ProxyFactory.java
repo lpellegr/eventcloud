@@ -29,6 +29,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
@@ -149,6 +150,30 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
         return createPublishProxy(
                 publishProxyAdl, ComponentUtils.createContext(vn), registryUrl,
                 id);
+    }
+
+    /**
+     * Creates a new publish proxy component deployed on a node provided by the
+     * specified {@code node provider}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * @param registryUrl
+     *            the EventClouds registry URL.
+     * @param id
+     *            the identifier that identify the EventCloud to work on.
+     * 
+     * @return the reference on the {@link PublishApi} interface of the new
+     *         publish proxy component created.
+     * 
+     * @throws EventCloudIdNotManaged
+     *             if the specified registry does not managed the given id.
+     */
+    public static PublishApi newPublishProxy(NodeProvider nodeProvider,
+                                             String registryUrl, EventCloudId id)
+            throws EventCloudIdNotManaged {
+        return createPublishProxy(publishProxyAdl, getContextFromNodeProvider(
+                nodeProvider, PublishProxyImpl.PROXY_VN), registryUrl, id);
     }
 
     protected static PublishApi createPublishProxy(String publishProxyAdl,
@@ -283,6 +308,37 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                 registryUrl, id, properties);
     }
 
+    /**
+     * Creates a new subscribe proxy component deployed on a node provided by
+     * the specified {@code node provider} and by registering the proxy to the
+     * registry in order to have the possibility to receive notification.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * @param registryUrl
+     *            the EventClouds registry URL.
+     * @param id
+     *            the identifier that identify the EventCloud to work on.
+     * @param properties
+     *            the ELA properties to set.
+     * 
+     * @return the reference on the {@link SubscribeApi} interface of the new
+     *         subscribe proxy component created.
+     * 
+     * @throws EventCloudIdNotManaged
+     *             if the specified registry does not managed the given id.
+     */
+    public static SubscribeApi newSubscribeProxy(NodeProvider nodeProvider,
+                                                 String registryUrl,
+                                                 EventCloudId id,
+                                                 AlterableElaProperty... properties)
+            throws EventCloudIdNotManaged {
+        return createSubscribeProxy(
+                subscribeProxyAdl, getContextFromNodeProvider(
+                        nodeProvider, SubscribeProxyImpl.PROXY_VN),
+                registryUrl, id, properties);
+    }
+
     protected static SubscribeApi createSubscribeProxy(String subscribeProxyAdl,
                                                        Map<String, Object> context,
                                                        String registryUrl,
@@ -410,6 +466,30 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
         return createPutGetProxy(
                 putgetProxyAdl, ComponentUtils.createContext(vn), registryUrl,
                 id);
+    }
+
+    /**
+     * Creates a new put/get proxy component deployed on a node provided by the
+     * specified {@code node provider}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * @param registryUrl
+     *            the EventClouds registry URL.
+     * @param id
+     *            the identifier that identify the EventCloud to work on.
+     * 
+     * @return the reference on the {@link PutGetApi} interface of the new
+     *         put/get proxy component created.
+     * 
+     * @throws EventCloudIdNotManaged
+     *             if the specified registry does not managed the given id.
+     */
+    public static PutGetApi newPutGetProxy(NodeProvider nodeProvider,
+                                           String registryUrl, EventCloudId id)
+            throws EventCloudIdNotManaged {
+        return createPutGetProxy(putgetProxyAdl, getContextFromNodeProvider(
+                nodeProvider, PutGetProxyImpl.PROXY_VN), registryUrl, id);
     }
 
     protected static PutGetApi createPutGetProxy(String putgetProxyAdl,
