@@ -72,7 +72,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public void start() {
-        if (!this.gcma.isStarted()) {
+        if (!this.isStarted()) {
             log.debug(
                     "Starting GCM deployment described in the GCM Application descriptor located at {}",
                     this.gcma.getDescriptorURL().getPath());
@@ -98,7 +98,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public Node getANode() {
-        if (this.gcma.isStarted()) {
+        if (this.isStarted()) {
             if (this.nodes == null) {
                 this.nodes = this.gcma.getAllNodes();
             }
@@ -123,7 +123,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public GCMVirtualNode getGcmVirtualNode(String virtualNodeName) {
-        if (this.gcma.isStarted()) {
+        if (this.isStarted()) {
             return this.gcma.getVirtualNode(virtualNodeName);
         } else {
             throw new IllegalStateException("Cannot get the GCMVirtualNode "
@@ -137,7 +137,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public void terminate() {
-        if (this.gcma.isStarted()) {
+        if (this.isStarted()) {
             log.debug(
                     "Terminating the GCM deployment described in the GCM Application descriptor located at {}",
                     this.gcma.getDescriptorURL().getPath());
