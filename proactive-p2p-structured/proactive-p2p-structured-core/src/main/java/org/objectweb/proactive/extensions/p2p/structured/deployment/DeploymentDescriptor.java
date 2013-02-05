@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import java.io.Serializable;
 
+import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -52,6 +53,8 @@ public class DeploymentDescriptor implements Serializable {
     public DeploymentDescriptor(
             SerializableProvider<? extends StructuredOverlay> overlayProvider) {
         this.overlayProvider = overlayProvider;
+        this.nodeProvider = new LocalNodeProvider();
+        this.nodeProvider.start();
     }
 
     /**
@@ -95,8 +98,10 @@ public class DeploymentDescriptor implements Serializable {
      */
     public DeploymentDescriptor setNodeProvider(NodeProvider nodeProvider) {
         Preconditions.checkState(
-                this.nodeProvider == null, "Node provider was already set");
+                this.nodeProvider instanceof LocalNodeProvider,
+                "Node provider was already set");
 
+        this.nodeProvider.terminate();
         this.nodeProvider = nodeProvider;
 
         return this;

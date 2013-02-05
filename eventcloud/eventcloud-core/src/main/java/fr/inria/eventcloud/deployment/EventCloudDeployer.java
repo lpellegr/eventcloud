@@ -79,13 +79,9 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Peer createPeer() {
-        if (super.descriptor.getNodeProvider() != null) {
-            return SemanticFactory.newSemanticPeer(
-                    super.descriptor.getOverlayProvider(),
-                    super.descriptor.getNodeProvider());
-        } else {
-            return SemanticFactory.newSemanticPeer(super.descriptor.getOverlayProvider());
-        }
+        return SemanticFactory.newSemanticPeer(
+                super.descriptor.getOverlayProvider(),
+                super.descriptor.getNodeProvider());
     }
 
     /**
@@ -93,12 +89,8 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Tracker createTracker(String networkName) {
-        if (super.descriptor.getNodeProvider() != null) {
-            return SemanticFactory.newSemanticTracker(
-                    networkName, super.descriptor.getNodeProvider());
-        } else {
-            return SemanticFactory.newSemanticTracker(networkName);
-        }
+        return SemanticFactory.newSemanticTracker(
+                networkName, super.descriptor.getNodeProvider());
     }
 
     /**
