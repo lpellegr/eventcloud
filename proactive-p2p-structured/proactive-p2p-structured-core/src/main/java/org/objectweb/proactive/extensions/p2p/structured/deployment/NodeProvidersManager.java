@@ -43,8 +43,9 @@ public class NodeProvidersManager {
     /**
      * Constructs a {@link NodeProvidersManager} which will manage a set of
      * {@code node providers} (a {@link LocalNodeProvider} associated to the
-     * identifier {@link DEFAULT_NODE_PROVIDER_ID} and the {@code node providers} loaded from the
-     * configuration file located at the path given by the property
+     * identifier {@link #DEFAULT_NODE_PROVIDER_ID} and the
+     * {@code node providers} loaded from the configuration file located at the
+     * path given by the property
      * {@link P2PStructuredProperties#NODE_PROVIDER_CONFIG_FILE}).
      */
     @SuppressWarnings("unchecked")
