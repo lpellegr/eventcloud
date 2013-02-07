@@ -115,11 +115,12 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
 
         try {
             this.gcma =
-                    PAGCMDeployment.loadApplicationDescriptor(new File(gcmaPath));
+                    PAGCMDeployment.loadApplicationDescriptor(new File(
+                            this.gcmaPath));
         } catch (ProActiveException pe) {
             throw new IllegalStateException(
                     "Failed to load GCM Application descriptor located at "
-                            + gcmaPath, pe);
+                            + this.gcmaPath, pe);
         }
         this.nodes = null;
         this.nodeIndex = 0;

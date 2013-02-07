@@ -29,7 +29,8 @@ import com.beust.jcommander.Parameter;
  */
 public abstract class WsLauncher extends Launcher {
 
-    protected static final NodeProvider LOCAL_NODE_PROVIDER = getLocalNodeProvider();
+    protected static final NodeProvider LOCAL_NODE_PROVIDER =
+            getLocalNodeProvider();
 
     @Parameter(names = {"--registry-url", "-r"}, description = "EventClouds registry URL", required = true)
     protected String registryUrl;

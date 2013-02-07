@@ -26,7 +26,8 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalN
  */
 public abstract class WsTest {
 
-    protected static final NodeProvider LOCAL_NODE_PROVIDER = getLocalNodeProvider();
+    protected static final NodeProvider LOCAL_NODE_PROVIDER =
+            getLocalNodeProvider();
 
     protected static final int WEBSERVICES_PORT = getWebservicesPort();
 
