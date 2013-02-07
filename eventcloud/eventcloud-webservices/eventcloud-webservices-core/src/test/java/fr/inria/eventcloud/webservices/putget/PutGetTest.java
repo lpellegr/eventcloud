@@ -106,6 +106,7 @@ public class PutGetTest extends WsTest {
 
         this.putgetWsProxyInfo =
                 WsDeployer.deployPutGetWsProxy(
+                        LOCAL_NODE_PROVIDER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         id.getStreamUrl(), "putget");
 

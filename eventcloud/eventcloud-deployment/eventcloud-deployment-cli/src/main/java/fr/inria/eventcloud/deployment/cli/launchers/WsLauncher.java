@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.deployment.cli.launchers;
 
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
+
 import com.beust.jcommander.Parameter;
 
 /**
@@ -26,6 +29,8 @@ import com.beust.jcommander.Parameter;
  */
 public abstract class WsLauncher extends Launcher {
 
+    protected static final NodeProvider LOCAL_NODE_PROVIDER = getLocalNodeProvider();
+
     @Parameter(names = {"--registry-url", "-r"}, description = "EventClouds registry URL", required = true)
     protected String registryUrl;
 
@@ -34,6 +39,14 @@ public abstract class WsLauncher extends Launcher {
 
     @Parameter(names = {"--number-id", "-n"}, description = "Identification number which will be part of the web service endpoint URL", required = true)
     protected int numberId;
+
+    private static final NodeProvider getLocalNodeProvider() {
+        NodeProvider nodeProvider = new LocalNodeProvider();
+
+        nodeProvider.start();
+
+        return nodeProvider;
+    }
 
     protected String getTopicName(String streamUrl) {
         return streamUrl.substring(streamUrl.lastIndexOf('/') + 1);

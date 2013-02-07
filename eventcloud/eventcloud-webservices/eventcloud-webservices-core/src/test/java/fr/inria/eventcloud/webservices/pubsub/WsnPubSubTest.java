@@ -258,10 +258,12 @@ public class WsnPubSubTest extends WsTest {
 
         this.subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
+                        LOCAL_NODE_PROVIDER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "subscribe", WEBSERVICES_PORT);
         this.publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
+                        LOCAL_NODE_PROVIDER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "publish", WEBSERVICES_PORT);
 
