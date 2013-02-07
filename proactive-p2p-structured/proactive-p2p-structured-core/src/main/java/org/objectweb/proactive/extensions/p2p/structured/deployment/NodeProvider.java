@@ -20,8 +20,8 @@ import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
 /**
- * A NodeProvider is used to provide ProActive nodes to deploy on several
- * machines a ProActive peer-to-peer network.
+ * Provider of ProActive nodes to deploy on several machines a ProActive
+ * peer-to-peer network.
  * 
  * @author lpellegr
  * @author bsauvan

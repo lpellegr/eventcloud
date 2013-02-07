@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.webservices;
 
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
+
 /**
  * Abstract class common to all web service tests.
  * 
@@ -23,7 +26,17 @@ package fr.inria.eventcloud.webservices;
  */
 public abstract class WsTest {
 
+    protected static final NodeProvider LOCAL_NODE_PROVIDER = getLocalNodeProvider();
+
     protected static final int WEBSERVICES_PORT = getWebservicesPort();
+
+    private static final NodeProvider getLocalNodeProvider() {
+        NodeProvider nodeProvider = new LocalNodeProvider();
+
+        nodeProvider.start();
+
+        return nodeProvider;
+    }
 
     private static final int getWebservicesPort() {
         String port = System.getProperty("eventcloud.webservices.port");

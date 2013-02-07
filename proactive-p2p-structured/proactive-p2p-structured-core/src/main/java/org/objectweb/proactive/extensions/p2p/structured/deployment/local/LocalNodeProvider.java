@@ -24,9 +24,10 @@ import org.objectweb.proactive.core.node.NodeFactory;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
+import com.google.common.base.Preconditions;
+
 /**
- * LocalNodeProvider is a concrete implementation of {@link NodeProvider} for a
- * local deployment.
+ * Concrete implementation of {@link NodeProvider} for a local deployment.
  * 
  * @author bsauvan
  */
@@ -37,7 +38,7 @@ public class LocalNodeProvider implements NodeProvider, Serializable {
     private Node node;
 
     /**
-     * Constructs a LocalNodeProvider.
+     * Constructs a {@link LocalNodeProvider}.
      */
     public LocalNodeProvider() {
     }
@@ -47,15 +48,14 @@ public class LocalNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public void start() {
-        if (!this.isStarted()) {
-            try {
-                this.node = NodeFactory.getDefaultNode();
-            } catch (NodeException e) {
-                throw new IllegalStateException(e);
-            }
-        } else {
-            throw new IllegalStateException(
-                    "Cannot start the local deployment because it has already been started");
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot start the local deployment because it has already been started");
+
+        try {
+            this.node = NodeFactory.getDefaultNode();
+        } catch (NodeException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -72,12 +72,11 @@ public class LocalNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public Node getANode() {
-        if (this.isStarted()) {
-            return this.node;
-        } else {
-            throw new IllegalStateException(
-                    "Cannot get a node because the local deployment has not yet been started");
-        }
+        Preconditions.checkState(
+                this.isStarted(),
+                "Cannot get a node because the local deployment has not yet been started");
+
+        return this.node;
     }
 
     /**
@@ -85,13 +84,13 @@ public class LocalNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public GCMVirtualNode getGcmVirtualNode(String virtualNodeName) {
-        if (this.isStarted()) {
-            return null;
-        } else {
-            throw new IllegalStateException("Cannot get the GCMVirtualNode "
-                    + virtualNodeName
-                    + " because the local deployment has not yet been started");
-        }
+        Preconditions.checkState(
+                this.isStarted(),
+                "Cannot get the GCMVirtualNode "
+                        + virtualNodeName
+                        + " because the local deployment has not yet been started");
+
+        return null;
     }
 
     /**
@@ -99,12 +98,11 @@ public class LocalNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public void terminate() {
-        if (this.isStarted()) {
-            this.node = null;
-        } else {
-            throw new IllegalStateException(
-                    "Cannot terminate the local deployment because it has not yet been started");
-        }
+        Preconditions.checkState(
+                this.isStarted(),
+                "Cannot terminate the local deployment because it has not yet been started");
+
+        this.node = null;
     }
 
 }

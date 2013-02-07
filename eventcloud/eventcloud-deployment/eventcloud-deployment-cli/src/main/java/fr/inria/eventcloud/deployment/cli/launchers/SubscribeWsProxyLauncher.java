@@ -40,6 +40,7 @@ public final class SubscribeWsProxyLauncher extends WsLauncher {
     @Override
     public String run() {
         return WsDeployer.deploySubscribeWsProxy(
+                LOCAL_NODE_PROVIDER,
                 super.registryUrl,
                 super.eventCloudUrl,
                 "eventclouds/" + this.getTopicName(super.eventCloudUrl)

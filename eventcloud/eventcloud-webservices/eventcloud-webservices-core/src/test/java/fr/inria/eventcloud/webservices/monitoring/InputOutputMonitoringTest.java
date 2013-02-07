@@ -188,12 +188,12 @@ public class InputOutputMonitoringTest extends WsTest {
     private void initializeWebServices() {
         this.subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
-                        this.registryUrl, STREAM_URL, "subscribe",
-                        WEBSERVICES_PORT);
+                        LOCAL_NODE_PROVIDER, this.registryUrl, STREAM_URL,
+                        "subscribe", WEBSERVICES_PORT);
         this.publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
-                        this.registryUrl, STREAM_URL, "publish",
-                        WEBSERVICES_PORT);
+                        LOCAL_NODE_PROVIDER, this.registryUrl, STREAM_URL,
+                        "publish", WEBSERVICES_PORT);
 
         this.subscribeWsnClient =
                 WsClientFactory.createWsClient(

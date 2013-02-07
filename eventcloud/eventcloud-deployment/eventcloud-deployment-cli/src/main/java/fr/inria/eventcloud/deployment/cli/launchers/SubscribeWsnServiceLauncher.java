@@ -42,6 +42,7 @@ public final class SubscribeWsnServiceLauncher extends WsnServiceLauncher {
     @Override
     public String run() {
         return WsDeployer.deploySubscribeWsnService(
+                LOCAL_NODE_PROVIDER,
                 super.registryUrl,
                 super.eventCloudUrl,
                 WSConstants.SERVICES_PATH + "eventclouds/"

@@ -255,10 +255,12 @@ public class PubSubTest extends WsTest {
 
         this.subscribeWsProxyInfo =
                 WsDeployer.deploySubscribeWsProxy(
+                        LOCAL_NODE_PROVIDER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "subscribe");
         this.publishWsProxyInfo =
                 WsDeployer.deployPublishWsProxy(
+                        LOCAL_NODE_PROVIDER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "publish");
 

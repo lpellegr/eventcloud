@@ -43,6 +43,7 @@ import org.objectweb.proactive.core.component.PAInterface;
 import org.objectweb.proactive.core.component.Utils;
 import org.objectweb.proactive.core.component.control.PAMembraneController;
 import org.objectweb.proactive.core.component.exceptions.NoSuchComponentException;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvidersManager;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -86,6 +87,8 @@ public class EventCloudsManagementServiceImpl implements
     private static final String RAW_REPORT_TOPIC =
             "http://www.petalslink.org/rawreport/1.0/RawReportTopic";
 
+    private final NodeProvidersManager nodeProvidersManager;
+
     private final String registryUrl;
 
     private EventCloudsRegistry registry;
@@ -124,6 +127,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     public EventCloudsManagementServiceImpl(String registryUrl,
             int wsnServicePort) {
+        this.nodeProvidersManager = new NodeProvidersManager();
         this.registryUrl = registryUrl;
         this.wsnServicePort = wsnServicePort;
         this.wsInfos = Maps.newHashMap();
@@ -140,6 +144,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @PostConstruct
     public void init() {
+        this.nodeProvidersManager.startAllNodeProviders();
         try {
             this.registry =
                     EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
@@ -160,16 +165,35 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
+    public List<String> getNodeProviderIds() {
+        return this.nodeProvidersManager.getNodeProviderIds();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean createEventCloud(String streamUrl) {
+        return this.createEventCloudWithNodeProvider(
+                NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean createEventCloudWithNodeProvider(String nodeProviderId,
+                                                    String streamUrl) {
         EventCloudId id = new EventCloudId(streamUrl);
 
         if (!this.registry.contains(id)) {
             EventCloudDescription description = new EventCloudDescription(id);
-
+            EventCloudDeploymentDescriptor deploymentDescriptor =
+                    new EventCloudDeploymentDescriptor(
+                            new SemanticPersistentOverlayProvider());
+            deploymentDescriptor.setNodeProvider(this.nodeProvidersManager.getNodeProvider(nodeProviderId));
             EventCloudDeployer deployer =
-                    new EventCloudDeployer(
-                            description, new EventCloudDeploymentDescriptor(
-                                    new SemanticPersistentOverlayProvider()));
+                    new EventCloudDeployer(description, deploymentDescriptor);
 
             deployer.deploy(1, 1);
 
@@ -257,12 +281,23 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deployPublishWsnService(String streamUrl) {
+        return this.deployPublishWsnServiceWithNodeProvider(
+                NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String deployPublishWsnServiceWithNodeProvider(String nodeProviderId,
+                                                          String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
         int numberId = this.lockUnassignedNumberId(topicName);
         WsnServiceInfo publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
+                        this.nodeProvidersManager.getNodeProvider(nodeProviderId),
                         this.registryUrl, streamUrl, WSConstants.SERVICES_PATH
                                 + "eventclouds/" + topicName + "/"
                                 + WSN_SERVICE_ID + numberId
@@ -277,12 +312,23 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deploySubscribeWsnService(String streamUrl) {
+        return this.deploySubscribeWsnServiceWithNodeProvider(
+                NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String deploySubscribeWsnServiceWithNodeProvider(String nodeProviderId,
+                                                            String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
         int numberId = this.lockUnassignedNumberId(topicName);
         WsnServiceInfo subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
+                        this.nodeProvidersManager.getNodeProvider(nodeProviderId),
                         this.registryUrl, streamUrl, WSConstants.SERVICES_PATH
                                 + "eventclouds/" + topicName + "/"
                                 + WSN_SERVICE_ID + numberId
@@ -297,12 +343,23 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deployPublishWsProxy(String streamUrl) {
+        return this.deployPublishWsProxyWithNodeProvider(
+                NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String deployPublishWsProxyWithNodeProvider(String nodeProviderId,
+                                                       String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
         int numberId = this.lockUnassignedNumberId(topicName);
         WsProxyInfo publishWsProxyInfo =
                 WsDeployer.deployPublishWsProxy(
+                        this.nodeProvidersManager.getNodeProvider(nodeProviderId),
                         this.registryUrl, streamUrl, "eventclouds/" + topicName
                                 + "/" + WS_PROXY_ID + numberId);
 
@@ -315,12 +372,23 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deploySubscribeWsProxy(String streamUrl) {
+        return this.deploySubscribeWsProxyWithNodeProvider(
+                NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String deploySubscribeWsProxyWithNodeProvider(String nodeProviderId,
+                                                         String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
         int numberId = this.lockUnassignedNumberId(topicName);
         WsProxyInfo subscribeWsProxyInfo =
                 WsDeployer.deploySubscribeWsProxy(
+                        this.nodeProvidersManager.getNodeProvider(nodeProviderId),
                         this.registryUrl, streamUrl, "eventclouds/" + topicName
                                 + "/" + WS_PROXY_ID + numberId);
 
@@ -333,12 +401,23 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deployPutGetWsProxy(String streamUrl) {
+        return this.deployPutGetWsProxyWithNodeProvider(
+                NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String deployPutGetWsProxyWithNodeProvider(String nodeProviderId,
+                                                      String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
         int numberId = this.lockUnassignedNumberId(topicName);
         WsProxyInfo putgetWsProxyInfo =
                 WsDeployer.deployPutGetWsProxy(
+                        this.nodeProvidersManager.getNodeProvider(nodeProviderId),
                         this.registryUrl, streamUrl, "eventclouds/" + topicName
                                 + "/" + WS_PROXY_ID + numberId);
 
