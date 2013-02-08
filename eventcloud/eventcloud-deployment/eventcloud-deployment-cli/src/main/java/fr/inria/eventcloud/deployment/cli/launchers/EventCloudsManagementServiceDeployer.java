@@ -21,9 +21,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +29,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.cxf.endpoint.Server;
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.core.util.ProActiveInet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,12 +159,9 @@ public class EventCloudsManagementServiceDeployer {
 
             StringBuilder eventCloudsManagementWsEndpoint =
                     new StringBuilder("http://");
-            try {
-                eventCloudsManagementWsEndpoint.append(InetAddress.getLocalHost()
-                        .getHostAddress());
-            } catch (UnknownHostException uhe) {
-                uhe.printStackTrace();
-            }
+            eventCloudsManagementWsEndpoint.append(ProActiveInet.getInstance()
+                    .getInetAddress()
+                    .getHostAddress());
             eventCloudsManagementWsEndpoint.append(':');
             eventCloudsManagementWsEndpoint.append(port);
             eventCloudsManagementWsEndpoint.append('/');
