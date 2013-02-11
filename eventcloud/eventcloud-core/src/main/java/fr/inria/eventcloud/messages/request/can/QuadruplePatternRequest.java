@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
@@ -58,21 +59,20 @@ public class QuadruplePatternRequest extends
     public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
                                                           AnycastRequest<SemanticElement> request,
                                                           QuadruplePattern quadruplePattern) {
-        List<Quadruple> result = null;
-
         TransactionalDatasetGraph txnGraph =
                 ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
                         AccessMode.READ_ONLY);
 
         try {
-            result = Lists.newArrayList(txnGraph.find(quadruplePattern));
+            return Lists.newArrayList(txnGraph.find(quadruplePattern));
         } catch (Exception e) {
+            // keep trace of the error but return a result to avoid the overall
+            // system to crash
             e.printStackTrace();
+            return new ArrayList<Quadruple>(0);
         } finally {
             txnGraph.end();
         }
-
-        return result;
     }
 
 }

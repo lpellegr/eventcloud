@@ -58,37 +58,41 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
                              AnycastResponse<E> response) {
         ResponseEntry entry = overlay.getResponseEntry(response.getId());
 
-        @SuppressWarnings("unchecked")
-        AnycastResponse<E> localResponse =
-                (AnycastResponse<E>) entry.getResponse();
-        localResponse = AnycastResponse.merge(localResponse, response);
-        entry.setResponse(localResponse);
-        entry.incrementResponsesCount(1);
+        // ensure that only one thread at a time can access the response entry
+        // when we receive two responses related to a same initial request
+        synchronized (entry) {
+            @SuppressWarnings("unchecked")
+            AnycastResponse<E> localResponse =
+                    (AnycastResponse<E>) entry.getResponse();
+            localResponse = AnycastResponse.merge(localResponse, response);
+            entry.setResponse(localResponse);
+            entry.incrementResponsesCount(1);
 
-        // we are on a synchronization point and all responses are received,
-        // we must ensure that the query datastore operation is terminated
-        // before to send back the response.
-        if (entry.getStatus() == ResponseEntry.Status.RECEIPT_COMPLETED) {
-            localResponse.synchronizationPointUnlocked(overlay);
+            // we are on a synchronization point and all responses are received,
+            // we must ensure that potential operation performed in background
+            // is terminated before to send back the response.
+            if (entry.getStatus() == ResponseEntry.Status.RECEIPT_COMPLETED) {
+                localResponse.synchronizationPointUnlocked(overlay);
 
-            // we are on the initiator of the query we need to wake up its
-            // thread in order to remove the synchronization point
-            if (localResponse.getAnycastRoutingList().size() == 0) {
-                this.handle(overlay, localResponse);
-            } else {
-                logger.debug(
-                        "All subreplies received on {} for request {}",
-                        overlay, response.getId());
-                // the synchronization point is on a peer in the sub-tree.
-                // we call the route method in order to know where to sent back
-                // the response.
-                this.route(overlay, localResponse);
+                // we are on the initiator of the query we need to wake up its
+                // thread in order to remove the synchronization point
+                if (localResponse.getAnycastRoutingList().size() == 0) {
+                    this.handle(overlay, localResponse);
+                } else {
+                    logger.debug(
+                            "All subreplies received on {} for request {}",
+                            overlay, response.getId());
+                    // the synchronization point is on a peer in the sub-tree.
+                    // we call the route method in order to know where to sent
+                    // back the response.
+                    this.route(overlay, localResponse);
 
-                // the response has been handled and sent back so we can remove
-                // it from the table.
-                overlay.getRequestResponseManager()
-                        .getResponsesReceived()
-                        .remove(localResponse.getId());
+                    // the response has been handled and sent back so we can
+                    // remove it from the table.
+                    overlay.getRequestResponseManager()
+                            .getResponsesReceived()
+                            .remove(localResponse.getId());
+                }
             }
         }
     }
