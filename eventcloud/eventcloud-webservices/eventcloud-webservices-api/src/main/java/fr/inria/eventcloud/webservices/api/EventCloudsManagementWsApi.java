@@ -43,7 +43,18 @@ public interface EventCloudsManagementWsApi {
     public String getRegistryEndpointUrl();
 
     /**
-     * Creates a new EventCloud for the specified {@code streamUrl}.
+     * Returns the {@code node provider} identifiers which are available to
+     * deploy EventClouds and proxies.
+     * 
+     * @return the {@code node provider} identifiers which are available to
+     *         deploy EventClouds and proxies.
+     */
+    @WebMethod
+    public List<String> getNodeProviderIds();
+
+    /**
+     * Creates a new EventCloud deployed by using the default
+     * {@code node provider} and for the specified {@code streamUrl}.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud among an organization.
@@ -56,6 +67,26 @@ public interface EventCloudsManagementWsApi {
      */
     @WebMethod
     public boolean createEventCloud(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Creates a new EventCloud deployed by using the {@code node provider}
+     * represented by the specified identifier and for the specified
+     * {@code streamUrl}.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud among an organization.
+     * 
+     * @return a boolean which indicates whether an EventCloud has been created
+     *         for the specified {@code streamUrl} or not. In the former case,
+     *         when the return value is {@code false}, this means that an
+     *         EventCloud is already running for the specified {@code streamUrl}
+     *         .
+     */
+    @WebMethod
+    public boolean createEventCloudWithNodeProvider(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                                    @WebParam(name = "streamUrl") String streamUrl);
 
     /**
      * Indicates whether an EventCloud exists or not according to its streamUrl.
@@ -80,7 +111,7 @@ public interface EventCloudsManagementWsApi {
     public List<String> getEventCloudIds();
 
     /**
-     * Detroys the EventCloud identified by {@code streamUrl}.
+     * Destroys the EventCloud identified by {@code streamUrl}.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud among an organization.
@@ -94,10 +125,11 @@ public interface EventCloudsManagementWsApi {
     public boolean destroyEventCloud(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
-     * Deploys a new {@link PublishWsnApi publish WS-Notification service} for
-     * the EventCloud identified by the specified {@code streamUrl}. When the
-     * call succeeds, the endpoint URL to the {@link PublishWsnApi publish
-     * WS-Notification service} is returned.
+     * Deploys a new {@link PublishWsnApi publish WS-Notification service} by
+     * using the default {@code node provider} and for the EventCloud identified
+     * by the specified {@code streamUrl}. When the call succeeds, the endpoint
+     * URL to the {@link PublishWsnApi publish WS-Notification service} is
+     * returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -111,10 +143,32 @@ public interface EventCloudsManagementWsApi {
     public String deployPublishWsnService(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
+     * Deploys a new {@link PublishWsnApi publish WS-Notification service} by
+     * using the {@code node provider} represented by the specified identifier
+     * and for the EventCloud identified by the specified {@code streamUrl}.
+     * When the call succeeds, the endpoint URL to the {@link PublishWsnApi
+     * publish WS-Notification service} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link PublishWsnApi publish
+     *         WS-Notification service} which is deployed or {@code null} if
+     *         there was no existing EventCloud for the specified
+     *         {@code streamUrl}.
+     */
+    @WebMethod
+    public String deployPublishWsnServiceWithNodeProvider(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                                          @WebParam(name = "streamUrl") String streamUrl);
+
+    /**
      * Deploys a new {@link SubscribeWsnApi subscribe WS-Notification service}
-     * for the EventCloud identified by the specified {@code streamUrl}. When
-     * the call succeeds, the endpoint URL to the {@link SubscribeWsnApi
-     * subscribe WS-Notification service} is returned.
+     * by using the default {@code node provider} and for the EventCloud
+     * identified by the specified {@code streamUrl}. When the call succeeds,
+     * the endpoint URL to the {@link SubscribeWsnApi subscribe WS-Notification
+     * service} is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -128,10 +182,31 @@ public interface EventCloudsManagementWsApi {
     public String deploySubscribeWsnService(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
-     * Deploys a new {@link PublishWsApi publish web service proxy} for the
-     * EventCloud identified by the specified {@code streamUrl}. When the call
-     * succeeds, the endpoint URL to the {@link PublishWsApi publish web service
-     * proxy} is returned.
+     * Deploys a new {@link SubscribeWsnApi subscribe WS-Notification service}
+     * by using the {@code node provider} represented by the specified
+     * identifier and for the EventCloud identified by the specified
+     * {@code streamUrl}. When the call succeeds, the endpoint URL to the
+     * {@link SubscribeWsnApi subscribe WS-Notification service} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link SubscribeWsnApi subscribe
+     *         WS-Notification service} which is deployed or {@code null} if
+     *         there was no existing EventCloud for the specified
+     *         {@code streamUrl}.
+     */
+    @WebMethod
+    public String deploySubscribeWsnServiceWithNodeProvider(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                                            @WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Deploys a new {@link PublishWsApi publish web service proxy} by using the
+     * default {@code node provider} and for the EventCloud identified by the
+     * specified {@code streamUrl}. When the call succeeds, the endpoint URL to
+     * the {@link PublishWsApi publish web service proxy} is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -144,10 +219,30 @@ public interface EventCloudsManagementWsApi {
     public String deployPublishWsProxy(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
-     * Deploys a new {@link SubscribeWsApi subscribe web service proxy} for the
+     * Deploys a new {@link PublishWsApi publish web service proxy} by using the
+     * {@code node provider} represented by the specified identifier and for the
      * EventCloud identified by the specified {@code streamUrl}. When the call
-     * succeeds, the endpoint URL to the {@link SubscribeWsApi subscribe web
-     * service proxy} is returned.
+     * succeeds, the endpoint URL to the {@link PublishWsApi publish web service
+     * proxy} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link PublishWsApi publish web service
+     *         proxy} which is deployed or {@code null} if there was no existing
+     *         EventCloud for the specified {@code streamUrl}.
+     */
+    @WebMethod
+    public String deployPublishWsProxyWithNodeProvider(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                                       @WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Deploys a new {@link SubscribeWsApi subscribe web service proxy} by using
+     * the default {@code node provider} and for the EventCloud identified by
+     * the specified {@code streamUrl}. When the call succeeds, the endpoint URL
+     * to the {@link SubscribeWsApi subscribe web service proxy} is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -160,10 +255,30 @@ public interface EventCloudsManagementWsApi {
     public String deploySubscribeWsProxy(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
-     * Deploys a new {@link PutGetWsApi put/get web service proxy} for the
-     * EventCloud identified by the specified {@code streamUrl}. When the call
-     * succeeds, the endpoint URL to the {@link PutGetWsApi put/get web service
-     * proxy} is returned.
+     * Deploys a new {@link SubscribeWsApi subscribe web service proxy} by using
+     * the {@code node provider} represented by the specified identifier and for
+     * the EventCloud identified by the specified {@code streamUrl}. When the
+     * call succeeds, the endpoint URL to the {@link SubscribeWsApi subscribe
+     * web service proxy} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link SubscribeWsApi subscribe web
+     *         service proxy} which is deployed or {@code null} if there was no
+     *         existing EventCloud for the specified {@code streamUrl}.
+     */
+    @WebMethod
+    public String deploySubscribeWsProxyWithNodeProvider(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                                         @WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Deploys a new {@link PutGetWsApi put/get web service proxy} by using the
+     * default {@code node provider} and for the EventCloud identified by the
+     * specified {@code streamUrl}. When the call succeeds, the endpoint URL to
+     * the {@link PutGetWsApi put/get web service proxy} is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -174,6 +289,26 @@ public interface EventCloudsManagementWsApi {
      */
     @WebMethod
     public String deployPutGetWsProxy(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Deploys a new {@link PutGetWsApi put/get web service proxy} by using the
+     * {@code node provider} represented by the specified identifier and for the
+     * EventCloud identified by the specified {@code streamUrl}. When the call
+     * succeeds, the endpoint URL to the {@link PutGetWsApi put/get web service
+     * proxy} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link PutGetWsApi put/get web service
+     *         proxy} which is deployed or {@code null} if there was no existing
+     *         EventCloud for the specified {@code streamUrl}.
+     */
+    @WebMethod
+    public String deployPutGetWsProxyWithNodeProvider(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                                      @WebParam(name = "streamUrl") String streamUrl);
 
     /**
      * Returns the endpoint URLs for the {@link PublishWsnApi publish

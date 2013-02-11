@@ -47,7 +47,7 @@ public class BroadcastsBenchmark {
      */
     private static String logDirectory = "/tmp/broadcast_logs/";
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
 
         if (args.length > 0) {
             nbPeers = Integer.parseInt(args[0]);

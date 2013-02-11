@@ -31,6 +31,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
@@ -122,6 +123,21 @@ public final class SemanticFactory extends AbstractFactory {
     }
 
     /**
+     * Creates a new semantic tracker component deployed on a node provided by
+     * the specified {@code node provider} and associates it to the network
+     * named "default".
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(NodeProvider nodeProvider) {
+        return SemanticFactory.newSemanticTracker("default", nodeProvider);
+    }
+
+    /**
      * Creates a new semantic tracker component deployed on the specified
      * {@code node} and associates it to the given {@code networkName}.
      * 
@@ -156,6 +172,26 @@ public final class SemanticFactory extends AbstractFactory {
                                                      GCMVirtualNode vn) {
         return SemanticFactory.createSemanticTracker(
                 networkName, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on a node provided by
+     * the specified {@code node provider} and associates it to the given
+     * {@code networkName}.
+     * 
+     * @param networkName
+     *            the network name managed by the tracker.
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(String networkName,
+                                                     NodeProvider nodeProvider) {
+        return SemanticFactory.createSemanticTracker(
+                networkName, getContextFromNodeProvider(
+                        nodeProvider, SemanticTrackerImpl.TRACKER_VN));
     }
 
     private static SemanticTracker createSemanticTracker(String networkName,
@@ -229,6 +265,25 @@ public final class SemanticFactory extends AbstractFactory {
                                                                              GCMVirtualNode vn) {
         return SemanticFactory.createSemanticPeer(
                 overlayProvider, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new semantic peer component deployed on a node provided by the
+     * specified {@code node provider}.
+     * 
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         semantic peer component created.
+     */
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider,
+                                                                             NodeProvider nodeProvider) {
+        return SemanticFactory.createSemanticPeer(
+                overlayProvider, getContextFromNodeProvider(
+                        nodeProvider, SemanticPeerImpl.PEER_VN));
     }
 
     private static <T extends StructuredOverlay> SemanticPeer createSemanticPeer(SerializableProvider<T> overlayProvider,

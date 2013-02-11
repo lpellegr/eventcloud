@@ -26,6 +26,9 @@ public class P2PStructuredProperties {
     private P2PStructuredProperties() {
     }
 
+    public static final PropertyString NODE_PROVIDER_CONFIG_FILE =
+            new PropertyString("node.provider.config.file", null);
+
     public static final PropertyString GCM_PROVIDER = new PropertyString(
             "gcm.provider", "org.objectweb.proactive.core.component.Fractive");
 
