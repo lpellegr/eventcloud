@@ -21,8 +21,8 @@ import java.io.Serializable;
 import org.objectweb.proactive.core.UniqueID;
 
 /**
- * A GcmVirtualNodeEntry is the basic entry to use with the
- * {@link SchedulerNodeProvider}. It defines the following elements:
+ * Basic entry to use with the {@link SchedulerNodeProvider}. It defines the
+ * following elements:
  * <ul>
  * <li>the name of the GCMVirtualNode to create.</li>
  * <li>the number of ProActive nodes of the GCMVirtualNode to create.</li>
@@ -37,16 +37,22 @@ public class GcmVirtualNodeEntry implements Serializable {
 
     private static final long serialVersionUID = 140L;
 
-    private final String virtualNodeName;
+    private String virtualNodeName;
 
-    private final String[] nodeSourceNames;
+    private String[] nodeSourceNames;
 
-    private final int nbNodes;
+    private int nbNodes;
 
     protected UniqueID nodeRequestId;
 
     /**
-     * Constructs a GcmVirtualNodeEntry.
+     * Constructs a {@link GcmVirtualNodeEntry}.
+     */
+    public GcmVirtualNodeEntry() {
+    }
+
+    /**
+     * Constructs a {@link GcmVirtualNodeEntry}.
      * 
      * @param vnName
      *            the name of the GCMVirtualNode to create.
@@ -64,7 +70,7 @@ public class GcmVirtualNodeEntry implements Serializable {
     }
 
     /**
-     * Gets the name of the GCMVirtualNode to create.
+     * Returns the name of the GCMVirtualNode to create.
      * 
      * @return the name of the GCMVirtualNode to create.
      */
@@ -73,7 +79,17 @@ public class GcmVirtualNodeEntry implements Serializable {
     }
 
     /**
-     * Gets the number of ProActive nodes of the GCMVirtualNode to create.
+     * Sets the name of the GCMVirtualNode to create.
+     * 
+     * @param virtualNodeName
+     *            the virtualNodeName to set
+     */
+    public void setVirtualNodeName(String virtualNodeName) {
+        this.virtualNodeName = virtualNodeName;
+    }
+
+    /**
+     * Returns the number of ProActive nodes of the GCMVirtualNode to create.
      * 
      * @return the number of ProActive nodes of the GCMVirtualNode to create.
      */
@@ -82,14 +98,36 @@ public class GcmVirtualNodeEntry implements Serializable {
     }
 
     /**
-     * Gets the names of the node sources to use to get the ProActive nodes that
-     * will compose the GCMVirtualNode to create.
+     * Sets the number of ProActive nodes of the GCMVirtualNode to create.
+     * 
+     * @param nbNodes
+     *            the number of ProActive nodes of the GCMVirtualNode to create.
+     */
+    public void setNbNodes(int nbNodes) {
+        this.nbNodes = nbNodes;
+    }
+
+    /**
+     * Returns the names of the node sources to use to get the ProActive nodes
+     * that will compose the GCMVirtualNode to create.
      * 
      * @return the names of the node sources to use to get the ProActive nodes
      *         that will compose the GCMVirtualNode to create.
      */
     public String[] getNodeSourceNames() {
         return this.nodeSourceNames;
+    }
+
+    /**
+     * Sets the names of the node sources to use to get the ProActive nodes that
+     * will compose the GCMVirtualNode to create.
+     * 
+     * @param nodeSourceNames
+     *            the names of the node sources to use to get the ProActive
+     *            nodes that will compose the GCMVirtualNode to create.
+     */
+    public void setNodeSourceNames(String[] nodeSourceNames) {
+        this.nodeSourceNames = nodeSourceNames;
     }
 
 }

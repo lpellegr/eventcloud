@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployme
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.node.Node;
@@ -28,9 +29,10 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
- * GcmDeploymentNodeProvider is a concrete implementation of
- * {@link NodeProvider} for the GCM deployment.
+ * Concrete implementation of {@link NodeProvider} for the GCM deployment.
  * 
  * @author bsauvan
  */
@@ -41,23 +43,51 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
     private static final Logger log =
             LoggerFactory.getLogger(GcmDeploymentNodeProvider.class);
 
-    private final GCMApplication gcma;
+    private String gcmaPath;
+
+    private GCMApplication gcma;
+
+    private List<Node> nodes;
+
+    private int nodeIndex;
 
     /**
-     * Constructs a GcmDeploymentNodeProvider.
+     * Constructs a {@link GcmDeploymentNodeProvider}.
+     */
+    public GcmDeploymentNodeProvider() {
+    }
+
+    /**
+     * Constructs a {@link GcmDeploymentNodeProvider}.
      * 
      * @param gcmaPath
      *            the path to the GCM Application descriptor.
      */
     public GcmDeploymentNodeProvider(String gcmaPath) {
-        try {
-            this.gcma =
-                    PAGCMDeployment.loadApplicationDescriptor(new File(gcmaPath));
-        } catch (ProActiveException pe) {
-            throw new IllegalStateException(
-                    "Failed to load GCM Application descriptor located at "
-                            + gcmaPath, pe);
-        }
+        this.gcmaPath = gcmaPath;
+    }
+
+    /**
+     * Returns the path to the GCM Application descriptor.
+     * 
+     * @return the path to the GCM Application descriptor.
+     */
+    public String getGcmaPath() {
+        return this.gcmaPath;
+    }
+
+    /**
+     * Sets the path to the GCM Application descriptor.
+     * 
+     * @param gcmaPath
+     *            the path to the GCM Application descriptor.
+     */
+    public void setGcmaPath(String gcmaPath) {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot set the path to the GCM Application descriptor because the GCM deployment has already been started");
+
+        this.gcmaPath = gcmaPath;
     }
 
     /**
@@ -65,17 +95,35 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public void start() {
-        if (!this.gcma.isStarted()) {
-            log.debug(
-                    "Starting GCM deployment described in the GCM Application descriptor located at {}",
-                    this.gcma.getDescriptorURL().getPath());
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot start the GCM deployment because it has already been started");
 
-            this.gcma.startDeployment();
-            this.gcma.waitReady();
-        } else {
+        log.debug(
+                "Starting GCM deployment described in the GCM Application descriptor located at {}",
+                this.gcma.getDescriptorURL().getPath());
+
+        this.init();
+        this.gcma.startDeployment();
+        this.gcma.waitReady();
+    }
+
+    private void init() {
+        Preconditions.checkNotNull(
+                this.gcmaPath,
+                "Cannot initialize the GCM deployment because no path for the GCM Application descriptor has been given");
+
+        try {
+            this.gcma =
+                    PAGCMDeployment.loadApplicationDescriptor(new File(
+                            this.gcmaPath));
+        } catch (ProActiveException pe) {
             throw new IllegalStateException(
-                    "Cannot start the GCM deployment because it has already been started");
+                    "Failed to load GCM Application descriptor located at "
+                            + this.gcmaPath, pe);
         }
+        this.nodes = null;
+        this.nodeIndex = 0;
     }
 
     /**
@@ -83,7 +131,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public boolean isStarted() {
-        return this.gcma.isStarted();
+        return (this.gcma != null) && this.gcma.isStarted();
     }
 
     /**
@@ -91,7 +139,22 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public Node getANode() {
-        throw new UnsupportedOperationException();
+        Preconditions.checkState(
+                this.isStarted(),
+                "Cannot get a node because the GCM deployment has not yet been started");
+
+        if (this.nodes == null) {
+            this.nodes = this.gcma.getAllNodes();
+        }
+
+        Preconditions.checkElementIndex(
+                this.nodeIndex, this.nodes.size(), "No node available");
+
+        Node node = this.nodes.get(this.nodeIndex);
+
+        this.nodeIndex++;
+
+        return node;
     }
 
     /**
@@ -99,13 +162,13 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public GCMVirtualNode getGcmVirtualNode(String virtualNodeName) {
-        if (this.gcma.isStarted()) {
-            return this.gcma.getVirtualNode(virtualNodeName);
-        } else {
-            throw new IllegalStateException("Cannot get the GCMVirtualNode "
-                    + virtualNodeName
-                    + " because the GCM deployment has not yet been started");
-        }
+        Preconditions.checkState(
+                this.isStarted(),
+                "Cannot get the GCMVirtualNode "
+                        + virtualNodeName
+                        + " because the GCM deployment has not yet been started");
+
+        return this.gcma.getVirtualNode(virtualNodeName);
     }
 
     /**
@@ -113,16 +176,15 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public void terminate() {
-        if (this.gcma.isStarted()) {
-            log.debug(
-                    "Terminating the GCM deployment described in the GCM Application descriptor located at {}",
-                    this.gcma.getDescriptorURL().getPath());
+        Preconditions.checkState(
+                this.isStarted(),
+                "Cannot terminate the GCM deployment because it has not yet been started");
 
-            this.gcma.kill();
-        } else {
-            throw new IllegalStateException(
-                    "Cannot terminate the GCM deployment because it has not yet been started");
-        }
+        log.debug(
+                "Terminating the GCM deployment described in the GCM Application descriptor located at {}",
+                this.gcma.getDescriptorURL().getPath());
+
+        this.gcma.kill();
     }
 
 }

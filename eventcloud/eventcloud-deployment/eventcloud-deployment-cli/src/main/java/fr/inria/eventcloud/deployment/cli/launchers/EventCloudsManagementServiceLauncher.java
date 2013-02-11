@@ -40,10 +40,10 @@ public class EventCloudsManagementServiceLauncher extends Launcher {
      */
     @Override
     protected String run() {
-        return WsDeployer.getEndpointUrl(WsDeployer.deployEventCloudsManagementService(
+        return WsDeployer.deployEventCloudsManagementService(
                 this.registryUrl,
                 "proactive/services/eventclouds/management-webservices",
-                this.port));
+                this.port).getEndpoint().getEndpointInfo().getAddress();
     }
 
 }

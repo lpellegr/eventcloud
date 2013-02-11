@@ -16,8 +16,15 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.factories;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
+import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.pnp.PNPConfig;
+import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,15 +61,42 @@ public class AbstractFactory {
                     + "\" set to " + PNPConfig.PA_PNP_PORT.getValue());
         }
 
-        if (CentralPAPropertyRepository.PA_HOSTNAME.getValue() == null) {
-            log.warn("Java property \""
+        if ((CentralPAPropertyRepository.PA_HOSTNAME.getValue() == null)
+                && (CentralPAPropertyRepository.PA_NET_INTERFACE.getValue() == null)) {
+            log.warn("Neither the java property \""
                     + CentralPAPropertyRepository.PA_HOSTNAME.getName()
-                    + "\" is not set");
+                    + "\" nor the java property "
+                    + CentralPAPropertyRepository.PA_NET_INTERFACE.getName()
+                    + " are set");
         } else if (log.isDebugEnabled()) {
-            log.debug("Java property \""
-                    + CentralPAPropertyRepository.PA_HOSTNAME.getName()
-                    + "\" set to "
-                    + CentralPAPropertyRepository.PA_HOSTNAME.getValue());
+            if (CentralPAPropertyRepository.PA_HOSTNAME.getValue() != null) {
+                log.debug("Java property \""
+                        + CentralPAPropertyRepository.PA_HOSTNAME.getName()
+                        + "\" set to "
+                        + CentralPAPropertyRepository.PA_HOSTNAME.getValue());
+            } else {
+                log.debug("Java property \""
+                        + CentralPAPropertyRepository.PA_NET_INTERFACE.getName()
+                        + "\" set to "
+                        + CentralPAPropertyRepository.PA_NET_INTERFACE.getValue());
+            }
+        }
+    }
+
+    protected static Map<String, Object> getContextFromNodeProvider(NodeProvider nodeProvider,
+                                                                    String vnName) {
+        GCMVirtualNode vn = nodeProvider.getGcmVirtualNode(vnName);
+
+        if (vn != null) {
+            return ComponentUtils.createContext(vn);
+        } else {
+            Node node = nodeProvider.getANode();
+
+            if (node != null) {
+                return ComponentUtils.createContext(node);
+            } else {
+                return new HashMap<String, Object>();
+            }
         }
     }
 

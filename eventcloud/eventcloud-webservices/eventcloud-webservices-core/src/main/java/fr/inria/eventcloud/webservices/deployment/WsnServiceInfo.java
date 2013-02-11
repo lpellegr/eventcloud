@@ -38,16 +38,13 @@ public class WsnServiceInfo extends WsInfo {
      * @param streamUrl
      *            the URL which identifies the EventCloud which has been used to
      *            create the web service.
-     * @param wsEndpointUrl
-     *            the endpoint URL of the web service.
      * @param service
      *            the WS-Notification service.
      * @param server
      *            the Server instance of the web service.
      */
-    public WsnServiceInfo(String streamUrl, String wsEndpointUrl,
-            WsnService<?> service, Server server) {
-        super(streamUrl, wsEndpointUrl);
+    public WsnServiceInfo(String streamUrl, WsnService<?> service, Server server) {
+        super(streamUrl, server.getEndpoint().getEndpointInfo().getAddress());
         this.service = service;
         this.server = server;
     }
