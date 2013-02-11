@@ -17,6 +17,8 @@
 package fr.inria.eventcloud.webservices.api;
 
 import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 import org.oasis_open.docs.wsn.bw_2.NotificationProducer;
 import org.oasis_open.docs.wsn.bw_2.SubscriptionManager;
@@ -28,14 +30,14 @@ import org.oasis_open.docs.wsn.bw_2.SubscriptionManager;
  * @author bsauvan
  */
 @WebService(serviceName = "EventCloudSubscribeWsn", portName = "EventCloudSubscribeWsnPort", name = "EventCloudSubscribeWsnPortType", targetNamespace = "http://docs.oasis-open.org/wsn/bw-2")
-@javax.xml.bind.annotation.XmlSeeAlso(value = {
+@XmlSeeAlso(value = {
         org.oasis_open.docs.wsn.br_2.ObjectFactory.class,
         org.oasis_open.docs.wsrf.rp_2.ObjectFactory.class,
         org.oasis_open.docs.wsrf.bf_2.ObjectFactory.class,
         org.oasis_open.docs.wsrf.r_2.ObjectFactory.class,
         org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
         org.oasis_open.docs.wsn.b_2.ObjectFactory.class})
-@javax.jws.soap.SOAPBinding(parameterStyle = javax.jws.soap.SOAPBinding.ParameterStyle.BARE)
+@SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
 public interface SubscribeWsnApi extends NotificationProducer,
         SubscriptionManager {
 
