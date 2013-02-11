@@ -48,6 +48,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
 
     // The identifier of the broadcast request.
     private UUID originalMessageId;
+
     private AnycastRoutingList broadcastRoutingList = new AnycastRoutingList();
     // The directions on which the broadcast request has to be propagated by the
     // peer receiving it.

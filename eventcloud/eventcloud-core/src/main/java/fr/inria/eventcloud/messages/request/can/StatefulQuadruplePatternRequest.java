@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.An
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -80,18 +80,18 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
      * {@inheritDoc}
      */
     @Override
-    public OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
-        return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
+    public AnycastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
+        return new AnycastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
             @Override
             public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
                                                        final AnycastRequest<SemanticElement> request) {
                 final SemanticRequestResponseManager messagingManager =
                         (SemanticRequestResponseManager) overlay.getRequestResponseManager();
 
-                messagingManager.getPendingResults().put(
-                        request.getId(),
-                        messagingManager.getThreadPool().submit(
-                                new Callable<StatefulRequestAction<T>>() {
+                messagingManager.getPendingResults()
+                        .put(
+                                request.getId(),
+                                messagingManager.threadPool.submit(new Callable<StatefulRequestAction<T>>() {
                                     @Override
                                     public StatefulRequestAction<T> call() {
                                         long start = System.nanoTime();

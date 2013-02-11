@@ -17,8 +17,6 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 
@@ -55,8 +53,7 @@ public class ResponseEntry implements Serializable {
     /**
      * The response corresponding to the last response which has been merged.
      */
-    private AtomicReference<Response<?>> response =
-            new AtomicReference<Response<?>>();
+    private Response<?> response;
 
     /**
      * The maximum number of replies expected.
@@ -66,7 +63,7 @@ public class ResponseEntry implements Serializable {
     /**
      * The current number of responses received.
      */
-    private AtomicInteger responsesCount = new AtomicInteger();
+    private int responsesCount = 0;
 
     /**
      * Constructs a new entry with the specified {@code expectedResponsesNumber}
@@ -85,7 +82,7 @@ public class ResponseEntry implements Serializable {
      * @return the current number of responses received.
      */
     public int getResponsesCount() {
-        return this.responsesCount.get();
+        return this.responsesCount;
     }
 
     /**
@@ -112,11 +109,13 @@ public class ResponseEntry implements Serializable {
      * @return the last response merged.
      */
     public Response<?> getResponse() {
-        return this.response.get();
+        return this.response;
     }
 
     public void incrementResponsesCount(int increment) {
-        if (this.responsesCount.getAndAdd(increment) + increment == this.expectedResponsesCount) {
+        this.responsesCount++;
+
+        if (this.responsesCount == this.expectedResponsesCount) {
             this.status = Status.RECEIPT_COMPLETED;
         }
     }
@@ -128,7 +127,7 @@ public class ResponseEntry implements Serializable {
      *            the new response to associate to this entry.
      */
     public void setResponse(Response<?> response) {
-        this.response.set(response);
+        this.response = response;
     }
 
     /**
