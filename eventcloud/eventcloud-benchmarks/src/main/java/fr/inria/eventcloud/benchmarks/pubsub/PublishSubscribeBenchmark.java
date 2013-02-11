@@ -27,11 +27,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.objectweb.proactive.core.ProActiveException;
-import org.objectweb.proactive.core.util.MutableInteger;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -46,6 +44,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -63,7 +62,8 @@ import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
- * 
+ * Simple application to evaluate the publish/subscribe algorithm on a single
+ * machine.
  * 
  * @author lpellegr
  */
@@ -87,6 +87,9 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"--nb-subscribers"}, description = "Number of subscribers")
     private int nbSubscribers = 1;
 
+    @Parameter(names = {"--publish-quadruples"}, description = "Indicates whether quadruples must be published instead of compound events")
+    private boolean publishQuadruples = false;
+
     @Parameter(names = {"-lt", "--listener-type"}, description = "Listener type to use for subscriptions", converter = ListenerTypeConverter.class)
     private NotificationListenerType listenerType =
             NotificationListenerType.COMPOUND_EVENT;
@@ -104,13 +107,15 @@ public class PublishSubscribeBenchmark {
 
     private final Stopwatch receiveExpectedEventsStopwatch = new Stopwatch();
 
-    private MutableInteger nbEventsPublished = new MutableInteger();
-
     private ExecutorService threadPool =
-            Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads());
+            Executors.newFixedThreadPool(this.nbPublishers);
 
-    private final Supplier<? extends Event> supplier =
-            new CompoundEventSupplier(this.compoundEventSize);
+    private final Supplier<? extends Event> supplier = this.publishQuadruples
+            ? new QuadrupleSupplier() : new CompoundEventSupplier(
+                    this.compoundEventSize);
+
+    private final boolean usingCompoundEventSupplier =
+            this.supplier instanceof CompoundEventSupplier;
 
     public static void main(String[] args) {
         LoggerUtils.disableLoggers();
@@ -137,12 +142,21 @@ public class PublishSubscribeBenchmark {
     }
 
     public void execute() {
+        // pre-generates events so that the data are the same for all the runs
+        // and the time is not included into the benchmark execution time
+        final Event[] events = new Event[this.nbPublications];
+
+        for (int i = 0; i < this.nbPublications; i++) {
+            events[i] = this.supplier.get();
+        }
+
+        // creates and runs micro benchmark
         MicroBenchmark microBenchmark =
                 new MicroBenchmark(this.nbRuns, new Callable<Long>() {
 
                     @Override
                     public Long call() throws Exception {
-                        return PublishSubscribeBenchmark.this.test();
+                        return PublishSubscribeBenchmark.this.test(events);
                     }
 
                 });
@@ -157,7 +171,7 @@ public class PublishSubscribeBenchmark {
                 + microBenchmark.getMean());
     }
 
-    public long test() {
+    public long test(final Event[] events) {
         SerializableProvider<? extends SemanticCanOverlay> overlayProvider;
 
         if (this.inMemoryDatastore) {
@@ -221,28 +235,32 @@ public class PublishSubscribeBenchmark {
 
         this.receiveExpectedEventsStopwatch.start();
 
-        boolean running = true;
-        while (running) {
-            for (int i = 0; i < this.nbPublishers; i++) {
-                final PublishApi publishProxy = publishProxies.get(i);
+        final int segment = (this.nbPublications / this.nbPublishers);
 
-                if (this.nbEventsPublished.getValue() < this.nbPublications) {
-                    this.threadPool.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            PublishSubscribeBenchmark.this.publish(publishProxy);
-                        }
-                    });
-                    this.nbEventsPublished.add(1);
-                } else {
-                    running = false;
-                    break;
+        for (int i = 0; i < this.nbPublishers; i++) {
+            final PublishApi publishProxy = publishProxies.get(i);
+            final int j = i;
+
+            this.threadPool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    int start = j * segment;
+                    int end = (j + 1) * segment - 1;
+
+                    PublishSubscribeBenchmark.this.publish(
+                            publishProxy, events, start, end);
                 }
-            }
+            });
         }
 
-        // waits to receive at least the number of expected
-        // events
+        int rest = this.nbPublications % this.nbPublishers;
+        if (rest != 0) {
+            int start = this.nbPublishers * segment;
+            PublishSubscribeBenchmark.this.publish(
+                    publishProxies.get(0), events, start, start + rest - 1);
+        }
+
+        // waits to receive the number of published events
         synchronized (nbEventsReceivedBySubscriber) {
             while (!this.allEventsReceived()) {
                 try {
@@ -264,7 +282,6 @@ public class PublishSubscribeBenchmark {
 
         nbEventsReceivedBySubscriber =
                 new HashMap<SubscriptionId, AtomicLong>();
-        this.nbEventsPublished = new MutableInteger();
 
         return result;
     }
@@ -293,14 +310,18 @@ public class PublishSubscribeBenchmark {
         return result;
     }
 
-    private void publish(PublishApi publishProxy) {
-        if (this.supplier instanceof QuadrupleSupplier) {
-            publishProxy.publish(((QuadrupleSupplier) this.supplier).get());
-        } else if (this.supplier instanceof CompoundEventSupplier) {
-            publishProxy.publish(((CompoundEventSupplier) this.supplier).get());
+    private void publish(PublishApi publishProxy, Event[] events, int start,
+                         int end) {
+        for (int i = start; i <= end; i++) {
+            this.publish(publishProxy, events[i]);
+        }
+    }
+
+    private void publish(PublishApi publishProxy, Event event) {
+        if (this.usingCompoundEventSupplier) {
+            publishProxy.publish((CompoundEvent) event);
         } else {
-            throw new IllegalArgumentException("Unknow supplier type: "
-                    + this.supplier.getClass());
+            publishProxy.publish((Quadruple) event);
         }
     }
 
