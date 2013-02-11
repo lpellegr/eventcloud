@@ -329,10 +329,13 @@ public class StaticLoadBalancingTestBuilder {
 
                     if (StaticLoadBalancingTestBuilder.this.nbLookupsAfterJoinOperations > 0) {
                         for (int i = 0; i < StaticLoadBalancingTestBuilder.this.nbLookupsAfterJoinOperations; i++) {
+                            long size =
+                                    putgetProxy.find(QuadruplePattern.ANY)
+                                            .size();
+
                             Assert.assertEquals(
                                     StaticLoadBalancingTestBuilder.this.nbQuadsToInsert,
-                                    putgetProxy.find(QuadruplePattern.ANY)
-                                            .size());
+                                    size);
                         }
                     }
                 } else {

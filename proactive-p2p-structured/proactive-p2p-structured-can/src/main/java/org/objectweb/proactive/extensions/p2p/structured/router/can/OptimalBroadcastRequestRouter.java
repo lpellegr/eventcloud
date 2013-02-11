@@ -101,11 +101,13 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                 e.printStackTrace();
             }
         }
+
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
             logger.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
+
             if (JobLogger.bcastDebugMode) {
                 Date receiveTime = new Date();
                 String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
@@ -140,6 +142,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                 }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
             }
+
             // Sends the message to the other neighbors which validates the
             // constraints and also that don't validate the constraint because
             // there is only one path to follow
@@ -192,7 +195,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                 }
             }
             // neighborsToSendTo > 0 means we have to perform many send
-            // operation and the current peer must await for the number
+            // operations and the current peer must await for the number
             // of responses sent.
             else {
                 if (logger.isDebugEnabled()) {
@@ -223,11 +226,13 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                         while (it.hasNext()) {
                             NeighborEntryWrapper<E> neighborEntry = it.next();
                             Peer p = neighborEntry.getNeighborEntry().getStub();
+
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Sending request "
-                                        + request.getId() + " from " + overlay
-                                        + " -> " + p);
+                                        + request.getId() + " from "
+                                        + overlay.getId() + " to " + p);
                             }
+
                             request.setDirections(neighborEntry.getDirections());
                             request.setSplitPlans(neighborEntry.getSplitPlans());
                             p.route(request);

@@ -102,10 +102,11 @@ public abstract class RequestResponseManager implements Serializable {
      * 
      * @return the response for the specified requestId.
      */
-    private Response<?> pullResponse(UUID requestId) {
+    protected Response<?> pullResponse(UUID requestId) {
         ((RequestExecutor) this.multiActiveService.getServingController()).incrementExtraActiveRequestCount(this.getResponsesReceived()
                 .get(requestId)
                 .getExpectedResponsesCount());
+
         // waits for the final response
         this.waitForFinalResponse(requestId);
 
