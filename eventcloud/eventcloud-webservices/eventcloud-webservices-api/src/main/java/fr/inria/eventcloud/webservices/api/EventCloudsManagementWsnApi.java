@@ -16,9 +16,37 @@
  **/
 package fr.inria.eventcloud.webservices.api;
 
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlSeeAlso;
+
+import org.oasis_open.docs.wsn.b_2.GetCurrentMessage;
+import org.oasis_open.docs.wsn.b_2.GetCurrentMessageResponse;
+import org.oasis_open.docs.wsn.b_2.Renew;
+import org.oasis_open.docs.wsn.b_2.RenewResponse;
+import org.oasis_open.docs.wsn.b_2.Subscribe;
+import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
+import org.oasis_open.docs.wsn.b_2.Unsubscribe;
+import org.oasis_open.docs.wsn.b_2.UnsubscribeResponse;
+import org.oasis_open.docs.wsn.bw_2.InvalidFilterFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidMessageContentExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidProducerPropertiesExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.InvalidTopicExpressionFault;
+import org.oasis_open.docs.wsn.bw_2.MultipleTopicsSpecifiedFault;
+import org.oasis_open.docs.wsn.bw_2.NoCurrentMessageOnTopicFault;
+import org.oasis_open.docs.wsn.bw_2.NotifyMessageNotSupportedFault;
+import org.oasis_open.docs.wsn.bw_2.SubscribeCreationFailedFault;
+import org.oasis_open.docs.wsn.bw_2.TopicExpressionDialectUnknownFault;
+import org.oasis_open.docs.wsn.bw_2.TopicNotSupportedFault;
+import org.oasis_open.docs.wsn.bw_2.UnableToDestroySubscriptionFault;
+import org.oasis_open.docs.wsn.bw_2.UnacceptableInitialTerminationTimeFault;
+import org.oasis_open.docs.wsn.bw_2.UnacceptableTerminationTimeFault;
+import org.oasis_open.docs.wsn.bw_2.UnrecognizedPolicyRequestFault;
+import org.oasis_open.docs.wsn.bw_2.UnsupportedPolicyRequestFault;
+import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
 
 /**
  * {@link EventCloudsManagementWsApi} extended to support subscriptions as
@@ -34,7 +62,39 @@ import javax.xml.bind.annotation.XmlSeeAlso;
         org.oasis_open.docs.wsrf.r_2.ObjectFactory.class,
         org.oasis_open.docs.wsn.t_1.ObjectFactory.class,
         org.oasis_open.docs.wsn.b_2.ObjectFactory.class})
-@SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
-public interface EventCloudsManagementWsnApi extends
-        EventCloudsManagementWsApi, SubscribeWsnApi {
+public interface EventCloudsManagementWsnApi extends EventCloudsManagementWsApi {
+
+    @WebResult(name = "GetCurrentMessageResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", partName = "GetCurrentMessageResponse")
+    @WebMethod(operationName = "GetCurrentMessage")
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    public GetCurrentMessageResponse getCurrentMessage(@WebParam(partName = "GetCurrentMessageRequest", name = "GetCurrentMessage", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") GetCurrentMessage getCurrentMessageRequest)
+            throws NoCurrentMessageOnTopicFault, TopicNotSupportedFault,
+            ResourceUnknownFault, MultipleTopicsSpecifiedFault,
+            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault;
+
+    @WebResult(name = "SubscribeResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", partName = "SubscribeResponse")
+    @WebMethod(operationName = "Subscribe")
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    public SubscribeResponse subscribe(@WebParam(partName = "SubscribeRequest", name = "Subscribe", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Subscribe subscribeRequest)
+            throws UnrecognizedPolicyRequestFault,
+            SubscribeCreationFailedFault,
+            InvalidProducerPropertiesExpressionFault,
+            UnsupportedPolicyRequestFault, TopicNotSupportedFault,
+            NotifyMessageNotSupportedFault, ResourceUnknownFault,
+            UnacceptableInitialTerminationTimeFault,
+            InvalidMessageContentExpressionFault, InvalidFilterFault,
+            TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault;
+
+    @WebResult(name = "RenewResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", partName = "RenewResponse")
+    @WebMethod(operationName = "Renew")
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    public RenewResponse renew(@WebParam(partName = "RenewRequest", name = "Renew", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Renew renewRequest)
+            throws UnacceptableTerminationTimeFault, ResourceUnknownFault;
+
+    @WebResult(name = "UnsubscribeResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", partName = "UnsubscribeResponse")
+    @WebMethod(operationName = "Unsubscribe")
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    public UnsubscribeResponse unsubscribe(@WebParam(partName = "UnsubscribeRequest", name = "Unsubscribe", targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Unsubscribe unsubscribeRequest)
+            throws UnableToDestroySubscriptionFault, ResourceUnknownFault;
+
 }
