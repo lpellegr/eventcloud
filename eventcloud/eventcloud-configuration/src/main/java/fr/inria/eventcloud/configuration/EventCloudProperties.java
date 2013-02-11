@@ -283,7 +283,7 @@ public class EventCloudProperties {
      */
     public static final PropertyClass STATS_RECORDER_CLASS = new PropertyClass(
             "eventcloud.stats.recorder.class",
-            "fr.inria.eventcloud.datastore.stats.MeanStatsRecorder");
+            "fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder");
 
     /**
      * Defines the soft limit used by each EventClouds registry that runs with

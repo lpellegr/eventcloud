@@ -17,11 +17,10 @@
 package fr.inria.eventcloud.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
@@ -41,7 +40,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * @author lpellegr
  */
 public abstract class StatelessQuadruplePatternRequest extends
-        OptimalBroadcastRequest<SemanticElement> {
+        AnycastRequest<SemanticElement> {
 
     private static final long serialVersionUID = 140L;
 
@@ -83,8 +82,8 @@ public abstract class StatelessQuadruplePatternRequest extends
      * {@inheritDoc}
      */
     @Override
-    public OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
-        return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
+    public AnycastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
+        return new AnycastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
             @Override
             public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
                                                        final AnycastRequest<SemanticElement> request) {

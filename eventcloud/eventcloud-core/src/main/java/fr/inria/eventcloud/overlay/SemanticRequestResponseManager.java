@@ -18,13 +18,11 @@ package fr.inria.eventcloud.overlay;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -64,7 +62,11 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     private final ConcurrentHashMap<UUID, Future<? extends Object>> pendingResults;
 
-    private ExecutorService threadPool;
+    // this thread pool is used to execute an atomic query on the underlying
+    // semantic datastore while the request continue to be forwarded to
+    // others peers. The thread that is used is joined once a response is routed
+    // back through this peer to retrieve the results
+    public ExecutorService threadPool;
 
     public SemanticRequestResponseManager(
             TransactionalTdbDatastore colanderDatastore) {
@@ -77,8 +79,9 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                         16, 0.75f,
                         P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
 
-        // TODO choose the optimal size to use for the thread-pool
-        this.threadPool = Executors.newFixedThreadPool(30);
+        this.threadPool =
+                Executors.newFixedThreadPool(Runtime.getRuntime()
+                        .availableProcessors());
     }
 
     /**
@@ -238,33 +241,22 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     private List<QuadruplePatternResponse> dispatch(final List<SparqlAtomicRequest> requests,
                                                     final StructuredOverlay overlay) {
         final List<QuadruplePatternResponse> replies =
-                Collections.synchronizedList(new ArrayList<QuadruplePatternResponse>(
-                        requests.size()));
-        final CountDownLatch doneSignal = new CountDownLatch(requests.size());
+                new ArrayList<QuadruplePatternResponse>(requests.size());
 
-        for (final SparqlAtomicRequest request : requests) {
-
-            this.getThreadPool().execute(new Runnable() {
-                @Override
-                public void run() {
-                    QuadruplePatternResponse resp =
-                            (QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
-                                    request, overlay);
-                    if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-                        resp.setInitialRequestForThisResponse(request.getQuery());
-                    }
-                    replies.add(resp);
-
-                    doneSignal.countDown();
-                }
-            });
-
+        // dispatch each request asynchronously
+        for (SparqlAtomicRequest request : requests) {
+            this.dispatchv(request, overlay);
         }
 
-        try {
-            doneSignal.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        // wait for responses
+        for (SparqlAtomicRequest request : requests) {
+            QuadruplePatternResponse resp =
+                    (QuadruplePatternResponse) super.pullResponse(request.getId());
+
+            if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+                resp.setInitialRequestForThisResponse(request.getQuery());
+            }
+            replies.add(resp);
         }
 
         return replies;
@@ -272,10 +264,6 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     public ConcurrentHashMap<UUID, Future<? extends Object>> getPendingResults() {
         return this.pendingResults;
-    }
-
-    public ExecutorService getThreadPool() {
-        return this.threadPool;
     }
 
     public SparqlColander getColander() {
@@ -293,9 +281,9 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
             this.colander.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            this.threadPool.shutdown();
         }
-
-        this.threadPool.shutdown();
     }
 
 }
