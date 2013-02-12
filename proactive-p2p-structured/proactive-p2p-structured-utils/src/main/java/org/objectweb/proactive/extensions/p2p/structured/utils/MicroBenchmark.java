@@ -73,10 +73,12 @@ public class MicroBenchmark {
 
             if (this.showProgress) {
                 System.out.print("Run #" + (i + 1) + " performed");
+                System.out.print(" (" + executionTime + ")");
+
                 if (this.discardFirstRun && i == 0) {
-                    System.out.println(" (ignored)");
+                    System.out.println(" [ignored]");
                 } else {
-                    System.out.println(" (" + executionTime + ")");
+                    System.out.println();
                 }
             }
         }
