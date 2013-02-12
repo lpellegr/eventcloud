@@ -16,11 +16,6 @@
  **/
 package fr.inria.eventcloud.webservices.proxies;
 
-import java.util.Collection;
-import java.util.List;
-
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.proxies.PutGetProxyImpl;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
 
@@ -48,62 +43,6 @@ public class PutGetWsProxyImpl extends PutGetProxyImpl implements PutGetWsApi {
      */
     public PutGetWsProxyImpl() {
         super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean addQuadruple(Quadruple quad) {
-        return this.add(quad);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean addQuadrupleCollection(Collection<Quadruple> quads) {
-        return this.add(quads);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean containsQuadruple(Quadruple quad) {
-        return this.contains(quad);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean deleteQuadruple(Quadruple quad) {
-        return this.delete(quad);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean deleteQuadrupleCollection(Collection<Quadruple> quads) {
-        return this.delete(quads);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Quadruple> deleteQuadruplePattern(QuadruplePattern quadPattern) {
-        return this.delete(quadPattern);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Quadruple> findQuadruplePattern(QuadruplePattern quadPattern) {
-        return this.find(quadPattern);
     }
 
 }

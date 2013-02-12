@@ -61,7 +61,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "addQuadruple")
-    public boolean addQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    public boolean add(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Loads the specified collection of quadruples into the EventCloud in
@@ -74,7 +74,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "addQuadrupleCollection")
-    public boolean addQuadrupleCollection(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
+    public boolean add(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
 
     /**
      * Indicates whether the specified quadruples is contained by the
@@ -87,7 +87,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "containsQuadruple")
-    public boolean containsQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    public boolean contains(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Deletes the specified quadruple from the EventCloud.
@@ -99,7 +99,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "deleteQuadruple")
-    public boolean deleteQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    public boolean delete(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Deletes the specified quadruples from the EventCloud.
@@ -111,7 +111,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "deleteQuadrupleCollection")
-    public boolean deleteQuadrupleCollection(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
+    public boolean delete(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
 
     /**
      * Deletes from the EventCloud the quadruples that match the specified
@@ -125,7 +125,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "deleteQuadruplePattern")
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
-    public List<Quadruple> deleteQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
+    public List<Quadruple> delete(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
      * Finds all the quadruples that match the specified quadruple pattern.
@@ -138,7 +138,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "findQuadruplePattern")
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
-    public List<Quadruple> findQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
+    public List<Quadruple> find(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
      * Executes on the EventCloud the specified SPARQL query. This SPARQL query

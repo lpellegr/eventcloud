@@ -100,7 +100,7 @@ public class PubSubTest extends WsTest {
 
         // Publishes an event
         CompoundEvent event = CompoundEventGenerator.random(1);
-        this.publishWsClient.publishCompoundEvent(event);
+        this.publishWsClient.publish(event);
 
         synchronized (this.subscriberService.signalsReceived) {
             while (this.subscriberService.signalsReceived.getValue() != 1) {
@@ -113,7 +113,7 @@ public class PubSubTest extends WsTest {
 
         // Publishes a second event
         event = CompoundEventGenerator.random(1);
-        this.publishWsClient.publishCompoundEvent(event);
+        this.publishWsClient.publish(event);
 
         // Checks that no more events are received
         synchronized (this.subscriberService.signalsReceived) {
@@ -142,7 +142,7 @@ public class PubSubTest extends WsTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user1@company.com"));
         q1.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q1);
+        this.publishWsClient.publish(q1);
 
         Quadruple q2 =
                 new Quadruple(
@@ -151,7 +151,7 @@ public class PubSubTest extends WsTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User1"));
         q2.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q2);
+        this.publishWsClient.publish(q2);
 
         publicationTime = System.currentTimeMillis();
 
@@ -162,7 +162,7 @@ public class PubSubTest extends WsTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user2@company.com"));
         q3.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q3);
+        this.publishWsClient.publish(q3);
 
         Quadruple q4 =
                 new Quadruple(
@@ -171,7 +171,7 @@ public class PubSubTest extends WsTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 3"));
         q4.setPublicationTime();
-        this.publishWsClient.publishQuadruple(q4);
+        this.publishWsClient.publish(q4);
 
         Quadruple q5 =
                 new Quadruple(
@@ -180,7 +180,7 @@ public class PubSubTest extends WsTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 2"));
         q5.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q5);
+        this.publishWsClient.publish(q5);
 
         synchronized (this.subscriberService.bindingsReceived) {
             while (this.subscriberService.bindingsReceived.size() != 2) {
@@ -203,7 +203,7 @@ public class PubSubTest extends WsTest {
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user3@company.com"));
         q6.setPublicationTime(publicationTime);
-        this.publishWsClient.publishQuadruple(q6);
+        this.publishWsClient.publish(q6);
 
         // Checks that no more events are received
         synchronized (this.subscriberService.bindingsReceived) {
@@ -224,7 +224,7 @@ public class PubSubTest extends WsTest {
         SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Publishes an event
-        this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(4));
+        this.publishWsClient.publish(CompoundEventGenerator.random(4));
 
         synchronized (this.subscriberService.eventsReceived) {
             while (this.subscriberService.eventsReceived.size() != 1) {
@@ -238,7 +238,7 @@ public class PubSubTest extends WsTest {
         this.subscribeWsClient.unsubscribe(subscriptionId);
 
         // Publishes a second event
-        this.publishWsClient.publishCompoundEvent(CompoundEventGenerator.random(4));
+        this.publishWsClient.publish(CompoundEventGenerator.random(4));
 
         // Checks that no more events are received
         synchronized (this.subscriberService.eventsReceived) {
