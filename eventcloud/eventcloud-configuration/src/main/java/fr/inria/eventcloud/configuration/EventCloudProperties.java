@@ -319,7 +319,7 @@ public class EventCloudProperties {
     public static final PropertyInteger MAO_HARD_LIMIT_SUBSCRIBE_PROXIES =
             new PropertyInteger(
                     "eventcloud.mao.hard.limit.subscribe.proxies",
-                    Runtime.getRuntime().availableProcessors() * 32);
+                    Runtime.getRuntime().availableProcessors() * 4);
 
     /**
      * Specifies the number maximum of attempts to lookup a proxy that is not
