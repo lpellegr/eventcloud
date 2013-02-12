@@ -88,7 +88,7 @@ public class PublishSubscribeBenchmark {
     private int nbSubscribers = 1;
 
     @Parameter(names = {"--publish-quadruples"}, description = "Indicates whether quadruples must be published instead of compound events")
-    private boolean publishQuadruples = false;
+    private boolean publishIndependentQuadruples = false;
 
     @Parameter(names = {"-lt", "--listener-type"}, description = "Listener type to use for subscriptions", converter = ListenerTypeConverter.class)
     private NotificationListenerType listenerType =
@@ -110,12 +110,9 @@ public class PublishSubscribeBenchmark {
     private ExecutorService threadPool =
             Executors.newFixedThreadPool(this.nbPublishers);
 
-    private final Supplier<? extends Event> supplier = this.publishQuadruples
-            ? new QuadrupleSupplier() : new CompoundEventSupplier(
-                    this.compoundEventSize);
+    private Supplier<? extends Event> supplier;
 
-    private final boolean usingCompoundEventSupplier =
-            this.supplier instanceof CompoundEventSupplier;
+    private boolean usingCompoundEventSupplier;
 
     public static void main(String[] args) {
         LoggerUtils.disableLoggers();
@@ -142,6 +139,14 @@ public class PublishSubscribeBenchmark {
     }
 
     public void execute() {
+        this.supplier =
+                this.publishIndependentQuadruples
+                        ? new QuadrupleSupplier() : new CompoundEventSupplier(
+                                this.compoundEventSize);
+
+        this.usingCompoundEventSupplier =
+                this.supplier instanceof CompoundEventSupplier;
+
         // pre-generates events so that the data are the same for all the runs
         // and the time is not included into the benchmark execution time
         final Event[] events = new Event[this.nbPublications];
