@@ -61,7 +61,7 @@ public class PutGetTest extends WsTest {
 
     @Test(timeout = 180000)
     public void testPutGetWsProxy() throws Exception {
-        this.putgetWsClient.addQuadruple(new Quadruple(
+        this.putgetWsClient.add(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"),
                 Node.createURI("http://france.meteofrance.com/france/meteo"),
@@ -69,19 +69,18 @@ public class PutGetTest extends WsTest {
 
         Node expectedNodeResult =
                 Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011-2012/");
-        this.putgetWsClient.addQuadruple(new Quadruple(
+        this.putgetWsClient.add(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"), expectedNodeResult,
                 Node.createLiteral("29", XSDDatatype.XSDint)));
 
-        this.putgetWsClient.addQuadruple(new Quadruple(
+        this.putgetWsClient.add(new Quadruple(
                 Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
                 Node.createURI("http://www.nice.fr"),
                 Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011-2012/"),
                 Node.createLiteral("26", XSDDatatype.XSDint)));
 
-        List<Quadruple> result =
-                this.putgetWsClient.findQuadruplePattern(QuadruplePattern.ANY);
+        List<Quadruple> result = this.putgetWsClient.find(QuadruplePattern.ANY);
         log.info("Quadruples contained by the EventCloud:");
         for (Quadruple quad : result) {
             log.info(quad.toString());

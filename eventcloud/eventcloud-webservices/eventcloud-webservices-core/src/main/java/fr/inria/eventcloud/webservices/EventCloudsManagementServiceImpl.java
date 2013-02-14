@@ -174,7 +174,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public boolean createEventCloud(String streamUrl) {
-        return this.createEventCloudWithNodeProvider(
+        return this.createEventCloud(
                 NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
     }
 
@@ -182,8 +182,7 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public boolean createEventCloudWithNodeProvider(String nodeProviderId,
-                                                    String streamUrl) {
+    public boolean createEventCloud(String nodeProviderId, String streamUrl) {
         EventCloudId id = new EventCloudId(streamUrl);
 
         if (!this.registry.contains(id)) {
@@ -281,7 +280,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deployPublishWsnService(String streamUrl) {
-        return this.deployPublishWsnServiceWithNodeProvider(
+        return this.deployPublishWsnService(
                 NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
     }
 
@@ -289,8 +288,8 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String deployPublishWsnServiceWithNodeProvider(String nodeProviderId,
-                                                          String streamUrl) {
+    public String deployPublishWsnService(String nodeProviderId,
+                                          String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
@@ -312,7 +311,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deploySubscribeWsnService(String streamUrl) {
-        return this.deploySubscribeWsnServiceWithNodeProvider(
+        return this.deploySubscribeWsnService(
                 NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
     }
 
@@ -320,8 +319,8 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String deploySubscribeWsnServiceWithNodeProvider(String nodeProviderId,
-                                                            String streamUrl) {
+    public String deploySubscribeWsnService(String nodeProviderId,
+                                            String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
@@ -343,7 +342,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deployPublishWsProxy(String streamUrl) {
-        return this.deployPublishWsProxyWithNodeProvider(
+        return this.deployPublishWsProxy(
                 NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
     }
 
@@ -351,8 +350,7 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String deployPublishWsProxyWithNodeProvider(String nodeProviderId,
-                                                       String streamUrl) {
+    public String deployPublishWsProxy(String nodeProviderId, String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
@@ -372,7 +370,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deploySubscribeWsProxy(String streamUrl) {
-        return this.deploySubscribeWsProxyWithNodeProvider(
+        return this.deploySubscribeWsProxy(
                 NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
     }
 
@@ -380,8 +378,7 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String deploySubscribeWsProxyWithNodeProvider(String nodeProviderId,
-                                                         String streamUrl) {
+    public String deploySubscribeWsProxy(String nodeProviderId, String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);
@@ -401,7 +398,7 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public String deployPutGetWsProxy(String streamUrl) {
-        return this.deployPutGetWsProxyWithNodeProvider(
+        return this.deployPutGetWsProxy(
                 NodeProvidersManager.DEFAULT_NODE_PROVIDER_ID, streamUrl);
     }
 
@@ -409,8 +406,7 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public String deployPutGetWsProxyWithNodeProvider(String nodeProviderId,
-                                                      String streamUrl) {
+    public String deployPutGetWsProxy(String nodeProviderId, String streamUrl) {
         this.checkEventCloudId(streamUrl);
 
         String topicName = this.getTopicName(streamUrl);

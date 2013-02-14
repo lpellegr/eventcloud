@@ -45,7 +45,7 @@ public interface PublishWsApi {
      *            the quadruple to publish.
      */
     @WebMethod(operationName = "publishQuadruple")
-    public void publishQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    public void publish(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Publishes the specified compound event.
@@ -54,7 +54,7 @@ public interface PublishWsApi {
      *            the compound event to publish.
      */
     @WebMethod(operationName = "publishCompoundEvent")
-    public void publishCompoundEvent(@WebParam(name = "event") @XmlJavaTypeAdapter(CompoundEventAdapter.class) CompoundEvent event);
+    public void publish(@WebParam(name = "event") @XmlJavaTypeAdapter(CompoundEventAdapter.class) CompoundEvent event);
 
     /**
      * Publishes the specified collection of compound events.
@@ -63,6 +63,6 @@ public interface PublishWsApi {
      *            the collection of compound events to publish.
      */
     @WebMethod(operationName = "publishCompoundEventCollection")
-    public void publishCompoundEventCollection(@WebParam(name = "events") @XmlJavaTypeAdapter(CompoundEventCollectionAdapter.class) Collection<CompoundEvent> events);
+    public void publish(@WebParam(name = "events") @XmlJavaTypeAdapter(CompoundEventCollectionAdapter.class) Collection<CompoundEvent> events);
 
 }
