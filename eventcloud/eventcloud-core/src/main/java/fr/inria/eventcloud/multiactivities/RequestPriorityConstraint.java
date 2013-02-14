@@ -20,9 +20,11 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 
 /**
- * 
+ * Defines the priority level to apply to the method call with the specified
+ * method name and optionally, the given parameter types.
  * 
  * @author lpellegr
  */
@@ -36,12 +38,17 @@ public class RequestPriorityConstraint implements
     // priority level for methods without priority is 0
     private final int priorityLevel;
 
-    public RequestPriorityConstraint(String methodName, int priorityLevel) {
-        this(methodName, null, priorityLevel);
+    public RequestPriorityConstraint(int priorityLevel, String methodName) {
+        this(priorityLevel, methodName, (List<Class<?>>) null);
     }
 
-    public RequestPriorityConstraint(String methodName,
-            List<Class<?>> parameterTypes, int priorityLevel) {
+    public RequestPriorityConstraint(int priorityLevel, String methodName,
+            Class<?>... parameterTypes) {
+        this(priorityLevel, methodName, ImmutableList.copyOf(parameterTypes));
+    }
+
+    public RequestPriorityConstraint(int priorityLevel, String methodName,
+            List<Class<?>> parameterTypes) {
         this.methodName = methodName;
         this.parameterTypes = parameterTypes;
         this.priorityLevel = priorityLevel;

@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
-import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -61,11 +60,13 @@ import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
+import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
+import fr.inria.eventcloud.messages.request.can.RemoveEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
@@ -141,9 +142,17 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         this.servingPolicy =
                 new PriorityServingPolicy(
                         new RequestPriorityConstraint(
-                                "send",
-                                ImmutableList.<Class<?>> of(ReconstructCompoundEventRequest.class),
-                                1));
+                                3, "send",
+                                ReconstructCompoundEventRequest.class),
+                        new RequestPriorityConstraint(
+                                2, "sendv",
+                                IndexEphemeralSubscriptionRequest.class),
+                        new RequestPriorityConstraint(
+                                1, "sendv", IndexSubscriptionRequest.class),
+                        new RequestPriorityConstraint(-1, "publish"),
+                        new RequestPriorityConstraint(
+                                -2, "sendv",
+                                RemoveEphemeralSubscriptionRequest.class));
 
         super.multiActiveService.policyServing(
                 this.servingPolicy,
