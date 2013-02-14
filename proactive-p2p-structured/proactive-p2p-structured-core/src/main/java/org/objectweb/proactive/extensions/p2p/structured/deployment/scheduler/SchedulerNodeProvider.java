@@ -311,11 +311,11 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
                 !this.isStarted(),
                 "Cannot submit jobs because they have already been submitted");
 
+        this.init();
+
         log.debug(
                 "Submitting {} jobs to the ProActive Scheduler located at {}",
                 this.virtualNodeEntries.size(), this.schedulerUrl);
-
-        this.init();
 
         for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
             log.debug(

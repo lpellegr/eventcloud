@@ -99,11 +99,12 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
                 !this.isStarted(),
                 "Cannot start the GCM deployment because it has already been started");
 
+        this.init();
+
         log.debug(
                 "Starting GCM deployment described in the GCM Application descriptor located at {}",
-                this.gcma.getDescriptorURL().getPath());
+                this.gcmaPath);
 
-        this.init();
         this.gcma.startDeployment();
         this.gcma.waitReady();
     }
@@ -182,7 +183,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
 
         log.debug(
                 "Terminating the GCM deployment described in the GCM Application descriptor located at {}",
-                this.gcma.getDescriptorURL().getPath());
+                this.gcmaPath);
 
         this.gcma.kill();
     }
