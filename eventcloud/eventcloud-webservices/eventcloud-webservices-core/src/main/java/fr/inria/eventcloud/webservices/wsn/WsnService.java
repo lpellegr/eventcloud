@@ -89,7 +89,7 @@ public abstract class WsnService<T> {
     @PostConstruct
     public void init() {
         try {
-            this.proxy = this.createProxy();
+            this.proxy = this.getProxy();
             log.info("{} proxy deployed", this.proxy.getClass().getName());
         } catch (EventCloudIdNotManaged e) {
             throw new IllegalStateException(e);
@@ -97,14 +97,14 @@ public abstract class WsnService<T> {
     }
 
     /**
-     * Creates the underlying proxy.
+     * Returns the underlying proxy.
      * 
      * @return the undelying proxy.
      * @throws EventCloudIdNotManaged
      *             if there was no existing EventCloud for the {@code streamUrl}
      *             .
      */
-    public abstract T createProxy() throws EventCloudIdNotManaged;
+    public abstract T getProxy() throws EventCloudIdNotManaged;
 
     /**
      * Terminates the underlying proxy.

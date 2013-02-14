@@ -84,10 +84,14 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
      * {@inheritDoc}
      */
     @Override
-    public SubscribeApi createProxy() throws EventCloudIdNotManaged {
-        return ProxyFactory.newSubscribeProxy(
-                super.nodeProvider, super.registryUrl, new EventCloudId(
-                        super.streamUrl));
+    public SubscribeApi getProxy() throws EventCloudIdNotManaged {
+        if (super.proxy != null) {
+            return super.proxy;
+        } else {
+            return ProxyFactory.newSubscribeProxy(
+                    super.nodeProvider, super.registryUrl, new EventCloudId(
+                            super.streamUrl));
+        }
     }
 
     /**
