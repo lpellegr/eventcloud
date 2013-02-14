@@ -17,11 +17,6 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 
 import org.objectweb.proactive.Body;
@@ -45,9 +40,6 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
-import org.objectweb.proactive.multiactivity.ServingPolicy;
-import org.objectweb.proactive.multiactivity.compatibility.StatefulCompatibilityMap;
-import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +89,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
 
     protected transient StructuredOverlay overlay;
 
-    private transient MultiActiveService multiActiveService;
+    protected transient MultiActiveService multiActiveService;
 
     /**
      * Empty constructor required by ProActive.
@@ -125,10 +117,6 @@ public class PeerImpl extends AbstractComponent implements Peer,
         this.multiActiveService.multiActiveServing(
                 P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
                 false);
-
-        // this.multiActiveService.policyServing(createCustomServingPolicy(
-        // body, multiActiveService,
-        // P2PStructuredProperties.MAO_SOFT_LIMIT.getValue()));
     }
 
     /**
@@ -137,71 +125,6 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @Override
     public void endComponentActivity(Body body) {
         this.overlay.close();
-    }
-
-    @SuppressWarnings("unused")
-    private static final ServingPolicy createCustomServingPolicy(final Body body,
-                                                                 final MultiActiveService multiActiveService,
-                                                                 final int maxThreads) {
-        final String[] prioritizedMethods = {"route"}; // table if we need to
-                                                       // add new prioritized
-                                                       // methods
-        return new ServingPolicy() {
-            @Override
-            public List<org.objectweb.proactive.core.body.request.Request> runPolicy(StatefulCompatibilityMap compatibility) {
-                List<org.objectweb.proactive.core.body.request.Request> result =
-                        new LinkedList<org.objectweb.proactive.core.body.request.Request>();
-                List<org.objectweb.proactive.core.body.request.Request> queue =
-                        compatibility.getQueueContents();
-
-                if (queue.size() == 0) {
-                    return result;
-                }
-
-                Collection<org.objectweb.proactive.core.body.request.Request> execQueue =
-                        compatibility.getExecutingRequests();
-                if (execQueue.size()
-                        - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() >= maxThreads) {
-                    Iterator<org.objectweb.proactive.core.body.request.Request> itQ =
-                            queue.iterator();
-                    while (itQ.hasNext()) {
-                        org.objectweb.proactive.core.body.request.Request r =
-                                itQ.next();
-                        if (compatibility.isCompatibleWithRequests(r, execQueue)
-                                && Arrays.asList(prioritizedMethods).contains(
-                                        r.getMethodName())) {
-                            result.add(r);
-                            queue.remove(r);
-                            return result;
-                        }
-                    }
-                } else {
-                    org.objectweb.proactive.core.body.request.Request current;
-                    Iterator<org.objectweb.proactive.core.body.request.Request> itQ =
-                            queue.iterator();
-                    int i = -1;
-                    while (itQ.hasNext()
-                            && execQueue.size()
-                                    + result.size()
-                                    - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() < maxThreads) {
-                        current = itQ.next();
-                        i++;
-                        if (compatibility.isCompatibleWithRequests(
-                                current, result)
-                                && compatibility.isCompatibleWithRequests(
-                                        current, execQueue)
-                                && compatibility.getIndexOfLastCompatibleWith(
-                                        current, queue) >= i - 1) {
-                            result.add(current);
-                            itQ.remove();
-                        } else {
-                            return result;
-                        }
-                    }
-                }
-                return result;
-            }
-        };
     }
 
     /**

@@ -29,12 +29,16 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.ServingPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
+import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -61,9 +65,12 @@ import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
+import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
+import fr.inria.eventcloud.multiactivities.PriorityServingPolicy;
+import fr.inria.eventcloud.multiactivities.RequestPriorityConstraint;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.utils.Callback;
@@ -82,6 +89,7 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
+
 public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
@@ -102,6 +110,8 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     public static final String SOCIAL_FILTER_SERVICES_ITF =
             "social-filter-services";
 
+    private transient ServingPolicy servingPolicy;
+
     /**
      * Empty constructor required by ProActive.
      */
@@ -119,6 +129,25 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         this.configurationProperty = "eventcloud.configuration";
         this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        super.multiActiveService = new MultiActiveService(body);
+
+        this.servingPolicy =
+                new PriorityServingPolicy(
+                        new RequestPriorityConstraint(
+                                "send",
+                                ImmutableList.<Class<?>> of(ReconstructCompoundEventRequest.class),
+                                1));
+
+        super.multiActiveService.policyServing(
+                this.servingPolicy,
+                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
     }
 
     /**
