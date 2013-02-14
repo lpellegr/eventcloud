@@ -67,10 +67,14 @@ public class PublishWsnServiceImpl extends WsnService<PublishApi> implements
      * {@inheritDoc}
      */
     @Override
-    public PublishApi createProxy() throws EventCloudIdNotManaged {
-        return ProxyFactory.newPublishProxy(
-                super.nodeProvider, super.registryUrl, new EventCloudId(
-                        super.streamUrl));
+    public PublishApi getProxy() throws EventCloudIdNotManaged {
+        if (super.proxy != null) {
+            return super.proxy;
+        } else {
+            return ProxyFactory.newPublishProxy(
+                    super.nodeProvider, super.registryUrl, new EventCloudId(
+                            super.streamUrl));
+        }
     }
 
     /**
