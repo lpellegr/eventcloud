@@ -1,21 +1,24 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -32,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
 public abstract class RequestResponseMessage<K> implements Routable<K>,
         Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * Universally unique identifier used in order to identify the message.
@@ -42,7 +45,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     /**
      * Constraints validator used to make the routing decision possible.
      */
-    protected ConstraintsValidator<K> constraintsValidator;
+    protected transient ConstraintsValidator<K> constraintsValidator;
 
     /**
      * The number of hops between the source and the destination of the message.
@@ -124,7 +127,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     /**
      * Increments the hop count (i.e. the counter counting the number of hops
      * between the source and the destination of this message) by the specified
-     * <code>increment</code>.
+     * {@code increment}.
      * 
      * @param increment
      *            the size of the increment.
@@ -160,8 +163,8 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      * @param overlay
      *            the overlay on which the constraints are checked.
      * 
-     * @return <code>true</code> if the constraints are validated,
-     *         <code>false</code> otherwise.
+     * @return {@code true} if the constraints are validated, {@code false}
+     *         otherwise.
      */
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
         return this.constraintsValidator.validatesKeyConstraints(overlay);
@@ -175,6 +178,29 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
         return "RequestResponseMessage [id=" + this.uuid
                 + ", constraintsValidator=" + this.constraintsValidator
                 + ", hopCount=" + this.hopCount + "]";
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException,
+            ClassNotFoundException {
+        stream.defaultReadObject();
+        this.customReadObject(stream);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void customReadObject(ObjectInputStream stream)
+            throws ClassNotFoundException, IOException {
+        this.constraintsValidator =
+                (ConstraintsValidator<K>) stream.readObject();
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+        this.customWriteObject(stream);
+    }
+
+    protected void customWriteObject(ObjectOutputStream stream)
+            throws IOException {
+        stream.writeObject(this.constraintsValidator);
     }
 
 }

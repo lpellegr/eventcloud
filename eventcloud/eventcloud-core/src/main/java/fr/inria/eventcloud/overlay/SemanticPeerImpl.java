@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.overlay;
@@ -29,14 +29,18 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.ServingPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -56,11 +60,20 @@ import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
+import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
+import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
+import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
+import fr.inria.eventcloud.messages.request.can.RemoveEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
+import fr.inria.eventcloud.multiactivities.PriorityServingPolicy;
+import fr.inria.eventcloud.multiactivities.RequestPriorityConstraint;
 import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.utils.Callback;
 
 /**
@@ -77,10 +90,11 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
+
 public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(SemanticPeerImpl.class);
@@ -96,6 +110,8 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     public static final String SOCIAL_FILTER_SERVICES_ITF =
             "social-filter-services";
+
+    private transient ServingPolicy servingPolicy;
 
     /**
      * Empty constructor required by ProActive.
@@ -114,6 +130,101 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         this.configurationProperty = "eventcloud.configuration";
         this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        super.multiActiveService = new MultiActiveService(body);
+
+        this.servingPolicy =
+                new PriorityServingPolicy(
+                        new RequestPriorityConstraint(
+                                3, "send",
+                                ReconstructCompoundEventRequest.class),
+                        new RequestPriorityConstraint(
+                                2, "sendv",
+                                IndexEphemeralSubscriptionRequest.class),
+                        new RequestPriorityConstraint(
+                                1, "sendv", IndexSubscriptionRequest.class),
+                        new RequestPriorityConstraint(-1, "publish"),
+                        new RequestPriorityConstraint(
+                                -2, "sendv",
+                                RemoveEphemeralSubscriptionRequest.class));
+
+        super.multiActiveService.policyServing(
+                this.servingPolicy,
+                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void publish(Quadruple quad) {
+        if (quad.getPublicationTime() == -1) {
+            quad.setPublicationTime();
+        }
+
+        // the quadruple is routed without taking into account the publication
+        // datetime (neither the other meta information)
+        super.sendv(new PublishQuadrupleRequest(quad));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void publish(CompoundEvent compoundEvent) {
+        long publicationTime = System.currentTimeMillis();
+
+        // SBCE3
+        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            // the timestamp must be set to all the quadruples before to send
+            // the full CE to each peer managing one of the quadruples contained
+            // by the compound event
+            for (Quadruple q : compoundEvent) {
+                q.setPublicationTime(publicationTime);
+            }
+
+            for (Quadruple q : compoundEvent) {
+                // sends the whole compound event
+                super.sendv(new PublishCompoundEventRequest(compoundEvent, q));
+            }
+
+            // the meta quadruple is necessary when we use the fallback scheme
+            // (SBCE2)
+            Quadruple metaQuadruple =
+                    CompoundEvent.createMetaQuadruple(compoundEvent);
+            metaQuadruple.setPublicationTime(publicationTime);
+            this.publish(metaQuadruple);
+        } else {
+            // SBCE1 or SBCE2
+            Quadruple metaQuadruple =
+                    CompoundEvent.createMetaQuadruple(compoundEvent);
+            metaQuadruple.setPublicationTime(publicationTime);
+            this.publish(metaQuadruple);
+
+            for (Quadruple quad : compoundEvent) {
+                quad.setPublicationTime(publicationTime);
+                this.publish(quad);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("parallel")
+    public void subscribe(Subscription subscription) {
+        subscription.setIndexationTime();
+
+        super.sendv(new IndexSubscriptionRequest(subscription));
     }
 
     /*

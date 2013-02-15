@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.operations.can;
@@ -31,25 +31,27 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.pubsub.Notification;
-import fr.inria.eventcloud.pubsub.NotificationId;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
+import fr.inria.eventcloud.pubsub.notifications.BindingNotification;
+import fr.inria.eventcloud.pubsub.notifications.NotificationId;
 
 /**
- * The class RetrieveSubSolutionOperation is used to retrieve the sub-solutions
- * associated to a {@link Notification}.
+ * This class is used to retrieve the remaining sub solutions associated to a
+ * solution matching a subscription register by a subscriber along with a
+ * {@link BindingNotificationListener}.
  * 
  * @author lpellegr
  */
 public class RetrieveSubSolutionOperation implements RunnableOperation {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(RetrieveSubSolutionOperation.class);
@@ -59,7 +61,6 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
     private final HashCode hash;
 
     public RetrieveSubSolutionOperation(NotificationId id, HashCode hash) {
-        super();
         this.notificationId = id;
         this.hash = hash;
     }
@@ -101,51 +102,56 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
             txnGraph.end();
         }
 
-        txnGraph = datastore.begin(AccessMode.WRITE);
-        try {
-            txnGraph.delete(metaQuad);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            txnGraph.end();
-        }
+        if (metaQuad != null) {
+            Pair<Quadruple, SubscriptionId> extractedMetaInfo =
+                    PublishSubscribeUtils.extractMetaInformation(metaQuad);
 
-        Pair<Quadruple, SubscriptionId> extractedMetaInfo =
-                PublishSubscribeUtils.extractMetaInformation(metaQuad);
+            // extracts only the variables that are declared as result variables
+            // in the original subscription
+            Subscription subscription =
+                    ((SemanticCanOverlay) overlay).findSubscription(PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()));
 
-        // Subsubscription subSubscription =
-        // Subsubscription.parseFrom(
-        // datastore,
-        // PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()),
-        // extractedMetaInfo.getSecond());
+            // an unsubscribe request has been sent after that a notification
+            // has been triggered because a publication matches the current
+            // subscription. However, the unsubscribe request has been handled
+            // before we send back to the subscriber all the intermediate
+            // binding values to the subscriber
+            if (subscription == null) {
+                return;
+            }
 
-        // extracts only the variables that are declared as result variables in
-        // the original subscription
-        Subscription subscription =
-                ((SemanticCanOverlay) overlay).findSubscription(PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()));
+            Binding binding =
+                    PublishSubscribeUtils.filter(
+                            extractedMetaInfo.getFirst(),
+                            subscription.getResultVars(),
+                            subscription.getSubSubscriptions()[0].getAtomicQuery());
 
-        Binding binding =
-                PublishSubscribeUtils.filter(
-                        extractedMetaInfo.getFirst(),
-                        subscription.getResultVars(),
-                        subscription.getSubSubscriptions()[0].getAtomicQuery());
+            try {
+                subscription.getSubscriberProxy()
+                        .receiveSbce1Or2(
+                                new BindingNotification(
+                                        this.notificationId,
+                                        extractedMetaInfo.getSecond(),
+                                        PAActiveObject.getUrl(semanticOverlay.getStub()),
+                                        binding));
+            } catch (ExecutionException e) {
+                log.error("No SubscribeProxy found under the given URL: "
+                        + subscription.getSubscriberUrl(), e);
 
-        // TODO: replace PAActiveObject.getUrl(overlay.getStub()) by the
-        // component URL? (same in PublishQuadrupleRequest and
-        // IndexSubscriptionRequest)
-        try {
-            subscription.getSubscriberProxy().receive(
-                    new Notification(
-                            this.notificationId,
-                            PAActiveObject.getUrl(overlay.getStub()), binding));
-        } catch (ExecutionException e) {
-            log.error("No SubscribeProxy found under the given URL: "
-                    + subscription.getSubscriberUrl(), e);
+                // TODO: this could be due to a subscriber which has left
+                // without unsubscribing. In that case we can remove the
+                // subscription information associated to this subscriber
+                // and also send a message
+            }
 
-            // TODO: this could be due to a subscriber which has left
-            // without unsubscribing. In that case we can remove the
-            // subscription information associated to this subscriber
-            // and also send a message
+            txnGraph = datastore.begin(AccessMode.WRITE);
+            try {
+                txnGraph.delete(metaQuad);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                txnGraph.end();
+            }
         }
     }
 

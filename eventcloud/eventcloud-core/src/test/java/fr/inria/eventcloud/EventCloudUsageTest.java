@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud;
@@ -43,6 +43,7 @@ import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 
 /**
  * The purpose of this test is just to show how to instantiate and to use an
@@ -52,7 +53,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
  */
 public class EventCloudUsageTest implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudUsageTest.class);
@@ -131,8 +132,8 @@ public class EventCloudUsageTest implements Serializable {
                 ProxyFactory.newSubscribeProxy(
                         deployer.getEventCloudsRegistryUrl(), eventCloudId);
 
-        // Once a subscription is created, a SubscriptionId can be retrived from
-        // the subscription object to have the possibility to perform an
+        // Once a subscription is created, a SubscriptionId can be retrieved
+        // from the subscription object to have the possibility to perform an
         // unsubscribe operation
         Subscription subscription =
                 new Subscription(
@@ -140,7 +141,7 @@ public class EventCloudUsageTest implements Serializable {
 
         subscribeProxy.subscribe(
                 subscription, new BindingNotificationListener() {
-                    private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 140L;
 
                     @Override
                     public void onNotification(SubscriptionId id,
@@ -155,6 +156,8 @@ public class EventCloudUsageTest implements Serializable {
         log.info(
                 "Subscription with id {} has been registered",
                 subscription.getId());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Finally, we can simulate an event source by creating a PublishProxy
         PublishApi publishProxy =
@@ -182,49 +185,38 @@ public class EventCloudUsageTest implements Serializable {
         q2.setPublicationTime(publicationTime);
         publishProxy.publish(q2);
 
-        // this quadruple shows chronicle context property because it is
-        // delivered by reconsuming the first quadruple which was published
-        Quadruple q3 =
-                new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user1.new.email@company.com"));
-        q3.setPublicationTime(publicationTime);
-        publishProxy.publish(q3);
-
         publicationTime = System.currentTimeMillis();
 
-        Quadruple q4 =
+        Quadruple q3 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
                         Node.createURI("https://plus.google.com/107545688688906540962"),
                         Node.createURI("http://xmlns.com/foaf/0.1/email"),
                         Node.createLiteral("user2@company.com"));
-        q4.setPublicationTime(publicationTime);
-        publishProxy.publish(q4);
+        q3.setPublicationTime(publicationTime);
+        publishProxy.publish(q3);
 
-        Quadruple q5 =
+        Quadruple q4 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
                         Node.createURI("https://plus.google.com/14023231238123495031/"),
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 3"));
-        q5.setPublicationTime();
-        publishProxy.publish(q5);
+        q4.setPublicationTime();
+        publishProxy.publish(q4);
 
-        Quadruple q6 =
+        Quadruple q5 =
                 new Quadruple(
                         Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
                         Node.createURI("https://plus.google.com/107545688688906540962"),
                         Node.createURI("http://xmlns.com/foaf/0.1/name"),
                         Node.createLiteral("User 2"));
-        q6.setPublicationTime(publicationTime);
-        publishProxy.publish(q6);
+        q5.setPublicationTime(publicationTime);
+        publishProxy.publish(q5);
 
         // 3 notifications are expected
         synchronized (bindingsReceived) {
-            while (bindingsReceived.size() != 3) {
+            while (bindingsReceived.size() != 2) {
                 try {
                     bindingsReceived.wait();
                 } catch (InterruptedException e) {
@@ -232,27 +224,6 @@ public class EventCloudUsageTest implements Serializable {
                 }
             }
         }
-
-        // try {
-        // deployer.getRandomSemanticPeer(eventCloudId).send(
-        // new StatelessQuadruplePatternRequest(QuadruplePattern.ANY) {
-        //
-        // private static final long serialVersionUID = 1L;
-        //
-        // @Override
-        // public void onPeerValidatingKeyConstraints(CanOverlay overlay,
-        // QuadruplePattern quadruplePattern) {
-        // System.err.println("$A$A$ Peer " + overlay
-        // + " contains:");
-        // for (Quadruple quad : ((SynchronizedJenaDatasetGraph)
-        // overlay.getDatastore()).find(QuadruplePattern.ANY)) {
-        // log.debug(quad.toString());
-        // }
-        // }
-        // });
-        // } catch (DispatchException e) {
-        // e.printStackTrace();
-        // }
 
         // Unsubscribes. Once this step is done no notification related to the
         // subscription must be received.

@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.pubsub;
@@ -50,6 +50,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.webservices.CompoundEventNotificationConsumer;
@@ -123,6 +124,8 @@ public class WsnPubSubTest extends WsTest {
                 WsnHelper.getSubcriptionId(subscribeResponse);
 
         log.info("Subscription submitted, ID is " + subscriptionId);
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         // Creates the notify request
         Notify notifyRequest =
@@ -205,6 +208,8 @@ public class WsnPubSubTest extends WsTest {
         // Subscribes for any events with topic TaxiUc
         this.subscribeWsnClient.subscribe(subscribeRequest);
 
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         // Creates the notify request emitted by source1
         Notify notifyRequest =
                 WsnHelper.createNotifyMessage(
@@ -253,10 +258,12 @@ public class WsnPubSubTest extends WsTest {
 
         this.subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
+                        LOCAL_NODE_PROVIDER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "subscribe", WEBSERVICES_PORT);
         this.publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
+                        LOCAL_NODE_PROVIDER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "publish", WEBSERVICES_PORT);
 

@@ -1,29 +1,26 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.api;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
 import com.hp.hpl.jena.graph.Node;
 
@@ -37,53 +34,21 @@ public class QuadruplePatternTest {
     private static final String DEFAULT_URI = "http://www.inria.fr";
 
     @Test
-    public void testSerialization() {
+    public void testNullValues() {
+        new QuadruplePattern(null, null, null, null);
+    }
+
+    @Test
+    public void testSerialization() throws IOException, ClassNotFoundException {
         QuadruplePattern quadPattern =
                 new QuadruplePattern(
                         Node.ANY, Node.ANY, Node.createURI(DEFAULT_URI),
                         Node.createLiteral("Literal Value"));
 
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        QuadruplePattern quadPatternDeepCopy =
+                (QuadruplePattern) MakeDeepCopy.makeDeepCopy(quadPattern);
 
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(buffer);
-            oos.writeObject(quadPattern);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (oos != null) {
-                    oos.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        ObjectInputStream ois = null;
-        QuadruplePattern newQuad = null;
-
-        try {
-            ois =
-                    new ObjectInputStream(new ByteArrayInputStream(
-                            buffer.toByteArray()));
-            newQuad = (QuadruplePattern) ois.readObject();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (ois != null) {
-                    ois.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Assert.assertEquals(quadPattern, newQuad);
+        Assert.assertEquals(quadPattern, quadPatternDeepCopy);
     }
 
 }

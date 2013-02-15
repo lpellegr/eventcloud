@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils;
@@ -143,7 +143,7 @@ public final class UnicodeUtils {
     }
 
     /*
-     * The following two methods have been copied from JDK7
+     * The next two methods have been copied from JDK7
      */
 
     /**
@@ -155,12 +155,6 @@ public final class UnicodeUtils {
      * point) in the UTF-16 encoding. If the specified character is not a <a
      * href="Character.html#supplementary">supplementary character</a>, an
      * unspecified {@code char} is returned.
-     * <p>
-     * If {@link #isSupplementaryCodePoint isSupplementaryCodePoint(x)} is
-     * {@code true}, then {@link #isHighSurrogate isHighSurrogate}
-     * {@code (highSurrogate(x))} and {@link #toCodePoint toCodePoint}
-     * {@code (highSurrogate(x), }{@link #lowSurrogate lowSurrogate}
-     * {@code (x)) == x} are also always {@code true}.
      * 
      * @param codePoint
      *            a supplementary character (Unicode code point)
@@ -180,12 +174,6 @@ public final class UnicodeUtils {
      * point) in the UTF-16 encoding. If the specified character is not a <a
      * href="Character.html#supplementary">supplementary character</a>, an
      * unspecified {@code char} is returned.
-     * <p>
-     * If {@link #isSupplementaryCodePoint isSupplementaryCodePoint(x)} is
-     * {@code true}, then {@link #isLowSurrogate isLowSurrogate}
-     * {@code (lowSurrogate(x))} and {@link #toCodePoint toCodePoint}{@code (}
-     * {@link #highSurrogate highSurrogate}{@code (x), lowSurrogate(x)) == x}
-     * are also always {@code true}.
      * 
      * @param codePoint
      *            a supplementary character (Unicode code point)

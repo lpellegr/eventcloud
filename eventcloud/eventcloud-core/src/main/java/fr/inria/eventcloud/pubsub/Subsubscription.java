@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.pubsub;
@@ -28,15 +28,19 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_VAR_NAMES_NODE;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_VAR_NAMES_PROPERTY;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruplable;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -44,7 +48,6 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.datastore.VariableDatatype;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -114,53 +117,52 @@ public class Subsubscription implements Quadruplable {
      */
     @Override
     public List<Quadruple> toQuadruples() {
-        List<Quadruple> quads = new ArrayList<Quadruple>();
+        Builder<Quadruple> result = new ImmutableList.Builder<Quadruple>();
 
         Node originalSubscriptionURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.originalId);
         Node subSubscriptionURI =
                 Node.createURI(SUBSUBSCRIPTION_NS + this.id.toString());
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_ID_NODE,
                 Node.createLiteral(this.id.toString()), false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_INDEX_NODE, Node.createLiteral(
                         Integer.toString(this.index), XSDDatatype.XSDint),
                 false, false));
 
-        quads.add(new Quadruple(
-                originalSubscriptionURI,
-                subSubscriptionURI,
+        result.add(new Quadruple(
+                originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_GRAPH_VALUE_NODE,
-                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getGraph()),
-                false, false));
+                replaceVarNodeByConstant(this.atomicQuery.getGraph()), false,
+                false));
 
-        quads.add(new Quadruple(
-                originalSubscriptionURI,
-                subSubscriptionURI,
+        result.add(new Quadruple(
+                originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_SUBJECT_VALUE_NODE,
-                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getSubject()),
-                false, false));
+                replaceVarNodeByConstant(this.atomicQuery.getSubject()), false,
+                false));
 
-        quads.add(new Quadruple(
-                originalSubscriptionURI,
-                subSubscriptionURI,
+        result.add(new Quadruple(
+                originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_PREDICATE_VALUE_NODE,
-                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getPredicate()),
+                replaceVarNodeByConstant(this.atomicQuery.getPredicate()),
                 false, false));
 
-        quads.add(new Quadruple(
-                originalSubscriptionURI,
-                subSubscriptionURI,
+        result.add(new Quadruple(
+                originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_OBJECT_VALUE_NODE,
-                replaceVarNodeByVariableTypedLiteral(this.atomicQuery.getObject()),
-                false, false));
+                replaceVarNodeByConstant(this.atomicQuery.getObject()), false,
+                false));
 
-        return quads;
+        result.add(createVarNamesQuadruple(
+                originalSubscriptionURI, subSubscriptionURI, this.atomicQuery));
+
+        return result.build();
     }
 
     /**
@@ -198,6 +200,9 @@ public class Subsubscription implements Quadruplable {
 
         try {
             return parseFrom(txnGraph, subscriptionId, subSubscriptionIdNode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             txnGraph.end();
         }
@@ -241,37 +246,53 @@ public class Subsubscription implements Quadruplable {
             }
         }
 
+        Node[] ssNodes =
+                AtomicQuery.parseVarNamesFromString(properties.get(
+                        SUBSUBSCRIPTION_VAR_NAMES_PROPERTY)
+                        .getLiteralLexicalForm());
+
+        if (!properties.get(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY).equals(
+                PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE)) {
+            ssNodes[0] = properties.get(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY);
+        }
+
+        if (!properties.get(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY).equals(
+                PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE)) {
+            ssNodes[1] = properties.get(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY);
+        }
+
+        if (!properties.get(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY).equals(
+                PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE)) {
+            ssNodes[2] =
+                    properties.get(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY);
+        }
+
+        if (!properties.get(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY).equals(
+                PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE)) {
+            ssNodes[3] = properties.get(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY);
+        }
+
         return new Subsubscription(
                 originalId,
                 subscriptionId,
                 SubscriptionId.parseSubscriptionId(PublishSubscribeUtils.extractSubscriptionId(subSubscriptionIdNode.getURI())),
                 (Integer) properties.get(SUBSUBSCRIPTION_INDEX_PROPERTY)
-                        .getLiteralValue(),
-                // when they are serialized, variables are serialized as
-                // typed-literal with VariableDatatype datatype. To get a
-                // Node_Variable we have to get the parsed literal value but
-                // only if the serialized value was a variable
-                replaceVariableTypedLiteralByVarNode(properties.get(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY)),
-                replaceVariableTypedLiteralByVarNode(properties.get(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY)),
-                replaceVariableTypedLiteralByVarNode(properties.get(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY)),
-                replaceVariableTypedLiteralByVarNode(properties.get(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY)));
+                        .getLiteralValue(), ssNodes[0], ssNodes[1], ssNodes[2],
+                ssNodes[3]);
     }
 
-    private static final Node replaceVarNodeByVariableTypedLiteral(Node node) {
+    private static Quadruple createVarNamesQuadruple(Node originalSubscriptionURI,
+                                                     Node subSubscriptionURI,
+                                                     AtomicQuery atomicQuery) {
+        return new Quadruple(
+                originalSubscriptionURI, subSubscriptionURI,
+                SUBSUBSCRIPTION_VAR_NAMES_NODE,
+                Node.createLiteral(atomicQuery.getVarNamesAsString()));
+    }
+
+    private static Node replaceVarNodeByConstant(Node node) {
         if (node.isVariable()) {
-            return Node.createLiteral(
-                    node.getName(), VariableDatatype.getInstance());
-        }
-
-        return node;
-    }
-
-    private static final Node replaceVariableTypedLiteralByVarNode(Node node) {
-        if (node.isLiteral()
-                && node.getLiteralDatatype() != null
-                && node.getLiteralDatatype().equals(
-                        VariableDatatype.getInstance())) {
-            return (Node) node.getLiteralValue();
+            return PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE;
         }
 
         return node;

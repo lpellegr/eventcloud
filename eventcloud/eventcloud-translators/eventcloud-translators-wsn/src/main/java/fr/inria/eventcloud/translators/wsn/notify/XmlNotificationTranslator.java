@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.translators.wsn.notify;
@@ -59,8 +59,8 @@ import fr.inria.eventcloud.api.generators.UriGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
+import fr.inria.eventcloud.translators.wsn.WsnConstants;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
-import fr.inria.eventcloud.translators.wsn.WsnTranslatorConstants;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
@@ -94,9 +94,7 @@ public class XmlNotificationTranslator extends
             byte[] nodeBytes = xmlNodeToByteArray(incomingNode);
             String nodeString = new String(nodeBytes, "UTF-8");
             nodeString = nodeString.replaceAll(">\\s*<", "><");
-            nodeString =
-                    nodeString.replaceAll(
-                            "#", WsnTranslatorConstants.SHARP_ESCAPE);
+            nodeString = nodeString.replaceAll("#", WsnConstants.SHARP_ESCAPE);
             incomingNode = byteArrayToXmlNode(nodeString.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,37 +144,10 @@ public class XmlNotificationTranslator extends
         String eventId = null;
         Node eventIdNode = null;
         Node subjectNode = null;
-        Node subscriptionAddressNode = null;
         Node topicNode = null;
         Node producerAddressNode = null;
         Map<Node, Node> producerMetadataNodes = new HashMap<Node, Node>();
         Map<Node, Node> messageNodes = new HashMap<Node, Node>();
-
-        W3CEndpointReference subscriptionReference =
-                notificationMessage.getSubscriptionReference();
-        if (subscriptionReference != null) {
-            Object subscriptionAddress =
-                    ReflectionUtils.getFieldValue(
-                            subscriptionReference, "address");
-            if (subscriptionAddress != null) {
-                String subscriptionAddressUri =
-                        (String) ReflectionUtils.getFieldValue(
-                                subscriptionAddress, "uri");
-                if (subscriptionAddressUri != null) {
-                    subscriptionAddressNode =
-                            Node.createLiteral(subscriptionAddressUri);
-                } else {
-                    throw new TranslationException(
-                            "No subscription uri specified");
-                }
-            } else {
-                throw new TranslationException(
-                        "No subscription address specified");
-            }
-        } else {
-            throw new TranslationException(
-                    "No subscription reference specified");
-        }
 
         if (notificationMessage.getTopic() != null) {
             QName topic = WsnHelper.getTopic(notificationMessage);
@@ -239,15 +210,9 @@ public class XmlNotificationTranslator extends
 
                 // Map<predicate, object
                 for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
-                    if (entry.getKey()
-                            .getURI()
-                            .contains(
-                                    WsnTranslatorConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
+                    if (entry.getKey().getURI().contains(
+                            WsnConstants.PRODUCER_METADATA_EVENT_NAMESPACE)) {
                         eventId = entry.getValue().getLiteralLexicalForm();
-                        if (!eventId.endsWith(WsnTranslatorConstants.XML_TRANSLATION_MARKER)) {
-                            eventId +=
-                                    WsnTranslatorConstants.XML_TRANSLATION_MARKER;
-                        }
                         break;
                     }
                 }
@@ -262,8 +227,14 @@ public class XmlNotificationTranslator extends
                     UriGenerator.randomPrefixed(
                             10,
                             EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue())
-                            .toString()
-                            + WsnTranslatorConstants.XML_TRANSLATION_MARKER;
+                            .toString();
+        }
+        if (!eventId.contains(WsnConstants.XML_TRANSLATION_MARKER)) {
+            eventId += WsnConstants.XML_TRANSLATION_MARKER;
+        }
+        if (WsnHelper.hasSimpleTopicExpression(notificationMessage)
+                && !eventId.endsWith(WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+            eventId += WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER;
         }
         eventIdNode = Node.createURI(eventId);
         subjectNode = Node.createURI(eventId + "#event");
@@ -280,17 +251,11 @@ public class XmlNotificationTranslator extends
         }
 
         quads.add(new Quadruple(
-                eventIdNode, subjectNode,
-                WsnTranslatorConstants.SUBSCRIPTION_ADDRESS_NODE,
-                subscriptionAddressNode, false, true));
+                eventIdNode, subjectNode, WsnConstants.TOPIC_NODE, topicNode,
+                false, true));
 
         quads.add(new Quadruple(
-                eventIdNode, subjectNode, WsnTranslatorConstants.TOPIC_NODE,
-                topicNode, false, true));
-
-        quads.add(new Quadruple(
-                eventIdNode, subjectNode,
-                WsnTranslatorConstants.PRODUCER_ADDRESS_NODE,
+                eventIdNode, subjectNode, WsnConstants.PRODUCER_ADDRESS_NODE,
                 producerAddressNode, false, true));
 
         for (Entry<Node, Node> entry : producerMetadataNodes.entrySet()) {
@@ -355,8 +320,8 @@ public class XmlNotificationTranslator extends
             Node predicateNode = null;
             if (!metadata) {
                 predicateNode =
-                        Node.createURI(WsnTranslatorConstants.MESSAGE_TEXT
-                                + WsnTranslatorConstants.URI_SEPARATOR
+                        Node.createURI(WsnConstants.MESSAGE_TEXT
+                                + WsnConstants.URI_SEPARATOR
                                 + predicate.toString());
             } else {
                 predicateNode = Node.createURI(predicate.toString());
@@ -366,7 +331,7 @@ public class XmlNotificationTranslator extends
                     literalValue, findDatatype(literalValue)));
         } else {
             if (predicate.length() > 0) {
-                predicate.append(WsnTranslatorConstants.URI_SEPARATOR);
+                predicate.append(WsnConstants.URI_SEPARATOR);
             }
 
             if (node.getNamespaceURI() != null) {

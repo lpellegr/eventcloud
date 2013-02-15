@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.translators.wsn;
@@ -104,26 +104,26 @@ public class WsnTranslatorTest {
     private static String asString(Element elt) {
         TransformerFactory transfac = TransformerFactory.newInstance();
         Transformer trans = null;
+
         try {
             trans = transfac.newTransformer();
-        } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
-        }
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        trans.setOutputProperty(OutputKeys.INDENT, "yes");
-        trans.setOutputProperty(
-                "{http://xml.apache.org/xslt}indent-amount", "4");
+            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            trans.setOutputProperty(
+                    "{http://xml.apache.org/xslt}indent-amount", "4");
 
-        StringWriter sw = new StringWriter();
-        StreamResult result = new StreamResult(sw);
-        DOMSource source = new DOMSource(elt);
-        try {
+            StringWriter sw = new StringWriter();
+            StreamResult result = new StreamResult(sw);
+            DOMSource source = new DOMSource(elt);
+
             trans.transform(source, result);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
 
-        return sw.toString();
+            return sw.toString();
+        } catch (TransformerConfigurationException e) {
+            throw new IllegalStateException(e);
+        } catch (TransformerException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static void logInfo(CompoundEvent event) {

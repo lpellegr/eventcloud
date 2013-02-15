@@ -1,32 +1,28 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.Compatible;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.DefineRules;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
@@ -44,9 +40,6 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
-import org.objectweb.proactive.multiactivity.ServingPolicy;
-import org.objectweb.proactive.multiactivity.compatibility.StatefulCompatibilityMap;
-import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +55,19 @@ import org.slf4j.LoggerFactory;
  * @author lpellegr
  * @author bsauvan
  */
-@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
+@DefineGroups({
+        @Group(name = "join", selfCompatible = false),
+        @Group(name = "leave", selfCompatible = false),
+        @Group(name = "parallel", selfCompatible = true),
+        @Group(name = "receiveCallableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation", condition = "isCompatible")})
+@DefineRules({
+        @Compatible(value = {"receiveCallableOperation", "join"}, condition = "!isJoinOperation"),
+        @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "!isLeaveOperation"),
+        @Compatible(value = {"receiveCallableOperation", "parallel"}),})
 public class PeerImpl extends AbstractComponent implements Peer,
         PeerAttributeController, ComponentEndActive, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * ADL name of the peer component.
@@ -88,7 +89,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
 
     protected transient StructuredOverlay overlay;
 
-    private transient MultiActiveService multiActiveService;
+    protected transient MultiActiveService multiActiveService;
 
     /**
      * Empty constructor required by ProActive.
@@ -116,10 +117,6 @@ public class PeerImpl extends AbstractComponent implements Peer,
         this.multiActiveService.multiActiveServing(
                 P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
                 false);
-
-        // this.multiActiveService.policyServing(createCustomServingPolicy(
-        // body, multiActiveService,
-        // P2PStructuredProperties.MAO_SOFT_LIMIT.getValue()));
     }
 
     /**
@@ -127,76 +124,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     public void endComponentActivity(Body body) {
-        try {
-            this.overlay.getRequestResponseManager().close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @SuppressWarnings("unused")
-    private static final ServingPolicy createCustomServingPolicy(final Body body,
-                                                                 final MultiActiveService multiActiveService,
-                                                                 final int maxThreads) {
-        final String[] prioritizedMethods = {"route"}; // table if we need to
-                                                       // add new prioritized
-                                                       // methods
-        return new ServingPolicy() {
-            @Override
-            public List<org.objectweb.proactive.core.body.request.Request> runPolicy(StatefulCompatibilityMap compatibility) {
-                List<org.objectweb.proactive.core.body.request.Request> result =
-                        new LinkedList<org.objectweb.proactive.core.body.request.Request>();
-                List<org.objectweb.proactive.core.body.request.Request> queue =
-                        compatibility.getQueueContents();
-
-                if (queue.size() == 0) {
-                    return result;
-                }
-
-                Collection<org.objectweb.proactive.core.body.request.Request> execQueue =
-                        compatibility.getExecutingRequests();
-                if (execQueue.size()
-                        - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() >= maxThreads) {
-                    Iterator<org.objectweb.proactive.core.body.request.Request> itQ =
-                            queue.iterator();
-                    while (itQ.hasNext()) {
-                        org.objectweb.proactive.core.body.request.Request r =
-                                itQ.next();
-                        if (compatibility.isCompatibleWithRequests(r, execQueue)
-                                && Arrays.asList(prioritizedMethods).contains(
-                                        r.getMethodName())) {
-                            result.add(r);
-                            queue.remove(r);
-                            return result;
-                        }
-                    }
-                } else {
-                    org.objectweb.proactive.core.body.request.Request current;
-                    Iterator<org.objectweb.proactive.core.body.request.Request> itQ =
-                            queue.iterator();
-                    int i = -1;
-                    while (itQ.hasNext()
-                            && execQueue.size()
-                                    + result.size()
-                                    - ((RequestExecutor) multiActiveService.getServingController()).getExtraActiveRequestCount() < maxThreads) {
-                        current = itQ.next();
-                        i++;
-                        if (compatibility.isCompatibleWithRequests(
-                                current, result)
-                                && compatibility.isCompatibleWithRequests(
-                                        current, execQueue)
-                                && compatibility.getIndexOfLastCompatibleWith(
-                                        current, queue) >= i - 1) {
-                            result.add(current);
-                            itQ.remove();
-                        } else {
-                            return result;
-                        }
-                    }
-                }
-                return result;
-            }
-        };
+        this.overlay.close();
     }
 
     /**
@@ -257,6 +185,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("join")
     public void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
             PeerNotActivatedException {
         // the update to the internal variables do not have to be synchronized
@@ -278,6 +207,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("leave")
     public void leave() throws NetworkNotJoinedException {
         // same as the join this method should be handled in FIFO order
         // regarding other methods
@@ -293,7 +223,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("receiveCallableOperation")
     public ResponseOperation receive(CallableOperation operation) {
         return operation.handle(this.overlay);
     }
@@ -338,7 +268,6 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
     public String dump() {
         return this.overlay.dump();
     }

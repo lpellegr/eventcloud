@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.monitoring;
@@ -36,6 +36,7 @@ import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.CompoundEventNotificationConsumer;
 import fr.inria.eventcloud.webservices.WsTest;
@@ -120,6 +121,8 @@ public class InputOutputMonitoringTest extends WsTest {
         this.subscribeWsnClient.subscribe(WsnHelper.createSubscribeMessage(
                 this.notificationConsumerWsEndpointUrl, STREAM_QNAME));
 
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         // Publishes a compound event through a ws publish proxy
         this.publishWsnClient.notify(WsnHelper.createNotifyMessage(
                 this.publishWsnServiceInfo.getWsEndpointUrl(), STREAM_QNAME,
@@ -128,10 +131,11 @@ public class InputOutputMonitoringTest extends WsTest {
         // Publishes a compound event through a java publish proxy
         this.publishProxy.publish(CompoundEventGenerator.random(STREAM_URL, 10));
 
-        // We must receive one report for each subscribe proxy times the number
-        // of publications matching the subscriptions
+        // We must receive one report for each subscription registered along
+        // with a compound event notification listener, times the number of
+        // publications matching the subscriptions
         synchronized (this.monitoringService.notificationsReceived) {
-            while (this.monitoringService.notificationsReceived.size() != 4) {
+            while (this.monitoringService.notificationsReceived.size() != 2) {
                 this.monitoringService.notificationsReceived.wait();
             }
         }
@@ -151,7 +155,7 @@ public class InputOutputMonitoringTest extends WsTest {
         // Checks that no more reports are received
         synchronized (this.monitoringService.notificationsReceived) {
             this.monitoringService.notificationsReceived.wait(4000);
-            Assert.assertTrue(this.monitoringService.notificationsReceived.size() == 4);
+            Assert.assertTrue(this.monitoringService.notificationsReceived.size() == 2);
         }
     }
 
@@ -162,7 +166,7 @@ public class InputOutputMonitoringTest extends WsTest {
         this.registryUrl = registry.register("registry");
 
         this.eventCloudsManagementServer =
-                WsDeployer.deployEventCloudManagementWebService(
+                WsDeployer.deployEventCloudsManagementService(
                         this.registryUrl, "management", WEBSERVICES_PORT);
         this.eventCloudsManagementWsnClient =
                 WsClientFactory.createWsClient(
@@ -184,12 +188,12 @@ public class InputOutputMonitoringTest extends WsTest {
     private void initializeWebServices() {
         this.subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
-                        this.registryUrl, STREAM_URL, "subscribe",
-                        WEBSERVICES_PORT);
+                        LOCAL_NODE_PROVIDER, this.registryUrl, STREAM_URL,
+                        "subscribe", WEBSERVICES_PORT);
         this.publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
-                        this.registryUrl, STREAM_URL, "publish",
-                        WEBSERVICES_PORT);
+                        LOCAL_NODE_PROVIDER, this.registryUrl, STREAM_URL,
+                        "publish", WEBSERVICES_PORT);
 
         this.subscribeWsnClient =
                 WsClientFactory.createWsClient(
@@ -220,7 +224,7 @@ public class InputOutputMonitoringTest extends WsTest {
     private static class CustomSignalNotificationListener extends
             SignalNotificationListener {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id) {

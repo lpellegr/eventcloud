@@ -1,25 +1,29 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.router.can;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.Iterator;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
@@ -85,12 +89,29 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
         CanRequestResponseManager messagingManager =
                 (CanRequestResponseManager) canOverlay.getRequestResponseManager();
-
+        // retrieves the hostname for debugging purpose
+        String hostname = "";
+        if (JobLogger.bcastDebugMode) {
+            try {
+                hostname = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                logger.error("Cannot log broadcast algorithm : "
+                        + "hostname couldn't be retrieved");
+                e.printStackTrace();
+            }
+        }
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
             logger.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
+            if (JobLogger.bcastDebugMode) {
+                Date receiveTime = new Date();
+                String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
+                JobLogger.logMessage(request.getId().toString() + "_"
+                        + "FloodingBroadcast_" + hostname, "1 " + timestamp
+                        + JobLogger.RETURN);
+            }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
                 request.getAnycastRoutingList()
@@ -108,7 +129,14 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
-
+                if (JobLogger.bcastDebugMode) {
+                    Date receiveTime = new Date();
+                    String timestamp =
+                            JobLogger.DATE_FORMAT.format(receiveTime);
+                    JobLogger.logMessage(request.getId().toString() + "_"
+                            + "FloodingBroadcast_" + hostname, "0 " + timestamp
+                            + JobLogger.RETURN);
+                }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
 
                 // sends the message to the other neighbors which validates the
@@ -272,11 +300,14 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             }
         }
 
-	if (dimension == 4) {
-	    dimension =
-                (byte) (P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1);
-	}
-        System.out.println("AnycastRequestRouter.route() DIM=====> " + dimension);
+        // TODO find out why dimension = 4 after the for loop when using the
+        // filter constraints validator (AtomicQueryConstraintsValidator)
+        if (dimension == 4) {
+            dimension =
+                    (byte) (P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1);
+        }
+        System.out.println("AnycastRequestRouter.route() DIM=====> "
+                + dimension);
 
         // selects one neighbor in the dimension and the direction previously
         // affected
@@ -284,7 +315,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 overlayCAN.nearestNeighbor(
                         request.getKey(), dimension, direction);
 
-        System.out.println("AnycastRequestRouter.route() NEAREST NEIGHBOR=" + neighborChosen);
+        System.out.println("AnycastRequestRouter.route() NEAREST NEIGHBOR="
+                + neighborChosen);
 
         if (neighborChosen == null) {
             if (request.getResponseProvider() != null) {

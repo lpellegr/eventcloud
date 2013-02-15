@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.deployment;
@@ -23,9 +23,7 @@ import java.util.List;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
-import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudDescription;
@@ -47,7 +45,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  */
 public class EventCloudDeployer extends NetworkDeployer {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     private final EventCloudDescription eventCloudDescription;
 
@@ -81,14 +79,9 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Peer createPeer() {
-        if (super.descriptor.getNodeProvider() != null) {
-            return SemanticFactory.newSemanticPeer(
-                    super.descriptor.getOverlayProvider(),
-                    super.descriptor.getNodeProvider().getGcmVirtualNode(
-                            PeerImpl.PEER_VN));
-        } else {
-            return SemanticFactory.newSemanticPeer(super.descriptor.getOverlayProvider());
-        }
+        return SemanticFactory.newSemanticPeer(
+                super.descriptor.getOverlayProvider(),
+                super.descriptor.getNodeProvider());
     }
 
     /**
@@ -96,13 +89,8 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Tracker createTracker(String networkName) {
-        if (super.descriptor.getNodeProvider() != null) {
-            return SemanticFactory.newSemanticTracker(
-                    networkName, super.descriptor.getNodeProvider()
-                            .getGcmVirtualNode(TrackerImpl.TRACKER_VN));
-        } else {
-            return SemanticFactory.newSemanticTracker(networkName);
-        }
+        return SemanticFactory.newSemanticTracker(
+                networkName, super.descriptor.getNodeProvider());
     }
 
     /**
@@ -207,8 +195,7 @@ public class EventCloudDeployer extends NetworkDeployer {
         ComponentUtils.terminateComponents(this.publishProxies);
         ComponentUtils.terminateComponents(this.putgetProxies);
         ComponentUtils.terminateComponents(this.subscribeProxies);
-        ComponentUtils.terminateComponents(super.getRandomTracker().getPeers());
-        ComponentUtils.terminateComponents(this.getTrackers());
+        super.internalUndeploy();
     }
 
     /**
@@ -216,6 +203,7 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected void reset() {
+        super.reset();
         this.publishProxies = null;
         this.putgetProxies = null;
         this.subscribeProxies = null;

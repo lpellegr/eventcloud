@@ -1,22 +1,20 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.deployment;
-
-import java.net.UnknownHostException;
 
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
@@ -27,6 +25,8 @@ import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.core.node.NodeException;
+import org.objectweb.proactive.core.util.ProActiveInet;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 import org.objectweb.proactive.extensions.webservices.component.Utils;
 import org.objectweb.proactive.extensions.webservices.component.controller.PAWebServicesController;
@@ -53,16 +53,14 @@ import fr.inria.eventcloud.webservices.wsn.PublishWsnServiceImpl;
 import fr.inria.eventcloud.webservices.wsn.SubscribeWsnServiceImpl;
 
 /**
- * Class used to ease web service operations (deploy and undeploy).
+ * Deployer to ease web service operations (deploy and undeploy).
  * 
  * @author bsauvan
  */
 public class WsDeployer {
 
-    private static final String DEFAULT_IP = "0.0.0.0";
-
     /**
-     * Deploys a new {@link EventCloudsManagementWsnApi EventCloud Management
+     * Deploys a new {@link EventCloudsManagementWsnApi EventClouds Management
      * Service}.
      * 
      * @param registryUrl
@@ -77,9 +75,9 @@ public class WsDeployer {
      * 
      * @return the Server instance of the web service.
      */
-    public static Server deployEventCloudManagementWebService(String registryUrl,
-                                                              String urlSuffix,
-                                                              int port) {
+    public static Server deployEventCloudsManagementService(String registryUrl,
+                                                            String urlSuffix,
+                                                            int port) {
         return deployWebService(
                 EventCloudsManagementWsnApi.class,
                 new EventCloudsManagementServiceImpl(registryUrl, port),
@@ -89,6 +87,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link PublishWsnApi publish WS-Notification service}.
      * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the
+     *            underlying publish proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the underlying publish proxy.
@@ -102,25 +103,28 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deployPublishWsnService(String registryUrl,
+    public static WsnServiceInfo deployPublishWsnService(NodeProvider nodeProvider,
+                                                         String registryUrl,
                                                          String streamUrl,
                                                          String urlSuffix,
                                                          int port) {
         PublishWsnServiceImpl publishWsnService =
-                new PublishWsnServiceImpl(registryUrl, streamUrl);
+                new PublishWsnServiceImpl(nodeProvider, registryUrl, streamUrl);
 
         Server publishWsnServer =
                 deployWebService(
                         PublishWsnApi.class, publishWsnService, urlSuffix, port);
 
         return new WsnServiceInfo(
-                streamUrl, getEndpointUrl(publishWsnServer), publishWsnService,
-                publishWsnServer);
+                streamUrl, publishWsnService, publishWsnServer);
     }
 
     /**
      * Deploys a new {@link SubscribeWsnApi subscribe service}.
      * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the
+     *            underlying subscribe proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the underlying subscribe proxy.
@@ -134,38 +138,22 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deploySubscribeWsnService(String registryUrl,
+    public static WsnServiceInfo deploySubscribeWsnService(NodeProvider nodeProvider,
+                                                           String registryUrl,
                                                            String streamUrl,
                                                            String urlSuffix,
                                                            int port) {
-        SubscribeWsnServiceImpl subscribeService =
-                new SubscribeWsnServiceImpl(registryUrl, streamUrl);
+        SubscribeWsnServiceImpl subscribeWsnService =
+                new SubscribeWsnServiceImpl(
+                        nodeProvider, registryUrl, streamUrl);
 
-        Server server =
+        Server subscribeWsnServer =
                 deployWebService(
-                        SubscribeWsnApi.class, subscribeService, urlSuffix,
+                        SubscribeWsnApi.class, subscribeWsnService, urlSuffix,
                         port);
 
         return new WsnServiceInfo(
-                streamUrl, getEndpointUrl(server), subscribeService, server);
-    }
-
-    public static String getEndpointUrl(Server server) {
-        String endpointUrl =
-                server.getEndpoint().getEndpointInfo().getAddress();
-
-        if (endpointUrl.contains(DEFAULT_IP)) {
-            try {
-                endpointUrl =
-                        endpointUrl.replaceFirst(
-                                DEFAULT_IP, java.net.InetAddress.getLocalHost()
-                                        .getHostAddress());
-            } catch (UnknownHostException uhe) {
-                // ignore the exception, the default ip will be used
-            }
-        }
-
-        return endpointUrl;
+                streamUrl, subscribeWsnService, subscribeWsnServer);
     }
 
     /**
@@ -206,7 +194,9 @@ public class WsDeployer {
                                           int port) {
         // binds the web service to all interfaces by default
         StringBuilder address = new StringBuilder("http://");
-        address.append(DEFAULT_IP);
+        address.append(ProActiveInet.getInstance()
+                .getInetAddress()
+                .getHostAddress());
         address.append(':');
         address.append(port);
         address.append('/');
@@ -233,6 +223,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link PublishWsApi publish web service proxy}.
      * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the publish
+     *            web service proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the publish web service proxy.
@@ -245,13 +238,15 @@ public class WsDeployer {
      * 
      * @return the WsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deployPublishWsProxy(String registryUrl,
+    public static WsProxyInfo deployPublishWsProxy(NodeProvider nodeProvider,
+                                                   String registryUrl,
                                                    String streamUrl,
                                                    String proxyName) {
         try {
             PublishApi publishProxy =
                     WsProxyFactory.newPublishProxy(
-                            registryUrl, new EventCloudId(streamUrl));
+                            nodeProvider, registryUrl, new EventCloudId(
+                                    streamUrl));
 
             String endpointUrl =
                     exposePublishWebService(publishProxy, proxyName);
@@ -267,6 +262,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link SubscribeWsApi subscribe web service proxy}.
      * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the
+     *            subscribe web service proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the subscribe web service proxy.
@@ -279,13 +277,15 @@ public class WsDeployer {
      * 
      * @return the WsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deploySubscribeWsProxy(String registryUrl,
+    public static WsProxyInfo deploySubscribeWsProxy(NodeProvider nodeProvider,
+                                                     String registryUrl,
                                                      String streamUrl,
                                                      String proxyName) {
         try {
             SubscribeApi subscribeProxy =
                     WsProxyFactory.newSubscribeProxy(
-                            registryUrl, new EventCloudId(streamUrl));
+                            nodeProvider, registryUrl, new EventCloudId(
+                                    streamUrl));
 
             String endpointUrl =
                     exposeSubscribeWebService(subscribeProxy, proxyName);
@@ -302,6 +302,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link PutGetWsApi put/get web service proxy}.
      * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the put/get
+     *            web service proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the put/get web service proxy.
@@ -314,13 +317,15 @@ public class WsDeployer {
      * 
      * @return the WsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deployPutGetWsProxy(String registryUrl,
+    public static WsProxyInfo deployPutGetWsProxy(NodeProvider nodeProvider,
+                                                  String registryUrl,
                                                   String streamUrl,
                                                   String proxyName) {
         try {
             PutGetApi putgetProxy =
                     WsProxyFactory.newPutGetProxy(
-                            registryUrl, new EventCloudId(streamUrl));
+                            nodeProvider, registryUrl, new EventCloudId(
+                                    streamUrl));
 
             String endpointUrl = exposePutGetWebService(putgetProxy, proxyName);
 
@@ -423,7 +428,7 @@ public class WsDeployer {
             wsc.exposeComponentAsWebService(
                     proxyName, new String[] {interfaceName});
 
-            return wsc.getLocalUrl() + WSConstants.SERVICES_PATH + proxyName
+            return getUrl(wsc.getUrl()) + WSConstants.SERVICES_PATH + proxyName
                     + "_" + interfaceName;
         } catch (NoSuchInterfaceException e) {
             e.printStackTrace();
@@ -436,6 +441,22 @@ public class WsDeployer {
         }
 
         return null;
+    }
+
+    /*
+     * TODO: Remove when the new release of ProActive containing the fix for PROACTIVE-1239 will be deployed 
+     */
+    private static String getUrl(String localUrl) {
+        String url = localUrl;
+
+        if (url.contains("localhost")) {
+            url =
+                    url.replaceFirst("localhost", ProActiveInet.getInstance()
+                            .getInetAddress()
+                            .getHostAddress());
+        }
+
+        return url;
     }
 
     /**

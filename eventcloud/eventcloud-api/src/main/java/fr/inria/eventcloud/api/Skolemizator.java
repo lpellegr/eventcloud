@@ -1,28 +1,29 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.api;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.hp.hpl.jena.graph.Node;
@@ -75,7 +76,7 @@ public class Skolemizator {
      */
     public static List<Quadruple> skolemize(Collection<Quadruple> quads) {
 
-        List<Quadruple> result = new ArrayList<Quadruple>();
+        Builder<Quadruple> result = new ImmutableList.Builder<Quadruple>();
 
         Map<Node, Node> assignedSkolems = new HashMap<Node, Node>();
 
@@ -93,13 +94,14 @@ public class Skolemizator {
                 }
 
                 result.add(new Quadruple(
-                        q.getGraph(), subject, q.getPredicate(), object));
+                        q.createMetaGraphNode(), subject, q.getPredicate(),
+                        object, false, true));
             } else {
                 result.add(q);
             }
         }
 
-        return result;
+        return result.build();
     }
 
     private static Node getOrCreateSkolemUri(Node subjectOrObject,

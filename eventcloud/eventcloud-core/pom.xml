@@ -6,33 +6,29 @@
 	<parent>
 		<artifactId>eventcloud</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>1.4.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
 	<artifactId>eventcloud-core</artifactId>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.4.0-SNAPSHOT</version>
 	<name>eventcloud-core</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
 			<artifactId>eventcloud-api</artifactId>
-			<version>1.3.0-SNAPSHOT</version>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
 			<artifactId>eventcloud-utils-trigwriter</artifactId>
-			<version>1.3.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jdbm</groupId>
-			<artifactId>jdbm</artifactId>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-can</artifactId>
-			<version>1.3.0-SNAPSHOT</version>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -41,12 +37,12 @@
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-core</artifactId>
-			<version>1.3.0-SNAPSHOT</version>
+			<version>1.4.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.soceda</groupId>
+			<groupId>com.ebmwebsourcing.projects.soceda.wp2-federated-middleware-layer.social-components</groupId>
 			<artifactId>social-filter</artifactId>
 		</dependency>
 		<dependency>
@@ -117,7 +113,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>-Xmx4096m -XX:MaxPermSize=512M</argLine>
-					<forkMode>always</forkMode>
 					<systemPropertyVariables>
 						<java.security.policy>${project.build.testOutputDirectory}/proactive.security.policy</java.security.policy>
 						<log4j.configuration>file:${project.build.testOutputDirectory}/log4j.xml</log4j.configuration>

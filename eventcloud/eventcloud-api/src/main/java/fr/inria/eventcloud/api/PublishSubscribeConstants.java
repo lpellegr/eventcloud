@@ -1,22 +1,25 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.api;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 /**
  * Defines constants that are regularly used by the publish/subscribe
@@ -34,13 +37,16 @@ public final class PublishSubscribeConstants {
 
     public static final String EVENT_NS = EVENTCLOUD_NS + "event:";
 
+    public static final String PUBLICATION_NS = EVENTCLOUD_NS + "pub:";
+
+    public static final String QUADRUPLE_NS = EVENTCLOUD_NS + "quad:";
+
     public static final String SUBSCRIPTION_NS = EVENTCLOUD_NS + "s:";
 
     public static final String SUBSUBSCRIPTION_NS = EVENTCLOUD_NS + "ss:";
 
-    public static final String PUBLICATION_NS = EVENTCLOUD_NS + "pub:";
-
-    public static final String QUADRUPLE_NS = EVENTCLOUD_NS + "quad:";
+    public static final String EPHEMERAL_SUBSCRIPTION_NS = EVENTCLOUD_NS
+            + "es:";
 
     /*
      * Nodes associated to namespaces
@@ -48,20 +54,26 @@ public final class PublishSubscribeConstants {
 
     public static final Node EVENT_NS_NODE = Node.createURI(EVENT_NS);
 
+    public static final Node PUBLICATION_NS_NODE =
+            Node.createURI(PUBLICATION_NS);
+
+    public static final Node QUADRUPLE_NS_NODE = Node.createURI(QUADRUPLE_NS);
+
     public static final Node SUBSCRIPTION_NS_NODE =
             Node.createURI(SUBSCRIPTION_NS);
 
     public static final Node SUBSUBSCRIPTION_NS_NODE =
             Node.createURI(SUBSUBSCRIPTION_NS);
 
-    public static final Node PUBLICATION_NS_NODE =
-            Node.createURI(PUBLICATION_NS);
-
-    public static final Node QUADRUPLE_NS_NODE = Node.createURI(QUADRUPLE_NS);
-
     /*
      * Properties
      */
+
+    public static final String EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY =
+            EPHEMERAL_SUBSCRIPTION_NS + "itime";
+
+    public static final String EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_PROPERTY =
+            EPHEMERAL_SUBSCRIPTION_NS + "subscriber";
 
     public static final String EVENT_NB_QUADRUPLES = EVENT_NS + "nbquads";
 
@@ -119,9 +131,18 @@ public final class PublishSubscribeConstants {
     public static final String SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY =
             SUBSUBSCRIPTION_NS + "o";
 
+    public static final String SUBSUBSCRIPTION_VAR_NAMES_PROPERTY =
+            SUBSUBSCRIPTION_NS + "varnames";
+
     /*
      *  Nodes associated to the properties
      */
+
+    public static final Node EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE =
+            Node.createURI(EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY);
+
+    public static final Node EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE =
+            Node.createURI(EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_PROPERTY);
 
     public static final Node EVENT_NB_QUADRUPLES_NODE =
             Node.createURI(EVENT_NB_QUADRUPLES);
@@ -180,6 +201,9 @@ public final class PublishSubscribeConstants {
     public static final Node SUBSUBSCRIPTION_OBJECT_VALUE_NODE =
             Node.createURI(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY);
 
+    public static final Node SUBSUBSCRIPTION_VAR_NAMES_NODE =
+            Node.createURI(SUBSUBSCRIPTION_VAR_NAMES_PROPERTY);
+
     /*
      * Values
      */
@@ -203,5 +227,54 @@ public final class PublishSubscribeConstants {
     private PublishSubscribeConstants() {
 
     }
+
+    /*
+     * Some constants regarding variables allocation
+     */
+
+    public static final Var GRAPH_VAR = Var.alloc("g");
+
+    // sId
+    public static final Var SUBSCRIPTION_ID_VAR = Var.alloc("a");
+
+    // sSrc
+    public static final Var SUBSCRIPTION_SOURCE_VAR = Var.alloc("b");
+
+    // ssId
+    public static final Var SUBSUBSCRIPTION_ID_VAR = Var.alloc("c");
+
+    // ssSrc
+    public static final Var SUBSUBSCRIPTION_SOURCE_VAR = Var.alloc("d");
+
+    // ssGraph
+    public static final Var SUBSUBSCRIPTION_GRAPH_VAR = Var.alloc("e");
+
+    // ssSubject
+    public static final Var SUBSUBSCRIPTION_SUBJECT_VAR = Var.alloc("f");
+
+    // ssPredicate
+    public static final Var SUBSUBSCRIPTION_PREDICATE_VAR = Var.alloc("h");
+
+    // ssObject
+    public static final Var SUBSUBSCRIPTION_OBJECT_VAR = Var.alloc("i");
+
+    /*
+     * Some constants encapsulated as ExprVar regarding variables allocation
+     */
+
+    public static final ExprVar SUBSUBSCRIPTION_GRAPH_EXPR_VAR = new ExprVar(
+            SUBSUBSCRIPTION_GRAPH_VAR);
+
+    public static final NodeValue SUBSUBSCRIPTION_VARIABLE_EXPR =
+            NodeValue.makeNode(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE);
+
+    public static final ExprVar SUBSUBSCRIPTION_SUBJECT_EXPR_VAR = new ExprVar(
+            SUBSUBSCRIPTION_SUBJECT_VAR);
+
+    public static final ExprVar SUBSUBSCRIPTION_PREDICATE_EXPR_VAR =
+            new ExprVar(SUBSUBSCRIPTION_PREDICATE_VAR);
+
+    public static final ExprVar SUBSUBSCRIPTION_OBJECT_EXPR_VAR = new ExprVar(
+            SUBSUBSCRIPTION_OBJECT_VAR);
 
 }

@@ -1,27 +1,26 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.proxies;
 
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
-import fr.inria.eventcloud.webservices.listeners.WsBindingWrapperNotificationListener;
+import fr.inria.eventcloud.webservices.listeners.WsBindingNotificationListener;
 import fr.inria.eventcloud.webservices.listeners.WsCompoundEventNotificationListener;
 import fr.inria.eventcloud.webservices.listeners.WsSignalNotificationListener;
 
@@ -35,7 +34,7 @@ import fr.inria.eventcloud.webservices.listeners.WsSignalNotificationListener;
 public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
         SubscribeWsApi {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * ADL name of the subscribe web service proxy component.
@@ -62,8 +61,12 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public String subscribeSignal(String sparqlQuery,
                                   String subscriberWsEndpointUrl) {
-        return this.subscribe(sparqlQuery, new WsSignalNotificationListener(
+        Subscription subscription = new Subscription(sparqlQuery);
+
+        super.subscribe(subscription, new WsSignalNotificationListener(
                 subscriberWsEndpointUrl));
+
+        return subscription.getId().toString();
     }
 
     /**
@@ -72,9 +75,12 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public String subscribeBinding(String sparqlQuery,
                                    String subscriberWsEndpointUrl) {
-        return this.subscribe(
-                sparqlQuery, new WsBindingWrapperNotificationListener(
-                        subscriberWsEndpointUrl));
+        Subscription subscription = new Subscription(sparqlQuery);
+
+        super.subscribe(subscription, new WsBindingNotificationListener(
+                subscriberWsEndpointUrl));
+
+        return subscription.getId().toString();
     }
 
     /**
@@ -83,16 +89,11 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
     @Override
     public String subscribeCompoundEvent(String sparqlQuery,
                                          String subscriberWsEndpointUrl) {
-        return this.subscribe(
-                sparqlQuery, new WsCompoundEventNotificationListener(
-                        subscriberWsEndpointUrl));
-    }
 
-    private <T> String subscribe(String sparqlQuery,
-                                 NotificationListener<T> listener) {
         Subscription subscription = new Subscription(sparqlQuery);
 
-        this.subscribe(subscription, listener);
+        super.subscribe(subscription, new WsCompoundEventNotificationListener(
+                subscriberWsEndpointUrl));
 
         return subscription.getId().toString();
     }

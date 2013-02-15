@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.factories;
@@ -23,6 +23,7 @@ import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
@@ -97,6 +98,25 @@ public final class PeerFactory extends AbstractFactory {
                                                              GCMVirtualNode vn) {
         return PeerFactory.createPeer(
                 overlayProvider, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new peer component deployed on a node provided by the specified
+     * {@code node provider} by using the given {@code overlay} abstraction.
+     * 
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
+     */
+    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
+                                                             NodeProvider nodeProvider) {
+        return PeerFactory.createPeer(
+                overlayProvider, getContextFromNodeProvider(
+                        nodeProvider, PeerImpl.PEER_VN));
     }
 
     private static <T extends StructuredOverlay> Peer createPeer(SerializableProvider<T> overlayProvider,

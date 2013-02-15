@@ -1,7 +1,22 @@
+/**
+ * Copyright (c) 2011-2013 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
 package org.objectweb.proactive.extensions.p2p.structured.configuration;
 
 /**
- * Copyright (c) 2011-2012 INRIA.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,11 +48,11 @@ import org.junit.rules.TemporaryFolder;
 public class ConfigurationParserTest {
 
     @Rule
-    public static final TemporaryFolder folder = new TemporaryFolder();
+    public final TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void testLoadWithJavaProperty() throws IOException {
-        File file = folder.newFile();
+        File file = this.folder.newFile();
 
         PrintWriter pw = new PrintWriter(file);
         pw.write("property1");
@@ -48,9 +63,13 @@ public class ConfigurationParserTest {
 
         System.setProperty("test.configuration", file.toString());
 
+        File fileLoaded =
+                ConfigurationParser.load(
+                        ConfigurationParserTest.Properties.class,
+                        "test.configuration", file.getAbsolutePath());
+
         Assert.assertEquals(
-                file.getAbsolutePath(),
-                ConfigurationParserTest.Properties.configurationFileLoaded.getAbsolutePath());
+                file.getAbsolutePath(), fileLoaded.getAbsolutePath());
 
         Assert.assertTrue(Properties.PROPERTY_1.getValue() != Properties.PROPERTY_1.getDefaultValue());
         Assert.assertTrue(Properties.PROPERTY_1.getValue());
@@ -64,20 +83,6 @@ public class ConfigurationParserTest {
 
         public static final PropertyString PROPERTY_2 = new PropertyString(
                 "property2", "value");
-
-        private static File configurationFileLoaded = null;
-
-        static {
-            try {
-                configurationFileLoaded =
-                        ConfigurationParser.load(
-                                ConfigurationParserTest.Properties.class,
-                                "test.configuration", folder.newFile()
-                                        .toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
     }
 

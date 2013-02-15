@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.factories;
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
@@ -81,6 +82,21 @@ public class EventCloudsRegistryFactory extends AbstractFactory {
      */
     public static EventCloudsRegistry newEventCloudsRegistry(GCMVirtualNode vn) {
         return EventCloudsRegistryFactory.createEventCloudsRegistry(ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new EventClouds registry component deployed on a node provided
+     * by the specified {@code node provider}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link EventCloudsRegistry} interface of the
+     *         new EventClouds registry component created.
+     */
+    public static EventCloudsRegistry newEventCloudsRegistry(NodeProvider nodeProvider) {
+        return EventCloudsRegistryFactory.createEventCloudsRegistry(getContextFromNodeProvider(
+                nodeProvider, EventCloudsRegistryImpl.REGISTRY_VN));
     }
 
     private static EventCloudsRegistry createEventCloudsRegistry(Map<String, Object> context) {

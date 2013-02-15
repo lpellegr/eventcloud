@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.factories;
@@ -23,6 +23,7 @@ import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.TrackerImpl;
@@ -102,6 +103,21 @@ public class TrackerFactory extends AbstractFactory {
     }
 
     /**
+     * Creates a new tracker component deployed on a node provided by the
+     * specified {@code node provider} and associates it to the network name
+     * "default".
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link Tracker} interface of the new tracker
+     *         component created.
+     */
+    public static Tracker newTracker(NodeProvider nodeProvider) {
+        return TrackerFactory.newTracker("default", nodeProvider);
+    }
+
+    /**
      * Creates a new tracker component deployed on the specified {@code node}
      * and associates it to the given {@code networkName}.
      * 
@@ -134,6 +150,26 @@ public class TrackerFactory extends AbstractFactory {
     public static Tracker newTracker(String networkName, GCMVirtualNode vn) {
         return TrackerFactory.createTracker(
                 networkName, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new tracker component deployed on a node provided by the
+     * specified {@code node provider} and associates it to the given
+     * {@code networkName}.
+     * 
+     * @param networkName
+     *            the name of the network the tracker manages.
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link Tracker} interface of the new tracker
+     *         component created.
+     */
+    public static Tracker newTracker(String networkName,
+                                     NodeProvider nodeProvider) {
+        return TrackerFactory.createTracker(
+                networkName, getContextFromNodeProvider(
+                        nodeProvider, TrackerImpl.TRACKER_VN));
     }
 
     private static Tracker createTracker(String networkName,

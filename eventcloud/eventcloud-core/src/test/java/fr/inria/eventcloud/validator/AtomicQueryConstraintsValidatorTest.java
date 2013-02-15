@@ -73,7 +73,7 @@ public class AtomicQueryConstraintsValidatorTest {
         boolean res = this.validator.validatesKeyConstraints(this.semanticZone);
         Assert.assertFalse(res);
     }
-    
+
     @Test
     public void andTestTrue() {
         this.exprList.add(ExprUtils.parse("(str(?s) = \"http://www.z.com/resource/bus\") && (\"http://www.namespace.org/test\" > str(?o))"));

@@ -157,22 +157,38 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
                     Expr variable;
                     String constant;
 
-                    // we have to remove str(?x) to keep only ?x for this validator
-                    if (func.getArg1().toString().startsWith("str("))
-                    {
-                        expr1 = ExprUtils.parse(func.getArg1().toString().substring(func.getArg1().toString().indexOf("(", 0)+1, func.getArg1().toString().length()-1));
+                    // we have to remove str(?x) to keep only ?x for this
+                    // validator
+                    if (func.getArg1().toString().startsWith("str(")) {
+                        expr1 =
+                                ExprUtils.parse(func.getArg1()
+                                        .toString()
+                                        .substring(
+                                                func.getArg1()
+                                                        .toString()
+                                                        .indexOf("(", 0) + 1,
+                                                func.getArg1()
+                                                        .toString()
+                                                        .length() - 1));
+                    } else if (func.getArg2().toString().startsWith("str(")) {
+                        expr2 =
+                                ExprUtils.parse(func.getArg2()
+                                        .toString()
+                                        .substring(
+                                                func.getArg2()
+                                                        .toString()
+                                                        .indexOf("(", 0) + 1,
+                                                func.getArg2()
+                                                        .toString()
+                                                        .length() - 1));
                     }
-                    else if (func.getArg2().toString().startsWith("str("))
-                    {
-                        expr2 = ExprUtils.parse(func.getArg2().toString().substring(func.getArg2().toString().indexOf("(", 0)+1, func.getArg2().toString().length()-1));
-                    }
-                    
+
                     if (expr1.isVariable()) {
                         variable = expr1;
                     } else {
                         variable = expr2;
                     }
-                    
+
                     if (func.getArg1().isConstant()) {
                         constant =
                                 SemanticElement.removePrefix(Node.createURI(expr1.getConstant()
@@ -182,20 +198,22 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
                                 SemanticElement.removePrefix(Node.createURI(expr2.getConstant()
                                         .asString()));
                     }
-                    
+
                     int dimension =
                             this.atomicQuery.getVarIndex(variable.getVarName());
-                    
+
                     int compareToLowerBound =
-                            SemanticElement.removePrefix(Node.createURI(this.zone.getLowerBound((byte) dimension)
-                                    .getValue()))
+                            SemanticElement.removePrefix(
+                                    Node.createURI(this.zone.getLowerBound(
+                                            (byte) dimension).getValue()))
                                     .compareTo(constant);
 
                     int compareToUpperBound =
-                            SemanticElement.removePrefix(Node.createURI(this.zone.getUpperBound((byte) dimension)
-                                    .getValue()))
+                            SemanticElement.removePrefix(
+                                    Node.createURI(this.zone.getUpperBound(
+                                            (byte) dimension).getValue()))
                                     .compareTo(constant);
-                  
+
                     if (func.getArg1().isVariable()) {
                         if (func.getOpName().equals(">")
                                 && compareToUpperBound > 0) {
@@ -293,14 +311,14 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
                     // if expr looks like ?x > ?x (mainly because of Jena)
                     // we cannot use this validator so query is sent to peer
                     try {
-                    if (func.getArg1().getVarName().equals(
-                            func.getArg2().getVarName())) {
-                        System.out.println("AtomicQueryConstraintsValidator.FilterTransformer.transform() var1=var2");
-                        return new E_Bool(true);
+                        if (func.getArg1().getVarName().equals(
+                                func.getArg2().getVarName())) {
+                            System.out.println("AtomicQueryConstraintsValidator.FilterTransformer.transform() var1=var2");
+                            return new E_Bool(true);
                         }
-                    }
-                    catch (NullPointerException e){};
-                    
+                    } catch (NullPointerException e) {
+                    };
+
                     ExprFunction2 exprfunc2_1 = (ExprFunction2) func.getArg1();
                     Expr exprfunc2_1_bool =
                             this.transform(

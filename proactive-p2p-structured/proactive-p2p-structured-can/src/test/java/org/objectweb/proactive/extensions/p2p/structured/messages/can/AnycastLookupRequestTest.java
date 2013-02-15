@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can;
@@ -63,7 +63,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         super(
                 new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<StringCanOverlay>() {
-                            private static final long serialVersionUID = 1L;
+                            private static final long serialVersionUID = 140L;
 
                             @Override
                             public StringCanOverlay get() {
@@ -139,7 +139,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static class SetValuesRequest extends AnycastRequest<StringElement> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         public SetValuesRequest() {
             super(new DefaultAnycastConstraintsValidator<StringElement>(
@@ -161,14 +161,14 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static class GetValuesRequest extends AnycastRequest<StringElement> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         public GetValuesRequest() {
             super(
                     new DefaultAnycastConstraintsValidator<StringElement>(
                             CoordinateFactory.newStringCoordinate()),
                     new ResponseProvider<AnycastResponse<StringElement>, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 1L;
+                        private static final long serialVersionUID = 140L;
 
                         @Override
                         public AnycastResponse<StringElement> get() {
@@ -182,7 +182,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetValuesResponse extends
             AnycastResponse<StringElement> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         private List<Boolean> result = new ArrayList<Boolean>();
 
@@ -207,7 +207,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetZonesValidatingConstraintsRequest extends
             AnycastRequest<StringElement> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         public GetZonesValidatingConstraintsRequest(
                 Coordinate<StringElement> coordinatesToReach) {
@@ -215,7 +215,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                     new DefaultAnycastConstraintsValidator<StringElement>(
                             coordinatesToReach),
                     new ResponseProvider<AnycastResponse<StringElement>, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 1L;
+                        private static final long serialVersionUID = 140L;
 
                         @Override
                         public AnycastResponse<StringElement> get() {
@@ -229,7 +229,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetZonesValidatingConstraintsResponse extends
             AnycastResponse<StringElement> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         private List<Zone<StringElement>> zonesValidatingConstraints =
                 new ArrayList<Zone<StringElement>>();

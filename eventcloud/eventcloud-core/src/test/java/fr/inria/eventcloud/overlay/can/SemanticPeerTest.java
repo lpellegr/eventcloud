@@ -1,23 +1,20 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.overlay.can;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,6 +24,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.core.ProActiveException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +36,19 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
+import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
+import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
+import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
+import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -302,9 +306,22 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect3() throws MalformedSparqlQueryException {
+    public void testExecuteSparqlSelect3()
+            throws MalformedSparqlQueryException, ProActiveException,
+            EventCloudIdNotManaged {
+        EventCloudsRegistry registry =
+                EventCloudsRegistryFactory.newEventCloudsRegistry();
+        EventCloudDeployer deployer = (EventCloudDeployer) super.deployer;
+        String registryUrl = registry.register("registry");
+        registry.register(deployer);
+
+        PublishApi publishProxy =
+                ProxyFactory.newPublishProxy(
+                        registryUrl, deployer.getEventCloudDescription()
+                                .getId());
+
         for (int i = 0; i < 10; i++) {
-            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+            publishProxy.publish(QuadrupleGenerator.random());
         }
 
         ResultSet resultSet =
@@ -315,8 +332,8 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         while (resultSet.hasNext()) {
             QuerySolution binding = resultSet.next();
-            assertTrue(binding.get("g").asNode().getURI().contains(
-                    Quadruple.META_INFORMATION_SEPARATOR));
+            Assert.assertTrue(binding.get("g").asNode().getURI().contains(
+                    Quadruple.PUBLICATION_TIME_SEPARATOR));
         }
 
         resultSet =
@@ -327,8 +344,10 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
         while (resultSet.hasNext()) {
             QuerySolution binding = resultSet.next();
-            assertFalse(binding.get("shortGraph").asNode().getURI().contains(
-                    Quadruple.META_INFORMATION_SEPARATOR));
+            Assert.assertFalse(binding.get("shortGraph")
+                    .asNode()
+                    .getURI()
+                    .contains(Quadruple.PUBLICATION_TIME_SEPARATOR));
         }
     }
 

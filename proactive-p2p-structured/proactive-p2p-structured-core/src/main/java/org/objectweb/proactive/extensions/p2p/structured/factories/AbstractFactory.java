@@ -1,23 +1,30 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.factories;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
+import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.pnp.PNPConfig;
+import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,15 +61,42 @@ public class AbstractFactory {
                     + "\" set to " + PNPConfig.PA_PNP_PORT.getValue());
         }
 
-        if (CentralPAPropertyRepository.PA_HOSTNAME.getValue() == null) {
-            log.warn("Java property \""
+        if ((CentralPAPropertyRepository.PA_HOSTNAME.getValue() == null)
+                && (CentralPAPropertyRepository.PA_NET_INTERFACE.getValue() == null)) {
+            log.warn("Neither the java property \""
                     + CentralPAPropertyRepository.PA_HOSTNAME.getName()
-                    + "\" is not set");
+                    + "\" nor the java property "
+                    + CentralPAPropertyRepository.PA_NET_INTERFACE.getName()
+                    + " are set");
         } else if (log.isDebugEnabled()) {
-            log.debug("Java property \""
-                    + CentralPAPropertyRepository.PA_HOSTNAME.getName()
-                    + "\" set to "
-                    + CentralPAPropertyRepository.PA_HOSTNAME.getValue());
+            if (CentralPAPropertyRepository.PA_HOSTNAME.getValue() != null) {
+                log.debug("Java property \""
+                        + CentralPAPropertyRepository.PA_HOSTNAME.getName()
+                        + "\" set to "
+                        + CentralPAPropertyRepository.PA_HOSTNAME.getValue());
+            } else {
+                log.debug("Java property \""
+                        + CentralPAPropertyRepository.PA_NET_INTERFACE.getName()
+                        + "\" set to "
+                        + CentralPAPropertyRepository.PA_NET_INTERFACE.getValue());
+            }
+        }
+    }
+
+    protected static Map<String, Object> getContextFromNodeProvider(NodeProvider nodeProvider,
+                                                                    String vnName) {
+        GCMVirtualNode vn = nodeProvider.getGcmVirtualNode(vnName);
+
+        if (vn != null) {
+            return ComponentUtils.createContext(vn);
+        } else {
+            Node node = nodeProvider.getANode();
+
+            if (node != null) {
+                return ComponentUtils.createContext(node);
+            } else {
+                return new HashMap<String, Object>();
+            }
         }
     }
 
