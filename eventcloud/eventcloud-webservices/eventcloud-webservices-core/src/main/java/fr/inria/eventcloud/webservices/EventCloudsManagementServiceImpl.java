@@ -621,12 +621,18 @@ public class EventCloudsManagementServiceImpl implements
      */
     @Override
     public SubscribeResponse subscribe(Subscribe subscribe) {
-        SubscriptionId subscriptionId = new SubscriptionId();
-        String consumerReference =
-                WsnHelper.getAddress(subscribe.getConsumerReference());
         QName topic = WsnHelper.getTopic(subscribe);
+        String expandedTopic = topic.getNamespaceURI();
+        if (!expandedTopic.endsWith("/")) {
+            expandedTopic += "/";
+        }
+        expandedTopic += topic.getLocalPart();
 
-        if ((topic.getNamespaceURI() + topic.getLocalPart()).equals(RAW_REPORT_TOPIC)) {
+        if (expandedTopic.equals(RAW_REPORT_TOPIC)) {
+            SubscriptionId subscriptionId = new SubscriptionId();
+            String consumerReference =
+                    WsnHelper.getAddress(subscribe.getConsumerReference());
+
             this.monitoringSubscriptions.put(subscriptionId, consumerReference);
 
             // enable input/output monitoring for all EventClouds
@@ -641,10 +647,12 @@ public class EventCloudsManagementServiceImpl implements
                     }
                 }
             }
+
+            return WsnHelper.createSubscribeResponse(
+                    subscriptionId, consumerReference);
         }
 
-        return WsnHelper.createSubscribeResponse(
-                subscriptionId, consumerReference);
+        return new SubscribeResponse();
     }
 
     /**
