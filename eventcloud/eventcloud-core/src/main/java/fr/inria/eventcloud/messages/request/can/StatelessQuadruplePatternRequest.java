@@ -73,8 +73,7 @@ public abstract class StatelessQuadruplePatternRequest extends
             AnycastConstraintsValidator<SemanticElement> validator,
             QuadruplePattern quadPattern,
             ResponseProvider<? extends StatelessQuadruplePatternResponse, Coordinate<SemanticElement>> responseProvider) {
-        super(validator,
-                responseProvider);
+        super(validator, responseProvider);
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 

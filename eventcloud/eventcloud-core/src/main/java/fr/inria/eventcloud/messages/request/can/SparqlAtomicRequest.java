@@ -20,9 +20,6 @@ import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -62,12 +59,14 @@ public class SparqlAtomicRequest extends
         // TODO offer the possibility to use a constraints validator that will
         // use the filter constraints contained by the quadruple pattern to
         // route the request
-        super(new AtomicQueryConstraintsValidator<SemanticElement>(atomicQuery), atomicQuery.getQuadruplePattern(),
+        super(
+                new AtomicQueryConstraintsValidator<SemanticElement>(
+                        atomicQuery), atomicQuery.getQuadruplePattern(),
                 new QuadruplePatternResponseProvider());
 
         this.atomicQuery = atomicQuery;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -75,6 +74,11 @@ public class SparqlAtomicRequest extends
     public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
                                                           AnycastRequest<SemanticElement> request,
                                                           fr.inria.eventcloud.api.QuadruplePattern quadruplePattern) {
+        System.out.println("SparqlAtomicRequest.onPeerValidatingKeyConstraints() overlay="
+                + overlay.getId()
+                + " "
+                + this.atomicQuery.getOpRepresentation());
+
         TransactionalDatasetGraph txnGraph =
                 ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
                         AccessMode.READ_ONLY);
@@ -85,7 +89,8 @@ public class SparqlAtomicRequest extends
                             this.atomicQuery.getOpRepresentation(),
                             txnGraph.getUnderlyingDataset());
 
-            return toQuadruples(iterator, this.atomicQuery);
+            List<Quadruple> result = toQuadruples(iterator, this.atomicQuery);
+            return result;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         } finally {
@@ -122,5 +127,5 @@ public class SparqlAtomicRequest extends
     public String getQuery() {
         return this.atomicQuery.toString();
     }
-    
+
 }

@@ -186,7 +186,8 @@ public class SparqlColander implements Closeable {
                     // returns by default the graph value as it is contained by
                     // the Jena datastores
                     Node graph = quad.createMetaGraphNode();
-
+                    System.out.println("SparqlColander.cleanAndFill() QUAD="
+                            + quad);
                     txnGraph.add(
                             graph, quad.getSubject(), quad.getPredicate(),
                             quad.getObject());

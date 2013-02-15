@@ -188,7 +188,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             new AnycastRoutingEntry(
                                     overlay.getId(), overlay.getStub()));
                 }
-                
+
                 for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
                     for (byte direction = 0; direction < 2; direction++) {
                         Iterator<NeighborEntry<E>> it =
@@ -272,11 +272,30 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             }
         }
 
+	if (dimension == 4) {
+	    dimension =
+                (byte) (P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1);
+	}
+        System.out.println("AnycastRequestRouter.route() DIM=====> " + dimension);
+
         // selects one neighbor in the dimension and the direction previously
         // affected
         NeighborEntry<E> neighborChosen =
                 overlayCAN.nearestNeighbor(
                         request.getKey(), dimension, direction);
+
+        System.out.println("AnycastRequestRouter.route() NEAREST NEIGHBOR=" + neighborChosen);
+
+        if (neighborChosen == null) {
+            if (request.getResponseProvider() != null) {
+                overlay.getResponseEntries().put(
+                        request.getId(), new ResponseEntry(1));
+                request.getResponseProvider().get(request, overlay).route(
+                        overlayCAN);
+
+            }
+            return;
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("The message is routed to a neigbour because the current peer "

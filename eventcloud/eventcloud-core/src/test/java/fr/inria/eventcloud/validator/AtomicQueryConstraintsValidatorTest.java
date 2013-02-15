@@ -63,19 +63,32 @@ public class AtomicQueryConstraintsValidatorTest {
     }
 
     @Test
-    public void andTest() {
-        this.exprList.add(ExprUtils.parse("(?s != \"http://www.z.com/resource/bus\") && (\"http://www.namespace.org/test\" > ?o)"));
+    public void andTestFalse() {
+        this.exprList.add(ExprUtils.parse("(str(?s) = \"http://www.z.com/resource/aa\") && (\"http://www.namespace.org/test\" > str(?o))"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =
                 new AtomicQueryConstraintsValidator<SemanticElement>(
                         this.atomicQuery);
-        Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
+        boolean res = this.validator.validatesKeyConstraints(this.semanticZone);
+        Assert.assertFalse(res);
+    }
+    
+    @Test
+    public void andTestTrue() {
+        this.exprList.add(ExprUtils.parse("(str(?s) = \"http://www.z.com/resource/bus\") && (\"http://www.namespace.org/test\" > str(?o))"));
+        this.exprListList.add(this.exprList);
+        this.atomicQuery.setFilterConstraints(this.exprListList);
+        this.validator =
+                new AtomicQueryConstraintsValidator<SemanticElement>(
+                        this.atomicQuery);
+        boolean res = this.validator.validatesKeyConstraints(this.semanticZone);
+        Assert.assertTrue(res);
     }
 
     @Test
     public void andOrTest() {
-        this.exprList.add(ExprUtils.parse("((\"http://www.namespace.org/test\" > ?s) || (\"http://www.unice.fr/test\" > ?o && ?p = \"http://www.test.org/zoo\") )"));
+        this.exprList.add(ExprUtils.parse("((\"http://www.namespace.org/test\" > str(?s)) || (\"http://www.unice.fr/test\" > str(?o) && str(?p) = \"http://www.test.org/zoo\") )"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =
@@ -86,12 +99,12 @@ public class AtomicQueryConstraintsValidatorTest {
 
     @Test
     public void equalsTest() {
-        this.exprList.add(ExprUtils.parse("?p = \"http://www.predicate.fr/eventcloud/begin_predicate\""));
-        this.exprList.add(ExprUtils.parse("\"http://www.predicate.fr/eventcloud/begin_predicate\" = ?p"));
-        this.exprList.add(ExprUtils.parse("\"http://www.test.com/eventcloud/predicate\" = ?p"));
-        this.exprList.add(ExprUtils.parse("?p = \"http://www.test.com/eventcloud/predicate\""));
-        this.exprList.add(ExprUtils.parse("\"http://www.unice.fr/eventcloud/stop_predicate\" = ?p"));
-        this.exprList.add(ExprUtils.parse("?p = \"http://www.unice.fr/eventcloud/stop_predicate\""));
+        this.exprList.add(ExprUtils.parse("str(?p) = \"http://www.predicate.fr/eventcloud/begin_predicate\""));
+        this.exprList.add(ExprUtils.parse("\"http://www.predicate.fr/eventcloud/begin_predicate\" = str(?p)"));
+        this.exprList.add(ExprUtils.parse("\"http://www.test.com/eventcloud/predicate\" = str(?p)"));
+        this.exprList.add(ExprUtils.parse("str(?p) = \"http://www.test.com/eventcloud/predicate\""));
+        this.exprList.add(ExprUtils.parse("\"http://www.unice.fr/eventcloud/stop_predicate\" = str(?p)"));
+        this.exprList.add(ExprUtils.parse("str(?p) = \"http://www.unice.fr/eventcloud/stop_predicate\""));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =
@@ -102,8 +115,8 @@ public class AtomicQueryConstraintsValidatorTest {
 
     @Test
     public void greatherThanTest() {
-        this.exprList.add(ExprUtils.parse("?p > \"http://www.test.com/eventcloud\""));
-        this.exprList.add(ExprUtils.parse("\"http://www.test.com/eventcloud\" < ?p"));
+        this.exprList.add(ExprUtils.parse("str(?p) > \"http://www.test.com/eventcloud\""));
+        this.exprList.add(ExprUtils.parse("\"http://www.test.com/eventcloud\" < str(?p)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =
@@ -114,8 +127,8 @@ public class AtomicQueryConstraintsValidatorTest {
 
     @Test
     public void greatherThanOrEqualTest() {
-        this.exprList.add(ExprUtils.parse("?s >= \"http://www.unice.fr/eventcloud/begin_subject\""));
-        this.exprList.add(ExprUtils.parse("\"http://www.unice.fr/eventcloud\" <= ?s"));
+        this.exprList.add(ExprUtils.parse("str(?s) >= \"http://www.unice.fr/eventcloud/begin_subject\""));
+        this.exprList.add(ExprUtils.parse("\"http://www.unice.fr/eventcloud\" <= str(?s)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =
@@ -126,8 +139,8 @@ public class AtomicQueryConstraintsValidatorTest {
 
     @Test
     public void lessThanTest() {
-        this.exprList.add(ExprUtils.parse("?s < \"http://www.test.com/eventcloud\""));
-        this.exprList.add(ExprUtils.parse("\"http://www.test.com/eventcloud\" > ?s"));
+        this.exprList.add(ExprUtils.parse("str(?s) < \"http://www.test.com/eventcloud\""));
+        this.exprList.add(ExprUtils.parse("\"http://www.test.com/eventcloud\" > str(?s)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =
@@ -138,8 +151,8 @@ public class AtomicQueryConstraintsValidatorTest {
 
     @Test
     public void lessThanOrEqualTest() {
-        this.exprList.add(ExprUtils.parse("?o <= \"http://www.object.fr/eventcloud/begin_object\""));
-        this.exprList.add(ExprUtils.parse("\"http://www.object.fr/eventcloud/begin_object\" >= ?o"));
+        this.exprList.add(ExprUtils.parse("str(?o) <= \"http://www.object.fr/eventcloud/begin_object\""));
+        this.exprList.add(ExprUtils.parse("\"http://www.object.fr/eventcloud/begin_object\" >= str(?o)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =
@@ -150,8 +163,8 @@ public class AtomicQueryConstraintsValidatorTest {
 
     @Test
     public void notEqualsTest() {
-        this.exprList.add(ExprUtils.parse("?p != \"http://www.predicate.fr/eventcloud/predicate\""));
-        this.exprList.add(ExprUtils.parse("\"http://www.predicate.fr/eventcloud/predicate\" != ?p"));
+        this.exprList.add(ExprUtils.parse("str(?p) != \"http://www.predicate.fr/eventcloud/predicate\""));
+        this.exprList.add(ExprUtils.parse("\"http://www.predicate.fr/eventcloud/predicate\" != str(?p)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =
@@ -162,7 +175,7 @@ public class AtomicQueryConstraintsValidatorTest {
 
     @Test
     public void orTest() {
-        this.exprList.add(ExprUtils.parse("(((\"http://www.unice.fr/eventcloud/stop_subject\" < ?s) || (\"http://www.object.fr/eventcloud/begin_object\" > ?o || ?p != \"http://www.namespace.org/test\") ) || ?s > \"http://www.unice.fr/eventcloud/zoo\")"));
+        this.exprList.add(ExprUtils.parse("(((\"http://www.unice.fr/eventcloud/stop_subject\" < str(?s)) || (\"http://www.object.fr/eventcloud/begin_object\" > str(?o) || str(?p) != \"http://www.namespace.org/test\") ) || str(?s) > \"http://www.unice.fr/eventcloud/zoo\")"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
         this.validator =

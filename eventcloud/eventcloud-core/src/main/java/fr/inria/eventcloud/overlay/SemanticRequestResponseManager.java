@@ -163,6 +163,8 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                 this.getColander().filterSparqlSelect(
                         sparqlSelectQuery, responses);
 
+        System.out.println("SemanticRequestResponseManager.executeSparqlSelect()"
+                + result.getResultVars());
         long[] measurements = this.aggregateMeasurements(responses);
 
         SparqlSelectResponse sparqlSelectResponse =
