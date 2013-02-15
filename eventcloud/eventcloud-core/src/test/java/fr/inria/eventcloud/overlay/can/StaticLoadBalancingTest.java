@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.overlay.can;
@@ -20,7 +20,6 @@ import java.util.concurrent.Callable;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
@@ -36,8 +35,8 @@ import fr.inria.eventcloud.datastore.stats.MeanStatsRecorder;
 public class StaticLoadBalancingTest {
 
     @Rule
-    public TestRule globalTimeout = new Timeout(300000); // 5 min max per method
-                                                         // tested
+    public Timeout globalTimeout = new Timeout(300000); // 5 min max per
+                                                        // method tested
 
     /*
      * Two peers, load-balancing and stats recording disabled. Short RDF terms length.

@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.tracker;
@@ -32,7 +32,7 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  */
 public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     /**
      * ADL name of the semantic tracker component.
@@ -65,7 +65,7 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
         return (SemanticPeer) super.getRandomPeer();
     }
 
-    // private static final long serialVersionUID = 1L;
+    // private static final long serialVersionUID = 140L;
     //
     // private static final Logger logger =
     // LoggerFactory.getLogger(SemanticTracker.class);
@@ -277,7 +277,7 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
     //
     // public static class CharacterFrequency implements Serializable {
     //
-    // private static final long serialVersionUID = 1L;
+    // private static final long serialVersionUID = 140L;
     //
     // private long occurencesCount;
     //
@@ -303,7 +303,7 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
     //
     // public static class SemanticFrequencies implements Serializable {
     //
-    // private static final long serialVersionUID = 1L;
+    // private static final long serialVersionUID = 140L;
     //
     // public enum Type {
     // GRAPH, SUBJECT, PREDICATE, OBJECT,

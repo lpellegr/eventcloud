@@ -1,23 +1,22 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.api.generators;
 
 import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 
 /**
  * Provides static methods to generate random Uniform Resource Identifiers
@@ -35,11 +34,11 @@ public class UriGenerator extends Generator {
             StringGenerator.ALPHABETIC_UPPERCASE_RANGE,
             StringGenerator.NUMERIC_RANGE,
             // - and . characters
-            Ranges.closed('\u002D', '\u002E'),
+            Range.closed('\u002D', '\u002E'),
             // _ character
-            Ranges.closed('\u005F', '\u005F'),
+            Range.closed('\u005F', '\u005F'),
             // ~ character
-            Ranges.closed('\u007E', '\u007E')};
+            Range.closed('\u007E', '\u007E')};
 
     /**
      * Creates a random URI with the specified schemeName and whose length for

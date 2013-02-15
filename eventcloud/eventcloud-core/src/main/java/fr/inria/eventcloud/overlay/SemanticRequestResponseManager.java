@@ -1,30 +1,28 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.overlay;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -58,13 +56,17 @@ import fr.inria.eventcloud.reasoner.SparqlReasoner;
  */
 public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     private SparqlColander colander;
 
     private final ConcurrentHashMap<UUID, Future<? extends Object>> pendingResults;
 
-    private ExecutorService threadPool;
+    // this thread pool is used to execute an atomic query on the underlying
+    // semantic datastore while the request continue to be forwarded to
+    // others peers. The thread that is used is joined once a response is routed
+    // back through this peer to retrieve the results
+    public ExecutorService threadPool;
 
     public SemanticRequestResponseManager(
             TransactionalTdbDatastore colanderDatastore) {
@@ -77,8 +79,9 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
                         16, 0.75f,
                         P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
 
-        // TODO choose the optimal size to use for the thread-pool
-        this.threadPool = Executors.newFixedThreadPool(30);
+        this.threadPool =
+                Executors.newFixedThreadPool(Runtime.getRuntime()
+                        .availableProcessors());
     }
 
     /**
@@ -240,33 +243,22 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     private List<QuadruplePatternResponse> dispatch(final List<SparqlAtomicRequest> requests,
                                                     final StructuredOverlay overlay) {
         final List<QuadruplePatternResponse> replies =
-                Collections.synchronizedList(new ArrayList<QuadruplePatternResponse>(
-                        requests.size()));
-        final CountDownLatch doneSignal = new CountDownLatch(requests.size());
+                new ArrayList<QuadruplePatternResponse>(requests.size());
 
-        for (final SparqlAtomicRequest request : requests) {
-
-            this.getThreadPool().execute(new Runnable() {
-                @Override
-                public void run() {
-                    QuadruplePatternResponse resp =
-                            (QuadruplePatternResponse) SemanticRequestResponseManager.this.dispatch(
-                                    request, overlay);
-                    if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-                        resp.setInitialRequestForThisResponse(request.getQuery());
-                    }
-                    replies.add(resp);
-
-                    doneSignal.countDown();
-                }
-            });
-
+        // dispatch each request asynchronously
+        for (SparqlAtomicRequest request : requests) {
+            this.dispatchv(request, overlay);
         }
 
-        try {
-            doneSignal.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        // wait for responses
+        for (SparqlAtomicRequest request : requests) {
+            QuadruplePatternResponse resp =
+                    (QuadruplePatternResponse) super.pullResponse(request.getId());
+
+            if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
+                resp.setInitialRequestForThisResponse(request.getQuery());
+            }
+            replies.add(resp);
         }
 
         return replies;
@@ -274,10 +266,6 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     public ConcurrentHashMap<UUID, Future<? extends Object>> getPendingResults() {
         return this.pendingResults;
-    }
-
-    public ExecutorService getThreadPool() {
-        return this.threadPool;
     }
 
     public SparqlColander getColander() {
@@ -288,9 +276,16 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
      * {@inheritDoc}
      */
     @Override
-    public void close() throws IOException {
-        this.colander.close();
-        this.threadPool.shutdown();
+    public void close() {
+        super.close();
+
+        try {
+            this.colander.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            this.threadPool.shutdown();
+        }
     }
 
 }

@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.api;
@@ -61,7 +61,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "addQuadruple")
-    public boolean addQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    public boolean add(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Loads the specified collection of quadruples into the EventCloud in
@@ -74,7 +74,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "addQuadrupleCollection")
-    public boolean addQuadrupleCollection(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
+    public boolean add(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
 
     /**
      * Indicates whether the specified quadruples is contained by the
@@ -87,7 +87,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "containsQuadruple")
-    public boolean containsQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    public boolean contains(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Deletes the specified quadruple from the EventCloud.
@@ -99,7 +99,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "deleteQuadruple")
-    public boolean deleteQuadruple(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    public boolean delete(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Deletes the specified quadruples from the EventCloud.
@@ -111,7 +111,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "deleteQuadrupleCollection")
-    public boolean deleteQuadrupleCollection(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
+    public boolean delete(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
 
     /**
      * Deletes from the EventCloud the quadruples that match the specified
@@ -125,7 +125,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "deleteQuadruplePattern")
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
-    public List<Quadruple> deleteQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
+    public List<Quadruple> delete(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
      * Finds all the quadruples that match the specified quadruple pattern.
@@ -138,7 +138,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "findQuadruplePattern")
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
-    public List<Quadruple> findQuadruplePattern(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
+    public List<Quadruple> find(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
      * Executes on the EventCloud the specified SPARQL query. This SPARQL query

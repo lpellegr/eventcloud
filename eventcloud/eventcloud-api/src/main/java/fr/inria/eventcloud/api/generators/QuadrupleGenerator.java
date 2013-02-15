@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.api.generators;
@@ -68,7 +68,7 @@ public final class QuadrupleGenerator extends Generator {
         }
 
         return new Quadruple(
-                nodes[0], nodes[1], nodes[2], nodes[3], true, false);
+                nodes[0], nodes[1], nodes[2], nodes[3], false, true);
     }
 
     private static Node generate(String prefix, ObjectType objectType,
@@ -120,7 +120,7 @@ public final class QuadrupleGenerator extends Generator {
         return new Quadruple(
                 graph, NodeGenerator.randomUri(DEFAULT_LENGTH),
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
-                NodeGenerator.random(DEFAULT_LENGTH));
+                NodeGenerator.random(DEFAULT_LENGTH), false, true);
     }
 
     /**
@@ -137,7 +137,8 @@ public final class QuadrupleGenerator extends Generator {
         return new Quadruple(
                 NodeGenerator.randomUri(length),
                 NodeGenerator.randomUri(length),
-                NodeGenerator.randomUri(length), NodeGenerator.random(length));
+                NodeGenerator.randomUri(length), NodeGenerator.random(length),
+                false, true);
     }
 
     /**
@@ -154,7 +155,7 @@ public final class QuadrupleGenerator extends Generator {
                 NodeGenerator.randomUri(length),
                 NodeGenerator.randomUri(length),
                 NodeGenerator.randomUri(length),
-                NodeGenerator.randomUri(length));
+                NodeGenerator.randomUri(length), false, true);
     }
 
     /**
@@ -175,7 +176,7 @@ public final class QuadrupleGenerator extends Generator {
                 NodeGenerator.randomUri(prefix, length),
                 NodeGenerator.randomUri(prefix, length),
                 NodeGenerator.randomUri(prefix, length), NodeGenerator.random(
-                        prefix, length));
+                        prefix, length), false, true);
     }
 
     /**
@@ -195,7 +196,7 @@ public final class QuadrupleGenerator extends Generator {
                 NodeGenerator.randomUri(prefix, length),
                 NodeGenerator.randomUri(prefix, length),
                 NodeGenerator.randomUri(prefix, length),
-                NodeGenerator.randomUri(prefix, length));
+                NodeGenerator.randomUri(prefix, length), false, true);
     }
 
     /**
@@ -214,7 +215,8 @@ public final class QuadrupleGenerator extends Generator {
     public static Quadruple random(Node graph, int length) {
         return new Quadruple(
                 graph, NodeGenerator.randomUri(length),
-                NodeGenerator.randomUri(length), NodeGenerator.random(length));
+                NodeGenerator.randomUri(length), NodeGenerator.random(length),
+                false, true);
     }
 
     /**
@@ -234,7 +236,7 @@ public final class QuadrupleGenerator extends Generator {
         return new Quadruple(
                 graph, NodeGenerator.randomUri(length),
                 NodeGenerator.randomUri(length),
-                NodeGenerator.randomUri(length));
+                NodeGenerator.randomUri(length), false, true);
     }
 
     /**
@@ -257,7 +259,7 @@ public final class QuadrupleGenerator extends Generator {
         return new Quadruple(
                 graph, NodeGenerator.randomUri(prefix, length),
                 NodeGenerator.randomUri(prefix, length), NodeGenerator.random(
-                        prefix, length));
+                        prefix, length), false, true);
     }
 
     /**
@@ -281,7 +283,7 @@ public final class QuadrupleGenerator extends Generator {
         return new Quadruple(
                 graph, NodeGenerator.randomUri(prefix, length),
                 NodeGenerator.randomUri(prefix, length),
-                NodeGenerator.randomUri(prefix, length));
+                NodeGenerator.randomUri(prefix, length), false, true);
     }
 
     /**
@@ -295,7 +297,7 @@ public final class QuadrupleGenerator extends Generator {
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
-                NodeGenerator.randomLiteral(DEFAULT_LENGTH));
+                NodeGenerator.randomLiteral(DEFAULT_LENGTH), false, true);
     }
 
     /**
@@ -308,7 +310,8 @@ public final class QuadrupleGenerator extends Generator {
         return new Quadruple(
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
-                NodeGenerator.randomUri(DEFAULT_LENGTH), createLiteral(literal));
+                NodeGenerator.randomUri(DEFAULT_LENGTH),
+                createLiteral(literal), false, true);
     }
 
     /**
@@ -322,7 +325,7 @@ public final class QuadrupleGenerator extends Generator {
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
                 NodeGenerator.randomUri(DEFAULT_LENGTH),
-                NodeGenerator.randomUri(DEFAULT_LENGTH));
+                NodeGenerator.randomUri(DEFAULT_LENGTH), false, true);
     }
 
     public static void main(String[] args) {

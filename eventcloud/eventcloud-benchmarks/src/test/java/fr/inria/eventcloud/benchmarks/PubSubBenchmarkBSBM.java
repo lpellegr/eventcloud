@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.benchmarks;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
@@ -53,6 +54,7 @@ import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
+import fr.inria.eventcloud.benchmarks.pubsub.CompoundEventSupplier;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
@@ -60,6 +62,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 
 /**
  * Functional test case to have the possibility to test the pub/sub layer in
@@ -183,10 +186,11 @@ public class PubSubBenchmarkBSBM {
             nbEventsReceivedBySubscriber.put(
                     subscription.getId(), new AtomicLong());
 
-            subscribeProxy.subscribe(
-                    subscription,
-                    createNotificationListener(this.notificationListenerType));
+            subscribe(
+                    subscribeProxy, subscription, this.notificationListenerType);
         }
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
 
         this.receiveExpectedEventsStopwatch.start();
 
@@ -202,19 +206,21 @@ public class PubSubBenchmarkBSBM {
                             Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
                             Node.createURI("http://www.w3.org/2000/01/rdf-schema#label"),
-                            Node.createURI("manner gatemen")));
+                            Node.createURI("manner gatemen"), false, false));
 
                     quadsForCompoundEvent1.add(new Quadruple(
                             Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature142")));
+                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature142"),
+                            false, false));
 
                     quadsForCompoundEvent1.add(new Quadruple(
                             Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
                             Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature144")));
+                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature144"),
+                            false, false));
 
                     this.compoundEvent =
                             new CompoundEvent(quadsForCompoundEvent1);
@@ -255,7 +261,7 @@ public class PubSubBenchmarkBSBM {
                 new Object[] {
                         this.receiveExpectedEventsStopwatch,
                         this.expectedNbEvents,
-                        ((this.expectedNbEvents * 10e2) / this.receiveExpectedEventsStopwatch.elapsedMillis()),
+                        ((this.expectedNbEvents * 10e2) / this.receiveExpectedEventsStopwatch.elapsed(TimeUnit.MILLISECONDS)),
                         this.nbPeers, this.nbPublishers, this.nbSubscribers,
                         this.notificationListenerType.getSimpleName()});
 
@@ -310,13 +316,15 @@ public class PubSubBenchmarkBSBM {
         return true;
     }
 
-    private static NotificationListener<?> createNotificationListener(Class<? extends NotificationListener<?>> listenerType) {
+    private static void subscribe(SubscribeApi subscribeProxy,
+                                  Subscription subscription,
+                                  Class<? extends NotificationListener<?>> listenerType) {
         if (listenerType.equals(BindingNotificationListener.class)) {
-            return new CustomBindingListener();
+            subscribeProxy.subscribe(subscription, new CustomBindingListener());
         } else if (listenerType.equals(CompoundEventNotificationListener.class)) {
-            return new CustomEventListener();
+            subscribeProxy.subscribe(subscription, new CustomEventListener());
         } else if (listenerType.equals(SignalNotificationListener.class)) {
-            return new CustomSignalListener();
+            subscribeProxy.subscribe(subscription, new CustomSignalListener());
         } else {
             throw new IllegalArgumentException("Unknown listener type: "
                     + listenerType.getName());
@@ -336,7 +344,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomBindingListener extends
             BindingNotificationListener {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id, Binding solution) {
@@ -349,7 +357,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomEventListener extends
             CompoundEventNotificationListener {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id, CompoundEvent solution) {
@@ -362,7 +370,7 @@ public class PubSubBenchmarkBSBM {
 
     private static final class CustomSignalListener extends
             SignalNotificationListener {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         @Override
         public void onNotification(SubscriptionId id) {

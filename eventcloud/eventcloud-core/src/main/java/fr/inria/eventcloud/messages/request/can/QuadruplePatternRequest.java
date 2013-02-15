@@ -1,21 +1,22 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.messages.request.can;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
@@ -41,7 +42,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public class QuadruplePatternRequest extends
         StatefulQuadruplePatternRequest<List<Quadruple>> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     public QuadruplePatternRequest(Node g, Node s, Node p, Node o) {
         this(new QuadruplePattern(g, s, p, o));
@@ -58,21 +59,20 @@ public class QuadruplePatternRequest extends
     public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
                                                           AnycastRequest<SemanticElement> request,
                                                           QuadruplePattern quadruplePattern) {
-        List<Quadruple> result = null;
-
         TransactionalDatasetGraph txnGraph =
                 ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
                         AccessMode.READ_ONLY);
 
         try {
-            result = Lists.newArrayList(txnGraph.find(quadruplePattern));
+            return Lists.newArrayList(txnGraph.find(quadruplePattern));
         } catch (Exception e) {
+            // keep trace of the error but return a result to avoid the overall
+            // system to crash
             e.printStackTrace();
+            return new ArrayList<Quadruple>(0);
         } finally {
             txnGraph.end();
         }
-
-        return result;
     }
 
 }

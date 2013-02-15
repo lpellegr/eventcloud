@@ -1,22 +1,21 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.proxies;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -26,10 +25,8 @@ import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 
-import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -229,29 +226,8 @@ public class PutGetProxyImpl extends AbstractProxy implements PutGetProxy,
     @Override
     public void runComponentActivity(Body body) {
         new MultiActiveService(body).multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_PUTGET_PROXIES.getValue(),
-                false, false);
-    }
-
-    /**
-     * Lookups a put/get proxy component on the specified {@code componentUri}.
-     * 
-     * @param componentUri
-     *            the URL of the put/get proxy component.
-     * 
-     * @return the reference on the {@link PutGetApi} interface of the put/get
-     *         proxy component.
-     * 
-     * @throws IOException
-     *             if an error occurs during the construction of the stub.
-     * 
-     * @deprecated This method will be removed for the next release. Please use
-     *             {@link ProxyFactory#lookupPutGetProxy(String)} instead.
-     */
-    @Deprecated
-    public static PutGetProxy lookup(String componentUri) throws IOException {
-        return ComponentUtils.lookupFcInterface(
-                componentUri, PUTGET_SERVICES_ITF, PutGetProxy.class);
+                EventCloudProperties.MAO_HARD_LIMIT_PUTGET_PROXIES.getValue(),
+                true, false);
     }
 
 }

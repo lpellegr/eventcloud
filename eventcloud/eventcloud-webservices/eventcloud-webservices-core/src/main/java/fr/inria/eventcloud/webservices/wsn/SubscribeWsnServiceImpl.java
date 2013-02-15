@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.wsn;
@@ -29,6 +29,7 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.Unsubscribe;
 import org.oasis_open.docs.wsn.b_2.UnsubscribeResponse;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,15 +64,19 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
     /**
      * Creates a {@link SubscribeWsnServiceImpl}.
      * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the
+     *            underlying subscribe proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the underlying subscribe proxy.
      * @param streamUrl
      *            the URL which identifies the EventCloud on which the
-     *            underlying publish proxy must be connected.
+     *            underlying subscribe proxy must be connected.
      */
-    public SubscribeWsnServiceImpl(String registryUrl, String streamUrl) {
-        super(registryUrl, streamUrl);
+    public SubscribeWsnServiceImpl(NodeProvider nodeProvider,
+            String registryUrl, String streamUrl) {
+        super(nodeProvider, registryUrl, streamUrl);
         this.subscribers = new HashMap<SubscriptionId, String>();
     }
 
@@ -79,9 +84,14 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
      * {@inheritDoc}
      */
     @Override
-    public SubscribeApi createProxy() throws EventCloudIdNotManaged {
-        return ProxyFactory.newSubscribeProxy(
-                super.registryUrl, new EventCloudId(super.streamUrl));
+    public SubscribeApi getProxy() throws EventCloudIdNotManaged {
+        if (super.proxy != null) {
+            return super.proxy;
+        } else {
+            return ProxyFactory.newSubscribeProxy(
+                    super.nodeProvider, super.registryUrl, new EventCloudId(
+                            super.streamUrl));
+        }
     }
 
     /**

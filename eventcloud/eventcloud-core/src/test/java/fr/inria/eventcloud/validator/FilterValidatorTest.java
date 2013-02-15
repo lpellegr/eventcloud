@@ -49,29 +49,23 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelectWithNodeLiteral() throws MalformedSparqlQueryException {
+    public void testExecuteSparqlSelectWithNodeLiteral()
+            throws MalformedSparqlQueryException {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
-
-        // Quadruple quadruple;
-        // for (int i = 0; i < 100; i++) {
-        // quadruple = QuadrupleGenerator.random();
-        // quadruples.add(quadruple);
-        // super.getRandomSemanticPeer().add(quadruple);
-        // }
 
         Quadruple quadruple =
                 new Quadruple(
-                        Node.createLiteral("http://www.namespace.org/g_abcde"),
-                        Node.createLiteral("http://www.namespace.org/s_abcde"),
-                        Node.createLiteral("http://www.namespace.org/predicate_abcde"),
-                        Node.createLiteral("http://www.namespace.org/abcde"));
+                        Node.createURI("http://www.namespace.org/g_abcde"),
+                        Node.createURI("http://www.namespace.org/s_abcde"),
+                        Node.createURI("http://www.namespace.org/predicate_abcde"),
+                        Node.createLiteral("abcde"));
         quadruples.add(quadruple);
         super.getRandomSemanticPeer().add(quadruple);
 
         ResultSet resultSet =
                 super.getRandomSemanticPeer()
                         .executeSparqlSelect(
-                                "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o FILTER (?o <= \"http://www.namespace.org/zzzzz\")} }")
+                                "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o FILTER (?o <= \"zzzzz\")} }")
                         .getResult();
 
         Binding binding = null;
@@ -96,17 +90,11 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
 
         Assert.assertEquals(1, count);
     }
-    
-    @Test
-    public void testExecuteSparqlSelectWithNodeURI() throws MalformedSparqlQueryException {
-        Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
-        // Quadruple quadruple;
-        // for (int i = 0; i < 100; i++) {
-        // quadruple = QuadrupleGenerator.random();
-        // quadruples.add(quadruple);
-        // super.getRandomSemanticPeer().add(quadruple);
-        // }
+    @Test
+    public void testExecuteSparqlSelectWithNodeURI()
+            throws MalformedSparqlQueryException {
+        Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
         Quadruple quadruple =
                 new Quadruple(
@@ -117,7 +105,6 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
         quadruples.add(quadruple);
         super.getRandomSemanticPeer().add(quadruple);
 
-        // TODO add support for equality/inequality comparisons between URI and Literal
         ResultSet resultSet =
                 super.getRandomSemanticPeer()
                         .executeSparqlSelect(

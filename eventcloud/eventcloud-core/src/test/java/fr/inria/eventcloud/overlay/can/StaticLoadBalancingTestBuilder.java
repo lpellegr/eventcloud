@@ -1,3 +1,19 @@
+/**
+ * Copyright (c) 2011-2013 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
 package fr.inria.eventcloud.overlay.can;
 
 import java.io.BufferedInputStream;
@@ -5,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.Precision;
@@ -268,7 +285,7 @@ public class StaticLoadBalancingTestBuilder {
                         stopwatch.toString(),
                         StaticLoadBalancingTestBuilder.this.nbQuadsToInsert);
 
-                this.executionTime = stopwatch.elapsedMillis();
+                this.executionTime = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 
                 if (StaticLoadBalancingTestBuilder.this.nbPeersToInject > 0) {
                     log.info("Before join, first peer dump:\n"
@@ -312,10 +329,13 @@ public class StaticLoadBalancingTestBuilder {
 
                     if (StaticLoadBalancingTestBuilder.this.nbLookupsAfterJoinOperations > 0) {
                         for (int i = 0; i < StaticLoadBalancingTestBuilder.this.nbLookupsAfterJoinOperations; i++) {
+                            long size =
+                                    putgetProxy.find(QuadruplePattern.ANY)
+                                            .size();
+
                             Assert.assertEquals(
                                     StaticLoadBalancingTestBuilder.this.nbQuadsToInsert,
-                                    putgetProxy.find(QuadruplePattern.ANY)
-                                            .size());
+                                    size);
                         }
                     }
                 } else {

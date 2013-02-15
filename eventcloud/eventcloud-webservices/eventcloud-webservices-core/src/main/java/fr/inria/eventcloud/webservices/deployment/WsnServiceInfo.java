@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.deployment;
@@ -38,16 +38,13 @@ public class WsnServiceInfo extends WsInfo {
      * @param streamUrl
      *            the URL which identifies the EventCloud which has been used to
      *            create the web service.
-     * @param wsEndpointUrl
-     *            the endpoint URL of the web service.
      * @param service
      *            the WS-Notification service.
      * @param server
      *            the Server instance of the web service.
      */
-    public WsnServiceInfo(String streamUrl, String wsEndpointUrl,
-            WsnService<?> service, Server server) {
-        super(streamUrl, wsEndpointUrl);
+    public WsnServiceInfo(String streamUrl, WsnService<?> service, Server server) {
+        super(streamUrl, server.getEndpoint().getEndpointInfo().getAddress());
         this.service = service;
         this.server = server;
     }

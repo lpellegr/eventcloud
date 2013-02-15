@@ -1,24 +1,22 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 
@@ -35,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.Respo
  */
 public class ResponseEntry implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     public enum Status {
         /**
@@ -55,8 +53,7 @@ public class ResponseEntry implements Serializable {
     /**
      * The response corresponding to the last response which has been merged.
      */
-    private AtomicReference<Response<?>> response =
-            new AtomicReference<Response<?>>();
+    private Response<?> response;
 
     /**
      * The maximum number of replies expected.
@@ -66,7 +63,7 @@ public class ResponseEntry implements Serializable {
     /**
      * The current number of responses received.
      */
-    private AtomicInteger responsesCount = new AtomicInteger();
+    private int responsesCount = 0;
 
     /**
      * Constructs a new entry with the specified {@code expectedResponsesNumber}
@@ -85,7 +82,7 @@ public class ResponseEntry implements Serializable {
      * @return the current number of responses received.
      */
     public int getResponsesCount() {
-        return this.responsesCount.get();
+        return this.responsesCount;
     }
 
     /**
@@ -112,11 +109,13 @@ public class ResponseEntry implements Serializable {
      * @return the last response merged.
      */
     public Response<?> getResponse() {
-        return this.response.get();
+        return this.response;
     }
 
     public void incrementResponsesCount(int increment) {
-        if (this.responsesCount.getAndAdd(increment) + increment == this.expectedResponsesCount) {
+        this.responsesCount++;
+
+        if (this.responsesCount == this.expectedResponsesCount) {
             this.status = Status.RECEIPT_COMPLETED;
         }
     }
@@ -128,7 +127,7 @@ public class ResponseEntry implements Serializable {
      *            the new response to associate to this entry.
      */
     public void setResponse(Response<?> response) {
-        this.response.set(response);
+        this.response = response;
     }
 
     /**

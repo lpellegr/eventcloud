@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.translators.wsn;
@@ -25,7 +25,6 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
 import org.apache.cxf.wsn.util.WSNHelper;
-import org.apache.xerces.dom.ElementNSImpl;
 import org.oasis_open.docs.wsn.b_2.FilterType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
@@ -34,7 +33,10 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.oasis_open.docs.wsn.b_2.Unsubscribe;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import eu.play_project.play_commons.eventformat.xml.DocumentBuilder;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.utils.ReflectionUtils;
@@ -70,9 +72,8 @@ public class WsnHelper {
 
         JAXBElement<TopicExpressionType> jaxbElement =
                 new JAXBElement<TopicExpressionType>(
-                        new QName(
-                                "http://docs.oasis-open.org/wsn/b-2",
-                                "TopicExpression"), TopicExpressionType.class,
+                        WsnConstants.TOPIC_EXPRESSION_QNAME,
+                        TopicExpressionType.class,
                         createTopicExpressionType(topic));
         filterType.getAny().add(jaxbElement);
         subscribeRequest.setFilter(filterType);
@@ -98,9 +99,22 @@ public class WsnHelper {
      */
     public static SubscribeResponse createSubscribeResponse(SubscriptionId subscriptionId,
                                                             String subscriptionReferenceAddress) {
-        SubscribeResponse subscribeResponse =
-                createSubscribeResponse(subscriptionReferenceAddress);
-        subscribeResponse.getAny().add(createJaxbElement(subscriptionId));
+        SubscribeResponse subscribeResponse = new SubscribeResponse();
+        ClassLoader classLoader =
+                Thread.currentThread().getContextClassLoader();
+
+        try {
+            Thread.currentThread().setContextClassLoader(
+                    WsnHelper.class.getClassLoader());
+            W3CEndpointReference subscriptionReference =
+                    new W3CEndpointReferenceBuilder().address(
+                            subscriptionReferenceAddress).referenceParameter(
+                            createElement(subscriptionId)).build();
+            subscribeResponse.setSubscriptionReference(subscriptionReference);
+        } finally {
+            Thread.currentThread().setContextClassLoader(classLoader);
+        }
+
         return subscribeResponse;
     }
 
@@ -131,12 +145,28 @@ public class WsnHelper {
      * @return the {@link SubscriptionId subscription identifier} contained into
      *         the specified {@link SubscribeResponse}.
      */
+    @SuppressWarnings("unchecked")
     public static SubscriptionId getSubcriptionId(SubscribeResponse subscribeResponse) {
-        if (subscribeResponse.getAny().size() > 0) {
-            return getSubcriptionId(subscribeResponse.getAny().get(0));
-        } else {
-            return null;
+        W3CEndpointReference subscriptionReference =
+                subscribeResponse.getSubscriptionReference();
+
+        if (subscriptionReference != null) {
+            Object referenceParameters =
+                    ReflectionUtils.getFieldValue(
+                            subscriptionReference, "referenceParameters");
+
+            if (referenceParameters != null) {
+                List<Element> elements =
+                        (List<Element>) ReflectionUtils.getFieldValue(
+                                referenceParameters, "elements");
+
+                if (elements.size() > 0) {
+                    return getSubcriptionId(elements.get(0));
+                }
+            }
         }
+
+        return null;
     }
 
     /**
@@ -151,7 +181,7 @@ public class WsnHelper {
      */
     public static Unsubscribe createUnsubscribeRequest(SubscriptionId subscriptionId) {
         Unsubscribe unsubscribeRequest = new Unsubscribe();
-        unsubscribeRequest.getAny().add(createJaxbElement(subscriptionId));
+        unsubscribeRequest.getAny().add(createElement(subscriptionId));
         return unsubscribeRequest;
     }
 
@@ -175,38 +205,40 @@ public class WsnHelper {
     }
 
     /**
-     * Creates a {@link JAXBElement} with the specified {@link SubscriptionId
+     * Creates an {@link Element} with the specified {@link SubscriptionId
      * subscription identifier}.
      * 
      * @param subscriptionId
      *            the {@link SubscriptionId subscription identifier}.
      * 
-     * @return a {@link JAXBElement} with the specified {@link SubscriptionId
+     * @return an {@link Element} with the specified {@link SubscriptionId
      *         subscription identifier}.
      */
-    public static JAXBElement<String> createJaxbElement(SubscriptionId subscriptionId) {
-        return new JAXBElement<String>(
-                new QName("http://evencloud.inria.fr", "SubscriptionId"),
-                String.class, subscriptionId.toString());
+    public static Element createElement(SubscriptionId subscriptionId) {
+        Document document = DocumentBuilder.createDocument();
+        Element element =
+                document.createElementNS(
+                        WsnConstants.SUBSCRIPTION_ID_NAMESPACE,
+                        WsnConstants.SUBSCRIPTION_ID_QUALIFIED_NAME);
+        element.setTextContent(subscriptionId.toString());
+
+        return element;
     }
 
     /**
      * Returns the {@link SubscriptionId subscription identifier} contained into
      * the specified object.
      * 
-     * @param any
+     * @param object
      *            the object containing the {@link SubscriptionId subscription
      *            identifier}.
      * 
      * @return the {@link SubscriptionId subscription identifier} contained into
      *         the specified object.
      */
-    @SuppressWarnings("unchecked")
-    public static SubscriptionId getSubcriptionId(Object any) {
-        if (any instanceof JAXBElement<?>) {
-            return SubscriptionId.parseSubscriptionId(((JAXBElement<String>) any).getValue());
-        } else if (any instanceof ElementNSImpl) {
-            return SubscriptionId.parseSubscriptionId(((ElementNSImpl) any).getTextContent());
+    public static SubscriptionId getSubcriptionId(Object object) {
+        if (object instanceof Element) {
+            return SubscriptionId.parseSubscriptionId(((Element) object).getTextContent());
         } else {
             return null;
         }
@@ -281,7 +313,12 @@ public class WsnHelper {
         for (CompoundEvent event : compoundEvents) {
             NotificationMessageHolderType message = translator.translate(event);
             message.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
-            message.setTopic(createTopicExpressionType(topic));
+            if (event.getGraph().getURI().endsWith(
+                    WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+                message.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
+            } else {
+                message.setTopic(createTopicExpressionType(topic));
+            }
             notify.getNotificationMessage().add(message);
         }
 
@@ -318,9 +355,32 @@ public class WsnHelper {
         TopicExpressionType topicExpressionType = new TopicExpressionType();
         topicExpressionType.getOtherAttributes().put(
                 topic, topic.getNamespaceURI());
-        topicExpressionType.setDialect("http://docs.oasis-open.org/wsn/t-1/TopicExpression/Concrete");
+        topicExpressionType.setDialect(WsnConstants.TOPIC_EXPRESSION_DIALECT);
         topicExpressionType.getContent().add(
                 topic.getPrefix() + ":" + topic.getLocalPart());
+
+        return topicExpressionType;
+    }
+
+    /**
+     * Creates a topic expression type with a {@code simpleExpressionType}
+     * element from the specified topic information.
+     * 
+     * @param topic
+     *            the qname associated to the topic of the topic expression type
+     *            to build.
+     * 
+     * @return a topic expression type with a {@code simpleExpressionType}
+     *         element from the specified topic information.
+     */
+    public static TopicExpressionType createTopicExpressionTypeWithSimpleExpressionType(QName topic) {
+        TopicExpressionType topicExpressionType = new TopicExpressionType();
+        topicExpressionType.setDialect(WsnConstants.SIMPLE_TOPIC_EXPRESSION_DIALECT);
+        JAXBElement<QName> simpleTopicExpression =
+                new JAXBElement<QName>(
+                        WsnConstants.SIMPLE_TOPIC_EXPRESSION_QNAME,
+                        QName.class, null, topic);
+        topicExpressionType.getContent().add(simpleTopicExpression);
 
         return topicExpressionType;
     }
@@ -347,6 +407,53 @@ public class WsnHelper {
     }
 
     /**
+     * Indicates whether the topic of the specified {@link Subscribe} message is
+     * defined by a {@code simpleTopicExpression} element or not.
+     * 
+     * @param subscribe
+     *            the subscribe message to analyze.
+     * 
+     * @return true if the topic of the specified {@link Subscribe} message is
+     *         defined by a {@code simpleTopicExpression} element, false
+     *         otherwise.
+     */
+    public static boolean hasSimpleTopicExpression(Subscribe subscribe) {
+        return hasSimpleTopicExpression(getTopicExpressionType(subscribe));
+    }
+
+    /**
+     * Indicates whether the topic of the specified
+     * {@link NotificationMessageHolderType} is defined by a
+     * {@code simpleTopicExpression} element or not.
+     * 
+     * @param notificationMessage
+     *            the {@link NotificationMessageHolderType} to analyze.
+     * 
+     * @return true if the topic of the specified
+     *         {@link NotificationMessageHolderType} is defined by a
+     *         {@code simpleTopicExpression} element, false otherwise.
+     */
+    public static boolean hasSimpleTopicExpression(NotificationMessageHolderType notificationMessage) {
+        return hasSimpleTopicExpression(notificationMessage.getTopic());
+    }
+
+    private static boolean hasSimpleTopicExpression(TopicExpressionType topicExpressionType) {
+        List<Object> content = topicExpressionType.getContent();
+        if (content.size() > 0) {
+            try {
+                Element topicElement = (Element) content.get(0);
+                return topicElement.getLocalName()
+                        .equals(
+                                WsnConstants.SIMPLE_TOPIC_EXPRESSION_QNAME.getLocalPart());
+            } catch (ClassCastException cce) {
+                return false;
+            }
+        } else {
+            throw new IllegalArgumentException("No topic content set");
+        }
+    }
+
+    /**
      * Extracts and returns the topic qname contained by the specified
      * {@link Subscribe} message.
      * 
@@ -357,23 +464,7 @@ public class WsnHelper {
      *         message.
      */
     public static QName getTopic(Subscribe subscribe) {
-        FilterType filterType = subscribe.getFilter();
-        if (filterType != null) {
-            List<Object> any = filterType.getAny();
-            if (any.size() > 0) {
-                @SuppressWarnings("unchecked")
-                TopicExpressionType topicExpressionType =
-                        ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
-
-                return getTopic(topicExpressionType);
-            } else {
-                throw new IllegalArgumentException(
-                        "No any object set in the subscribe message");
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "No filter set in the subscribe message");
-        }
+        return getTopic(getTopicExpressionType(subscribe));
     }
 
     /**
@@ -390,41 +481,82 @@ public class WsnHelper {
         return getTopic(notificationMessage.getTopic());
     }
 
-    protected static QName getTopic(TopicExpressionType topicExpressionType) {
+    private static QName getTopic(TopicExpressionType topicExpressionType) {
         List<Object> content = topicExpressionType.getContent();
         if (content.size() > 0) {
-            String topic =
-                    ((String) content.get(0)).trim().replaceAll("\n", "");
-
-            String topicLocalPart =
-                    org.apache.xml.utils.QName.getLocalPart(topic);
-            String topicPrefix =
-                    org.apache.xml.utils.QName.getPrefixPart(topic);
+            String topicLocalPart = null;
+            String topicPrefix = null;
             String topicNamespace = null;
 
-            for (Entry<QName, String> entry : topicExpressionType.getOtherAttributes()
-                    .entrySet()) {
-                // TODO: compare by using prefix declaration and not
-                // local parts. It is possible to have two local part
-                // values that are the same but each one is using a
-                // different prefix. In such a case, the namespace
-                // extracted may be wrong. Before to fix this problem,
-                // issue #43 has to be resolved.
-                if (entry.getKey().getLocalPart().equals(topicLocalPart)
-                        || entry.getKey().getLocalPart().equals(topicPrefix)) {
-                    topicNamespace = entry.getValue();
+            if (content.get(0) instanceof String) {
+                String topic =
+                        ((String) content.get(0)).trim().replaceAll("\n", "");
 
-                    if (!topicNamespace.endsWith("/")) {
-                        topicNamespace = topicNamespace + "/";
+                topicLocalPart = org.apache.xml.utils.QName.getLocalPart(topic);
+                topicPrefix = org.apache.xml.utils.QName.getPrefixPart(topic);
+
+                for (Entry<QName, String> entry : topicExpressionType.getOtherAttributes()
+                        .entrySet()) {
+                    // TODO: compare by using prefix declaration and not
+                    // local parts. It is possible to have two local part
+                    // values that are the same but each one is using a
+                    // different prefix. In such a case, the namespace
+                    // extracted may be wrong. Before to fix this problem,
+                    // issue #43 has to be resolved.
+                    if (entry.getKey().getLocalPart().equals(topicLocalPart)
+                            || entry.getKey()
+                                    .getLocalPart()
+                                    .equals(topicPrefix)) {
+                        topicNamespace = entry.getValue();
+
+                        if (!topicNamespace.endsWith("/")) {
+                            topicNamespace = topicNamespace + "/";
+                        }
+
+                        break;
                     }
+                }
+            } else {
+                Element topicElement = (Element) content.get(0);
 
-                    break;
+                if (topicElement.getLocalName()
+                        .equals(
+                                WsnConstants.SIMPLE_TOPIC_EXPRESSION_QNAME.getLocalPart())) {
+                    String topic =
+                            topicElement.getTextContent().trim().replaceAll(
+                                    "\n", "");
+                    topicLocalPart =
+                            org.apache.xml.utils.QName.getLocalPart(topic);
+                    topicPrefix =
+                            org.apache.xml.utils.QName.getPrefixPart(topic);
+                    topicNamespace =
+                            topicElement.lookupNamespaceURI(topicPrefix);
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unable to extract topic content");
                 }
             }
 
             return new QName(topicNamespace, topicLocalPart, topicPrefix);
         } else {
             throw new IllegalArgumentException("No topic content set");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static TopicExpressionType getTopicExpressionType(Subscribe subscribe) {
+        FilterType filterType = subscribe.getFilter();
+        if (filterType != null) {
+            List<Object> any = filterType.getAny();
+            if (any.size() > 0) {
+                return ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
+            } else {
+                throw new IllegalArgumentException(
+                        "No any object set in the subscribe message");
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "No filter set in the subscribe message");
         }
     }
 

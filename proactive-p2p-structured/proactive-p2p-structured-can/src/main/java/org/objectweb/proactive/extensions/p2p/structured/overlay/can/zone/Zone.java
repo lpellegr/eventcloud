@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
@@ -46,7 +46,7 @@ import com.google.common.math.DoubleMath;
  */
 public abstract class Zone<E extends Element> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     protected final Coordinate<E> lowerBound;
 
@@ -277,6 +277,27 @@ public abstract class Zone<E extends Element> implements Serializable {
     }
 
     /**
+     * Returns the direction on which the current zone neighbors the specified
+     * zone on the given dimension.
+     * 
+     * @param zone
+     *            the zone to compare with.
+     * @param dimension
+     *            the dimension on which the zones are neighbors.
+     * 
+     * @return the direction on which the current zone neighbors the specified
+     *         zone on the given dimension.
+     */
+    public byte neighbors(Zone<E> zone, byte dimension) {
+        if (zone.getUpperBound().getElement(dimension).compareTo(
+                this.upperBound.getElement(dimension)) > 0) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
      * Returns two zones representing the original one split into two following
      * the specified {@code dimension}.
      * 
@@ -322,6 +343,13 @@ public abstract class Zone<E extends Element> implements Serializable {
      *         specified one.
      */
     public abstract Zone<E> merge(Zone<E> zone);
+
+    public void enlarge(byte dimension, byte direction, E element) {
+        Coordinate<E> bound = direction > 0
+                ? this.upperBound : this.lowerBound;
+
+        bound.setElement(dimension, element);
+    }
 
     protected HomogenousPair<Coordinate<E>> mergeCoordinates(Zone<E> zone) {
         byte d = this.neighbors(zone);

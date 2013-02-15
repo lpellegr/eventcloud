@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.api;
@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.generators.NodeGenerator;
@@ -163,30 +164,6 @@ public class QuadrupleTest {
     }
 
     @Test
-    public void testSerialization() throws IOException, ClassNotFoundException {
-        Quadruple q1 = QuadrupleGenerator.randomWithLiteral();
-        q1.setPublicationSource("publisher1");
-        q1.setPublicationTime(System.currentTimeMillis());
-
-        Quadruple q2 = (Quadruple) MakeDeepCopy.makeDeepCopy(q1);
-
-        Assert.assertEquals(
-                "Quadruples are not equals after serialization", q1, q2);
-
-        Quadruple q3 = (Quadruple) MakeDeepCopy.makeDeepCopy(q2);
-
-        Assert.assertEquals(q2, q3);
-        Assert.assertEquals(q1, q3);
-
-        Quadruple q4 =
-                new Quadruple(
-                        q3.createMetaGraphNode(), q3.getSubject(),
-                        q3.getPredicate(), q3.getObject());
-
-        Assert.assertEquals(q3, q4);
-    }
-
-    @Test
     public void testGetPublicationTime() {
         Quadruple q1 = QuadrupleGenerator.random();
 
@@ -207,6 +184,7 @@ public class QuadrupleTest {
 
         Assert.assertNull(Quadruple.getPublicationSource(q1.createMetaGraphNode()));
 
+        q1.setPublicationTime();
         q1.setPublicationSource("publisher1");
 
         Assert.assertEquals(
@@ -223,7 +201,63 @@ public class QuadrupleTest {
         Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getPredicate()));
         Assert.assertFalse(Quadruple.isMetaGraphNode(q1.getObject()));
 
+        Assert.assertFalse(Quadruple.isMetaGraphNode(q1.createMetaGraphNode()));
+
+        q1.setPublicationTime();
         Assert.assertTrue(Quadruple.isMetaGraphNode(q1.createMetaGraphNode()));
+    }
+
+    @Test
+    public void testSerialization() throws IOException, ClassNotFoundException {
+        Quadruple q1 = QuadrupleGenerator.randomWithLiteral();
+        q1.setPublicationSource("publisher1");
+        q1.setPublicationTime(System.currentTimeMillis());
+
+        Quadruple q2 = (Quadruple) MakeDeepCopy.makeDeepCopy(q1);
+
+        Assert.assertEquals("Quadruples are not equals after deep copy", q1, q2);
+
+        Quadruple q3 = (Quadruple) MakeDeepCopy.makeDeepCopy(q2);
+
+        Assert.assertEquals(q2, q3);
+        Assert.assertEquals(q1, q3);
+
+        Quadruple q4 =
+                new Quadruple(
+                        q3.createMetaGraphNode(), q3.getSubject(),
+                        q3.getPredicate(), q3.getObject(), false, true);
+
+        Assert.assertEquals(q3, q4);
+    }
+
+    @Test
+    public void testSerializationObjectLiteralLanguageTag() throws IOException,
+            ClassNotFoundException {
+        testQuadrupleSerialization(new Quadruple(
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), Node.createLiteral(
+                        "hello", "en", null)));
+    }
+
+    @Test
+    public void testSerializationObjectLiteralDatatype() throws IOException,
+            ClassNotFoundException {
+        testQuadrupleSerialization(new Quadruple(
+                NodeGenerator.randomUri(), NodeGenerator.randomUri(),
+                NodeGenerator.randomUri(), Node.createLiteral(
+                        "true", null, XSDDatatype.XSDboolean)));
+    }
+
+    @Test
+    public void testSerializationObjectLiteralLanguageTagDatatype() {
+    }
+
+    private static void testQuadrupleSerialization(Quadruple q)
+            throws ClassNotFoundException, IOException {
+        Quadruple deepCopy = (Quadruple) MakeDeepCopy.makeDeepCopy(q);
+
+        Assert.assertEquals(
+                "Quadruples are not equals after deep copy", q, deepCopy);
     }
 
 }

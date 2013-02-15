@@ -1,22 +1,23 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment.scheduler;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,46 +31,58 @@ import org.ow2.proactive.scheduler.job.programming.NodeProviderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
- * SchedulerNodeProvider is a concrete implementation of {@link NodeProvider}
- * for the ProActive Scheduler.
+ * Concrete implementation of {@link NodeProvider} for the ProActive Scheduler.
  * 
  * @author bsauvan
  * @author lpellegr
  */
 public class SchedulerNodeProvider implements NodeProvider, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     private static final Logger log =
             LoggerFactory.getLogger(SchedulerNodeProvider.class);
 
-    private final String schedulerUrl;
+    private String schedulerUrl;
 
-    private final String username;
+    private String username;
 
-    private final String password;
+    private String password;
 
-    private final String credentialsPath;
+    private String credentialsPath;
 
-    private final String dataFolder;
+    private String dataFolder;
 
-    private final List<String> jvmArguments;
+    private List<String> jvmArguments;
 
-    private final List<GcmVirtualNodeEntry> virtualNodeEntries;
+    private List<GcmVirtualNodeEntry> virtualNodeEntries;
 
     // TODO remove transient
-    private final transient org.ow2.proactive.scheduler.job.programming.SchedulerNodeProvider schedulerNodeProvider;
+    private transient org.ow2.proactive.scheduler.job.programming.SchedulerNodeProvider schedulerNodeProvider;
 
     private boolean isStarted;
 
-    private final Map<String, GCMVirtualNode> virtualNodes;
+    private Map<String, GCMVirtualNode> virtualNodes;
+
+    private List<Node> nodes;
+
+    private int nodeIndex;
 
     /**
-     * Constructs a SchedulerNodeProvider.
+     * Constructs a {@link SchedulerNodeProvider}.
+     */
+    public SchedulerNodeProvider() {
+        this(null, null, null, null, null, null, null);
+    }
+
+    /**
+     * Constructs a {@link SchedulerNodeProvider}.
      * 
      * @param schedulerUrl
-     *            URL of the ProActive Scheduler.
+     *            the URL of the ProActive Scheduler.
      * @param username
      *            the username to connect to the ProActive Scheduler.
      * @param password
@@ -93,7 +106,7 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
      * Constructs a SchedulerNodeProvider.
      * 
      * @param schedulerUrl
-     *            URL of the ProActive Scheduler.
+     *            the URL of the ProActive Scheduler.
      * @param credentialsPath
      *            the path of the credentials to connect to the scheduler.
      * @param dataFolder
@@ -121,6 +134,234 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
         this.dataFolder = dataFolder;
         this.jvmArguments = jvmArguments;
         this.virtualNodeEntries = entries;
+        this.isStarted = false;
+    }
+
+    /**
+     * Returns the URL of the ProActive Scheduler.
+     * 
+     * @return the URL of the ProActive Scheduler.
+     */
+    public String getSchedulerUrl() {
+        return this.schedulerUrl;
+    }
+
+    /**
+     * Sets the URL of the ProActive Scheduler.
+     * 
+     * @param schedulerUrl
+     *            the URL of the ProActive Scheduler.
+     */
+    public void setSchedulerUrl(String schedulerUrl) {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot set the URL of the ProActive Scheduler because the jobs have already been submitted");
+
+        this.schedulerUrl = schedulerUrl;
+    }
+
+    /**
+     * Returns the username to connect to the ProActive Scheduler.
+     * 
+     * @return the username to connect to the ProActive Scheduler.
+     */
+    public String getUsername() {
+        return this.username;
+    }
+
+    /**
+     * Sets the username to connect to the ProActive Scheduler.
+     * 
+     * @param username
+     *            the username to connect to the ProActive Scheduler.
+     */
+    public void setUsername(String username) {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot set the username to connect to the ProActive Scheduler because the jobs have already been submitted");
+
+        this.username = username;
+    }
+
+    /**
+     * Returns the password to connect to the ProActive Scheduler.
+     * 
+     * @return the password to connect to the ProActive Scheduler.
+     */
+    public String getPassword() {
+        return this.password;
+    }
+
+    /**
+     * Sets the password to connect to the ProActive Scheduler.
+     * 
+     * @param password
+     *            the password to connect to the ProActive Scheduler.
+     */
+    public void setPassword(String password) {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot set the password to connect to the ProActive Scheduler because the jobs have already been submitted");
+
+        this.password = password;
+    }
+
+    /**
+     * Returns the path of the credentials to connect to the scheduler.
+     * 
+     * @return the path of the credentials to connect to the scheduler.
+     */
+    public String getCredentialsPath() {
+        return this.credentialsPath;
+    }
+
+    /**
+     * Sets the path of the credentials to connect to the scheduler.
+     * 
+     * @param credentialsPath
+     *            the path of the credentials to connect to the scheduler.
+     */
+    public void setCredentialsPath(String credentialsPath) {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot set the path of the credentials to connect to the scheduler because the jobs have already been submitted");
+
+        this.credentialsPath = credentialsPath;
+    }
+
+    /**
+     * Returns the folder containing the data to transfer to the nodes.
+     * 
+     * @return the folder containing the data to transfer to the nodes.
+     */
+    public String getDataFolder() {
+        return this.dataFolder;
+    }
+
+    /**
+     * Sets the folder containing the data to transfer to the nodes.
+     * 
+     * @param dataFolder
+     *            the folder containing the data to transfer to the nodes.
+     */
+    public void setDataFolder(String dataFolder) {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot set the folder containing the data to transfer to the nodes because the jobs have already been submitted");
+
+        this.dataFolder = dataFolder;
+    }
+
+    /**
+     * Returns the JVM arguments to use for the nodes.
+     * 
+     * @return the JVM arguments to use for the nodes.
+     */
+    public List<String> getJvmArguments() {
+        return this.jvmArguments;
+    }
+
+    /**
+     * Sets the JVM arguments to use for the nodes.
+     * 
+     * @param jvmArguments
+     *            the JVM arguments to use for the nodes.
+     */
+    public void setJvmArguments(List<String> jvmArguments) {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot set the JVM arguments to use for the nodes because the jobs have already been submitted");
+
+        this.jvmArguments = jvmArguments;
+    }
+
+    /**
+     * Returns the {@link GcmVirtualNodeEntry GcmVirtualNodeEntries} defining
+     * the GCMVirtualNodes to deploy.
+     * 
+     * @return the {@link GcmVirtualNodeEntry GcmVirtualNodeEntries} defining
+     *         the GCMVirtualNodes to deploy.
+     */
+    public List<GcmVirtualNodeEntry> getVirtualNodeEntries() {
+        return this.virtualNodeEntries;
+    }
+
+    /**
+     * Sets the {@link GcmVirtualNodeEntry GcmVirtualNodeEntries} defining the
+     * GCMVirtualNodes to deploy.
+     * 
+     * @param virtualNodeEntries
+     *            the {@link GcmVirtualNodeEntry GcmVirtualNodeEntries} defining
+     *            the GCMVirtualNodes to deploy.
+     */
+    public void setVirtualNodeEntries(List<GcmVirtualNodeEntry> virtualNodeEntries) {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot set the GcmVirtualNodeEntries defining the GCMVirtualNodes to deploy because the jobs have already been submitted");
+
+        this.virtualNodeEntries = virtualNodeEntries;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void start() {
+        Preconditions.checkState(
+                !this.isStarted(),
+                "Cannot submit jobs because they have already been submitted");
+
+        this.init();
+
+        log.debug(
+                "Submitting {} jobs to the ProActive Scheduler located at {}",
+                this.virtualNodeEntries.size(), this.schedulerUrl);
+
+        for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
+            log.debug(
+                    "Submitting a job to acquire {} nodes for the GCMVirtualNode {}",
+                    virtualNodeEntry.getNbNodes(),
+                    virtualNodeEntry.getVirtualNodeName());
+
+            try {
+                if (this.username != null) {
+                    virtualNodeEntry.nodeRequestId =
+                            this.schedulerNodeProvider.submitNodeRequest(
+                                    this.schedulerUrl, this.username,
+                                    this.password,
+                                    virtualNodeEntry.getNbNodes(),
+                                    this.dataFolder, this.jvmArguments,
+                                    virtualNodeEntry.getNodeSourceNames());
+                } else {
+                    virtualNodeEntry.nodeRequestId =
+                            this.schedulerNodeProvider.submitNodeRequest(
+                                    this.schedulerUrl, this.credentialsPath,
+                                    virtualNodeEntry.getNbNodes(),
+                                    this.dataFolder, this.jvmArguments,
+                                    virtualNodeEntry.getNodeSourceNames());
+                }
+            } catch (NodeProviderException npe) {
+                throw new IllegalStateException(
+                        "Failed to submit job for GCMVirtualNode "
+                                + virtualNodeEntry.getVirtualNodeName(), npe);
+            }
+        }
+
+        this.isStarted = true;
+    }
+
+    private void init() {
+        Preconditions.checkNotNull(
+                this.schedulerUrl,
+                "Cannot initialize because no URL for the ProActive Scheduler has been given");
+        Preconditions.checkNotNull(
+                (((this.username != null) && (this.password != null)) || (this.credentialsPath != null))
+                        ? true : null,
+                "Cannot initialize because no username/password or credentials have been given");
+        Preconditions.checkNotNull(
+                this.virtualNodeEntries,
+                "Cannot initialize because no GcmVirtualNodeEntries have been given");
+
         try {
             this.schedulerNodeProvider =
                     new org.ow2.proactive.scheduler.job.programming.SchedulerNodeProvider();
@@ -130,55 +371,8 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
         }
         this.isStarted = false;
         this.virtualNodes = new HashMap<String, GCMVirtualNode>();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void start() {
-        if (!this.isStarted()) {
-            log.debug(
-                    "Submitting {} jobs to the ProActive Scheduler located at {}",
-                    this.virtualNodeEntries.size(), this.schedulerUrl);
-
-            for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
-                log.debug(
-                        "Submitting a job to acquire {} nodes for the GCMVirtualNode {}",
-                        virtualNodeEntry.getNbNodes(),
-                        virtualNodeEntry.getVirtualNodeName());
-
-                try {
-                    if (this.username != null) {
-                        virtualNodeEntry.nodeRequestId =
-                                this.schedulerNodeProvider.submitNodeRequest(
-                                        this.schedulerUrl, this.username,
-                                        this.password,
-                                        virtualNodeEntry.getNbNodes(),
-                                        this.dataFolder, this.jvmArguments,
-                                        virtualNodeEntry.getNodeSourceNames());
-                    } else {
-                        virtualNodeEntry.nodeRequestId =
-                                this.schedulerNodeProvider.submitNodeRequest(
-                                        this.schedulerUrl,
-                                        this.credentialsPath,
-                                        virtualNodeEntry.getNbNodes(),
-                                        this.dataFolder, this.jvmArguments,
-                                        virtualNodeEntry.getNodeSourceNames());
-                    }
-                } catch (NodeProviderException npe) {
-                    throw new IllegalStateException(
-                            "Failed to submit job for GCMVirtualNode "
-                                    + virtualNodeEntry.getVirtualNodeName(),
-                            npe);
-                }
-            }
-
-            this.isStarted = true;
-        } else {
-            throw new IllegalStateException(
-                    "Cannot submit jobs because they have already been submitted");
-        }
+        this.nodes = null;
+        this.nodeIndex = 0;
     }
 
     /**
@@ -194,8 +388,32 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public synchronized Node getANode() {
-        // TODO implement
-        throw new UnsupportedOperationException();
+        Preconditions.checkState(
+                this.isStarted(),
+                "Cannot get a node because the jobs have not yet been submitted");
+
+        try {
+            if (this.nodes == null) {
+                List<UniqueID> nodeRequestIds = new ArrayList<UniqueID>();
+
+                for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
+                    nodeRequestIds.add(virtualNodeEntry.nodeRequestId);
+                }
+                this.nodes =
+                        this.schedulerNodeProvider.getNodes(nodeRequestIds.toArray(new UniqueID[] {}));
+            }
+
+            Preconditions.checkElementIndex(
+                    this.nodeIndex, this.nodes.size(), "No node available");
+
+            Node node = this.nodes.get(this.nodeIndex);
+
+            this.nodeIndex++;
+
+            return node;
+        } catch (NodeProviderException npe) {
+            throw new IllegalStateException("Failed to get a node", npe);
+        }
     }
 
     /**
@@ -203,45 +421,41 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public synchronized GCMVirtualNode getGcmVirtualNode(String virtualNodeName) {
-        if (this.isStarted()) {
-            if (!this.virtualNodes.containsKey(virtualNodeName)) {
-                UniqueID nodeRequestId = null;
+        Preconditions.checkState(
+                this.isStarted(), "Cannot get the GCMVirtualNode "
+                        + virtualNodeName
+                        + " because the jobs have not yet been submitted");
 
-                for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
-                    if (virtualNodeEntry.getVirtualNodeName().equals(
-                            virtualNodeName)) {
-                        nodeRequestId = virtualNodeEntry.nodeRequestId;
-                        break;
-                    }
-                }
+        if (!this.virtualNodes.containsKey(virtualNodeName)) {
+            UniqueID nodeRequestId = null;
 
-                if (nodeRequestId != null) {
-                    try {
-                        log.debug(
-                                "Getting the GCMVirtualNode {}",
-                                virtualNodeName);
-
-                        this.virtualNodes.put(
-                                virtualNodeName,
-                                this.schedulerNodeProvider.getGCMVirtualNode(
-                                        virtualNodeName, nodeRequestId));
-                    } catch (NodeProviderException npe) {
-                        throw new IllegalStateException(
-                                "Failed to get GCMVirtualNode "
-                                        + virtualNodeName, npe);
-                    }
-                } else {
-                    throw new IllegalArgumentException(
-                            "No such GCMVirtualNode: " + virtualNodeName);
+            for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
+                if (virtualNodeEntry.getVirtualNodeName().equals(
+                        virtualNodeName)) {
+                    nodeRequestId = virtualNodeEntry.nodeRequestId;
+                    break;
                 }
             }
 
-            return this.virtualNodes.get(virtualNodeName);
-        } else {
-            throw new IllegalStateException("Cannot get the GCMVirtualNode "
-                    + virtualNodeName
-                    + " because the jobs have not yet been submitted");
+            if (nodeRequestId != null) {
+                try {
+                    log.debug("Getting the GCMVirtualNode {}", virtualNodeName);
+
+                    this.virtualNodes.put(
+                            virtualNodeName,
+                            this.schedulerNodeProvider.getGCMVirtualNode(
+                                    virtualNodeName, nodeRequestId));
+                } catch (NodeProviderException npe) {
+                    throw new IllegalStateException(
+                            "Failed to get GCMVirtualNode " + virtualNodeName,
+                            npe);
+                }
+            } else {
+                return null;
+            }
         }
+
+        return this.virtualNodes.get(virtualNodeName);
     }
 
     /**
@@ -249,20 +463,19 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
      */
     @Override
     public void terminate() {
-        if (this.isStarted()) {
-            log.debug(
-                    "Terminating the {} jobs submitted to the ProActive Scheduler located at {}",
-                    this.virtualNodeEntries.size(), this.schedulerUrl);
+        Preconditions.checkState(
+                this.isStarted(),
+                "Cannot terminate jobs because they have not yet been submitted");
 
-            for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
-                this.schedulerNodeProvider.releaseNodes(virtualNodeEntry.nodeRequestId);
-            }
+        log.debug(
+                "Terminating the {} jobs submitted to the ProActive Scheduler located at {}",
+                this.virtualNodeEntries.size(), this.schedulerUrl);
 
-            this.isStarted = false;
-        } else {
-            throw new IllegalStateException(
-                    "Cannot terminate jobs because they have not yet been submitted");
+        for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
+            this.schedulerNodeProvider.releaseNodes(virtualNodeEntry.nodeRequestId);
         }
+
+        this.isStarted = false;
     }
 
 }

@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.overlay.can;
@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
@@ -53,16 +54,17 @@ import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
+import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 
 /**
  * Test the data transfer during a join operation with a {@link CanOverlay}.
  * 
  * @author lpellegr
  */
-public class DataTransfertTest {
+public class DataTransferTest {
 
     private static final Logger log =
-            LoggerFactory.getLogger(DataTransfertTest.class);
+            LoggerFactory.getLogger(DataTransferTest.class);
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
@@ -79,8 +81,8 @@ public class DataTransfertTest {
     }
 
     @Test
-    public void testMiscDataTransfert() throws NetworkAlreadyJoinedException,
-            PeerNotActivatedException {
+    public void testMiscDataTransfer() throws NetworkAlreadyJoinedException,
+            PeerNotActivatedException, NetworkNotJoinedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 1);
 
         SemanticPeer firstPeer =
@@ -169,12 +171,16 @@ public class DataTransfertTest {
 
         Assert.assertEquals(1, firstPeerResult.size());
         Assert.assertEquals(1, secondPeerResult.size());
+
+        firstPeer.leave();
+
+        Assert.assertEquals(2, Operations.findQuadruplesOperation(
+                secondPeer, QuadruplePattern.ANY).size());
     }
 
     @Test
-    public void testSubscriptionsTransfert() throws EventCloudIdNotManaged,
-            InterruptedException, NetworkAlreadyJoinedException,
-            PeerNotActivatedException {
+    public void testSubscriptionsTransfer() throws EventCloudIdNotManaged,
+            NetworkAlreadyJoinedException, PeerNotActivatedException {
         this.eventCloudId = this.deployer.newEventCloud(1, 2);
 
         SemanticPeer firstPeer =
@@ -233,6 +239,8 @@ public class DataTransfertTest {
         subscribeProxy.subscribe(s1, new CustomNotificationListener());
         subscribeProxy.subscribe(s2, new CustomNotificationListener());
 
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
         SemanticPeer thirdPeer =
                 SemanticFactory.newSemanticPeer(new SemanticInMemoryOverlayProvider());
 
@@ -244,16 +252,14 @@ public class DataTransfertTest {
         publishProxy.publish(new CompoundEvent(new Quadruple(
                 uri2, uri2, uri2, uri2)));
 
-        // to ensure that the subscriptions have been indexed
-        Thread.sleep(3000);
-
         List<Quadruple> subscriptions =
                 Operations.findQuadruplesOperation(
                         firstPeer, QuadruplePattern.ANY, true);
         int nbSubscriptionQuadsFirstPeerBeforeJoin = subscriptions.size();
 
         log.debug(
-                "Subscriptions for first peer before join:\n{}",
+                "{} quadruples for first peer before join:\n{}",
+                nbSubscriptionQuadsFirstPeerBeforeJoin,
                 QuadruplesFormatter.toString(subscriptions));
 
         thirdPeer.join(firstPeer);
@@ -261,10 +267,11 @@ public class DataTransfertTest {
         subscriptions =
                 Operations.findQuadruplesOperation(
                         firstPeer, QuadruplePattern.ANY, true);
-        // int nbSubscriptionQuadsFirstPeerAfterJoin = subscriptions.size();
+        int nbSubscriptionQuadsFirstPeerAfterJoin = subscriptions.size();
 
         log.debug(
-                "Subscriptions for first peer after join:\n{}",
+                "{} quadruples for first peer after join:\n{}",
+                nbSubscriptionQuadsFirstPeerAfterJoin,
                 QuadruplesFormatter.toString(subscriptions));
 
         subscriptions =
@@ -272,7 +279,8 @@ public class DataTransfertTest {
                         thirdPeer, QuadruplePattern.ANY, true);
 
         log.debug(
-                "Subscriptions for third peer after join:\n{}",
+                "{} quadruples for third peer after join:\n{}",
+                subscriptions.size(),
                 QuadruplesFormatter.toString(subscriptions));
 
         // Assert.assertTrue(nbSubscriptionQuadsFirstPeerBeforeJoin >
@@ -327,7 +335,7 @@ public class DataTransfertTest {
     private static class CustomNotificationListener extends
             BindingNotificationListener {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         /**
          * {@inheritDoc}

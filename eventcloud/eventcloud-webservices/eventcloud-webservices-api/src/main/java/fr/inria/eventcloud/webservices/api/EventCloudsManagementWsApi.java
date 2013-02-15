@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.webservices.api;
@@ -29,7 +29,7 @@ import javax.jws.WebService;
  * @author lpellegr
  * @author bsauvan
  */
-@WebService(serviceName = "EventCloudManagement", portName = "EventCloudManagementPort", targetNamespace = "http://webservices.eventcloud.inria.fr/", name = "EventCloudManagementPortType")
+@WebService(serviceName = "EventCloudsManagement", portName = "EventCloudsManagementPort", name = "EventCloudsManagementPortType", targetNamespace = "http://webservices.eventcloud.inria.fr/")
 public interface EventCloudsManagementWsApi {
 
     /**
@@ -39,11 +39,22 @@ public interface EventCloudsManagementWsApi {
      * @return the endpoint URL associated to the EventClouds registry which
      *         knows what are the EventClouds that are manageable.
      */
-    @WebMethod
+    @WebMethod(operationName = "getRegistryEndpointUrl")
     public String getRegistryEndpointUrl();
 
     /**
-     * Creates a new EventCloud for the specified {@code streamUrl}.
+     * Returns the {@code node provider} identifiers which are available to
+     * deploy EventClouds and proxies.
+     * 
+     * @return the {@code node provider} identifiers which are available to
+     *         deploy EventClouds and proxies.
+     */
+    @WebMethod(operationName = "getNodeProviderIds")
+    public List<String> getNodeProviderIds();
+
+    /**
+     * Creates a new EventCloud deployed by using the default
+     * {@code node provider} and for the specified {@code streamUrl}.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud among an organization.
@@ -54,8 +65,28 @@ public interface EventCloudsManagementWsApi {
      *         EventCloud is already running for the specified {@code streamUrl}
      *         .
      */
-    @WebMethod
+    @WebMethod(operationName = "createEventCloud")
     public boolean createEventCloud(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Creates a new EventCloud deployed by using the {@code node provider}
+     * represented by the specified identifier and for the specified
+     * {@code streamUrl}.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud among an organization.
+     * 
+     * @return a boolean which indicates whether an EventCloud has been created
+     *         for the specified {@code streamUrl} or not. In the former case,
+     *         when the return value is {@code false}, this means that an
+     *         EventCloud is already running for the specified {@code streamUrl}
+     *         .
+     */
+    @WebMethod(operationName = "createEventCloudWithNodeProvider")
+    public boolean createEventCloud(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                    @WebParam(name = "streamUrl") String streamUrl);
 
     /**
      * Indicates whether an EventCloud exists or not according to its streamUrl.
@@ -66,7 +97,7 @@ public interface EventCloudsManagementWsApi {
      * @return {@code true} if the EventCloud identified by the specified
      *         streamUrl is already created, {@code false} otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "isCreated")
     public boolean isCreated(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
@@ -76,11 +107,11 @@ public interface EventCloudsManagementWsApi {
      * @return a list that contains the URLs of the streams which are managed by
      *         the EventClouds registry used by this web service.
      */
-    @WebMethod
+    @WebMethod(operationName = "getEventCloudIds")
     public List<String> getEventCloudIds();
 
     /**
-     * Detroys the EventCloud identified by {@code streamUrl}.
+     * Destroys the EventCloud identified by {@code streamUrl}.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud among an organization.
@@ -90,14 +121,15 @@ public interface EventCloudsManagementWsApi {
      *         means that there was no EventCloud found with the specified
      *         {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "destroyEventCloud")
     public boolean destroyEventCloud(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
-     * Deploys a new {@link PublishWsnApi publish WS-Notification service} for
-     * the EventCloud identified by the specified {@code streamUrl}. When the
-     * call succeeds, the endpoint URL to the {@link PublishWsnApi publish
-     * WS-Notification service} is returned.
+     * Deploys a new {@link PublishWsnApi publish WS-Notification service} by
+     * using the default {@code node provider} and for the EventCloud identified
+     * by the specified {@code streamUrl}. When the call succeeds, the endpoint
+     * URL to the {@link PublishWsnApi publish WS-Notification service} is
+     * returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -107,14 +139,36 @@ public interface EventCloudsManagementWsApi {
      *         there was no existing EventCloud for the specified
      *         {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "deployPublishWsnService")
     public String deployPublishWsnService(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
+     * Deploys a new {@link PublishWsnApi publish WS-Notification service} by
+     * using the {@code node provider} represented by the specified identifier
+     * and for the EventCloud identified by the specified {@code streamUrl}.
+     * When the call succeeds, the endpoint URL to the {@link PublishWsnApi
+     * publish WS-Notification service} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link PublishWsnApi publish
+     *         WS-Notification service} which is deployed or {@code null} if
+     *         there was no existing EventCloud for the specified
+     *         {@code streamUrl}.
+     */
+    @WebMethod(operationName = "deployPublishWsnServiceWithNodeProvider")
+    public String deployPublishWsnService(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                          @WebParam(name = "streamUrl") String streamUrl);
+
+    /**
      * Deploys a new {@link SubscribeWsnApi subscribe WS-Notification service}
-     * for the EventCloud identified by the specified {@code streamUrl}. When
-     * the call succeeds, the endpoint URL to the {@link SubscribeWsnApi
-     * subscribe WS-Notification service} is returned.
+     * by using the default {@code node provider} and for the EventCloud
+     * identified by the specified {@code streamUrl}. When the call succeeds,
+     * the endpoint URL to the {@link SubscribeWsnApi subscribe WS-Notification
+     * service} is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -124,14 +178,35 @@ public interface EventCloudsManagementWsApi {
      *         there was no existing EventCloud for the specified
      *         {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "deploySubscribeWsnService")
     public String deploySubscribeWsnService(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
-     * Deploys a new {@link PublishWsApi publish web service proxy} for the
-     * EventCloud identified by the specified {@code streamUrl}. When the call
-     * succeeds, the endpoint URL to the {@link PublishWsApi publish web service
-     * proxy} is returned.
+     * Deploys a new {@link SubscribeWsnApi subscribe WS-Notification service}
+     * by using the {@code node provider} represented by the specified
+     * identifier and for the EventCloud identified by the specified
+     * {@code streamUrl}. When the call succeeds, the endpoint URL to the
+     * {@link SubscribeWsnApi subscribe WS-Notification service} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link SubscribeWsnApi subscribe
+     *         WS-Notification service} which is deployed or {@code null} if
+     *         there was no existing EventCloud for the specified
+     *         {@code streamUrl}.
+     */
+    @WebMethod(operationName = "deploySubscribeWsnServiceWithNodeProvider")
+    public String deploySubscribeWsnService(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                            @WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Deploys a new {@link PublishWsApi publish web service proxy} by using the
+     * default {@code node provider} and for the EventCloud identified by the
+     * specified {@code streamUrl}. When the call succeeds, the endpoint URL to
+     * the {@link PublishWsApi publish web service proxy} is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -140,14 +215,34 @@ public interface EventCloudsManagementWsApi {
      *         proxy} which is deployed or {@code null} if there was no existing
      *         EventCloud for the specified {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "deployPublishWsProxy")
     public String deployPublishWsProxy(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
-     * Deploys a new {@link SubscribeWsApi subscribe web service proxy} for the
+     * Deploys a new {@link PublishWsApi publish web service proxy} by using the
+     * {@code node provider} represented by the specified identifier and for the
      * EventCloud identified by the specified {@code streamUrl}. When the call
-     * succeeds, the endpoint URL to the {@link SubscribeWsApi subscribe web
-     * service proxy} is returned.
+     * succeeds, the endpoint URL to the {@link PublishWsApi publish web service
+     * proxy} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link PublishWsApi publish web service
+     *         proxy} which is deployed or {@code null} if there was no existing
+     *         EventCloud for the specified {@code streamUrl}.
+     */
+    @WebMethod(operationName = "deployPublishWsProxyWithNodeProvider")
+    public String deployPublishWsProxy(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                       @WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Deploys a new {@link SubscribeWsApi subscribe web service proxy} by using
+     * the default {@code node provider} and for the EventCloud identified by
+     * the specified {@code streamUrl}. When the call succeeds, the endpoint URL
+     * to the {@link SubscribeWsApi subscribe web service proxy} is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -156,14 +251,34 @@ public interface EventCloudsManagementWsApi {
      *         service proxy} which is deployed or {@code null} if there was no
      *         existing EventCloud for the specified {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "deploySubscribeWsProxy")
     public String deploySubscribeWsProxy(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
-     * Deploys a new {@link PutGetWsApi put/get web service proxy} for the
-     * EventCloud identified by the specified {@code streamUrl}. When the call
-     * succeeds, the endpoint URL to the {@link PutGetWsApi put/get web service
-     * proxy} is returned.
+     * Deploys a new {@link SubscribeWsApi subscribe web service proxy} by using
+     * the {@code node provider} represented by the specified identifier and for
+     * the EventCloud identified by the specified {@code streamUrl}. When the
+     * call succeeds, the endpoint URL to the {@link SubscribeWsApi subscribe
+     * web service proxy} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link SubscribeWsApi subscribe web
+     *         service proxy} which is deployed or {@code null} if there was no
+     *         existing EventCloud for the specified {@code streamUrl}.
+     */
+    @WebMethod(operationName = "deploySubscribeWsProxyWithNodeProvider")
+    public String deploySubscribeWsProxy(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                         @WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Deploys a new {@link PutGetWsApi put/get web service proxy} by using the
+     * default {@code node provider} and for the EventCloud identified by the
+     * specified {@code streamUrl}. When the call succeeds, the endpoint URL to
+     * the {@link PutGetWsApi put/get web service proxy} is returned.
      * 
      * @param streamUrl
      *            an URL which identifies an EventCloud which is running.
@@ -172,8 +287,28 @@ public interface EventCloudsManagementWsApi {
      *         proxy} which is deployed or {@code null} if there was no existing
      *         EventCloud for the specified {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "deployPutGetWsProxy")
     public String deployPutGetWsProxy(@WebParam(name = "streamUrl") String streamUrl);
+
+    /**
+     * Deploys a new {@link PutGetWsApi put/get web service proxy} by using the
+     * {@code node provider} represented by the specified identifier and for the
+     * EventCloud identified by the specified {@code streamUrl}. When the call
+     * succeeds, the endpoint URL to the {@link PutGetWsApi put/get web service
+     * proxy} is returned.
+     * 
+     * @param nodeProviderId
+     *            the identifier of a node provider.
+     * @param streamUrl
+     *            an URL which identifies an EventCloud which is running.
+     * 
+     * @return the endpoint URL to the {@link PutGetWsApi put/get web service
+     *         proxy} which is deployed or {@code null} if there was no existing
+     *         EventCloud for the specified {@code streamUrl}.
+     */
+    @WebMethod(operationName = "deployPutGetWsProxyWithNodeProvider")
+    public String deployPutGetWsProxy(@WebParam(name = "nodeProviderId") String nodeProviderId,
+                                      @WebParam(name = "streamUrl") String streamUrl);
 
     /**
      * Returns the endpoint URLs for the {@link PublishWsnApi publish
@@ -187,7 +322,7 @@ public interface EventCloudsManagementWsApi {
      *         WS-Notification services} which have been created for the
      *         specified {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "getPublishWsnServiceEndpointUrls")
     public List<String> getPublishWsnServiceEndpointUrls(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
@@ -202,7 +337,7 @@ public interface EventCloudsManagementWsApi {
      *         WS-Notification services} which have been created for the
      *         specified {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "getSubscribeWsnServiceEndpointUrls")
     public List<String> getSubscribeWsnServiceEndpointUrls(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
@@ -216,7 +351,7 @@ public interface EventCloudsManagementWsApi {
      *         proxies} which have been created for the specified
      *         {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "getPublishWsProxyEndpointUrls")
     public List<String> getPublishWsProxyEndpointUrls(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
@@ -231,7 +366,7 @@ public interface EventCloudsManagementWsApi {
      *         service proxy} which have been created for the specified
      *         {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "getSubscribeWsProxyEndpointUrls")
     public List<String> getSubscribeWsProxyEndpointUrls(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
@@ -245,7 +380,7 @@ public interface EventCloudsManagementWsApi {
      *         proxies} which have been created for the specified
      *         {@code streamUrl}.
      */
-    @WebMethod
+    @WebMethod(operationName = "getPutGetWsProxyEndpointUrls")
     public List<String> getPutGetWsProxyEndpointUrls(@WebParam(name = "streamUrl") String streamUrl);
 
     /**
@@ -259,7 +394,7 @@ public interface EventCloudsManagementWsApi {
      * @return {@code true} if the {@link PublishWsnApi publish WS-Notification
      *         service} has been destroyed, {@code false} otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "destroyPublishWsnService")
     public boolean destroyPublishWsnService(@WebParam(name = "publishWsnEndpointUrl") String publishWsnEndpointUrl);
 
     /**
@@ -274,7 +409,7 @@ public interface EventCloudsManagementWsApi {
      *         WS-Notification service} has been destroyed, {@code false}
      *         otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "destroySubscribeWsnService")
     public boolean destroySubscribeWsnService(@WebParam(name = "subscribeWsnEndpointUrl") String subscribeWsnEndpointUrl);
 
     /**
@@ -288,7 +423,7 @@ public interface EventCloudsManagementWsApi {
      * @return {@code true} if the {@link PublishWsApi publish web service
      *         proxy} has been destroyed, {@code false} otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "destroyPublishWsProxy")
     public boolean destroyPublishWsProxy(@WebParam(name = "publishWsProxyEndpointUrl") String publishWsProxyEndpointUrl);
 
     /**
@@ -302,7 +437,7 @@ public interface EventCloudsManagementWsApi {
      * @return {@code true} if the {@link SubscribeWsApi subscribe web service
      *         proxy} has been destroyed, {@code false} otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "destroySubscribeWsProxy")
     public boolean destroySubscribeWsProxy(@WebParam(name = "subscribeWsProxyEndpointUrl") String subscribeWsProxyEndpointUrl);
 
     /**
@@ -316,7 +451,7 @@ public interface EventCloudsManagementWsApi {
      * @return {@code true} if the {@link PutGetWsApi put/get web service proxy}
      *         has been destroyed, {@code false} otherwise.
      */
-    @WebMethod
+    @WebMethod(operationName = "destroyPutGetWsProxy")
     public boolean destroyPutGetWsProxy(@WebParam(name = "publishProxyEndpoint") String putgetWsProxyEndpointUrl);
 
 }

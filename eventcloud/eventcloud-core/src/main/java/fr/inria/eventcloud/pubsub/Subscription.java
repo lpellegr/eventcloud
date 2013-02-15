@@ -1,17 +1,17 @@
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
 package fr.inria.eventcloud.pubsub;
@@ -52,6 +52,8 @@ import javax.xml.bind.DatatypeConverter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashCodes;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -71,6 +73,7 @@ import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.reasoner.SparqlDecomposer;
@@ -84,7 +87,7 @@ import fr.inria.eventcloud.reasoner.SparqlDecomposer;
  */
 public class Subscription implements Quadruplable, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     public static final LoadingCache<String, SubscribeProxy> SUBSCRIBE_PROXIES_CACHE;
 
@@ -121,7 +124,7 @@ public class Subscription implements Quadruplable, Serializable {
 
     private final long creationTime;
 
-    private final long indexationTime;
+    private long indexationTime;
 
     private final String sparqlQuery;
 
@@ -143,23 +146,14 @@ public class Subscription implements Quadruplable, Serializable {
     private transient Node graphNode;
 
     public Subscription(SubscriptionId originalId, SubscriptionId parentId,
-            SubscriptionId id, long indexationTime, String sparqlQuery,
-            String subscribeProxyUrl, NotificationListenerType listenerType) {
-        this(originalId, parentId, id, System.currentTimeMillis(),
-                indexationTime, sparqlQuery, subscribeProxyUrl, null,
-                listenerType);
+            SubscriptionId id, long creationTime, String sparqlQuery,
+            String subscriberUrl, String subscriptionDestination,
+            NotificationListenerType listenerType) {
+        this(originalId, parentId, id, creationTime, -1, sparqlQuery,
+                subscriberUrl, subscriptionDestination, listenerType);
     }
 
     public Subscription(SubscriptionId originalId, SubscriptionId parentId,
-            SubscriptionId id, long indexationTime, String sparqlQuery,
-            String subscribeProxyUrl, String subscriptionDestination,
-            NotificationListenerType listenerType) {
-        this(originalId, parentId, id, System.currentTimeMillis(),
-                indexationTime, sparqlQuery, subscribeProxyUrl,
-                subscriptionDestination, listenerType);
-    }
-
-    private Subscription(SubscriptionId originalId, SubscriptionId parentId,
             SubscriptionId id, long creationTime, long indexationTime,
             String sparqlQuery, String subscriberUrl,
             String subscriptionDestination,
@@ -206,6 +200,11 @@ public class Subscription implements Quadruplable, Serializable {
                         Node.ANY,
                         PublishSubscribeUtils.createSubscriptionIdUri(id),
                         Node.ANY, Node.ANY);
+
+        // no subscription found for the specified subscription id
+        if (!it.hasNext()) {
+            return null;
+        }
 
         while (it.hasNext()) {
             Quadruple quad = it.next();
@@ -263,9 +262,9 @@ public class Subscription implements Quadruplable, Serializable {
                         basicInfo.get(SUBSCRIPTION_SPARQL_QUERY_PROPERTY)
                                 .getLiteralLexicalForm(),
                         basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
-                                .getLiteralLexicalForm(),
+                                .getURI(),
                         subscriptionDestination,
-                        NotificationListenerType.UNKNOWN.convert(((Integer) basicInfo.get(
+                        NotificationListenerType.BINDING.convert(((Integer) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
                                 .getLiteralValue()).shortValue()));
 
@@ -328,12 +327,32 @@ public class Subscription implements Quadruplable, Serializable {
         return this.id;
     }
 
+    /**
+     * Returns the creation time of the subscription.
+     * 
+     * @return the creation time of the subscription.
+     */
     public long getCreationTime() {
         return this.creationTime;
     }
 
+    /**
+     * Returns the indexation time of the subscription.
+     * 
+     * @return the indexation time of the subscription.
+     */
     public long getIndexationTime() {
         return this.indexationTime;
+    }
+
+    /**
+     * Sets the indexation time of the subscription to the current time if it
+     * has not already been set.
+     */
+    public void setIndexationTime() {
+        if (this.indexationTime == -1) {
+            this.indexationTime = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -437,7 +456,7 @@ public class Subscription implements Quadruplable, Serializable {
      */
     @Override
     public List<Quadruple> toQuadruples() {
-        List<Quadruple> quads = new ArrayList<Quadruple>();
+        Builder<Quadruple> result = new ImmutableList.Builder<Quadruple>();
 
         Node subscriptionURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.id);
@@ -445,19 +464,19 @@ public class Subscription implements Quadruplable, Serializable {
         Node subscriptionOriginalURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.originalId);
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI, SUBSCRIPTION_ID_NODE,
                 Node.createLiteral(this.id.toString()), false, false));
 
         if (this.parentId != null) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_PARENT_ID_NODE,
                     Node.createLiteral(this.parentId.toString()), false, false));
         }
 
         if (this.originalId != null) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI,
                     subscriptionURI,
                     SUBSCRIPTION_ORIGINAL_ID_NODE,
@@ -465,20 +484,20 @@ public class Subscription implements Quadruplable, Serializable {
                     false, false));
         }
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SERIALIZED_VALUE_NODE,
                 Node.createLiteral(this.sparqlQuery), false, false));
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(this.creationTime);
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_CREATION_DATETIME_NODE, Node.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime), false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 PublishSubscribeConstants.SUBSCRIPTION_TYPE_NODE,
                 Node.createLiteral(
@@ -486,33 +505,33 @@ public class Subscription implements Quadruplable, Serializable {
                         XSDDatatype.XSDshort), false, false));
 
         calendar.setTimeInMillis(this.indexationTime);
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_INDEXATION_DATETIME_NODE, Node.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime), false, false));
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SUBSCRIBER_NODE,
-                Node.createLiteral(this.subscriberUrl), false, false));
+                Node.createURI(this.subscriberUrl), false, false));
 
         if (this.subscriptionDestination != null) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_DESTINATION_NODE,
                     Node.createLiteral(this.subscriptionDestination), false,
                     false));
         }
 
-        quads.add(new Quadruple(
+        result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_INDEXED_WITH_NODE,
                 Node.createLiteral(this.getSubSubscriptions()[0].getId()
                         .toString()), false, false));
 
         for (Stub stub : this.stubs) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_STUB_NODE,
                     Node.createLiteral(stub.quadrupleHash.toString() + " "
@@ -520,17 +539,16 @@ public class Subscription implements Quadruplable, Serializable {
         }
 
         for (Subsubscription ssubscription : this.getSubSubscriptions()) {
-            quads.add(new Quadruple(
+            result.add(new Quadruple(
                     subscriptionOriginalURI,
                     subscriptionURI,
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE,
-                    // Node.createLiteral(ssubscription.getId().toString()),
                     PublishSubscribeUtils.createSubSubscriptionIdUri(ssubscription.getId()),
                     false, false));
-            quads.addAll(ssubscription.toQuadruples());
+            result.addAll(ssubscription.toQuadruples());
         }
 
-        return quads;
+        return result.build();
     }
 
     /**
@@ -566,7 +584,7 @@ public class Subscription implements Quadruplable, Serializable {
 
     public static final class Stub implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         // the url which identifies the peer to visit
         public final String peerUrl;
@@ -579,6 +597,11 @@ public class Subscription implements Quadruplable, Serializable {
             this.quadrupleHash = quadrupleHashValue;
         }
 
+        @Override
+        public String toString() {
+            return this.peerUrl;
+        }
+
     }
 
     public static void main(String[] args) {
@@ -586,10 +609,12 @@ public class Subscription implements Quadruplable, Serializable {
         Subscription subscription =
                 new Subscription(
                         id, null, id, System.currentTimeMillis(),
+                        System.currentTimeMillis(),
                         "SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o }}",
-                        "http://dummy.com", NotificationListenerType.BINDINGS);
+                        "subscriberURI", "destinationURI",
+                        NotificationListenerType.BINDING);
 
-        System.out.println(subscription.toQuadruples());
+        QuadruplesFormatter.output(System.out, subscription.toQuadruples());
     }
 
 }
