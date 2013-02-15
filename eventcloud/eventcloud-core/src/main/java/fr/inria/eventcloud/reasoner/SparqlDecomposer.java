@@ -19,8 +19,6 @@ package fr.inria.eventcloud.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import arq.query;
-
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
@@ -35,16 +33,9 @@ import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.expr.ExprAggregator;
 import com.hp.hpl.jena.sparql.expr.ExprFunction0;
-import com.hp.hpl.jena.sparql.expr.ExprFunction1;
 import com.hp.hpl.jena.sparql.expr.ExprFunction2;
-import com.hp.hpl.jena.sparql.expr.ExprFunction3;
-import com.hp.hpl.jena.sparql.expr.ExprFunctionN;
-import com.hp.hpl.jena.sparql.expr.ExprFunctionOp;
 import com.hp.hpl.jena.sparql.expr.ExprList;
-import com.hp.hpl.jena.sparql.expr.ExprTransform;
-import com.hp.hpl.jena.sparql.expr.ExprTransformBase;
 import com.hp.hpl.jena.sparql.expr.ExprTransformCopy;
 import com.hp.hpl.jena.sparql.expr.ExprTransformer;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
@@ -52,9 +43,8 @@ import com.hp.hpl.jena.sparql.expr.ExprVisitorBase;
 import com.hp.hpl.jena.sparql.expr.ExprWalker;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.function.FunctionEnv;
-import com.hp.hpl.jena.sparql.util.ExprUtils;
-import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
+import com.hp.hpl.jena.sparql.util.ExprUtils;
 
 import fr.inria.eventcloud.exceptions.DecompositionException;
 
@@ -66,7 +56,7 @@ import fr.inria.eventcloud.exceptions.DecompositionException;
  * @author lpellegr
  */
 public final class SparqlDecomposer {
-    
+
     private static class Singleton {
         private static final SparqlDecomposer INSTANCE = new SparqlDecomposer();
     }
@@ -145,24 +135,48 @@ public final class SparqlDecomposer {
             atomicQuery.setLimit(query.getLimit());
         }
         // it is unnecessary to order results if no limit is applied
-        if (query.hasLimit() && query.getOrderBy() != null) {
+        if (visitor.basicGraphPatterns.size() == 1 && query.hasLimit()
+                && query.getOrderBy() != null) {
             atomicQuery.setOrderBy(this.filterSortConditions(
                     atomicQuery, query.getOrderBy()));
         }
-        if (!(visitor.getFilterConstraints().isEmpty()))
-        {
+        if (!(visitor.getFilterConstraints().isEmpty())) {
             FilterTransformer transformer = new FilterTransformer(atomicQuery);
             List<ExprList> filterConstraints = new ArrayList<ExprList>();
-            for (ExprList el : visitor.getFilterConstraints()) {
-                ExprList exprList = ExprTransformer.transform(transformer, el);
-                if (!(ExprUtils.fmtSPARQL(exprList).equals("null()")))
-                {
+            // visitor.getFilterConstraints().size() is always equal to 1
+            ExprList el = visitor.getFilterConstraints().get(0);
+            ExprList exprList = ExprTransformer.transform(transformer, el);
+
+            if (!(ExprUtils.fmtSPARQL(exprList).equals("null()"))) {
+                String expList = ExprUtils.fmtSPARQL(exprList);
+                if (expList.contains(" , ")) {
+                    // if several FILTER clauses, exprList will look like :
+                    // filter1 , filter2 , etc
+                    // so we have to split it, remove null() if the atomic query
+                    // doesn't match
+                    // all of the filters but only some of them, and put each
+                    // different filter
+                    // into Expr variables
+                    String[] tabExpList = expList.split(" , ");
+                    for (int i = 0; i < tabExpList.length; i++) {
+                        if (tabExpList[i].contains("null()")) {
+                            ;
+                        } else {
+                            Expr newExpr = ExprUtils.parse(tabExpList[i]);
+                            filterConstraints.add(new ExprList(newExpr));
+                        }
+                    }
+                } else {
                     filterConstraints.add(exprList);
-                    System.out.println("SparqlDecomposer.createAtomicQuery " + ExprUtils.fmtSPARQL(exprList));
                 }
             }
             atomicQuery.setFilterConstraints(filterConstraints);
         }
+
+        else {
+            atomicQuery.setFilterConstraints(new ArrayList<ExprList>());
+        }
+
         return atomicQuery;
     }
 
@@ -253,38 +267,38 @@ public final class SparqlDecomposer {
 
             this.filterConstraints.add(opFilter.getExprs());
         }
-        
-        public List<ExprList> getFilterConstraints()
-        {
+
+        public List<ExprList> getFilterConstraints() {
             return this.filterConstraints;
         }
-        
+
     }
-    
-    
+
     private static class FilterTransformer extends ExprTransformCopy {
-       
+
         private AtomicQuery query;
-        
+
         public FilterTransformer(AtomicQuery query) {
             super();
             this.query = query;
         }
-        
+
         @Override
         public Expr transform(ExprVar exprVar) {
             System.out.println("ExprTransformBase.transform(ExprVar)");
-            // supprime les conditions qui portent sur la variable o
-            if (query.containsVariable(exprVar.getVarName())) {
+            // if atomic query contains a variable that is in the filter clause
+            if (this.query.containsVariable(exprVar.getVarName())) {
                 return exprVar;
             }
-            
+            // else we don't add filter condition to this atomic query
             return NodeValue.nvNothing;
         }
-        
+
         @Override
         public Expr transform(ExprFunction2 func, Expr expr1, Expr expr2) {
-            System.out.println("ExprTransformBase.transform(ExprFunction2, Expr, Expr)");
+            System.out.println("ExprTransformBase.transform(ExprFunction2, Expr, Expr) "
+                    + func + " EXP1=" + expr1 + " EXPR2=" + expr2);
+
             if (expr1 == null) {
                 return new E_Null();
             }
@@ -303,9 +317,9 @@ public final class SparqlDecomposer {
 
             return super.transform(func, expr1, expr2);
         }
-        
+
     }
-    
+
     private static class E_Null extends ExprFunction0 {
         private static final String symbol = "null";
 
@@ -324,5 +338,31 @@ public final class SparqlDecomposer {
         }
 
     }
-    
-   }
+
+    public static String query10 =
+            "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> "
+                    + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
+                    + "PREFIX dc: <http://purl.org/dc/elements/1.1/> "
+                    + "PREFIX dataFromProducer1: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/> "
+                    + "SELECT DISTINCT ?offer ?price "
+                    + "WHERE { GRAPH ?g  { "
+                    + " ?offer bsbm:product dataFromProducer1:Product12 ."
+                    + " ?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#GB> ."
+                    + " ?offer bsbm:vendor ?vendor ."
+                    + " ?offer dc:publisher ?vendor ."
+                    + " ?offer bsbm:deliveryDays ?deliveryDays ."
+                    + " FILTER (?deliveryDays <= 6)"
+                    + " ?offer bsbm:price ?price ."
+                    + " ?offer bsbm:validTo ?date . "
+                    + " ?offer ?deliveryDays ?date "
+                    + " FILTER (?date > \"2000-01-06T00:00:00\"^^xsd:dateTime)"
+                    + "}}" + "ORDER BY xsd:double(str(?price)) " + "LIMIT 10";
+
+    public static void main(String[] args) throws Exception {
+
+        new SparqlDecomposer().decompose(query10);
+
+        ExprUtils.parse("( ?deliveryDays <= 6 ) , ( ?date > \"2000-01-06T00:00:00\"^^xsd:dateTime )");
+    }
+
+}

@@ -1,23 +1,21 @@
 package fr.inria.eventcloud.reasoner;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.expr.Expr;
 
 public class NodeConstraint {
-    
+
     private Node node;
-    
+
     private int dimension;
-    
+
     private String constraint;
-    
+
     private String constraintConstant;
-    
+
     private boolean isVarFirstArg;
-    
-    public NodeConstraint(Node node, int dimension, String constraint, String constraintConstant, 
-                          boolean isVarFirstArg)
-    {
+
+    public NodeConstraint(Node node, int dimension, String constraint,
+            String constraintConstant, boolean isVarFirstArg) {
         this.setNode(node);
         this.setDimension(dimension);
         this.setConstraint(constraint);
@@ -26,7 +24,7 @@ public class NodeConstraint {
     }
 
     public Node getNode() {
-        return node;
+        return this.node;
     }
 
     public void setNode(Node node) {
@@ -34,7 +32,7 @@ public class NodeConstraint {
     }
 
     public String getConstraint() {
-        return constraint;
+        return this.constraint;
     }
 
     public void setConstraint(String constraint) {
@@ -42,7 +40,7 @@ public class NodeConstraint {
     }
 
     public String getConstraintConstant() {
-        return constraintConstant;
+        return this.constraintConstant;
     }
 
     public void setConstraintConstant(String constraintConstant) {
@@ -50,7 +48,7 @@ public class NodeConstraint {
     }
 
     public int getDimension() {
-        return dimension;
+        return this.dimension;
     }
 
     public void setDimension(int dimension) {
@@ -58,7 +56,7 @@ public class NodeConstraint {
     }
 
     public boolean isVarFirstArg() {
-        return isVarFirstArg;
+        return this.isVarFirstArg;
     }
 
     public void setVarFirstArg(boolean isVarFirstArg) {

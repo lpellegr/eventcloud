@@ -20,8 +20,6 @@ package fr.inria.eventcloud.validator;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -38,7 +36,6 @@ import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprFunction0;
 import com.hp.hpl.jena.sparql.expr.ExprFunction2;
-import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.ExprTransformCopy;
 import com.hp.hpl.jena.sparql.expr.ExprTransformer;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
@@ -46,7 +43,6 @@ import com.hp.hpl.jena.sparql.function.FunctionEnv;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 
 import fr.inria.eventcloud.overlay.can.SemanticElement;
-import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -72,9 +68,6 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
      * @param key
      *            the key to reach.
      */
-    // renvoie un tab de 4 elements E > null si var ou node any sinon un new E
-    // de la string
-    // crée un coordonée a partir de ce tab à passer en param du super
     public AtomicQueryConstraintsValidator(AtomicQuery query) {
         super(
                 checkNotNull((Coordinate<E>) (AtomicQueryConstraintsValidator.replaceVariablesByNull(query))));
@@ -101,25 +94,27 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
             // if coordinate is null we skip the test
             if (super.key.getValue().getElement(i) != null) {
                 // the specified overlay does not contains the key
-            if (zone.contains(i, super.key.getValue().getElement(i)) != 0) {             
-                return false;
+                if (zone.contains(i, super.key.getValue().getElement(i)) != 0) {
+                    return false;
                 }
             }
         }
-        
-        if (this.atomicQuery.getFilterConstraints() != null)
-        {
-            System.out.println("AtomicQueryConstraintsValidator il y a contrainte de filtre");
-        for (int i = 0; i < this.atomicQuery.getFilterConstraints().size(); i++) {
-            ExprTransformer.transform(
-                    this.getTransformer(),
-                    this.atomicQuery.getFilterConstraints().get(i));
-        }
-        System.out.println("je retourne " + this.getTransformer().finalDecision);
-        return this.getTransformer().finalDecision;
-        }
-        else
-        {
+
+        try {
+            if (this.atomicQuery.getFilterConstraints().size() > 0) {
+                for (int i = 0; i < this.atomicQuery.getFilterConstraints()
+                        .size(); i++) {
+                    ExprTransformer.transform(
+                            this.getTransformer(),
+                            this.atomicQuery.getFilterConstraints().get(i));
+                }
+                return this.getTransformer().finalDecision;
+            } else {
+                // no filter condition to apply on this atomic query
+                return true;
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
             return true;
         }
     }
@@ -133,7 +128,8 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
         this.atomicQuery = atomicQuery;
     }
 
-    private class FilterTransformer extends ExprTransformCopy implements Serializable {
+    private class FilterTransformer extends ExprTransformCopy implements
+            Serializable {
 
         /**
          * 
@@ -155,20 +151,28 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
 
         @Override
         public Expr transform(ExprFunction2 func, Expr expr1, Expr expr2) {
-            System.out.println("func = " + ExprUtils.fmtSPARQL(func));
-            System.out.println("func instanceof = " + func.getClass().getSimpleName());
-            
+
             if (func != null) {
                 if (!(func instanceof E_LogicalAnd || func instanceof E_LogicalOr)) {
                     Expr variable;
                     String constant;
+
+                    // we have to remove str(?x) to keep only ?x for this validator
+                    if (func.getArg1().toString().startsWith("str("))
+                    {
+                        expr1 = ExprUtils.parse(func.getArg1().toString().substring(func.getArg1().toString().indexOf("(", 0)+1, func.getArg1().toString().length()-1));
+                    }
+                    else if (func.getArg2().toString().startsWith("str("))
+                    {
+                        expr2 = ExprUtils.parse(func.getArg2().toString().substring(func.getArg2().toString().indexOf("(", 0)+1, func.getArg2().toString().length()-1));
+                    }
                     
-                    if (func.getArg1().isVariable()) {
+                    if (expr1.isVariable()) {
                         variable = expr1;
                     } else {
                         variable = expr2;
                     }
-
+                    
                     if (func.getArg1().isConstant()) {
                         constant =
                                 SemanticElement.removePrefix(Node.createURI(expr1.getConstant()
@@ -178,26 +182,20 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
                                 SemanticElement.removePrefix(Node.createURI(expr2.getConstant()
                                         .asString()));
                     }
-
+                    
                     int dimension =
                             this.atomicQuery.getVarIndex(variable.getVarName());
-
+                    
                     int compareToLowerBound =
-                            this.zone.getLowerBound((byte) dimension)
-                                    .getValue()
+                            SemanticElement.removePrefix(Node.createURI(this.zone.getLowerBound((byte) dimension)
+                                    .getValue()))
                                     .compareTo(constant);
 
                     int compareToUpperBound =
-                            this.zone.getUpperBound((byte) dimension)
-                                    .getValue()
+                            SemanticElement.removePrefix(Node.createURI(this.zone.getUpperBound((byte) dimension)
+                                    .getValue()))
                                     .compareTo(constant);
-                    
-                    System.out.println("dimension = " + dimension);
-                    System.out.println("borne inf = " + this.zone.getLowerBound((byte) dimension)
-                            .toString());
-                    System.out.println("borne sup = " + this.zone.getUpperBound((byte) dimension)
-                            .toString());
-
+                  
                     if (func.getArg1().isVariable()) {
                         if (func.getOpName().equals(">")
                                 && compareToUpperBound > 0) {
@@ -217,7 +215,6 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
                             return new E_Bool(false);
                         } else if (func.getOpName().equals("<")
                                 && compareToLowerBound < 0) {
-                            System.out.println("AtomicQueryConstraintsValidator.FilterTransformer.transform()");
                             this.finalDecision = true;
                             return new E_Bool(true);
                         } else if (func.getOpName().equals("<")
@@ -293,14 +290,17 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
                     }
                 } else if (func instanceof E_LogicalAnd
                         || func instanceof E_LogicalOr) {
-                    System.out.println("arg1 = " + func.getArg1().getVarName() + " ET arg2 = " +
-                            func.getArg2().getVarName());
-                    // or try/catch ClassCastException on (ExprFunction2) func.getArg1();
-                    if (func.getArg1().getVarName().equals(func.getArg2().getVarName()))
-                    {
-                        return new E_Bool(false);
+                    // if expr looks like ?x > ?x (mainly because of Jena)
+                    // we cannot use this validator so query is sent to peer
+                    try {
+                    if (func.getArg1().getVarName().equals(
+                            func.getArg2().getVarName())) {
+                        System.out.println("AtomicQueryConstraintsValidator.FilterTransformer.transform() var1=var2");
+                        return new E_Bool(true);
+                        }
                     }
-                    System.out.println("classe = "+ func.getClass().getSimpleName() + "func = " + ExprUtils.fmtSPARQL(func));
+                    catch (NullPointerException e){};
+                    
                     ExprFunction2 exprfunc2_1 = (ExprFunction2) func.getArg1();
                     Expr exprfunc2_1_bool =
                             this.transform(
@@ -336,7 +336,7 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
 
                 }
             }
-            return null;
+            return new E_Bool(false);
         }
 
     }
@@ -385,20 +385,18 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
     }
 
     private static Coordinate<SemanticElement> replaceVariablesByNull(AtomicQuery query) {
-        SemanticElement[] tab = new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
-        
-        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++)
-        {
-            if (query.toArray()[i].isVariable() || query.toArray()[i].matches(Node.ANY))
-            {
+        SemanticElement[] tab =
+                new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+
+        for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+            if (query.toArray()[i].isVariable()
+                    || query.toArray()[i].matches(Node.ANY)) {
                 query.toArray()[i] = null;
-            }
-            else
-            {
+            } else {
                 tab[i] = new SemanticElement(query.toArray()[i]);
             }
         }
-        
+
         return new Coordinate<SemanticElement>(tab);
     }
 

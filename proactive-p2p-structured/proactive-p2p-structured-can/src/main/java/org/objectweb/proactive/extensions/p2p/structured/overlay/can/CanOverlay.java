@@ -161,10 +161,11 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         // no neighbors satisfying the coordinate on the specified dimension AND
         // direction
         if (neighbors.size() == 0) {
-            throw new IllegalStateException(
-                    "No neighbor to route to for coordinate " + coordinate
-                            + " on dimension " + dimension + " and direction "
-                            + direction + " , dump is:\n{}" + this.dump());
+            // throw new IllegalStateException(
+            // "No neighbor to route to for coordinate " + coordinate
+            // + " on dimension " + dimension + " and direction "
+            // + direction + " , dump is:\n{}" + this.dump());
+            return null;
         }
 
         // from neighbors which verify the dimensions get those which

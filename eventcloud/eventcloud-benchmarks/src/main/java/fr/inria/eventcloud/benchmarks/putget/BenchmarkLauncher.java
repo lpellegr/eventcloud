@@ -55,12 +55,14 @@ public class BenchmarkLauncher {
                     + "SELECT DISTINCT ?product ?label "
                     + "WHERE { GRAPH ?g  { "
                     + " ?product rdfs:label ?label ."
+                    + " FILTER (?label > \"http://aaaaa\")"
                     + " ?product a bsbm-inst:ProductType145 ."
                     + " ?product bsbm:productFeature bsbm-inst:ProductFeature4504 . "
                     + " ?product bsbm:productFeature bsbm-inst:ProductFeature4511 . "
-                    + " ?product bsbm:productPropertyNumeric1 ?value1 . "
-                    + " FILTER (?value1 > 15) }}"
-                    + " ORDER BY ?label "
+                    + " ?product bsbm:productPropertyNumeric1 ?value1  "
+                    + " FILTER (?value1 > 15) "
+                    + " } } "
+                    + "ORDER BY ?label "
                     + " LIMIT 10 ";
 
     private static String query5 =
@@ -98,7 +100,9 @@ public class BenchmarkLauncher {
                     + " ?offer bsbm:price ?price ."
                     + " ?offer bsbm:validTo ?date "
                     + " FILTER (?date > \"2000-01-06T00:00:00\"^^xsd:dateTime)"
-                    + "}}" + "ORDER BY xsd:double(str(?price)) " + "LIMIT 10";
+                    + "}}"
+
+                    + "ORDER BY xsd:double(str(?price)) " + "LIMIT 10";
 
     public static String query11 =
             "PREFIX dataFromVendor1: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/> "
@@ -212,16 +216,15 @@ public class BenchmarkLauncher {
                 nbResults++;
             }
             Element query =
-                    xmlWriter.addQuery(j + 1, resp
-                            .getTimeToGetResult(),resp
-                            .getQueryDatastoreTime(), resp
-                            .getLatency(), resp.getInboundHopCount());
+                    xmlWriter.addQuery(
+                            j + 1, resp.getTimeToGetResult(),
+                            resp.getQueryDatastoreTime(), resp.getLatency(),
+                            resp.getInboundHopCount());
             xmlWriter.addElement(query, "finalResults", "" + nbResults);
             xmlWriter.addElement(query, "intermediateResults", ""
                     + resp.getNbIntermediateResults());
             xmlWriter.addElement(query, "intermediateResultsSizeInBytes", ""
-                    + resp
-                            .getSizeOfIntermediateResultsInBytes());
+                    + resp.getSizeOfIntermediateResultsInBytes());
             xmlWriter.addElement(query, "subQueries", ""
                     + resp.getNbSubQueries());
             Map<String, Integer> nbResultsForEachSubquery =

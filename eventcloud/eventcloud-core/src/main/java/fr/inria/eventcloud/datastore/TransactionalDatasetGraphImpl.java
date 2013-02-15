@@ -136,7 +136,7 @@ public final class TransactionalDatasetGraphImpl implements
                 quadruplePattern.getGraph(), quadruplePattern.getSubject(),
                 quadruplePattern.getPredicate(), quadruplePattern.getObject());
     }
-    
+
     /**
      * {@inheritDoc}
      */
