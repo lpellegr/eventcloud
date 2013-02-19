@@ -44,7 +44,7 @@ public class EventCloudsManagementServiceDeployer {
             "http://eventcloud.inria.fr/binaries/";
 
     private static final String LOG_MANAGEMENT_WS_DEPLOYED =
-            "EventCloud management web service deployed at ";
+            "EventClouds management web service deployed at ";
 
     private static MutableBoolean servicesDeployed = new MutableBoolean(false);
 
@@ -169,7 +169,7 @@ public class EventCloudsManagementServiceDeployer {
             return eventCloudsManagementWsEndpoint.toString();
         } else {
             throw new IllegalStateException(
-                    "EventCloud management process already deployed");
+                    "EventClouds management process already deployed");
         }
     }
 
