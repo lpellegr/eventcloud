@@ -163,6 +163,14 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
+    public boolean ping() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void setSocialFilter(String socialFilterUrl, double threshold) {
         EventCloudProperties.SOCIAL_FILTER_URL.setValue(socialFilterUrl);
         EventCloudProperties.SOCIAL_FILTER_THRESHOLD.setValue(threshold);
