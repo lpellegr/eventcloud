@@ -311,7 +311,8 @@ public class WsnHelper {
         Notify notify = new Notify();
 
         for (CompoundEvent event : compoundEvents) {
-            NotificationMessageHolderType notificationMessage = translator.translate(event);
+            NotificationMessageHolderType notificationMessage =
+                    translator.translate(event);
             notificationMessage.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
             if (event.getGraph().getURI().endsWith(
                     WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {

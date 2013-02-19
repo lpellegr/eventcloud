@@ -83,7 +83,8 @@ public class WsnLogUtils {
                                     ((JAXBElement<TopicExpressionType>) obj).getValue(),
                                     "  ");
                         } catch (ClassCastException e) {
-                            log.info("  an object of class " + obj.getClass().getName());
+                            log.info("  an object of class "
+                                    + obj.getClass().getName());
                         }
                     }
                 } else {
