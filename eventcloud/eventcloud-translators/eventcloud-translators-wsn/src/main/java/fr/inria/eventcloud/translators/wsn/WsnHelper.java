@@ -546,14 +546,22 @@ public class WsnHelper {
     @SuppressWarnings("unchecked")
     private static TopicExpressionType getTopicExpressionType(Subscribe subscribe) {
         FilterType filterType = subscribe.getFilter();
+
         if (filterType != null) {
             List<Object> any = filterType.getAny();
-            if (any.size() > 0) {
-                return ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
-            } else {
-                throw new IllegalArgumentException(
-                        "No any object set in the subscribe message");
+
+            if (any != null) {
+                for (Object obj : any) {
+                    try {
+                        return ((JAXBElement<TopicExpressionType>) obj).getValue();
+                    } catch (ClassCastException e) {
+                        // Not a TopicExpressionType, ignore it
+                    }
+                }
             }
+
+            throw new IllegalArgumentException(
+                    "No topic expression type set in the subscribe message");
         } else {
             throw new IllegalArgumentException(
                     "No filter set in the subscribe message");

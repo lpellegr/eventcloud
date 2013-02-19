@@ -78,9 +78,13 @@ public class WsnLogUtils {
                 if ((any != null) && (any.size() != 0)) {
                     log.info("filter type any values are:");
                     for (Object obj : any) {
-                        logTopic(
-                                ((JAXBElement<TopicExpressionType>) obj).getValue(),
-                                "  ");
+                        try {
+                            logTopic(
+                                    ((JAXBElement<TopicExpressionType>) obj).getValue(),
+                                    "  ");
+                        } catch (ClassCastException e) {
+                            log.info("  an object of class " + obj.getClass().getName());
+                        }
                     }
                 } else {
                     log.info("filter type any is null");
