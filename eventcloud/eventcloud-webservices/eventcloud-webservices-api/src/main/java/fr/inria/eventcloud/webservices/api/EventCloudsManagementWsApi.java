@@ -33,6 +33,14 @@ import javax.jws.WebService;
 public interface EventCloudsManagementWsApi {
 
     /**
+     * Pings the service.
+     * 
+     * @return true if the service is deployed and ready.
+     */
+    @WebMethod(operationName = "ping")
+    public boolean ping();
+
+    /**
      * Sets the URL of the social filter to use and the threshold of the social
      * filter.
      * 
