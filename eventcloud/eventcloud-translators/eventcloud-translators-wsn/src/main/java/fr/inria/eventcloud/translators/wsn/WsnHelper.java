@@ -273,7 +273,7 @@ public class WsnHelper {
 
         notificationMessage.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
 
-        notificationMessage.setTopic(createTopicExpressionType(topic));
+        notificationMessage.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
 
         notificationMessage.setProducerReference(createW3cEndpointReference(producerReference));
 
@@ -311,15 +311,15 @@ public class WsnHelper {
         Notify notify = new Notify();
 
         for (CompoundEvent event : compoundEvents) {
-            NotificationMessageHolderType message = translator.translate(event);
-            message.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
+            NotificationMessageHolderType notificationMessage = translator.translate(event);
+            notificationMessage.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
             if (event.getGraph().getURI().endsWith(
                     WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
-                message.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
+                notificationMessage.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
             } else {
-                message.setTopic(createTopicExpressionType(topic));
+                notificationMessage.setTopic(createTopicExpressionType(topic));
             }
-            notify.getNotificationMessage().add(message);
+            notify.getNotificationMessage().add(notificationMessage);
         }
 
         return notify;
