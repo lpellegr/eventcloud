@@ -146,7 +146,8 @@ public class TransactionalTdbDatastore extends Datastore {
     }
 
     public boolean isMemory() {
-        return this.location.isMemUnique() || this.location.isMem();
+        return this.location == null || this.location.isMemUnique()
+                || this.location.isMem();
     }
 
 }
