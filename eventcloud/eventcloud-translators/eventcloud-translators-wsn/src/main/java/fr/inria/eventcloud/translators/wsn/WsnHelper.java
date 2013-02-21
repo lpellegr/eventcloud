@@ -510,10 +510,6 @@ public class WsnHelper {
                                     .equals(topicPrefix)) {
                         topicNamespace = entry.getValue();
 
-                        if (!topicNamespace.endsWith("/")) {
-                            topicNamespace = topicNamespace + "/";
-                        }
-
                         break;
                     }
                 }
@@ -536,6 +532,10 @@ public class WsnHelper {
                     throw new IllegalArgumentException(
                             "Unable to extract topic content");
                 }
+            }
+
+            if (!topicNamespace.endsWith("/")) {
+                topicNamespace = topicNamespace + "/";
             }
 
             return new QName(topicNamespace, topicLocalPart, topicPrefix);
