@@ -640,11 +640,7 @@ public class EventCloudsManagementServiceImpl implements
     @Override
     public SubscribeResponse subscribe(Subscribe subscribe) {
         QName topic = WsnHelper.getTopic(subscribe);
-        String expandedTopic = topic.getNamespaceURI();
-        if (!expandedTopic.endsWith("/")) {
-            expandedTopic += "/";
-        }
-        expandedTopic += topic.getLocalPart();
+        String expandedTopic = topic.getNamespaceURI() + topic.getLocalPart();
 
         if (expandedTopic.equals(RAW_REPORT_TOPIC)) {
             SubscriptionId subscriptionId = new SubscriptionId();
