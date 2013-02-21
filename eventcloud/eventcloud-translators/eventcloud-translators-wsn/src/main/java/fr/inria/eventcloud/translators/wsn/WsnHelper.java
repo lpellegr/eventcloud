@@ -534,7 +534,7 @@ public class WsnHelper {
                 }
             }
 
-            if (!topicNamespace.endsWith("/")) {
+            if ((topicNamespace != null) && (!topicNamespace.endsWith("/"))) {
                 topicNamespace = topicNamespace + "/";
             }
 
