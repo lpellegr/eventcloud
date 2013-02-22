@@ -38,20 +38,22 @@ import fr.inria.eventcloud.translators.wsn.subscribe.TopicSubscriptionTranslator
 public class WsnTranslator {
 
     /**
-     * Translates the specified {@link NotificationMessageHolderType} message to
-     * a {@link CompoundEvent} according to its type.
+     * Translates the specified {@link NotificationMessageHolderType
+     * WS-Notification message} to a {@link CompoundEvent compound event}
+     * according to its type.
      * 
-     * @param notification
-     *            the subscribe message to be translated.
+     * @param notificationMessage
+     *            the WS-Notification message to be translated.
      * 
-     * @return a compound event.
+     * @return the compound event corresponding to the specified WS-Notification
+     *         message.
      */
-    public CompoundEvent translate(NotificationMessageHolderType notification)
+    public CompoundEvent translate(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
-        if (notification.getMessage() != null) {
-            if (notification.getMessage().getAny() != null) {
+        if (notificationMessage.getMessage() != null) {
+            if (notificationMessage.getMessage().getAny() != null) {
                 // root element inside wsnt:Message
-                Element e = (Element) notification.getMessage().getAny();
+                Element e = (Element) notificationMessage.getMessage().getAny();
 
                 CompoundEvent result;
 
@@ -67,9 +69,10 @@ public class WsnTranslator {
                                 Event.WSN_MSG_ELEMENT.getNamespaceURI(),
                                 Event.WSN_MSG_SYNTAX_ATTRIBUTE) != null) {
                     // message content is a native semantic payload
-                    result = this.translateSemanticNotification(notification);
+                    result =
+                            this.translateSemanticNotification(notificationMessage);
                 } else {
-                    result = this.translateXmlNotification(notification);
+                    result = this.translateXmlNotification(notificationMessage);
                 }
 
                 return result;
@@ -84,13 +87,14 @@ public class WsnTranslator {
     }
 
     /**
-     * Translates a notification message (i.e. a message that contains arbitrary
-     * XML elements as payload) to its corresponding {@link CompoundEvent}.
+     * Translates a {@link NotificationMessageHolderType WS-Notification
+     * message} (i.e. a message that contains arbitrary XML elements as payload)
+     * to its corresponding {@link CompoundEvent compound event}.
      * 
      * @param notificationMessage
-     *            the notification message to be translated.
+     *            the WS-Notification message to be translated.
      * 
-     * @return the compound event corresponding to the specified notification
+     * @return the compound event corresponding to the specified WS-Notification
      *         message.
      */
     public CompoundEvent translateXmlNotification(NotificationMessageHolderType notificationMessage)
@@ -100,13 +104,15 @@ public class WsnTranslator {
     }
 
     /**
-     * Translates a semantic notification message (i.e. a message that contains
-     * directly a semantic payload) to its corresponding {@link CompoundEvent}.
+     * Translates a semantic {@link NotificationMessageHolderType
+     * WS-Notification message} (i.e. a message that contains directly a
+     * semantic payload) to its corresponding {@link CompoundEvent compound
+     * event}.
      * 
      * @param notificationMessage
-     *            the notification message to be translated.
+     *            the WS-Notification message to be translated.
      * 
-     * @return the compound event corresponding to the specified notification
+     * @return the compound event corresponding to the specified WS-Notification
      *         message.
      */
     public CompoundEvent translateSemanticNotification(NotificationMessageHolderType notificationMessage)
@@ -116,13 +122,15 @@ public class WsnTranslator {
     }
 
     /**
-     * Translates the specified compound event to its corresponding notification
-     * message.
+     * Translates the specified {@link CompoundEvent compound event} to its
+     * corresponding {@link NotificationMessageHolderType WS-Notification
+     * message}.
      * 
      * @param event
      *            the compound event to be translated.
      * 
-     * @return a notification message.
+     * @return the notification message corresponding to the specified
+     *         WS-Notification message.
      */
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
@@ -135,14 +143,16 @@ public class WsnTranslator {
     }
 
     /**
-     * Translates the specified compound event (which derives from a
-     * notification message with an arbitrary payload) to its corresponding
-     * notification message.
+     * Translates the specified {@link CompoundEvent compound event} (which
+     * derives from a {@link NotificationMessageHolderType WS-Notification
+     * message} with an arbitrary payload) to its corresponding
+     * {@link NotificationMessageHolderType WS-Notification message}.
      * 
      * @param event
      *            the compound event to be translated.
      * 
-     * @return a notification message.
+     * @return the WS-Notification message corresponding to the specified
+     *         compound event.
      */
     public NotificationMessageHolderType translateXmlCompoundEvent(CompoundEvent event)
             throws TranslationException {
@@ -150,13 +160,15 @@ public class WsnTranslator {
     }
 
     /**
-     * Translates the specified compound event (which derives from a semantic
-     * notification message) to its corresponding notification message.
+     * Translates the specified {@link CompoundEvent compound event} (which
+     * derives from a semantic WS-Notification message) to its corresponding
+     * {@link NotificationMessageHolderType WS-Notification message}.
      * 
      * @param event
      *            the compound event to be translated.
      * 
-     * @return a semantic notification message.
+     * @return the semantic {@link NotificationMessageHolderType WS-Notification
+     *         message} corresponding to the specified compound event.
      */
     public NotificationMessageHolderType translateSemanticCompoundEvent(CompoundEvent event)
             throws TranslationException {
@@ -164,29 +176,50 @@ public class WsnTranslator {
     }
 
     /**
-     * Translates the specified {@link Subscribe} message to its corresponding
-     * SPARQL query.
+     * Translates the specified {@link Subscribe WS-Notification Subscribe
+     * message} to its corresponding SPARQL query.
      * 
-     * @param subscription
-     *            the subscribe message to be translated.
+     * @param subscribe
+     *            the WS-Notification Subscribe message to be translated.
      * 
-     * @return the SPARQL query corresponding to the specified subscribe
-     *         message.
+     * @return the SPARQL query corresponding to the specified WS-Notification
+     *         Subscribe message.
      */
-    public String translate(Subscribe subscription) throws TranslationException {
+    public String translate(Subscribe subscribe) throws TranslationException {
         // TODO add support for both types of subscription (topic or
         // content-based) and call the correct method according to the type
-        return this.translateTopicSubscription(subscription);
+        return this.translateTopicSubscription(subscribe);
     }
 
+    /**
+     * Translates the specified {@link Subscribe WS-Notification Subscribe
+     * message} (which is supposed to be a topic based subscription) to its
+     * corresponding SPARQL query.
+     * 
+     * @param subscribe
+     *            the WS-Notification Subscribe message to be translated.
+     * 
+     * @return the SPARQL query corresponding to the specified WS-Notification
+     *         Subscribe message.
+     */
     public String translateTopicSubscription(Subscribe subscribe)
             throws TranslationException {
         return TopicSubscriptionTranslator.getInstance().translate(subscribe);
     }
 
+    /**
+     * Translates the specified {@link Subscribe WS-Notification Subscribe
+     * message} (which is supposed to be a content based subscription) to its
+     * corresponding SPARQL query.
+     * 
+     * @param subscribe
+     *            the WS-Notification Subscribe message to be translated.
+     * 
+     * @return the SPARQL query corresponding to the specified WS-Notification
+     *         Subscribe message.
+     */
     public String translateContentBasedSubscription(Subscribe subscribe) {
         // TODO implement
-        return null;
+        throw new UnsupportedOperationException();
     }
-
 }

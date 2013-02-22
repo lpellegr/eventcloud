@@ -64,8 +64,8 @@ import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
- * Translator for {@link NotificationMessageHolderType notification messages} to
- * {@link CompoundEvent events}.
+ * Translator for {@link NotificationMessageHolderType WS-Notification messages}
+ * to {@link CompoundEvent compound events}.
  * 
  * @author bsauvan
  * @author lpellegr
@@ -83,59 +83,15 @@ public class XmlNotificationTranslator extends
     }
 
     /**
-     * This method removes all white spaces between > < elements for a node
-     * 
-     * @param incomingNode
-     * 
-     * @return xml tree without white spaces between nodes.
-     */
-    public static org.w3c.dom.Node removeWhiteSpacesAndSharpFromNode(org.w3c.dom.Node incomingNode) {
-        try {
-            byte[] nodeBytes = xmlNodeToByteArray(incomingNode);
-            String nodeString = new String(nodeBytes, "UTF-8");
-            nodeString = nodeString.replaceAll(">\\s*<", "><");
-            nodeString = nodeString.replaceAll("#", WsnConstants.SHARP_ESCAPE);
-            incomingNode = byteArrayToXmlNode(nodeString.getBytes());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        return incomingNode;
-    }
-
-    public static byte[] xmlNodeToByteArray(org.w3c.dom.Node node) {
-        try {
-            Source source = new DOMSource(node);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Result result = new StreamResult(out);
-            TransformerFactory factory = TransformerFactory.newInstance();
-            Transformer transformer = factory.newTransformer();
-            transformer.transform(source, result);
-            return out.toByteArray();
-        } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static org.w3c.dom.Node byteArrayToXmlNode(byte[] xml)
-            throws SAXException, ParserConfigurationException, IOException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new ByteArrayInputStream(xml))
-                .getDocumentElement();
-    }
-
-    /**
-     * Translates the specified notification message to its corresponding event.
+     * Translates the specified {@link NotificationMessageHolderType
+     * WS-Notification message} to its corresponding {@link CompoundEvent
+     * compound event}.
      * 
      * @param notificationMessage
-     *            the notification message to be translated.
+     *            the WS-Notification message to be translated.
      * 
-     * @return the event corresponding to the specified notification message.
+     * @return the compound event corresponding to the specified WS-Notification
+     *         message.
      */
     @Override
     public CompoundEvent translate(NotificationMessageHolderType notificationMessage)
@@ -309,6 +265,46 @@ public class XmlNotificationTranslator extends
         }
 
         return result;
+    }
+
+    private static org.w3c.dom.Node removeWhiteSpacesAndSharpFromNode(org.w3c.dom.Node incomingNode) {
+        try {
+            byte[] nodeBytes = xmlNodeToByteArray(incomingNode);
+            String nodeString = new String(nodeBytes, "UTF-8");
+            nodeString = nodeString.replaceAll(">\\s*<", "><");
+            nodeString = nodeString.replaceAll("#", WsnConstants.SHARP_ESCAPE);
+            incomingNode = byteArrayToXmlNode(nodeString.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return incomingNode;
+    }
+
+    private static byte[] xmlNodeToByteArray(org.w3c.dom.Node node) {
+        try {
+            Source source = new DOMSource(node);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            Result result = new StreamResult(out);
+            TransformerFactory factory = TransformerFactory.newInstance();
+            Transformer transformer = factory.newTransformer();
+            transformer.transform(source, result);
+            return out.toByteArray();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static org.w3c.dom.Node byteArrayToXmlNode(byte[] xml)
+            throws SAXException, ParserConfigurationException, IOException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.parse(new ByteArrayInputStream(xml))
+                .getDocumentElement();
     }
 
     private void parseElement(org.w3c.dom.Node node, StringBuilder predicate,

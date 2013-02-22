@@ -29,10 +29,10 @@ import fr.inria.eventcloud.translators.wsn.WsnConstants;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 
 /**
- * This class defines a method to translate a WS-Notification {@link Subscribe}
- * message, which is supposed to be a topic based subscription, to a SPARQL
- * subscription. This translator makes the assumption that events which are
- * published comply with the event format defined with FZI (see
+ * Translator for {@link Subscribe WS-Notification Subscribe messages}, which
+ * are supposed to be a topic based subscription, to SPARQL subscriptions. This
+ * translator makes the assumption that events which are published comply with
+ * the event format defined with FZI (see
  * http://km.aifb.kit.edu/sites/lodstream/).
  * 
  * @author bsauvan
@@ -50,11 +50,11 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
     }
 
     /**
-     * Translates a WS-Notification {@link Subscribe} message, which is supposed
-     * to be a topic based subscription, to a SPARQL subscription.
+     * Translates a {@link Subscribe WS-Notification Subscribe message}, which
+     * is supposed to be a topic based subscription, to a SPARQL subscription.
      * 
      * @param subscription
-     *            the subscribe message to be translated.
+     *            the WS-Notification Subscribe message to be translated.
      * 
      * @return a SPARQL query corresponding to the topic-based subscription.
      */
