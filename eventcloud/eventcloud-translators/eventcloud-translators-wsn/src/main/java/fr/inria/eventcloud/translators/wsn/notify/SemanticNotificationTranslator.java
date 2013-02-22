@@ -40,7 +40,7 @@ import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
  * Translator for {@link NotificationMessageHolderType notification messages}
- * with the RDF message payload to{@link CompoundEvent events}
+ * with the RDF message payload to {@link CompoundEvent events}.
  * 
  * @author ialshaba
  * @author lpellegr
