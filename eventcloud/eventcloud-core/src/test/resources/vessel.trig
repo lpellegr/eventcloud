@@ -1,0 +1,1900 @@
+@prefix :        <http://events.event-processing.org/types/> . 
+@prefix e:       <http://events.event-processing.org/ids/> . 
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> . 
+@prefix ais:     <http://imu.ntua.gr/ais#> . 
+@prefix geo:     <http://www.w3.org/2003/01/geo/wgs84_pos#> . 
+
+e:Vessel1346837684541  {
+	<http://events.event-processing.org/ids/Vessel1346837684541#event> a :VesselEvent ;           
+	ais:MMSI "205280990" ;
+	geo:lat "51.34667666666667"^^xsd:double ;
+	geo:lon "4.2909049999999995"^^xsd:double ;
+	ais:name "SINJOOR 1" ;
+	ais:shipType "Dredging" ;
+	ais:shipCargo "Undefined" ;
+	ais:callSign "OT2809" ;
+	ais:navStatus "Under way using engine" ;
+	ais:windSpeed "0"^^xsd:double ;
+	ais:windDirection "0"^^xsd:double ;
+	ais:speed "0.0"^^xsd:double ;
+	ais:course "308.0"^^xsd:double ;
+	ais:trueHeading "51.1"^^xsd:double ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/VesselFeed#stream> .
+}
+
+e:ProximityInfo1346837684572  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684572#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "454.18214719743577"^^xsd:double ;
+	ais:nearbyMMSI "247217030" ;
+	ais:nearbySpeed "2.0"^^xsd:double ;
+	ais:nearbyCourse "330.0"^^xsd:double ;
+	ais:nearbyTrueHeading "15.0"^^xsd:double ;
+	geo:lat "51.344211666666666"^^xsd:double ;
+	geo:lon "4.29611"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684572  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684572#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "775.873233930375"^^xsd:double ;
+	ais:nearbyMMSI "477628374" ;
+	ais:nearbySpeed "10.0"^^xsd:double ;
+	ais:nearbyCourse "180.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34314"^^xsd:double ;
+	geo:lon "4.300520000000001"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684588  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684588#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "526.930608444811"^^xsd:double ;
+	ais:nearbyMMSI "154959442" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "91.0"^^xsd:double ;
+	ais:nearbyTrueHeading "9.0"^^xsd:double ;
+	geo:lat "51.344161666666665"^^xsd:double ;
+	geo:lon "4.284485"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684603  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684603#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "318.93245349122486"^^xsd:double ;
+	ais:nearbyMMSI "205504826" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "103.0"^^xsd:double ;
+	ais:nearbyTrueHeading "10.0"^^xsd:double ;
+	geo:lat "51.34381166666667"^^xsd:double ;
+	geo:lon "4.290921666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684619  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684619#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "441.0971023757631"^^xsd:double ;
+	ais:nearbyMMSI "246993040" ;
+	ais:nearbySpeed "2.0"^^xsd:double ;
+	ais:nearbyCourse "31.0"^^xsd:double ;
+	ais:nearbyTrueHeading "0.0"^^xsd:double ;
+	geo:lat "51.34688666666667"^^xsd:double ;
+	geo:lon "4.29724"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684635  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684635#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "393.1752691444761"^^xsd:double ;
+	ais:nearbyMMSI "247203136" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "279.0"^^xsd:double ;
+	ais:nearbyTrueHeading "27.0"^^xsd:double ;
+	geo:lat "51.34567333333334"^^xsd:double ;
+	geo:lon "4.296326666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684635  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684635#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "732.9247807338273"^^xsd:double ;
+	ais:nearbyMMSI "247195330" ;
+	ais:nearbySpeed "7.0"^^xsd:double ;
+	ais:nearbyCourse "165.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34151166666666"^^xsd:double ;
+	geo:lon "4.297441666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684650  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684650#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "773.0163140570986"^^xsd:double ;
+	ais:nearbyMMSI "244660102" ;
+	ais:nearbySpeed "2.0"^^xsd:double ;
+	ais:nearbyCourse "331.0"^^xsd:double ;
+	ais:nearbyTrueHeading "18.0"^^xsd:double ;
+	geo:lat "51.341413333333335"^^xsd:double ;
+	geo:lon "4.298156666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684666  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684666#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "207.36210099991956"^^xsd:double ;
+	ais:nearbyMMSI "17850344" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "100.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34616666666667"^^xsd:double ;
+	geo:lon "4.288036666666667"^^xsd:double ;
+	ais:nearbyName "FELICITAS" ;
+	ais:nearbyShipType "Unknown" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "PD3814" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684666  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684666#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "524.6691839398267"^^xsd:double ;
+	ais:nearbyMMSI "308121000" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "90.0"^^xsd:double ;
+	ais:nearbyTrueHeading "9.0"^^xsd:double ;
+	geo:lat "51.34418333333333"^^xsd:double ;
+	geo:lon "4.284501666666667"^^xsd:double ;
+	ais:nearbyName "CHIQUITA BELGIE" ;
+	ais:nearbyShipType "Cargo" ;
+	ais:nearbyShipCargo "Category A" ;
+	ais:nearbyCallSign "C6KD7" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684666  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684666#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "391.3370047558558"^^xsd:double ;
+	ais:nearbyMMSI "244188824" ;
+	ais:nearbySpeed "2.0"^^xsd:double ;
+	ais:nearbyCourse "328.0"^^xsd:double ;
+	ais:nearbyTrueHeading "32.0"^^xsd:double ;
+	geo:lat "51.344593333333336"^^xsd:double ;
+	geo:lon "4.295438333333333"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684681  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684681#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "740.308683613952"^^xsd:double ;
+	ais:nearbyMMSI "211105987" ;
+	ais:nearbySpeed "7.0"^^xsd:double ;
+	ais:nearbyCourse "0.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34813"^^xsd:double ;
+	geo:lon "4.301295"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684681  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684681#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "760.027548672421"^^xsd:double ;
+	ais:nearbyMMSI "202757211" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "84.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.346455"^^xsd:double ;
+	geo:lon "4.27998"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684681  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684681#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "710.236166161949"^^xsd:double ;
+	ais:nearbyMMSI "247395930" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "93.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34657333333334"^^xsd:double ;
+	geo:lon "4.280691666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684697  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684697#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "621.6387555307233"^^xsd:double ;
+	ais:nearbyMMSI "244030530" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "193.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34824666666667"^^xsd:double ;
+	geo:lon "4.299485000000001"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684697  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684697#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "633.4271910997504"^^xsd:double ;
+	ais:nearbyMMSI "201351696" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "278.0"^^xsd:double ;
+	ais:nearbyTrueHeading "26.0"^^xsd:double ;
+	geo:lat "51.346668333333334"^^xsd:double ;
+	geo:lon "4.281795"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684713  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684713#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "584.7820128627159"^^xsd:double ;
+	ais:nearbyMMSI "244670974" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "296.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34199666666667"^^xsd:double ;
+	geo:lon "4.294725"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684728  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684728#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "382.8997859100615"^^xsd:double ;
+	ais:nearbyMMSI "211501340" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "238.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34393166666667"^^xsd:double ;
+	geo:lon "4.294223333333333"^^xsd:double ;
+	ais:nearbyName "EXCELSIOR" ;
+	ais:nearbyShipType "Cargo" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "DA 5952" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684728  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684728#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "516.8872748615951"^^xsd:double ;
+	ais:nearbyMMSI "205206544" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "290.0"^^xsd:double ;
+	ais:nearbyTrueHeading "24.0"^^xsd:double ;
+	geo:lat "51.35013166666667"^^xsd:double ;
+	geo:lon "4.295871666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684728  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684728#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "364.8746514643572"^^xsd:double ;
+	ais:nearbyMMSI "209631030" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "100.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.34372"^^xsd:double ;
+	geo:lon "4.28864"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684744  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684744#event> a :ProximityInfoEvent ;           
+	ais:MMSI "205280990" ;
+	ais:distance "322.82043895353434"^^xsd:double ;
+	ais:nearbyMMSI "201948183" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "91.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.343783333333334"^^xsd:double ;
+	geo:lon "4.290591666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:Vessel1346837684744  {
+	<http://events.event-processing.org/ids/Vessel1346837684744#event> a :VesselEvent ;           
+	ais:MMSI "253047000" ;
+	geo:lat "51.896179999999994"^^xsd:double ;
+	geo:lon "4.238851666666666"^^xsd:double ;
+	ais:name "AMANDINE" ;
+	ais:shipType "Cargo" ;
+	ais:shipCargo "Category D" ;
+	ais:callSign "LXAM" ;
+	ais:navStatus "Moored" ;
+	ais:windSpeed "0"^^xsd:double ;
+	ais:windDirection "0"^^xsd:double ;
+	ais:speed "0.0"^^xsd:double ;
+	ais:course "286.0"^^xsd:double ;
+	ais:trueHeading "28.6"^^xsd:double ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/VesselFeed#stream> .
+}
+
+e:ProximityInfo1346837684760  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684760#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1963.9025571400198"^^xsd:double ;
+	ais:nearbyMMSI "304475000" ;
+	ais:nearbySpeed "8.0"^^xsd:double ;
+	ais:nearbyCourse "122.0"^^xsd:double ;
+	ais:nearbyTrueHeading "12.0"^^xsd:double ;
+	geo:lat "51.90528666666667"^^xsd:double ;
+	geo:lon "4.26334"^^xsd:double ;
+	ais:nearbyName "NEMUNA" ;
+	ais:nearbyShipType "Cargo" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "V2AR9" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684760  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684760#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2389.561933611173"^^xsd:double ;
+	ais:nearbyMMSI "155145894" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "249.0"^^xsd:double ;
+	ais:nearbyTrueHeading "28.0"^^xsd:double ;
+	geo:lat "51.89463666666666"^^xsd:double ;
+	geo:lon "4.204156666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684775  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684775#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2066.856425162275"^^xsd:double ;
+	ais:nearbyMMSI "240364787" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "303.0"^^xsd:double ;
+	ais:nearbyTrueHeading "30.0"^^xsd:double ;
+	geo:lat "51.91429"^^xsd:double ;
+	geo:lon "4.245486666666666"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684775  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684775#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1303.9612721217222"^^xsd:double ;
+	ais:nearbyMMSI "236302383" ;
+	ais:nearbySpeed "7.0"^^xsd:double ;
+	ais:nearbyCourse "321.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.897725"^^xsd:double ;
+	geo:lon "4.220035"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684791  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684791#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2261.470674927338"^^xsd:double ;
+	ais:nearbyMMSI "245290369" ;
+	ais:nearbySpeed "10.0"^^xsd:double ;
+	ais:nearbyCourse "118.0"^^xsd:double ;
+	ais:nearbyTrueHeading "12.0"^^xsd:double ;
+	geo:lat "51.90333333333333"^^xsd:double ;
+	geo:lon "4.269666666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684791  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684791#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2186.5583777370443"^^xsd:double ;
+	ais:nearbyMMSI "211515350" ;
+	ais:nearbySpeed "10.0"^^xsd:double ;
+	ais:nearbyCourse "302.0"^^xsd:double ;
+	ais:nearbyTrueHeading "30.0"^^xsd:double ;
+	geo:lat "51.90636166666666"^^xsd:double ;
+	geo:lon "4.266075"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684806  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684806#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2024.07948664979"^^xsd:double ;
+	ais:nearbyMMSI "257409016" ;
+	ais:nearbySpeed "8.0"^^xsd:double ;
+	ais:nearbyCourse "129.0"^^xsd:double ;
+	ais:nearbyTrueHeading "12.0"^^xsd:double ;
+	geo:lat "51.91416666666667"^^xsd:double ;
+	geo:lon "4.243166666666666"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684806  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684806#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1885.1221996226577"^^xsd:double ;
+	ais:nearbyMMSI "212794968" ;
+	ais:nearbySpeed "17.0"^^xsd:double ;
+	ais:nearbyCourse "122.0"^^xsd:double ;
+	ais:nearbyTrueHeading "12.0"^^xsd:double ;
+	geo:lat "51.907358333333335"^^xsd:double ;
+	geo:lon "4.259468333333333"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684806  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684806#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1847.9128974934224"^^xsd:double ;
+	ais:nearbyMMSI "244495608" ;
+	ais:nearbySpeed "8.0"^^xsd:double ;
+	ais:nearbyCourse "126.0"^^xsd:double ;
+	ais:nearbyTrueHeading "12.0"^^xsd:double ;
+	geo:lat "51.911231666666666"^^xsd:double ;
+	geo:lon "4.2501983333333335"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684822  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684822#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1919.9197849781751"^^xsd:double ;
+	ais:nearbyMMSI "211233912" ;
+	ais:nearbySpeed "10.0"^^xsd:double ;
+	ais:nearbyCourse "126.0"^^xsd:double ;
+	ais:nearbyTrueHeading "12.0"^^xsd:double ;
+	geo:lat "51.912130000000005"^^xsd:double ;
+	geo:lon "4.249486666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684822  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684822#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2206.2695009531267"^^xsd:double ;
+	ais:nearbyMMSI "116324506" ;
+	ais:nearbySpeed "10.0"^^xsd:double ;
+	ais:nearbyCourse "131.0"^^xsd:double ;
+	ais:nearbyTrueHeading "12.0"^^xsd:double ;
+	geo:lat "51.91599833333333"^^xsd:double ;
+	geo:lon "4.239161666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684822  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684822#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2429.413282598839"^^xsd:double ;
+	ais:nearbyMMSI "244528019" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "122.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.90092"^^xsd:double ;
+	geo:lon "4.273375"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684822  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684822#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2329.922535870714"^^xsd:double ;
+	ais:nearbyMMSI "244100284" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "141.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.91702333333333"^^xsd:double ;
+	geo:lon "4.235766666666667"^^xsd:double ;
+	ais:nearbyName "SCOPE" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684838  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684838#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2298.3988072577554"^^xsd:double ;
+	ais:nearbyMMSI "244734110" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "120.0"^^xsd:double ;
+	ais:nearbyTrueHeading "50.0"^^xsd:double ;
+	geo:lat "51.88268"^^xsd:double ;
+	geo:lon "4.264163333333333"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684838  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684838#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2266.906024691952"^^xsd:double ;
+	ais:nearbyMMSI "314216988" ;
+	ais:nearbySpeed "7.0"^^xsd:double ;
+	ais:nearbyCourse "124.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.902365"^^xsd:double ;
+	geo:lon "4.270295"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684838  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684838#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1827.233960209442"^^xsd:double ;
+	ais:nearbyMMSI "243874696" ;
+	ais:nearbySpeed "10.0"^^xsd:double ;
+	ais:nearbyCourse "122.0"^^xsd:double ;
+	ais:nearbyTrueHeading "12.0"^^xsd:double ;
+	geo:lat "51.91126666666666"^^xsd:double ;
+	geo:lon "4.249333333333333"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684853  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684853#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2020.2820125307758"^^xsd:double ;
+	ais:nearbyMMSI "636015186" ;
+	ais:nearbySpeed "9.0"^^xsd:double ;
+	ais:nearbyCourse "306.0"^^xsd:double ;
+	ais:nearbyTrueHeading "30.0"^^xsd:double ;
+	geo:lat "51.91382833333333"^^xsd:double ;
+	geo:lon "4.24571"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684853  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684853#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2232.2719239697904"^^xsd:double ;
+	ais:nearbyMMSI "211480102" ;
+	ais:nearbySpeed "11.0"^^xsd:double ;
+	ais:nearbyCourse "159.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.91347"^^xsd:double ;
+	geo:lon "4.222388333333333"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684900  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684900#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1110.6035446160595"^^xsd:double ;
+	ais:nearbyMMSI "243684998" ;
+	ais:nearbySpeed "8.0"^^xsd:double ;
+	ais:nearbyCourse "282.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.90136666666667"^^xsd:double ;
+	geo:lon "4.22504"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684900  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684900#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1733.3006801383005"^^xsd:double ;
+	ais:nearbyMMSI "244660374" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "130.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.911455000000004"^^xsd:double ;
+	geo:lon "4.243745"^^xsd:double ;
+	ais:nearbyName "STAELDIEP" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "PD4369" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684916  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684916#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2216.7742176996026"^^xsd:double ;
+	ais:nearbyMMSI "243597824" ;
+	ais:nearbySpeed "8.0"^^xsd:double ;
+	ais:nearbyCourse "301.0"^^xsd:double ;
+	ais:nearbyTrueHeading "30.0"^^xsd:double ;
+	geo:lat "51.904869999999995"^^xsd:double ;
+	geo:lon "4.2678899999999995"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684916  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684916#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1788.3822094316918"^^xsd:double ;
+	ais:nearbyMMSI "244740804" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "176.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.880536666666664"^^xsd:double ;
+	geo:lon "4.232925"^^xsd:double ;
+	ais:nearbyName "LA BLANCA" ;
+	ais:nearbyShipType "Cargo" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "PD3139" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684916  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684916#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2238.824718664433"^^xsd:double ;
+	ais:nearbyMMSI "219318000" ;
+	ais:nearbySpeed "10.0"^^xsd:double ;
+	ais:nearbyCourse "135.0"^^xsd:double ;
+	ais:nearbyTrueHeading "13.0"^^xsd:double ;
+	geo:lat "51.916291666666666"^^xsd:double ;
+	geo:lon "4.238915"^^xsd:double ;
+	ais:nearbyName "FLANDRIA SEAWAYS" ;
+	ais:nearbyShipType "Cargo" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "OZOJ2" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684931  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684931#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2313.92408096589"^^xsd:double ;
+	ais:nearbyMMSI "244700414" ;
+	ais:nearbySpeed "8.0"^^xsd:double ;
+	ais:nearbyCourse "337.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.91445"^^xsd:double ;
+	geo:lon "4.222783333333333"^^xsd:double ;
+	ais:nearbyName "KRALINGEN" ;
+	ais:nearbyShipType "Tanker" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "PF9089" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684931  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684931#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "745.3899687881802"^^xsd:double ;
+	ais:nearbyMMSI "244738405" ;
+	ais:nearbySpeed "3.0"^^xsd:double ;
+	ais:nearbyCourse "144.0"^^xsd:double ;
+	ais:nearbyTrueHeading "49.0"^^xsd:double ;
+	geo:lat "51.893164999999996"^^xsd:double ;
+	geo:lon "4.229163333333333"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684931  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684931#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "1830.9851238680214"^^xsd:double ;
+	ais:nearbyMMSI "23788862" ;
+	ais:nearbySpeed "11.0"^^xsd:double ;
+	ais:nearbyCourse "336.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.87994666666667"^^xsd:double ;
+	geo:lon "4.23456"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684947  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684947#event> a :ProximityInfoEvent ;           
+	ais:MMSI "253047000" ;
+	ais:distance "2439.322347695265"^^xsd:double ;
+	ais:nearbyMMSI "210605039" ;
+	ais:nearbySpeed "11.0"^^xsd:double ;
+	ais:nearbyCourse "138.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "51.91793500000001"^^xsd:double ;
+	geo:lon "4.234596666666667"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:Vessel1346837684963  {
+	<http://events.event-processing.org/ids/Vessel1346837684963#event> a :VesselEvent ;           
+	ais:MMSI "257126900" ;
+	geo:lat "59.881388333333334"^^xsd:double ;
+	geo:lon "10.615438333333334"^^xsd:double ;
+	ais:name "IN EXCESS" ;
+	ais:shipType "Undefined" ;
+	ais:shipCargo "Undefined" ;
+	ais:callSign "LKZF" ;
+	ais:navStatus "Not defined" ;
+	ais:windSpeed "0"^^xsd:double ;
+	ais:windDirection "0"^^xsd:double ;
+	ais:speed "102.3"^^xsd:double ;
+	ais:course "360.0"^^xsd:double ;
+	ais:trueHeading "51.1"^^xsd:double ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/VesselFeed#stream> .
+}
+
+e:ProximityInfo1346837684978  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684978#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "1418.7470124609144"^^xsd:double ;
+	ais:nearbyMMSI "258579310" ;
+	ais:nearbySpeed "7.0"^^xsd:double ;
+	ais:nearbyCourse "192.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.88097333333334"^^xsd:double ;
+	geo:lon "10.640823333333334"^^xsd:double ;
+	ais:nearbyName "THE BEACH" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684978  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684978#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "6239.290306246857"^^xsd:double ;
+	ais:nearbyMMSI "211809000" ;
+	ais:nearbySpeed "8.0"^^xsd:double ;
+	ais:nearbyCourse "196.0"^^xsd:double ;
+	ais:nearbyTrueHeading "19.0"^^xsd:double ;
+	geo:lat "59.82895666666666"^^xsd:double ;
+	geo:lon "10.575995"^^xsd:double ;
+	ais:nearbyName "JANA" ;
+	ais:nearbyShipType "Tanker" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "DFIH" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684978  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684978#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "5781.240687178928"^^xsd:double ;
+	ais:nearbyMMSI "257509180" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "35.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.913221666666665"^^xsd:double ;
+	geo:lon "10.697251666666666"^^xsd:double ;
+	ais:nearbyName "FIRST WE TAKEC" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684994  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684994#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "4126.116021650039"^^xsd:double ;
+	ais:nearbyMMSI "257713950" ;
+	ais:nearbySpeed "17.0"^^xsd:double ;
+	ais:nearbyCourse "23.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.844475"^^xsd:double ;
+	geo:lon "10.608755"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684994  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684994#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "1998.983398887119"^^xsd:double ;
+	ais:nearbyMMSI "257734590" ;
+	ais:nearbySpeed "2.0"^^xsd:double ;
+	ais:nearbyCourse "152.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.89788"^^xsd:double ;
+	geo:lon "10.601275"^^xsd:double ;
+	ais:nearbyName "HYAKA" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837684994  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837684994#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "3481.7719549358794"^^xsd:double ;
+	ais:nearbyMMSI "258168500" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "221.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.87368666666667"^^xsd:double ;
+	geo:lon "10.555033333333334"^^xsd:double ;
+	ais:nearbyName "BRANNBAT ASKER BARUF" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:44Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685010  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685010#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "3152.248681878913"^^xsd:double ;
+	ais:nearbyMMSI "257523680" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "127.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.86849666666667"^^xsd:double ;
+	geo:lon "10.665673333333332"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685010  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685010#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "6994.6504901702065"^^xsd:double ;
+	ais:nearbyMMSI "258107730" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "311.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.847698333333334"^^xsd:double ;
+	geo:lon "10.509793333333333"^^xsd:double ;
+	ais:nearbyName "STOR STAS" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685010  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685010#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "5598.460427978678"^^xsd:double ;
+	ais:nearbyMMSI "257754090" ;
+	ais:nearbySpeed "2.0"^^xsd:double ;
+	ais:nearbyCourse "231.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.909625"^^xsd:double ;
+	geo:lon "10.698409999999999"^^xsd:double ;
+	ais:nearbyName "RANJA" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685025  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685025#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "6652.3426592414535"^^xsd:double ;
+	ais:nearbyMMSI "265639680" ;
+	ais:nearbySpeed "3.0"^^xsd:double ;
+	ais:nearbyCourse "214.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.90672"^^xsd:double ;
+	geo:lon "10.723341666666666"^^xsd:double ;
+	ais:nearbyName "SALLE III" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685025  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685025#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "2223.8350393120636"^^xsd:double ;
+	ais:nearbyMMSI "257052500" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "255.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.87464833333333"^^xsd:double ;
+	geo:lon "10.652911666666666"^^xsd:double ;
+	ais:nearbyName "S/Y MOHAWK II      #" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685041  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685041#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "4518.536461419341"^^xsd:double ;
+	ais:nearbyMMSI "257776770" ;
+	ais:nearbySpeed "7.0"^^xsd:double ;
+	ais:nearbyCourse "102.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.86873833333333"^^xsd:double ;
+	geo:lon "10.692286666666666"^^xsd:double ;
+	ais:nearbyName "ALONAC" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685041  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685041#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "6274.815383683569"^^xsd:double ;
+	ais:nearbyMMSI "235015114" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "201.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.825309999999995"^^xsd:double ;
+	geo:lon "10.604081666666668"^^xsd:double ;
+	ais:nearbyName "NOMAD" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685072  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685072#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "2631.725019282325"^^xsd:double ;
+	ais:nearbyMMSI "257788740" ;
+	ais:nearbySpeed "7.0"^^xsd:double ;
+	ais:nearbyCourse "37.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.880046666666665"^^xsd:double ;
+	geo:lon "10.662475"^^xsd:double ;
+	ais:nearbyName "SAFIR" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685072  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685072#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "2331.4639900002526"^^xsd:double ;
+	ais:nearbyMMSI "257519250" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "42.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.86745666666666"^^xsd:double ;
+	geo:lon "10.646596666666666"^^xsd:double ;
+	ais:nearbyName "RUBICON" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685088  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685088#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "6258.525468615422"^^xsd:double ;
+	ais:nearbyMMSI "258087060" ;
+	ais:nearbySpeed "3.0"^^xsd:double ;
+	ais:nearbyCourse "164.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.86205833333334"^^xsd:double ;
+	geo:lon "10.510258333333333"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685088  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685088#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "0.0"^^xsd:double ;
+	ais:nearbyMMSI "257126900" ;
+	ais:nearbySpeed "102.0"^^xsd:double ;
+	ais:nearbyCourse "360.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.881388333333334"^^xsd:double ;
+	geo:lon "10.615438333333334"^^xsd:double ;
+	ais:nearbyName "IN EXCESS" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "LKZF" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685088  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685088#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "5960.98587706886"^^xsd:double ;
+	ais:nearbyMMSI "257590790" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "205.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.82799833333333"^^xsd:double ;
+	geo:lon "10.607241666666665"^^xsd:double ;
+	ais:nearbyName "ML" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685088  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685088#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "6293.313645997437"^^xsd:double ;
+	ais:nearbyMMSI "265696100" ;
+	ais:nearbySpeed "8.0"^^xsd:double ;
+	ais:nearbyCourse "53.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.903025"^^xsd:double ;
+	geo:lon "10.719558333333334"^^xsd:double ;
+	ais:nearbyName "PENTA 60" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685103  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685103#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "4095.395845322122"^^xsd:double ;
+	ais:nearbyMMSI "257996790" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "230.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.91251"^^xsd:double ;
+	geo:lon "10.654554999999998"^^xsd:double ;
+	ais:nearbyName "PINOCCIO" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685103  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685103#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "2169.4547166812526"^^xsd:double ;
+	ais:nearbyMMSI "257885290" ;
+	ais:nearbySpeed "27.0"^^xsd:double ;
+	ais:nearbyCourse "200.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.88872666666667"^^xsd:double ;
+	geo:lon "10.651421666666666"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685103  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685103#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "6649.461090590239"^^xsd:double ;
+	ais:nearbyMMSI "219011038" ;
+	ais:nearbySpeed "11.0"^^xsd:double ;
+	ais:nearbyCourse "58.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.900380000000006"^^xsd:double ;
+	geo:lon "10.728333333333333"^^xsd:double ;
+	ais:nearbyName "FRB - PEARL SEAWAYS" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685119  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685119#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "4646.412516956154"^^xsd:double ;
+	ais:nearbyMMSI "258537410" ;
+	ais:nearbySpeed "12.0"^^xsd:double ;
+	ais:nearbyCourse "215.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.841408333333334"^^xsd:double ;
+	geo:lon "10.63932"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685119  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685119#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "1917.45956294761"^^xsd:double ;
+	ais:nearbyMMSI "258097730" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "197.0"^^xsd:double ;
+	ais:nearbyTrueHeading "19.0"^^xsd:double ;
+	geo:lat "59.86493333333333"^^xsd:double ;
+	geo:lon "10.625583333333333"^^xsd:double ;
+	ais:nearbyName "TANGO KILOC" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685119  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685119#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "5241.625591608833"^^xsd:double ;
+	ais:nearbyMMSI "258110540" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "250.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.840138333333336"^^xsd:double ;
+	geo:lon "10.570216666666665"^^xsd:double ;
+	ais:nearbyName "ADELE" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685119  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685119#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "6036.376594435242"^^xsd:double ;
+	ais:nearbyMMSI "257786990" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "329.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.894713333333335"^^xsd:double ;
+	geo:lon "10.72021"^^xsd:double ;
+	ais:nearbyName "BAB" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685119  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685119#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "5708.778085256345"^^xsd:double ;
+	ais:nearbyMMSI "257555790" ;
+	ais:nearbySpeed "3.0"^^xsd:double ;
+	ais:nearbyCourse "329.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.91211833333333"^^xsd:double ;
+	geo:lon "10.697295"^^xsd:double ;
+	ais:nearbyName "PITERAQ" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685135  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685135#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "617.4028763856313"^^xsd:double ;
+	ais:nearbyMMSI "258002610" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "67.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.87625"^^xsd:double ;
+	geo:lon "10.619598333333332"^^xsd:double ;
+	ais:nearbyName "IMPULSA" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685135  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685135#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "4769.620123178848"^^xsd:double ;
+	ais:nearbyMMSI "257965890" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "5.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.846003333333336"^^xsd:double ;
+	geo:lon "10.567316666666667"^^xsd:double ;
+	ais:nearbyName "LITEN COOLING" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685135  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685135#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "4391.430380337228"^^xsd:double ;
+	ais:nearbyMMSI "258088520" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "235.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.894753333333334"^^xsd:double ;
+	geo:lon "10.68942"^^xsd:double ;
+	ais:nearbyName "AWESOMEB" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685150  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685150#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "3087.0265687787432"^^xsd:double ;
+	ais:nearbyMMSI "258999189" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "46.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.88483"^^xsd:double ;
+	geo:lon "10.670278333333332"^^xsd:double ;
+	ais:nearbyName "NUNATAK            C" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685150  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685150#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "5693.990097141459"^^xsd:double ;
+	ais:nearbyMMSI "257861780" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "330.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.906756666666666"^^xsd:double ;
+	geo:lon "10.703986666666667"^^xsd:double ;
+	ais:nearbyName "MY WAY" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685166  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685166#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "2210.8532884920232"^^xsd:double ;
+	ais:nearbyMMSI "257867480" ;
+	ais:nearbySpeed "1.0"^^xsd:double ;
+	ais:nearbyCourse "112.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.87694166666667"^^xsd:double ;
+	geo:lon "10.576866666666666"^^xsd:double ;
+	ais:nearbyName "LURIFAXC" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685166  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685166#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "4686.3211070154375"^^xsd:double ;
+	ais:nearbyMMSI "258027320" ;
+	ais:nearbySpeed "7.0"^^xsd:double ;
+	ais:nearbyCourse "48.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.896139999999995"^^xsd:double ;
+	geo:lon "10.694031666666666"^^xsd:double ;
+	ais:nearbyName "SJIRAFF" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685166  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685166#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "2381.535863754942"^^xsd:double ;
+	ais:nearbyMMSI "257843590" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "206.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.863791666666664"^^xsd:double ;
+	geo:lon "10.63968"^^xsd:double ;
+	ais:nearbyName "NEFERTITI" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685166  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685166#event> a :ProximityInfoEvent ;           
+	ais:MMSI "257126900" ;
+	ais:distance "5418.65993360129"^^xsd:double ;
+	ais:nearbyMMSI "257740570" ;
+	ais:nearbySpeed "2.0"^^xsd:double ;
+	ais:nearbyCourse "183.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "59.90936"^^xsd:double ;
+	geo:lon "10.694861666666666"^^xsd:double ;
+	ais:nearbyName "FIAB" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:Vessel1346837685181  {
+	<http://events.event-processing.org/ids/Vessel1346837685181#event> a :VesselEvent ;           
+	ais:MMSI "244710317" ;
+	geo:lat "52.687374999999996"^^xsd:double ;
+	geo:lon "5.270865"^^xsd:double ;
+	ais:name "PASSIE EN STRIJD" ;
+	ais:shipType "Pleasure" ;
+	ais:shipCargo "Undefined" ;
+	ais:callSign "PG5974" ;
+	ais:navStatus "Under way using engine" ;
+	ais:windSpeed "0"^^xsd:double ;
+	ais:windDirection "0"^^xsd:double ;
+	ais:speed "0.0"^^xsd:double ;
+	ais:course "0.0"^^xsd:double ;
+	ais:trueHeading "51.1"^^xsd:double ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/VesselFeed#stream> .
+}
+
+e:ProximityInfo1346837685181  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685181#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1814.9742201274248"^^xsd:double ;
+	ais:nearbyMMSI "244650984" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "10.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.693023333333336"^^xsd:double ;
+	geo:lon "5.296098333333333"^^xsd:double ;
+	ais:nearbyName "ESCAPE" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685181  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685181#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1981.4114176857447"^^xsd:double ;
+	ais:nearbyMMSI "244710326" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "170.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.69835166666667"^^xsd:double ;
+	geo:lon "5.293983333333333"^^xsd:double ;
+	ais:nearbyName "YOLANDA" ;
+	ais:nearbyShipType "Pleasure" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "PH7361" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685197  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685197#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1793.381851137121"^^xsd:double ;
+	ais:nearbyMMSI "244260865" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "358.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.693018333333335"^^xsd:double ;
+	geo:lon "5.2957600000000005"^^xsd:double ;
+	ais:nearbyName "CHARLOTTE LOUISE" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685197  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685197#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1382.578255277545"^^xsd:double ;
+	ais:nearbyMMSI "211530550" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "31.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.687175"^^xsd:double ;
+	geo:lon "5.291351666666667"^^xsd:double ;
+	ais:nearbyName "RESOLUTE" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685197  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685197#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1302.8453211742556"^^xsd:double ;
+	ais:nearbyMMSI "244770373" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "241.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.68698"^^xsd:double ;
+	geo:lon "5.290161666666666"^^xsd:double ;
+	ais:nearbyName "AMIDEAUB" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685213  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685213#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "2094.9049994327515"^^xsd:double ;
+	ais:nearbyMMSI "244730271" ;
+	ais:nearbySpeed "2.0"^^xsd:double ;
+	ais:nearbyCourse "70.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.698933333333336"^^xsd:double ;
+	geo:lon "5.295368333333333"^^xsd:double ;
+	ais:nearbyName "SOLID SUE" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685213  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685213#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1659.5313542422298"^^xsd:double ;
+	ais:nearbyMMSI "244740019" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "215.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.673721666666665"^^xsd:double ;
+	geo:lon "5.2609916666666665"^^xsd:double ;
+	ais:nearbyName "VOORUITGANG" ;
+	ais:nearbyShipType "Pleasure" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "PD2554" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685228  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685228#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1768.2865822492868"^^xsd:double ;
+	ais:nearbyMMSI "244050447" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "352.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.69857833333333"^^xsd:double ;
+	geo:lon "5.289445"^^xsd:double ;
+	ais:nearbyName "PAVANE" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685228  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685228#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "611.8465639212401"^^xsd:double ;
+	ais:nearbyMMSI "244650627" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "233.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.683205"^^xsd:double ;
+	geo:lon "5.276771666666666"^^xsd:double ;
+	ais:nearbyName "" ;
+	ais:nearbyShipType "" ;
+	ais:nearbyShipCargo "" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685244  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685244#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1578.5844119879232"^^xsd:double ;
+	ais:nearbyMMSI "246065030" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "196.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.67342833333333"^^xsd:double ;
+	geo:lon "5.266633333333333"^^xsd:double ;
+	ais:nearbyName "NEW CONCEPTB" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685244  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685244#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1769.2031263817425"^^xsd:double ;
+	ais:nearbyMMSI "244020262" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "169.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.693234999999994"^^xsd:double ;
+	geo:lon "5.295238333333333"^^xsd:double ;
+	ais:nearbyName "ALTEZZA" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685244  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685244#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1974.1587470860447"^^xsd:double ;
+	ais:nearbyMMSI "244391118" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "214.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.671465"^^xsd:double ;
+	geo:lon "5.257943333333333"^^xsd:double ;
+	ais:nearbyName "EABORA" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685260  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685260#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "669.3017856868248"^^xsd:double ;
+	ais:nearbyMMSI "244660623" ;
+	ais:nearbySpeed "6.0"^^xsd:double ;
+	ais:nearbyCourse "45.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.682225"^^xsd:double ;
+	geo:lon "5.2759833333333335"^^xsd:double ;
+	ais:nearbyName "DE RUITER" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685260  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685260#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "644.2391334517868"^^xsd:double ;
+	ais:nearbyMMSI "211294790" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "40.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.68282833333333"^^xsd:double ;
+	geo:lon "5.276771666666666"^^xsd:double ;
+	ais:nearbyName "BUTENDIEKS" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685260  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685260#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1432.8374197224935"^^xsd:double ;
+	ais:nearbyMMSI "244710488" ;
+	ais:nearbySpeed "5.0"^^xsd:double ;
+	ais:nearbyCourse "222.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.67532166666667"^^xsd:double ;
+	geo:lon "5.263416666666667"^^xsd:double ;
+	ais:nearbyName "GAIA" ;
+	ais:nearbyShipType "Passenger" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "PF8943" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685306  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685306#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "2041.7440473395711"^^xsd:double ;
+	ais:nearbyMMSI "244090010" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "291.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.69945833333334"^^xsd:double ;
+	geo:lon "5.293631666666667"^^xsd:double ;
+	ais:nearbyName "BONGO" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
+e:ProximityInfo1346837685306  {
+	<http://events.event-processing.org/ids/ProximityInfo1346837685306#event> a :ProximityInfoEvent ;           
+	ais:MMSI "244710317" ;
+	ais:distance "1398.6262618762614"^^xsd:double ;
+	ais:nearbyMMSI "244615629" ;
+	ais:nearbySpeed "4.0"^^xsd:double ;
+	ais:nearbyCourse "251.0"^^xsd:double ;
+	ais:nearbyTrueHeading "51.0"^^xsd:double ;
+	geo:lat "52.687466666666666"^^xsd:double ;
+	geo:lon "5.291591666666666"^^xsd:double ;
+	ais:nearbyName "LIESEL" ;
+	ais:nearbyShipType "Undefined" ;
+	ais:nearbyShipCargo "Undefined" ;
+	ais:nearbyCallSign "" ;
+	:endTime  "2012-09-05T09:34:45Z"^^xsd:dateTime ;              
+	:stream  <http://streams.event-processing.org/ids/ProximityInfoFeed#stream> .
+}
+
