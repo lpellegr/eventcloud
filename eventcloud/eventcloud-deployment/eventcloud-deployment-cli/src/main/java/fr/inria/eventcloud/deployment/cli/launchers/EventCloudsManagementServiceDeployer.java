@@ -87,6 +87,8 @@ public class EventCloudsManagementServiceDeployer {
      * @param activateLoggers
      *            {@code true} if the loggers have to be activated,
      *            {@code false} otherwise.
+     * @param properties
+     *            additional Java properties set to the new JVM.
      * 
      * @return the endpoint URL of the EventClouds Management Service.
      * 
@@ -95,7 +97,8 @@ public class EventCloudsManagementServiceDeployer {
      */
     public synchronized static String deploy(boolean onRelease, int port,
                                              String urlSuffix,
-                                             boolean activateLoggers)
+                                             boolean activateLoggers,
+                                             String... properties)
             throws IOException {
         if (eventCloudsManagementServiceProcess == null) {
             String binariesBaseUrl = EVENTCLOUD_BINARIES_URL;
@@ -121,6 +124,10 @@ public class EventCloudsManagementServiceDeployer {
 
             cmd.addAll(addProperties(
                     binariesBaseUrl + "resources/", activateLoggers));
+
+            for (String property : properties) {
+                cmd.add(property);
+            }
 
             cmd.add(EventCloudsManagementServiceDeployer.class.getCanonicalName());
             cmd.add(Integer.toString(port));
