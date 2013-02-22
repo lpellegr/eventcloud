@@ -38,6 +38,12 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.webservices.deployment.WsDeployer;
 
+/**
+ * Deployer to ease the deployment of an EventCloudsRegistry and an EventClouds
+ * Management Service in a separate JVM.
+ * 
+ * @author bsauvan
+ */
 public class EventCloudsManagementServiceDeployer {
 
     private static final String EVENTCLOUD_BINARIES_URL =
@@ -65,6 +71,28 @@ public class EventCloudsManagementServiceDeployer {
         });
     }
 
+    /**
+     * Deploys an EventCloudsRegistry and an EventClouds Management Service in a
+     * separate JVM according to the specified parameters.
+     * 
+     * @param onRelease
+     *            {@code true} if the lastest release of the EventCloud has to
+     *            be used, {@code false} to use the latest snapshot version.
+     * @param port
+     *            the port used to deploy the EventClouds Management Service and
+     *            which will also be used to deploy WS-Notification services.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            EventClouds Management Service to be deployed.
+     * @param activateLoggers
+     *            {@code true} if the loggers have to be activated,
+     *            {@code false} otherwise.
+     * 
+     * @return the endpoint URL of the EventClouds Management Service.
+     * 
+     * @throws IOException
+     *             if an error occurs during the deployment.
+     */
     public synchronized static String deploy(boolean onRelease, int port,
                                              String urlSuffix,
                                              boolean activateLoggers)
@@ -83,11 +111,9 @@ public class EventCloudsManagementServiceDeployer {
             String javaBinaryPath =
                     System.getProperty("java.home") + File.separator + "bin"
                             + File.separator + "java";
-
             if (System.getProperty("os.name").startsWith("Windows")) {
                 javaBinaryPath = javaBinaryPath + ".exe";
             }
-
             cmd.add(javaBinaryPath);
 
             cmd.add("-cp");
