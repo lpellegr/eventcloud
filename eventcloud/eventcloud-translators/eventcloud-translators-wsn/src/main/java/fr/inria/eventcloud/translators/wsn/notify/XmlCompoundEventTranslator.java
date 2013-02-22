@@ -55,11 +55,10 @@ public class XmlCompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
     // used only to have the possibility to create DOM elements
-    private static Document DOCUMENT = DocumentBuilder.createDocument();
+    private Document document;
 
-    private static XmlCompoundEventTranslator instance;
-
-    private XmlCompoundEventTranslator() {
+    public XmlCompoundEventTranslator() {
+        this.document = DocumentBuilder.createDocument();
     }
 
     /**
@@ -168,12 +167,12 @@ public class XmlCompoundEventTranslator extends
 
     private Element createMetadataElement(QName qname, String value) {
         Element metadataElt =
-                DOCUMENT.createElementNS(
+                this.document.createElementNS(
                         WsnConstants.PRODUCER_METADATA_NAMESPACE, "Metadata");
         Element childElt =
-                DOCUMENT.createElementNS(
+                this.document.createElementNS(
                         qname.getNamespaceURI(), qname.getLocalPart());
-        Text textNode = DOCUMENT.createTextNode(value);
+        Text textNode = this.document.createTextNode(value);
 
         metadataElt.appendChild(childElt);
         childElt.appendChild(textNode);
@@ -183,14 +182,6 @@ public class XmlCompoundEventTranslator extends
 
     private Element getMetadataElement(Quadruple quad) {
         return this.createElement(quad);
-    }
-
-    private static Element createElementFrom(String namespace, String localName) {
-        if (namespace.isEmpty()) {
-            return DOCUMENT.createElement(localName);
-        } else {
-            return DOCUMENT.createElementNS(namespace, localName);
-        }
     }
 
     private static Element findByName(org.w3c.dom.Node node, String namespace,
@@ -274,14 +265,14 @@ public class XmlCompoundEventTranslator extends
                     // here we assume we have only one element that matches
                     Element elt =
                             namespace.isEmpty()
-                                    ? DOCUMENT.createElement(localName)
-                                    : DOCUMENT.createElementNS(
+                                    ? this.document.createElement(localName)
+                                    : this.document.createElementNS(
                                             namespace, localName);
                     lastElt.appendChild(elt);
                     lastElt = elt;
 
                     if (i == elements.length - 1) {
-                        lastElt.appendChild(DOCUMENT.createTextNode(quadruple.getObject()
+                        lastElt.appendChild(this.document.createTextNode(quadruple.getObject()
                                 .getLiteralLexicalForm()
                                 .replaceAll(WsnConstants.SHARP_ESCAPE, "#")));
                     }
@@ -321,7 +312,7 @@ public class XmlCompoundEventTranslator extends
         String[] parts = splitUri(elements[0]);
         String namespace = parts[0];
         String localName = parts[1];
-        Element rootElt = createElementFrom(namespace, localName);
+        Element rootElt = this.createElementFrom(namespace, localName);
         Element lastElt = rootElt;
 
         // iterates on the String elements extracted from the predicate
@@ -332,13 +323,14 @@ public class XmlCompoundEventTranslator extends
 
             Element elt =
                     namespace.isEmpty()
-                            ? DOCUMENT.createElement(localName)
-                            : DOCUMENT.createElementNS(namespace, localName);
+                            ? this.document.createElement(localName)
+                            : this.document.createElementNS(
+                                    namespace, localName);
             lastElt.appendChild(elt);
             lastElt = elt;
 
             if (i == elements.length - 1) {
-                lastElt.appendChild(DOCUMENT.createTextNode(quadruple.getObject()
+                lastElt.appendChild(this.document.createTextNode(quadruple.getObject()
                         .getLiteralLexicalForm()
                         .replaceAll(WsnConstants.SHARP_ESCAPE, "#")));
             }
@@ -360,6 +352,14 @@ public class XmlCompoundEventTranslator extends
         return elements;
     }
 
+    private Element createElementFrom(String namespace, String localName) {
+        if (namespace.isEmpty()) {
+            return this.document.createElement(localName);
+        } else {
+            return this.document.createElementNS(namespace, localName);
+        }
+    }
+
     private static String[] splitUri(String uri) {
         if (uri.endsWith("/")) {
             uri = uri.substring(0, uri.length() - 1);
@@ -373,14 +373,6 @@ public class XmlCompoundEventTranslator extends
             return new String[] {
                     uri.substring(0, slashIndex), uri.substring(slashIndex + 1)};
         }
-    }
-
-    public static synchronized XmlCompoundEventTranslator getInstance() {
-        if (instance == null) {
-            instance = new XmlCompoundEventTranslator();
-        }
-
-        return instance;
     }
 
 }

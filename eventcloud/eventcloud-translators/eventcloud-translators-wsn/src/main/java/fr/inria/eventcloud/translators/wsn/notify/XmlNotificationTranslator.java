@@ -76,9 +76,7 @@ public class XmlNotificationTranslator extends
     private static Logger log =
             LoggerFactory.getLogger(XmlNotificationTranslator.class);
 
-    private static XmlNotificationTranslator instance;
-
-    private XmlNotificationTranslator() {
+    public XmlNotificationTranslator() {
 
     }
 
@@ -377,14 +375,6 @@ public class XmlNotificationTranslator extends
                 }
             }
         }
-    }
-
-    public static synchronized XmlNotificationTranslator getInstance() {
-        if (instance == null) {
-            instance = new XmlNotificationTranslator();
-        }
-
-        return instance;
     }
 
 }
