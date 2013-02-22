@@ -64,7 +64,7 @@ import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
- * Translator for {@link NotificationMessageHolderType} notification messages to
+ * Translator for {@link NotificationMessageHolderType notification messages} to
  * {@link CompoundEvent events}.
  * 
  * @author bsauvan
