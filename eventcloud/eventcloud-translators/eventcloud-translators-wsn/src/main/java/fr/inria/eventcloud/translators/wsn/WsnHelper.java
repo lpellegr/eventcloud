@@ -273,7 +273,7 @@ public class WsnHelper {
 
         notificationMessage.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
 
-        notificationMessage.setTopic(createTopicExpressionType(topic));
+        notificationMessage.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
 
         notificationMessage.setProducerReference(createW3cEndpointReference(producerReference));
 
@@ -311,15 +311,16 @@ public class WsnHelper {
         Notify notify = new Notify();
 
         for (CompoundEvent event : compoundEvents) {
-            NotificationMessageHolderType message = translator.translate(event);
-            message.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
+            NotificationMessageHolderType notificationMessage =
+                    translator.translate(event);
+            notificationMessage.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
             if (event.getGraph().getURI().endsWith(
                     WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
-                message.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
+                notificationMessage.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
             } else {
-                message.setTopic(createTopicExpressionType(topic));
+                notificationMessage.setTopic(createTopicExpressionType(topic));
             }
-            notify.getNotificationMessage().add(message);
+            notify.getNotificationMessage().add(notificationMessage);
         }
 
         return notify;
@@ -509,10 +510,6 @@ public class WsnHelper {
                                     .equals(topicPrefix)) {
                         topicNamespace = entry.getValue();
 
-                        if (!topicNamespace.endsWith("/")) {
-                            topicNamespace = topicNamespace + "/";
-                        }
-
                         break;
                     }
                 }
@@ -537,6 +534,10 @@ public class WsnHelper {
                 }
             }
 
+            if ((topicNamespace != null) && (!topicNamespace.endsWith("/"))) {
+                topicNamespace = topicNamespace + "/";
+            }
+
             return new QName(topicNamespace, topicLocalPart, topicPrefix);
         } else {
             throw new IllegalArgumentException("No topic content set");
@@ -546,14 +547,22 @@ public class WsnHelper {
     @SuppressWarnings("unchecked")
     private static TopicExpressionType getTopicExpressionType(Subscribe subscribe) {
         FilterType filterType = subscribe.getFilter();
+
         if (filterType != null) {
             List<Object> any = filterType.getAny();
-            if (any.size() > 0) {
-                return ((JAXBElement<TopicExpressionType>) any.get(0)).getValue();
-            } else {
-                throw new IllegalArgumentException(
-                        "No any object set in the subscribe message");
+
+            if (any != null) {
+                for (Object obj : any) {
+                    try {
+                        return ((JAXBElement<TopicExpressionType>) obj).getValue();
+                    } catch (ClassCastException e) {
+                        // Not a TopicExpressionType, ignore it
+                    }
+                }
             }
+
+            throw new IllegalArgumentException(
+                    "No topic expression type set in the subscribe message");
         } else {
             throw new IllegalArgumentException(
                     "No filter set in the subscribe message");

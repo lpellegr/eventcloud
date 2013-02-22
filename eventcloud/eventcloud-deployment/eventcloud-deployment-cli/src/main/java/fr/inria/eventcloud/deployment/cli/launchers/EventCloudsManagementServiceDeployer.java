@@ -44,7 +44,7 @@ public class EventCloudsManagementServiceDeployer {
             "http://eventcloud.inria.fr/binaries/";
 
     private static final String LOG_MANAGEMENT_WS_DEPLOYED =
-            "EventCloud management web service deployed at ";
+            "EventClouds management web service deployed at ";
 
     private static MutableBoolean servicesDeployed = new MutableBoolean(false);
 
@@ -65,18 +65,8 @@ public class EventCloudsManagementServiceDeployer {
         });
     }
 
-    public static String deploy(boolean onRelease, int port, String urlSuffix,
-                                boolean activateLoggers) throws IOException {
-        return deploy(
-                onRelease, port, urlSuffix, null,
-                EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue(),
-                activateLoggers);
-    }
-
     public synchronized static String deploy(boolean onRelease, int port,
                                              String urlSuffix,
-                                             String socialFilterUrl,
-                                             double socialFilterThreshold,
                                              boolean activateLoggers)
             throws IOException {
         if (eventCloudsManagementServiceProcess == null) {
@@ -109,11 +99,6 @@ public class EventCloudsManagementServiceDeployer {
             cmd.add(EventCloudsManagementServiceDeployer.class.getCanonicalName());
             cmd.add(Integer.toString(port));
             cmd.add(urlSuffix);
-            cmd.add(Double.toString(socialFilterThreshold));
-
-            if (socialFilterUrl != null && !socialFilterUrl.isEmpty()) {
-                cmd.add(socialFilterUrl);
-            }
 
             final ProcessBuilder processBuilder =
                     new ProcessBuilder(cmd.toArray(new String[cmd.size()]));
@@ -169,7 +154,7 @@ public class EventCloudsManagementServiceDeployer {
             return eventCloudsManagementWsEndpoint.toString();
         } else {
             throw new IllegalStateException(
-                    "EventCloud management process already deployed");
+                    "EventClouds management process already deployed");
         }
     }
 
@@ -321,18 +306,9 @@ public class EventCloudsManagementServiceDeployer {
         Logger log =
                 LoggerFactory.getLogger(EventCloudsManagementServiceDeployer.class);
 
-        if (args.length < 3 || args.length > 4) {
-            log.error("Usage: main port url_suffix social_filter_threshold [social_filter_url]");
+        if (args.length != 2) {
+            log.error("Usage: main port url_suffix");
             System.exit(1);
-        }
-
-        EventCloudProperties.SOCIAL_FILTER_THRESHOLD.setValue(Double.parseDouble(args[2]));
-
-        if (args.length == 4) {
-            EventCloudProperties.SOCIAL_FILTER_URL.setValue(args[3]);
-            log.info(
-                    "Property 'eventcloud.socialfilter.url' set to value '{}'",
-                    args[2]);
         }
 
         EventCloudsRegistry registry =

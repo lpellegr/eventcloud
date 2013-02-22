@@ -56,6 +56,7 @@ import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
@@ -156,6 +157,23 @@ public class EventCloudsManagementServiceImpl implements
         } catch (IOException ioe) {
             throw new IllegalStateException(ioe);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean ping() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setSocialFilter(String socialFilterUrl, double threshold) {
+        EventCloudProperties.SOCIAL_FILTER_URL.setValue(socialFilterUrl);
+        EventCloudProperties.SOCIAL_FILTER_THRESHOLD.setValue(threshold);
     }
 
     /**
@@ -622,11 +640,7 @@ public class EventCloudsManagementServiceImpl implements
     @Override
     public SubscribeResponse subscribe(Subscribe subscribe) {
         QName topic = WsnHelper.getTopic(subscribe);
-        String expandedTopic = topic.getNamespaceURI();
-        if (!expandedTopic.endsWith("/")) {
-            expandedTopic += "/";
-        }
-        expandedTopic += topic.getLocalPart();
+        String expandedTopic = topic.getNamespaceURI() + topic.getLocalPart();
 
         if (expandedTopic.equals(RAW_REPORT_TOPIC)) {
             SubscriptionId subscriptionId = new SubscriptionId();
