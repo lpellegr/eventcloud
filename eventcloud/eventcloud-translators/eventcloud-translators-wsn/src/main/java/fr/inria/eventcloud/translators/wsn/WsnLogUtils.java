@@ -44,7 +44,7 @@ import org.w3c.dom.Element;
 import fr.inria.eventcloud.utils.ReflectionUtils;
 
 /**
- * Some helpers to ease the logging of WS Notifications or Subscriptions.
+ * Some helpers to ease the logging of WS-Notification messages.
  * 
  * @author lpellegr
  * @author bsauvan
@@ -53,6 +53,12 @@ public class WsnLogUtils {
 
     private static Logger log = LoggerFactory.getLogger(WsnLogUtils.class);
 
+    /**
+     * Logs a {@link Subscribe WS-Notification Subscribe message}.
+     * 
+     * @param subscribe
+     *            the WS-Notification Subscribe message message to log.
+     */
     @SuppressWarnings("unchecked")
     public static void logSubscribe(Subscribe subscribe) {
         if (log.isInfoEnabled()) {
@@ -98,6 +104,13 @@ public class WsnLogUtils {
         }
     }
 
+    /**
+     * Logs a {@link NotificationMessageHolderType WS-Notification message}.
+     * 
+     * @param msg
+     *            the {@link NotificationMessageHolderType WS-Notification
+     *            message} to log.
+     */
     public static void logNotificationMessageHolderType(NotificationMessageHolderType msg) {
         if (log.isInfoEnabled()) {
             log.info("-- NotificationMessageHolderType message to process (start) ------");

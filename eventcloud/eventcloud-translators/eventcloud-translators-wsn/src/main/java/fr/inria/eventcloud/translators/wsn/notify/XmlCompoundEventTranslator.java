@@ -36,7 +36,6 @@ import org.w3c.dom.Text;
 import com.hp.hpl.jena.graph.Node;
 
 import eu.play_project.play_commons.constants.Stream;
-import eu.play_project.play_commons.eventformat.xml.DocumentBuilder;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -45,8 +44,8 @@ import fr.inria.eventcloud.translators.wsn.Translator;
 import fr.inria.eventcloud.translators.wsn.WsnConstants;
 
 /**
- * Translator for {@link CompoundEvent events} to
- * {@link NotificationMessageHolderType notification messages}.
+ * Translator for {@link CompoundEvent compound events} to
+ * {@link NotificationMessageHolderType WS-Notification messages}.
  * 
  * @author bsauvan
  * @author lpellegr
@@ -55,20 +54,23 @@ public class XmlCompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
     // used only to have the possibility to create DOM elements
-    private static Document DOCUMENT = DocumentBuilder.createDocument();
+    private static Document DOCUMENT;
 
     private static XmlCompoundEventTranslator instance;
 
     private XmlCompoundEventTranslator() {
-
     }
 
     /**
-     * Translates the specified event to its corresponding notification message.
+     * Translates the specified {@link CompoundEvent compound event} to its
+     * corresponding {@link NotificationMessageHolderType WS-Notification
+     * message}.
      * 
      * @param event
-     *            the event to be translated.
-     * @return the notification message corresponding to the specified event.
+     *            the compound event to be translated.
+     * 
+     * @return the WS-Notification message corresponding to the specified
+     *         compound event.
      */
     @Override
     public NotificationMessageHolderType translate(CompoundEvent event)
@@ -226,7 +228,7 @@ public class XmlCompoundEventTranslator extends
         return null;
     }
 
-    /**
+    /*
      * Creates an XML tree (represented by its root {@link Element}) from the
      * specified {@code quadruple} and {@code prevRootElt}. The
      * {@code prevRootElt} element stands for the XML tree to which the new
@@ -293,7 +295,7 @@ public class XmlCompoundEventTranslator extends
         return rootElt;
     }
 
-    /**
+    /*
      * Creates an XML tree (represented by its root {@link Element}) from the
      * specified {@code quadruple} value. This creation consists retrieving the
      * predicate value which contains the concatenated values of the elements

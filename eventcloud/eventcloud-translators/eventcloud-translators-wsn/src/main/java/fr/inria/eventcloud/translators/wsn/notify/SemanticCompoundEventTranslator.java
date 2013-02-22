@@ -34,8 +34,8 @@ import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
 
 /**
- * Translator for {@link CompoundEvent events} to
- * {@link NotificationMessageHolderType notification messages} with the RDF
+ * Translator for {@link CompoundEvent compound events} to
+ * {@link NotificationMessageHolderType WS-Notification messages} with the RDF
  * Message Payload.
  * 
  * @author ialshaba
@@ -51,12 +51,15 @@ public class SemanticCompoundEventTranslator extends
     }
 
     /**
-     * Translates the specified event to its corresponding notification message
-     * with RDF payload with XML escaped characters.
+     * Translates the specified {@link CompoundEvent compound event} to its
+     * corresponding {@link NotificationMessageHolderType WS-Notification
+     * message} with RDF payload with XML escaped characters.
      * 
      * @param event
-     *            the Compound Event to be translated.
-     * @return the notification message corresponding to the specified event.
+     *            the compound event to be translated.
+     * 
+     * @return the WS-Notification message corresponding to the specified
+     *         compound event.
      */
     @Override
     public NotificationMessageHolderType translate(CompoundEvent event)

@@ -54,15 +54,15 @@ public class WsnHelper {
             new WsnTranslator();
 
     /**
-     * Creates a {@link Subscribe} WS-Notification message from the specified
-     * subscriber's endpoint and topic information.
+     * Creates a {@link Subscribe WS-Notification Subscribe message} from the
+     * specified subscriber's endpoint and topic information.
      * 
      * @param subscriberEndpoint
      *            subscriber's endpoint.
      * @param topic
-     *            the qname associated to the topic to subscribe to.
+     *            the QName associated to the topic to subscribe to.
      * 
-     * @return a {@link Subscribe} WS-Notification message with the specified
+     * @return a WS-Notification Subscribe message with the specified
      *         subscriber's endpoint and topic information.
      */
     public static Subscribe createSubscribeMessage(String subscriberEndpoint,
@@ -84,18 +84,17 @@ public class WsnHelper {
     }
 
     /**
-     * Creates a {@link SubscribeResponse} with the specified subscription
-     * reference address and the specified {@link SubscriptionId subscription
-     * identifier}.
+     * Creates a {@link SubscribeResponse subscribe response} with the specified
+     * subscription reference address and the specified {@link SubscriptionId
+     * subscription identifier}.
      * 
      * @param subscriptionId
-     *            the {@link SubscriptionId subscription identifier}.
+     *            the subscription identifier.
      * @param subscriptionReferenceAddress
      *            the subscription reference address.
      * 
-     * @return a {@link SubscribeResponse} with the specified subscription
-     *         reference address and the specified {@link SubscriptionId
-     *         subscription identifier}.
+     * @return a subscribe response with the specified subscription reference
+     *         address and the specified subscription identifier.
      */
     public static SubscribeResponse createSubscribeResponse(SubscriptionId subscriptionId,
                                                             String subscriptionReferenceAddress) {
@@ -119,14 +118,14 @@ public class WsnHelper {
     }
 
     /**
-     * Creates a {@link SubscribeResponse} with the specified subscription
-     * reference address.
+     * Creates a {@link SubscribeResponse subscribe response} with the specified
+     * subscription reference address.
      * 
      * @param subscriptionReferenceAddress
      *            the subscription reference address.
      * 
-     * @return a {@link SubscribeResponse} with the specified subscription
-     *         reference address.
+     * @return a subscribe response with the specified subscription reference
+     *         address.
      */
     public static SubscribeResponse createSubscribeResponse(String subscriptionReferenceAddress) {
         SubscribeResponse subscribeResponse = new SubscribeResponse();
@@ -136,14 +135,13 @@ public class WsnHelper {
 
     /**
      * Returns the {@link SubscriptionId subscription identifier} contained into
-     * the specified {@link SubscribeResponse}.
+     * the specified {@link SubscribeResponse subscribe response}.
      * 
      * @param subscribeResponse
-     *            the {@link SubscribeResponse} containing the
-     *            {@link SubscriptionId subscription identifier}.
+     *            the subscribe response containing the subscription identifier.
      * 
-     * @return the {@link SubscriptionId subscription identifier} contained into
-     *         the specified {@link SubscribeResponse}.
+     * @return the subscription identifier contained into the specified
+     *         subscribe response.
      */
     @SuppressWarnings("unchecked")
     public static SubscriptionId getSubcriptionId(SubscribeResponse subscribeResponse) {
@@ -174,10 +172,10 @@ public class WsnHelper {
      * {@link SubscriptionId subscription identifier}.
      * 
      * @param subscriptionId
-     *            the {@link SubscriptionId subscription identifier}.
+     *            the subscription identifier.
      * 
-     * @return an {@link Unsubscribe unsubscribe request} with the specified
-     *         {@link SubscriptionId subscription identifier}.
+     * @return an unsubscribe request with the specified subscription
+     *         identifier.
      */
     public static Unsubscribe createUnsubscribeRequest(SubscriptionId subscriptionId) {
         Unsubscribe unsubscribeRequest = new Unsubscribe();
@@ -190,11 +188,11 @@ public class WsnHelper {
      * the specified {@link Unsubscribe unsubscribe request}.
      * 
      * @param unsubscribeRequest
-     *            the {@link Unsubscribe unsubscribe request} containing the
-     *            {@link SubscriptionId subscription identifier}.
+     *            the unsubscribe request containing the subscription
+     *            identifier.
      * 
-     * @return the {@link SubscriptionId subscription identifier} contained into
-     *         the specified {@link Unsubscribe unsubscribe request}.
+     * @return the subscription identifier contained into the specified
+     *         unsubscribe request.
      */
     public static SubscriptionId getSubcriptionId(Unsubscribe unsubscribeRequest) {
         if (unsubscribeRequest.getAny().size() > 0) {
@@ -209,10 +207,9 @@ public class WsnHelper {
      * subscription identifier}.
      * 
      * @param subscriptionId
-     *            the {@link SubscriptionId subscription identifier}.
+     *            the subscription identifier.
      * 
-     * @return an {@link Element} with the specified {@link SubscriptionId
-     *         subscription identifier}.
+     * @return an Element with the specified subscription identifier.
      */
     public static Element createElement(SubscriptionId subscriptionId) {
         Document document = DocumentBuilder.createDocument();
@@ -230,11 +227,9 @@ public class WsnHelper {
      * the specified object.
      * 
      * @param object
-     *            the object containing the {@link SubscriptionId subscription
-     *            identifier}.
+     *            the object containing the subscription identifier.
      * 
-     * @return the {@link SubscriptionId subscription identifier} contained into
-     *         the specified object.
+     * @return the subscription identifier contained into the specified object.
      */
     public static SubscriptionId getSubcriptionId(Object object) {
         if (object instanceof Element) {
@@ -245,23 +240,25 @@ public class WsnHelper {
     }
 
     /**
-     * Creates a notify message from the specified subscription and producer
-     * reference endpoint, topic information and payload.
+     * Creates a {@link Notify WS-Notification message} from the specified
+     * subscription and producer reference endpoint, topic information and
+     * payload.
      * 
      * @param subscriptionReference
-     *            the subscription reference endpoint of the notify message to
-     *            build.
+     *            the subscription reference endpoint of the WS-Notification
+     *            message to build.
      * @param topic
-     *            the qname associated to the topic of the notify message to
-     *            build.
+     *            the QName associated to the topic of the WS-Notification
+     *            message to build.
      * @param producerReference
-     *            the producer reference endpoint of the notify message to
-     *            build.
+     *            the producer reference endpoint of the WS-Notification message
+     *            to build.
      * @param payload
-     *            the payload to include in the notify message to build.
+     *            the payload to include in the WS-Notification message to
+     *            build.
      * 
-     * @return a notify message with the specified producer reference endpoint,
-     *         topic information and payload.
+     * @return a WS-Notification message with the specified producer reference
+     *         endpoint, topic information and payload.
      */
     public static Notify createNotifyMessage(String subscriptionReference,
                                              QName topic,
@@ -287,20 +284,21 @@ public class WsnHelper {
     }
 
     /**
-     * Creates a notify message from the specified topic information and
-     * {@link CompoundEvent}s by using the corresponding {@code translator}.
+     * Creates a {@link Notify WS-Notification message} message from the
+     * specified topic information and {@link CompoundEvent compound events} by
+     * using the corresponding {@code translator}.
      * 
      * @param subscriptionReference
-     *            the subscription reference endpoint of the notify message to
-     *            build.
+     *            the subscription reference endpoint of the WS-Notification
+     *            message to build.
      * @param topic
-     *            the qname associated to the topic of the notify message to
-     *            build.
+     *            the QName associated to the topic of the WS-Notification
+     *            message to build.
      * @param compoundEvents
      *            the compound events to serialize inside the message.
      * 
-     * @return a notify message with the specified topic information and
-     *         {@link CompoundEvent}s.
+     * @return a WS-Notification message with the specified topic information
+     *         and {@link CompoundEvent}s.
      * @throws TranslationException
      *             if an error during the translation occurs.
      */
@@ -327,7 +325,8 @@ public class WsnHelper {
     }
 
     /**
-     * Creates a W3C endpoint reference from the specified address.
+     * Creates a {@link W3CEndpointReference W3C endpoint reference} from the
+     * specified address.
      * 
      * @param address
      *            the address of the W3C endpoint reference to build.
@@ -347,7 +346,7 @@ public class WsnHelper {
      * Creates a topic expression type from the specified topic information.
      * 
      * @param topic
-     *            the qname associated to the topic of the topic expression type
+     *            the QName associated to the topic of the topic expression type
      *            to build.
      * 
      * @return a topic expression type from the specified topic information.
@@ -368,7 +367,7 @@ public class WsnHelper {
      * element from the specified topic information.
      * 
      * @param topic
-     *            the qname associated to the topic of the topic expression type
+     *            the QName associated to the topic of the topic expression type
      *            to build.
      * 
      * @return a topic expression type with a {@code simpleExpressionType}
@@ -388,13 +387,12 @@ public class WsnHelper {
 
     /**
      * Returns the address declared in the specified
-     * {@link W3CEndpointReference}.
+     * {@link W3CEndpointReference W3C endpoint reference}.
      * 
      * @param endpointReference
      *            the endpoint reference to analyze.
      * 
-     * @return the address declared in the specified
-     *         {@link W3CEndpointReference}.
+     * @return the address declared in the specified W3C endpoint reference.
      */
     public static String getAddress(W3CEndpointReference endpointReference) {
         Object address =
@@ -408,15 +406,16 @@ public class WsnHelper {
     }
 
     /**
-     * Indicates whether the topic of the specified {@link Subscribe} message is
-     * defined by a {@code simpleTopicExpression} element or not.
+     * Indicates whether the topic of the specified {@link Subscribe
+     * WS-Notification Subscribe message} is defined by a
+     * {@code simpleTopicExpression} element or not.
      * 
      * @param subscribe
-     *            the subscribe message to analyze.
+     *            the WS-Notification Subscribe message to analyze.
      * 
-     * @return true if the topic of the specified {@link Subscribe} message is
-     *         defined by a {@code simpleTopicExpression} element, false
-     *         otherwise.
+     * @return true if the topic of the specified WS-Notification Subscribe
+     *         message is defined by a {@code simpleTopicExpression} element,
+     *         false otherwise.
      */
     public static boolean hasSimpleTopicExpression(Subscribe subscribe) {
         return hasSimpleTopicExpression(getTopicExpressionType(subscribe));
@@ -424,15 +423,15 @@ public class WsnHelper {
 
     /**
      * Indicates whether the topic of the specified
-     * {@link NotificationMessageHolderType} is defined by a
-     * {@code simpleTopicExpression} element or not.
+     * {@link NotificationMessageHolderType WS-Notification message} is defined
+     * by a {@code simpleTopicExpression} element or not.
      * 
      * @param notificationMessage
-     *            the {@link NotificationMessageHolderType} to analyze.
+     *            the WS-Notification message to analyze.
      * 
-     * @return true if the topic of the specified
-     *         {@link NotificationMessageHolderType} is defined by a
-     *         {@code simpleTopicExpression} element, false otherwise.
+     * @return true if the topic of the specified WS-Notification message is
+     *         defined by a {@code simpleTopicExpression} element, false
+     *         otherwise.
      */
     public static boolean hasSimpleTopicExpression(NotificationMessageHolderType notificationMessage) {
         return hasSimpleTopicExpression(notificationMessage.getTopic());
@@ -455,28 +454,28 @@ public class WsnHelper {
     }
 
     /**
-     * Extracts and returns the topic qname contained by the specified
-     * {@link Subscribe} message.
+     * Extracts and returns the topic QName contained by the specified
+     * {@link Subscribe WS-Notification Subscribe message}.
      * 
      * @param subscribe
-     *            the subscribe message to analyze.
+     *            the WS-Notification Subscribe message to analyze.
      * 
-     * @return the topic qname contained by the specified {@link Subscribe}
-     *         message.
+     * @return the topic QName contained by the specified WS-Notification
+     *         Subscribe message.
      */
     public static QName getTopic(Subscribe subscribe) {
         return getTopic(getTopicExpressionType(subscribe));
     }
 
     /**
-     * Extracts and returns the topic qname contained by the specified
-     * {@link NotificationMessageHolderType}.
+     * Extracts and returns the topic QName contained by the specified
+     * {@link NotificationMessageHolderType WS-Notification message}.
      * 
      * @param notificationMessage
-     *            the {@link NotificationMessageHolderType} to analyze.
+     *            the WS-Notification message to analyze.
      * 
-     * @return the topic qname contained by the specified
-     *         {@link NotificationMessageHolderType}.
+     * @return the topic QName contained by the specified WS-Notification
+     *         message.
      */
     public static QName getTopic(NotificationMessageHolderType notificationMessage) {
         return getTopic(notificationMessage.getTopic());
