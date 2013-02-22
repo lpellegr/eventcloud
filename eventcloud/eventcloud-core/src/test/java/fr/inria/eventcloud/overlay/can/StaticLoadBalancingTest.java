@@ -16,13 +16,13 @@
  **/
 package fr.inria.eventcloud.overlay.can;
 
-import java.util.concurrent.Callable;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
 
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.MeanStatsRecorder;
@@ -163,23 +163,23 @@ public class StaticLoadBalancingTest {
         }
 
         MicroBenchmark microBenchmark =
-                new MicroBenchmark(nbRuns, new Callable<Long>() {
+                new MicroBenchmark(nbRuns, new MicroBenchmarkRun() {
                     @Override
-                    public Long call() throws Exception {
+                    public void run(StatsRecorder recorder) throws Exception {
                         StaticLoadBalancingTestBuilder.Test test =
                                 new StaticLoadBalancingTestBuilder(1000, 10).enableStatsRecording(
                                         MeanStatsRecorder.class)
                                         .build();
 
                         test.execute();
-                        return test.getExecutionTime();
+                        recorder.reportTime(0, test.getExecutionTime());
                     }
                 });
         microBenchmark.showProgress();
         microBenchmark.execute();
 
         System.out.println("Average time for " + nbRuns + " runs is "
-                + microBenchmark.getMean());
+                + microBenchmark.getStatsRecorder().getCategory(0).getMean());
     }
 
 }

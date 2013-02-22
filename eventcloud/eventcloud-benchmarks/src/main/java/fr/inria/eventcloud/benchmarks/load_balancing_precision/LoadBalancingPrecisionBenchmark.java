@@ -17,13 +17,14 @@
 package fr.inria.eventcloud.benchmarks.load_balancing_precision;
 
 import java.io.File;
-import java.util.concurrent.Callable;
 
 import org.apfloat.ApfloatContext;
 import org.apfloat.spi.BuilderFactory;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.MicroBenchmark;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -107,9 +108,9 @@ public class LoadBalancingPrecisionBenchmark {
         ApfloatUtils.DEFAULT_PRECISION = this.precision;
 
         MicroBenchmark microBenchmark =
-                new MicroBenchmark(this.nbRuns, new Callable<Long>() {
+                new MicroBenchmark(this.nbRuns, new MicroBenchmarkRun() {
                     @Override
-                    public Long call() throws Exception {
+                    public void run(StatsRecorder recorder) {
                         StaticLoadBalancingTestBuilder.Test test =
                                 new StaticLoadBalancingTestBuilder(
                                         LoadBalancingPrecisionBenchmark.this.trigResource.toString()).enableLoadBalancing(
@@ -119,14 +120,14 @@ public class LoadBalancingPrecisionBenchmark {
                                         .build();
 
                         test.execute();
-                        return test.getExecutionTime();
+                        recorder.reportTime(0, test.getExecutionTime());
                     }
                 });
         microBenchmark.showProgress();
         microBenchmark.execute();
 
         System.out.println("Average time for " + this.nbRuns + " runs is "
-                + microBenchmark.getMean());
+                + microBenchmark.getStatsRecorder().getCategory(1).getMean());
     }
 
 }

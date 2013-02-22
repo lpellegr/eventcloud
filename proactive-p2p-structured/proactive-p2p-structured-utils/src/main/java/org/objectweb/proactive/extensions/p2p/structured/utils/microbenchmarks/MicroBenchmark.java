@@ -14,9 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.utils;
-
-import java.util.concurrent.Callable;
+package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
 
 /**
  * A simple class that allows to perform a microbenchmark for a given task. The
@@ -29,21 +27,32 @@ public class MicroBenchmark {
 
     private final int nbRuns;
 
-    private final Callable<Long> benchmark;
+    private final MicroBenchmarkRun benchmark;
 
-    private boolean discardFirstRun = true;
+    private int discardFirstRuns = 1;
 
     private boolean showProgress = false;
 
-    private long mean;
+    private StatsRecorder statsRecorder;
 
-    public MicroBenchmark(int nbRuns, Callable<Long> task) {
-        this.nbRuns = nbRuns;
-        this.benchmark = task;
+    public MicroBenchmark(int nbRuns, MicroBenchmarkRun task) {
+        this(1, nbRuns, task);
     }
 
-    public void doNotDiscardFirstRun() {
-        this.discardFirstRun = false;
+    public MicroBenchmark(int nbCategories, int nbRuns, MicroBenchmarkRun task) {
+        this.nbRuns = nbRuns;
+        this.benchmark = task;
+        this.statsRecorder =
+                new StatsRecorderImpl(
+                        nbCategories, nbRuns, this.discardFirstRuns);
+    }
+
+    public void discardFirstRuns(int x) {
+        if (x < 0) {
+            throw new IllegalArgumentException("Invalid discard value: " + x);
+        }
+
+        this.discardFirstRuns = x;
     }
 
     public void showProgress() {
@@ -51,53 +60,33 @@ public class MicroBenchmark {
     }
 
     public void execute() {
-        this.mean = 0;
-
-        long[] times = new long[this.nbRuns];
-
-        for (int i = 0; i < (this.discardFirstRun
-                ? this.nbRuns + 1 : this.nbRuns); i++) {
-            long executionTime;
+        for (int i = 0; i < this.nbRuns + this.discardFirstRuns; i++) {
             try {
-                executionTime = this.benchmark.call();
+                this.benchmark.run(this.statsRecorder);
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
 
-            // discard the first run
-            if (this.discardFirstRun && i > 0) {
-                times[i - 1] = executionTime;
-            } else if (!this.discardFirstRun) {
-                times[i] = executionTime;
-            }
-
             if (this.showProgress) {
                 System.out.print("Run #" + (i + 1) + " performed");
-                System.out.print(" (" + executionTime + ")");
+                System.out.print(" ("
+                        + this.statsRecorder.getCategory(0).getTime(i) + ")");
 
-                if (this.discardFirstRun && i == 0) {
+                if (this.discardFirstRuns > 0 && i < this.discardFirstRuns) {
                     System.out.println(" [ignored]");
                 } else {
                     System.out.println();
                 }
             }
         }
-
-        long sum = 0;
-
-        for (int i = 0; i < times.length; i++) {
-            sum += times[i];
-        }
-
-        this.mean = sum / this.nbRuns;
-    }
-
-    public long getMean() {
-        return this.mean;
     }
 
     public int getNbRuns() {
         return this.nbRuns;
+    }
+
+    public StatsRecorder getStatsRecorder() {
+        return this.statsRecorder;
     }
 
 }

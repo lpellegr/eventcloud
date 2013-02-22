@@ -549,8 +549,6 @@ public class Can2dVisualizer extends JFrame {
                 new Can2dVisualizer(peers).setVisible(true);
             }
         });
-
-        deployer.undeploy();
     }
 
 }
