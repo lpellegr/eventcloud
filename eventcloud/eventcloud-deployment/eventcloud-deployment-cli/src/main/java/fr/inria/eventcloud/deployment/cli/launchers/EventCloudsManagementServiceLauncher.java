@@ -18,8 +18,16 @@ package fr.inria.eventcloud.deployment.cli.launchers;
 
 import com.beust.jcommander.Parameter;
 
+import fr.inria.eventcloud.webservices.api.EventCloudsManagementWsnApi;
 import fr.inria.eventcloud.webservices.deployment.WsDeployer;
 
+/**
+ * This launcher is used to deploy an {@link EventCloudsManagementWsnApi
+ * EventClouds management service}.
+ * 
+ * @author lpellegr
+ * @author bsauvan
+ */
 public class EventCloudsManagementServiceLauncher extends Launcher {
 
     @Parameter(names = {"--registry-url", "-r"}, description = "EventClouds registry URL", required = true)
