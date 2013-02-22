@@ -55,7 +55,7 @@ public class XmlCompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
     // used only to have the possibility to create DOM elements
-    private static Document DOCUMENT = DocumentBuilder.createDocument();;
+    private static Document DOCUMENT = DocumentBuilder.createDocument();
 
     private static XmlCompoundEventTranslator instance;
 
