@@ -20,15 +20,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Abstract class to ease implementation of translators.
+ * 
  * @author lpellegr
  * 
  * @param <IN>
+ *            the class of the object to translate.
  * @param <OUT>
+ *            the class of the object after translation.
  */
 public abstract class Translator<IN, OUT> {
 
     private static Logger log = LoggerFactory.getLogger(Translator.class);
 
+    /**
+     * Translates the specified object.
+     * 
+     * @param in
+     *            the object to translate.
+     * 
+     * @return the translated object.
+     * 
+     * @throws TranslationException
+     *             if an error occurs during the translation.
+     */
     public abstract OUT translate(IN in) throws TranslationException;
 
     protected static void logAndThrowTranslationException(String msg)
