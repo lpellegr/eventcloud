@@ -23,7 +23,7 @@ import fr.inria.eventcloud.webservices.deployment.WsDeployer;
 
 /**
  * This launcher is used to deploy an {@link EventCloudsManagementWsnApi
- * EventClouds management service}.
+ * EventClouds Management Service}.
  * 
  * @author lpellegr
  * @author bsauvan
