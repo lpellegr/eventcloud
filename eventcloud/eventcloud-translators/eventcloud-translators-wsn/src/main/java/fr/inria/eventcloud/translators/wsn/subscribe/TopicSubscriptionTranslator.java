@@ -43,9 +43,7 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
     private static Logger log =
             LoggerFactory.getLogger(TopicSubscriptionTranslator.class);
 
-    private static TopicSubscriptionTranslator instance;
-
-    private TopicSubscriptionTranslator() {
+    public TopicSubscriptionTranslator() {
 
     }
 
@@ -84,14 +82,6 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
         return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <"
                 + WsnConstants.TOPIC_TEXT + "> <" + topicNamespace
                 + topic.getLocalPart() + Stream.STREAM_ID_SUFFIX + "> . } }";
-    }
-
-    public static synchronized TopicSubscriptionTranslator getInstance() {
-        if (instance == null) {
-            instance = new TopicSubscriptionTranslator();
-        }
-
-        return instance;
     }
 
 }

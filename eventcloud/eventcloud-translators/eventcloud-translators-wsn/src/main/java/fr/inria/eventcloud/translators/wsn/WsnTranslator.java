@@ -37,6 +37,29 @@ import fr.inria.eventcloud.translators.wsn.subscribe.TopicSubscriptionTranslator
  */
 public class WsnTranslator {
 
+    private SemanticCompoundEventTranslator semanticCompoundEventTranslator;
+
+    private SemanticNotificationTranslator semanticNotificationTranslator;
+
+    private XmlCompoundEventTranslator xmlCompoundEventTranslator;
+
+    private XmlNotificationTranslator xmlNotificationTranslator;
+
+    private TopicSubscriptionTranslator topicSubscriptionTranslator;
+
+    /**
+     * Creates a {@link WsnTranslator}.
+     */
+    public WsnTranslator() {
+        this.semanticCompoundEventTranslator =
+                new SemanticCompoundEventTranslator();
+        this.semanticNotificationTranslator =
+                new SemanticNotificationTranslator();
+        this.xmlCompoundEventTranslator = new XmlCompoundEventTranslator();
+        this.xmlNotificationTranslator = new XmlNotificationTranslator();
+        this.topicSubscriptionTranslator = new TopicSubscriptionTranslator();
+    }
+
     /**
      * Translates the specified {@link NotificationMessageHolderType
      * WS-Notification message} to a {@link CompoundEvent compound event}
@@ -99,8 +122,7 @@ public class WsnTranslator {
      */
     public CompoundEvent translateXmlNotification(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
-        return XmlNotificationTranslator.getInstance().translate(
-                notificationMessage);
+        return this.xmlNotificationTranslator.translate(notificationMessage);
     }
 
     /**
@@ -117,8 +139,7 @@ public class WsnTranslator {
      */
     public CompoundEvent translateSemanticNotification(NotificationMessageHolderType notificationMessage)
             throws TranslationException {
-        return SemanticNotificationTranslator.getInstance().translate(
-                notificationMessage);
+        return this.semanticNotificationTranslator.translate(notificationMessage);
     }
 
     /**
@@ -156,7 +177,7 @@ public class WsnTranslator {
      */
     public NotificationMessageHolderType translateXmlCompoundEvent(CompoundEvent event)
             throws TranslationException {
-        return XmlCompoundEventTranslator.getInstance().translate(event);
+        return this.xmlCompoundEventTranslator.translate(event);
     }
 
     /**
@@ -172,7 +193,7 @@ public class WsnTranslator {
      */
     public NotificationMessageHolderType translateSemanticCompoundEvent(CompoundEvent event)
             throws TranslationException {
-        return SemanticCompoundEventTranslator.getInstance().translate(event);
+        return this.semanticCompoundEventTranslator.translate(event);
     }
 
     /**
@@ -204,7 +225,7 @@ public class WsnTranslator {
      */
     public String translateTopicSubscription(Subscribe subscribe)
             throws TranslationException {
-        return TopicSubscriptionTranslator.getInstance().translate(subscribe);
+        return this.topicSubscriptionTranslator.translate(subscribe);
     }
 
     /**
@@ -222,4 +243,5 @@ public class WsnTranslator {
         // TODO implement
         throw new UnsupportedOperationException();
     }
+
 }

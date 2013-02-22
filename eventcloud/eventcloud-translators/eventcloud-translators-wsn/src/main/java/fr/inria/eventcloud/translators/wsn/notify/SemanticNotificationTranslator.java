@@ -48,9 +48,7 @@ import fr.inria.eventcloud.utils.ReflectionUtils;
 public class SemanticNotificationTranslator extends
         Translator<NotificationMessageHolderType, CompoundEvent> {
 
-    private static SemanticNotificationTranslator instance;
-
-    private SemanticNotificationTranslator() {
+    public SemanticNotificationTranslator() {
 
     }
 
@@ -112,14 +110,6 @@ public class SemanticNotificationTranslator extends
         }
 
         return new CompoundEvent(Skolemizator.skolemize(quads));
-    }
-
-    public static synchronized SemanticNotificationTranslator getInstance() {
-        if (instance == null) {
-            instance = new SemanticNotificationTranslator();
-        }
-
-        return instance;
     }
 
 }

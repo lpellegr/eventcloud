@@ -44,9 +44,7 @@ import fr.inria.eventcloud.translators.wsn.Translator;
 public class SemanticCompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
-    private static SemanticCompoundEventTranslator instance;
-
-    private SemanticCompoundEventTranslator() {
+    public SemanticCompoundEventTranslator() {
 
     }
 
@@ -92,14 +90,6 @@ public class SemanticCompoundEventTranslator extends
         notificationMessage.setMessage(message);
 
         return notificationMessage;
-    }
-
-    public static synchronized SemanticCompoundEventTranslator getInstance() {
-        if (instance == null) {
-            instance = new SemanticCompoundEventTranslator();
-        }
-
-        return instance;
     }
 
 }
