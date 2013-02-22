@@ -36,6 +36,7 @@ import org.w3c.dom.Text;
 import com.hp.hpl.jena.graph.Node;
 
 import eu.play_project.play_commons.constants.Stream;
+import eu.play_project.play_commons.eventformat.xml.DocumentBuilder;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -54,7 +55,7 @@ public class XmlCompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
     // used only to have the possibility to create DOM elements
-    private static Document DOCUMENT;
+    private static Document DOCUMENT = DocumentBuilder.createDocument();;
 
     private static XmlCompoundEventTranslator instance;
 
