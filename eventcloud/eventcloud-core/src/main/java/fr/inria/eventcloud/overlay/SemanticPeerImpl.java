@@ -26,14 +26,13 @@ import java.util.List;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.DefinePriorities;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
+import org.objectweb.proactive.annotation.multiactivity.Priority;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.multiactivity.MultiActiveService;
-import org.objectweb.proactive.multiactivity.ServingPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
@@ -70,8 +69,6 @@ import fr.inria.eventcloud.messages.request.can.RemoveEphemeralSubscriptionReque
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
-import fr.inria.eventcloud.multiactivities.PriorityServingPolicy;
-import fr.inria.eventcloud.multiactivities.RequestPriorityConstraint;
 import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.utils.Callback;
@@ -90,7 +87,12 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
-
+@DefinePriorities({
+        @Priority(level = 3, name = "send", parameters = {ReconstructCompoundEventRequest.class}),
+        @Priority(level = 2, name = "sendv", parameters = {IndexEphemeralSubscriptionRequest.class}),
+        @Priority(level = 1, name = "sendv", parameters = {IndexSubscriptionRequest.class}),
+        @Priority(level = -1, name = "publish"),
+        @Priority(level = -2, name = "sendv", parameters = {RemoveEphemeralSubscriptionRequest.class})})
 public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
@@ -111,8 +113,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     public static final String SOCIAL_FILTER_SERVICES_ITF =
             "social-filter-services";
 
-    private transient ServingPolicy servingPolicy;
-
     /**
      * Empty constructor required by ProActive.
      */
@@ -130,33 +130,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         this.configurationProperty = "eventcloud.configuration";
         this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void runComponentActivity(Body body) {
-        super.multiActiveService = new MultiActiveService(body);
-
-        this.servingPolicy =
-                new PriorityServingPolicy(
-                        new RequestPriorityConstraint(
-                                3, "send",
-                                ReconstructCompoundEventRequest.class),
-                        new RequestPriorityConstraint(
-                                2, "sendv",
-                                IndexEphemeralSubscriptionRequest.class),
-                        new RequestPriorityConstraint(
-                                1, "sendv", IndexSubscriptionRequest.class),
-                        new RequestPriorityConstraint(-1, "publish"),
-                        new RequestPriorityConstraint(
-                                -2, "sendv",
-                                RemoveEphemeralSubscriptionRequest.class));
-
-        super.multiActiveService.policyServing(
-                this.servingPolicy,
-                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
     }
 
     /**
