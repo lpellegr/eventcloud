@@ -271,8 +271,8 @@ public class PublishSubscribeBenchmark {
         String registryURL = null;
         try {
             registryURL = registry.register("registry");
-        } catch (ProActiveException e1) {
-            e1.printStackTrace();
+        } catch (ProActiveException e) {
+            e.printStackTrace();
         }
 
         EventCloudId id = deployer.getEventCloudDescription().getId();
@@ -360,7 +360,7 @@ public class PublishSubscribeBenchmark {
 
         this.endToEndMeasurement.setExitTime();
 
-        deployer.undeploy();
+        // deployer.undeploy();
     }
 
     private List<PublishApi> createPublishProxies(String registryUrl,
@@ -401,8 +401,7 @@ public class PublishSubscribeBenchmark {
         if (this.usingCompoundEventSupplier) {
             CompoundEvent ce = (CompoundEvent) event;
 
-            pointToPointEntryMeasurements.put(
-                    ce.getGraph(), System.currentTimeMillis());
+            pointToPointEntryMeasurements.put(ce.getGraph(), System.nanoTime());
 
             publishProxy.publish(ce);
         } else {
@@ -514,7 +513,7 @@ public class PublishSubscribeBenchmark {
         }
 
         public void reportReception(Node eventId) {
-            this.times.put(eventId, System.currentTimeMillis());
+            this.times.put(eventId, System.nanoTime());
         }
 
         public long getElapsedTime(Map<Node, Long> pointToPointEntryMeasurements) {
@@ -526,7 +525,7 @@ public class PublishSubscribeBenchmark {
                                 - pointToPointEntryMeasurements.get(entry.getKey());
             }
 
-            return sum;
+            return sum / 1000000;
         }
 
     }
@@ -544,15 +543,16 @@ public class PublishSubscribeBenchmark {
          */
         @Override
         public long getElapsedTime() {
-            return this.exitTime - this.entryTime;
+            // returns elapsed time in ms
+            return (this.exitTime - this.entryTime) / 1000000;
         }
 
         public void setEntryTime() {
-            this.entryTime = System.currentTimeMillis();
+            this.entryTime = System.nanoTime();
         }
 
         public void setExitTime() {
-            this.exitTime = System.currentTimeMillis();;
+            this.exitTime = System.nanoTime();
         }
 
     }
