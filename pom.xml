@@ -62,16 +62,6 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>ow2-snapshots</id>
-			<url>http://repository.ow2.org/nexus/content/repositories/snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
 			<id>petalslink-public-research</id>
 			<url>http://maven.petalslink.com/public-research/</url>
 			<releases>
@@ -79,16 +69,6 @@
 			</releases>
 			<snapshots>
 				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>sonatype-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
 			</snapshots>
 		</repository>
 	</repositories>
@@ -116,6 +96,15 @@
 			<id>ialshalb</id>
 			<name>Iyad Alshabani</name>
 			<email>iyad.alshabani@inria.fr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>jrochas</id>
+			<name>Justine Rochas</name>
+			<email>justine.rochas@inria.fr</email>
 			<roles>
 				<role>Developer</role>
 			</roles>
@@ -193,7 +182,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>14.0-rc2</version>
+				<version>14.0-rc3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -266,7 +255,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming-mao-bundle</artifactId>
-				<version>5.2.0-v2</version>
+				<version>5.2.0-v3</version>
 				<exclusions>
 					<exclusion>
 						<groupId>log4j</groupId>
