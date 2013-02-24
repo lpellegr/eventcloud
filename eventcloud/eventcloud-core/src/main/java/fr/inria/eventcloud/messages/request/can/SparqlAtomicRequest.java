@@ -36,6 +36,7 @@ import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponseProvide
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
+import fr.inria.eventcloud.validator.AtomicQueryConstraintsValidator;
 
 /**
  * Retrieves all the {@link Quadruple}s that match the {@link AtomicQuery} that
@@ -46,6 +47,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  * constraints.
  * 
  * @author lpellegr
+ * @author mantoine
  */
 public class SparqlAtomicRequest extends
         StatefulQuadruplePatternRequest<List<Quadruple>> {
@@ -55,10 +57,8 @@ public class SparqlAtomicRequest extends
     private final AtomicQuery atomicQuery;
 
     public SparqlAtomicRequest(AtomicQuery atomicQuery) {
-        // TODO offer the possibility to use a constraints validator that will
-        // use the filter constraints contained by the quadruple pattern to
-        // route the request
-        super(atomicQuery.getQuadruplePattern(),
+        super(new AtomicQueryConstraintsValidator(atomicQuery),
+                atomicQuery.getQuadruplePattern(),
                 new QuadruplePatternResponseProvider());
 
         this.atomicQuery = atomicQuery;

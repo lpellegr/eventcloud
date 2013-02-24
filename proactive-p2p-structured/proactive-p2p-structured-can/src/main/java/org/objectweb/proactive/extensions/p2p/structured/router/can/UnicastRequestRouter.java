@@ -114,11 +114,27 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
             }
         }
 
+        if (dimension == P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()) {
+            dimension =
+                    (byte) (P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1);
+        }
+
         // selects one neighbor in the dimension and the direction previously
         // affected
         NeighborEntry<E> neighborChosen =
                 overlayCAN.nearestNeighbor(
                         request.getKey(), dimension, direction);
+
+        if (neighborChosen == null) {
+            if (request.getResponseProvider() != null) {
+                overlay.getResponseEntries().put(
+                        request.getId(), new ResponseEntry(1));
+                request.getResponseProvider().get(request, overlay).route(
+                        overlayCAN);
+            }
+
+            return;
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("Message routed to a neigbour because the current peer "
