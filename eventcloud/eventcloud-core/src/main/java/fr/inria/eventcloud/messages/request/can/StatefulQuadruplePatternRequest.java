@@ -25,6 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.can.StatefulQuadruplePatternResponse;
@@ -54,6 +55,13 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
             QuadruplePattern quadPattern,
             ResponseProvider<? extends StatefulQuadruplePatternResponse<T>, Coordinate<SemanticElement>> responseProvider) {
         super(quadPattern, responseProvider);
+    }
+
+    public StatefulQuadruplePatternRequest(
+            AnycastConstraintsValidator<SemanticElement> constraintsValidator,
+            QuadruplePattern quadPattern,
+            ResponseProvider<? extends StatefulQuadruplePatternResponse<T>, Coordinate<SemanticElement>> responseProvider) {
+        super(constraintsValidator, quadPattern, responseProvider);
     }
 
     /**

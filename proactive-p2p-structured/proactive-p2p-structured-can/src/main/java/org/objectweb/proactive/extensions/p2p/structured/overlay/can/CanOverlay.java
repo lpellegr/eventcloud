@@ -153,11 +153,8 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         // no neighbors satisfying the coordinate on the specified dimension AND
         // direction
-        if (neighbors.size() == 0) {
-            throw new IllegalStateException(
-                    "No neighbor to route to for coordinate " + coordinate
-                            + " on dimension " + dimension + " and direction "
-                            + direction + " , dump is:\n{}" + this.dump());
+        if (neighbors.isEmpty()) {
+            return null;
         }
 
         // from neighbors which verify the dimensions get those which
@@ -180,6 +177,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                         + entry.getZone());
             }
         }
+
         return entry;
     }
 
@@ -263,6 +261,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                 result.add(entry);
             }
         }
+
         return result;
     }
 

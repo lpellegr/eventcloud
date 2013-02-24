@@ -22,6 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -65,6 +66,14 @@ public abstract class StatelessQuadruplePatternRequest extends
         super(new DefaultAnycastConstraintsValidator<SemanticElement>(
                 SemanticCoordinateFactory.newSemanticCoordinate(quadPattern)),
                 responseProvider);
+        this.quadruplePattern = SerializedValue.create(quadPattern);
+    }
+
+    public StatelessQuadruplePatternRequest(
+            AnycastConstraintsValidator<SemanticElement> validator,
+            QuadruplePattern quadPattern,
+            ResponseProvider<? extends StatelessQuadruplePatternResponse, Coordinate<SemanticElement>> responseProvider) {
+        super(validator, responseProvider);
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 
