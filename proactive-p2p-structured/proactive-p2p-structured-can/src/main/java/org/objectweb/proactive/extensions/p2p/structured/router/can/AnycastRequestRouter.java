@@ -300,14 +300,10 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             }
         }
 
-        // TODO find out why dimension = 4 after the for loop when using the
-        // filter constraints validator (AtomicQueryConstraintsValidator)
-        if (dimension == 4) {
+        if (dimension == P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()) {
             dimension =
                     (byte) (P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1);
         }
-        System.out.println("AnycastRequestRouter.route() DIM=====> "
-                + dimension);
 
         // selects one neighbor in the dimension and the direction previously
         // affected
@@ -315,17 +311,14 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 overlayCAN.nearestNeighbor(
                         request.getKey(), dimension, direction);
 
-        System.out.println("AnycastRequestRouter.route() NEAREST NEIGHBOR="
-                + neighborChosen);
-
         if (neighborChosen == null) {
             if (request.getResponseProvider() != null) {
                 overlay.getResponseEntries().put(
                         request.getId(), new ResponseEntry(1));
                 request.getResponseProvider().get(request, overlay).route(
                         overlayCAN);
-
             }
+
             return;
         }
 

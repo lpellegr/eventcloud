@@ -54,6 +54,7 @@ import fr.inria.eventcloud.exceptions.DecompositionException;
  * is limited and does not support multiple graph patterns.
  * 
  * @author lpellegr
+ * @author mantoine
  */
 public final class SparqlDecomposer {
 
@@ -143,7 +144,7 @@ public final class SparqlDecomposer {
         if (!(visitor.getFilterConstraints().isEmpty())) {
             FilterTransformer transformer = new FilterTransformer(atomicQuery);
             List<ExprList> filterConstraints = new ArrayList<ExprList>();
-            // visitor.getFilterConstraints().size() is always equal to 1
+            // visitor.getFilterConstraints().size() is always equals to 1
             ExprList el = visitor.getFilterConstraints().get(0);
             ExprList exprList = ExprTransformer.transform(transformer, el);
 
@@ -153,15 +154,11 @@ public final class SparqlDecomposer {
                     // if several FILTER clauses, exprList will look like :
                     // filter1 , filter2 , etc
                     // so we have to split it, remove null() if the atomic query
-                    // doesn't match
-                    // all of the filters but only some of them, and put each
-                    // different filter
-                    // into Expr variables
+                    // doesn't match all of the filters but only some of them,
+                    // and put each different filter into Expr variables
                     String[] tabExpList = expList.split(" , ");
                     for (int i = 0; i < tabExpList.length; i++) {
-                        if (tabExpList[i].contains("null()")) {
-                            ;
-                        } else {
+                        if (!tabExpList[i].contains("null()")) {
                             Expr newExpr = ExprUtils.parse(tabExpList[i]);
                             filterConstraints.add(new ExprList(newExpr));
                         }
@@ -171,10 +168,8 @@ public final class SparqlDecomposer {
                 }
             }
             atomicQuery.setFilterConstraints(filterConstraints);
-        }
-
-        else {
-            atomicQuery.setFilterConstraints(new ArrayList<ExprList>());
+        } else {
+            atomicQuery.setFilterConstraints(new ArrayList<ExprList>(0));
         }
 
         return atomicQuery;
@@ -285,7 +280,6 @@ public final class SparqlDecomposer {
 
         @Override
         public Expr transform(ExprVar exprVar) {
-            System.out.println("ExprTransformBase.transform(ExprVar)");
             // if atomic query contains a variable that is in the filter clause
             if (this.query.containsVariable(exprVar.getVarName())) {
                 return exprVar;
@@ -296,9 +290,6 @@ public final class SparqlDecomposer {
 
         @Override
         public Expr transform(ExprFunction2 func, Expr expr1, Expr expr2) {
-            System.out.println("ExprTransformBase.transform(ExprFunction2, Expr, Expr) "
-                    + func + " EXP1=" + expr1 + " EXPR2=" + expr2);
-
             if (expr1 == null) {
                 return new E_Null();
             }
@@ -337,32 +328,6 @@ public final class SparqlDecomposer {
             return new E_Null();
         }
 
-    }
-
-    public static String query10 =
-            "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> "
-                    + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
-                    + "PREFIX dc: <http://purl.org/dc/elements/1.1/> "
-                    + "PREFIX dataFromProducer1: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/> "
-                    + "SELECT DISTINCT ?offer ?price "
-                    + "WHERE { GRAPH ?g  { "
-                    + " ?offer bsbm:product dataFromProducer1:Product12 ."
-                    + " ?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#GB> ."
-                    + " ?offer bsbm:vendor ?vendor ."
-                    + " ?offer dc:publisher ?vendor ."
-                    + " ?offer bsbm:deliveryDays ?deliveryDays ."
-                    + " FILTER (?deliveryDays <= 6)"
-                    + " ?offer bsbm:price ?price ."
-                    + " ?offer bsbm:validTo ?date . "
-                    + " ?offer ?deliveryDays ?date "
-                    + " FILTER (?date > \"2000-01-06T00:00:00\"^^xsd:dateTime)"
-                    + "}}" + "ORDER BY xsd:double(str(?price)) " + "LIMIT 10";
-
-    public static void main(String[] args) throws Exception {
-
-        new SparqlDecomposer().decompose(query10);
-
-        ExprUtils.parse("( ?deliveryDays <= 6 ) , ( ?date > \"2000-01-06T00:00:00\"^^xsd:dateTime )");
     }
 
 }

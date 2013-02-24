@@ -21,8 +21,6 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.ResultSet;
@@ -32,17 +30,13 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
-import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
- * Tests associated to semantic operations provided by {@link SemanticPeer}.
+ * Tests filter constraints on some historical queries executed on peers.
  * 
- * @author lpellegr
+ * @author mantoine
  */
 public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
-
-    private static final Logger log =
-            LoggerFactory.getLogger(FilterValidatorTest.class);
 
     public FilterValidatorTest() {
         super(1, 10);
@@ -74,7 +68,6 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
         Var vars[] = new Var[resultSet.getResultVars().size()];
         for (int i = 0; i < resultSet.getResultVars().size(); i++) {
             vars[i] = Var.alloc(resultSet.getResultVars().get(i));
-            System.out.println("vars => " + vars[i]);
         }
 
         int count = 0;
@@ -117,7 +110,6 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
         Var vars[] = new Var[resultSet.getResultVars().size()];
         for (int i = 0; i < resultSet.getResultVars().size(); i++) {
             vars[i] = Var.alloc(resultSet.getResultVars().get(i));
-            System.out.println("vars => " + vars[i]);
         }
 
         int count = 0;
