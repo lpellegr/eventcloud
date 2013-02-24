@@ -48,6 +48,7 @@ import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.utils.Callback;
 
 /**
+ * Launcher for running benchmarks with historical queries.
  * 
  * @author mantoine
  */
@@ -116,9 +117,7 @@ public class BenchmarkLauncher {
                     + " ?offer bsbm:price ?price ."
                     + " ?offer bsbm:validTo ?date "
                     + " FILTER (?date > \"2000-01-06T00:00:00\"^^xsd:dateTime)"
-                    + "}}"
-
-                    + "ORDER BY xsd:double(str(?price)) " + "LIMIT 10";
+                    + "}}" + "ORDER BY xsd:double(str(?price)) " + "LIMIT 10";
 
     public static String query11 =
             "PREFIX dataFromVendor1: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/> "

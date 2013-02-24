@@ -1,10 +1,25 @@
+/**
+ * Copyright (c) 2011-2013 INRIA.
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ **/
 package fr.inria.eventcloud.validator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -18,6 +33,11 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
+/**
+ * Test cases associated to {@link AtomicQueryConstraintsValidator}.
+ * 
+ * @author mantoine
+ */
 public class AtomicQueryConstraintsValidatorTest {
 
     private AtomicQuery atomicQuery;
@@ -26,7 +46,7 @@ public class AtomicQueryConstraintsValidatorTest {
 
     private List<ExprList> exprListList;
 
-    private AtomicQueryConstraintsValidator<SemanticElement> validator;
+    private AtomicQueryConstraintsValidator validator;
 
     private SemanticZone semanticZone;
 
@@ -67,9 +87,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("(str(?s) = \"http://www.z.com/resource/aa\") && (\"http://www.namespace.org/test\" > str(?o))"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         boolean res = this.validator.validatesKeyConstraints(this.semanticZone);
         Assert.assertFalse(res);
     }
@@ -79,9 +97,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("(str(?s) = \"http://www.z.com/resource/bus\") && (\"http://www.namespace.org/test\" > str(?o))"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         boolean res = this.validator.validatesKeyConstraints(this.semanticZone);
         Assert.assertTrue(res);
     }
@@ -91,9 +107,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("((\"http://www.namespace.org/test\" > str(?s)) || (\"http://www.unice.fr/test\" > str(?o) && str(?p) = \"http://www.test.org/zoo\") )"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
     }
 
@@ -107,9 +121,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("str(?p) = \"http://www.unice.fr/eventcloud/stop_predicate\""));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
     }
 
@@ -119,9 +131,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("\"http://www.test.com/eventcloud\" < str(?p)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
     }
 
@@ -131,9 +141,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("\"http://www.unice.fr/eventcloud\" <= str(?s)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
     }
 
@@ -143,9 +151,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("\"http://www.test.com/eventcloud\" > str(?s)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
     }
 
@@ -155,9 +161,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("\"http://www.object.fr/eventcloud/begin_object\" >= str(?o)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
     }
 
@@ -167,9 +171,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("\"http://www.predicate.fr/eventcloud/predicate\" != str(?p)"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
     }
 
@@ -178,9 +180,7 @@ public class AtomicQueryConstraintsValidatorTest {
         this.exprList.add(ExprUtils.parse("(((\"http://www.unice.fr/eventcloud/stop_subject\" < str(?s)) || (\"http://www.object.fr/eventcloud/begin_object\" > str(?o) || str(?p) != \"http://www.namespace.org/test\") ) || str(?s) > \"http://www.unice.fr/eventcloud/zoo\")"));
         this.exprListList.add(this.exprList);
         this.atomicQuery.setFilterConstraints(this.exprListList);
-        this.validator =
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        this.atomicQuery);
+        this.validator = new AtomicQueryConstraintsValidator(this.atomicQuery);
         Assert.assertTrue(this.validator.validatesKeyConstraints(this.semanticZone));
     }
 

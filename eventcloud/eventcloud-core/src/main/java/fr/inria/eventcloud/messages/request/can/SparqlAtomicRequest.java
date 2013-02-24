@@ -47,6 +47,7 @@ import fr.inria.eventcloud.validator.AtomicQueryConstraintsValidator;
  * constraints.
  * 
  * @author lpellegr
+ * @author mantoine
  */
 public class SparqlAtomicRequest extends
         StatefulQuadruplePatternRequest<List<Quadruple>> {
@@ -56,12 +57,8 @@ public class SparqlAtomicRequest extends
     private final AtomicQuery atomicQuery;
 
     public SparqlAtomicRequest(AtomicQuery atomicQuery) {
-        // TODO offer the possibility to use a constraints validator that will
-        // use the filter constraints contained by the quadruple pattern to
-        // route the request
-        super(
-                new AtomicQueryConstraintsValidator<SemanticElement>(
-                        atomicQuery), atomicQuery.getQuadruplePattern(),
+        super(new AtomicQueryConstraintsValidator(atomicQuery),
+                atomicQuery.getQuadruplePattern(),
                 new QuadruplePatternResponseProvider());
 
         this.atomicQuery = atomicQuery;
@@ -74,11 +71,6 @@ public class SparqlAtomicRequest extends
     public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
                                                           AnycastRequest<SemanticElement> request,
                                                           fr.inria.eventcloud.api.QuadruplePattern quadruplePattern) {
-        System.out.println("SparqlAtomicRequest.onPeerValidatingKeyConstraints() overlay="
-                + overlay.getId()
-                + " "
-                + this.atomicQuery.getOpRepresentation());
-
         TransactionalDatasetGraph txnGraph =
                 ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
                         AccessMode.READ_ONLY);
@@ -89,8 +81,7 @@ public class SparqlAtomicRequest extends
                             this.atomicQuery.getOpRepresentation(),
                             txnGraph.getUnderlyingDataset());
 
-            List<Quadruple> result = toQuadruples(iterator, this.atomicQuery);
-            return result;
+            return toQuadruples(iterator, this.atomicQuery);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         } finally {

@@ -1,21 +1,20 @@
-package fr.inria.eventcloud.validator;
-
 /**
- * Copyright (c) 2011-2012 INRIA.
+ * Copyright (c) 2011-2013 INRIA.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
+package fr.inria.eventcloud.validator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -23,11 +22,8 @@ import java.io.Serializable;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
 import com.hp.hpl.jena.graph.Node;
@@ -42,35 +38,31 @@ import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.function.FunctionEnv;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 
+import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
- * This class is the default validator for {@link AnycastRequestRouter}. This
+ * This class is the default validator for {@link SparqlAtomicRequest}. This
  * validator assumes that all coordinate elements set to {@code null} match the
- * constraints.
+ * constraints. It also leverage to the filter constraints that are specified to
+ * improve routing.
  * 
- * @author lpellegr
+ * @author mantoine
  */
-public final class AtomicQueryConstraintsValidator<E extends StringElement>
-        extends AnycastConstraintsValidator<E> {
+public final class AtomicQueryConstraintsValidator extends
+        AnycastConstraintsValidator<SemanticElement> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140L;
 
     private AtomicQuery atomicQuery;
 
     private FilterTransformer transformer;
 
-    /**
-     * Creates a new {@code AtomicQueryConstraintsValidator} with the specified
-     * {@code key} to reach.
-     * 
-     * @param key
-     *            the key to reach.
-     */
     public AtomicQueryConstraintsValidator(AtomicQuery query) {
         super(
-                checkNotNull((Coordinate<E>) (AtomicQueryConstraintsValidator.replaceVariablesByNull(query))));
+                checkNotNull(AtomicQueryConstraintsValidator.replaceVariablesByNull(query)));
         this.atomicQuery = query;
     }
 
@@ -78,16 +70,15 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public final boolean validatesKeyConstraints(StructuredOverlay overlay) {
-        return this.validatesKeyConstraints(((CanOverlay<E>) overlay).getZone());
+        return this.validatesKeyConstraints(((SemanticCanOverlay) overlay).getZone());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final boolean validatesKeyConstraints(Zone<E> zone) {
+    public final boolean validatesKeyConstraints(Zone<SemanticElement> zone) {
         this.transformer = new FilterTransformer(zone, this.atomicQuery);
         // check fixed parts
         for (byte i = 0; i < super.key.getValue().size(); i++) {
@@ -131,18 +122,16 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
     private class FilterTransformer extends ExprTransformCopy implements
             Serializable {
 
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 140L;
 
         private AtomicQuery atomicQuery;
 
-        private Zone<E> zone;
+        private Zone<SemanticElement> zone;
 
         private boolean finalDecision;
 
-        public FilterTransformer(Zone<E> zone, AtomicQuery atomicQuery) {
+        public FilterTransformer(Zone<SemanticElement> zone,
+                AtomicQuery atomicQuery) {
             super();
             this.zone = zone;
             this.atomicQuery = atomicQuery;
@@ -313,7 +302,6 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
                     try {
                         if (func.getArg1().getVarName().equals(
                                 func.getArg2().getVarName())) {
-                            System.out.println("AtomicQueryConstraintsValidator.FilterTransformer.transform() var1=var2");
                             return new E_Bool(true);
                         }
                     } catch (NullPointerException e) {
@@ -388,8 +376,7 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
 
         @Override
         public String toString() {
-            // TODO Auto-generated method stub
-            return "" + this.isBool();
+            return Boolean.toString(this.isBool());
         }
 
     }
@@ -407,11 +394,9 @@ public final class AtomicQueryConstraintsValidator<E extends StringElement>
                 new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
 
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            if (query.toArray()[i].isVariable()
-                    || query.toArray()[i].matches(Node.ANY)) {
-                query.toArray()[i] = null;
-            } else {
-                tab[i] = new SemanticElement(query.toArray()[i]);
+            if (query.getNode(i) != null && !query.getNode(i).equals(Node.ANY)
+                    && !query.getNode(i).isVariable()) {
+                tab[i] = new SemanticElement(query.getNode(i));
             }
         }
 

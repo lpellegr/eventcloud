@@ -59,6 +59,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
  * for any declared variable.
  * 
  * @author lpellegr
+ * @author mantoine
  * 
  * @see SparqlDecomposer
  */
@@ -73,8 +74,6 @@ public final class AtomicQuery implements Serializable {
     private transient VarDetails[] varDetails;
 
     private transient Op opRepresentation;
-
-    private transient List<ExprList> filterConstraints;
 
     /* 
      * Sequence modifiers 
@@ -96,8 +95,8 @@ public final class AtomicQuery implements Serializable {
     // put the solutions in order
     private transient List<SortCondition> orderBy;
 
-    // TODO: add support for filter constraints
-    // do not forget to update equals + hashcode accordingly
+    // filter constraints
+    private transient List<ExprList> filterConstraints;
 
     public AtomicQuery(Node graph, Node subject, Node predicate, Node object) {
         this.nodes = new Node[] {graph, subject, predicate, object};
@@ -109,6 +108,14 @@ public final class AtomicQuery implements Serializable {
 
     public boolean hasLiteralObject() {
         return this.nodes[2] != null && this.nodes[2].isLiteral();
+    }
+
+    public Node getNode(int index) {
+        if (index < 0 || index > 3) {
+            throw new IllegalArgumentException("Illegal index: " + index);
+        }
+
+        return this.nodes[index];
     }
 
     public String getVarName(int index) {
@@ -201,10 +208,19 @@ public final class AtomicQuery implements Serializable {
                     this.filterAndTransformNodeVariableToVar(this.getObject())));
 
             // named graph
-            Op op =
+            Op op = new OpBGP(bp);
+
+            // apply filter constraints
+            if (this.filterConstraints != null) {
+                for (ExprList expr : this.filterConstraints) {
+                    op = OpFilter.filter(expr, op);
+                }
+            }
+
+            op =
                     new OpGraph(
                             this.filterAndTransformNodeVariableToVar(this.getGraph()),
-                            new OpBGP(bp));
+                            op);
 
             if (this.orderBy != null) {
                 op = new OpOrder(op, this.orderBy);
@@ -223,11 +239,6 @@ public final class AtomicQuery implements Serializable {
             if (this.hasLimit()) {
                 // offset is ignored by using the internal Jena default value
                 op = new OpSlice(op, Long.MIN_VALUE, this.limit);
-            }
-            if (this.filterConstraints != null) {
-                for (ExprList expr : this.filterConstraints) {
-                    op = OpFilter.filter(expr, op);
-                }
             }
 
             this.opRepresentation = op;
@@ -327,6 +338,14 @@ public final class AtomicQuery implements Serializable {
         return this.reduced;
     }
 
+    public void setFilterConstraints(List<ExprList> filterConstraints) {
+        this.filterConstraints = filterConstraints;
+    }
+
+    public List<ExprList> getFilterConstraints() {
+        return this.filterConstraints;
+    }
+
     public long getLimit() {
         return this.limit;
     }
@@ -352,56 +371,25 @@ public final class AtomicQuery implements Serializable {
     }
 
     public void setOrderBy(List<SortCondition> sortConditions) {
-        if (sortConditions.size() > 0) {
-            System.out.println("je set orderby : "
-                    + sortConditions.get(0).toString());
-        }
         this.orderBy = sortConditions;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.distinct
-                ? 1231 : 1237);
-        result = prime * result + ((this.filterConstraints == null)
-                ? 0 : this.filterConstraints.hashCode());
-        result = prime * result + (int) (this.limit ^ (this.limit >>> 32));
-        result = prime * result + (this.reduced
-                ? 1231 : 1237);
-        return result;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-        AtomicQuery other = (AtomicQuery) obj;
-        if (this.distinct != other.distinct) {
-            return false;
-        }
-        if (this.filterConstraints == null) {
-            if (other.filterConstraints != null) {
-                return false;
-            }
-        } else if (!this.filterConstraints.equals(other.filterConstraints)) {
-            return false;
-        }
-        if (this.limit != other.limit) {
-            return false;
-        }
-        if (this.reduced != other.reduced) {
-            return false;
-        }
-        return true;
+        return obj instanceof AtomicQuery
+                && this.getOpRepresentation().equals(
+                        ((AtomicQuery) obj).getOpRepresentation());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return this.getOpRepresentation().hashCode();
     }
 
     /**
@@ -464,10 +452,11 @@ public final class AtomicQuery implements Serializable {
 
                 this.nodes[i] = node;
             }
-        } catch (Throwable t) { // needed to catch SPARQL parse exceptions
+        } catch (Throwable t) {
+            // needed to catch SPARQL parse exceptions
+            // otherwise ProActive eats it
             t.printStackTrace();
         }
-
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -512,14 +501,6 @@ public final class AtomicQuery implements Serializable {
         }
         outWriter.flush();
 
-    }
-
-    public List<ExprList> getFilterConstraints() {
-        return this.filterConstraints;
-    }
-
-    public void setFilterConstraints(List<ExprList> filterConstraints) {
-        this.filterConstraints = filterConstraints;
     }
 
     private static final class VarDetails {

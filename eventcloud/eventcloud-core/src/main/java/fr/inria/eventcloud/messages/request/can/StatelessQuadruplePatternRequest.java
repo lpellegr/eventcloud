@@ -106,4 +106,5 @@ public abstract class StatelessQuadruplePatternRequest extends
     public SerializedValue<QuadruplePattern> getQuadruplePattern() {
         return this.quadruplePattern;
     }
+
 }
