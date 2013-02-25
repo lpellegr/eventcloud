@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -76,8 +77,11 @@ public class XmlNotificationTranslator extends
     private static Logger log =
             LoggerFactory.getLogger(XmlNotificationTranslator.class);
 
-    public XmlNotificationTranslator() {
+    private Pattern phoneNumberPattern;
 
+    public XmlNotificationTranslator() {
+        this.phoneNumberPattern =
+                Pattern.compile("^0[0-9]{9}$|^00[0-9]{7,15}$");
     }
 
     /**
@@ -347,32 +351,37 @@ public class XmlNotificationTranslator extends
 
     /**
      * Finds the {@link XSDDatatype} associated to the specified {@code literal}
-     * value for simple types such that int, float, datetime and strings.
+     * value for simple types such that int, float, datetime, phone numbers and
+     * strings.
      * 
      * @param literal
      *            the literal value to parse.
      * 
      * @return the {@link XSDDatatype} associated to the specified
      *         {@code literal} value for simple types such that int, float,
-     *         datetime and strings.
+     *         datetime, phone numbers and strings.
      */
     private XSDDatatype findDatatype(String literal) {
-        try {
-            Integer.parseInt(literal);
-            return XSDDatatype.XSDint;
-        } catch (NumberFormatException nfe) {
+        if (this.phoneNumberPattern.matcher(literal).matches()) {
+            return XSDDatatype.XSDstring;
+        } else {
             try {
-                Float.parseFloat(literal);
-                return XSDDatatype.XSDfloat;
-            } catch (NumberFormatException nfe2) {
+                Integer.parseInt(literal);
+                return XSDDatatype.XSDint;
+            } catch (NumberFormatException nfe) {
                 try {
-                    DatatypeFactory.newInstance().newXMLGregorianCalendar(
-                            literal).toGregorianCalendar().getTime();
-                    return XSDDatatype.XSDdateTime;
-                } catch (DatatypeConfigurationException e) {
-                    return XSDDatatype.XSDstring;
-                } catch (IllegalArgumentException iae) {
-                    return XSDDatatype.XSDstring;
+                    Float.parseFloat(literal);
+                    return XSDDatatype.XSDfloat;
+                } catch (NumberFormatException nfe2) {
+                    try {
+                        DatatypeFactory.newInstance().newXMLGregorianCalendar(
+                                literal).toGregorianCalendar().getTime();
+                        return XSDDatatype.XSDdateTime;
+                    } catch (DatatypeConfigurationException e) {
+                        return XSDDatatype.XSDstring;
+                    } catch (IllegalArgumentException iae) {
+                        return XSDDatatype.XSDstring;
+                    }
                 }
             }
         }
