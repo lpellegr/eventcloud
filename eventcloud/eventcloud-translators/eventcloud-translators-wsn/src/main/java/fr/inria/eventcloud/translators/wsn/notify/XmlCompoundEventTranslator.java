@@ -184,8 +184,8 @@ public class XmlCompoundEventTranslator extends
         return this.createElement(quad);
     }
 
-    private static Element findByName(org.w3c.dom.Node node, String namespace,
-                                      String localName) {
+    private Element findByName(org.w3c.dom.Node node, String namespace,
+                               String localName) {
         if (node.hasChildNodes()) {
             if (namespace != null) {
                 if (node.getNodeName().equals(localName)
@@ -195,7 +195,8 @@ public class XmlCompoundEventTranslator extends
                     NodeList list = node.getChildNodes();
                     for (int i = 0; i < list.getLength(); i++) {
                         Element elt =
-                                findByName(list.item(0), namespace, localName);
+                                this.findByName(
+                                        list.item(0), namespace, localName);
                         if (elt != null) {
                             return elt;
                         }
@@ -208,7 +209,8 @@ public class XmlCompoundEventTranslator extends
                     NodeList list = node.getChildNodes();
                     for (int i = 0; i < list.getLength(); i++) {
                         Element elt =
-                                findByName(list.item(0), namespace, localName);
+                                this.findByName(
+                                        list.item(0), namespace, localName);
                         if (elt != null) {
                             return elt;
                         }
@@ -237,7 +239,7 @@ public class XmlCompoundEventTranslator extends
      *         new translated quadruple must be appended.
      */
     private Element createElement(Quadruple quadruple, Element prevRootElt) {
-        String[] elements = getXmlElements(quadruple);
+        String[] elements = this.getXmlElements(quadruple);
 
         Element rootElt = prevRootElt;
         Element lastElt = null;
@@ -250,7 +252,7 @@ public class XmlCompoundEventTranslator extends
             // empty it means that the wsnt:Message has been already created
             for (int i = 0; i < elements.length; i++) {
                 // splits the uri into namespace + localname
-                String[] parts = splitUri(elements[i]);
+                String[] parts = this.splitUri(elements[i]);
                 String namespace = parts[0];
                 String localName = parts[1];
 
@@ -259,7 +261,8 @@ public class XmlCompoundEventTranslator extends
                 // ? rootElt.getElementsByTagName(localName)
                 // : rootElt.getElementsByTagNameNS(
                 // namespace, localName);
-                Element eltFound = findByName(rootElt, namespace, localName);
+                Element eltFound =
+                        this.findByName(rootElt, namespace, localName);
 
                 if (eltFound == null) {
                     // here we assume we have only one element that matches
@@ -307,9 +310,9 @@ public class XmlCompoundEventTranslator extends
      *         literal value of the specified {@code quadruple}.
      */
     private Element createElement(Quadruple quadruple) {
-        String[] elements = getXmlElements(quadruple);
+        String[] elements = this.getXmlElements(quadruple);
 
-        String[] parts = splitUri(elements[0]);
+        String[] parts = this.splitUri(elements[0]);
         String namespace = parts[0];
         String localName = parts[1];
         Element rootElt = this.createElementFrom(namespace, localName);
@@ -317,7 +320,7 @@ public class XmlCompoundEventTranslator extends
 
         // iterates on the String elements extracted from the predicate
         for (int i = 1; i < elements.length; i++) {
-            parts = splitUri(elements[i]);
+            parts = this.splitUri(elements[i]);
             namespace = parts[0];
             localName = parts[1];
 
@@ -339,7 +342,7 @@ public class XmlCompoundEventTranslator extends
         return rootElt;
     }
 
-    private static String[] getXmlElements(Quadruple quadruple) {
+    private String[] getXmlElements(Quadruple quadruple) {
         String[] elements =
                 quadruple.getPredicate().getURI().replaceAll(
                         WsnConstants.SHARP_ESCAPE, "#").split(
@@ -360,7 +363,7 @@ public class XmlCompoundEventTranslator extends
         }
     }
 
-    private static String[] splitUri(String uri) {
+    private String[] splitUri(String uri) {
         if (uri.endsWith("/")) {
             uri = uri.substring(0, uri.length() - 1);
         }

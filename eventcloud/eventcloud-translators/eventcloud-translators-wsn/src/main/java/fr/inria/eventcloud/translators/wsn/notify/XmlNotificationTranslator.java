@@ -254,7 +254,8 @@ public class XmlNotificationTranslator extends
         Map<Node, Node> result = new HashMap<Node, Node>();
 
         if (element != null) {
-            org.w3c.dom.Node nn = removeWhiteSpacesAndSharpFromNode(element);
+            org.w3c.dom.Node nn =
+                    this.removeWhiteSpacesAndSharpFromNode(element);
             if (nn != null) {
                 this.parseElement(nn, new StringBuilder(), result, isMetadata);
             } else {
@@ -265,13 +266,13 @@ public class XmlNotificationTranslator extends
         return result;
     }
 
-    private static org.w3c.dom.Node removeWhiteSpacesAndSharpFromNode(org.w3c.dom.Node incomingNode) {
+    private org.w3c.dom.Node removeWhiteSpacesAndSharpFromNode(org.w3c.dom.Node incomingNode) {
         try {
-            byte[] nodeBytes = xmlNodeToByteArray(incomingNode);
+            byte[] nodeBytes = this.xmlNodeToByteArray(incomingNode);
             String nodeString = new String(nodeBytes, "UTF-8");
             nodeString = nodeString.replaceAll(">\\s*<", "><");
             nodeString = nodeString.replaceAll("#", WsnConstants.SHARP_ESCAPE);
-            incomingNode = byteArrayToXmlNode(nodeString.getBytes());
+            incomingNode = this.byteArrayToXmlNode(nodeString.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -279,7 +280,7 @@ public class XmlNotificationTranslator extends
         return incomingNode;
     }
 
-    private static byte[] xmlNodeToByteArray(org.w3c.dom.Node node) {
+    private byte[] xmlNodeToByteArray(org.w3c.dom.Node node) {
         try {
             Source source = new DOMSource(node);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -296,7 +297,7 @@ public class XmlNotificationTranslator extends
         return null;
     }
 
-    private static org.w3c.dom.Node byteArrayToXmlNode(byte[] xml)
+    private org.w3c.dom.Node byteArrayToXmlNode(byte[] xml)
             throws SAXException, ParserConfigurationException, IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -322,7 +323,7 @@ public class XmlNotificationTranslator extends
             }
 
             result.put(predicateNode, Node.createLiteral(
-                    literalValue, findDatatype(literalValue)));
+                    literalValue, this.findDatatype(literalValue)));
         } else {
             if (predicate.length() > 0) {
                 predicate.append(WsnConstants.URI_SEPARATOR);
@@ -355,7 +356,7 @@ public class XmlNotificationTranslator extends
      *         {@code literal} value for simple types such that int, float,
      *         datetime and strings.
      */
-    private static XSDDatatype findDatatype(String literal) {
+    private XSDDatatype findDatatype(String literal) {
         try {
             Integer.parseInt(literal);
             return XSDDatatype.XSDint;
