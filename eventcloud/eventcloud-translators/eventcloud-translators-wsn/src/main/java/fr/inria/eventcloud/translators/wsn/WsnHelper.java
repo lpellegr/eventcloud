@@ -303,9 +303,9 @@ public class WsnHelper {
      * @throws TranslationException
      *             if an error during the translation occurs.
      */
-    public static synchronized Notify createNotifyMessage(String subscriptionReference,
-                                                          QName topic,
-                                                          CompoundEvent... compoundEvents)
+    public static Notify createNotifyMessage(String subscriptionReference,
+                                             QName topic,
+                                             CompoundEvent... compoundEvents)
             throws TranslationException {
         Notify notify = new Notify();
 
@@ -315,6 +315,50 @@ public class WsnHelper {
             notificationMessage.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
             if (event.getGraph().getURI().endsWith(
                     WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
+                notificationMessage.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
+            } else {
+                notificationMessage.setTopic(createTopicExpressionType(topic));
+            }
+            notify.getNotificationMessage().add(notificationMessage);
+        }
+
+        return notify;
+    }
+
+    /**
+     * Creates a {@link Notify WS-Notification message} message from the
+     * specified topic information and {@link NotificationMessageHolderType
+     * notification messages}.
+     * 
+     * @param subscriptionReference
+     *            the subscription reference endpoint of the WS-Notification
+     *            message to build.
+     * @param topic
+     *            the QName associated to the topic of the WS-Notification
+     *            message to build.
+     * @param simpleTopicExpression
+     *            indicates if the topic expression type must contains a
+     *            simpleExpressionType element.
+     * @param notificationMessages
+     *            the notification messages of the WS-Notification message to
+     *            build.
+     * 
+     * @return a WS-Notification message with the specified topic information
+     *         and notification messages.
+     * 
+     * @throws TranslationException
+     *             if an error during the translation occurs.
+     */
+    public static Notify createNotifyMessage(String subscriptionReference,
+                                             QName topic,
+                                             boolean simpleTopicExpression,
+                                             NotificationMessageHolderType... notificationMessages)
+            throws TranslationException {
+        Notify notify = new Notify();
+
+        for (NotificationMessageHolderType notificationMessage : notificationMessages) {
+            notificationMessage.setSubscriptionReference(createW3cEndpointReference(subscriptionReference));
+            if (simpleTopicExpression) {
                 notificationMessage.setTopic(createTopicExpressionTypeWithSimpleExpressionType(topic));
             } else {
                 notificationMessage.setTopic(createTopicExpressionType(topic));

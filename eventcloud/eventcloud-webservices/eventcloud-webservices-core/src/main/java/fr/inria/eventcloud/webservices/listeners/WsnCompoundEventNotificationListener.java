@@ -27,7 +27,9 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
+import fr.inria.eventcloud.translators.wsn.WsnConstants;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
+import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
 /**
@@ -47,6 +49,8 @@ public class WsnCompoundEventNotificationListener extends
     private final QName streamQName;
 
     private final String subscriberWsEndpointUrl;
+
+    private transient WsnTranslator translator;
 
     private transient NotificationConsumer subscriberWsClient;
 
@@ -72,6 +76,14 @@ public class WsnCompoundEventNotificationListener extends
                         streamUrl.substring(index + 1), "s");
     }
 
+    private synchronized WsnTranslator getTranslator() {
+        if (this.translator == null) {
+            this.translator = new WsnTranslator();
+        }
+
+        return this.translator;
+    }
+
     private synchronized NotificationConsumer getSubscriberWsClient() {
         if (this.subscriberWsClient == null) {
             this.subscriberWsClient =
@@ -89,10 +101,16 @@ public class WsnCompoundEventNotificationListener extends
     @Override
     public void onNotification(SubscriptionId id, CompoundEvent solution) {
         try {
-            this.getSubscriberWsClient().notify(
-                    WsnHelper.createNotifyMessage(
-                            this.subscriberWsEndpointUrl, this.streamQName,
-                            solution));
+            this.getSubscriberWsClient()
+                    .notify(
+                            WsnHelper.createNotifyMessage(
+                                    this.subscriberWsEndpointUrl,
+                                    this.streamQName,
+                                    solution.getGraph()
+                                            .getURI()
+                                            .endsWith(
+                                                    WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER),
+                                    this.getTranslator().translate(solution)));
 
             log.info(
                     "Subscriber {} notified about:\n {}",
