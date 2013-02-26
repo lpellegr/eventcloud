@@ -443,8 +443,8 @@ public final class PublishSubscribeUtils {
         BindingMap binding = new BindingMap();
         Node[] quadNodes = quad.toArray();
 
-        int i = 0;
-        for (Node node : atomicQuery.toArray()) {
+        for (int i = 0; i < 4; i++) {
+            Node node = atomicQuery.getNode(i);
             if (node.isVariable() && vars.contains(Var.alloc(node.getName()))) {
                 Node resultNode;
                 // the graph value which is returned is the meta graph value
@@ -456,7 +456,6 @@ public final class PublishSubscribeUtils {
 
                 binding.add(Var.alloc(node.getName()), resultNode);
             }
-            i++;
         }
 
         return binding;

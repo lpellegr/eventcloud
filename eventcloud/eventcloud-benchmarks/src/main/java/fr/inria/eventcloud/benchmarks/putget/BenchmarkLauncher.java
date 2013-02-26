@@ -48,6 +48,7 @@ import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.utils.Callback;
 
 /**
+ * Launcher for running benchmarks with historical queries.
  * 
  * @author mantoine
  */
@@ -71,12 +72,14 @@ public class BenchmarkLauncher {
                     + "SELECT DISTINCT ?product ?label "
                     + "WHERE { GRAPH ?g  { "
                     + " ?product rdfs:label ?label ."
-                    + " ?product a bsbm-inst:ProductType1 ."
-                    + " ?product bsbm:productFeature bsbm-inst:ProductFeature25 . "
-                    + " ?product bsbm:productFeature bsbm-inst:ProductFeature29 . "
-                    + " ?product bsbm:productPropertyNumeric1 ?value1 . "
-                    + " FILTER (?value1 > 15) }}"
-                    + " ORDER BY ?label "
+                    + " FILTER (?label > \"http://aaaaa\")"
+                    + " ?product a bsbm-inst:ProductType145 ."
+                    + " ?product bsbm:productFeature bsbm-inst:ProductFeature4504 . "
+                    + " ?product bsbm:productFeature bsbm-inst:ProductFeature4511 . "
+                    + " ?product bsbm:productPropertyNumeric1 ?value1  "
+                    + " FILTER (?value1 > 15) "
+                    + " } } "
+                    + "ORDER BY ?label "
                     + " LIMIT 10 ";
 
     private static String query5 =
@@ -222,25 +225,25 @@ public class BenchmarkLauncher {
                         this.datastoreType, this.sizeOfQuadsInsertedInBytes);
         for (int j = 0; j < this.responses.size(); j++) {
             int nbResults = 0;
-            while (this.responses.get(j).getResult().hasNext()) {
-                this.responses.get(j).getResult().next();
+            SparqlSelectResponse resp = this.responses.get(j);
+            while (resp.getResult().hasNext()) {
+                resp.getResult().next();
                 nbResults++;
             }
             Element query =
-                    xmlWriter.addQuery(j + 1, this.responses.get(j)
-                            .getTimeToGetResult(), this.responses.get(j)
-                            .getQueryDatastoreTime(), this.responses.get(j)
-                            .getLatency());
+                    xmlWriter.addQuery(
+                            j + 1, resp.getTimeToGetResult(),
+                            resp.getQueryDatastoreTime(), resp.getLatency(),
+                            resp.getInboundHopCount());
             xmlWriter.addElement(query, "finalResults", "" + nbResults);
             xmlWriter.addElement(query, "intermediateResults", ""
-                    + this.responses.get(j).getNbIntermediateResults());
+                    + resp.getNbIntermediateResults());
             xmlWriter.addElement(query, "intermediateResultsSizeInBytes", ""
-                    + this.responses.get(j)
-                            .getSizeOfIntermediateResultsInBytes());
+                    + resp.getSizeOfIntermediateResultsInBytes());
             xmlWriter.addElement(query, "subQueries", ""
-                    + this.responses.get(j).getNbSubQueries());
+                    + resp.getNbSubQueries());
             Map<String, Integer> nbResultsForEachSubquery =
-                    this.responses.get(j).getMapSubQueryNbResults();
+                    resp.getMapSubQueryNbResults();
             for (String subQuery : nbResultsForEachSubquery.keySet()) {
                 xmlWriter.addSubQueryResults(
                         query, subQuery, nbResultsForEachSubquery.get(subQuery));
