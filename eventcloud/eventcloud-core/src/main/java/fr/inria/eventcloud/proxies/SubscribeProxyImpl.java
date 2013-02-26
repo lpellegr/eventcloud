@@ -732,10 +732,14 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                 quadHashesReceived.add(q.hashValue());
             }
 
-            try {
-                Thread.sleep(EventCloudProperties.RECONSTRUCTION_RETRY_THRESHOLD.getValue());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            // this condition is required to avoid a sleep on the last
+            // reconstruction once all the quadruples have been retrieved
+            if (quadsReceived.size() != expectedNbQuadruples) {
+                try {
+                    Thread.sleep(EventCloudProperties.RECONSTRUCTION_RETRY_THRESHOLD.getValue());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
 
