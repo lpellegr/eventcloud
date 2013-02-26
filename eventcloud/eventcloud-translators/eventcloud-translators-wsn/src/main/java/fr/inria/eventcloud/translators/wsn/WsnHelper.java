@@ -298,13 +298,14 @@ public class WsnHelper {
      *            the compound events to serialize inside the message.
      * 
      * @return a WS-Notification message with the specified topic information
-     *         and {@link CompoundEvent}s.
+     *         and compound events.
+     * 
      * @throws TranslationException
      *             if an error during the translation occurs.
      */
-    public static Notify createNotifyMessage(String subscriptionReference,
-                                             QName topic,
-                                             CompoundEvent... compoundEvents)
+    public static synchronized Notify createNotifyMessage(String subscriptionReference,
+                                                          QName topic,
+                                                          CompoundEvent... compoundEvents)
             throws TranslationException {
         Notify notify = new Notify();
 
