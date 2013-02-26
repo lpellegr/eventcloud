@@ -22,7 +22,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.openjena.riot.out.OutputLangUtils;
@@ -40,6 +39,7 @@ import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
+import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
 import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
@@ -48,7 +48,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.sse.writers.WriterExpr;
+import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -59,6 +59,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
  * for any declared variable.
  * 
  * @author lpellegr
+ * @author mantoine
  * 
  * @see SparqlDecomposer
  */
@@ -94,15 +95,27 @@ public final class AtomicQuery implements Serializable {
     // put the solutions in order
     private transient List<SortCondition> orderBy;
 
-    // TODO: add support for filter constraints
-    // do not forget to update equals + hashcode accordingly
+    // filter constraints
+    private transient List<ExprList> filterConstraints;
 
     public AtomicQuery(Node graph, Node subject, Node predicate, Node object) {
         this.nodes = new Node[] {graph, subject, predicate, object};
     }
 
+    public AtomicQuery() {
+        this.nodes = null;
+    };
+
     public boolean hasLiteralObject() {
         return this.nodes[2] != null && this.nodes[2].isLiteral();
+    }
+
+    public Node getNode(int index) {
+        if (index < 0 || index > 3) {
+            throw new IllegalArgumentException("Illegal index: " + index);
+        }
+
+        return this.nodes[index];
     }
 
     public String getVarName(int index) {
@@ -195,10 +208,19 @@ public final class AtomicQuery implements Serializable {
                     this.filterAndTransformNodeVariableToVar(this.getObject())));
 
             // named graph
-            Op op =
+            Op op = new OpBGP(bp);
+
+            // apply filter constraints
+            if (this.filterConstraints != null) {
+                for (ExprList expr : this.filterConstraints) {
+                    op = OpFilter.filter(expr, op);
+                }
+            }
+
+            op =
                     new OpGraph(
                             this.filterAndTransformNodeVariableToVar(this.getGraph()),
-                            new OpBGP(bp));
+                            op);
 
             if (this.orderBy != null) {
                 op = new OpOrder(op, this.orderBy);
@@ -316,6 +338,14 @@ public final class AtomicQuery implements Serializable {
         return this.reduced;
     }
 
+    public void setFilterConstraints(List<ExprList> filterConstraints) {
+        this.filterConstraints = filterConstraints;
+    }
+
+    public List<ExprList> getFilterConstraints() {
+        return this.filterConstraints;
+    }
+
     public long getLimit() {
         return this.limit;
     }
@@ -348,55 +378,18 @@ public final class AtomicQuery implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.distinct
-                ? 1231 : 1237);
-        result = prime * result + (int) (this.limit ^ (this.limit >>> 32));
-        result = prime * result + Arrays.hashCode(this.nodes);
-        result = prime * result + ((this.orderBy == null)
-                ? 0 : this.orderBy.hashCode());
-        result = prime * result + (this.reduced
-                ? 1231 : 1237);
-        return result;
+    public boolean equals(Object obj) {
+        return obj instanceof AtomicQuery
+                && this.getOpRepresentation().equals(
+                        ((AtomicQuery) obj).getOpRepresentation());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-        AtomicQuery other = (AtomicQuery) obj;
-        if (this.distinct != other.distinct) {
-            return false;
-        }
-        if (this.limit != other.limit) {
-            return false;
-        }
-        if (!Arrays.equals(this.nodes, other.nodes)) {
-            return false;
-        }
-        if (this.orderBy == null) {
-            if (other.orderBy != null) {
-                return false;
-            }
-        } else if (!this.orderBy.equals(other.orderBy)) {
-            return false;
-        }
-        if (this.reduced != other.reduced) {
-            return false;
-        }
-        return true;
+    public int hashCode() {
+        return this.getOpRepresentation().hashCode();
     }
 
     /**
@@ -409,37 +402,60 @@ public final class AtomicQuery implements Serializable {
 
     private void readObject(ObjectInputStream in) throws IOException,
             ClassNotFoundException {
-        in.defaultReadObject();
+        try {
+            in.defaultReadObject();
 
-        // reads sort conditions
-        int nbSortConditions = in.readInt();
+            // reads sort conditions
+            int nbSortConditions = in.readInt();
 
-        if (nbSortConditions > 0) {
-            this.orderBy = new ArrayList<SortCondition>(nbSortConditions);
+            if (nbSortConditions > 0) {
+                this.orderBy = new ArrayList<SortCondition>(nbSortConditions);
 
-            for (int i = 0; i < nbSortConditions; i++) {
-                int direction = in.readInt();
-                Expr expr = ExprUtils.parse(in.readUTF());
+                for (int i = 0; i < nbSortConditions; i++) {
+                    int direction = in.readInt();
 
-                this.orderBy.add(new SortCondition(expr, direction));
+                    String s = in.readUTF();
+                    Expr expr = ExprUtils.parse(s);
+
+                    this.orderBy.add(new SortCondition(expr, direction));
+                }
             }
-        }
 
-        // read nodes
-        this.nodes = new Node[4];
-        Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
+            // reads filter conditions
+            int nbFilterConditions = in.readInt();
+            if (nbFilterConditions > 0) {
+                this.filterConstraints =
+                        new ArrayList<ExprList>(nbFilterConditions);
 
-        for (int i = 0; i < this.nodes.length; i++) {
-            Token token = tokenizer.next();
-
-            Node node;
-            if (token.getType() == TokenType.VAR) {
-                node = Node.createVariable(token.getImage());
+                for (int i = 0; i < nbFilterConditions; i++) {
+                    String s = in.readUTF();
+                    Expr expr = ExprUtils.parse(s);
+                    this.filterConstraints.add(new ExprList(expr));
+                }
             } else {
-                node = token.asNode();
+                this.filterConstraints = new ArrayList<ExprList>();
             }
 
-            this.nodes[i] = node;
+            // read nodes
+            this.nodes = new Node[4];
+            Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(in);
+
+            for (int i = 0; i < this.nodes.length; i++) {
+                Token token = tokenizer.next();
+
+                Node node;
+                if (token.getType() == TokenType.VAR) {
+                    node = Node.createVariable(token.getImage());
+                } else {
+                    node = token.asNode();
+                }
+
+                this.nodes[i] = node;
+            }
+        } catch (Throwable t) {
+            // needed to catch SPARQL parse exceptions
+            // otherwise ProActive eats it
+            t.printStackTrace();
         }
     }
 
@@ -452,7 +468,21 @@ public final class AtomicQuery implements Serializable {
 
             for (SortCondition sortCondition : this.orderBy) {
                 out.writeInt(sortCondition.getDirection());
-                out.writeUTF(WriterExpr.asString(sortCondition.getExpression()));
+                // previous write erased parenthesis for str(?x)
+                // out.writeUTF(WriterExpr.asString(sortCondition.getExpression()));
+                out.writeUTF(ExprUtils.fmtSPARQL(sortCondition.getExpression()));
+            }
+        } else {
+            out.writeInt(0);
+        }
+
+        // write filter conditions
+        if (this.filterConstraints != null) {
+            out.writeInt(this.filterConstraints.size());
+            for (ExprList exprList : this.filterConstraints) {
+                String s = ExprUtils.fmtSPARQL(exprList);
+                out.writeUTF(s);
+                // out.writeObject(s);
             }
         } else {
             out.writeInt(0);
@@ -462,14 +492,15 @@ public final class AtomicQuery implements Serializable {
 
         // write nodes
         for (int i = 0; i < this.nodes.length; i++) {
+
             OutputLangUtils.output(outWriter, this.nodes[i], null);
 
             if (i < this.nodes.length - 1) {
                 outWriter.write(' ');
             }
         }
-
         outWriter.flush();
+
     }
 
     private static final class VarDetails {

@@ -32,11 +32,19 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprFunction0;
+import com.hp.hpl.jena.sparql.expr.ExprFunction2;
 import com.hp.hpl.jena.sparql.expr.ExprList;
+import com.hp.hpl.jena.sparql.expr.ExprTransformCopy;
+import com.hp.hpl.jena.sparql.expr.ExprTransformer;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.ExprVisitorBase;
 import com.hp.hpl.jena.sparql.expr.ExprWalker;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
+import com.hp.hpl.jena.sparql.function.FunctionEnv;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
+import com.hp.hpl.jena.sparql.util.ExprUtils;
 
 import fr.inria.eventcloud.exceptions.DecompositionException;
 
@@ -46,6 +54,7 @@ import fr.inria.eventcloud.exceptions.DecompositionException;
  * is limited and does not support multiple graph patterns.
  * 
  * @author lpellegr
+ * @author mantoine
  */
 public final class SparqlDecomposer {
 
@@ -127,9 +136,40 @@ public final class SparqlDecomposer {
             atomicQuery.setLimit(query.getLimit());
         }
         // it is unnecessary to order results if no limit is applied
-        if (query.hasLimit() && query.getOrderBy() != null) {
+        if (visitor.basicGraphPatterns.size() == 1 && query.hasLimit()
+                && query.getOrderBy() != null) {
             atomicQuery.setOrderBy(this.filterSortConditions(
                     atomicQuery, query.getOrderBy()));
+        }
+        if (!(visitor.getFilterConstraints().isEmpty())) {
+            FilterTransformer transformer = new FilterTransformer(atomicQuery);
+            List<ExprList> filterConstraints = new ArrayList<ExprList>();
+            // visitor.getFilterConstraints().size() is always equals to 1
+            ExprList el = visitor.getFilterConstraints().get(0);
+            ExprList exprList = ExprTransformer.transform(transformer, el);
+
+            if (!(ExprUtils.fmtSPARQL(exprList).equals("null()"))) {
+                String expList = ExprUtils.fmtSPARQL(exprList);
+                if (expList.contains(" , ")) {
+                    // if several FILTER clauses, exprList will look like :
+                    // filter1 , filter2 , etc
+                    // so we have to split it, remove null() if the atomic query
+                    // doesn't match all of the filters but only some of them,
+                    // and put each different filter into Expr variables
+                    String[] tabExpList = expList.split(" , ");
+                    for (int i = 0; i < tabExpList.length; i++) {
+                        if (!tabExpList[i].contains("null()")) {
+                            Expr newExpr = ExprUtils.parse(tabExpList[i]);
+                            filterConstraints.add(new ExprList(newExpr));
+                        }
+                    }
+                } else {
+                    filterConstraints.add(exprList);
+                }
+            }
+            atomicQuery.setFilterConstraints(filterConstraints);
+        } else {
+            atomicQuery.setFilterConstraints(new ArrayList<ExprList>(0));
         }
 
         return atomicQuery;
@@ -221,6 +261,71 @@ public final class SparqlDecomposer {
             super.visit(opFilter);
 
             this.filterConstraints.add(opFilter.getExprs());
+        }
+
+        public List<ExprList> getFilterConstraints() {
+            return this.filterConstraints;
+        }
+
+    }
+
+    private static class FilterTransformer extends ExprTransformCopy {
+
+        private AtomicQuery query;
+
+        public FilterTransformer(AtomicQuery query) {
+            super();
+            this.query = query;
+        }
+
+        @Override
+        public Expr transform(ExprVar exprVar) {
+            // if atomic query contains a variable that is in the filter clause
+            if (this.query.containsVariable(exprVar.getVarName())) {
+                return exprVar;
+            }
+            // else we don't add filter condition to this atomic query
+            return NodeValue.nvNothing;
+        }
+
+        @Override
+        public Expr transform(ExprFunction2 func, Expr expr1, Expr expr2) {
+            if (expr1 == null) {
+                return new E_Null();
+            }
+
+            if (expr2 == null) {
+                return new E_Null();
+            }
+
+            if (expr1 instanceof E_Null) {
+                return expr2;
+            }
+
+            if (expr2 instanceof E_Null) {
+                return expr1;
+            }
+
+            return super.transform(func, expr1, expr2);
+        }
+
+    }
+
+    private static class E_Null extends ExprFunction0 {
+        private static final String symbol = "null";
+
+        public E_Null() {
+            super(symbol);
+        }
+
+        @Override
+        public NodeValue eval(FunctionEnv env) {
+            return NodeValue.nvNothing;
+        }
+
+        @Override
+        public Expr copy() {
+            return new E_Null();
         }
 
     }
