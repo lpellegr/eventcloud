@@ -59,13 +59,11 @@ import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
-import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
-import fr.inria.eventcloud.messages.request.can.RemoveEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
@@ -87,12 +85,7 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
-@DefinePriorities({
-        @Priority(level = 3, name = "send", parameters = {ReconstructCompoundEventRequest.class}),
-        @Priority(level = 2, name = "sendv", parameters = {IndexEphemeralSubscriptionRequest.class}),
-        @Priority(level = 1, name = "sendv", parameters = {IndexSubscriptionRequest.class}),
-        @Priority(level = -1, name = "publish"),
-        @Priority(level = -2, name = "sendv", parameters = {RemoveEphemeralSubscriptionRequest.class})})
+@DefinePriorities({@Priority(level = 3, name = "send", parameters = {ReconstructCompoundEventRequest.class})})
 public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
