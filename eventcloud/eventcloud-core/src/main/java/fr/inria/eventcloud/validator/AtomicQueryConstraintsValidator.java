@@ -91,21 +91,15 @@ public final class AtomicQueryConstraintsValidator extends
             }
         }
 
-        try {
-            if (this.atomicQuery.getFilterConstraints().size() > 0) {
-                for (int i = 0; i < this.atomicQuery.getFilterConstraints()
-                        .size(); i++) {
-                    ExprTransformer.transform(
-                            this.getTransformer(),
-                            this.atomicQuery.getFilterConstraints().get(i));
-                }
-                return this.getTransformer().finalDecision;
-            } else {
-                // no filter condition to apply on this atomic query
-                return true;
+        if (this.atomicQuery.getFilterConstraints().size() > 0) {
+            for (int i = 0; i < this.atomicQuery.getFilterConstraints().size(); i++) {
+                ExprTransformer.transform(
+                        this.getTransformer(),
+                        this.atomicQuery.getFilterConstraints().get(i));
             }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+            return this.getTransformer().finalDecision;
+        } else {
+            // no filter condition to apply on this atomic query
             return true;
         }
     }
