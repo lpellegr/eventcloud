@@ -18,9 +18,10 @@ package fr.inria.eventcloud.parsers;
 
 import java.io.InputStream;
 
-import org.openjena.atlas.lib.Sink;
-import org.openjena.riot.RiotReader;
-import org.openjena.riot.lang.LangRIOT;
+import org.apache.jena.riot.RiotReader;
+import org.apache.jena.riot.lang.LangRIOT;
+import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFBase;
 
 import com.hp.hpl.jena.sparql.core.Quad;
 
@@ -83,23 +84,15 @@ public class RdfParser {
     public static final void parse(InputStream in, SerializationFormat format,
                                    final Callback<Quadruple> action,
                                    final boolean checkQuadrupleSyntax) {
-        Sink<Quad> sink = new Sink<Quad>() {
+
+        StreamRDF sink = new StreamRDFBase() {
             @Override
-            public void send(final Quad quad) {
+            public void quad(Quad quad) {
                 action.execute(new Quadruple(
                         quad.getGraph(), quad.getSubject(),
                         quad.getPredicate(), quad.getObject(),
                         checkQuadrupleSyntax, false));
             }
-
-            @Override
-            public void close() {
-            }
-
-            @Override
-            public void flush() {
-            }
-
         };
 
         LangRIOT parser;
@@ -117,7 +110,6 @@ public class RdfParser {
         }
 
         parser.parse();
-        sink.close();
     }
 
     public static final QuadrupleIterator parse(InputStream in,

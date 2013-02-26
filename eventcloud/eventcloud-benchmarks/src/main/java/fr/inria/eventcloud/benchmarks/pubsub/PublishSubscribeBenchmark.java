@@ -110,7 +110,9 @@ public class PublishSubscribeBenchmark {
     // measurements
 
     /*
-     * Measure the time taken to receive all the events by considering the time when the publications start to be published and the time when all the notifications are received on all the subscribers
+     * Measure the time taken to receive all the events by considering the time 
+     * when the publications start to be published and the time when all the 
+     * notifications are received on all the subscribers
      */
     private final SimpleMeasurement endToEndMeasurement =
             new SimpleMeasurement();
@@ -118,7 +120,8 @@ public class PublishSubscribeBenchmark {
     /*
      * Measure the time to receive all the events by considering the time when
      * the first event is received on the subscriber and the time when the last
-     * event is received on the subscriber (used to compte the throughput in terms of notifications per second on the subscriber side)
+     * event is received on the subscriber (used to compte the throughput in terms 
+     * of notifications per second on the subscriber side)
      */
     private static Map<SubscriptionId, SimpleMeasurement> outputMeasurements =
             new HashMap<SubscriptionId, SimpleMeasurement>();

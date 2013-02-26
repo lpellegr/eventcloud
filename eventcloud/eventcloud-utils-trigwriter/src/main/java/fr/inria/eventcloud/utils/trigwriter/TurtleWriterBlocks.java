@@ -25,8 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.openjena.atlas.io.IndentedWriter;
-import org.openjena.atlas.iterator.PeekIterator;
+import org.apache.jena.atlas.io.IndentedWriter;
+import org.apache.jena.atlas.iterator.PeekIterator;
 
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;

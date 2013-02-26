@@ -24,11 +24,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openjena.riot.out.OutputLangUtils;
-import org.openjena.riot.tokens.Token;
-import org.openjena.riot.tokens.TokenType;
-import org.openjena.riot.tokens.Tokenizer;
-import org.openjena.riot.tokens.TokenizerFactory;
+import org.apache.jena.riot.out.OutputLangUtils;
+import org.apache.jena.riot.tokens.Token;
+import org.apache.jena.riot.tokens.TokenType;
+import org.apache.jena.riot.tokens.Tokenizer;
+import org.apache.jena.riot.tokens.TokenizerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;

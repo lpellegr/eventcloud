@@ -23,9 +23,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.openjena.atlas.iterator.Iter;
-import org.openjena.atlas.iterator.Transform;
-import org.openjena.atlas.lib.Pair;
+import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.atlas.iterator.Transform;
+import org.apache.jena.atlas.lib.Pair;
 
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;

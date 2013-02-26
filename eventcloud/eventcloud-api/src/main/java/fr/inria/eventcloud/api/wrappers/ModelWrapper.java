@@ -32,7 +32,6 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.rdf.model.Alt;
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Bag;
@@ -126,14 +125,6 @@ public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
     @Override
     public Graph getGraph() {
         return super.object.getGraph();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public QueryHandler queryHandler() {
-        return super.object.queryHandler();
     }
 
     /**
