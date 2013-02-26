@@ -19,7 +19,7 @@ package fr.inria.eventcloud.parsers;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.openjena.riot.RiotWriter;
+import org.apache.jena.riot.RiotWriter;
 
 import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;

@@ -23,8 +23,8 @@ import java.util.List;
 
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
+import org.apache.jena.riot.RiotException;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
-import org.openjena.riot.RiotException;
 import org.w3c.dom.Element;
 
 import eu.play_project.play_commons.eventformat.EventFormatHelpers;

@@ -21,9 +21,9 @@ import java.util.List;
 
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
+import org.apache.jena.riot.WebContent;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
-import org.openjena.riot.WebContent;
 import org.w3c.dom.Element;
 
 import eu.play_project.play_commons.eventformat.EventFormatHelpers;
@@ -69,7 +69,7 @@ public class SemanticCompoundEventTranslator extends
 
         Element any =
                 EventFormatHelpers.wrapWithDomNativeMessageElement(new String(
-                        out.toByteArray()), WebContent.contentTypeTriGAlt);
+                        out.toByteArray()), WebContent.contentTypeTriGAlt1);
 
         Message message = new Message();
         message.setAny(any);

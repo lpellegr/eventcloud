@@ -36,14 +36,14 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.mutable.MutableObject;
+import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.riot.out.OutputLangUtils;
+import org.apache.jena.riot.tokens.Tokenizer;
+import org.apache.jena.riot.tokens.TokenizerFactory;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
-import org.openjena.riot.out.NodeFmtLib;
-import org.openjena.riot.out.OutputLangUtils;
-import org.openjena.riot.tokens.Tokenizer;
-import org.openjena.riot.tokens.TokenizerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

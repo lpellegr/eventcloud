@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.openjena.atlas.io.IndentedWriter;
-import org.openjena.atlas.lib.Pair;
-import org.openjena.riot.out.OutputLangUtils;
+import org.apache.jena.atlas.io.IndentedWriter;
+import org.apache.jena.atlas.lib.Pair;
+import org.apache.jena.riot.out.OutputLangUtils;
 
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
@@ -304,7 +304,7 @@ public class TurtleWriter2 {
         // Two or more.
         int here = out.getCol(); // before "["
         print(out, "[");
-        int i1 = out.getIndent();
+        int i1 = out.getAbsoluteIndent();
         out.setAbsoluteIndent(here);
         // Inline: println(out) ;
         out.incIndent(2);

@@ -23,8 +23,8 @@ import java.io.ObjectOutput;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import org.apache.jena.riot.Lang;
 import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
-import org.openjena.riot.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

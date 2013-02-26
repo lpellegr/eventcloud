@@ -29,12 +29,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.jena.riot.RiotReader;
+import org.apache.jena.riot.lang.LangRIOT;
+import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFBase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
-import org.openjena.atlas.lib.Sink;
-import org.openjena.riot.RiotReader;
-import org.openjena.riot.lang.LangRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -145,29 +146,19 @@ public class WsnTranslatorTest {
     private static List<Quadruple> read(String file) {
         final List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
-        Sink<Quad> sink = new Sink<Quad>() {
+        StreamRDF sink = new StreamRDFBase() {
             @Override
-            public void send(final Quad quad) {
+            public void quad(Quad quad) {
                 quadruples.add(new Quadruple(
                         quad.getGraph(), quad.getSubject(),
                         quad.getPredicate(), quad.getObject()));
             }
-
-            @Override
-            public void close() {
-            }
-
-            @Override
-            public void flush() {
-            }
-
         };
 
         LangRIOT parser =
                 RiotReader.createParserTriG(inputStreamFrom(file), null, sink);
 
         parser.parse();
-        sink.close();
 
         return quadruples;
     }

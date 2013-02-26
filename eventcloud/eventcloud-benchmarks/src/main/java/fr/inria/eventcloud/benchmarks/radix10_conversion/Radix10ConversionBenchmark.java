@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RiotReader;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
-import org.openjena.riot.Lang;
-import org.openjena.riot.RiotReader;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
