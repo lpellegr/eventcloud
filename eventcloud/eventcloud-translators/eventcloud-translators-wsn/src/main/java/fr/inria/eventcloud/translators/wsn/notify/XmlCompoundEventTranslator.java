@@ -184,44 +184,6 @@ public class XmlCompoundEventTranslator extends
         return this.createElement(quad);
     }
 
-    private Element findByName(org.w3c.dom.Node node, String namespace,
-                               String localName) {
-        if (node.hasChildNodes()) {
-            if (namespace != null) {
-                if (node.getNodeName().equals(localName)
-                        && namespace.equals(node.getNamespaceURI())) {
-                    return (Element) node;
-                } else {
-                    NodeList list = node.getChildNodes();
-                    for (int i = 0; i < list.getLength(); i++) {
-                        Element elt =
-                                this.findByName(
-                                        list.item(0), namespace, localName);
-                        if (elt != null) {
-                            return elt;
-                        }
-                    }
-                }
-            } else {
-                if (node.getNodeName().equals(localName)) {
-                    return (Element) node;
-                } else {
-                    NodeList list = node.getChildNodes();
-                    for (int i = 0; i < list.getLength(); i++) {
-                        Element elt =
-                                this.findByName(
-                                        list.item(0), namespace, localName);
-                        if (elt != null) {
-                            return elt;
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
     /*
      * Creates an XML tree (represented by its root {@link Element}) from the
      * specified {@code quadruple} and {@code prevRootElt}. The
@@ -266,11 +228,7 @@ public class XmlCompoundEventTranslator extends
 
                 if (eltFound == null) {
                     // here we assume we have only one element that matches
-                    Element elt =
-                            namespace.isEmpty()
-                                    ? this.document.createElement(localName)
-                                    : this.document.createElementNS(
-                                            namespace, localName);
+                    Element elt = this.createElementFrom(namespace, localName);
                     lastElt.appendChild(elt);
                     lastElt = elt;
 
@@ -288,6 +246,44 @@ public class XmlCompoundEventTranslator extends
         }
 
         return rootElt;
+    }
+
+    private Element findByName(org.w3c.dom.Node node, String namespace,
+                               String localName) {
+        if (node.hasChildNodes()) {
+            if (namespace != null) {
+                if (namespace.equals(node.getNamespaceURI())
+                        && localName.equals(node.getNodeName())) {
+                    return (Element) node;
+                } else {
+                    NodeList list = node.getChildNodes();
+                    for (int i = 0; i < list.getLength(); i++) {
+                        Element elt =
+                                this.findByName(
+                                        list.item(i), namespace, localName);
+                        if (elt != null) {
+                            return elt;
+                        }
+                    }
+                }
+            } else {
+                if (node.getNodeName().equals(localName)) {
+                    return (Element) node;
+                } else {
+                    NodeList list = node.getChildNodes();
+                    for (int i = 0; i < list.getLength(); i++) {
+                        Element elt =
+                                this.findByName(
+                                        list.item(i), namespace, localName);
+                        if (elt != null) {
+                            return elt;
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /*
@@ -324,11 +320,7 @@ public class XmlCompoundEventTranslator extends
             namespace = parts[0];
             localName = parts[1];
 
-            Element elt =
-                    namespace.isEmpty()
-                            ? this.document.createElement(localName)
-                            : this.document.createElementNS(
-                                    namespace, localName);
+            Element elt = this.createElementFrom(namespace, localName);
             lastElt.appendChild(elt);
             lastElt = elt;
 
