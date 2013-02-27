@@ -94,6 +94,12 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"--nb-subscribers"}, description = "The number of subscribers")
     private int nbSubscribers = 1;
 
+    @Parameter(names = {"-dfr", "--discard-first-runs"}, description = "Indicates the number of first runs to discard")
+    private int discardFirstRuns = 1;
+
+    @Parameter(names = {"--wait-between-publications"}, description = "The time to wait (in ms) between each publication from a publisher")
+    private int waitBetweenPublications = 0;
+
     @Parameter(names = {"--publish-quadruples"}, description = "Indicates whether events must be emitted as quadruples (default CEs)")
     private boolean publishIndependentQuadruples = false;
 
@@ -223,6 +229,7 @@ public class PublishSubscribeBenchmark {
                     }
 
                 });
+        microBenchmark.discardFirstRuns(this.discardFirstRuns);
         microBenchmark.showProgress();
         microBenchmark.execute();
 
@@ -409,6 +416,15 @@ public class PublishSubscribeBenchmark {
             publishProxy.publish(ce);
         } else {
             publishProxy.publish((Quadruple) event);
+        }
+
+        if (this.waitBetweenPublications > 0) {
+            try {
+                Thread.sleep(this.waitBetweenPublications);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
