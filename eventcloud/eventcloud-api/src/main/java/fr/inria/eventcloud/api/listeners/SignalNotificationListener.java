@@ -29,7 +29,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  * @author lpellegr
  */
 public abstract class SignalNotificationListener extends
-        NotificationListener<Object> {
+        NotificationListener<String> {
 
     private static final long serialVersionUID = 140L;
 
@@ -37,13 +37,7 @@ public abstract class SignalNotificationListener extends
      * {@inheritDoc}
      */
     @Override
-    public void onNotification(SubscriptionId id, Object solution) {
-        // the solution is supposed to be null and can be discarded because only
-        // the signal is interesting for end users
-        this.onNotification(id);
-    }
-
-    public abstract void onNotification(SubscriptionId id);
+    public abstract void onNotification(SubscriptionId id, String eventId);
 
     /**
      * {@inheritDoc}

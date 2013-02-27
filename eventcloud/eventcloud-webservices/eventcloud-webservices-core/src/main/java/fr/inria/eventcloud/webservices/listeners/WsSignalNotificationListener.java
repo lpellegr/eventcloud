@@ -62,7 +62,7 @@ public class WsSignalNotificationListener extends SignalNotificationListener {
      * {@inheritDoc}
      */
     @Override
-    public void onNotification(SubscriptionId id) {
+    public void onNotification(SubscriptionId id, String eventId) {
         try {
             this.subscriberWsClient.notifySignal(id.toString());
 

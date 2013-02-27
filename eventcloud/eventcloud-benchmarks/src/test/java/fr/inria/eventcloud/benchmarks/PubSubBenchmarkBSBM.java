@@ -373,7 +373,7 @@ public class PubSubBenchmarkBSBM {
         private static final long serialVersionUID = 140L;
 
         @Override
-        public void onNotification(SubscriptionId id) {
+        public void onNotification(SubscriptionId id, String eventId) {
             log.trace("New signal received for subscription {}", id);
             handleNewEvent(id);
         }

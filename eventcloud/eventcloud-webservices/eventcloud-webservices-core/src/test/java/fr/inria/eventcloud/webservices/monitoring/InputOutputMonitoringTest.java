@@ -227,7 +227,7 @@ public class InputOutputMonitoringTest extends WsTest {
         private static final long serialVersionUID = 140L;
 
         @Override
-        public void onNotification(SubscriptionId id) {
+        public void onNotification(SubscriptionId id, String eventId) {
         }
 
     }

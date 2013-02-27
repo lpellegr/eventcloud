@@ -395,6 +395,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @Override
     @MemberOf("parallel")
     public void receiveSbce1Or2(BindingNotification notification) {
+        this.logNotificationReception(notification);
+
         SubscriptionId subscriptionId = notification.getSubscriptionId();
         @SuppressWarnings("unchecked")
         SubscriptionEntry<BindingNotificationListener> subscriptionEntry =
@@ -405,8 +407,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         if (subscriptionEntry == null) {
             return;
         }
-
-        this.logNotificationReception(notification);
 
         // avoid creation of solution object when possible
         BindingSolution solution =
@@ -448,19 +448,19 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @Override
     @MemberOf("parallel")
     public void receiveSbce3(BindingNotification notification) {
+        this.logNotificationReception(notification);
+
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
         @SuppressWarnings("unchecked")
         SubscriptionEntry<BindingNotificationListener> subscriptionEntry =
                 (SubscriptionEntry<BindingNotificationListener>) this.subscriptions.get(subscriptionId);
 
-        // ignore the notifications which may be received after an unsubscribe
-        // operation because the unsubscribe operation is not atomic
-        if (subscriptionEntry == null) {
-            return;
-        }
-
-        if (this.markAsDelivered(notification.getId(), subscriptionId) == null) {
+        // ignore the notifications that may be received for a subscription
+        // which has been unregistered but also notifications that have been
+        // already received for a same event
+        if (subscriptionEntry != null
+                && this.markAsDelivered(notification.getId(), subscriptionId) == null) {
             this.deliver(subscriptionEntry, notification.getContent());
         }
     }
@@ -480,6 +480,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @MemberOf("parallel")
     @SuppressWarnings("unchecked")
     public void receiveSbce2(QuadruplesNotification notification) {
+        this.logNotificationReception(notification);
+
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
         if (this.getNotificationsDeliveredMap().containsKey(
@@ -499,17 +501,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                     + QuadruplesFormatter.toString(
                             notification.getContent(), true));
         }
-
-        SubscriptionEntry<?> subscriptionEntry =
-                this.subscriptions.get(subscriptionId);
-
-        // ignore the notifications which may be received after an unsubscribe
-        // operation because the unsubscribe operation is not atomic
-        if (subscriptionEntry == null) {
-            return;
-        }
-
-        this.logNotificationReception(notification);
 
         // avoid creation of solution object when possible
         QuadruplesSolution solution =
@@ -540,9 +531,16 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                 CompoundEvent compoundEvent =
                         new CompoundEvent(solution.getChunks());
 
-                this.deliver(
-                        (SubscriptionEntry<CompoundEventNotificationListener>) subscriptionEntry,
-                        compoundEvent.getGraph().getURI(), compoundEvent);
+                SubscriptionEntry<?> subscriptionEntry =
+                        this.subscriptions.get(subscriptionId);
+
+                // ignore the notifications that may be received for a
+                // subscription which has been unregistered
+                if (subscriptionEntry != null) {
+                    this.deliver(
+                            (SubscriptionEntry<CompoundEventNotificationListener>) subscriptionEntry,
+                            compoundEvent.getGraph().getURI(), compoundEvent);
+                }
 
                 this.sendRemoveEphemeralSubscription(
                         compoundEvent.getGraph(), subscriptionId);
@@ -576,15 +574,25 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @MemberOf("parallel")
     @SuppressWarnings("unchecked")
     public void receiveSbce3(QuadruplesNotification notification) {
-        if (this.markAsDelivered(
-                notification.getId(), notification.getSubscriptionId()) == null) {
+        this.logNotificationReception(notification);
+
+        SubscriptionEntry<CompoundEventNotificationListener> subscriptionEntry =
+                (SubscriptionEntry<CompoundEventNotificationListener>) this.subscriptions.get(notification.getSubscriptionId());
+
+        // ignore the notifications that may be received for a
+        // subscription which has been unregistered but also
+        // notifications that have been already received for a same
+        // event
+        if (subscriptionEntry != null
+                && this.markAsDelivered(
+                        notification.getId(), notification.getSubscriptionId()) == null) {
 
             CompoundEvent compoundEvent =
                     new CompoundEvent(notification.getContent());
 
             this.deliver(
-                    (SubscriptionEntry<CompoundEventNotificationListener>) this.subscriptions.get(notification.getSubscriptionId()),
-                    compoundEvent.getGraph().getURI(), compoundEvent);
+                    subscriptionEntry, compoundEvent.getGraph().getURI(),
+                    compoundEvent);
         }
     }
 
@@ -607,27 +615,27 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     }
 
     private void receive(SignalNotification notification) {
+        this.logNotificationReception(notification);
+
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
         @SuppressWarnings("unchecked")
         SubscriptionEntry<SignalNotificationListener> subscriptionEntry =
                 (SubscriptionEntry<SignalNotificationListener>) this.subscriptions.get(subscriptionId);
 
-        // ignore the notifications which may be received after an unsubscribe
-        // operation because the unsubscribe operation is not atomic
-        if (subscriptionEntry == null) {
-            return;
-        }
-
-        if (this.markAsDelivered(
-                notification.getId(), notification.getSubscriptionId()) == null) {
-            this.logNotificationReception(notification);
-            this.deliver(subscriptionEntry);
+        // ignore the notifications that may be received for a subscription
+        // which has been unregistered but also notifications that have been
+        // already received for a same event
+        if (subscriptionEntry != null
+                && this.markAsDelivered(
+                        notification.getId(), notification.getSubscriptionId()) == null) {
+            this.deliver(subscriptionEntry, notification.getMetaEventId());
         }
     }
 
-    private void deliver(SubscriptionEntry<SignalNotificationListener> entry) {
-        entry.listener.onNotification(entry.subscription.getId());
+    private void deliver(SubscriptionEntry<SignalNotificationListener> entry,
+                         String eventId) {
+        entry.listener.onNotification(entry.subscription.getId(), eventId);
 
         // do not output integration message and do not send monitoring
         // information for signal listener
@@ -643,41 +651,39 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     @MemberOf("parallel")
     @SuppressWarnings("unchecked")
     public void receiveSbce1(PollingSignalNotification notification) {
-        SubscriptionId subscriptionId = notification.getSubscriptionId();
-
-        CompoundEvent compoundEvent =
-                this.reconstructCompoundEvent(
-                        notification.getId(), subscriptionId,
-                        Node.createURI(notification.getMetaEventId()));
-
         this.logNotificationReception(notification);
 
-        SubscriptionEntry<CompoundEventNotificationListener> entry;
+        SubscriptionId subscriptionId = notification.getSubscriptionId();
 
-        if (compoundEvent != null
-                && ((entry =
-                        (SubscriptionEntry<CompoundEventNotificationListener>) this.subscriptions.get(subscriptionId)) != null)) {
-            this.deliver(entry, notification.getMetaEventId(), compoundEvent);
+        SubscriptionEntry<CompoundEventNotificationListener> subscriptionEntry =
+                (SubscriptionEntry<CompoundEventNotificationListener>) this.subscriptions.get(subscriptionId);
+
+        // checks that the subscription has not been removed been while we are
+        // receiving and delivering the notification
+        if (subscriptionEntry != null) {
+            CompoundEvent compoundEvent =
+                    this.reconstructCompoundEvent(
+                            notification.getId(), subscriptionId,
+                            Node.createURI(notification.getMetaEventId()));
+
+            if (compoundEvent != null) {
+                this.deliver(
+                        subscriptionEntry, notification.getMetaEventId(),
+                        compoundEvent);
+            }
         }
     };
 
     private void deliver(SubscriptionEntry<CompoundEventNotificationListener> entry,
                          String graph, CompoundEvent compoundEvent) {
-        // checks that the subscription has not been removed been while we are
-        // receiving and delivering the notification
-        if (entry != null) {
-            SubscriptionId subscriptionId = entry.subscription.getId();
-            CompoundEventNotificationListener listener = entry.listener;
+        SubscriptionId subscriptionId = entry.subscription.getId();
+        CompoundEventNotificationListener listener = entry.listener;
 
-            listener.onNotification(subscriptionId, compoundEvent);
+        listener.onNotification(subscriptionId, compoundEvent);
 
-            this.sendInputOutputMonitoringReport(
-                    Quadruple.getPublicationSource(graph),
-                    listener.getSubscriberUrl(),
-                    Quadruple.getPublicationTime(graph));
+        this.sendInputOutputMonitoringReport(graph, listener.getSubscriberUrl());
 
-            this.logIntegrationInformation(graph);
-        }
+        this.logIntegrationInformation(graph);
     }
 
     /**
@@ -750,18 +756,21 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         return new CompoundEvent(quadsReceived);
     }
 
-    private void sendInputOutputMonitoringReport(String source,
-                                                 String destination,
-                                                 long eventPublicationTimestamp) {
-        if (source == null) {
-            source = "http://0.0.0.0";
-        }
-
-        if (destination == null) {
-            destination = this.componentUri;
-        }
-
+    private void sendInputOutputMonitoringReport(String graph,
+                                                 String destination) {
         if (super.monitoringManager != null) {
+            String source = Quadruple.getPublicationSource(graph);
+            if (source == null) {
+                source = "http://0.0.0.0";
+            }
+
+            if (destination == null) {
+                destination = this.componentUri;
+            }
+
+            long eventPublicationTimestamp =
+                    Quadruple.getPublicationTime(graph);
+
             super.monitoringManager.sendInputOutputMonitoringReport(
                     source, destination, eventPublicationTimestamp);
         }
@@ -785,8 +794,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     }
 
     private void logNotificationReception(Notification<?> notification) {
-        if (log.isDebugEnabled()) {
-            log.debug(
+        if (log.isTraceEnabled()) {
+            log.trace(
                     "New notification received {} on {} for subscription id {}",
                     new Object[] {
                             notification.getId(), this.componentUri,
