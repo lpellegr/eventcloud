@@ -306,6 +306,14 @@ public final class SparqlDecomposer {
                 return expr1;
             }
 
+            // can happen if filter condition contains mathematical operators
+            // like (?x < (?y + 300) && ?x > (?y - 300)):
+            // Jena would return (?x && ?x)
+            // so this filter condition isn't added to the atomic query
+            if (expr1.equals(expr2)) {
+                return new E_Null();
+            }
+
             return super.transform(func, expr1, expr2);
         }
 
