@@ -29,6 +29,8 @@ public class MicroBenchmark {
 
     private final MicroBenchmarkRun benchmark;
 
+    private final int nbCategories;
+
     private int discardFirstRuns = 1;
 
     private boolean showProgress = false;
@@ -40,11 +42,9 @@ public class MicroBenchmark {
     }
 
     public MicroBenchmark(int nbCategories, int nbRuns, MicroBenchmarkRun task) {
+        this.nbCategories = nbCategories;
         this.nbRuns = nbRuns;
         this.benchmark = task;
-        this.statsRecorder =
-                new StatsRecorderImpl(
-                        nbCategories, nbRuns, this.discardFirstRuns);
     }
 
     public void discardFirstRuns(int x) {
@@ -60,6 +60,10 @@ public class MicroBenchmark {
     }
 
     public void execute() {
+        this.statsRecorder =
+                new StatsRecorderImpl(
+                        this.nbCategories, this.nbRuns, this.discardFirstRuns);
+
         for (int i = 0; i < this.nbRuns + this.discardFirstRuns; i++) {
             try {
                 this.benchmark.run(this.statsRecorder);
