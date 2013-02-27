@@ -663,17 +663,21 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private void deliver(SubscriptionEntry<CompoundEventNotificationListener> entry,
                          String graph, CompoundEvent compoundEvent) {
-        SubscriptionId subscriptionId = entry.subscription.getId();
-        CompoundEventNotificationListener listener = entry.listener;
+        // checks that the subscription has not been removed been while we are
+        // receiving and delivering the notification
+        if (entry != null) {
+            SubscriptionId subscriptionId = entry.subscription.getId();
+            CompoundEventNotificationListener listener = entry.listener;
 
-        listener.onNotification(subscriptionId, compoundEvent);
+            listener.onNotification(subscriptionId, compoundEvent);
 
-        this.sendInputOutputMonitoringReport(
-                Quadruple.getPublicationSource(graph),
-                listener.getSubscriberUrl(),
-                Quadruple.getPublicationTime(graph));
+            this.sendInputOutputMonitoringReport(
+                    Quadruple.getPublicationSource(graph),
+                    listener.getSubscriberUrl(),
+                    Quadruple.getPublicationTime(graph));
 
-        this.logIntegrationInformation(graph);
+            this.logIntegrationInformation(graph);
+        }
     }
 
     /**
