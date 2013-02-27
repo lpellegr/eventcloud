@@ -702,7 +702,7 @@ public class SubscribeProxyTest {
          * {@inheritDoc}
          */
         @Override
-        public void onNotification(SubscriptionId id) {
+        public void onNotification(SubscriptionId id, String eventId) {
             synchronized (signals) {
                 signals.add(1);
                 signals.notifyAll();

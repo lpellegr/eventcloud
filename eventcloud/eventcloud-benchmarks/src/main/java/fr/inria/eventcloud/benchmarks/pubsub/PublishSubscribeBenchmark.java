@@ -476,7 +476,7 @@ public class PublishSubscribeBenchmark {
         private static final long serialVersionUID = 140L;
 
         @Override
-        public void onNotification(SubscriptionId id) {
+        public void onNotification(SubscriptionId id, String eventId) {
             handleNewEvent(id);
         }
     }
