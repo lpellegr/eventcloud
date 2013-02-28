@@ -85,7 +85,7 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
-@DefinePriorities({@Priority(level = 3, name = "send", parameters = {ReconstructCompoundEventRequest.class})})
+@DefinePriorities({@Priority(level = 3, boostThreads = 8, name = "send", parameters = {ReconstructCompoundEventRequest.class})})
 public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
