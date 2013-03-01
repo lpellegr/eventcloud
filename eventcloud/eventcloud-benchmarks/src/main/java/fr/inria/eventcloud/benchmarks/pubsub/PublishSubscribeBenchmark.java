@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
-import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.Category;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
@@ -157,7 +156,7 @@ public class PublishSubscribeBenchmark {
     private boolean usingCompoundEventSupplier;
 
     public static void main(String[] args) {
-        LoggerUtils.disableLoggers();
+        // LoggerUtils.disableLoggers();
 
         PublishSubscribeBenchmark benchmark = new PublishSubscribeBenchmark();
 
