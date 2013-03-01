@@ -713,6 +713,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         QuadruplePattern reconstructPattern =
                 new QuadruplePattern(eventId, Node.ANY, Node.ANY, Node.ANY);
 
+        // int nbReconstructRequestSent = 0;
+
         // perform polling while all the quadruples have not been retrieved
         while (quadsReceived.size() != expectedNbQuadruples) {
             if (log.isInfoEnabled()) {
@@ -749,7 +751,24 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                     Thread.sleep(EventCloudProperties.RECONSTRUCTION_RETRY_THRESHOLD.getValue());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                    e.printStackTrace();
                 }
+
+                // try {
+                // Thread.sleep(ExponentialBackoff.compteValue(
+                // nbReconstructRequestSent,
+                // 1,
+                // EventCloudProperties.RECONSTRUCTION_RETRY_THRESHOLD.getValue(),
+                // 3000));
+                // } catch (InterruptedException e) {
+                // Thread.currentThread().interrupt();
+                // }
+
+                // nbReconstructRequestSent++;
+                //
+                // if (quads.size() != 0) {
+                // nbReconstructRequestSent = 0;
+                // }
             }
         }
 
