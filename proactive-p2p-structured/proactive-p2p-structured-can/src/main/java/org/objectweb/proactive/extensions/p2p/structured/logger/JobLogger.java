@@ -49,10 +49,10 @@ public class JobLogger {
             new Hashtable<String, Logger>();
 
     // These values can be set in a test that uses the JobLogger
-    private static int nbPeers = 0;
+    private static int nbPeers;
     public static String logDirectory = System.getProperty("java.io.tmpdir")
-            + File.separator + "broadcast_logs";
-    public static final boolean bcastDebugMode = false;
+            + File.separator + "broadcast_logs" + File.separator;
+    public static final boolean bcastDebugMode = true;
     public static String PREFIX;
 
     public static final String RETURN = System.getProperty("line.separator");
@@ -101,8 +101,7 @@ public class JobLogger {
      */
     public static void setNbPeers(int newNbPeers) {
         nbPeers = newNbPeers;
-        PREFIX =
-                P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() + "D_"
+        PREFIX = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() + "D_"
                         + nbPeers + "P_";
     }
 
@@ -126,27 +125,6 @@ public class JobLogger {
     public static synchronized void logMessage(String jobName, String message) {
         Logger l = getJobLogger(jobName);
         l.info(message);
-    }
-
-    /**
-     * Logs the results of a broadcast execution.
-     * 
-     * @param loggerName
-     * @param nbPeers
-     * @param filename
-     * @param runNumber
-     * @param id
-     * 
-     * @return the number of peers reached.
-     */
-    public static synchronized int logResults(String loggerName, int nbPeers,
-                                              String filename,
-                                              String runNumber, String id) {
-        LogReader reader = new LogReader(logDirectory + filename);
-        reader.setAttributes(loggerName, nbPeers);
-        int nbPeersReached =
-                reader.scanNprintResults(loggerName, runNumber, id);
-        return nbPeersReached;
     }
 
     /**
