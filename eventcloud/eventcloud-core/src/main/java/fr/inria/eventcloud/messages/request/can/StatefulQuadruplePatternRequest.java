@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.An
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
@@ -88,8 +88,8 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
      * {@inheritDoc}
      */
     @Override
-    public AnycastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
-        return new AnycastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
+    public OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
+        return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
             @Override
             public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
                                                        final AnycastRequest<SemanticElement> request) {

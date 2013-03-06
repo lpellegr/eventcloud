@@ -67,7 +67,8 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                             public StringCanOverlay get() {
                                 return new StringCanOverlay();
                             }
-                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider()),
+                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider
+                        		.newFractalInjectionConstraintsProvider()),
                 1, nbPeers);
         this.nbPeers = nbPeers;
         this.logDirectory = logDirectory;
@@ -117,12 +118,12 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(2000);
+        Thread.sleep(5000);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_FLOODING at the root of the logs directory (see JobLogger)
         int nbPeerReached =
-                JobLogger.logResults(
+                LogReader.logResults(
                         LOG_FLOODING, this.nbPeers, request.getId().toString()
                                 + JobLogger.PREFIX + LOG_FLOODING, "1", "");
 
@@ -150,13 +151,13 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(2000);
+        Thread.sleep(5000);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_EFFICIENT at the root of the logs directory (see
         // JobLogger)
         int nbPeerReached =
-                JobLogger.logResults(
+                LogReader.logResults(
                         LOG_EFFICIENT, this.nbPeers, request.getId().toString()
                                 + JobLogger.PREFIX + LOG_EFFICIENT, "1", "");
 
@@ -184,12 +185,12 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(2000);
+        Thread.sleep(5000);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_OPTIMAL at the root of the logs directory (see JobLogger)
         int nbPeerReached =
-                JobLogger.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
+                LogReader.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
                         .toString()
                         + JobLogger.PREFIX + LOG_OPTIMAL, "1", "");
 
