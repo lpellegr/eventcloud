@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmarks;
+package org.objectweb.proactive.extensions.p2p.structured.logger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
 
 /**
  * Utility class that provides some metrics about a type of broadcast algorithm.
