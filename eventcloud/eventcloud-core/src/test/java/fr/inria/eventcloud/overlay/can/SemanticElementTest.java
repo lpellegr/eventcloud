@@ -128,4 +128,31 @@ public final class SemanticElementTest {
                 SemanticElement.removePrefix(Node.createURI("#fragment")));
     }
 
+    @Test
+    public void testParseElement15() {
+        Assert.assertEquals(
+                "p1", SemanticElement.removePrefix(Node.createURI("urn:p1")));
+    }
+
+    @Test
+    public void testParseElement16() {
+        Assert.assertEquals(
+                "isbn:096139210x",
+                SemanticElement.removePrefix(Node.createURI("urn:isbn:096139210x")));
+    }
+
+    @Test
+    public void testParseElement17() {
+        Assert.assertEquals(
+                "comp.lang.java",
+                SemanticElement.removePrefix(Node.createURI("news:comp.lang.java")));
+    }
+
+    @Test
+    public void testParseElement18() {
+        Assert.assertEquals(
+                "user@company.com",
+                SemanticElement.removePrefix(Node.createURI("mailto:user@company.com")));
+    }
+
 }
