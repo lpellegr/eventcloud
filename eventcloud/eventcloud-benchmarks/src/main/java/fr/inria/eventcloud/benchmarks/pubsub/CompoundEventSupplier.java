@@ -23,6 +23,7 @@ import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.generators.UuidGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -37,16 +38,34 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
 
     private final int size;
 
+    private final int rewritingLevel;
+
     /**
-     * Constructs a compound event supplier that builds compound events composed
-     * of the specified number of quadruples.
+     * Constructs a compound event supplier that builds compound events randomly
+     * by using the specified number of quadruples.
      * 
      * @param size
      *            the number of quadruples contained by each compound event
      *            which is generated.
+     * @param rewritingLevel
      */
-    public CompoundEventSupplier(int size) {
+    public CompoundEventSupplier(int size, int rewritingLevel) {
+        if (size < 1) {
+            throw new IllegalArgumentException(
+                    "The size of a compound event must be greater than one");
+        }
+
+        if (size <= rewritingLevel) {
+            throw new IllegalArgumentException(
+                    "The size of a compound event must be greater than the rewriting level");
+        }
+
         this.size = size;
+        this.rewritingLevel = rewritingLevel;
+    }
+
+    public CompoundEventSupplier(int size) {
+        this(size, 0);
     }
 
     /**
@@ -60,8 +79,27 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
                 Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
                         + UuidGenerator.randomUuid());
 
-        for (int i = 0; i < this.size; i++) {
-            builder.add(QuadrupleGenerator.random(graph));
+        Node[] randomlyGenerateNodes = new Node[this.size];
+        for (int i = 0; i < randomlyGenerateNodes.length; i++) {
+            randomlyGenerateNodes[i] = NodeGenerator.randomUri();
+        }
+
+        for (int i = 1; i <= this.size; i++) {
+            if (this.rewritingLevel == 0) {
+                builder.add(QuadrupleGenerator.random(graph));
+            } else {
+                Node subject;
+
+                if (i == 1) {
+                    subject = NodeGenerator.randomUri();
+                } else {
+                    subject = randomlyGenerateNodes[i - 2];
+                }
+
+                builder.add(new Quadruple(
+                        graph, subject, Node.createURI("urn:p" + i),
+                        randomlyGenerateNodes[i - 1], false, false));
+            }
         }
 
         return new CompoundEvent(builder.build());

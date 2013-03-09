@@ -99,6 +99,10 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"--wait-between-publications"}, description = "The time to wait (in ms) between each publication from a publisher")
     private int waitBetweenPublications = 0;
 
+    // a rewriting level of 0 means no rewrite
+    @Parameter(names = {"--rewriting-level", "-rl"}, description = "Indicates the number of rewrites to force before delivering a notification")
+    private int rewritingLevel = 0;
+
     @Parameter(names = {"--publish-quadruples"}, description = "Indicates whether events must be emitted as quadruples (default CEs)")
     private boolean publishIndependentQuadruples = false;
 
@@ -180,10 +184,15 @@ public class PublishSubscribeBenchmark {
     }
 
     public void execute() {
+        if (this.rewritingLevel < 0) {
+            throw new IllegalStateException("Illegal rewriting level: "
+                    + this.rewritingLevel);
+        }
+
         this.supplier =
                 this.publishIndependentQuadruples
                         ? new QuadrupleSupplier() : new CompoundEventSupplier(
-                                this.compoundEventSize);
+                                this.compoundEventSize, this.rewritingLevel);
 
         this.usingCompoundEventSupplier =
                 this.supplier instanceof CompoundEventSupplier;
@@ -308,8 +317,7 @@ public class PublishSubscribeBenchmark {
             final SubscribeApi subscribeProxy = subscribeProxies.get(i);
 
             Subscription subscription =
-                    new Subscription(
-                            "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+                    new Subscription(this.createSubscription());
 
             nbEventsReceivedBySubscriber.put(
                     subscription.getId(), new AtomicInteger());
@@ -370,6 +378,45 @@ public class PublishSubscribeBenchmark {
         this.endToEndMeasurement.setExitTime();
 
         // deployer.undeploy();
+    }
+
+    private String createSubscription() {
+        String subscription;
+
+        if (this.rewritingLevel == 0) {
+            subscription = "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
+        } else {
+            StringBuilder buf = new StringBuilder();
+
+            buf.append("SELECT ?g ");
+            for (int i = 1; i <= this.rewritingLevel + 1; i++) {
+                buf.append("?o");
+                buf.append(i);
+                buf.append(' ');
+            }
+
+            buf.append("WHERE { GRAPH ?g { ");
+            for (int i = 1; i <= this.rewritingLevel + 1; i++) {
+                if (i == 1) {
+                    buf.append("?s1 ");
+                } else {
+                    buf.append("?o");
+                    buf.append(i - 1);
+                    buf.append(' ');
+                }
+
+                buf.append("<urn:p");
+                buf.append(i);
+                buf.append("> ?o");
+                buf.append(i);
+                buf.append(" . ");
+            }
+            buf.append("} }");
+
+            subscription = buf.toString();
+        }
+
+        return subscription;
     }
 
     private List<PublishApi> createPublishProxies(String registryUrl,
@@ -456,7 +503,7 @@ public class PublishSubscribeBenchmark {
 
     private boolean allEventsReceived() {
         for (AtomicInteger counter : nbEventsReceivedBySubscriber.values()) {
-            if (counter.get() < nbPublications - 1) {
+            if (counter.get() < nbPublications) {
                 return false;
             }
         }
