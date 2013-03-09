@@ -12,4 +12,4 @@
 	<root level="off">
 		<appender-ref ref="stdout" />
 	</root>
-</configuration> 
+</configuration>

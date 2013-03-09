@@ -6,10 +6,10 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.objectweb.proactive.extensions.p2p" level="DEBUG" />
-	<logger name="fr.inria.eventcloud" level="DEBUG" />
+	<logger name="org.objectweb.proactive.extensions.p2p" level="debug" />
+	<logger name="fr.inria.eventcloud" level="debug" />
 
-	<root level="INFO">
+	<root level="info">
 		<appender-ref ref="stdout" />
 	</root>
 </configuration>
