@@ -207,7 +207,7 @@
 			<dependency>
 				<groupId>org.mapdb</groupId>
 				<artifactId>mapdb</artifactId>
-				<version>20130226</version>
+				<version>20130308</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -328,6 +328,11 @@
 				<groupId>com.esotericsoftware.yamlbeans</groupId>
 				<artifactId>yamlbeans</artifactId>
 				<version>1.06</version>
+			</dependency>
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>2.2</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
