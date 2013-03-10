@@ -11,8 +11,8 @@ set CLASSPATH=%PATH_TO_LIBRARIES%\*;%CLASSPATH%
 
 rem Paths to output files
 set LOGS_DIR=%BUNDLE_HOME%\logs
-set REGISTRY_OUTPUT_FILE=%LOGS_DIR%\eventclouds-registry.output
-set WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE=%LOGS_DIR%\ws-eventclouds-management.output
+set REGISTRY_OUTPUT_FILE=nul
+set WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE=nul
 
 rem Paths to instance files
 set INSTANCES_DIR=%BUNDLE_HOME%\instances
@@ -106,6 +106,8 @@ goto:eof
      -Deventcloud.bundle.home="%BUNDLE_HOME%" ^
      -Deventcloud.configuration="%PATH_TO_RESOURCES%/eventcloud.properties" ^
      -Deventcloud.instance.file="%REGISTRY_INSTANCE_FILE%" ^
+     -Deventcloud.redirect.stdouterr ^
+     -Dorg.apache.cxf.Logger=org.apache.cxf.common.logging.Slf4jLogger ^
      -Dlog4j.configuration="file:%PATH_TO_RESOURCES%/log4j.properties" ^
      -Dlogback.configurationFile="file:%PATH_TO_RESOURCES%/logback.xml" ^
      -Dlogging.output.filename="%BASENAME_REGISTRY_INSTANCE_FILE%" ^
@@ -133,6 +135,8 @@ goto:eof
      -Deventcloud.bundle.home="%BUNDLE_HOME%" ^
      -Deventcloud.configuration="%PATH_TO_RESOURCES%/eventcloud.properties" ^
      -Deventcloud.instance.file="%WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%" ^
+     -Deventcloud.redirect.stdouterr ^
+     -Dorg.apache.cxf.Logger=org.apache.cxf.common.logging.Slf4jLogger ^
      -Dlog4j.configuration="file:%PATH_TO_RESOURCES%/log4j.properties" ^
      -Dlogback.configurationFile="file:%PATH_TO_RESOURCES%/logback.xml" ^
      -Dlogging.output.filename="%BASENAME_WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%" ^
