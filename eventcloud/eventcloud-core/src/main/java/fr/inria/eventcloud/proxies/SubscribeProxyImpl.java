@@ -797,7 +797,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private void logIntegrationInformation(String graph) {
         // log information for integration test purposes
-        if (EventCloudProperties.INTEGRATION_LOG.getValue()) {
+        if (log.isTraceEnabled()) {
             String msg = "EventCloud Exit";
 
             if (graph != null) {
@@ -808,7 +808,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             msg += " ";
             msg += super.eventCloudCache.getId().getStreamUrl();
 
-            log.info(msg);
+            log.trace(msg);
         }
     }
 

@@ -240,12 +240,6 @@ public class EventCloudProperties {
             new PropertyDouble("eventcloud.socialfilter.threshold", 0.5);
 
     /**
-     * Specifies whether the integration information must be logged or not.
-     */
-    public static final PropertyBoolean INTEGRATION_LOG = new PropertyBoolean(
-            "eventcloud.integration.log", false);
-
-    /**
      * Defines whether statistics recording must be enabled or not for the misc
      * datastore. When it is enabled, some statistics like the number of
      * quadruples added, etc. are recorded during each data insertion.
