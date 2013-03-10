@@ -4,8 +4,8 @@
 
 # Paths to output files
 LOGS_DIR=$BUNDLE_HOME/logs
-REGISTRY_OUTPUT_FILE=$LOGS_DIR/eventclouds-registry.output
-WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE=$LOGS_DIR/ws-eventclouds-management.output
+REGISTRY_OUTPUT_FILE=/dev/null
+WS_EVENTCLOUDS_MANAGEMENT_OUTPUT_FILE=/dev/null
 
 # Paths to instance files
 INSTANCES_DIR=$BUNDLE_HOME/instances
@@ -116,6 +116,8 @@ function deploy_eventclouds_registry() {
      -Deventcloud.bundle.home=$BUNDLE_HOME \
      -Deventcloud.configuration=$PATH_TO_RESOURCES/eventcloud.properties \
      -Deventcloud.instance.file=$REGISTRY_INSTANCE_FILE \
+     -Deventcloud.redirect.stdouterr \
+     -Dorg.apache.cxf.Logger=org.apache.cxf.common.logging.Slf4jLogger \
      -Dlog4j.configuration=file:$PATH_TO_RESOURCES/log4j.properties \
      -Dlogback.configurationFile=file:$PATH_TO_RESOURCES/logback.xml \
      -Dlogging.output.filename=$(basename $REGISTRY_INSTANCE_FILE) \
@@ -141,6 +143,8 @@ function deploy_ws_eventclouds_management() {
      -Deventcloud.bundle.home=$BUNDLE_HOME \
      -Deventcloud.configuration=$PATH_TO_RESOURCES/eventcloud.properties \
      -Deventcloud.instance.file=$WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE \
+     -Deventcloud.redirect.stdouterr \
+     -Dorg.apache.cxf.Logger=org.apache.cxf.common.logging.Slf4jLogger \
      -Dlog4j.configuration=file:$PATH_TO_RESOURCES/log4j.properties \
      -Dlogback.configurationFile=file:$PATH_TO_RESOURCES/logback.xml \
      -Dlogging.output.filename=$(basename $WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE) \
