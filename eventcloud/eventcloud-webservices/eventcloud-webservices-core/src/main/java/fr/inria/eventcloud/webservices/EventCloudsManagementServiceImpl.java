@@ -171,8 +171,7 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void setSocialFilter(String socialFilterUrl, double threshold) {
-        EventCloudProperties.SOCIAL_FILTER_URL.setValue(socialFilterUrl);
+    public void setSocialFilter(double threshold) {
         EventCloudProperties.SOCIAL_FILTER_THRESHOLD.setValue(threshold);
     }
 
