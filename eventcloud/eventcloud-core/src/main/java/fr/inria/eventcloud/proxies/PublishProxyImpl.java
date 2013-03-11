@@ -103,9 +103,9 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
     @Override
     @MemberOf("parallel")
     public void publish(CompoundEvent event) {
-        if (EventCloudProperties.INTEGRATION_LOG.getValue()) {
+        if (log.isTraceEnabled()) {
             // log information for integration test purposes
-            log.info(
+            log.trace(
                     "EventCloud Entry {} {}", event.getGraph(),
                     super.eventCloudCache.getId().getStreamUrl());
         }

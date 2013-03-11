@@ -28,6 +28,7 @@ import com.beust.jcommander.ParameterException;
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
+import fr.inria.eventcloud.deployment.cli.commands.Command;
 import fr.inria.eventcloud.deployment.cli.commands.CreateEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.DestroyEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
@@ -52,7 +53,6 @@ public class EventCloudsRegistryReader {
         new EventCloudsRegistryReader().run(args);
     }
 
-    @SuppressWarnings("unchecked")
     public void run(String[] args) {
         JCommander jCommander = new JCommander(this);
         jCommander.setProgramName(EventCloudsRegistryReader.class.getCanonicalName());
@@ -78,11 +78,12 @@ public class EventCloudsRegistryReader {
         System.out.println("Type 'help' to know what are the possible actions");
 
         CommandLineReader<EventCloudsRegistry> reader =
-                new CommandLineReader<EventCloudsRegistry>(Arrays.asList(
-                        new CreateEventCloudCommand(),
-                        new DestroyEventCloudCommand(),
-                        new ListEventCloudsCommand(),
-                        new SubscribeEventCloudCommand()), registry);
+                new CommandLineReader<EventCloudsRegistry>(
+                        Arrays.<Command<EventCloudsRegistry>> asList(
+                                new CreateEventCloudCommand(),
+                                new DestroyEventCloudCommand(),
+                                new ListEventCloudsCommand(),
+                                new SubscribeEventCloudCommand()), registry);
         reader.run();
     }
 

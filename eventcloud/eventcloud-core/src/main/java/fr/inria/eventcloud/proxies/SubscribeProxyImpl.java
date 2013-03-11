@@ -713,7 +713,12 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         QuadruplePattern reconstructPattern =
                 new QuadruplePattern(eventId, Node.ANY, Node.ANY, Node.ANY);
 
-        // int nbReconstructRequestSent = 0;
+        int nbReconstructRequestSent = 0;
+        long reconstructionStartTime = 0;
+
+        if (log.isTraceEnabled()) {
+            reconstructionStartTime = System.nanoTime();
+        }
 
         // perform polling while all the quadruples have not been retrieved
         while (quadsReceived.size() != expectedNbQuadruples) {
@@ -764,12 +769,19 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                 // Thread.currentThread().interrupt();
                 // }
 
-                // nbReconstructRequestSent++;
+                nbReconstructRequestSent++;
                 //
                 // if (quads.size() != 0) {
                 // nbReconstructRequestSent = 0;
                 // }
             }
+        }
+
+        if (log.isTraceEnabled()) {
+            log.trace("Reconstruction for eventId " + eventId
+                    + " has required " + (nbReconstructRequestSent + 1)
+                    + " requests and "
+                    + (System.nanoTime() - reconstructionStartTime) + " ns");
         }
 
         return new CompoundEvent(quadsReceived);
@@ -797,7 +809,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private void logIntegrationInformation(String graph) {
         // log information for integration test purposes
-        if (EventCloudProperties.INTEGRATION_LOG.getValue()) {
+        if (log.isTraceEnabled()) {
             String msg = "EventCloud Exit";
 
             if (graph != null) {
@@ -808,7 +820,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             msg += " ";
             msg += super.eventCloudCache.getId().getStreamUrl();
 
-            log.info(msg);
+            log.trace(msg);
         }
     }
 

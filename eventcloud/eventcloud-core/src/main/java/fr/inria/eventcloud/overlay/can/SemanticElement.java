@@ -84,8 +84,6 @@ public class SemanticElement extends StringElement {
      */
     public static final String removePrefix(final Node value) {
         if (value.isURI()) {
-            // TODO: add support for opaque URI (c.f.
-            // http://download.oracle.com/javase/6/docs/api/java/net/URI.html)
             String content = value.getURI();
 
             int slashIndex = content.lastIndexOf('/');
@@ -102,6 +100,13 @@ public class SemanticElement extends StringElement {
             URI uri = null;
             try {
                 uri = new URI(content);
+
+                // basic support for opaque URI
+                // http://download.oracle.com/javase/6/docs/api/java/net/URI.html
+                if (uri.isOpaque()) {
+                    String scheme = uri.getScheme();
+                    return content.substring(scheme.length() + 1);
+                }
             } catch (URISyntaxException e) {
                 return content;
             }

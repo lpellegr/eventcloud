@@ -68,7 +68,6 @@ public class UriGenerator extends Generator {
      * 
      * @return the random URI.
      */
-    @SuppressWarnings("unchecked")
     public static String random(int length, String schemeName) {
         StringBuilder result = new StringBuilder(schemeName);
         result.append(StringGenerator.random(

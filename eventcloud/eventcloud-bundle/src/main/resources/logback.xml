@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<appender name="FILE"
+	<appender name="file"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${eventcloud.bundle.home}/logs/${logging.output.filename}.logback</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -12,10 +12,10 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.objectweb.proactive.extensions.p2p" level="DEBUG" />
-	<logger name="fr.inria.eventcloud" level="DEBUG" />
+	<logger name="org.objectweb.proactive.extensions.p2p" level="debug" />
+	<logger name="fr.inria.eventcloud" level="debug" />
 
-	<root level="INFO">
-		<appender-ref ref="FILE" />
+	<root level="info">
+		<appender-ref ref="file" />
 	</root>
 </configuration>

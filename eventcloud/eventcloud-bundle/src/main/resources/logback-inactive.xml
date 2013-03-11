@@ -1,15 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>%-30(%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5.5level %22.22logger{0}]) %msg%n</pattern>
-		</encoder>
-	</appender>
-
-	<logger name="org.objectweb.proactive.extensions.p2p" level="OFF" />
-	<logger name="fr.inria.eventcloud" level="OFF" />
-
-	<root level="OFF">
-		<appender-ref ref="stdout" />
-	</root>
+	<root level="off" />
 </configuration>

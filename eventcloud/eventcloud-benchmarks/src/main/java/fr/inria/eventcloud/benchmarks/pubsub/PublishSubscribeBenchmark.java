@@ -76,41 +76,45 @@ public class PublishSubscribeBenchmark {
     // parameters
 
     @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish")
-    private static int nbPublications = 10;
+    public static int nbPublications = 10;
 
     @Parameter(names = {"-ces", "--compound-event-size"}, description = "The number of quadruples contained by each CE")
-    private int compoundEventSize = 10;
+    public int compoundEventSize = 10;
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "The number of runs to perform", required = true)
-    private int nbRuns = 1;
+    public int nbRuns = 1;
 
     @Parameter(names = {"-p", "--nb-peers"}, description = "The number of peers to inject into the P2P network")
-    private int nbPeers = 1;
+    public int nbPeers = 1;
 
     @Parameter(names = {"--nb-publishers"}, description = "The number of publishers, each sharing the publication pool")
-    private int nbPublishers = 1;
+    public int nbPublishers = 1;
 
     @Parameter(names = {"--nb-subscribers"}, description = "The number of subscribers")
-    private int nbSubscribers = 1;
+    public int nbSubscribers = 1;
 
     @Parameter(names = {"-dfr", "--discard-first-runs"}, description = "Indicates the number of first runs to discard")
-    private int discardFirstRuns = 1;
+    public int discardFirstRuns = 1;
 
     @Parameter(names = {"--wait-between-publications"}, description = "The time to wait (in ms) between each publication from a publisher")
-    private int waitBetweenPublications = 0;
+    public int waitBetweenPublications = 0;
+
+    // a rewriting level of 0 means no rewrite
+    @Parameter(names = {"--rewriting-level", "-rl"}, description = "Indicates the number of rewrites to force before delivering a notification")
+    public int rewritingLevel = 0;
 
     @Parameter(names = {"--publish-quadruples"}, description = "Indicates whether events must be emitted as quadruples (default CEs)")
-    private boolean publishIndependentQuadruples = false;
+    public boolean publishIndependentQuadruples = false;
 
     @Parameter(names = {"-lt", "--listener-type"}, description = "The listener type used by all the subscribers for subscribing", converter = ListenerTypeConverter.class)
-    private NotificationListenerType listenerType =
+    public NotificationListenerType listenerType =
             NotificationListenerType.COMPOUND_EVENT;
 
     @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
-    private boolean inMemoryDatastore = false;
+    public boolean inMemoryDatastore = false;
 
     @Parameter(names = {"-h", "--help"}, description = "Print help", help = true)
-    private boolean help;
+    public boolean help;
 
     // measurements
 
@@ -179,11 +183,16 @@ public class PublishSubscribeBenchmark {
         System.exit(0);
     }
 
-    public void execute() {
+    public StatsRecorder execute() {
+        if (this.rewritingLevel < 0) {
+            throw new IllegalStateException("Illegal rewriting level: "
+                    + this.rewritingLevel);
+        }
+
         this.supplier =
                 this.publishIndependentQuadruples
                         ? new QuadrupleSupplier() : new CompoundEventSupplier(
-                                this.compoundEventSize);
+                                this.compoundEventSize, this.rewritingLevel);
 
         this.usingCompoundEventSupplier =
                 this.supplier instanceof CompoundEventSupplier;
@@ -257,6 +266,8 @@ public class PublishSubscribeBenchmark {
         System.out.println("Output measurement, average=" + output.getMean()
                 + ", median=" + output.getMedian() + ", average throughput="
                 + (nbPublications / (output.getMean() / 1000)));
+
+        return microBenchmark.getStatsRecorder();
     }
 
     public void execute(final Event[] events) {
@@ -277,6 +288,7 @@ public class PublishSubscribeBenchmark {
         EventCloudsRegistry registry =
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
         registry.register(deployer);
+
         String registryURL = null;
         try {
             registryURL = registry.register("registry");
@@ -308,8 +320,7 @@ public class PublishSubscribeBenchmark {
             final SubscribeApi subscribeProxy = subscribeProxies.get(i);
 
             Subscription subscription =
-                    new Subscription(
-                            "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }");
+                    new Subscription(this.createSubscription());
 
             nbEventsReceivedBySubscriber.put(
                     subscription.getId(), new AtomicInteger());
@@ -368,8 +379,46 @@ public class PublishSubscribeBenchmark {
         }
 
         this.endToEndMeasurement.setExitTime();
-
         // deployer.undeploy();
+    }
+
+    private String createSubscription() {
+        String subscription;
+
+        if (this.rewritingLevel == 0) {
+            subscription = "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
+        } else {
+            StringBuilder buf = new StringBuilder();
+
+            buf.append("SELECT ?g ");
+            for (int i = 1; i <= this.rewritingLevel + 1; i++) {
+                buf.append("?o");
+                buf.append(i);
+                buf.append(' ');
+            }
+
+            buf.append("WHERE { GRAPH ?g { ");
+            for (int i = 1; i <= this.rewritingLevel + 1; i++) {
+                if (i == 1) {
+                    buf.append("?s1 ");
+                } else {
+                    buf.append("?o");
+                    buf.append(i - 1);
+                    buf.append(' ');
+                }
+
+                buf.append("<urn:p");
+                buf.append(i);
+                buf.append("> ?o");
+                buf.append(i);
+                buf.append(" . ");
+            }
+            buf.append("} }");
+
+            subscription = buf.toString();
+        }
+
+        return subscription;
     }
 
     private List<PublishApi> createPublishProxies(String registryUrl,
@@ -456,7 +505,7 @@ public class PublishSubscribeBenchmark {
 
     private boolean allEventsReceived() {
         for (AtomicInteger counter : nbEventsReceivedBySubscriber.values()) {
-            if (counter.get() < nbPublications - 1) {
+            if (counter.get() < nbPublications) {
                 return false;
             }
         }
@@ -512,6 +561,10 @@ public class PublishSubscribeBenchmark {
                 nbEventsReceivedBySubscriber.notifyAll();
             }
         }
+    }
+
+    public static int getNbPublications() {
+        return nbPublications;
     }
 
     private static interface Measurement extends Serializable {

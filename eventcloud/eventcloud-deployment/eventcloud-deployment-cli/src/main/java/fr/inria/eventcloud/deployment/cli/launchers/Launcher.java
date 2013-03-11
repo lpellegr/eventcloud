@@ -19,6 +19,10 @@ package fr.inria.eventcloud.deployment.cli.launchers;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 
@@ -35,13 +39,35 @@ public abstract class Launcher {
     private static final String INSTANCE_FILE_JAVA_PROPERTY_NAME =
             "eventcloud.instance.file";
 
+    private static final String REDIRECT_STANDARD_OUTERR_JAVA_PROPERTY_NAME =
+            "eventcloud.redirect.stdouterr";
+
+    private static final Logger log = LoggerFactory.getLogger("StdOutErr");
+
     private File instanceFile;
 
     protected Launcher() {
-        if (System.getProperty(INSTANCE_FILE_JAVA_PROPERTY_NAME) != null) {
-            this.instanceFile =
-                    new File(
-                            System.getProperty(INSTANCE_FILE_JAVA_PROPERTY_NAME));
+        String instanceFileJavaProperty =
+                System.getProperty(INSTANCE_FILE_JAVA_PROPERTY_NAME);
+
+        if (instanceFileJavaProperty != null) {
+            this.instanceFile = new File(instanceFileJavaProperty);
+        }
+
+        if (System.getProperty(REDIRECT_STANDARD_OUTERR_JAVA_PROPERTY_NAME) != null) {
+            System.setOut(new PrintStream(System.out) {
+                @Override
+                public void print(String s) {
+                    log.info(s);
+                }
+            });
+
+            System.setErr(new PrintStream(System.err) {
+                @Override
+                public void print(String s) {
+                    log.error(s);
+                }
+            });
         }
     }
 
