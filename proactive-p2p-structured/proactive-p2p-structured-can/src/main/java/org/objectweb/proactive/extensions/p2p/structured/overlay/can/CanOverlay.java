@@ -849,4 +849,16 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         return this.neighborTable.contains(peerID);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() {
+        super.close();
+
+        if (this.maintenanceTask != null) {
+            this.maintenanceTask.shutdown();
+        }
+    }
+
 }

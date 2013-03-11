@@ -194,7 +194,9 @@ public abstract class StructuredOverlay implements DataHandler {
      * is called).
      */
     public void close() {
-        // to be overridden if necessary
+        if (this.messageManager != null) {
+            this.messageManager.close();
+        }
     }
 
 }

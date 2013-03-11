@@ -965,8 +965,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     public void close() {
         super.close();
 
-        this.messageManager.close();
-
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
                 || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             this.ephemeralSubscriptionsGarbageColletor.shutdownNow();
