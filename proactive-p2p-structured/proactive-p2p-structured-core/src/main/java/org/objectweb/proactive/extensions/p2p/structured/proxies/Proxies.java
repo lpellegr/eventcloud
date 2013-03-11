@@ -29,7 +29,6 @@ import com.google.common.collect.Lists;
  */
 public class Proxies {
 
-    @SafeVarargs
     public static <T extends Tracker> Proxy newProxy(T... trackers) {
         return newProxy(Lists.newArrayList(trackers));
     }

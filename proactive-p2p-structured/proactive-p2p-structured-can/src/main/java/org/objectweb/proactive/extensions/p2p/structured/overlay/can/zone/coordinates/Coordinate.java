@@ -52,7 +52,6 @@ public final class Coordinate<E extends Element> implements Cloneable,
      * @param elements
      *            the elements composing the coordinate.
      */
-    @SafeVarargs
     public Coordinate(E... elements) {
         if (elements.length != P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()) {
             throw new AssertionError("The number of coordinate elements ("
