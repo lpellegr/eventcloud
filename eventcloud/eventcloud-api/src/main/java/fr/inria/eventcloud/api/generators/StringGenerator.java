@@ -191,7 +191,6 @@ public final class StringGenerator extends Generator {
      * @throws IllegalArgumentException
      *             if {@code length} &lt; 0.
      */
-    @SafeVarargs
     public static String random(long length, Range<Character>... ranges) {
         return random(length, Generator.RANDOM, ranges);
     }
@@ -233,7 +232,6 @@ public final class StringGenerator extends Generator {
      * 
      * @return the random string.
      */
-    @SafeVarargs
     public static String random(long length, String prefix,
                                 Range<Character>... ranges) {
         StringBuilder result = new StringBuilder(prefix);
@@ -266,7 +264,6 @@ public final class StringGenerator extends Generator {
      * @throws IllegalArgumentException
      *             if {@code length} &lt; 0.
      */
-    @SafeVarargs
     public static String random(long length, Random random,
                                 Range<Character>... ranges) {
         if (length == 0) {
