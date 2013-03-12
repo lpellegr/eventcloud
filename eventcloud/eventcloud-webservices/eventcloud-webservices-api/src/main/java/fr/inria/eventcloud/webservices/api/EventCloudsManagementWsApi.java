@@ -41,7 +41,8 @@ public interface EventCloudsManagementWsApi {
     public boolean ping();
 
     /**
-     * Sets the URL of the social filter to use and the threshold to filter notifications.
+     * Sets the URL of the social filter to use and the threshold to filter
+     * notifications.
      * 
      * @param socialFilterUrl
      *            the URL of the social filter.
