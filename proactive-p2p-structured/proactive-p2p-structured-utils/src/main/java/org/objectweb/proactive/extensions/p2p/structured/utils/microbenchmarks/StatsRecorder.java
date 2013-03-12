@@ -24,8 +24,8 @@ package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
  */
 public interface StatsRecorder {
 
-    void reportTime(int categoryIndex, long time);
+    void reportTime(String categoryName, long time);
 
-    Category getCategory(int categoryIndex);
+    Category getCategory(String name);
 
 }
