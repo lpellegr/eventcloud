@@ -621,7 +621,9 @@ public class PublishSubscribeBenchmark {
         }
 
         public void reportReception(Node eventId) {
-            this.times.put(eventId, System.currentTimeMillis());
+            synchronized (this.times) {
+                this.times.put(eventId, System.currentTimeMillis());
+            }
         }
 
         public long getElapsedTime(Map<Node, Long> pointToPointEntryMeasurements) {
