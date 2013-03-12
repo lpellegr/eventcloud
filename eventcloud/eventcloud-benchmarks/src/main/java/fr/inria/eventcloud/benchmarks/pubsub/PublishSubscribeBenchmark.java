@@ -627,10 +627,12 @@ public class PublishSubscribeBenchmark {
         public long getElapsedTime(Map<Node, Long> pointToPointEntryMeasurements) {
             long sum = 0;
 
-            for (Entry<Node, Long> entry : this.times.entrySet()) {
-                sum +=
-                        entry.getValue()
-                                - pointToPointEntryMeasurements.get(entry.getKey());
+            synchronized (this.times) {
+                for (Entry<Node, Long> entry : this.times.entrySet()) {
+                    sum +=
+                            entry.getValue()
+                                    - pointToPointEntryMeasurements.get(entry.getKey());
+                }
             }
 
             return sum;
