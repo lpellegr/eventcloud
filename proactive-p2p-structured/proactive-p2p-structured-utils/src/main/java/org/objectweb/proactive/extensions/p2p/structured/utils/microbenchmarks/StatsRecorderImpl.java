@@ -16,6 +16,11 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
 
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
+
 /**
  * Default implementation for {@link StatsRecorder}.
  * 
@@ -23,37 +28,40 @@ package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
  */
 public class StatsRecorderImpl implements StatsRecorder {
 
-    private Category[] categories;
+    private Map<String, Category> categories;
 
-    public StatsRecorderImpl(int nbCategories, int nbEntriesPerCategory,
+    public StatsRecorderImpl(String[] categoryNames, int nbEntriesPerCategory,
             int discardFirstRuns) {
-        this.categories = new Category[nbCategories];
+        Builder<String, Category> builder =
+                ImmutableMap.<String, Category> builder();
 
-        for (int i = 0; i < nbCategories; i++) {
-            this.categories[i] =
-                    new CategoryImpl(nbEntriesPerCategory, discardFirstRuns);
+        for (int i = 0; i < categoryNames.length; i++) {
+            builder.put(categoryNames[i], new CategoryImpl(
+                    nbEntriesPerCategory, discardFirstRuns));
         }
+
+        this.categories = builder.build();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void reportTime(int categoryIndex, long time) {
-        if (categoryIndex > this.categories.length - 1) {
-            throw new IllegalArgumentException("Out of range category index: "
-                    + categoryIndex);
+    public void reportTime(String categoryName, long time) {
+        if (!this.categories.containsKey(categoryName)) {
+            throw new IllegalArgumentException("Unknow category name "
+                    + categoryName);
         }
 
-        this.categories[categoryIndex].reportTime(time);
+        this.categories.get(categoryName).reportTime(time);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Category getCategory(int categoryIndex) {
-        return this.categories[categoryIndex];
+    public Category getCategory(String name) {
+        return this.categories.get(name);
     }
 
 }
