@@ -171,8 +171,14 @@ public class EventCloudsManagementServiceImpl implements
      * {@inheritDoc}
      */
     @Override
-    public void setSocialFilter(double threshold) {
-        EventCloudProperties.SOCIAL_FILTER_THRESHOLD.setValue(threshold);
+    public void setSocialFilter(String socialFilterUrl, double threshold) {
+        if (this.registry.listEventClouds().size() == 0) {
+            EventCloudProperties.SOCIAL_FILTER_URL.setValue(socialFilterUrl);
+            EventCloudProperties.SOCIAL_FILTER_THRESHOLD.setValue(threshold);
+        } else {
+            throw new IllegalStateException(
+                    "EventClouds have already been created, it is not possible anymore to set Social Filter properties");
+        }
     }
 
     /**

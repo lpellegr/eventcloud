@@ -41,13 +41,16 @@ public interface EventCloudsManagementWsApi {
     public boolean ping();
 
     /**
-     * Sets the threshold for the social filter.
+     * Sets the URL of the social filter to use and the threshold to filter notifications.
      * 
+     * @param socialFilterUrl
+     *            the URL of the social filter.
      * @param threshold
-     *            the threshold of the social filter.
+     *            the threshold to filter notifications.
      */
     @WebMethod(operationName = "setSocialFilter")
-    public void setSocialFilter(@WebParam(name = "threshold") double threshold);
+    public void setSocialFilter(@WebParam(name = "socialFilterUrl") String socialFilterUrl,
+                                @WebParam(name = "threshold") double threshold);
 
     /**
      * Returns the endpoint URL associated to the EventClouds registry which
