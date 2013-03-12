@@ -69,6 +69,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -110,6 +111,9 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     // this cache is used to prevent compound events to be handled multi-times
     // on a same peer
     private Cache<Node, Boolean> alreadyHandledCompoundEvent;
+
+    private final PublishQuadrupleRequestDelayer publishQuadrupleRequestDelayer =
+            new PublishQuadrupleRequestDelayer(this);
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -332,6 +336,15 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     public boolean hasSocialFilter() {
         return this.socialFilter != null;
+    }
+
+    /**
+     * Returns the {@link PublishQuadrupleRequest} delayer instance.
+     * 
+     * @return the {@link PublishQuadrupleRequest} delayer instance.
+     */
+    public PublishQuadrupleRequestDelayer getPublishQuadrupleRequestDelayer() {
+        return this.publishQuadrupleRequestDelayer;
     }
 
     /**
@@ -964,6 +977,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     @Override
     public void close() {
         super.close();
+
+        this.publishQuadrupleRequestDelayer.close();
 
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
                 || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
