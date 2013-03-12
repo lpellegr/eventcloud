@@ -577,13 +577,17 @@ public class Quadruple implements Externalizable, Event {
     }
 
     public static Node removeMetaInformation(Node graph) {
+        return Node.createURI(removeMetaInformation(graph.getURI()));
+    }
+
+    public static String removeMetaInformation(String graph) {
         String[] splits =
-                graph.getURI().split(Pattern.quote(PUBLICATION_TIME_SEPARATOR));
+                graph.split(Pattern.quote(PUBLICATION_TIME_SEPARATOR));
 
         if (splits.length == 1) {
             return graph;
         } else {
-            return Node.createURI(splits[0]);
+            return splits[0];
         }
     }
 
