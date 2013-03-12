@@ -103,6 +103,23 @@ public class EventCloudProperties {
                     "http://eventcloud.inria.fr/function#");
 
     /**
+     * Defines the number of entries that may be bufferized by the publish
+     * quadruples delayer before to be commited.
+     */
+    public static final PropertyInteger PUBLISH_QUADRUPLES_DELAYER_BUFFER_SIZE =
+            new PropertyInteger(
+                    "eventcloud.publish.quadruples.delayer.buffer.size", 40);
+
+    /**
+     * Defines the maximum timeout (in milliseconds) to wait before to commit
+     * bufferized entries when a commit thread is running with the publish
+     * quadruples delayer.
+     */
+    public static final PropertyInteger PUBLISH_QUADRUPLES_DELAYER_TIMEOUT =
+            new PropertyInteger(
+                    "eventcloud.publish.quadruples.delayer.buffer.size", 500);
+
+    /**
      * Constant used to identify the SBCE publish/subscribe algorithm in version
      * 1.
      */
