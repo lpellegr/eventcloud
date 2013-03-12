@@ -25,11 +25,13 @@ package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
  */
 public class MicroBenchmark {
 
+    public static final String DEFAULT_CATEGORY_NAME = "default";
+
     private final int nbRuns;
 
     private final MicroBenchmarkRun benchmark;
 
-    private final int nbCategories;
+    private final String[] categoryNames;
 
     private int discardFirstRuns = 1;
 
@@ -38,11 +40,12 @@ public class MicroBenchmark {
     private StatsRecorder statsRecorder;
 
     public MicroBenchmark(int nbRuns, MicroBenchmarkRun task) {
-        this(1, nbRuns, task);
+        this(new String[] {"default"}, nbRuns, task);
     }
 
-    public MicroBenchmark(int nbCategories, int nbRuns, MicroBenchmarkRun task) {
-        this.nbCategories = nbCategories;
+    public MicroBenchmark(String[] categoryNames, int nbRuns,
+            MicroBenchmarkRun task) {
+        this.categoryNames = categoryNames;
         this.nbRuns = nbRuns;
         this.benchmark = task;
     }
@@ -62,7 +65,7 @@ public class MicroBenchmark {
     public void execute() {
         this.statsRecorder =
                 new StatsRecorderImpl(
-                        this.nbCategories, this.nbRuns, this.discardFirstRuns);
+                        this.categoryNames, this.nbRuns, this.discardFirstRuns);
 
         for (int i = 0; i < this.nbRuns + this.discardFirstRuns; i++) {
             try {
@@ -74,7 +77,8 @@ public class MicroBenchmark {
             if (this.showProgress) {
                 System.out.print("Run #" + (i + 1) + " performed");
                 System.out.print(" ("
-                        + this.statsRecorder.getCategory(0).getTime(i) + ")");
+                        + this.statsRecorder.getCategory(DEFAULT_CATEGORY_NAME)
+                                .getTime(i) + ")");
 
                 if (this.discardFirstRuns > 0 && i < this.discardFirstRuns) {
                     System.out.println(" [ignored]");

@@ -25,6 +25,8 @@ package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
  */
 public interface Category {
 
+    int getNbEntries();
+
     double getMean();
 
     double getMedian();

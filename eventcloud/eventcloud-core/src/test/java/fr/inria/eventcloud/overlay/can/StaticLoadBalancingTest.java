@@ -172,14 +172,19 @@ public class StaticLoadBalancingTest {
                                         .build();
 
                         test.execute();
-                        recorder.reportTime(0, test.getExecutionTime());
+                        recorder.reportTime(
+                                MicroBenchmark.DEFAULT_CATEGORY_NAME,
+                                test.getExecutionTime());
                     }
                 });
         microBenchmark.showProgress();
         microBenchmark.execute();
 
-        System.out.println("Average time for " + nbRuns + " runs is "
-                + microBenchmark.getStatsRecorder().getCategory(0).getMean());
+        System.out.println("Average time for "
+                + nbRuns
+                + " runs is "
+                + microBenchmark.getStatsRecorder().getCategory(
+                        MicroBenchmark.DEFAULT_CATEGORY_NAME).getMean());
     }
 
 }
