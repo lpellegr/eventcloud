@@ -42,6 +42,14 @@ public class CategoryImpl implements Category {
      * {@inheritDoc}
      */
     @Override
+    public int getNbEntries() {
+        return this.times.length;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public double getMean() {
         return StatUtils.mean(this.filter(this.times));
 

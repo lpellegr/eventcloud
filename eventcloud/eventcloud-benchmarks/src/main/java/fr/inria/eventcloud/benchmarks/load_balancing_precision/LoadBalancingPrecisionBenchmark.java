@@ -120,14 +120,19 @@ public class LoadBalancingPrecisionBenchmark {
                                         .build();
 
                         test.execute();
-                        recorder.reportTime(0, test.getExecutionTime());
+                        recorder.reportTime(
+                                MicroBenchmark.DEFAULT_CATEGORY_NAME,
+                                test.getExecutionTime());
                     }
                 });
         microBenchmark.showProgress();
         microBenchmark.execute();
 
-        System.out.println("Average time for " + this.nbRuns + " runs is "
-                + microBenchmark.getStatsRecorder().getCategory(1).getMean());
+        System.out.println("Average time for "
+                + this.nbRuns
+                + " runs is "
+                + microBenchmark.getStatsRecorder().getCategory(
+                        MicroBenchmark.DEFAULT_CATEGORY_NAME).getMean());
     }
 
 }

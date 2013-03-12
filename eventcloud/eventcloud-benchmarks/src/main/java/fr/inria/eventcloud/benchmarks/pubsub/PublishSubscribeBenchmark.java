@@ -47,6 +47,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
@@ -67,7 +68,8 @@ import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
  * Simple application to evaluate the publish/subscribe algorithm on a single
- * machine.
+ * machine. Times are measured in milliseconds with
+ * {@link System#currentTimeMillis()}.
  * 
  * @author lpellegr
  */
@@ -116,6 +118,17 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"-h", "--help"}, description = "Print help", help = true)
     public boolean help;
 
+    // category names
+
+    public static final String END_TO_END_MEASUREMENT_CATEGORY =
+            MicroBenchmark.DEFAULT_CATEGORY_NAME;
+
+    public static final String OUTPUT_MEASUREMENT_CATEGORY =
+            "outputMeasurement";
+
+    public static final String POINT_TO_POINT_MEASUREMENT_CATEGORY =
+            "pointToPointMeasurement";
+
     // measurements
 
     /*
@@ -132,17 +145,14 @@ public class PublishSubscribeBenchmark {
      * event is received on the subscriber (used to compte the throughput in terms 
      * of notifications per second on the subscriber side)
      */
-    private static Map<SubscriptionId, SimpleMeasurement> outputMeasurements =
-            new HashMap<SubscriptionId, SimpleMeasurement>();
+    private static Map<SubscriptionId, SimpleMeasurement> outputMeasurements;
 
     /*
      * Measures the time to receive each event independently (i.e. average latency)
      */
-    private static Map<Node, Long> pointToPointEntryMeasurements =
-            new ConcurrentHashMap<Node, Long>();
+    private static Map<Node, Long> pointToPointEntryMeasurements;
 
-    private static Map<SubscriptionId, CumulatedMeasurement> pointToPointExitMeasurements =
-            new ConcurrentHashMap<SubscriptionId, CumulatedMeasurement>();
+    private static Map<SubscriptionId, CumulatedMeasurement> pointToPointExitMeasurements;
 
     // internal
 
@@ -197,6 +207,18 @@ public class PublishSubscribeBenchmark {
         this.usingCompoundEventSupplier =
                 this.supplier instanceof CompoundEventSupplier;
 
+        outputMeasurements =
+                new ConcurrentHashMap<SubscriptionId, SimpleMeasurement>(
+                        this.nbSubscribers);
+
+        pointToPointEntryMeasurements =
+                new ConcurrentHashMap<Node, Long>(this.nbSubscribers
+                        * nbPublications);
+
+        pointToPointExitMeasurements =
+                new ConcurrentHashMap<SubscriptionId, CumulatedMeasurement>(
+                        pointToPointEntryMeasurements.size());
+
         // pre-generates events so that the data are the same for all the runs
         // and the time is not included into the benchmark execution time
         final Event[] events = new Event[nbPublications];
@@ -207,36 +229,40 @@ public class PublishSubscribeBenchmark {
 
         // creates and runs micro benchmark
         MicroBenchmark microBenchmark =
-                new MicroBenchmark(3, this.nbRuns, new MicroBenchmarkRun() {
+                new MicroBenchmark(
+                        new String[] {
+                                END_TO_END_MEASUREMENT_CATEGORY,
+                                OUTPUT_MEASUREMENT_CATEGORY,
+                                POINT_TO_POINT_MEASUREMENT_CATEGORY},
+                        this.nbRuns, new MicroBenchmarkRun() {
 
-                    @Override
-                    public void run(StatsRecorder recorder) {
-                        PublishSubscribeBenchmark.this.execute(events);
+                            @Override
+                            public void run(StatsRecorder recorder) {
+                                PublishSubscribeBenchmark.this.execute(events);
 
-                        recorder.reportTime(
-                                0,
-                                PublishSubscribeBenchmark.this.endToEndMeasurement.getElapsedTime());
+                                recorder.reportTime(
+                                        END_TO_END_MEASUREMENT_CATEGORY,
+                                        PublishSubscribeBenchmark.this.endToEndMeasurement.getElapsedTime());
 
-                        if (PublishSubscribeBenchmark.this.listenerType == NotificationListenerType.COMPOUND_EVENT) {
-                            SimpleMeasurement outputMeasurement =
-                                    outputMeasurements.values()
-                                            .iterator()
-                                            .next();
+                                SimpleMeasurement outputMeasurement =
+                                        outputMeasurements.values()
+                                                .iterator()
+                                                .next();
 
-                            recorder.reportTime(
-                                    1, outputMeasurement.getElapsedTime());
+                                recorder.reportTime(
+                                        OUTPUT_MEASUREMENT_CATEGORY,
+                                        outputMeasurement.getElapsedTime());
 
-                            recorder.reportTime(
-                                    2,
-                                    pointToPointExitMeasurements.values()
-                                            .iterator()
-                                            .next()
-                                            .getElapsedTime(
-                                                    pointToPointEntryMeasurements));
-                        }
-                    }
+                                recorder.reportTime(
+                                        POINT_TO_POINT_MEASUREMENT_CATEGORY,
+                                        pointToPointExitMeasurements.values()
+                                                .iterator()
+                                                .next()
+                                                .getElapsedTime(
+                                                        pointToPointEntryMeasurements));
+                            }
 
-                });
+                        });
         microBenchmark.discardFirstRuns(this.discardFirstRuns);
         microBenchmark.showProgress();
         microBenchmark.execute();
@@ -248,10 +274,15 @@ public class PublishSubscribeBenchmark {
         System.out.println();
         System.out.println(this.nbRuns + " run(s)");
 
-        Category endToEnd = microBenchmark.getStatsRecorder().getCategory(0);
-        Category output = microBenchmark.getStatsRecorder().getCategory(1);
+        Category endToEnd =
+                microBenchmark.getStatsRecorder().getCategory(
+                        END_TO_END_MEASUREMENT_CATEGORY);
+        Category output =
+                microBenchmark.getStatsRecorder().getCategory(
+                        OUTPUT_MEASUREMENT_CATEGORY);
         Category pointToPoint =
-                microBenchmark.getStatsRecorder().getCategory(2);
+                microBenchmark.getStatsRecorder().getCategory(
+                        POINT_TO_POINT_MEASUREMENT_CATEGORY);
 
         System.out.println("End-to-End measurement, average="
                 + endToEnd.getMean() + ", median=" + endToEnd.getMedian()
@@ -459,7 +490,8 @@ public class PublishSubscribeBenchmark {
         if (this.usingCompoundEventSupplier) {
             CompoundEvent ce = (CompoundEvent) event;
 
-            pointToPointEntryMeasurements.put(ce.getGraph(), System.nanoTime());
+            pointToPointEntryMeasurements.put(
+                    ce.getGraph(), System.currentTimeMillis());
 
             publishProxy.publish(ce);
         } else {
@@ -520,6 +552,9 @@ public class PublishSubscribeBenchmark {
         @Override
         public void onNotification(SubscriptionId id, Binding solution) {
             handleNewEvent(id);
+            pointToPointExitMeasurements.get(id)
+                    .reportReception(
+                            Quadruple.removeMetaInformation(solution.get(PublishSubscribeConstants.GRAPH_VAR)));
         }
     }
 
@@ -542,6 +577,8 @@ public class PublishSubscribeBenchmark {
         @Override
         public void onNotification(SubscriptionId id, String eventId) {
             handleNewEvent(id);
+            pointToPointExitMeasurements.get(id).reportReception(
+                    Node.createURI(Quadruple.removeMetaInformation(eventId)));
         }
     }
 
@@ -584,7 +621,7 @@ public class PublishSubscribeBenchmark {
         }
 
         public void reportReception(Node eventId) {
-            this.times.put(eventId, System.nanoTime());
+            this.times.put(eventId, System.currentTimeMillis());
         }
 
         public long getElapsedTime(Map<Node, Long> pointToPointEntryMeasurements) {
@@ -596,7 +633,7 @@ public class PublishSubscribeBenchmark {
                                 - pointToPointEntryMeasurements.get(entry.getKey());
             }
 
-            return sum / 1000000;
+            return sum;
         }
 
     }
@@ -614,16 +651,15 @@ public class PublishSubscribeBenchmark {
          */
         @Override
         public long getElapsedTime() {
-            // returns elapsed time in ms
-            return (this.exitTime - this.entryTime) / 1000000;
+            return this.exitTime - this.entryTime;
         }
 
         public void setEntryTime() {
-            this.entryTime = System.nanoTime();
+            this.entryTime = System.currentTimeMillis();
         }
 
         public void setExitTime() {
-            this.exitTime = System.nanoTime();
+            this.exitTime = System.currentTimeMillis();
         }
 
     }
