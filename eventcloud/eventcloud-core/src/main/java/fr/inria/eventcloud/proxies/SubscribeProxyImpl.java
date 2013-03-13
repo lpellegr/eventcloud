@@ -717,7 +717,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         long reconstructionStartTime = 0;
 
         if (log.isTraceEnabled()) {
-            reconstructionStartTime = System.nanoTime();
+            reconstructionStartTime = System.currentTimeMillis();
         }
 
         // perform polling while all the quadruples have not been retrieved
@@ -781,7 +781,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             log.trace("Reconstruction for eventId " + eventId
                     + " has required " + (nbReconstructRequestSent + 1)
                     + " requests and "
-                    + (System.nanoTime() - reconstructionStartTime) + " ns");
+                    + (System.currentTimeMillis() - reconstructionStartTime)
+                    + " ms");
         }
 
         return new CompoundEvent(quadsReceived);
