@@ -83,8 +83,9 @@ public class LogReader {
                         // 0 : it is a first received message
                         // 1 : it is a duplicate
                         if (line.length() > 0) {
-                            String type = line.substring(0, 1);
-                            String timestamp = line.substring(1, line.length());
+                        	String[] lineArray = line.split(" ");
+                            String type = lineArray[0];
+                            String timestamp = lineArray[1] + " " + lineArray[2];
                             int suspectedDuplicate = Integer.parseInt(type);
                             if (suspectedDuplicate == 1) {
                                 nbDuplicates++;
