@@ -69,6 +69,9 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.delayers.PublishCompoundEventRequestDelayer;
+import fr.inria.eventcloud.delayers.PublishQuadrupleRequestDelayer;
+import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
@@ -112,8 +115,9 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     // on a same peer
     private Cache<Node, Boolean> alreadyHandledCompoundEvent;
 
-    private final PublishQuadrupleRequestDelayer publishQuadrupleRequestDelayer =
-            new PublishQuadrupleRequestDelayer(this);
+    private final PublishQuadrupleRequestDelayer publishQuadrupleRequestDelayer;
+
+    private final PublishCompoundEventRequestDelayer publishCompoundEventRequestDelayer;
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -218,11 +222,19 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         }
 
         if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.publishQuadrupleRequestDelayer =
+                    new PublishQuadrupleRequestDelayer(this);
+            this.publishCompoundEventRequestDelayer =
+                    new PublishCompoundEventRequestDelayer(this);
             this.alreadyHandledCompoundEvent =
                     CacheBuilder.newBuilder()
                             .maximumSize(13000)
                             .expireAfterWrite(10, TimeUnit.MINUTES)
                             .build();
+        } else {
+            this.publishQuadrupleRequestDelayer =
+                    new PublishQuadrupleRequestDelayer(this);
+            this.publishCompoundEventRequestDelayer = null;
         }
     }
 
@@ -345,6 +357,15 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     public PublishQuadrupleRequestDelayer getPublishQuadrupleRequestDelayer() {
         return this.publishQuadrupleRequestDelayer;
+    }
+
+    /**
+     * Returns the {@link PublishCompoundEventRequest} delayer instance.
+     * 
+     * @return the {@link PublishCompoundEventRequest} delayer instance.
+     */
+    public PublishCompoundEventRequestDelayer getPublishCompoundEventRequestDelayer() {
+        return this.publishCompoundEventRequestDelayer;
     }
 
     /**

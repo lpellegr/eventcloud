@@ -44,7 +44,7 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
 
     private static final long serialVersionUID = 140L;
 
-    private Quadruple quadruple;
+    protected Quadruple quadruple;
 
     public QuadrupleRequest(Quadruple quad) {
         this(
