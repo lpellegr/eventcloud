@@ -111,7 +111,8 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                 String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
                 JobLogger.logMessage(request.getId().toString() + "_"
                         + "EfficientBroadcast_" + hostname, "1 " + timestamp
-                        + JobLogger.RETURN);
+                        + " " + canOverlay.getId() + " " + canOverlay
+                        .getNeighborTable().size() + JobLogger.RETURN);
             }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
@@ -135,8 +136,9 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                     String timestamp =
                             JobLogger.DATE_FORMAT.format(receiveTime);
                     JobLogger.logMessage(request.getId().toString() + "_"
-                            + "EfficientBroadcast_" + hostname, "0 "
-                            + timestamp + JobLogger.RETURN);
+                            + "EfficientBroadcast_" + hostname, "0 " + timestamp 
+                            + " " + canOverlay.getId() + " " + canOverlay
+                            .getNeighborTable().size() + JobLogger.RETURN);
                 }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
                 // sends the message to the other neighbors which validates the
