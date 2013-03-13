@@ -50,7 +50,8 @@ public class CompoundEvent implements Event, Externalizable,
     private static final long serialVersionUID = 140L;
 
     // this internal list does not contain the meta quadruple
-    // it is automatically added during a publish operation from a proxy
+    // it is automatically injected to the network during a publish
+    // operation from a proxy
     private List<Quadruple> quadruples;
 
     private transient List<Triple> triples;

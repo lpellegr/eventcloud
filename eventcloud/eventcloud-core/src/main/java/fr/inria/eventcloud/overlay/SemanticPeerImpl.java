@@ -159,9 +159,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
                 q.setPublicationTime(publicationTime);
             }
 
-            for (Quadruple q : compoundEvent) {
+            for (int i = 0; i < compoundEvent.getQuadruples().size(); i++) {
                 // sends the whole compound event
-                super.sendv(new PublishCompoundEventRequest(compoundEvent, q));
+                super.sendv(new PublishCompoundEventRequest(compoundEvent, i));
             }
 
             // the meta quadruple is necessary when we use the fallback scheme

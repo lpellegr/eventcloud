@@ -104,6 +104,23 @@ public class EventCloudProperties {
 
     /**
      * Defines the number of entries that may be bufferized by the publish
+     * compound event delayer before to be commited.
+     */
+    public static final PropertyInteger PUBLISH_COMPOUND_EVENT_DELAYER_BUFFER_SIZE =
+            new PropertyInteger(
+                    "eventcloud.publish.compoundevent.delayer.buffer.size", 40);
+
+    /**
+     * Defines the maximum timeout (in milliseconds) to wait before to commit
+     * bufferized entries when a commit thread is running with the publish
+     * compound event delayer.
+     */
+    public static final PropertyInteger PUBLISH_COMPOUND_EVENT_DELAYER_TIMEOUT =
+            new PropertyInteger(
+                    "eventcloud.publish.compoundevent.delayer.buffer.size", 500);
+
+    /**
+     * Defines the number of entries that may be bufferized by the publish
      * quadruples delayer before to be commited.
      */
     public static final PropertyInteger PUBLISH_QUADRUPLES_DELAYER_BUFFER_SIZE =
