@@ -54,7 +54,7 @@ public class JobLogger {
 			+ File.separator + "broadcast_logs" + File.separator;
 	public static final boolean bcastDebugMode = true;
 	// Warning : logging message receptions to the console might significantly slow down the delivery
-	public static final boolean logToConsoleEnabled = false;
+	public static final boolean logToConsoleEnabled = true;
 	public static String PREFIX;
 
 	public static final String RETURN = System.getProperty("line.separator");

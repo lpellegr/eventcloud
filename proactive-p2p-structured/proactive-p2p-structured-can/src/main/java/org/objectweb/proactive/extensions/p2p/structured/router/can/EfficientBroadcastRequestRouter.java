@@ -231,7 +231,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                                         + " -> " + p);
                             }
                             request.setDirections(neighborEntry.getDirections());
-                            request.setSplitPlans(neighborEntry.getSplitPlans());
                             p.route(request);
                         }
                     }
@@ -257,9 +256,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                 new NeighborTableWrapper<E>();
         // The directions that the node has to cover.
         byte[][] directions;
-        // The constraints that the neighbors have to validate in order to
-        // receive the message
-        Element[] plane;
 
         // If the request is received by the initiator(there are no given
         // directions) then it has to compute the directions and coordinates
@@ -267,10 +263,8 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
         // broadcast request.
         if (request.getDirections() == null) {
             directions = this.getDirections();
-            plane = this.getPlanToBeContained(overlay);
         } else {
             directions = request.getDirections();
-            plane = request.getSplitPlans();
         }
 
         // Create an extended neighbor table(one that contains more
@@ -285,9 +279,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
         }
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            // We don't need to verify if the neighbor contains the sender's
-            // coordinate on the dimension on which they are neighbors.
-            plane[dimension] = null;
 
             for (byte direction = 0; direction < 2; direction++) {
                 // A peer only needs to propagate the broadcast request only on
@@ -320,7 +311,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                         if (contains == true) {
                             byte[][] newDirections =
                                     this.copyDirections(directions);
-                            Element[] newPlan = this.copyPlan(plane);
                             // Remove from the directions array the peer's
                             // opposite direction (if it is neighbor with the
                             // sender on the x superior side, the x inferior
@@ -328,7 +318,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                             // the message to the sender).
                             newDirections[(direction + 1) % 2][dimension] = -1;
                             neighbor.setDirections(newDirections);
-                            neighbor.setSplitPlans(newPlan);
                             neighborsToSendTo.add(
                                     dimension, direction, neighbor);
                         }
@@ -387,55 +376,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
     }
 
     /**
-     * Computes the coordinates that need to be validated by the peers receiving
-     * the message.
-     * 
-     * @param can
-     *            the overlay
-     * @return the coordinates to be contained by the peers receiving the
-     *         message.
-     */
-    protected Element[] getPlanToBeContained(CanOverlay<E> can) {
-        Element[] plan =
-                new Element[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
-
-        // In this case the values of the constraints are equal to the lower
-        // bound of the initiator.
-        // We can choose other constraints too as long as the values are in the
-        // initiator's zone.
-        for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            plan[i] = can.getZone().getLowerBound(i);
-        }
-
-        return plan;
-    }
-
-    /**
-     * Checks if a value is included in the zone on a given dimension.
-     * 
-     * @param zone
-     *            the zone that has to contain a given value
-     * @param value
-     *            the value that needs to be contained by the zone
-     * @param dimension
-     *            the dimension on which the zone has to contain the given
-     *            value.
-     * @return true if zone contains the value on the given dimension; false,
-     *         otherwise.
-     */
-    protected boolean containsCoordinate(Zone<E> zone, Element value,
-                                         byte dimension) {
-        if (value != null) {
-            if (value.isBetween(
-                    zone.getLowerBound(dimension),
-                    zone.getUpperBound(dimension)) == false) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * Initializes the dimensions array.
      */
     protected byte[][] getDirections() {
@@ -466,21 +406,4 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
         }
         return directions;
     }
-
-    /**
-     * Create a new StringElement array from an existing one.
-     * 
-     * @param initialPlan
-     *            initial StringElement array
-     * @return the new StringElement array
-     */
-    protected Element[] copyPlan(Element[] initialPlan) {
-        Element[] plan =
-                new Element[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
-        for (int j = 0; j < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); j++) {
-            plan[j] = initialPlan[j];
-        }
-        return plan;
-    }
-
 }

@@ -54,7 +54,6 @@ public class BroadcastsBenchmark {
 				System.exit(0);
 			}
 		}
-		// Removing all the previous logs
 		File directory = new File(JobLogger.logDirectory);
 		if (directory.exists()) {
 			File[] files = directory.listFiles();
