@@ -16,7 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmarks;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 import org.junit.Assert;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
@@ -112,6 +114,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
         // constraint));
+        printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
         JobLogger.recordTime("FloodingBroadcast", request.getId());
@@ -119,7 +122,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(5000);
+        Thread.sleep(10000);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_FLOODING at the root of the logs directory (see JobLogger)
@@ -145,6 +148,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
         // constraint));
+        printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
         JobLogger.recordTime("EfficientBroadcast", request.getId());
@@ -152,7 +156,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(5000);
+        Thread.sleep(10000);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_EFFICIENT at the root of the logs directory (see
@@ -179,6 +183,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
         // constraint));
+        printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
         JobLogger.recordTime("OptimalBroadcast", request.getId());
@@ -186,7 +191,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(5000);
+        Thread.sleep(10000);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_OPTIMAL at the root of the logs directory (see JobLogger)
@@ -199,4 +204,22 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         Assert.assertEquals(this.nbPeers, nbPeerReached);
     }
 
+    /**
+     * Displays the request size in bytes.
+     * Request size is different for the three kinds of request experimented.
+     * @param request
+     */
+    public void printRequestSize(Request<Coordinate<StringElement>> request) {
+    	ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        ObjectOutputStream oos;
+		try {
+			oos = new ObjectOutputStream(bout);
+			 oos.writeObject(request);
+		        oos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        System.out.println("The size of an " + request.getClass() + 
+        		" is : " + bout.size() + " bytes.");
+    }
 }
