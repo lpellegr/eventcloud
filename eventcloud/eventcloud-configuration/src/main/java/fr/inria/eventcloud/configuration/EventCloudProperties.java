@@ -125,7 +125,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger PUBLISH_QUADRUPLES_DELAYER_BUFFER_SIZE =
             new PropertyInteger(
-                    "eventcloud.publish.quadruples.delayer.buffer.size", 40);
+                    "eventcloud.publish.quadruples.delayer.buffer.size", 65);
 
     /**
      * Defines the maximum timeout (in milliseconds) to wait before to commit
