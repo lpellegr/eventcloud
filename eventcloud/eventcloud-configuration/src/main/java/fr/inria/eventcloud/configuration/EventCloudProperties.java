@@ -108,7 +108,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger PUBLISH_COMPOUND_EVENT_DELAYER_BUFFER_SIZE =
             new PropertyInteger(
-                    "eventcloud.publish.compoundevent.delayer.buffer.size", 40);
+                    "eventcloud.publish.compoundevent.delayer.buffer.size", 25);
 
     /**
      * Defines the maximum timeout (in milliseconds) to wait before to commit
