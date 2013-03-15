@@ -257,23 +257,21 @@ public abstract class Zone<E extends Element> implements Serializable {
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             if (this.overlaps(zone, dimension)) {
                 overlaps++;
-            } else {
-                if (this.abuts(zone, dimension, true)
-                        || this.abuts(zone, dimension, false)) {
-                    abutsDimension = dimension;
-                    abuts++;
-                } else {
-                    return -1;
-                }
+            }
+
+            if (this.abuts(zone, dimension, true)
+                    || this.abuts(zone, dimension, false)) {
+                abutsDimension = dimension;
+                abuts++;
             }
         }
 
-        if ((abuts != 1)
-                || (overlaps != P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1)) {
-            return -1;
-        } else {
+        if (abuts == 1
+                && overlaps == P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1) {
             return abutsDimension;
         }
+
+        return -1;
     }
 
     /**
