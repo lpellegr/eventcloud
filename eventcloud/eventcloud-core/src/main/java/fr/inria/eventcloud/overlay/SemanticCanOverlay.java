@@ -666,12 +666,14 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         JoinIntroduceResponseOperation<SemanticElement> response =
                 super.handleJoinIntroduceMessage(msg);
 
-        // We have to sync in order to ensure that there is no background
-        // threads updating the stats fields otherwise when someone will call
-        // the method to know what is the point where the split should be done
-        // it may returns a value that is not between the bounds managed by the
-        // peer
-        this.miscDatastore.getStatsRecorder().sync();
+        if (this.miscDatastore.getStatsRecorder() != null) {
+            // We have to sync in order to ensure that there is no background
+            // threads updating the stats fields otherwise when someone will
+            // call the method to know what is the point where the split should
+            // be done it may returns a value that is not between the bounds
+            // managed by the peer
+            this.miscDatastore.getStatsRecorder().sync();
+        }
 
         return response;
     }
