@@ -663,7 +663,17 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     public JoinIntroduceResponseOperation<SemanticElement> handleJoinIntroduceMessage(JoinIntroduceOperation<SemanticElement> msg) {
-        return super.handleJoinIntroduceMessage(msg);
+        JoinIntroduceResponseOperation<SemanticElement> response =
+                super.handleJoinIntroduceMessage(msg);
+
+        // We have to sync in order to ensure that there is no background
+        // threads updating the stats fields otherwise when someone will call
+        // the method to know what is the point where the split should be done
+        // it may returns a value that is not between the bounds managed by the
+        // peer
+        this.miscDatastore.getStatsRecorder().sync();
+
+        return response;
     }
 
     /**
@@ -967,7 +977,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                             .computeSplitEstimation(dimension);
 
             // no estimation can performed because no quadruple has
-            // been recorded, thus we performe a traditional split
+            // been recorded, thus we apply the default split method
             if (estimatedMiddle == null) {
                 return super.splitZones(dimension);
             }
