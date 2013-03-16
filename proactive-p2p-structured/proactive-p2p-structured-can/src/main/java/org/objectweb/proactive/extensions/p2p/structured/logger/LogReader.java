@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+
 /**
  * Utility class that provides some metrics about a type of broadcast algorithm.
  * 
@@ -36,35 +37,32 @@ public class LogReader {
 
     public static final String separator = "\t";
 
-    private String filePath;
-    private String loggerName;
-    private int nbPeers;
+    private static String filePath;
+    private static String loggerName;
+    private static int nbPeers;
 
-    public LogReader(String filename) {
-        this.filePath = filename;
-    }
-
-    public void setAttributes(String loggerName, int nbPeers) {
-        this.loggerName = loggerName;
-        this.nbPeers = nbPeers;
+    private static void setAttributes(String _loggerName, int _nbPeers, String _filePath) {
+        loggerName = _loggerName;
+        nbPeers = _nbPeers;
+        filePath = _filePath;
     }
 
     /**
      * Read the log file and count how many duplicated the broadcast generated
      */
-    public int scanNprintResults(String name, String runNumber, String id) {
+    private static int scanNprintResults(String name, String runNumber, String id) {
         Date startingDate = null;
         int nbDuplicates = 0;
         int nbPeersReached = 0;
         List<Date> firstReceptionTimestamps = new LinkedList<Date>();
         List<Date> receptionTimestamps = new LinkedList<Date>();
-        this.appendAllLogs(name, id);
+        appendAllLogs(name, id);
         try {
             String line;
             Date receptionDate;
             Date firstReceptionDate;
             BufferedReader buff =
-                    new BufferedReader(new FileReader(this.filePath + ".logs"));
+                    new BufferedReader(new FileReader(filePath + ".logs"));
             try {
                 if ((line = buff.readLine()) != null) {
                     try {
@@ -85,8 +83,9 @@ public class LogReader {
                         // 0 : it is a first received message
                         // 1 : it is a duplicate
                         if (line.length() > 0) {
-                            String type = line.substring(0, 1);
-                            String timestamp = line.substring(1, line.length());
+                        	String[] lineArray = line.split(" ");
+                            String type = lineArray[0];
+                            String timestamp = lineArray[1] + " " + lineArray[2];
                             int suspectedDuplicate = Integer.parseInt(type);
                             if (suspectedDuplicate == 1) {
                                 nbDuplicates++;
@@ -135,7 +134,7 @@ public class LogReader {
         long receptionDelay =
                 maxFirstReceptionDate.getTime() - startingDate.getTime();
         long waveDelay = maxReceptionDate.getTime() - startingDate.getTime();
-        this.logRunData(
+        logRunData(
                 nbDuplicates, nbPeersReached, receptionDelay, waveDelay,
                 runNumber);
         return nbPeersReached;
@@ -144,10 +143,10 @@ public class LogReader {
     /**
      * Gather all the logs produced by each machine reached by the broadcast.
      */
-    private void appendAllLogs(String name, String id) {
+    private static void appendAllLogs(String name, String id) {
         BufferedReader source = null;
         BufferedWriter destination = null;
-        String[] path = this.filePath.split("/");
+        String[] path = filePath.split("/");
         StringBuilder completeFileName = new StringBuilder();
         for (int i = 0; i < path.length - 1; i++) {
             completeFileName.append(path[i]);
@@ -163,7 +162,7 @@ public class LogReader {
                             new BufferedReader(new FileReader(completeFileName
                                     + hostname));
                     destination =
-                            new BufferedWriter(new FileWriter(this.filePath
+                            new BufferedWriter(new FileWriter(filePath
                                     + ".logs", true));
                     try {
                         line = source.readLine();
@@ -192,13 +191,13 @@ public class LogReader {
      * @param waveDelay
      * @param runNumber
      */
-    private void logRunData(int nbDuplicates, int nbPeersReached,
+    private static void logRunData(int nbDuplicates, int nbPeersReached,
                             long receptionDelay, long waveDelay,
                             String runNumber) {
         try {
             BufferedWriter dataWriter =
                     new BufferedWriter(new FileWriter(JobLogger.logDirectory
-                            + JobLogger.PREFIX + this.loggerName + "_"
+                            + JobLogger.PREFIX + loggerName + "_"
                             + runNumber + ".data"));
             dataWriter.write("peers" + separator + nbPeersReached);
             dataWriter.newLine();
@@ -210,9 +209,9 @@ public class LogReader {
             dataWriter.newLine();
             dataWriter.close();
             System.out.println("Broadcast algorithm used : \t\t\t\t"
-                    + this.loggerName);
+                    + loggerName);
             System.out.println("Number of peers in the network : \t\t\t"
-                    + this.nbPeers);
+                    + nbPeers);
             System.out.println("Number of peers reached by the broadcast : \t\t"
                     + nbPeersReached);
             System.out.println("Number of duplicates listed : \t\t\t\t"
@@ -224,5 +223,25 @@ public class LogReader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Logs the results of a broadcast execution.
+     * 
+     * @param loggerName
+     * @param nbPeers
+     * @param filename
+     * @param runNumber
+     * @param id
+     * 
+     * @return the number of peers reached.
+     */
+    public static int logResults(String loggerName, int nbPeers,
+                                              String filename,
+                                              String runNumber, String id) {
+        setAttributes(loggerName, nbPeers, JobLogger.logDirectory + filename);
+        int nbPeersReached =
+                scanNprintResults(loggerName, runNumber, id);
+        return nbPeersReached;
     }
 }
