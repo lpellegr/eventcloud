@@ -289,7 +289,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                             dimension, direction)) {
                         boolean contains = true;
                         // We need to check all the constraints that are given
-                        // by the plane array.
                         for (byte coordinate = 0; coordinate < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); coordinate++) {
                             // MCAN Strategy : If the dimension considered is
                             // lower than the

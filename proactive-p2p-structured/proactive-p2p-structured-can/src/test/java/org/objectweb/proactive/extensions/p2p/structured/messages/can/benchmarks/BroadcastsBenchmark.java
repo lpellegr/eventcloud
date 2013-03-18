@@ -32,25 +32,26 @@ import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
  * @author jrochas
  */
 public class BroadcastsBenchmark {
-
-	/**
-	 * Number of peers in the network (can be changed through first main method
-	 * parameter)
-	 */
+	
+	/** Number of peers in the network (can be changed through
+	 * first main method parameter) */
 	private static int nbPeers = 25;
+	/** Number of dimensions of the CAN (can be changed through
+	 * second main method parameter) */
 	private static int nbDimensions = 4;
 
 	public static void main(String[] args) {
 
-		if (args.length > 0) {
+		if (args.length > 1) {
 			try {
 				nbPeers = Integer.parseInt(args[0]);
 				nbDimensions = Integer.parseInt(args[1]);
 			}
 			catch (NumberFormatException e) {
-				System.out.println("Aborting - Require two arguments " +
+				System.out.println("Aborting - Require arguments : " +
 						"number of peers in the network + number of dimensions " +
-						"of the CAN, or require no arguments at all (default values : 25 4)");
+						"of the CAN [-fractal], or require no arguments at all (default values : 25 4)" +
+						" + [-fractal] if the CAN must be built according to a fractal approach.");
 				System.exit(0);
 			}
 		}
@@ -68,9 +69,20 @@ public class BroadcastsBenchmark {
 		JobLogger.setNbPeers(nbPeers);
 
 		try {
+			boolean fractalCAN = false;
+			if ((args.length > 0 && args[0].equals("-fractal")) || 
+					(args.length > 2 && args[2].equals("-fractal"))) {
+				fractalCAN = true;
+				JobLogger.logMessage(BroadcastsBenchmark.class.getName(), 
+						"********** Building fractal CAN **********");
+			}
+			else {
+				JobLogger.logMessage(BroadcastsBenchmark.class.getName(),
+						"********** Building random CAN **********");
+			}
 			// Building the CAN
 			BroadcastInfrastructure broadcastInfrastructure =
-					new BroadcastInfrastructure(nbPeers, JobLogger.logDirectory);
+					new BroadcastInfrastructure(nbPeers, JobLogger.logDirectory, fractalCAN);
 			broadcastInfrastructure.initialize();
 
 			// Running a FloodingBroadcast
