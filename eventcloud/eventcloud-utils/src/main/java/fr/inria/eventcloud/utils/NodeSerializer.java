@@ -63,12 +63,7 @@ public class NodeSerializer {
     }
 
     public static String readString(ObjectInput in) throws IOException {
-        int stringLength = in.readInt();
-        byte[] data = new byte[stringLength];
-
-        in.read(data);
-
-        return new String(data);
+        return in.readUTF();
     }
 
     public static void writeLiteralOrUri(ObjectOutput out, Node node)
@@ -131,8 +126,7 @@ public class NodeSerializer {
 
     public static void writeString(ObjectOutput out, String s)
             throws IOException {
-        out.writeInt(s.length());
-        out.writeBytes(s);
+        out.writeUTF(s);
     }
 
 }
