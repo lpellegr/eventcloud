@@ -60,8 +60,9 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
     protected Proxy proxy;
 
-    public BroadcastInfrastructure(int nbPeers, String logDirectory) {
-        super(
+    public BroadcastInfrastructure(int nbPeers, String logDirectory, boolean fractalCAN) {
+        super(fractalCAN ?
+        		
                 new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<StringCanOverlay>() {
                             private static final long serialVersionUID = 140L;
@@ -71,8 +72,19 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                                 return new StringCanOverlay();
                             }
                         }).setInjectionConstraintsProvider(InjectionConstraintsProvider
-                        		.newFractalInjectionConstraintsProvider()),
+                        		.newFractalInjectionConstraintsProvider())
+                        		
+                        		: new CanDeploymentDescriptor<StringElement>(
+                                        new SerializableProvider<StringCanOverlay>() {
+                                            private static final long serialVersionUID = 140L;
+
+                                            @Override
+                                            public StringCanOverlay get() {
+                                                return new StringCanOverlay();
+                                            }
+                                        }),
                 1, nbPeers);
+        
         this.nbPeers = nbPeers;
         this.logDirectory = logDirectory;
     }
@@ -122,14 +134,14 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(10000);
+        Thread.sleep(1000 * nbPeers / 2);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_FLOODING at the root of the logs directory (see JobLogger)
         int nbPeerReached =
                 LogReader.logResults(
                         LOG_FLOODING, this.nbPeers, request.getId().toString()
-                                + JobLogger.PREFIX + LOG_FLOODING, "1", "");
+                                + JobLogger.PREFIX + LOG_FLOODING, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);
@@ -156,7 +168,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(10000);
+        Thread.sleep(1000 * nbPeers / 2);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_EFFICIENT at the root of the logs directory (see
@@ -164,7 +176,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         int nbPeerReached =
                 LogReader.logResults(
                         LOG_EFFICIENT, this.nbPeers, request.getId().toString()
-                                + JobLogger.PREFIX + LOG_EFFICIENT, "1", "");
+                                + JobLogger.PREFIX + LOG_EFFICIENT, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);
@@ -191,14 +203,14 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(10000);
+        Thread.sleep(1000 * nbPeers / 2);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_OPTIMAL at the root of the logs directory (see JobLogger)
         int nbPeerReached =
                 LogReader.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
                         .toString()
-                        + JobLogger.PREFIX + LOG_OPTIMAL, "1", "");
+                        + JobLogger.PREFIX + LOG_OPTIMAL, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);

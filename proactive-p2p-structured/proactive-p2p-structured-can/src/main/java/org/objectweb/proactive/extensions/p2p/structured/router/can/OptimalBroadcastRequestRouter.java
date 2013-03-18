@@ -256,7 +256,8 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      */
     private NeighborTableWrapper<E> getNeighborsToSendTo(final CanOverlay<E> overlay,
                                                          final OptimalBroadcastRequest<E> request) {
-        NeighborTableWrapper<E> extendedNeighbors =
+        int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
+    	NeighborTableWrapper<E> extendedNeighbors =
                 new NeighborTableWrapper<E>();
         NeighborTableWrapper<E> neighborsToSendTo =
                 new NeighborTableWrapper<E>();
@@ -281,7 +282,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
         // Create an extended neighbor table (one that contains more
         // information regarding the neighbors than the ordinary neighbor
         // table) from the current neighbor table.
-        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (byte dim = 0; dim < dimensions ; dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 extendedNeighbors.addAll(
                         dim, direction, overlay.getNeighborTable().get(
@@ -289,7 +290,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
             }
         }
 
-        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (byte dimension = 0; dimension < dimensions ; dimension++) {
             // We don't need to verify if the neighbor contains the sender's
             // coordinate on the dimension on which they are neighbors.
             plane[dimension] = null;
@@ -304,7 +305,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                         boolean contains = true;
                         // We need to check all the constraints that are given
                         // by the plane array.
-                        for (byte coordinate = 0; coordinate < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); coordinate++) {
+                        for (byte coordinate = 0; coordinate < dimensions ; coordinate++) {
                             // If plane has the null value on a certain
                             // dimension (that is not the dimension on which the
                             // sender and peer are neighbors) then in order for
@@ -378,9 +379,8 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                          OptimalBroadcastRequest<E> request) {
         // This method is not used with the optimal broadcast because a message
         // has to follow a unique path and no heuristics can be made to route
-        // the message
-        // to peers validating the constraint. Hence, the path followed is the
-        // as "handle".
+        // the message to peers validating the constraint. Hence, the path 
+    	// followed is the as "handle".
     }
 
     /**
@@ -395,13 +395,10 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      * @return true if zone1 contains the corner of zone2, false otherwise.
      */
     protected boolean contains(Zone<E> zone1, Zone<E> zone2, byte dimension) {
-        if (Element.min(
-                zone1.getLowerBound(dimension), zone2.getLowerBound(dimension)) == zone1.getLowerBound(dimension)
-                || zone1.getLowerBound(dimension).equals(
-                        zone2.getLowerBound(dimension))) {
+        if (zone2.getLowerBound(dimension).isBetween(
+        		zone1.getLowerBound(dimension), zone1.getUpperBound(dimension))) {
             return true;
         }
-
         return false;
     }
 
@@ -415,17 +412,15 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      *         message.
      */
     protected Element[] getPlanToBeContained(CanOverlay<E> can) {
-        Element[] plan =
-                new Element[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
-
+    	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
+        Element[] plan = new Element[dimensions];
         // In this case the values of the constraints are equal to the lower
         // bound of the initiator.
         // We can choose other constraints too as long as the values are in the
         // initiator's zone.
-        for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+        for (byte i = 0; i < dimensions ; i++) {
             plan[i] = can.getZone().getLowerBound(i);
         }
-
         return plan;
     }
 
@@ -442,8 +437,8 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      * @return true if zone contains the value on the given dimension; false,
      *         otherwise.
      */
-    protected boolean containsCoordinate(Zone<E> zone, Element value,
-                                         byte dimension) {
+    protected boolean containsCoordinate(
+    		Zone<E> zone, Element value, byte dimension) {
         if (value != null) {
             if (value.isBetween(
                     zone.getLowerBound(dimension),
@@ -458,10 +453,11 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      * Initializes the dimensions array.
      */
     protected byte[][] getDirections() {
+    	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         byte[][] directions =
-                new byte[2][P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+                new byte[2][dimensions];
         for (byte direction = 0; direction < 2; direction++) {
-            for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte dimension = 0; dimension < dimensions ; dimension++) {
                 directions[direction][dimension] = 1;
             }
         }
@@ -476,10 +472,11 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      * @return the new byte array
      */
     protected byte[][] copyDirections(byte[][] initialDirs) {
+    	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         byte[][] directions =
-                new byte[2][P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+                new byte[2][dimensions];
         for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); j++) {
+            for (int j = 0; j < dimensions ; j++) {
                 directions[i][j] = initialDirs[i][j];
             }
         }
@@ -494,12 +491,13 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      * @return the new StringElement array
      */
     protected Element[] copyPlan(Element[] initialPlan) {
+    	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         Element[] plan =
-                new Element[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
-        for (int j = 0; j < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); j++) {
+                new Element[dimensions];
+        for (int j = 0; j < dimensions ; j++) {
             plan[j] = initialPlan[j];
         }
         return plan;
     }
-
+    
 }
