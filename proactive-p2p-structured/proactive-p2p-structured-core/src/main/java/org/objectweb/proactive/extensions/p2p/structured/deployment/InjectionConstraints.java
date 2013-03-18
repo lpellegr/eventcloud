@@ -86,14 +86,14 @@ public class InjectionConstraints {
     }
 
     /**
-     * Creates a new fractal injection constraint. It means that the constraints
-     * will force peer created at step {@code i} to join peer created at step
+     * Creates a new fractal injection constraints object. Its purpose is to
+     * force the peer created at step {@code i} to join the peer created at step
      * {@code i-1}.
      * 
      * @param nbPeers
      *            the number of peers that are constrained.
      * 
-     * @return a new fractal injection constraint.
+     * @return a new fractal injection constraints object.
      */
     public static InjectionConstraints newFractalInjectionConstraints(int nbPeers) {
         InjectionConstraints result = new InjectionConstraints();
@@ -103,6 +103,34 @@ public class InjectionConstraints {
         }
 
         return result;
+    }
+
+    /**
+     * Creates a new uniform injection constraints object. Its purpose is to
+     * force the insertion of peers to be distributed uniformly among the
+     * available peers.
+     * 
+     * @param nbPeers
+     *            the number of peers that are constrained.
+     * 
+     * @return a new uniform injection constraints object.
+     */
+    public static InjectionConstraints newUniformInjectionConstraints(int nbPeers) {
+        InjectionConstraints result = new InjectionConstraints();
+
+        int bucket = 1;
+
+        for (int i = 0, count = 0; i < nbPeers - 1; i++, count++) {
+            if (count == bucket) {
+                bucket *= 2;
+                count = 0;
+            }
+
+            result.addConstraint(i + 1, count);
+        }
+
+        return result;
+
     }
 
 }

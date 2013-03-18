@@ -53,4 +53,26 @@ public abstract class InjectionConstraintsProvider implements Serializable {
         };
     }
 
+    /**
+     * Returns an {@link InjectionConstraintsProvider} that knows how to create
+     * an uniform {@link InjectionConstraints} (c.f.
+     * {@link InjectionConstraints#newUniformInjectionConstraints(int)}).
+     * 
+     * @return an {@link InjectionConstraintsProvider} that knows how to create
+     *         an uniform {@link InjectionConstraints} (c.f.
+     *         {@link InjectionConstraints#newUniformInjectionConstraints(int)}
+     *         ).
+     */
+    public static InjectionConstraintsProvider newUniformInjectionConstraintsProvider() {
+        return new InjectionConstraintsProvider() {
+
+            private static final long serialVersionUID = 140L;
+
+            @Override
+            public InjectionConstraints get(int nbPeers) {
+                return InjectionConstraints.newUniformInjectionConstraints(nbPeers);
+            }
+        };
+    }
+
 }
