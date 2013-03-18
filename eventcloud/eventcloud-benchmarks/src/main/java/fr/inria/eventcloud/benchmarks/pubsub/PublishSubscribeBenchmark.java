@@ -28,6 +28,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.Category;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
@@ -63,6 +67,8 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
@@ -114,6 +120,9 @@ public class PublishSubscribeBenchmark {
 
     @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
     public boolean inMemoryDatastore = false;
+
+    @Parameter(names = {"-udd", "--uniform-data-distribution"}, description = "Generates data so that they are distributed uniformly among the available peers")
+    public boolean uniformDataDistribution = false;
 
     @Parameter(names = {"-h", "--help"}, description = "Print help", help = true)
     public boolean help;
@@ -219,12 +228,14 @@ public class PublishSubscribeBenchmark {
                 new ConcurrentHashMap<SubscriptionId, CumulatedMeasurement>(
                         pointToPointEntryMeasurements.size());
 
-        // pre-generates events so that the data are the same for all the runs
-        // and the time is not included into the benchmark execution time
+        // pre-generates events so that the data are the same for all the
+        // runs and the time is not included into the benchmark execution time
         final Event[] events = new Event[nbPublications];
 
-        for (int i = 0; i < nbPublications; i++) {
-            events[i] = this.supplier.get();
+        if (!this.uniformDataDistribution) {
+            for (int i = 0; i < nbPublications; i++) {
+                events[i] = this.supplier.get();
+            }
         }
 
         // creates and runs micro benchmark
@@ -267,10 +278,6 @@ public class PublishSubscribeBenchmark {
         microBenchmark.showProgress();
         microBenchmark.execute();
 
-        // for (Peer p : deployer.getRandomSemanticTracker(id).getPeers()) {
-        // log.info(p.dump());
-        // }
-
         System.out.println();
         System.out.println(this.nbRuns + " run(s)");
 
@@ -310,11 +317,38 @@ public class PublishSubscribeBenchmark {
             overlayProvider = new SemanticPersistentOverlayProvider();
         }
 
+        EventCloudDeploymentDescriptor descriptor =
+                new EventCloudDeploymentDescriptor(overlayProvider);
+        descriptor.setInjectionConstraintsProvider(InjectionConstraintsProvider.newUniformInjectionConstraintsProvider());
+
         EventCloudDeployer deployer =
-                new EventCloudDeployer(
-                        new EventCloudDescription(),
-                        new EventCloudDeploymentDescriptor(overlayProvider));
+                new EventCloudDeployer(new EventCloudDescription(), descriptor);
         deployer.deploy(1, this.nbPeers);
+
+        if (this.uniformDataDistribution) {
+            SemanticZone[] zones = new SemanticZone[this.nbPeers];
+
+            int i = 0;
+            for (Peer peer : deployer.getRandomSemanticTracker().getPeers()) {
+                GetIdAndZoneResponseOperation<SemanticElement> response =
+                        CanOperations.getIdAndZoneResponseOperation(peer);
+                SemanticZone zone = (SemanticZone) response.getPeerZone();
+                zones[i] = zone;
+                i++;
+            }
+
+            for (i = 0; i < nbPublications; i++) {
+                if (this.publishIndependentQuadruples) {
+                    events[i] =
+                            EventGenerator.randomQuadruple(zones[i
+                                    % this.nbPeers], 10);
+                } else {
+                    events[i] =
+                            EventGenerator.randomCompoundEvent(zones[i
+                                    % this.nbPeers], this.compoundEventSize, 10);
+                }
+            }
+        }
 
         EventCloudsRegistry registry =
                 EventCloudsRegistryFactory.newEventCloudsRegistry();
@@ -410,7 +444,12 @@ public class PublishSubscribeBenchmark {
         }
 
         this.endToEndMeasurement.setExitTime();
+
         // deployer.undeploy();
+
+        // for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
+        // System.out.println(p.dump());
+        // }
     }
 
     private String createSubscription() {
