@@ -554,7 +554,10 @@ public final class PublishSubscribeUtils {
 
             logSocialFilterAnswer(subscription, quadruple, relationshipStrength);
 
-            if (relationshipStrength < EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue()) {
+            if ((relationshipStrength > 0.0) // if relationshipStrength == 0.0,
+                                             // the source or the target is
+                                             // unknown
+                    && (relationshipStrength < EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue())) {
                 return;
             }
         }
