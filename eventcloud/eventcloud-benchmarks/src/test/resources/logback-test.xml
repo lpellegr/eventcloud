@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%-30(%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5.5level %22.22logger{0}]) %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="com.hp" level="off" />
+	<logger name="com.hp.hpl.jena.tdb.info" level="off" />
+	<logger name="org.objectweb.proactive.extensions.p2p" level="off" />
+	<logger name="fr.inria.eventcloud.overlay.PublishQuadrupleRequestDelayer" level="trace" />
+	<logger name="fr.inria.eventcloud.proxies.SubscribeProxyImpl" level="trace" />
+	<logger name="fr.inria.eventcloud.benchmarks.PublishSubscribeBenchmarkTest" level="debug" />
+	
+	<root level="off">
+		<appender-ref ref="stdout" />
+	</root>
+</configuration>
