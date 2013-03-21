@@ -80,10 +80,7 @@ public abstract class Datastore implements Closeable {
      */
     @Override
     public synchronized void close() {
-        if (!this.initialized) {
-            throw new IllegalStateException(
-                    "The datastore has not been initialized via open");
-        } else {
+        if (this.initialized) {
             this._close();
             this.initialized = false;
         }
