@@ -235,6 +235,16 @@ public class ComponentUtils {
         }
     }
 
+    public static <T> void terminateComponent(String url) {
+        try {
+            terminateComponent(Fractive.lookup(url));
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        } catch (NamingException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
     /**
      * Terminates the component represented by the given stub.
      * 
