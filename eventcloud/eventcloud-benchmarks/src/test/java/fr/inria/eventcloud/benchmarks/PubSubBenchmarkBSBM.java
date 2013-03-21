@@ -54,7 +54,7 @@ import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
-import fr.inria.eventcloud.benchmarks.pubsub.CompoundEventSupplier;
+import fr.inria.eventcloud.benchmarks.pubsub.suppliers.CompoundEventSupplier;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;

@@ -17,11 +17,12 @@
 package fr.inria.eventcloud.benchmarks.pubsub;
 
 import com.beust.jcommander.IStringConverter;
+import com.beust.jcommander.JCommander;
 
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 
 /**
- * 
+ * Simple listener type converter for {@link JCommander}.
  * 
  * @author lpellegr
  */

@@ -104,6 +104,7 @@ public abstract class NetworkDeployer extends
         this.notifyDeploymentStarted();
 
         this.deployTrackers(nbTrackers);
+
         this.injectPeers(nbPeers);
 
         this.state.set(NetworkDeployerState.DEPLOYED);
