@@ -72,7 +72,7 @@ public abstract class NotificationManager<T> implements Serializable {
 
             // notifies the collector in two steps to avoid to take the time to
             // transfer measurements into the end-to-end delay
-            this.collector.reportEndToEndTermination();
+            this.collector.reportEndToEndTermination(System.currentTimeMillis());
 
             // reports other measurements
             this.collector.reportMeasurements(

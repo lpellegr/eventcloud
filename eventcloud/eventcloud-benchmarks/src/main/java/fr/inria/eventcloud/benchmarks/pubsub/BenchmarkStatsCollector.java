@@ -43,7 +43,7 @@ import fr.inria.eventcloud.benchmarks.pubsub.measurements.SimpleMeasurement;
 /**
  * Class in charge of collecting benchmark statistics. Also, it allows to create
  * a synchronization point to wait for the specified number of reports from
- * subscribers.
+ * publishers and susbcribers.
  * 
  * @author lpellegr
  */
@@ -53,13 +53,20 @@ import fr.inria.eventcloud.benchmarks.pubsub.measurements.SimpleMeasurement;
 @DefineRules({@Compatible(value = {"notify", "wait"})})
 public class BenchmarkStatsCollector implements InitActive, RunActive {
 
+    private final int nbPublishers;
+
     private final int nbSubscribers;
 
-    private MutableInteger nbReports = new MutableInteger();
+    private MutableInteger nbReportsReceivedByPublishers = new MutableInteger();
+
+    private MutableInteger nbReportsReceivedBySubscribers =
+            new MutableInteger();
 
     private RequestExecutor requestExecutor;
 
-    private boolean wakeUp = false;
+    private boolean publisherWakeUp = false;
+
+    private boolean subscriberWakeUp = false;
 
     // measurements
 
@@ -67,13 +74,17 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     private Map<SubscriptionId, SimpleMeasurement> outputMeasurements;
 
+    private Map<String, Long> pointToPointEntryMeasurements;
+
     private Map<SubscriptionId, CumulatedMeasurement> pointToPointExitMeasurements;
 
     public BenchmarkStatsCollector() {
+        this.nbPublishers = 0;
         this.nbSubscribers = 0;
     }
 
-    public BenchmarkStatsCollector(int nbSubscribers) {
+    public BenchmarkStatsCollector(int nbPublishers, int nbSubscribers) {
+        this.nbPublishers = nbPublishers;
         this.nbSubscribers = nbSubscribers;
     }
 
@@ -86,14 +97,38 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
                 new HashMap<SubscriptionId, SimpleMeasurement>(
                         this.nbSubscribers);
 
+        this.pointToPointEntryMeasurements = new HashMap<String, Long>();
+
         this.pointToPointExitMeasurements =
                 new HashMap<SubscriptionId, CumulatedMeasurement>();
     }
 
     @MemberOf("notify")
-    public long reportEndToEndTermination() {
-        this.endToEndTerminationTime = System.currentTimeMillis();
+    public long reportEndToEndTermination(long endTime) {
+        if (endTime > this.endToEndTerminationTime) {
+            this.endToEndTerminationTime = endTime;
+        }
+
         return this.endToEndTerminationTime;
+    }
+
+    @MemberOf("notify")
+    public boolean reportMeasurements(Map<String, Long> pointToPointEntryMeasurements) {
+        this.pointToPointEntryMeasurements.putAll(pointToPointEntryMeasurements);
+
+        this.nbReportsReceivedByPublishers.add(1);
+
+        if (this.nbReportsReceivedByPublishers.getValue() == this.nbPublishers) {
+            this.publisherWakeUp = true;
+
+            synchronized (this.nbReportsReceivedByPublishers) {
+                this.nbReportsReceivedByPublishers.notifyAll();
+            }
+
+            this.requestExecutor.decrementExtraActiveRequestCount(1);
+        }
+
+        return true;
     }
 
     @MemberOf("notify")
@@ -109,13 +144,13 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
                         subscriptionId, pointToPointExitMeasurement);
 
         if (result) {
-            this.nbReports.add(1);
+            this.nbReportsReceivedBySubscribers.add(1);
 
-            if (this.nbReports.getValue() == this.nbSubscribers) {
-                this.wakeUp = true;
+            if (this.nbReportsReceivedBySubscribers.getValue() == this.nbSubscribers) {
+                this.subscriberWakeUp = true;
 
-                synchronized (this.nbReports) {
-                    this.nbReports.notifyAll();
+                synchronized (this.nbReportsReceivedBySubscribers) {
+                    this.nbReportsReceivedBySubscribers.notifyAll();
                 }
 
                 this.requestExecutor.decrementExtraActiveRequestCount(1);
@@ -152,24 +187,27 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         return this.outputMeasurements;
     }
 
+    public Map<String, Long> getPointToPointEntryMeasurements() {
+        return this.pointToPointEntryMeasurements;
+    }
+
     public Map<SubscriptionId, CumulatedMeasurement> getPointToPointExitMeasurements() {
         return this.pointToPointExitMeasurements;
     }
 
     @MemberOf("wait")
-    public void waitForAllSubscriberReports(int timeout)
-            throws TimeoutException {
+    public void waitForAllPublisherReports(int timeout) throws TimeoutException {
 
-        if (this.nbReports.getValue() < this.nbSubscribers) {
-            synchronized (this.nbReports) {
-                while (this.nbReports.getValue() < this.nbSubscribers) {
+        if (this.nbReportsReceivedByPublishers.getValue() < this.nbPublishers) {
+            synchronized (this.nbReportsReceivedByPublishers) {
+                while (this.nbReportsReceivedByPublishers.getValue() < this.nbPublishers) {
                     try {
-                        this.nbReports.wait(timeout);
+                        this.nbReportsReceivedByPublishers.wait(timeout);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
-                    if (!this.wakeUp) {
+                    if (!this.publisherWakeUp) {
                         break;
                     }
                 }
@@ -178,10 +216,41 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
             this.requestExecutor.decrementExtraActiveRequestCount(1);
         }
 
-        if (!this.wakeUp) {
+        if (!this.publisherWakeUp) {
             throw new TimeoutException("Received only "
-                    + this.nbReports.getValue() + " whereas "
-                    + this.nbSubscribers + " were expected.");
+                    + this.nbReportsReceivedByPublishers.getValue()
+                    + " publisher report(s) whereas " + this.nbPublishers
+                    + " were expected.");
+        }
+    }
+
+    @MemberOf("wait")
+    public void waitForAllSubscriberReports(int timeout)
+            throws TimeoutException {
+
+        if (this.nbReportsReceivedBySubscribers.getValue() < this.nbSubscribers) {
+            synchronized (this.nbReportsReceivedBySubscribers) {
+                while (this.nbReportsReceivedBySubscribers.getValue() < this.nbSubscribers) {
+                    try {
+                        this.nbReportsReceivedBySubscribers.wait(timeout);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (!this.subscriberWakeUp) {
+                        break;
+                    }
+                }
+            }
+
+            this.requestExecutor.decrementExtraActiveRequestCount(1);
+        }
+
+        if (!this.subscriberWakeUp) {
+            throw new TimeoutException("Received only "
+                    + this.nbReportsReceivedBySubscribers.getValue()
+                    + " subscriber report(s) whereas " + this.nbSubscribers
+                    + " were expected.");
         }
     }
 
@@ -204,38 +273,69 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
             TimeoutException, IOException {
         BenchmarkStatsCollector collector =
                 PAActiveObject.newActive(
-                        BenchmarkStatsCollector.class, new Object[] {2});
+                        BenchmarkStatsCollector.class, new Object[] {2, 2});
 
         final String url = PAActiveObject.getUrl(collector);
 
+        // simulate publishers
         new Thread(new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(3000);
+
+                    System.out.println("Publishers report measurements");
 
                     BenchmarkStatsCollector collector =
                             PAActiveObject.lookupActive(
                                     BenchmarkStatsCollector.class, url);
 
-                    System.out.println("First report");
-                    collector.reportMeasurements(
-                            new SubscriptionId(), new SimpleMeasurement(),
-                            new CumulatedMeasurement());
-                    System.out.println("Second report");
-                    collector.reportMeasurements(
-                            new SubscriptionId(), new SimpleMeasurement(),
-                            new CumulatedMeasurement());
+                    System.out.println("Publisher sends report");
+                    collector.reportMeasurements(new HashMap<String, Long>());
 
-                    System.out.println("End");
+                    System.out.println("Publisher sends report");
+                    collector.reportMeasurements(new HashMap<String, Long>());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }).start();
 
+        // simulate subscribers
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+
+                    System.out.println("Subscribers report measurements");
+
+                    BenchmarkStatsCollector collector =
+                            PAActiveObject.lookupActive(
+                                    BenchmarkStatsCollector.class, url);
+
+                    System.out.println("Subscriber sends report");
+                    collector.reportMeasurements(
+                            new SubscriptionId(), new SimpleMeasurement(),
+                            new CumulatedMeasurement());
+
+                    System.out.println("Subscriber sends report");
+                    collector.reportMeasurements(
+                            new SubscriptionId(), new SimpleMeasurement(),
+                            new CumulatedMeasurement());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        collector.waitForAllPublisherReports(10000);
+        System.out.println("All publisher reports received");
+
         collector.waitForAllSubscriberReports(10000);
+        System.out.println("All subscriber reports received");
 
         System.out.println("All reports received");
     }
