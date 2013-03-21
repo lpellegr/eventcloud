@@ -80,17 +80,18 @@
 						</goals>
 						<configuration>
 							<includes>
-								<include>java.util.List</include>
+								<include>fr.inria.eventcloud.EventCloudsRegistry</include>
+								<include>fr.inria.eventcloud.EventCloudsRegistryImpl</include>
 								<include>fr.inria.eventcloud.api.Event</include>
 								<include>fr.inria.eventcloud.api.Quadruple</include>
 								<include>fr.inria.eventcloud.api.QuadruplePattern</include>
 								<include>fr.inria.eventcloud.api.SubscriptionId</include>
-								<include>fr.inria.eventcloud.EventCloudsRegistry</include>
-								<include>fr.inria.eventcloud.tracker.SemanticTrackerImpl</include>
-								<include>fr.inria.eventcloud.overlay.SemanticPeerImpl</include>
-								<include>fr.inria.eventcloud.proxies.SubscribeProxyImpl</include>
 								<include>fr.inria.eventcloud.proxies.PublishProxyImpl</include>
 								<include>fr.inria.eventcloud.proxies.PutGetProxyImpl</include>
+								<include>fr.inria.eventcloud.overlay.SemanticPeerImpl</include>
+								<include>fr.inria.eventcloud.proxies.SubscribeProxyImpl</include>
+								<include>fr.inria.eventcloud.tracker.SemanticTrackerImpl</include>
+								<include>java.util.List</include>
 							</includes>
 						</configuration>
 					</execution>
