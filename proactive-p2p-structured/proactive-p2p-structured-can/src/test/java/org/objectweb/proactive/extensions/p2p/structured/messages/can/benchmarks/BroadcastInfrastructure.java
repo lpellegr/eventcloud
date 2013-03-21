@@ -141,7 +141,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         int nbPeerReached =
                 LogReader.logResults(
                         LOG_FLOODING, this.nbPeers, request.getId().toString()
-                                + JobLogger.PREFIX + LOG_FLOODING, "0", "");
+                                + JobLogger.getPrefix() + LOG_FLOODING, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);
@@ -176,7 +176,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         int nbPeerReached =
                 LogReader.logResults(
                         LOG_EFFICIENT, this.nbPeers, request.getId().toString()
-                                + JobLogger.PREFIX + LOG_EFFICIENT, "0", "");
+                                + JobLogger.getPrefix() + LOG_EFFICIENT, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);
@@ -210,7 +210,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         int nbPeerReached =
                 LogReader.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
                         .toString()
-                        + JobLogger.PREFIX + LOG_OPTIMAL, "0", "");
+                        + JobLogger.getPrefix() + LOG_OPTIMAL, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);

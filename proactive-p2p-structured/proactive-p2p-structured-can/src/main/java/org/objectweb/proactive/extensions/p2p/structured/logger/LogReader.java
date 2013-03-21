@@ -35,11 +35,15 @@ import java.util.Set;
  */
 public class LogReader {
 
-    public static final String separator = "\t";
+    private static final String SEPARATOR = "\t";
 
     private static String filePath;
     private static String loggerName;
     private static int nbPeers;
+    
+    public static String getSeparator() {
+    	return SEPARATOR;
+    }
 
     private static void setAttributes(String _loggerName, int _nbPeers, String _filePath) {
         loggerName = _loggerName;
@@ -66,7 +70,7 @@ public class LogReader {
             try {
                 if ((line = buff.readLine()) != null) {
                     try {
-                        startingDate = JobLogger.DATE_FORMAT.parse(line);
+                        startingDate = JobLogger.getDateFormat().parse(line);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -94,12 +98,12 @@ public class LogReader {
                                 nbPeersReached++;
                                 // Getting the timestamp of the first reception
                                 firstReceptionDate =
-                                        JobLogger.DATE_FORMAT.parse(timestamp);
+                                        JobLogger.getDateFormat().parse(timestamp);
                                 firstReceptionTimestamps.add(firstReceptionDate);
                             }
                             // Getting the timestamp of the reception
                             receptionDate =
-                                    JobLogger.DATE_FORMAT.parse(timestamp);
+                                    JobLogger.getDateFormat().parse(timestamp);
                             receptionTimestamps.add(receptionDate);
                         }
                     } catch (NumberFormatException e) {
@@ -196,16 +200,16 @@ public class LogReader {
                             String runNumber) {
         try {
             BufferedWriter dataWriter =
-                    new BufferedWriter(new FileWriter(JobLogger.logDirectory
-                            + JobLogger.PREFIX + loggerName + "_"
+                    new BufferedWriter(new FileWriter(JobLogger.getLogDirectory()
+                            + JobLogger.getPrefix() + loggerName + "_"
                             + runNumber + ".data"));
-            dataWriter.write("peers" + separator + nbPeersReached);
+            dataWriter.write("peers" + SEPARATOR + nbPeersReached);
             dataWriter.newLine();
-            dataWriter.write("duplicates" + separator + nbDuplicates);
+            dataWriter.write("duplicates" + SEPARATOR + nbDuplicates);
             dataWriter.newLine();
-            dataWriter.write("reception" + separator + receptionDelay);
+            dataWriter.write("reception" + SEPARATOR + receptionDelay);
             dataWriter.newLine();
-            dataWriter.write("wave" + separator + waveDelay);
+            dataWriter.write("wave" + SEPARATOR + waveDelay);
             dataWriter.newLine();
             dataWriter.close();
             System.out.println("Broadcast algorithm used : \t\t\t\t"
@@ -239,7 +243,7 @@ public class LogReader {
     public static int logResults(String loggerName, int nbPeers,
                                               String filename,
                                               String runNumber, String id) {
-        setAttributes(loggerName, nbPeers, JobLogger.logDirectory + filename);
+        setAttributes(loggerName, nbPeers, JobLogger.getLogDirectory() + filename);
         int nbPeersReached =
                 scanNprintResults(loggerName, runNumber, id);
         return nbPeersReached;

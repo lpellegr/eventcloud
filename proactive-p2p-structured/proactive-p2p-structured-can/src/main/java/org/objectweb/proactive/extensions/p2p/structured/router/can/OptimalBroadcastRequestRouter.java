@@ -92,7 +92,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                 (CanRequestResponseManager) canOverlay.getRequestResponseManager();
         // retrieves the hostname for debugging purpose
         String hostname = "";
-        if (JobLogger.bcastDebugMode) {
+        if (JobLogger.getBcastDebug()) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
@@ -108,13 +108,13 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
 
-            if (JobLogger.bcastDebugMode) {
+            if (JobLogger.getBcastDebug()) {
                 Date receiveTime = new Date();
-                String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
+                String timestamp = JobLogger.getDateFormat().format(receiveTime);
                 JobLogger.logMessage(request.getId().toString() + "_"
                         + "OptimalBroadcast_" + hostname, "1 " + timestamp
                         + " " + canOverlay.getId() + " " + canOverlay
-                        .getNeighborTable().size() + JobLogger.RETURN);
+                        .getNeighborTable().size() + JobLogger.getLineSeparator());
             }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
@@ -133,14 +133,14 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
-                if (JobLogger.bcastDebugMode) {
+                if (JobLogger.getBcastDebug()) {
                     Date receiveTime = new Date();
                     String timestamp =
-                            JobLogger.DATE_FORMAT.format(receiveTime);
+                            JobLogger.getDateFormat().format(receiveTime);
                     JobLogger.logMessage(request.getId().toString() + "_"
                             + "OptimalBroadcast_" + hostname, "0 " + timestamp
                             + " " + canOverlay.getId() + " " + canOverlay
-                            .getNeighborTable().size() + JobLogger.RETURN);
+                            .getNeighborTable().size() + JobLogger.getLineSeparator());
                 }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
             }
@@ -247,7 +247,8 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
 
     /**
      * Apply the algorithm of the OptimalBroadcast to select the peers to
-     * forward the message.
+     * forward the message. This algorithm removes all the duplicated 
+     * messages that can arise when broadcasting.
      * 
      * @param overlay
      * @param request
@@ -414,10 +415,9 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
     protected Element[] getPlanToBeContained(CanOverlay<E> can) {
     	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         Element[] plan = new Element[dimensions];
-        // In this case the values of the constraints are equal to the lower
-        // bound of the initiator.
-        // We can choose other constraints too as long as the values are in the
-        // initiator's zone.
+        // In this case the values of the constraints are equal to the lowest
+        // bound of the initiator. We can choose other constraints too as long 
+        // as the values are in the initiator's zone.
         for (byte i = 0; i < dimensions ; i++) {
             plan[i] = can.getZone().getLowerBound(i);
         }
@@ -454,8 +454,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      */
     protected byte[][] getDirections() {
     	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
-        byte[][] directions =
-                new byte[2][dimensions];
+        byte[][] directions = new byte[2][dimensions];
         for (byte direction = 0; direction < 2; direction++) {
             for (byte dimension = 0; dimension < dimensions ; dimension++) {
                 directions[direction][dimension] = 1;
@@ -473,8 +472,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      */
     protected byte[][] copyDirections(byte[][] initialDirs) {
     	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
-        byte[][] directions =
-                new byte[2][dimensions];
+        byte[][] directions = new byte[2][dimensions];
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < dimensions ; j++) {
                 directions[i][j] = initialDirs[i][j];
@@ -484,7 +482,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
     }
 
     /**
-     * Create a new StringElement array from an existing one.
+     * Create a new Element array from an existing one.
      * 
      * @param initialPlan
      *            initial StringElement array
@@ -492,8 +490,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      */
     protected Element[] copyPlan(Element[] initialPlan) {
     	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
-        Element[] plan =
-                new Element[dimensions];
+        Element[] plan = new Element[dimensions];
         for (int j = 0; j < dimensions ; j++) {
             plan[j] = initialPlan[j];
         }

@@ -55,7 +55,7 @@ public class BroadcastsBenchmark {
 				System.exit(0);
 			}
 		}
-		File directory = new File(JobLogger.logDirectory);
+		File directory = new File(JobLogger.getLogDirectory());
 		if (directory.exists()) {
 			File[] files = directory.listFiles();
 			for (File file : files) {
@@ -81,8 +81,9 @@ public class BroadcastsBenchmark {
 						"********** Building random CAN **********");
 			}
 			// Building the CAN
-			BroadcastInfrastructure broadcastInfrastructure =
-					new BroadcastInfrastructure(nbPeers, JobLogger.logDirectory, fractalCAN);
+			BroadcastInfrastructure broadcastInfrastructure = 
+					new BroadcastInfrastructure(
+							nbPeers, JobLogger.getLogDirectory(), fractalCAN);
 			broadcastInfrastructure.initialize();
 
 			// Running a FloodingBroadcast

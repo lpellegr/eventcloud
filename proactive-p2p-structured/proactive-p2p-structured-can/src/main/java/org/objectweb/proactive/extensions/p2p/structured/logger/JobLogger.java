@@ -33,7 +33,6 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 /**
  * Class used to write information in a log file. Used to check if there is any
@@ -43,24 +42,52 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  * @author acraciun
  */
 public class JobLogger {
-
-	/** Collection of loggers created during the execution */
-	private static Hashtable<String, Logger> m_loggers =
-			new Hashtable<String, Logger>();
-
-	// These values can be set in a test that uses the JobLogger
-	private static int nbPeers;
-	public static String logDirectory = System.getProperty("java.io.tmpdir")
+	
+	/** The full path toward the directory where the log files will be found */
+	private static final String LOG_DIRECTORY = System.getProperty("java.io.tmpdir")
 			+ File.separator + "broadcast_logs" + File.separator;
-	public static final boolean bcastDebugMode = true;
-	// Warning : logging message receptions to the console might significantly slow down the delivery
-	public static final boolean logToConsoleEnabled = true;
-	public static String PREFIX;
-
-	public static final String RETURN = System.getProperty("line.separator");
-	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+	/** If true, trigger the code to monitor messages when messages are received */
+	private static final boolean BCAST_DEBUG = true;
+	/** Determine if the logs should be written on the console as well.
+	 * Warning : logging to the console might slow down the execution */
+	private static final boolean LOG_TO_CONSOLE = false;
+	/** The separator between two lines in the log files */
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	/** The format of the dates that will be written in the log files */
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss:SSS");
 
+	/** Collection of already known loggers during the execution */
+	private static Hashtable<String, Logger> m_loggers = new Hashtable<String, Logger>();
+	/** Number of peers in the created network */
+	private static int nbPeers;
+	/** Prefix of the logs' filenames */
+	private static String prefix;	
+	
+	public static String getLogDirectory() {
+		return LOG_DIRECTORY;
+	}
+	
+	public static boolean getBcastDebug() {
+		return BCAST_DEBUG;
+	}
+
+	public static boolean getLogToConsole() {
+		return LOG_TO_CONSOLE;
+	}
+	
+	public static String getLineSeparator() {
+		return LINE_SEPARATOR;
+	}
+	
+	public static SimpleDateFormat getDateFormat() {
+		return DATE_FORMAT;
+	}
+	
+	public static String getPrefix() {
+		return prefix;
+	}
+	
 	/**
 	 * Retrieves a job logger with the given name.
 	 * 
@@ -69,7 +96,7 @@ public class JobLogger {
 	 * @return job logger instance.
 	 */
 	private static synchronized Logger getJobLogger(String jobName) {
-		if (!logToConsoleEnabled) {
+		if (!LOG_TO_CONSOLE) {
 			Logger.getRootLogger().removeAllAppenders();
 		}
 		Logger logger = m_loggers.get(jobName);
@@ -79,14 +106,12 @@ public class JobLogger {
 			m_loggers.put(jobName, logger);
 			logger.setLevel(Level.INFO);
 			try {
-				File file = new File(logDirectory);
+				File file = new File(LOG_DIRECTORY);
 				file.mkdirs();
 				UUID id = UUID.randomUUID();
-				file =
-						new File(logDirectory + jobName + id.toString()
-								+ ".log");
-				FileAppender appender =
-						new FileAppender(layout, file.getAbsolutePath(), false);
+				file = new File(LOG_DIRECTORY + jobName + id.toString() + ".log");
+				FileAppender appender = new FileAppender(
+						layout, file.getAbsolutePath(), false);
 				appender.setImmediateFlush(true);
 				appender.activateOptions();
 				logger.removeAllAppenders();
@@ -106,8 +131,7 @@ public class JobLogger {
 	 */
 	public static void setNbPeers(int newNbPeers) {
 		nbPeers = newNbPeers;
-		PREFIX = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() + "D_"
-				+ nbPeers + "P_";
+		prefix = nbPeers + "P_";
 	}
 
 	/**
@@ -142,9 +166,8 @@ public class JobLogger {
 		Date startingDate = new Date();
 		String timestamp = DATE_FORMAT.format(startingDate);
 		try {
-			BufferedWriter logFile =
-					new BufferedWriter(new FileWriter(logDirectory
-							+ id.toString() + PREFIX + name + ".logs"));
+			BufferedWriter logFile = new BufferedWriter(new FileWriter(
+					LOG_DIRECTORY + id.toString() + prefix + name + ".logs"));
 			logFile.write(timestamp);
 			logFile.newLine();
 			logFile.close();
@@ -164,11 +187,11 @@ public class JobLogger {
 	public static synchronized Set<String> retrieveHostsVisited(String name,
 			String id) {
 		HashSet<String> hostnames = new HashSet<String>();
-		File directory = new File(logDirectory);
+		File directory = new File(LOG_DIRECTORY);
 		String[] files = directory.list();
 		for (String file : files) {
 			try {
-				FileReader f = new FileReader(JobLogger.logDirectory + file);
+				FileReader f = new FileReader(JobLogger.LOG_DIRECTORY + file);
 				f.close();
 			} catch (IOException e) {
 				e.printStackTrace();

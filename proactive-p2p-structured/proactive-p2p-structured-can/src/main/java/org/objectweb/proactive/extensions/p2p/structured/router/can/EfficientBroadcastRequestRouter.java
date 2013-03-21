@@ -92,7 +92,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                 (CanRequestResponseManager) canOverlay.getRequestResponseManager();
         // retrieves the hostname for debugging purpose
         String hostname = "";
-        if (JobLogger.bcastDebugMode) {
+        if (JobLogger.getBcastDebug()) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
@@ -106,13 +106,13 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
             logger.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
-            if (JobLogger.bcastDebugMode) {
+            if (JobLogger.getBcastDebug()) {
                 Date receiveTime = new Date();
-                String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
+                String timestamp = JobLogger.getDateFormat().format(receiveTime);
                 JobLogger.logMessage(request.getId().toString() + "_"
                         + "EfficientBroadcast_" + hostname, "1 " + timestamp
                         + " " + canOverlay.getId() + " " + canOverlay
-                        .getNeighborTable().size() + JobLogger.RETURN);
+                        .getNeighborTable().size() + JobLogger.getLineSeparator());
             }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
@@ -131,14 +131,14 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
-                if (JobLogger.bcastDebugMode) {
+                if (JobLogger.getBcastDebug()) {
                     Date receiveTime = new Date();
                     String timestamp =
-                            JobLogger.DATE_FORMAT.format(receiveTime);
+                            JobLogger.getDateFormat().format(receiveTime);
                     JobLogger.logMessage(request.getId().toString() + "_"
                             + "EfficientBroadcast_" + hostname, "0 " + timestamp 
                             + " " + canOverlay.getId() + " " + canOverlay
-                            .getNeighborTable().size() + JobLogger.RETURN);
+                            .getNeighborTable().size() + JobLogger.getLineSeparator());
                 }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
                 // sends the message to the other neighbors which validates the
@@ -250,10 +250,13 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
      */
     private NeighborTableWrapper<E> getNeighborsToSendTo(final CanOverlay<E> overlay,
                                                          final EfficientBroadcastRequest<E> request) {
-        NeighborTableWrapper<E> extendedNeighbors =
+        int dimensions = 
+        		P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
+    	NeighborTableWrapper<E> extendedNeighbors =
                 new NeighborTableWrapper<E>();
         NeighborTableWrapper<E> neighborsToSendTo =
                 new NeighborTableWrapper<E>();
+
         // The directions that the node has to cover.
         byte[][] directions;
 
@@ -270,7 +273,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
         // Create an extended neighbor table(one that contains more
         // information regarding the neighbors then the ordinary neighbor
         // table) from the current neighbor table.
-        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+        for (byte dim = 0; dim < dimensions ; dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 extendedNeighbors.addAll(
                         dim, direction, overlay.getNeighborTable().get(
@@ -278,7 +281,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
             }
         }
 
-        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+        for (byte dimension = 0; dimension < dimensions ; dimension++) {
 
             for (byte direction = 0; direction < 2; direction++) {
                 // A peer only needs to propagate the broadcast request only on
@@ -345,11 +348,11 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
     @Override
     protected void route(StructuredOverlay overlay,
                          EfficientBroadcastRequest<E> request) {
-        // This method is not used with the optimal broadcast because a message
+        // This method is not used with this broadcast algorithm because a message
         // has to follow a unique path and no heuristics can be made to route
-        // the message
-        // to peers validating the constraint. Hence, the path followed is the
-        // as "handle".
+        // the message to peers validating the constraint. Hence, we always use
+    	// the EfficientBroadcastRequestRouter#handle method and never this one,
+    	// since the behavior should be the same for both methods.
     }
 
     /**
@@ -364,13 +367,10 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
      * @return true if zone1 contains the corner of zone2, false otherwise.
      */
     protected boolean contains(Zone<E> zone1, Zone<E> zone2, byte dimension) {
-        if (Element.min(
-                zone1.getLowerBound(dimension), zone2.getLowerBound(dimension)) == zone1.getLowerBound(dimension)
-                || zone1.getLowerBound(dimension).equals(
-                        zone2.getLowerBound(dimension))) {
+        if (zone2.getLowerBound(dimension).isBetween(
+        		zone1.getLowerBound(dimension), zone1.getUpperBound(dimension))) {
             return true;
         }
-
         return false;
     }
 
@@ -378,10 +378,10 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
      * Initializes the dimensions array.
      */
     protected byte[][] getDirections() {
-        byte[][] directions =
-                new byte[2][P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+    	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
+        byte[][] directions = new byte[2][dimensions];
         for (byte direction = 0; direction < 2; direction++) {
-            for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte dimension = 0; dimension < dimensions ; dimension++) {
                 directions[direction][dimension] = 1;
             }
         }
@@ -396,10 +396,10 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
      * @return the new byte array
      */
     protected byte[][] copyDirections(byte[][] initialDirs) {
-        byte[][] directions =
-                new byte[2][P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+    	int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
+        byte[][] directions = new byte[2][dimensions];
         for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); j++) {
+            for (int j = 0; j < dimensions ; j++) {
                 directions[i][j] = initialDirs[i][j];
             }
         }
