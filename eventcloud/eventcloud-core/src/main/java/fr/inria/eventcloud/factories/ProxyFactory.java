@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.factories;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -62,9 +61,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
  * @author lpellegr
  * @author bsauvan
  */
-public class ProxyFactory extends AbstractFactory implements Serializable {
-
-    private static final long serialVersionUID = 140L;
+public class ProxyFactory extends AbstractFactory {
 
     private static final Logger log;
 
@@ -176,19 +173,29 @@ public class ProxyFactory extends AbstractFactory implements Serializable {
                 nodeProvider, PublishProxyImpl.PROXY_VN), registryUrl, id);
     }
 
-    protected static PublishApi createPublishProxy(String publishProxyAdl,
-                                                   Map<String, Object> context,
-                                                   String registryUrl,
-                                                   EventCloudId id)
+    protected static <T extends PublishProxy> PublishApi createPublishProxy(String publishProxyAdl,
+                                                                            Map<String, Object> context,
+                                                                            String registryUrl,
+                                                                            EventCloudId id)
+            throws EventCloudIdNotManaged {
+        return createPublishProxy(
+                publishProxyAdl, PublishProxy.class, context, registryUrl, id);
+    }
+
+    protected static <T extends PublishProxy> PublishApi createPublishProxy(String publishProxyAdl,
+                                                                            Class<T> interfaceClass,
+                                                                            Map<String, Object> context,
+                                                                            String registryUrl,
+                                                                            EventCloudId id)
             throws EventCloudIdNotManaged {
         checkNotNull(registryUrl, id);
 
         try {
-            PublishProxy pubProxy =
+            T pubProxy =
                     ComponentUtils.createComponentAndGetInterface(
                             publishProxyAdl, context,
                             PublishProxyImpl.PUBLISH_SERVICES_ITF,
-                            PublishProxy.class, true);
+                            interfaceClass, true);
 
             EventCloudCache eventCloudProxy =
                     new EventCloudCache(registryUrl, id);
