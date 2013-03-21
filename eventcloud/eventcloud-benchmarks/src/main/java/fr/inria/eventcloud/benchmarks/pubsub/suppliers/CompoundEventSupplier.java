@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.benchmarks.pubsub;
+package fr.inria.eventcloud.benchmarks.pubsub.suppliers;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;

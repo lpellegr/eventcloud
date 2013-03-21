@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,14 +24,20 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeoutException;
 
+import org.objectweb.proactive.ActiveObjectCreationException;
+import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.core.node.NodeException;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployment.GcmDeploymentNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.Category;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
@@ -42,8 +47,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Supplier;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -51,7 +54,6 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
-import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
@@ -61,6 +63,13 @@ import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
+import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomBindingListener;
+import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomCompoundEventListener;
+import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomSignalListener;
+import fr.inria.eventcloud.benchmarks.pubsub.measurements.CumulatedMeasurement;
+import fr.inria.eventcloud.benchmarks.pubsub.measurements.SimpleMeasurement;
+import fr.inria.eventcloud.benchmarks.pubsub.suppliers.CompoundEventSupplier;
+import fr.inria.eventcloud.benchmarks.pubsub.suppliers.QuadrupleSupplier;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
@@ -87,7 +96,7 @@ public class PublishSubscribeBenchmark {
     public static int nbPublications = 10;
 
     @Parameter(names = {"-ces", "--compound-event-size"}, description = "The number of quadruples contained by each CE")
-    public int compoundEventSize = 10;
+    public int nbQuadruplesPerCompoundEvent = 10;
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "The number of runs to perform", required = true)
     public int nbRuns = 1;
@@ -124,6 +133,9 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"-udd", "--uniform-data-distribution"}, description = "Generates data so that they are distributed uniformly among the available peers")
     public boolean uniformDataDistribution = false;
 
+    @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
+    public String gcmaDescriptor = null;
+
     @Parameter(names = {"-h", "--help"}, description = "Print help", help = true)
     public boolean help;
 
@@ -154,19 +166,15 @@ public class PublishSubscribeBenchmark {
      * event is received on the subscriber (used to compte the throughput in terms 
      * of notifications per second on the subscriber side)
      */
-    private static Map<SubscriptionId, SimpleMeasurement> outputMeasurements;
+    private Map<SubscriptionId, SimpleMeasurement> outputMeasurements;
 
     /*
      * Measures the time to receive each event independently (i.e. average latency)
      */
-    private static Map<Node, Long> pointToPointEntryMeasurements;
-
-    private static Map<SubscriptionId, CumulatedMeasurement> pointToPointExitMeasurements;
+    private Map<String, Long> pointToPointEntryMeasurements;
+    private Map<SubscriptionId, CumulatedMeasurement> pointToPointExitMeasurements;
 
     // internal
-
-    private static Map<SubscriptionId, AtomicInteger> nbEventsReceivedBySubscriber =
-            new HashMap<SubscriptionId, AtomicInteger>();
 
     private Map<SubscriptionId, NotificationListener<?>> listeners =
             new HashMap<SubscriptionId, NotificationListener<?>>();
@@ -179,8 +187,6 @@ public class PublishSubscribeBenchmark {
     private boolean usingCompoundEventSupplier;
 
     public static void main(String[] args) {
-        // LoggerUtils.disableLoggers();
-
         PublishSubscribeBenchmark benchmark = new PublishSubscribeBenchmark();
 
         JCommander jCommander = new JCommander(benchmark);
@@ -211,22 +217,23 @@ public class PublishSubscribeBenchmark {
         this.supplier =
                 this.publishIndependentQuadruples
                         ? new QuadrupleSupplier() : new CompoundEventSupplier(
-                                this.compoundEventSize, this.rewritingLevel);
+                                this.nbQuadruplesPerCompoundEvent,
+                                this.rewritingLevel);
 
         this.usingCompoundEventSupplier =
                 this.supplier instanceof CompoundEventSupplier;
 
-        outputMeasurements =
-                new ConcurrentHashMap<SubscriptionId, SimpleMeasurement>(
+        this.outputMeasurements =
+                new HashMap<SubscriptionId, SimpleMeasurement>(
                         this.nbSubscribers);
 
-        pointToPointEntryMeasurements =
-                new ConcurrentHashMap<Node, Long>(this.nbSubscribers
+        this.pointToPointEntryMeasurements =
+                new ConcurrentHashMap<String, Long>(this.nbSubscribers
                         * nbPublications);
 
-        pointToPointExitMeasurements =
-                new ConcurrentHashMap<SubscriptionId, CumulatedMeasurement>(
-                        pointToPointEntryMeasurements.size());
+        this.pointToPointExitMeasurements =
+                new HashMap<SubscriptionId, CumulatedMeasurement>(
+                        this.pointToPointEntryMeasurements.size());
 
         // pre-generates events so that the data are the same for all the
         // runs and the time is not included into the benchmark execution time
@@ -249,28 +256,32 @@ public class PublishSubscribeBenchmark {
 
                             @Override
                             public void run(StatsRecorder recorder) {
-                                PublishSubscribeBenchmark.this.execute(events);
+                                try {
+                                    PublishSubscribeBenchmark.this.execute(events);
 
-                                recorder.reportTime(
-                                        END_TO_END_MEASUREMENT_CATEGORY,
-                                        PublishSubscribeBenchmark.this.endToEndMeasurement.getElapsedTime());
+                                    recorder.reportTime(
+                                            END_TO_END_MEASUREMENT_CATEGORY,
+                                            PublishSubscribeBenchmark.this.endToEndMeasurement.getElapsedTime());
 
-                                SimpleMeasurement outputMeasurement =
-                                        outputMeasurements.values()
-                                                .iterator()
-                                                .next();
+                                    SimpleMeasurement outputMeasurement =
+                                            PublishSubscribeBenchmark.this.outputMeasurements.values()
+                                                    .iterator()
+                                                    .next();
 
-                                recorder.reportTime(
-                                        OUTPUT_MEASUREMENT_CATEGORY,
-                                        outputMeasurement.getElapsedTime());
+                                    recorder.reportTime(
+                                            OUTPUT_MEASUREMENT_CATEGORY,
+                                            outputMeasurement.getElapsedTime());
 
-                                recorder.reportTime(
-                                        POINT_TO_POINT_MEASUREMENT_CATEGORY,
-                                        pointToPointExitMeasurements.values()
-                                                .iterator()
-                                                .next()
-                                                .getElapsedTime(
-                                                        pointToPointEntryMeasurements));
+                                    recorder.reportTime(
+                                            POINT_TO_POINT_MEASUREMENT_CATEGORY,
+                                            PublishSubscribeBenchmark.this.pointToPointExitMeasurements.values()
+                                                    .iterator()
+                                                    .next()
+                                                    .getElapsedTime(
+                                                            PublishSubscribeBenchmark.this.pointToPointEntryMeasurements));
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
 
                         });
@@ -308,110 +319,72 @@ public class PublishSubscribeBenchmark {
         return microBenchmark.getStatsRecorder();
     }
 
-    public void execute(final Event[] events) {
-        SerializableProvider<? extends SemanticCanOverlay> overlayProvider;
+    public void execute(Event[] events) throws ActiveObjectCreationException,
+            NodeException, EventCloudIdNotManaged, TimeoutException {
+        // clears results collected during previous run
+        this.outputMeasurements.clear();
+        this.pointToPointExitMeasurements.clear();
+        this.pointToPointEntryMeasurements.clear();
 
-        if (this.inMemoryDatastore) {
-            overlayProvider = new SemanticInMemoryOverlayProvider();
-        } else {
-            overlayProvider = new SemanticPersistentOverlayProvider();
-        }
+        // creates collector
+        BenchmarkStatsCollector collector =
+                PAActiveObject.newActive(
+                        BenchmarkStatsCollector.class,
+                        new Object[] {this.nbSubscribers});
+
+        GcmDeploymentNodeProvider nodeProvider =
+                this.createNodeProviderIfRequired();
 
         EventCloudDeploymentDescriptor descriptor =
-                new EventCloudDeploymentDescriptor(overlayProvider);
-        descriptor.setInjectionConstraintsProvider(InjectionConstraintsProvider.newUniformInjectionConstraintsProvider());
+                this.createDeploymentDescriptor(nodeProvider);
 
+        // creates eventcloud
         EventCloudDeployer deployer =
                 new EventCloudDeployer(new EventCloudDescription(), descriptor);
         deployer.deploy(1, this.nbPeers);
 
         if (this.uniformDataDistribution) {
-            SemanticZone[] zones = new SemanticZone[this.nbPeers];
-
-            int i = 0;
-            for (Peer peer : deployer.getRandomSemanticTracker().getPeers()) {
-                GetIdAndZoneResponseOperation<SemanticElement> response =
-                        CanOperations.getIdAndZoneResponseOperation(peer);
-                SemanticZone zone = (SemanticZone) response.getPeerZone();
-                zones[i] = zone;
-                i++;
-            }
-
-            for (i = 0; i < nbPublications; i++) {
-                if (this.publishIndependentQuadruples) {
-                    events[i] =
-                            EventGenerator.randomQuadruple(zones[i
-                                    % this.nbPeers], 10);
-                } else {
-                    events[i] =
-                            EventGenerator.randomCompoundEvent(zones[i
-                                    % this.nbPeers], this.compoundEventSize, 10);
-                }
-            }
+            events = this.updateEventsForUniformDistribution(deployer);
         }
 
-        EventCloudsRegistry registry =
-                EventCloudsRegistryFactory.newEventCloudsRegistry();
-        registry.register(deployer);
-
-        String registryURL = null;
-        try {
-            registryURL = registry.register("registry");
-        } catch (ProActiveException e) {
-            e.printStackTrace();
-        }
+        String registryURL = this.deployRegistry(deployer, nodeProvider);
 
         EventCloudId id = deployer.getEventCloudDescription().getId();
 
-        List<PublishApi> publishProxies = null;
-        List<SubscribeApi> subscribeProxies = null;
-        try {
-            publishProxies =
-                    this.createPublishProxies(
-                            registryURL, id, this.nbPublishers);
-            subscribeProxies =
-                    this.createSubscribeProxies(
-                            registryURL, id, this.nbSubscribers);
-        } catch (EventCloudIdNotManaged e) {
-            e.printStackTrace();
-        }
+        // creates proxies
+        List<PublishApi> publishProxies =
+                this.createPublishProxies(
+                        registryURL, id, nodeProvider, this.nbPublishers);
+        List<SubscribeApi> subscribeProxies =
+                this.createSubscribeProxies(
+                        registryURL, id, nodeProvider, this.nbSubscribers);
 
-        nbEventsReceivedBySubscriber.clear();
-        outputMeasurements.clear();
-        pointToPointExitMeasurements.clear();
-        pointToPointEntryMeasurements.clear();
-
+        // subscribes
         for (int i = 0; i < this.nbSubscribers; i++) {
             final SubscribeApi subscribeProxy = subscribeProxies.get(i);
 
             Subscription subscription =
                     new Subscription(this.createSubscription());
 
-            nbEventsReceivedBySubscriber.put(
-                    subscription.getId(), new AtomicInteger());
-
-            outputMeasurements.put(
-                    subscription.getId(), new SimpleMeasurement());
-            pointToPointExitMeasurements.put(
-                    subscription.getId(), new CumulatedMeasurement(
-                            nbPublications));
-
-            this.subscribe(subscribeProxy, subscription, this.listenerType);
+            this.subscribe(
+                    collector, subscribeProxy, subscription, this.listenerType);
         }
 
+        // waits that subscriptions are indexed as the process is asynchronous
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        // publishes
         final int segment = (nbPublications / this.nbPublishers);
-
         this.endToEndMeasurement.setEntryTime();
 
         for (int i = 0; i < this.nbPublishers; i++) {
             final PublishApi publishProxy = publishProxies.get(i);
             final int j = i;
+            final Event[] pevents = events;
 
             this.threadPool.submit(new Runnable() {
                 @Override
@@ -420,7 +393,7 @@ public class PublishSubscribeBenchmark {
                     int end = (j + 1) * segment - 1;
 
                     PublishSubscribeBenchmark.this.publish(
-                            publishProxy, events, start, end);
+                            publishProxy, pevents, start, end);
                 }
             });
         }
@@ -432,24 +405,157 @@ public class PublishSubscribeBenchmark {
                     publishProxies.get(0), events, start, start + rest - 1);
         }
 
-        // waits to receive the number of published events
-        synchronized (nbEventsReceivedBySubscriber) {
-            while (!this.allEventsReceived()) {
-                try {
-                    nbEventsReceivedBySubscriber.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        collector.waitForAllSubscriberReports(0);
+
+        // the end to end termination time is the time at which the last
+        // subscriber has notified the collector about its termination
+        this.endToEndMeasurement.setExitTime(collector.getEndToEndTerminationTime());
+
+        // collects output measurements
+        for (Entry<SubscriptionId, SimpleMeasurement> entry : collector.getOutputMeasurements()
+                .entrySet()) {
+            this.outputMeasurements.put(entry.getKey(), entry.getValue());
+        }
+
+        // collects point-to-point exit measurements
+        for (Entry<SubscriptionId, CumulatedMeasurement> entry : collector.getPointToPointExitMeasurements()
+                .entrySet()) {
+            this.pointToPointExitMeasurements.put(
+                    entry.getKey(), entry.getValue());
+        }
+
+        deployer.undeploy();
+        ComponentUtils.terminateComponent(registryURL);
+    }
+
+    private String deployRegistry(EventCloudDeployer deployer,
+                                  GcmDeploymentNodeProvider nodeProvider) {
+        EventCloudsRegistry registry;
+        if (this.gcmaDescriptor == null) {
+            registry = EventCloudsRegistryFactory.newEventCloudsRegistry();
+        } else {
+            registry =
+                    EventCloudsRegistryFactory.newEventCloudsRegistry(nodeProvider);
+        }
+        registry.register(deployer);
+
+        String registryURL = null;
+        try {
+            registryURL = registry.register("registry");
+        } catch (ProActiveException e) {
+            e.printStackTrace();
+        }
+        return registryURL;
+    }
+
+    private Event[] updateEventsForUniformDistribution(EventCloudDeployer deployer) {
+        Event[] events = new Event[nbPublications];
+        SemanticZone[] zones = new SemanticZone[this.nbPeers];
+
+        int i = 0;
+        for (Peer peer : deployer.getRandomSemanticTracker().getPeers()) {
+            GetIdAndZoneResponseOperation<SemanticElement> response =
+                    CanOperations.getIdAndZoneResponseOperation(peer);
+            SemanticZone zone = (SemanticZone) response.getPeerZone();
+            zones[i] = zone;
+            i++;
+        }
+
+        for (i = 0; i < nbPublications; i++) {
+            if (this.publishIndependentQuadruples) {
+                events[i] =
+                        EventGenerator.randomQuadruple(
+                                zones[i % this.nbPeers], 10);
+            } else {
+                events[i] =
+                        EventGenerator.randomCompoundEvent(
+                                zones[i % this.nbPeers],
+                                this.nbQuadruplesPerCompoundEvent, 10);
             }
         }
 
-        this.endToEndMeasurement.setExitTime();
+        return events;
+    }
 
-        // deployer.undeploy();
+    private EventCloudDeploymentDescriptor createDeploymentDescriptor(GcmDeploymentNodeProvider nodeProvider) {
+        EventCloudDeploymentDescriptor descriptor =
+                new EventCloudDeploymentDescriptor(
+                        this.createOverlayProvider(this.inMemoryDatastore));
+        descriptor.setInjectionConstraintsProvider(InjectionConstraintsProvider.newUniformInjectionConstraintsProvider());
 
-        // for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
-        // System.out.println(p.dump());
-        // }
+        if (this.gcmaDescriptor != null) {
+            descriptor.setNodeProvider(nodeProvider);
+        }
+        return descriptor;
+    }
+
+    private GcmDeploymentNodeProvider createNodeProviderIfRequired() {
+        GcmDeploymentNodeProvider nodeProvider = null;
+
+        if (this.gcmaDescriptor != null) {
+            nodeProvider = new GcmDeploymentNodeProvider(this.gcmaDescriptor);
+            nodeProvider.start();
+        }
+
+        return nodeProvider;
+    }
+
+    private SerializableProvider<? extends SemanticCanOverlay> createOverlayProvider(boolean inMemory) {
+        if (this.inMemoryDatastore) {
+            return new SemanticInMemoryOverlayProvider();
+        } else {
+            return new SemanticPersistentOverlayProvider();
+        }
+    }
+
+    private List<PublishApi> createPublishProxies(String registryUrl,
+                                                  EventCloudId id,
+                                                  NodeProvider nodeProvider,
+                                                  int nbPublishProxies)
+            throws EventCloudIdNotManaged {
+        List<PublishApi> result = new ArrayList<PublishApi>(nbPublishProxies);
+
+        for (int i = 0; i < nbPublishProxies; i++) {
+            PublishApi publishProxy;
+
+            if (nodeProvider == null) {
+                publishProxy = ProxyFactory.newPublishProxy(registryUrl, id);
+            } else {
+                publishProxy =
+                        ProxyFactory.newPublishProxy(
+                                nodeProvider, registryUrl, id);
+            }
+
+            result.add(publishProxy);
+        }
+
+        return result;
+    }
+
+    private List<SubscribeApi> createSubscribeProxies(String registryUrl,
+                                                      EventCloudId id,
+                                                      NodeProvider nodeProvider,
+                                                      int nbSubscribeProxies)
+            throws EventCloudIdNotManaged {
+        List<SubscribeApi> result =
+                new ArrayList<SubscribeApi>(nbSubscribeProxies);
+
+        for (int i = 0; i < nbSubscribeProxies; i++) {
+            SubscribeApi subscribeProxy;
+
+            if (nodeProvider == null) {
+                subscribeProxy =
+                        ProxyFactory.newSubscribeProxy(registryUrl, id);
+            } else {
+                subscribeProxy =
+                        ProxyFactory.newSubscribeProxy(
+                                nodeProvider, registryUrl, id);
+            }
+
+            result.add(subscribeProxy);
+        }
+
+        return result;
     }
 
     private String createSubscription() {
@@ -491,33 +597,6 @@ public class PublishSubscribeBenchmark {
         return subscription;
     }
 
-    private List<PublishApi> createPublishProxies(String registryUrl,
-                                                  EventCloudId id,
-                                                  int nbPublishProxies)
-            throws EventCloudIdNotManaged {
-        List<PublishApi> result = new ArrayList<PublishApi>(nbPublishProxies);
-
-        for (int i = 0; i < nbPublishProxies; i++) {
-            result.add(ProxyFactory.newPublishProxy(registryUrl, id));
-        }
-
-        return result;
-    }
-
-    private List<SubscribeApi> createSubscribeProxies(String registryUrl,
-                                                      EventCloudId id,
-                                                      int nbSubscribeProxies)
-            throws EventCloudIdNotManaged {
-        List<SubscribeApi> result =
-                new ArrayList<SubscribeApi>(nbSubscribeProxies);
-
-        for (int i = 0; i < nbSubscribeProxies; i++) {
-            result.add(ProxyFactory.newSubscribeProxy(registryUrl, id));
-        }
-
-        return result;
-    }
-
     private void publish(PublishApi publishProxy, Event[] events, int start,
                          int end) {
         for (int i = start; i <= end; i++) {
@@ -529,8 +608,8 @@ public class PublishSubscribeBenchmark {
         if (this.usingCompoundEventSupplier) {
             CompoundEvent ce = (CompoundEvent) event;
 
-            pointToPointEntryMeasurements.put(
-                    ce.getGraph(), System.currentTimeMillis());
+            this.pointToPointEntryMeasurements.put(
+                    ce.getGraph().getURI(), System.currentTimeMillis());
 
             publishProxy.publish(ce);
         } else {
@@ -547,7 +626,8 @@ public class PublishSubscribeBenchmark {
         }
     }
 
-    private void subscribe(SubscribeApi subscribeProxy,
+    private void subscribe(BenchmarkStatsCollector collector,
+                           SubscribeApi subscribeProxy,
                            Subscription subscription,
                            NotificationListenerType listenerType) {
 
@@ -555,156 +635,26 @@ public class PublishSubscribeBenchmark {
 
         switch (listenerType) {
             case BINDING:
-                listener = new CustomBindingListener();
+                listener = new CustomBindingListener(collector, nbPublications);
                 subscribeProxy.subscribe(
-                        subscription, (CustomBindingListener) listener);
+                        subscription, (BindingNotificationListener) listener);
                 break;
             case COMPOUND_EVENT:
-                listener = new CustomEventListener();
+                listener =
+                        new CustomCompoundEventListener(
+                                collector, nbPublications);
                 subscribeProxy.subscribe(
-                        subscription, (CustomEventListener) listener);
+                        subscription,
+                        (CompoundEventNotificationListener) listener);
                 break;
             case SIGNAL:
-                listener = new CustomSignalListener();
+                listener = new CustomSignalListener(collector, nbPublications);
                 subscribeProxy.subscribe(
-                        subscription, (CustomSignalListener) listener);
+                        subscription, (SignalNotificationListener) listener);
                 break;
         }
 
         this.listeners.put(subscription.getId(), listener);
-    }
-
-    private boolean allEventsReceived() {
-        for (AtomicInteger counter : nbEventsReceivedBySubscriber.values()) {
-            if (counter.get() < nbPublications) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static final class CustomBindingListener extends
-            BindingNotificationListener {
-        private static final long serialVersionUID = 140L;
-
-        @Override
-        public void onNotification(SubscriptionId id, Binding solution) {
-            handleNewEvent(id);
-            pointToPointExitMeasurements.get(id)
-                    .reportReception(
-                            Quadruple.removeMetaInformation(solution.get(PublishSubscribeConstants.GRAPH_VAR)));
-        }
-    }
-
-    private static final class CustomEventListener extends
-            CompoundEventNotificationListener {
-        private static final long serialVersionUID = 140L;
-
-        @Override
-        public void onNotification(SubscriptionId id, CompoundEvent solution) {
-            handleNewEvent(id);
-            pointToPointExitMeasurements.get(id).reportReception(
-                    solution.getGraph());
-        }
-    }
-
-    private static final class CustomSignalListener extends
-            SignalNotificationListener {
-        private static final long serialVersionUID = 140L;
-
-        @Override
-        public void onNotification(SubscriptionId id, String eventId) {
-            handleNewEvent(id);
-            pointToPointExitMeasurements.get(id).reportReception(
-                    Node.createURI(Quadruple.removeMetaInformation(eventId)));
-        }
-    }
-
-    private static void handleNewEvent(SubscriptionId id) {
-        synchronized (nbEventsReceivedBySubscriber) {
-            long nbEventsReceived =
-                    nbEventsReceivedBySubscriber.get(id).incrementAndGet();
-
-            SimpleMeasurement outputMeasurement = outputMeasurements.get(id);
-
-            if (nbEventsReceived == 1) {
-                outputMeasurement.setEntryTime();
-            }
-
-            if (nbEventsReceived == nbPublications) {
-                outputMeasurement.setExitTime();
-                nbEventsReceivedBySubscriber.notifyAll();
-            }
-        }
-    }
-
-    public static int getNbPublications() {
-        return nbPublications;
-    }
-
-    private static interface Measurement extends Serializable {
-
-        long getElapsedTime();
-
-    }
-
-    private static class CumulatedMeasurement implements Serializable {
-
-        private static final long serialVersionUID = 140L;
-
-        private Map<Node, Long> times;
-
-        public CumulatedMeasurement(int nbPublicationsExpected) {
-            this.times = new HashMap<Node, Long>(nbPublicationsExpected);
-        }
-
-        public void reportReception(Node eventId) {
-            synchronized (this.times) {
-                this.times.put(eventId, System.currentTimeMillis());
-            }
-        }
-
-        public long getElapsedTime(Map<Node, Long> pointToPointEntryMeasurements) {
-            long sum = 0;
-
-            synchronized (this.times) {
-                for (Entry<Node, Long> entry : this.times.entrySet()) {
-                    sum +=
-                            entry.getValue()
-                                    - pointToPointEntryMeasurements.get(entry.getKey());
-                }
-            }
-
-            return sum;
-        }
-
-    }
-
-    private static class SimpleMeasurement implements Measurement {
-
-        private static final long serialVersionUID = 140L;
-
-        private long entryTime;
-
-        private long exitTime;
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public long getElapsedTime() {
-            return this.exitTime - this.entryTime;
-        }
-
-        public void setEntryTime() {
-            this.entryTime = System.currentTimeMillis();
-        }
-
-        public void setExitTime() {
-            this.exitTime = System.currentTimeMillis();
-        }
-
     }
 
 }

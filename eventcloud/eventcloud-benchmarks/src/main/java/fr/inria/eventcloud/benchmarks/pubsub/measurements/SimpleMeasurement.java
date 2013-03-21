@@ -14,27 +14,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.benchmarks.pubsub;
-
-import com.google.common.base.Supplier;
-
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
+package fr.inria.eventcloud.benchmarks.pubsub.measurements;
 
 /**
- * This class provides a randomly generated {@link Quadruple} each time a call
- * to {@link QuadrupleSupplier#get()} is performed.
+ * Simple measurement to keep entry and exit times.
  * 
  * @author lpellegr
  */
-public class QuadrupleSupplier implements Supplier<Quadruple> {
+public class SimpleMeasurement implements Measurement {
+
+    private static final long serialVersionUID = 140L;
+
+    private long entryTime;
+
+    private long exitTime;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Quadruple get() {
-        return QuadrupleGenerator.randomWithoutLiteral();
+    public long getElapsedTime() {
+        return this.exitTime - this.entryTime;
+    }
+
+    public void setEntryTime() {
+        this.entryTime = System.currentTimeMillis();
+    }
+
+    public void setExitTime() {
+        this.exitTime = System.currentTimeMillis();
+    }
+
+    public void setExitTime(long timestamp) {
+        this.exitTime = timestamp;
     }
 
 }
