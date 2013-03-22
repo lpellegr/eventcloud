@@ -69,6 +69,9 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
      */
     @Override
     public void publish() {
+        // this method should be called only once
+        this.pointToPointEntryMeasurements = new HashMap<String, Long>(this.events.size());
+        
         if (!this.events.isEmpty()) {
             if (this.events.get(0) instanceof CompoundEvent) {
                 for (int i = 0; i < this.events.size(); i++) {
@@ -121,7 +124,6 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
         super.initComponentActivity(body);
 
         this.events = new ArrayList<Event>();
-        this.pointToPointEntryMeasurements = new HashMap<String, Long>();
     }
 
     /**
