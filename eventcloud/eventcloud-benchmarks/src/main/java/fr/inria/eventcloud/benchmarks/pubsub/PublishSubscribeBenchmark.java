@@ -78,7 +78,7 @@ import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
  * Simple application to evaluate the publish/subscribe algorithm on a single
- * machine. Times are measured in milliseconds with
+ * machine or in a distributed setup. Times are measured in milliseconds with
  * {@link System#currentTimeMillis()}.
  * 
  * @author lpellegr
