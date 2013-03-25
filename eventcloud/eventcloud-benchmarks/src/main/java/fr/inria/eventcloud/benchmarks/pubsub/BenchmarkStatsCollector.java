@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -270,7 +269,7 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
      */
     public static void main(String[] args)
             throws ActiveObjectCreationException, NodeException,
-            TimeoutException, IOException {
+            TimeoutException {
         BenchmarkStatsCollector collector =
                 PAActiveObject.newActive(
                         BenchmarkStatsCollector.class, new Object[] {2, 2});
