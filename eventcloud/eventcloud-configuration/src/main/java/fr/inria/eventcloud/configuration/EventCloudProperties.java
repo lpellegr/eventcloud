@@ -108,7 +108,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger PUBLISH_COMPOUND_EVENT_DELAYER_BUFFER_SIZE =
             new PropertyInteger(
-                    "eventcloud.publish.compoundevent.delayer.buffer.size", 25);
+                    "eventcloud.publish.compoundevent.delayer.buffer.size", 65);
 
     /**
      * Defines the maximum timeout (in milliseconds) to wait before to commit
@@ -236,7 +236,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger RECONSTRUCTION_RETRY_THRESHOLD =
             new PropertyInteger(
-                    "eventcloud.reconstruction.retry.threshold", 300);
+                    "eventcloud.reconstruction.retry.threshold", 330);
 
     /**
      * Specifies the maximum number of subscriptions to put in cache. This
