@@ -152,9 +152,11 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
                 continue;
             }
 
-            log.trace(
-                    "Ordering issue detected for eventId {} with subscription {}",
-                    quadrupleMatching.getGraph(), subscription.getId());
+            if (log.isTraceEnabled() && subscription.getParentId() == null) {
+                log.trace(
+                        "Ordering issue detected for eventId {} with subscription {}",
+                        quadrupleMatching.getGraph(), subscription.getId());
+            }
 
             PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
                     semanticOverlay, subscription, quadrupleMatching);
