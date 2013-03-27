@@ -21,6 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.delayers.ExtendedCompoundEvent;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -71,8 +72,9 @@ public class PublishCompoundEventRequest extends QuadrupleRequest {
 
         ((SemanticCanOverlay) overlay).getPublishCompoundEventRequestDelayer()
                 .receive(
-                        this.compoundEvent.getValue(),
-                        this.indexQuadrupleUsedForIndexing);
+                        new ExtendedCompoundEvent(
+                                this.compoundEvent.getValue(),
+                                this.indexQuadrupleUsedForIndexing));
     }
 
 }

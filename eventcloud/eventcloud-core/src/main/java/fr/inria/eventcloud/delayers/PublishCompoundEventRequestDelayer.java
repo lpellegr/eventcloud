@@ -16,9 +16,7 @@
  **/
 package fr.inria.eventcloud.delayers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.slf4j.Logger;
@@ -66,93 +64,33 @@ import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
  * 
  * @author lpellegr
  */
-public class PublishCompoundEventRequestDelayer {
+public class PublishCompoundEventRequestDelayer extends
+        Delayer<ExtendedCompoundEvent> {
 
     private static final Logger log =
             LoggerFactory.getLogger(PublishCompoundEventRequestDelayer.class);
 
-    private final SemanticCanOverlay overlay;
-
-    private final List<ExtendedCompoundEvent> buffer =
-            new ArrayList<ExtendedCompoundEvent>(
-                    EventCloudProperties.PUBLISH_COMPOUND_EVENT_DELAYER_BUFFER_SIZE.getValue());
-
-    private Thread commitThread;
-
-    private boolean running = true;
-
     public PublishCompoundEventRequestDelayer(SemanticCanOverlay overlay) {
-        this.overlay = overlay;
+        super(
+                overlay,
+                log,
+                "matching subscriptions",
+                "compound events",
+                EventCloudProperties.PUBLISH_COMPOUND_EVENT_DELAYER_BUFFER_SIZE.getValue(),
+                EventCloudProperties.PUBLISH_COMPOUND_EVENT_DELAYER_TIMEOUT.getValue());
     }
 
-    public void receive(CompoundEvent compoundEvent,
-                        int indexQuadrupleUsedForIndexing) {
-        synchronized (this.buffer) {
-            this.buffer.add(new ExtendedCompoundEvent(
-                    compoundEvent, indexQuadrupleUsedForIndexing));
-
-            if (this.buffer.size() >= EventCloudProperties.PUBLISH_COMPOUND_EVENT_DELAYER_BUFFER_SIZE.getValue()) {
-                int nbQuadruplesFlushed = this.commit();
-                log.trace(
-                        "{} quadruples flushed because threshold exceeded on {}",
-                        nbQuadruplesFlushed, this.overlay);
-            } else {
-                if (!this.buffer.isEmpty()) {
-                    // check whether we have a commit thread running
-                    synchronized (this) {
-                        if (this.commitThread == null) {
-                            log.trace(
-                                    "Commit thread created on {}", this.overlay);
-
-                            this.commitThread = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    while (PublishCompoundEventRequestDelayer.this.running) {
-                                        try {
-                                            Thread.sleep(EventCloudProperties.PUBLISH_QUADRUPLES_DELAYER_TIMEOUT.getValue());
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                            Thread.currentThread().interrupt();
-                                        }
-
-                                        int nbQuadruplesFlushed =
-                                                PublishCompoundEventRequestDelayer.this.commit();
-
-                                        if (nbQuadruplesFlushed == 0) {
-                                            log.trace(
-                                                    "Commit thread terminated on {}",
-                                                    PublishCompoundEventRequestDelayer.this.overlay);
-                                            // nothing was commited, we should
-                                            // stop the thread
-                                            PublishCompoundEventRequestDelayer.this.commitThread =
-                                                    null;
-                                            return;
-                                        } else {
-                                            log.trace(
-                                                    "Commit thread has flushed {} quadruples on {}",
-                                                    nbQuadruplesFlushed,
-                                                    PublishCompoundEventRequestDelayer.this.overlay);
-                                        }
-                                    }
-                                }
-                            });
-
-                            this.commitThread.setName("PublishQuadrupleRequestCommitThread");
-                            this.commitThread.start();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void flushBuffer(SemanticCanOverlay semanticOverlay) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void flushBuffer() {
         TransactionalDatasetGraph txnGraph =
-                semanticOverlay.getMiscDatastore().begin(AccessMode.WRITE);
+                this.overlay.getMiscDatastore().begin(AccessMode.WRITE);
 
         try {
             // the quadruple is stored by using its meta graph value
-            for (ExtendedCompoundEvent ec : this.buffer) {
+            for (ExtendedCompoundEvent ec : super.buffer) {
                 Quadruple q = ec.getIndexedQuadruple();
                 txnGraph.add(
                         q.createMetaGraphNode(), q.getSubject(),
@@ -167,39 +105,14 @@ public class PublishCompoundEventRequestDelayer {
         }
     }
 
-    public int commit() {
-        synchronized (this.buffer) {
-            int size = this.buffer.size();
-
-            long startTime = 0;
-
-            if (log.isTraceEnabled()) {
-                startTime = System.currentTimeMillis();
-            }
-
-            this.flushBuffer(this.overlay);
-
-            if (log.isTraceEnabled()) {
-                log.trace(
-                        "Buffer flushed in {} ms on {}",
-                        System.currentTimeMillis() - startTime, this.overlay);
-                startTime = System.currentTimeMillis();
-            }
-
-            for (ExtendedCompoundEvent ce : this.buffer) {
-                this.fireMatchingSubscriptions(
-                        ce.compoundEvent, ce.indexQuadrupleUsedForIndexing);
-            }
-
-            if (log.isTraceEnabled()) {
-                log.trace(
-                        "Fired matching subscriptions in {} ms on {}",
-                        System.currentTimeMillis() - startTime, this.overlay);
-            }
-
-            this.buffer.clear();
-
-            return size;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void postAction() {
+        for (ExtendedCompoundEvent ce : super.buffer) {
+            this.fireMatchingSubscriptions(
+                    ce.compoundEvent, ce.indexQuadrupleUsedForIndexing);
         }
     }
 
@@ -419,38 +332,6 @@ public class PublishCompoundEventRequestDelayer {
                 objectExpr), new E_Equals(
                 PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
-    }
-
-    public synchronized void close() {
-        if (this.commitThread != null) {
-            this.running = false;
-
-            try {
-                this.commitThread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    private static class ExtendedCompoundEvent {
-
-        public final CompoundEvent compoundEvent;
-
-        public final int indexQuadrupleUsedForIndexing;
-
-        public ExtendedCompoundEvent(CompoundEvent compoundEvent,
-                int indexQuadrupleUsedForIndexing) {
-            this.compoundEvent = compoundEvent;
-            this.indexQuadrupleUsedForIndexing = indexQuadrupleUsedForIndexing;
-        }
-
-        public Quadruple getIndexedQuadruple() {
-            return this.compoundEvent.getQuadruples().get(
-                    this.indexQuadrupleUsedForIndexing);
-        }
-
     }
 
 }
