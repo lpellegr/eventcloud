@@ -32,8 +32,10 @@ import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.component.Fractive;
+import org.objectweb.proactive.core.component.Utils;
 import org.objectweb.proactive.core.component.adl.FactoryFactory;
 import org.objectweb.proactive.core.component.adl.nodes.ADLNodeProvider;
+import org.objectweb.proactive.core.component.control.PAGCMLifeCycleController;
 import org.objectweb.proactive.core.config.CentralPAPropertyRepository;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -255,8 +257,11 @@ public class ComponentUtils {
         try {
             Component component = ((Interface) stub).getFcItfOwner();
 
-            GCM.getGCMLifeCycleController(component).stopFc();
-            GCM.getGCMLifeCycleController(component).terminateGCMComponent();
+            PAGCMLifeCycleController controller =
+                    Utils.getPAGCMLifeCycleController(component);
+
+            controller.stopFc();
+            controller.terminateGCMComponent(false);
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
