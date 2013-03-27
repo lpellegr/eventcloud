@@ -69,6 +69,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.delayers.IndexSubscriptionRequestDelayer;
 import fr.inria.eventcloud.delayers.PublishCompoundEventRequestDelayer;
 import fr.inria.eventcloud.delayers.PublishQuadrupleRequestDelayer;
 import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
@@ -114,6 +115,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     // this cache is used to prevent compound events to be handled multi-times
     // on a same peer
     private Cache<Node, Boolean> alreadyHandledCompoundEvent;
+
+    private final IndexSubscriptionRequestDelayer indexSubscriptionRequestDelayer;
 
     private final PublishQuadrupleRequestDelayer publishQuadrupleRequestDelayer;
 
@@ -221,9 +224,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                     TimeUnit.MILLISECONDS);
         }
 
+        this.indexSubscriptionRequestDelayer =
+                new IndexSubscriptionRequestDelayer(this);
+        this.publishQuadrupleRequestDelayer =
+                new PublishQuadrupleRequestDelayer(this);
+
         if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-            this.publishQuadrupleRequestDelayer =
-                    new PublishQuadrupleRequestDelayer(this);
             this.publishCompoundEventRequestDelayer =
                     new PublishCompoundEventRequestDelayer(this);
             this.alreadyHandledCompoundEvent =
@@ -232,8 +238,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                             .expireAfterWrite(10, TimeUnit.MINUTES)
                             .build();
         } else {
-            this.publishQuadrupleRequestDelayer =
-                    new PublishQuadrupleRequestDelayer(this);
             this.publishCompoundEventRequestDelayer = null;
         }
     }
@@ -348,6 +352,19 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     public boolean hasSocialFilter() {
         return this.socialFilter != null;
+    }
+
+    public LoadingCache<SubscriptionId, Subscription> getSubscriptionsCache() {
+        return this.subscriptionsCache;
+    }
+
+    /**
+     * Returns the {@link IndexSubscriptionRequestDelayer} delayer instance.
+     * 
+     * @return the {@link IndexSubscriptionRequestDelayer} delayer instance.
+     */
+    public IndexSubscriptionRequestDelayer getIndexSubscriptionRequestDelayer() {
+        return this.indexSubscriptionRequestDelayer;
     }
 
     /**
@@ -1011,7 +1028,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     public void close() {
         super.close();
 
+        this.indexSubscriptionRequestDelayer.close();
         this.publishQuadrupleRequestDelayer.close();
+
+        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.publishCompoundEventRequestDelayer.close();
+        }
 
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
                 || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {

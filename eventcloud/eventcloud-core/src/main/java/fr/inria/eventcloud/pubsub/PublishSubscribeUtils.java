@@ -794,7 +794,8 @@ public final class PublishSubscribeUtils {
                     + rewrittenSubscription.getSparqlQuery());
         }
 
-        overlay.dispatchv(new IndexSubscriptionRequest(rewrittenSubscription));
+        overlay.getStub().route(
+                new IndexSubscriptionRequest(rewrittenSubscription));
     }
 
     /**
