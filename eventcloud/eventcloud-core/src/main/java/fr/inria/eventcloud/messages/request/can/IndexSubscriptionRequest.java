@@ -16,27 +16,16 @@
  **/
 package fr.inria.eventcloud.messages.request.can;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.graph.Node;
-
-import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.AccessMode;
-import fr.inria.eventcloud.datastore.QuadrupleIterator;
-import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
-import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
-import fr.inria.eventcloud.pubsub.Subsubscription;
 
 /**
  * Request used to index a subscription or a rewritten subscription after the
@@ -92,75 +81,8 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
         log.debug("Indexing subscription {} on peer {}", subscription, overlay);
 
-        // writes the subscription into the cache and the local datastore
-        semanticOverlay.storeSubscription(subscription);
-
-        Subsubscription firstSubsubscription =
-                subscription.getSubSubscriptions()[0];
-
-        // stores the quadruples into a list in order to avoid a concurrent
-        // exception if a add operation (or more generally a write operation) is
-        // done on the datastore while we are iterating on the ResultSet.
-        // Indeed, the result set does not contain the solutions but knows how
-        // to retrieve a solution each time a call to next is performed.
-        List<Quadruple> quadruplesMatching = new ArrayList<Quadruple>();
-
-        QuadruplePattern qp =
-                firstSubsubscription.getAtomicQuery().getQuadruplePattern();
-
-        TransactionalDatasetGraph txnGraph =
-                ((SemanticCanOverlay) overlay).getMiscDatastore().begin(
-                        AccessMode.READ_ONLY);
-
-        try {
-            QuadrupleIterator it =
-                    txnGraph.find(
-                            Node.ANY, qp.getSubject(), qp.getPredicate(),
-                            qp.getObject());
-            while (it.hasNext()) {
-                Quadruple q = it.next();
-
-                if (qp.getGraph() == Node.ANY
-                        || q.getGraph().getURI().startsWith(
-                                qp.getGraph().getURI())) {
-                    quadruplesMatching.add(q);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            txnGraph.end();
-        }
-
-        for (Quadruple quadrupleMatching : quadruplesMatching) {
-            boolean mustIgnoreQuadrupleMatching =
-                    quadrupleMatching.getPublicationTime() < subscription.getIndexationTime();
-
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
-                        new Object[] {
-                                subscription.getIndexationTime(),
-                                quadrupleMatching.getPublicationTime(),
-                                quadrupleMatching.getGraph(),
-                                mustIgnoreQuadrupleMatching});
-            }
-
-            // if q sent before s but s indexed before q then q must not be
-            // notified
-            if (mustIgnoreQuadrupleMatching) {
-                continue;
-            }
-
-            if (log.isTraceEnabled() && subscription.getParentId() == null) {
-                log.trace(
-                        "Ordering issue detected for eventId {} with subscription {}",
-                        quadrupleMatching.getGraph(), subscription.getId());
-            }
-
-            PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
-                    semanticOverlay, subscription, quadrupleMatching);
-        }
+        semanticOverlay.getIndexSubscriptionRequestDelayer().receive(
+                subscription);
     }
 
 }

@@ -58,91 +58,32 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * 
  * @author lpellegr
  */
-public class PublishQuadrupleRequestDelayer {
+public class PublishQuadrupleRequestDelayer extends Delayer<Quadruple> {
 
     private static final Logger log =
             LoggerFactory.getLogger(PublishQuadrupleRequestDelayer.class);
 
-    private final SemanticCanOverlay overlay;
-
-    private final List<Quadruple> buffer =
-            new ArrayList<Quadruple>(
-                    EventCloudProperties.PUBLISH_QUADRUPLES_DELAYER_BUFFER_SIZE.getValue());
-
-    private Thread commitThread;
-
-    private boolean running = true;
-
     public PublishQuadrupleRequestDelayer(SemanticCanOverlay overlay) {
-        this.overlay = overlay;
+        super(
+                overlay,
+                log,
+                "matching subscriptions",
+                "quadruples",
+                EventCloudProperties.PUBLISH_QUADRUPLES_DELAYER_BUFFER_SIZE.getValue(),
+                EventCloudProperties.PUBLISH_QUADRUPLES_DELAYER_TIMEOUT.getValue());
     }
 
-    public void receive(Quadruple quadruple) {
-        synchronized (this.buffer) {
-            this.buffer.add(quadruple);
-
-            if (this.buffer.size() >= EventCloudProperties.PUBLISH_QUADRUPLES_DELAYER_BUFFER_SIZE.getValue()) {
-                int nbQuadruplesFlushed = this.commit();
-                log.trace(
-                        "{} quadruples flushed because threshold exceeded on {}",
-                        nbQuadruplesFlushed, this.overlay);
-            } else {
-                if (!this.buffer.isEmpty()) {
-                    // check whether we have a commit thread running
-                    synchronized (this) {
-                        if (this.commitThread == null) {
-                            log.trace(
-                                    "Commit thread created on {}", this.overlay);
-
-                            this.commitThread = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    while (PublishQuadrupleRequestDelayer.this.running) {
-                                        try {
-                                            Thread.sleep(EventCloudProperties.PUBLISH_QUADRUPLES_DELAYER_TIMEOUT.getValue());
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                            Thread.currentThread().interrupt();
-                                        }
-
-                                        int nbQuadruplesFlushed =
-                                                PublishQuadrupleRequestDelayer.this.commit();
-
-                                        if (nbQuadruplesFlushed == 0) {
-                                            log.trace(
-                                                    "Commit thread terminated on {}",
-                                                    PublishQuadrupleRequestDelayer.this.overlay);
-                                            // nothing was commited, we should
-                                            // stop the thread
-                                            PublishQuadrupleRequestDelayer.this.commitThread =
-                                                    null;
-                                            return;
-                                        } else {
-                                            log.trace(
-                                                    "Commit thread has flushed {} quadruples on {}",
-                                                    nbQuadruplesFlushed,
-                                                    PublishQuadrupleRequestDelayer.this.overlay);
-                                        }
-                                    }
-                                }
-                            });
-
-                            this.commitThread.setName("PublishQuadrupleRequestCommitThread");
-                            this.commitThread.start();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void flushBuffer(SemanticCanOverlay semanticOverlay) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void flushBuffer() {
         TransactionalDatasetGraph txnGraph =
-                semanticOverlay.getMiscDatastore().begin(AccessMode.WRITE);
+                super.overlay.getMiscDatastore().begin(AccessMode.WRITE);
 
         try {
             // the quadruple is stored by using its meta graph value
-            for (Quadruple q : this.buffer) {
+            for (Quadruple q : super.buffer) {
                 txnGraph.add(
                         q.createMetaGraphNode(), q.getSubject(),
                         q.getPredicate(), q.getObject());
@@ -156,38 +97,13 @@ public class PublishQuadrupleRequestDelayer {
         }
     }
 
-    public int commit() {
-        synchronized (this.buffer) {
-            int size = this.buffer.size();
-
-            long startTime = 0;
-
-            if (log.isTraceEnabled()) {
-                startTime = System.currentTimeMillis();
-            }
-
-            this.flushBuffer(this.overlay);
-
-            if (log.isTraceEnabled()) {
-                log.trace(
-                        "Buffer flushed in {} ms on {}",
-                        System.currentTimeMillis() - startTime, this.overlay);
-                startTime = System.currentTimeMillis();
-            }
-
-            for (Quadruple q : this.buffer) {
-                this.fireMatchingSubscriptions(q);
-            }
-
-            if (log.isTraceEnabled()) {
-                log.trace(
-                        "Fired matching subscriptions in {} ms on {}",
-                        System.currentTimeMillis() - startTime, this.overlay);
-            }
-
-            this.buffer.clear();
-
-            return size;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void postAction() {
+        for (Quadruple q : super.buffer) {
+            this.fireMatchingSubscriptions(q);
         }
     }
 
@@ -196,7 +112,7 @@ public class PublishQuadrupleRequestDelayer {
         // matching the quadruple which have been just inserted into the
         // local datastore
         TransactionalDatasetGraph txnGraph =
-                this.overlay.getSubscriptionsDatastore().begin(
+                super.overlay.getSubscriptionsDatastore().begin(
                         AccessMode.READ_ONLY);
 
         List<Subscription> subscriptionsMatching =
@@ -214,7 +130,7 @@ public class PublishQuadrupleRequestDelayer {
                 final Binding binding = it.nextBinding();
                 log.debug(
                         "Peer {} has a sub subscription that matches the quadruple {} ",
-                        this.overlay, quadruple);
+                        super.overlay, quadruple);
 
                 // the identifier of the sub subscription that is matched is
                 // available from the result of the query which has been
@@ -225,7 +141,7 @@ public class PublishQuadrupleRequestDelayer {
                                 .getLiteralLexicalForm());
 
                 Subscription subscription =
-                        this.overlay.findSubscription(txnGraph, subscriptionId);
+                        super.overlay.findSubscription(txnGraph, subscriptionId);
 
                 boolean mustIgnoreQuadrupleMatching =
                         quadruple.getPublicationTime() < subscription.getIndexationTime();
@@ -241,8 +157,7 @@ public class PublishQuadrupleRequestDelayer {
                 }
 
                 // if s sent before q but q indexed before s then q must not
-                // be
-                // notified
+                // be notified
                 if (!mustIgnoreQuadrupleMatching) {
                     // We have to use an intermediate collection because
                     // nested transactions are currently not allowed (i.e. a
@@ -270,14 +185,14 @@ public class PublishQuadrupleRequestDelayer {
             // a subscription with only one sub subscription (that matches
             // the quadruple which has been inserted) has been detected
             PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
-                    this.overlay, subscriptionMatching, quadruple);
+                    super.overlay, subscriptionMatching, quadruple);
         }
 
         // finds the ephemeral subscriptions that are resolved
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
                 || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             PublishSubscribeUtils.findAndHandleEphemeralSubscriptions(
-                    this.overlay, quadruple, quadruple.createMetaGraphNode());
+                    super.overlay, quadruple, quadruple.createMetaGraphNode());
         }
     }
 
@@ -378,19 +293,6 @@ public class PublishQuadrupleRequestDelayer {
         return new OpProject(
                 new OpGraph(PublishSubscribeConstants.GRAPH_VAR, filter),
                 Arrays.asList(PublishSubscribeConstants.SUBSCRIPTION_ID_VAR));
-    }
-
-    public synchronized void close() {
-        if (this.commitThread != null) {
-            this.running = false;
-
-            try {
-                this.commitThread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-            }
-        }
     }
 
 }
