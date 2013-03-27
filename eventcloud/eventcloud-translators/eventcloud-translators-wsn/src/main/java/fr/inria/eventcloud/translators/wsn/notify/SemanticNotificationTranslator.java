@@ -48,6 +48,9 @@ import fr.inria.eventcloud.utils.ReflectionUtils;
 public class SemanticNotificationTranslator extends
         Translator<NotificationMessageHolderType, CompoundEvent> {
 
+    /**
+     * Creates a {@link SemanticNotificationTranslator}.
+     */
     public SemanticNotificationTranslator() {
 
     }

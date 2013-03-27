@@ -51,13 +51,25 @@ public class WsnTranslator {
      * Creates a {@link WsnTranslator}.
      */
     public WsnTranslator() {
+        this(WsnConstants.DEFAULT_TOPIC_NAMESPACE);
+    }
+
+    /**
+     * Creates a {@link WsnTranslator}.
+     * 
+     * @param defaultTopicNamespace
+     *            the default topic namespace to use if it is not declared.
+     */
+    public WsnTranslator(String defaultTopicNamespace) {
         this.semanticCompoundEventTranslator =
                 new SemanticCompoundEventTranslator();
         this.semanticNotificationTranslator =
                 new SemanticNotificationTranslator();
         this.xmlCompoundEventTranslator = new XmlCompoundEventTranslator();
-        this.xmlNotificationTranslator = new XmlNotificationTranslator();
-        this.topicSubscriptionTranslator = new TopicSubscriptionTranslator();
+        this.xmlNotificationTranslator =
+                new XmlNotificationTranslator(defaultTopicNamespace);
+        this.topicSubscriptionTranslator =
+                new TopicSubscriptionTranslator(defaultTopicNamespace);
     }
 
     /**

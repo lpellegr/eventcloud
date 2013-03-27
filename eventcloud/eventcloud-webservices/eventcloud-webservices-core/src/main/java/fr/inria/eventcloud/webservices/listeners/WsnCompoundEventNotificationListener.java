@@ -72,13 +72,14 @@ public class WsnCompoundEventNotificationListener extends
 
         this.streamQName =
                 new QName(
-                        streamUrl.substring(0, index),
+                        streamUrl.substring(0, index + 1),
                         streamUrl.substring(index + 1), "s");
     }
 
     private synchronized WsnTranslator getTranslator() {
         if (this.translator == null) {
-            this.translator = new WsnTranslator();
+            this.translator =
+                    new WsnTranslator(this.streamQName.getNamespaceURI());
         }
 
         return this.translator;

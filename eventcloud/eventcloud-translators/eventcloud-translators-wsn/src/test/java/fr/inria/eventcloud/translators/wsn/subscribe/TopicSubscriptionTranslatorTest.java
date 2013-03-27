@@ -66,7 +66,7 @@ public class TopicSubscriptionTranslatorTest {
                         "http://example.org/subscriber/s1", topic);
 
         String sparqlQuery =
-                (new TopicSubscriptionTranslator()).translate(subscribeMessage);
+                (new TopicSubscriptionTranslator(TOPIC_NAMESPACE)).translate(subscribeMessage);
 
         Assert.assertNotNull(sparqlQuery);
 

@@ -43,8 +43,17 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
     private static Logger log =
             LoggerFactory.getLogger(TopicSubscriptionTranslator.class);
 
-    public TopicSubscriptionTranslator() {
+    private String defaultTopicNamespace;
 
+    /**
+     * Creates a {@link TopicSubscriptionTranslator}.
+     * 
+     * @param defaultTopicNamespace
+     *            the default topic namespace to use if not declared in the
+     *            WS-Notification subscribe message.
+     */
+    public TopicSubscriptionTranslator(String defaultTopicNamespace) {
+        this.defaultTopicNamespace = defaultTopicNamespace;
     }
 
     /**
@@ -70,13 +79,12 @@ public class TopicSubscriptionTranslator extends Translator<Subscribe, String> {
         if ((topicNamespace == null) || (topicNamespace.equals(""))) {
             // FIXME: a TranslationException should be thrown but
             // first the issue #43 has to be fixed
-            log.warn("No namespace declared for prefix '"
-                    + topic.getPrefix()
-                    + "' associated to topic "
-                    + topic
-                    + " the default topic namespace will be used 'http://streams.event-processing.org/ids/'");
+            log.warn("No namespace declared for prefix '" + topic.getPrefix()
+                    + "' associated to topic " + topic
+                    + " the default topic namespace will be used '"
+                    + this.defaultTopicNamespace + "'");
 
-            topicNamespace = "http://streams.event-processing.org/ids/";
+            topicNamespace = this.defaultTopicNamespace;
         }
 
         return "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <"

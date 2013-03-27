@@ -80,7 +80,9 @@ public abstract class WsnService<T> {
         this.nodeProvider = nodeProvider;
         this.registryUrl = registryUrl;
         this.streamUrl = streamUrl;
-        this.translator = new WsnTranslator();
+        int index = this.streamUrl.lastIndexOf('/');
+        this.translator =
+                new WsnTranslator(this.streamUrl.substring(0, index + 1));
     }
 
     /**

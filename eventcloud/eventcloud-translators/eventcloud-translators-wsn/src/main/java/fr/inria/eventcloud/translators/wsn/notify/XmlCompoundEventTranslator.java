@@ -54,6 +54,9 @@ import fr.inria.eventcloud.translators.wsn.WsnConstants;
 public class XmlCompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
+    /**
+     * Creates a {@link XmlCompoundEventTranslator}.
+     */
     public XmlCompoundEventTranslator() {
 
     }

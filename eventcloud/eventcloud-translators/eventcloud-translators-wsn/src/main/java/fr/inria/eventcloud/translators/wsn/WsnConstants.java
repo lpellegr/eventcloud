@@ -30,6 +30,9 @@ import eu.play_project.play_commons.constants.Namespace;
  */
 public class WsnConstants {
 
+    public static final String DEFAULT_TOPIC_NAMESPACE =
+            "http://streams.event-processing.org/ids/";
+
     /**
      * Defines the value of the separator that is used to concatenate several
      * URIs into a new one.

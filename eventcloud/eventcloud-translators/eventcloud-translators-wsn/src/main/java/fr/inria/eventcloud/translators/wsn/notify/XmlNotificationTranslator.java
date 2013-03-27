@@ -77,9 +77,19 @@ public class XmlNotificationTranslator extends
     private static Logger log =
             LoggerFactory.getLogger(XmlNotificationTranslator.class);
 
+    private String defaultTopicNamespace;
+
     private Pattern phoneNumberPattern;
 
-    public XmlNotificationTranslator() {
+    /**
+     * Creates a {@link XmlNotificationTranslator}.
+     * 
+     * @param defaultTopicNamespace
+     *            the default topic namespace to use if it is not declared in
+     *            the WS-Notification message.
+     */
+    public XmlNotificationTranslator(String defaultTopicNamespace) {
+        this.defaultTopicNamespace = defaultTopicNamespace;
         this.phoneNumberPattern =
                 Pattern.compile("^0[0-9]{9}$|^00[0-9]{7,15}$");
     }
@@ -114,12 +124,11 @@ public class XmlNotificationTranslator extends
                 // FIXME: a TranslationException should be thrown but
                 // first the issue #43 has to be fixed
                 log.warn("No namespace declared for prefix '"
-                        + topic.getPrefix()
-                        + "' associated to topic "
-                        + topic
-                        + " the default topic namespace will be used 'http://streams.event-processing.org/ids/'");
+                        + topic.getPrefix() + "' associated to topic " + topic
+                        + " the default topic namespace will be used '"
+                        + this.defaultTopicNamespace + "'");
 
-                topicNamespace = "http://streams.event-processing.org/ids/";
+                topicNamespace = this.defaultTopicNamespace;
             }
             topicNode =
                     Node.createURI(topicNamespace + topic.getLocalPart()

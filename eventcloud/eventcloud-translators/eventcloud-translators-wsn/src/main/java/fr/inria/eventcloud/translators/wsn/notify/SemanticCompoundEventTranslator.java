@@ -44,6 +44,9 @@ import fr.inria.eventcloud.translators.wsn.Translator;
 public class SemanticCompoundEventTranslator extends
         Translator<CompoundEvent, NotificationMessageHolderType> {
 
+    /**
+     * Creates a {@link SemanticCompoundEventTranslator}.
+     */
     public SemanticCompoundEventTranslator() {
 
     }
