@@ -376,7 +376,11 @@ public class EventCloudProperties {
 
     private static File configurationFileLoaded;
 
-    public static void loadConfiguration() {
+    static {
+        loadConfiguration();
+    }
+    
+    public static synchronized void loadConfiguration() {
         if (configurationFileLoaded == null) {
             configurationFileLoaded =
                     ConfigurationParser.load(
