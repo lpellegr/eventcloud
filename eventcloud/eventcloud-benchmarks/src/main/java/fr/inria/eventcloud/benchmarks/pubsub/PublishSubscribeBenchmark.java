@@ -38,6 +38,8 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.C
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -85,10 +87,13 @@ import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
  */
 public class PublishSubscribeBenchmark {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(PublishSubscribeBenchmark.class);
+
     // parameters
 
     @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish")
-    public static int nbPublications = 10;
+    public static int nbPublications = 1000;
 
     @Parameter(names = {"-ces", "--compound-event-size"}, description = "The number of quadruples contained by each CE")
     public int nbQuadruplesPerCompoundEvent = 10;
@@ -199,7 +204,27 @@ public class PublishSubscribeBenchmark {
         System.exit(0);
     }
 
+    private void logParameterValues() {
+        log.info("Benchmark starting with the following parameters:");
+        log.info("  compoundEventSize -> {}", nbQuadruplesPerCompoundEvent);
+        log.info("  discardFirstRuns -> {}", discardFirstRuns);
+        log.info("  gcmaDescriptor -> {}", gcmaDescriptor);
+        log.info("  inMemoryDatastore -> {}", inMemoryDatastore);
+        log.info("  listenerType -> {}", listenerType);
+        log.info("  nbPeers -> {}", nbPeers);
+        log.info("  nbPublications -> {}", nbPublications);
+        log.info("  nbPublishers -> {}", nbPublishers);
+        log.info("  nbRuns -> {}", nbRuns);
+        log.info("  nbSubscribers -> {}", nbSubscribers);
+        log.info("  publishQuadruples -> {}", publishIndependentQuadruples);
+        log.info("  rewritingLevel -> {}", rewritingLevel);
+        log.info("  uniformDataDistribution -> {}", uniformDataDistribution);
+        log.info("  waitBetweenPublications -> {}", waitBetweenPublications);
+    }
+
     public StatsRecorder execute() {
+        logParameterValues();
+
         if (this.rewritingLevel < 0) {
             throw new IllegalStateException("Illegal rewriting level: "
                     + this.rewritingLevel);
