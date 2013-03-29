@@ -206,24 +206,26 @@ public class PublishSubscribeBenchmark {
 
     private void logParameterValues() {
         log.info("Benchmark starting with the following parameters:");
-        log.info("  compoundEventSize -> {}", nbQuadruplesPerCompoundEvent);
-        log.info("  discardFirstRuns -> {}", discardFirstRuns);
-        log.info("  gcmaDescriptor -> {}", gcmaDescriptor);
-        log.info("  inMemoryDatastore -> {}", inMemoryDatastore);
-        log.info("  listenerType -> {}", listenerType);
-        log.info("  nbPeers -> {}", nbPeers);
+        log.info("  compoundEventSize -> {}", this.nbQuadruplesPerCompoundEvent);
+        log.info("  discardFirstRuns -> {}", this.discardFirstRuns);
+        log.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
+        log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
+        log.info("  listenerType -> {}", this.listenerType);
+        log.info("  nbPeers -> {}", this.nbPeers);
         log.info("  nbPublications -> {}", nbPublications);
-        log.info("  nbPublishers -> {}", nbPublishers);
-        log.info("  nbRuns -> {}", nbRuns);
-        log.info("  nbSubscribers -> {}", nbSubscribers);
-        log.info("  publishQuadruples -> {}", publishIndependentQuadruples);
-        log.info("  rewritingLevel -> {}", rewritingLevel);
-        log.info("  uniformDataDistribution -> {}", uniformDataDistribution);
-        log.info("  waitBetweenPublications -> {}", waitBetweenPublications);
+        log.info("  nbPublishers -> {}", this.nbPublishers);
+        log.info("  nbRuns -> {}", this.nbRuns);
+        log.info("  nbSubscribers -> {}", this.nbSubscribers);
+        log.info("  publishQuadruples -> {}", this.publishIndependentQuadruples);
+        log.info("  rewritingLevel -> {}", this.rewritingLevel);
+        log.info(
+                "  uniformDataDistribution -> {}", this.uniformDataDistribution);
+        log.info(
+                "  waitBetweenPublications -> {}", this.waitBetweenPublications);
     }
 
     public StatsRecorder execute() {
-        logParameterValues();
+        this.logParameterValues();
 
         if (this.rewritingLevel < 0) {
             throw new IllegalStateException("Illegal rewriting level: "
