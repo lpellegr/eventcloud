@@ -118,7 +118,11 @@ public class P2PStructuredProperties {
 
     private static boolean configurationLoaded = false;
 
-    public static void loadConfiguration() {
+    static {
+        loadConfiguration();
+    }
+
+    public static synchronized void loadConfiguration() {
         if (!configurationLoaded) {
             ConfigurationParser.load(
                     P2PStructuredProperties.class,
