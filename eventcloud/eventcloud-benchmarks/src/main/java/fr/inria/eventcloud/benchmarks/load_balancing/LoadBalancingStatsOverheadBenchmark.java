@@ -16,6 +16,11 @@
  **/
 package fr.inria.eventcloud.benchmarks.load_balancing;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.core.ProActiveException;
@@ -30,6 +35,7 @@ import ch.qos.logback.classic.Logger;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.converters.FileConverter;
 import com.google.common.base.Stopwatch;
 
 import fr.inria.eventcloud.EventCloudDescription;
@@ -37,14 +43,17 @@ import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
+import fr.inria.eventcloud.parsers.RdfParser;
 
 /**
  * Load-balancing benchmark to evaluate the impact of the stats computed in
@@ -54,11 +63,14 @@ import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
  */
 public class LoadBalancingStatsOverheadBenchmark {
 
+    @Parameter(names = {"-if", "--input-file"}, description = "Read the quadruple to publish from a file", converter = FileConverter.class)
+    private File inputFile = null;
+
     @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed", required = true)
     private int nbRuns = 1;
 
-    @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish")
-    private int nbPublications = 1000;
+    @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish", required = true)
+    private int nbPublications = -1;
 
     @Parameter(names = {"-nc", "--nb-characters-per-rdfterm"}, description = "The number of characters per RDF term")
     private int nbCharacters = 10;
@@ -106,7 +118,7 @@ public class LoadBalancingStatsOverheadBenchmark {
             EventCloudProperties.STATS_RECORDER_CLASS.setValue(this.statsRecorderClass);
         }
 
-        final Quadruple[] quadruples = createQuadruples();
+        final List<Quadruple> quadruples = this.loadQuadruples();
 
         MicroBenchmark microBenchmark =
                 new MicroBenchmark(this.nbRuns, new MicroBenchmarkRun() {
@@ -136,7 +148,7 @@ public class LoadBalancingStatsOverheadBenchmark {
 
                         for (int i = 0; i < LoadBalancingStatsOverheadBenchmark.this.nbPublications; i++) {
                             stopwatch.start();
-                            putgetProxy.add(quadruples[i]);
+                            putgetProxy.add(quadruples.get(i));
                             stopwatch.stop();
                         }
 
@@ -154,13 +166,34 @@ public class LoadBalancingStatsOverheadBenchmark {
                 MicroBenchmark.DEFAULT_CATEGORY_NAME).getMean());
     }
 
-    private Quadruple[] createQuadruples() {
-        final Quadruple[] quadruples = new Quadruple[this.nbPublications];
+    private List<Quadruple> loadQuadruples() {
+        final List<Quadruple> quadruples =
+                new ArrayList<Quadruple>(this.nbPublications);
 
-        for (int i = 0; i < this.nbPublications; i++) {
-            quadruples[i] =
-                    QuadrupleGenerator.randomWithoutLiteral(this.nbCharacters);
+        if (this.inputFile != null) {
+            try {
+                QuadrupleIterator it =
+                        RdfParser.parse(
+                                new FileInputStream(this.inputFile),
+                                SerializationFormat.NQuads, false);
+                int c = 0;
+                while (it.hasNext()) {
+                    quadruples.add(it.next());
+                    c++;
+
+                    if (this.nbPublications > 0 && c == this.nbPublications) {
+                        break;
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            for (int i = 0; i < this.nbPublications; i++) {
+                quadruples.add(QuadrupleGenerator.randomWithoutLiteral(this.nbCharacters));
+            }
         }
+
         return quadruples;
     }
 
