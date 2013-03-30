@@ -49,13 +49,42 @@ public class CumulatedMeasurement implements Serializable {
 
         synchronized (this.times) {
             for (Entry<String, Long> entry : this.times.entrySet()) {
-                sum +=
-                        entry.getValue()
-                                - pointToPointEntryMeasurements.get(entry.getKey());
+                Long entryValue =
+                        pointToPointEntryMeasurements.get(entry.getKey());
+                Long exitValue = entry.getValue();
+
+                if (entryValue == null) {
+                    throw new IllegalStateException(
+                            "Entry time not found for eventId "
+                                    + entry.getKey()
+                                    + "\nPoint-to-point entry map contains "
+                                    + pointToPointEntryMeasurements.size()
+                                    + " entrie(s)\n"
+                                    + "Point-to-point exit map contains "
+                                    + this.times.size()
+                                    + " entrie(s)\nPoint-to-point entry collection dump:\n"
+                                    + this.toString(pointToPointEntryMeasurements));
+                }
+
+                sum += exitValue - entryValue;
             }
         }
 
         return sum;
+    }
+
+    private String toString(Map<String, Long> pointToPointMeasurements) {
+        StringBuilder buf = new StringBuilder();
+
+        for (Entry<String, Long> entry : pointToPointMeasurements.entrySet()) {
+            buf.append("  ");
+            buf.append(entry.getKey());
+            buf.append(": ");
+            buf.append(entry.getValue());
+            buf.append("\n");
+        }
+
+        return buf.toString();
     }
 
 }
