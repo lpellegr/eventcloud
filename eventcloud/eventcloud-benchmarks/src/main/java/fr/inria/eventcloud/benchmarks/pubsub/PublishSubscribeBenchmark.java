@@ -427,14 +427,14 @@ public class PublishSubscribeBenchmark {
             proxy.publish();
         }
 
-        // timeout after 1 hour
-        collector.waitForAllPublisherReports(3600000);
+        // timeout after 10 hours
+        collector.waitForAllPublisherReports(36000000);
 
         this.pointToPointEntryMeasurements =
                 collector.getPointToPointEntryMeasurements();
 
-        // timeout after 1 hour
-        collector.waitForAllSubscriberReports(3600000);
+        // timeout after 10 hours
+        collector.waitForAllSubscriberReports(36000000);
 
         // the end to end termination time is the time at which the last
         // subscriber has notified the collector about its termination
