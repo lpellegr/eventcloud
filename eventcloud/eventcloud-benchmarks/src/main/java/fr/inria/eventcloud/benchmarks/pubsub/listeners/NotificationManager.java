@@ -59,13 +59,13 @@ public abstract class NotificationManager<T> implements Serializable {
 
     // WARNING: this method may be invoked in parallel
     public void handleNewEvent(SubscriptionId subscriptionId, T solution) {
+        this.pointToPointExitMeasurements.reportReception(this.getEventId(solution));
+
         int nbEventsReceived = this.nbEventsReceived.incrementAndGet();
 
         if (nbEventsReceived == 1) {
             this.outputMeasurement.setEntryTime();
         }
-
-        this.pointToPointExitMeasurements.reportReception(this.getEventId(solution));
 
         if (nbEventsReceived == this.nbEventsExpected) {
             this.outputMeasurement.setExitTime();

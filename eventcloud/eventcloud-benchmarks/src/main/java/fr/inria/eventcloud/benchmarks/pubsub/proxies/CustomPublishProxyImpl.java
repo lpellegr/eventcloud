@@ -78,10 +78,10 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
                 for (int i = 0; i < this.events.size(); i++) {
                     CompoundEvent ce = (CompoundEvent) this.events.get(i);
 
-                    super.publish(ce);
-
                     this.pointToPointEntryMeasurements.put(ce.getGraph()
                             .getURI(), System.currentTimeMillis());
+
+                    super.publish(ce);
 
                     if (i < this.events.size() - 1) {
                         this.forceWaitingPeriod();
@@ -91,10 +91,10 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
                 for (int i = 0; i < this.events.size(); i++) {
                     Quadruple q = (Quadruple) this.events.get(i);
 
-                    super.publish(q);
-
                     this.pointToPointEntryMeasurements.put(q.getGraph()
                             .getURI(), System.currentTimeMillis());
+
+                    super.publish(q);
 
                     if (i < this.events.size() - 1) {
                         this.forceWaitingPeriod();
