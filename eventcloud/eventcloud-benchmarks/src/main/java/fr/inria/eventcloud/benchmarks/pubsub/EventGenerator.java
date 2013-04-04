@@ -79,7 +79,7 @@ public class EventGenerator {
         Random rand = new Random();
 
         for (int i = 0; i < nodeSize; i++) {
-            int lowerBound = P2PStructuredProperties.CAN_LOWER_BOUND.getValue();;
+            int lowerBound = P2PStructuredProperties.CAN_LOWER_BOUND.getValue();
             int upperBound = P2PStructuredProperties.CAN_UPPER_BOUND.getValue();
 
             if (i < lbCodePoints.length) {
@@ -88,6 +88,12 @@ public class EventGenerator {
 
             if (i < upCodePoints.length) {
                 upperBound = upCodePoints[i];
+            }
+
+            if (lowerBound > upperBound) {
+                int tmp = lowerBound;
+                lowerBound = upperBound;
+                upperBound = tmp;
             }
 
             int diff = upperBound - lowerBound;
