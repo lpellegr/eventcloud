@@ -47,13 +47,13 @@ public class StatsRecorderImpl implements StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public void reportTime(String categoryName, long time) {
+    public void reportValue(String categoryName, long value) {
         if (!this.categories.containsKey(categoryName)) {
             throw new IllegalArgumentException("Unknow category name "
                     + categoryName);
         }
 
-        this.categories.get(categoryName).reportTime(time);
+        this.categories.get(categoryName).reportTime(value);
     }
 
     /**
