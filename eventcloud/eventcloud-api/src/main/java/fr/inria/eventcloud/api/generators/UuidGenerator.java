@@ -16,8 +16,9 @@
  **/
 package fr.inria.eventcloud.api.generators;
 
-import java.util.Random;
 import java.util.UUID;
+
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 
 /**
  * Utility class that defines a convenient method to create arbitrary
@@ -26,8 +27,6 @@ import java.util.UUID;
  * @author bsauvan
  */
 public class UuidGenerator {
-
-    private static Random random = new Random();
 
     /**
      * Returns the string representation of a randomly generated {@link UUID}
@@ -41,10 +40,11 @@ public class UuidGenerator {
 
         if (Character.isDigit(randomUuid.charAt(0))) {
             randomUuid =
-                    ((char) (random.nextInt(26) + 'a'))
+                    ((char) (RandomUtils.nextInt(26) + 'a'))
                             + randomUuid.substring(1);
         }
 
         return randomUuid;
     }
+
 }
