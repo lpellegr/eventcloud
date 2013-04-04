@@ -858,6 +858,12 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         if (this.maintenanceTask != null) {
             this.maintenanceTask.shutdown();
+
+            try {
+                this.maintenanceTask.awaitTermination(2, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

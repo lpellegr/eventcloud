@@ -1028,16 +1028,23 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     public void close() {
         super.close();
 
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            this.ephemeralSubscriptionsGarbageColletor.shutdown();
+
+            try {
+                this.ephemeralSubscriptionsGarbageColletor.awaitTermination(
+                        2, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         this.indexSubscriptionRequestDelayer.close();
         this.publishQuadrupleRequestDelayer.close();
 
         if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             this.publishCompoundEventRequestDelayer.close();
-        }
-
-        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
-                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-            this.ephemeralSubscriptionsGarbageColletor.shutdownNow();
         }
 
         this.miscDatastore.close();
