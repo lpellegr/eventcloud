@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
-import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +27,8 @@ import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.sparql.function.FunctionRegistry;
 import com.hp.hpl.jena.tdb.StoreConnection;
 import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.tdb.base.block.FileMode;
 import com.hp.hpl.jena.tdb.base.file.Location;
-import com.hp.hpl.jena.tdb.sys.SystemTDB;
+import com.hp.hpl.jena.tdb.transaction.TDBTransactionException;
 
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
@@ -120,18 +118,23 @@ public class TransactionalTdbDatastore extends Datastore {
      */
     @Override
     protected void _close() {
-        TDBFactory.release(this.dataset);
+        boolean released = false;
+
+        // TODO: avoid active wait. The best solution consist in providing a
+        // patch to Jena in order to force a wait by using wait/notify mechanism
+        // when Location#release is called
+        while (!released) {
+            try {
+                TDBFactory.release(this.dataset);
+                released = true;
+            } catch (TDBTransactionException e) {
+                // it is only used to detect that they are still some
+                // active transactions to close before to release
+                Thread.yield();
+            }
+        }
 
         if (this.autoRemove) {
-            if (SystemUtils.isWindows()
-                    && SystemTDB.fileMode() == FileMode.mapped) {
-                // FIXME: TDB uses mapped files and due to a Java bug
-                // (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4715154),
-                // the repository cannot be removed before to force garbage
-                // collection
-                System.gc();
-            }
-
             try {
                 Files.deleteDirectory(this.location.getDirectoryPath());
             } catch (IOException e) {

@@ -192,10 +192,11 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected void internalUndeploy() {
+        super.internalUndeploy();
+
         ComponentUtils.terminateComponents(this.publishProxies);
         ComponentUtils.terminateComponents(this.putgetProxies);
         ComponentUtils.terminateComponents(this.subscribeProxies);
-        super.internalUndeploy();
     }
 
     /**

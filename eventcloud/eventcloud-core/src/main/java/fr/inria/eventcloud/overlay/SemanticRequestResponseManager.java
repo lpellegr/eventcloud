@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -283,6 +284,12 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
             throw new RuntimeException(e);
         } finally {
             this.threadPool.shutdown();
+
+            try {
+                this.threadPool.awaitTermination(2, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
