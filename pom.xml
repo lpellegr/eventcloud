@@ -42,7 +42,7 @@
 
 	<repositories>
 		<repository>
-			<id>mapdb-releases</id>
+			<id>eventcloud-releases</id>
 			<url>http://eventcloud.bitbucket.org/maven/releases</url>
 			<releases>
 				<enabled>true</enabled>
@@ -207,7 +207,7 @@
 			<dependency>
 				<groupId>org.mapdb</groupId>
 				<artifactId>mapdb</artifactId>
-				<version>20130308</version>
+				<version>20130404</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>

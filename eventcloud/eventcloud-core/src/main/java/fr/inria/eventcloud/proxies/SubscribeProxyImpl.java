@@ -190,11 +190,11 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                         .cacheSoftRefEnable()
                         .closeOnJvmShutdown()
                         .deleteFilesAfterClose()
-                        .journalDisable()
+                        .writeAheadLogDisable()
                         .make();
 
         this.notificationsDeliveredDB.createHashMap(
-                NOTIFICATIONS_DELIVERED_MAP_NAME,
+                NOTIFICATIONS_DELIVERED_MAP_NAME, false,
                 new NotificationId.Serializer(),
                 new SubscriptionId.Serializer());
     }
