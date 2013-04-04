@@ -108,84 +108,94 @@ public class PublishQuadrupleRequestDelayer extends Delayer<Quadruple> {
     }
 
     private void fireMatchingSubscriptions(Quadruple quadruple) {
-        // finds the sub subscriptions which are stored locally and that are
-        // matching the quadruple which have been just inserted into the
-        // local datastore
-        TransactionalDatasetGraph txnGraph =
-                super.overlay.getSubscriptionsDatastore().begin(
-                        AccessMode.READ_ONLY);
+        // the meta quadruple that is added by the system should not trigger the
+        // matching algorithm, its purposes is just to help the subscriber to
+        // know the number of quadruples that is expected (i.e. it should be
+        // retrieved by the polling mechanism triggered by SBCE1 or used to
+        // match ephemeral subscriptions with SBCE2 and 3)
+        if (!quadruple.getPredicate().equals(
+                PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
 
-        List<Subscription> subscriptionsMatching =
-                new ArrayList<Subscription>();
+            // finds the sub subscriptions which are stored locally and that are
+            // matching the quadruple which have been just inserted into the
+            // local datastore
+            TransactionalDatasetGraph txnGraph =
+                    super.overlay.getSubscriptionsDatastore().begin(
+                            AccessMode.READ_ONLY);
 
-        QueryIterator it = null;
-        try {
-            Optimize.noOptimizer();
-            it =
-                    Algebra.exec(
-                            createAlgebraRetrievingSubscriptionsMatching(quadruple),
-                            txnGraph.getUnderlyingDataset());
+            List<Subscription> subscriptionsMatching =
+                    new ArrayList<Subscription>();
 
-            while (it.hasNext()) {
-                final Binding binding = it.nextBinding();
-                log.debug(
-                        "Peer {} has a sub subscription that matches the quadruple {} ",
-                        super.overlay, quadruple);
+            QueryIterator it = null;
+            try {
+                Optimize.noOptimizer();
+                it =
+                        Algebra.exec(
+                                createAlgebraRetrievingSubscriptionsMatching(quadruple),
+                                txnGraph.getUnderlyingDataset());
 
-                // the identifier of the sub subscription that is matched is
-                // available from the result of the query which has been
-                // executed
-                SubscriptionId subscriptionId =
-                        SubscriptionId.parseSubscriptionId(binding.get(
-                                PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
-                                .getLiteralLexicalForm());
-
-                Subscription subscription =
-                        super.overlay.findSubscription(txnGraph, subscriptionId);
-
-                boolean mustIgnoreQuadrupleMatching =
-                        quadruple.getPublicationTime() < subscription.getIndexationTime();
-
-                if (log.isDebugEnabled()) {
+                while (it.hasNext()) {
+                    final Binding binding = it.nextBinding();
                     log.debug(
-                            "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
-                            new Object[] {
-                                    subscription.getIndexationTime(),
-                                    quadruple.getPublicationTime(),
-                                    quadruple.getGraph(),
-                                    mustIgnoreQuadrupleMatching});
-                }
+                            "Peer {} has a sub subscription that matches the quadruple {} ",
+                            super.overlay, quadruple);
 
-                // if s sent before q but q indexed before s then q must not
-                // be notified
-                if (!mustIgnoreQuadrupleMatching) {
-                    // We have to use an intermediate collection because
-                    // nested transactions are currently not allowed (i.e. a
-                    // write
-                    // transaction inside a read) with Jena (or we have to
-                    // force the overall transaction to be a write
-                    // transaction and
-                    // to pass the txnGraph variable to the
-                    // PublishSubscribeUtils.rewriteSubscriptionOrNotifySender
-                    // method. However this implies more contention).
-                    subscriptionsMatching.add(subscription);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (it != null) {
-                it.close();
-            }
-            txnGraph.end();
-            Optimize.setFactory(Optimize.stdOptimizationFactory);
-        }
+                    // the identifier of the sub subscription that is matched is
+                    // available from the result of the query which has been
+                    // executed
+                    SubscriptionId subscriptionId =
+                            SubscriptionId.parseSubscriptionId(binding.get(
+                                    PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
+                                    .getLiteralLexicalForm());
 
-        for (Subscription subscriptionMatching : subscriptionsMatching) {
-            // a subscription with only one sub subscription (that matches
-            // the quadruple which has been inserted) has been detected
-            PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
-                    super.overlay, subscriptionMatching, quadruple);
+                    Subscription subscription =
+                            super.overlay.findSubscription(
+                                    txnGraph, subscriptionId);
+
+                    boolean mustIgnoreQuadrupleMatching =
+                            quadruple.getPublicationTime() < subscription.getIndexationTime();
+
+                    if (log.isDebugEnabled()) {
+                        log.debug(
+                                "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
+                                new Object[] {
+                                        subscription.getIndexationTime(),
+                                        quadruple.getPublicationTime(),
+                                        quadruple.getGraph(),
+                                        mustIgnoreQuadrupleMatching});
+                    }
+
+                    // if s sent before q but q indexed before s then q must not
+                    // be notified
+                    if (!mustIgnoreQuadrupleMatching) {
+                        // We have to use an intermediate collection because
+                        // nested transactions are currently not allowed (i.e. a
+                        // write
+                        // transaction inside a read) with Jena (or we have to
+                        // force the overall transaction to be a write
+                        // transaction and
+                        // to pass the txnGraph variable to the
+                        // PublishSubscribeUtils.rewriteSubscriptionOrNotifySender
+                        // method. However this implies more contention).
+                        subscriptionsMatching.add(subscription);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+                txnGraph.end();
+                Optimize.setFactory(Optimize.stdOptimizationFactory);
+            }
+
+            for (Subscription subscriptionMatching : subscriptionsMatching) {
+                // a subscription with only one sub subscription (that matches
+                // the quadruple which has been inserted) has been detected
+                PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
+                        super.overlay, subscriptionMatching, quadruple);
+            }
         }
 
         // finds the ephemeral subscriptions that are resolved
