@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub.suppliers;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -40,6 +42,9 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
 
     private final int rewritingLevel;
 
+    // sequence number appended to the graph value of each CE generated
+    private final AtomicInteger sequenceNumber;
+
     /**
      * Constructs a compound event supplier that builds compound events randomly
      * by using the specified number of quadruples.
@@ -62,6 +67,7 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
 
         this.size = size;
         this.rewritingLevel = rewritingLevel;
+        this.sequenceNumber = new AtomicInteger();
     }
 
     public CompoundEventSupplier(int size) {
@@ -77,7 +83,8 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
 
         Node graph =
                 Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
-                        + UuidGenerator.randomUuid());
+                        + UuidGenerator.randomUuid()
+                        + this.sequenceNumber.incrementAndGet());
 
         Node[] randomlyGenerateNodes = new Node[this.size];
         for (int i = 0; i < randomlyGenerateNodes.length; i++) {
