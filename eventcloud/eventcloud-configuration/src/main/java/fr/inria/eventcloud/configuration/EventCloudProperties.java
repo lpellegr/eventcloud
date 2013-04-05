@@ -193,7 +193,7 @@ public class EventCloudProperties {
 
     /**
      * Defines at which frequence the garbage collection timeout for ephemeral
-     * subscriptions must be triggered.
+     * subscriptions must be triggered (in minutes)
      */
     public static final PropertyInteger EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT =
             new PropertyInteger(
@@ -204,7 +204,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger EPHEMERAL_SUBSCRIPTION_EXPIRATION_TIME =
             new PropertyInteger(
-                    "eventcloud.ephemeral.subscription.expiration.time", 3000);
+                    "eventcloud.ephemeral.subscription.expiration.time", 20000);
 
     /**
      * Defines whether static load balancing must be enabled or not. When it is
@@ -379,7 +379,7 @@ public class EventCloudProperties {
     static {
         loadConfiguration();
     }
-    
+
     public static synchronized void loadConfiguration() {
         if (configurationFileLoaded == null) {
             configurationFileLoaded =
