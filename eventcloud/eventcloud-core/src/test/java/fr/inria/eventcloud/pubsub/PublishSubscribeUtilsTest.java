@@ -145,7 +145,8 @@ public class PublishSubscribeUtilsTest {
             CompoundEvent compoundEvent = new CompoundEvent(permutation);
 
             Binding binding =
-                    PublishSubscribeUtils.matches(compoundEvent, subscription);
+                    PublishSubscribeUtils.matches(compoundEvent, subscription)
+                            .getFirst();
 
             assertEquals(binding, expectedResult);
         }

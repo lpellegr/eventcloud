@@ -120,7 +120,7 @@ public class LoadBalancingPrecisionBenchmark {
                                         .build();
 
                         test.execute();
-                        recorder.reportTime(
+                        recorder.reportValue(
                                 MicroBenchmark.DEFAULT_CATEGORY_NAME,
                                 test.getExecutionTime());
                     }

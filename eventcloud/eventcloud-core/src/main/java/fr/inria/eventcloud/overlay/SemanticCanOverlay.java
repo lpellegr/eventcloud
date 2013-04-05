@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -40,16 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.SetMultimap;
-import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -79,7 +73,6 @@ import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.SubscriberConnectionFailure;
 import fr.inria.eventcloud.pubsub.Subscription;
-import fr.inria.eventcloud.pubsub.notifications.NotificationId;
 import fr.inria.eventcloud.reasoner.SparqlColander;
 
 /**
@@ -104,17 +97,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private final TransactionalTdbDatastore subscriptionsDatastore;
 
-    // this collection is used only when SCBE2 or SBCE3 is enabled.
-    // its purpose is to maintain temporarily a trace of the quadruples which
-    // have already been sent for a given notification in order to avoid
-    // to send duplicates and thus saving some bandwidth
-    private SetMultimap<NotificationId, HashCode> sentQuadrupleHashValues;
-
     private ScheduledExecutorService ephemeralSubscriptionsGarbageColletor;
-
-    // this cache is used to prevent compound events to be handled multi-times
-    // on a same peer
-    private Cache<Node, Boolean> alreadyHandledCompoundEvent;
 
     private final IndexSubscriptionRequestDelayer indexSubscriptionRequestDelayer;
 
@@ -197,13 +180,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         this.subscriberConnectionFailures =
                 new MapMaker().softValues().makeMap();
 
-        if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
-            this.sentQuadrupleHashValues =
-                    Multimaps.synchronizedSetMultimap(HashMultimap.<NotificationId, HashCode> create(
-                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue(),
-                            EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue()));
-        }
-
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
                 || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             this.ephemeralSubscriptionsGarbageColletor =
@@ -221,7 +197,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                     },
                     EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
                     EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
-                    TimeUnit.MILLISECONDS);
+                    TimeUnit.MINUTES);
         }
 
         this.indexSubscriptionRequestDelayer =
@@ -232,11 +208,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             this.publishCompoundEventRequestDelayer =
                     new PublishCompoundEventRequestDelayer(this);
-            this.alreadyHandledCompoundEvent =
-                    CacheBuilder.newBuilder()
-                            .maximumSize(13000)
-                            .expireAfterWrite(10, TimeUnit.MINUTES)
-                            .build();
         } else {
             this.publishCompoundEventRequestDelayer = null;
         }
@@ -281,18 +252,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         txnGraph = this.subscriptionsDatastore.begin(AccessMode.WRITE);
 
-        Set<HashCode> sentQuadrupleHashValuesResult = null;
         try {
             for (Node[] solution : solutions) {
                 Node graph = solution[0];
                 Node sId = solution[1];
-
-                if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
-                    sentQuadrupleHashValuesResult =
-                            this.sentQuadrupleHashValues.removeAll(new NotificationId(
-                                    PublishSubscribeUtils.extractSubscriptionId(sId),
-                                    graph));
-                }
 
                 txnGraph.delete(
                         graph,
@@ -309,6 +272,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             txnGraph.commit();
         } catch (Exception e) {
             e.printStackTrace();
+            txnGraph.abort();
         } finally {
             txnGraph.end();
         }
@@ -319,29 +283,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             msg.append(solutions.size());
             msg.append(" quadruple(s) removed");
 
-            if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
-                msg.append(" and ");
-                msg.append(sentQuadrupleHashValuesResult == null
-                        ? 0 : sentQuadrupleHashValuesResult.size());
-                msg.append(" removed from the sentQuadrupleHashValues datastructure");
-            }
-
             log.debug(msg.toString());
         }
-    }
-
-    public boolean markAsHandled(Node eventId) {
-        return this.alreadyHandledCompoundEvent.asMap().putIfAbsent(
-                eventId, Boolean.TRUE) == null;
-    }
-
-    public boolean markAsSent(NotificationId notificationId, Quadruple quadruple) {
-        return this.sentQuadrupleHashValues.put(
-                notificationId, quadruple.hashValue());
-    }
-
-    public void dropAsSent(NotificationId notificationId) {
-        this.sentQuadrupleHashValues.removeAll(notificationId);
     }
 
     /**
@@ -575,32 +518,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append(this.miscDatastore.getStatsRecorder().getNbQuads());
             result.append('\n');
         }
-
-        if (this.sentQuadrupleHashValues != null) {
-            result.append("Nb entries contained by sentQuadrupleHashValues datastructure: ");
-            result.append(this.sentQuadrupleHashValues.size());
-            result.append('\n');
-        }
-
-        // TransactionalDatasetGraph txnGraph =
-        // this.miscDatastore.begin(AccessMode.READ_ONLY);
-        //
-        // QuadrupleIterator it = txnGraph.find(QuadruplePattern.ANY);
-        //
-        // int shortTerm = 0;
-        // int longTerm = 0;
-        // while (it.hasNext()) {
-        // if (it.next().getGraph().toString().length() > 20) {
-        // longTerm++;
-        // } else {
-        // shortTerm++;
-        // }
-        // }
-        //
-        // txnGraph.end();
-        //
-        // result.append("SHORT RDF TERM: " + shortTerm);
-        // result.append("\nLONG RDF TERM: " + longTerm);
 
         return result.toString();
     }

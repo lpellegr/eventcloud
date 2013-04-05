@@ -152,7 +152,7 @@ public class LoadBalancingStatsOverheadBenchmark {
                             stopwatch.stop();
                         }
 
-                        recorder.reportTime(
+                        recorder.reportValue(
                                 MicroBenchmark.DEFAULT_CATEGORY_NAME,
                                 stopwatch.elapsed(TimeUnit.MILLISECONDS));
                     }

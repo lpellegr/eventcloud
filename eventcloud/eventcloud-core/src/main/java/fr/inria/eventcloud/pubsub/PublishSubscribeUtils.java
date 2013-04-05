@@ -609,17 +609,12 @@ public final class PublishSubscribeUtils {
                                         quadruple.createMetaGraphNode(),
                                         source, ImmutableList.of(quadruple));
 
-                        if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
-                                || (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue() && semanticCanOverlay.markAsSent(
-                                        quadruplesNotification.getId(),
-                                        quadruple))) {
-                            subscriber.receiveSbce2(quadruplesNotification);
-                            semanticCanOverlay.getStub().sendv(
-                                    new IndexEphemeralSubscriptionRequest(
-                                            quadruple.createMetaGraphNode(),
-                                            subscription.getOriginalId(),
-                                            subscription.getSubscriberUrl()));
-                        }
+                        subscriber.receiveSbce2(quadruplesNotification);
+                        semanticCanOverlay.getStub().sendv(
+                                new IndexEphemeralSubscriptionRequest(
+                                        quadruple.createMetaGraphNode(),
+                                        subscription.getOriginalId(),
+                                        subscription.getSubscriberUrl()));
                     }
                     break;
                 case SIGNAL:
@@ -800,7 +795,7 @@ public final class PublishSubscribeUtils {
 
     /**
      * Finds the ephemeral subscriptions contained by the peer represented by
-     * the specified {@code overlay}. For each ephemeral that is verified the
+     * the specified {@code overlay}. For each ephemeral that is satisfied the
      * given {@code quadruple} is notified to the subscriber associated to the
      * ephemeral subscription.
      * 
@@ -841,12 +836,8 @@ public final class PublishSubscribeUtils {
                                 PAActiveObject.getUrl(overlay.getStub()),
                                 ImmutableList.of(quadruple));
 
-                if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
-                        || (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue() && overlay.markAsSent(
-                                n.getId(), quadruple))) {
-                    Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
-                            .receiveSbce2(n);
-                }
+                Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberUrl)
+                        .receiveSbce2(n);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -864,11 +855,13 @@ public final class PublishSubscribeUtils {
      * @param subscription
      *            the subscription to rewrite.
      * 
-     * @return {@code true} if the specified subscription is matched by the
-     *         given compound event, {@code false} otherwise.
+     * @return a {@link Pair} whose the first element contains the bindings
+     *         associated to the parts of the subscription that are satisfied or
+     *         {@code null}. The second element contains the index of the first
+     *         quadruple that satisfies the subscription or {@code -1}.
      */
-    public static final Binding matches(CompoundEvent compoundEvent,
-                                        Subscription subscription) {
+    public static final Pair<Binding, Integer> matches(CompoundEvent compoundEvent,
+                                                       Subscription subscription) {
         if (compoundEvent.size() < subscription.getSubSubscriptions().length) {
             return null;
         }
@@ -879,15 +872,20 @@ public final class PublishSubscribeUtils {
         BindingMap binding = new BindingMap();
         int nbSubSubscriptions = subscription.getSubSubscriptions().length;
 
+        int indexFirstQuadrupleMatching = -1;
+
         for (int i = 0; i < nbSubSubscriptions; i++) {
             AtomicQuery aq =
                     subscription.getSubSubscriptions()[0].getAtomicQuery();
 
-            for (Quadruple quadruple : quadruples) {
+            for (int j = 0; j < quadruples.size(); j++) {
                 BindingMap tmpBinding;
 
-                if ((tmpBinding = matches(quadruple, aq)) == null) {
+                if ((tmpBinding = matches(quadruples.get(j), aq)) == null) {
                     continue;
+                } else if (indexFirstQuadrupleMatching == -1
+                        && tmpBinding != null) {
+                    indexFirstQuadrupleMatching = j;
                 }
 
                 binding.addAll(tmpBinding);
@@ -895,16 +893,16 @@ public final class PublishSubscribeUtils {
                 if (i < nbSubSubscriptions - 1) {
                     subscription =
                             SubscriptionRewriter.rewrite(
-                                    subscription, quadruple);
+                                    subscription, quadruples.get(j));
                 }
 
                 // once a quadruple has matched it can not match again
-                quadruples.remove(quadruple);
+                quadruples.remove(quadruples.get(j));
                 break;
             }
         }
 
-        return binding;
+        return Pair.create((Binding) binding, indexFirstQuadrupleMatching);
     }
 
     /**

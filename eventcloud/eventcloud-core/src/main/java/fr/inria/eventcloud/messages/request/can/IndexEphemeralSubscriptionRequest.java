@@ -31,7 +31,6 @@ import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
@@ -104,13 +103,7 @@ public class IndexEphemeralSubscriptionRequest extends
                 while (it.hasNext()) {
                     Quadruple quadruple = it.next();
 
-                    if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()
-                            && semanticOverlay.markAsSent(
-                                    notificationId, quadruple)) {
-                        builder.add(quadruple);
-                    } else if (!EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
-                        builder.add(quadruple);
-                    }
+                    builder.add(quadruple);
                 }
 
                 List<Quadruple> quadruples = builder.build();

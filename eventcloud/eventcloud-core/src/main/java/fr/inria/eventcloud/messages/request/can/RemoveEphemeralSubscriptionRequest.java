@@ -24,13 +24,11 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
-import fr.inria.eventcloud.pubsub.notifications.NotificationId;
 
 /**
  * Request used to remove an ephemeral subscription from peers once it is
@@ -78,12 +76,6 @@ public class RemoveEphemeralSubscriptionRequest extends
             e.printStackTrace();
         } finally {
             txnGraph.end();
-        }
-
-        if (EventCloudProperties.PREVENT_CHUNK_DUPLICATES.getValue()) {
-            semanticOverlay.dropAsSent(new NotificationId(
-                    this.subscriptionId.getValue(),
-                    super.quadruplePattern.getValue().getGraph()));
         }
     }
 
