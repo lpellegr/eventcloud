@@ -614,23 +614,18 @@ public class SubscribeProxyTest {
             }
         }
 
-        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
-                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-            // wait for 2 garbage collection to ensure that outdated things are
-            // removed
-            Thread.sleep(EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue() * 2);
-        }
+        if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
+            for (Peer p : this.deployer.getRandomSemanticTracker(
+                    this.eventCloudId).getPeers()) {
+                List<Quadruple> subscriptionData =
+                        Operations.findQuadruplesOperation(
+                                p, QuadruplePattern.ANY, true);
 
-        for (Peer p : this.deployer.getRandomSemanticTracker(this.eventCloudId)
-                .getPeers()) {
-            List<Quadruple> subscriptionData =
-                    Operations.findQuadruplesOperation(
-                            p, QuadruplePattern.ANY, true);
-
-            log.info(
-                    "After unsubscribe peer {} contains the following subscriptions:\n{}",
-                    p, QuadruplesFormatter.toString(subscriptionData, true));
-            Assert.assertEquals(0, subscriptionData.size());
+                log.info(
+                        "After unsubscribe peer {} contains the following subscriptions:\n{}",
+                        p, QuadruplesFormatter.toString(subscriptionData, true));
+                Assert.assertEquals(0, subscriptionData.size());
+            }
         }
     }
 
