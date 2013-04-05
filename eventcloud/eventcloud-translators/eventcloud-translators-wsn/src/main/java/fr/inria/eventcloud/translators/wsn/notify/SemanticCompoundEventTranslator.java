@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.translators.wsn.notify;
 
 import java.io.ByteArrayOutputStream;
-import java.util.List;
 
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
@@ -28,7 +27,6 @@ import org.w3c.dom.Element;
 
 import eu.play_project.play_commons.eventformat.EventFormatHelpers;
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.parsers.RdfSerializer;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
@@ -66,9 +64,8 @@ public class SemanticCompoundEventTranslator extends
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        List<Quadruple> quads = event.getQuadruples();
 
-        RdfSerializer.triGWriter(out, quads);
+        RdfSerializer.triGWriter(out, event);
 
         Element any =
                 EventFormatHelpers.wrapWithDomNativeMessageElement(new String(
@@ -80,8 +77,7 @@ public class SemanticCompoundEventTranslator extends
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
         if (event.size() > 0) {
-            String publicationSource =
-                    event.getQuadruples().get(0).getPublicationSource();
+            String publicationSource = event.get(0).getPublicationSource();
 
             if (publicationSource != null) {
                 W3CEndpointReferenceBuilder endPointReferenceBuilder =

@@ -96,9 +96,8 @@ public class WsnTranslatorTest {
             logInfo(event);
 
             Assert.assertEquals(
-                    // +1 for the metadata containing the event id
-                    initialEvent.getQuadruples().size() + 1,
-                    event.getQuadruples().size());
+            // +1 for the metadata containing the event id
+                    initialEvent.size() + 1, event.size());
         }
     }
 

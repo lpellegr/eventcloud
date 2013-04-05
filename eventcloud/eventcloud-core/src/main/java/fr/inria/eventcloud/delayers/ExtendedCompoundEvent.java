@@ -38,8 +38,7 @@ public class ExtendedCompoundEvent {
     }
 
     public Quadruple getIndexedQuadruple() {
-        return this.compoundEvent.getQuadruples().get(
-                this.indexQuadrupleUsedForIndexing);
+        return this.compoundEvent.get(this.indexQuadrupleUsedForIndexing);
     }
 
 }

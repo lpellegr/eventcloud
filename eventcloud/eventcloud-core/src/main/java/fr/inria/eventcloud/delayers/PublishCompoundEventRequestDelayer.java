@@ -23,6 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
@@ -120,9 +121,7 @@ public class PublishCompoundEventRequestDelayer extends
 
     private void fireMatchingSubscriptions(CompoundEvent compoundEvent,
                                            int indexQuadrupleUsedForIndexing) {
-        Quadruple quadruple =
-                compoundEvent.getQuadruples()
-                        .get(indexQuadrupleUsedForIndexing);
+        Quadruple quadruple = compoundEvent.get(indexQuadrupleUsedForIndexing);
 
         Node metaGraphNode = quadruple.createMetaGraphNode();
 
@@ -194,7 +193,7 @@ public class PublishCompoundEventRequestDelayer extends
                             subscriber.receiveSbce3(new QuadruplesNotification(
                                     subscription.getOriginalId(),
                                     metaGraphNode, source,
-                                    compoundEvent.getQuadruples()));
+                                    ImmutableList.copyOf(compoundEvent)));
                             break;
                         case SIGNAL:
                             subscriber.receiveSbce3(new SignalNotification(

@@ -83,8 +83,7 @@ public class SemanticNotificationTranslatorTest {
 
             Assert.assertEquals(
             // +1 for the metadata containing the event id
-                    initialEvent.getQuadruples().size(), event.getQuadruples()
-                            .size());
+                    initialEvent.size(), event.size());
         }
 
     }
@@ -98,14 +97,14 @@ public class SemanticNotificationTranslatorTest {
         CompoundEvent translatedEvent =
                 this.translator.translateSemanticNotification(this.translator.translateSemanticCompoundEvent(event));
 
-        Assert.assertFalse(containsBlankNodes(translatedEvent.getQuadruples()));
+        Assert.assertFalse(containsBlankNodes(translatedEvent));
 
         Assert.assertEquals(
                 translatedEvent,
                 this.translator.translateSemanticNotification(this.translator.translateSemanticCompoundEvent(translatedEvent)));
     }
 
-    private static boolean containsBlankNodes(List<Quadruple> quadruples) {
+    private static boolean containsBlankNodes(Iterable<Quadruple> quadruples) {
         for (Quadruple q : quadruples) {
             if (q.getSubject().isBlank() || q.getObject().isBlank()) {
                 return true;

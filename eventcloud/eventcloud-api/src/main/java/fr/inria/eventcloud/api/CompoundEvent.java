@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Iterators;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -83,7 +84,7 @@ public class CompoundEvent implements Event, Externalizable,
     public CompoundEvent(Collection<Quadruple> quadruples) {
         checkDataStructureSize(quadruples.size());
 
-        if (quadruples instanceof ImmutableList) {
+        if (quadruples instanceof List) {
             this.quadruples = (List<Quadruple>) quadruples;
         } else {
             this.quadruples = ImmutableList.copyOf(quadruples);
@@ -122,14 +123,14 @@ public class CompoundEvent implements Event, Externalizable,
     }
 
     /**
-     * Returns an unmodifiable list of the quadruples contained by the compound
-     * event.
+     * Returns the quadruple at the specified {@code index}.
      * 
-     * @return an unmodifiable list of the quadruples contained by the compound
-     *         event.
+     * @param index
+     * 
+     * @return the quadruple at the specified {@code index}.
      */
-    public List<Quadruple> getQuadruples() {
-        return this.quadruples;
+    public Quadruple get(int index) {
+        return this.quadruples.get(index);
     }
 
     /**
@@ -188,7 +189,7 @@ public class CompoundEvent implements Event, Externalizable,
      */
     @Override
     public Iterator<Quadruple> iterator() {
-        return this.quadruples.iterator();
+        return Iterators.unmodifiableIterator(this.quadruples.iterator());
     }
 
     /**

@@ -72,12 +72,6 @@ public class CompoundEventTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testImmutability1() {
         CompoundEvent compoundEvent = CompoundEventGenerator.random(10);
-        compoundEvent.getQuadruples().add(QuadrupleGenerator.random());
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void testImmutability2() {
-        CompoundEvent compoundEvent = CompoundEventGenerator.random(10);
         compoundEvent.getTriples().add(
                 new Triple(
                         NodeGenerator.randomUri(), NodeGenerator.randomUri(),
@@ -101,7 +95,7 @@ public class CompoundEventTest {
         ImmutableList<Quadruple> quadruples = builder.build();
 
         CompoundEvent e1 = new CompoundEvent(quadruples);
-        Assert.assertEquals(quadruples.size(), e1.getQuadruples().size());
+        Assert.assertEquals(quadruples.size(), e1.size());
 
         CompoundEvent e2 = null;
         try {
