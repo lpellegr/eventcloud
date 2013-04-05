@@ -16,18 +16,29 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
+import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 
@@ -64,7 +75,7 @@ public class EventGenerator {
      * 
      * @return the generated compound event.
      */
-    public static CompoundEvent randomCompoundEvent(SemanticZone[] zones,
+    public static CompoundEvent randomCompoundEvent(List<SemanticZone> zones,
                                                     int nbQuadruples,
                                                     int nodeSize) {
 
@@ -72,14 +83,21 @@ public class EventGenerator {
 
         Node graphNode =
                 randomGraphNode(
-                        zones[RandomUtils.nextInt(zones.length)], nodeSize);
+                        zones.get(RandomUtils.nextInt(zones.size())), nodeSize);
 
         for (int i = 0; i < nbQuadruples; i++) {
             builder.add(randomQuadruple(
-                    zones[i % zones.length], graphNode, nodeSize));
+                    zones.get(i % zones.size()), graphNode, nodeSize));
         }
 
         return new CompoundEvent(builder.build());
+    }
+
+    public static CompoundEvent randomCompoundEvent(SemanticZone[] zones,
+                                                    int nbQuadruples,
+                                                    int nodeSize) {
+        return randomCompoundEvent(
+                ImmutableList.copyOf(zones), nbQuadruples, nodeSize);
     }
 
     /**
@@ -183,13 +201,51 @@ public class EventGenerator {
     public static void main(String[] args) {
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
 
-        SemanticZone zone = new SemanticZone();
+        EventCloudDeployer deployer =
+                new EventCloudDeployer(
+                        new EventCloudDescription(),
+                        new EventCloudDeploymentDescriptor());
+        deployer.deploy(10);
 
-        for (int i = 0; i < 10; i++) {
-            zone = (SemanticZone) zone.split((byte) 0).getSecond();
+        List<SemanticZone> zones = new ArrayList<SemanticZone>();
+
+        for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
+            GetIdAndZoneResponseOperation<SemanticElement> response =
+                    CanOperations.getIdAndZoneResponseOperation(p);
+            zones.add((SemanticZone) response.getPeerZone());
         }
 
-        System.out.println(randomCompoundEvent(zone, 1, 10));
+        System.out.println("Zones are:");
+
+        for (SemanticZone z : zones) {
+            System.out.println("  " + z);
+        }
+
+        System.out.println("Generated compound event:");
+
+        CompoundEvent ce = randomCompoundEvent(zones, 10, 10);
+
+        /*
+         * Simple scenario to check that each quadruple that is 
+         * generated belongs to the zone of one peer only
+         */
+        for (Quadruple q : ce) {
+            System.out.println("  "
+                    + q.toString(StringRepresentation.CODE_POINTS));
+
+            Coordinate<SemanticElement> sc =
+                    SemanticCoordinateFactory.newSemanticCoordinate(q);
+
+            for (SemanticZone z : zones) {
+                if (z.contains(sc)) {
+                    System.out.println("     contained by " + z);
+                }
+            }
+        }
+
+        System.out.println("end");
+
+        deployer.undeploy();
     }
 
 }
