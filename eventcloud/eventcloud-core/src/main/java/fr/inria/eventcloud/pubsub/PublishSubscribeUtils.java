@@ -866,8 +866,7 @@ public final class PublishSubscribeUtils {
             return null;
         }
 
-        List<Quadruple> quadruples =
-                new ArrayList<Quadruple>(compoundEvent.getQuadruples());
+        List<Quadruple> quadruples = Lists.newArrayList(compoundEvent);
 
         BindingMap binding = new BindingMap();
         int nbSubSubscriptions = subscription.getSubSubscriptions().length;

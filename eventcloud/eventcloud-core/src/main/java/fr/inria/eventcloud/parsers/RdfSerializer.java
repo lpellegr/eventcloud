@@ -46,7 +46,7 @@ public class RdfSerializer {
      * @param quads
      *            the collection of quadruples to be written
      */
-    public static void triGWriter(OutputStream out, List<Quadruple> quads) {
+    public static void triGWriter(OutputStream out, Iterable<Quadruple> quads) {
 
         // Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(new
         // FileInputStream("D.trig")) ;
@@ -83,7 +83,7 @@ public class RdfSerializer {
      *            the collection of the quadruples
      * @return the corresponding data set graph
      */
-    private static DatasetGraph quadruplesToDatasetGraph(List<Quadruple> quads) {
+    private static DatasetGraph quadruplesToDatasetGraph(Iterable<Quadruple> quads) {
         DatasetGraph dsg = DatasetGraphFactory.createMem();
         for (Quadruple q : quads) {
             if (q.getPredicate() != PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE) {

@@ -83,7 +83,7 @@ public class XmlCompoundEventTranslator extends
         String eventId = null;
         boolean hasSimpleExpressionType = false;
 
-        for (Quadruple quad : event.getQuadruples()) {
+        for (Quadruple quad : event) {
             if (quad.getPredicate().equals(
                     Node.createURI(PublishSubscribeConstants.EVENTCLOUD_NS
                             + "event/" + "nbquads"))) {

@@ -160,7 +160,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
                 q.setPublicationTime(publicationTime);
             }
 
-            for (int i = 0; i < compoundEvent.getQuadruples().size(); i++) {
+            for (int i = 0; i < compoundEvent.size(); i++) {
                 // sends the whole compound event
                 super.sendv(new PublishCompoundEventRequest(compoundEvent, i));
             }

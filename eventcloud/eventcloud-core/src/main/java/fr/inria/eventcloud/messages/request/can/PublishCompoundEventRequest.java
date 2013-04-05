@@ -56,8 +56,7 @@ public class PublishCompoundEventRequest extends QuadrupleRequest {
             int indexQuadrupleUsedForIndexing) {
         // TODO: avoid the copy of the quadruple used for indexing the request.
         // It is already embedded by the compoundEvent
-        super(compoundEvent.getQuadruples().get(indexQuadrupleUsedForIndexing),
-                null);
+        super(compoundEvent.get(indexQuadrupleUsedForIndexing), null);
 
         this.compoundEvent = SerializedValue.create(compoundEvent);
         this.indexQuadrupleUsedForIndexing = indexQuadrupleUsedForIndexing;

@@ -16,7 +16,6 @@
  **/
 package fr.inria.eventcloud.api;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,22 +45,6 @@ public class Skolemizator {
             ".well-known/genid/";
 
     /**
-     * Replaces blank nodes with IRIs within the specified {@link CompoundEvent}
-     * . The transformation applied is the one described in the last <a href=
-     * "https://dvcs.w3.org/hg/rdf/raw-file/default/rdf-concepts/index.html#section-skolemization"
-     * >RDF 1.1 draft</a>.
-     * 
-     * @param ce
-     *            the compound event to process.
-     * 
-     * @return a compound event where Blank Nodes have been replaced by IRIs.
-     */
-    public static CompoundEvent skolemize(CompoundEvent ce) {
-        return new CompoundEvent(Skolemizator.skolemize(ce.getQuadruples()));
-
-    }
-
-    /**
      * Replaces blank nodes with IRIs within the specified collection of
      * {@link Quadruple}s. The transformation applied is the one described in
      * the last <a href=
@@ -74,7 +57,7 @@ public class Skolemizator {
      * @return a collection of quadruples where Blank Nodes have been replaced
      *         by IRIs.
      */
-    public static List<Quadruple> skolemize(Collection<Quadruple> quads) {
+    public static List<Quadruple> skolemize(Iterable<Quadruple> quads) {
 
         Builder<Quadruple> result = new ImmutableList.Builder<Quadruple>();
 
