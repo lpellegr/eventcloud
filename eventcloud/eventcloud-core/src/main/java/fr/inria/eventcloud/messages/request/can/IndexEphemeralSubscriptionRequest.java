@@ -38,7 +38,6 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
-import fr.inria.eventcloud.pubsub.notifications.NotificationId;
 import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 
 /**
@@ -95,10 +94,6 @@ public class IndexEphemeralSubscriptionRequest extends
                     txnGraph.find(metaGraphNode, Node.ANY, Node.ANY, Node.ANY);
 
             if (it.hasNext()) {
-                NotificationId notificationId =
-                        new NotificationId(
-                                this.subscriptionId.getValue(), metaGraphNode);
-
                 Builder<Quadruple> builder = ImmutableList.builder();
                 while (it.hasNext()) {
                     Quadruple quadruple = it.next();
