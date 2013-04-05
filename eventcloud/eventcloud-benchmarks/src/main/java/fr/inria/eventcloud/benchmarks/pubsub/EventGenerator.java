@@ -16,9 +16,10 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub;
 
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 
 import com.google.common.collect.ImmutableList;
@@ -38,36 +39,103 @@ import fr.inria.eventcloud.overlay.can.SemanticZone;
  */
 public class EventGenerator {
 
-    public static CompoundEvent randomCompoundEvent(SemanticZone zone,
+    private static AtomicInteger sequenceNumber = new AtomicInteger();
+
+    /**
+     * Reset the event generator. It resets essentially the sequence number to
+     * its default value.
+     */
+    public static void reset() {
+        sequenceNumber.set(0);
+    }
+
+    /**
+     * Generates a compound event so that each quadruple from the compound event
+     * is uniformly distributed to the specified zones.
+     * 
+     * @param zones
+     *            the zones used to generate the quadruples contained by the
+     *            compound event.
+     * @param nbQuadruples
+     *            the number of quadruples to generate for the compound event.
+     * @param nodeSize
+     *            the number of characters assigned to each RDF term of
+     *            quadruple that is generated.
+     * 
+     * @return the generated compound event.
+     */
+    public static CompoundEvent randomCompoundEvent(SemanticZone[] zones,
                                                     int nbQuadruples,
                                                     int nodeSize) {
+
         Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
 
+        Node graphNode =
+                randomGraphNode(
+                        zones[RandomUtils.nextInt(zones.length)], nodeSize);
+
         for (int i = 0; i < nbQuadruples; i++) {
-            builder.add(randomQuadruple(zone, nodeSize));
+            builder.add(randomQuadruple(
+                    zones[i % zones.length], graphNode, nodeSize));
         }
 
         return new CompoundEvent(builder.build());
     }
 
-    public static Quadruple randomQuadruple(SemanticZone zone, int nodeSize) {
-        Node[] nodes =
-                new Node[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+    /**
+     * Generates a compound event whose all the quadruples fit into the
+     * specified zone.
+     * 
+     * @param zone
+     *            the zone used to generate the quadruples contained by the
+     *            compound event.
+     * @param nbQuadruples
+     *            the number of quadruples to generate for the compound event.
+     * @param nodeSize
+     *            the number of characters assigned to each RDF term of
+     *            quadruple that is generated.
+     * 
+     * @return the generated compound event.
+     */
+    public static CompoundEvent randomCompoundEvent(SemanticZone zone,
+                                                    int nbQuadruples,
+                                                    int nodeSize) {
+        Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
 
-        for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            nodes[i] =
+        Node graphNode = randomGraphNode(zone, nodeSize);
+
+        for (int i = 0; i < nbQuadruples; i++) {
+            builder.add(randomQuadruple(zone, graphNode, nodeSize));
+        }
+
+        return new CompoundEvent(builder.build());
+    }
+
+    private static Node randomGraphNode(SemanticZone zone, int nodeSize) {
+        return randomNode(
+                zone.getLowerBound((byte) 0), zone.getUpperBound((byte) 0),
+                sequenceNumber.incrementAndGet(), nodeSize);
+    }
+
+    public static Quadruple randomQuadruple(SemanticZone zone, Node graphNode,
+                                            int nodeSize) {
+        Node[] nodes =
+                new Node[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1];
+
+        for (byte i = 1; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+            nodes[i - 1] =
                     randomNode(
-                            zone.getLowerBound(i), zone.getUpperBound(i),
+                            zone.getLowerBound(i), zone.getUpperBound(i), -1,
                             nodeSize);
         }
 
         return new Quadruple(
-                nodes[0], nodes[1], nodes[2], nodes[3], false, false);
+                graphNode, nodes[0], nodes[1], nodes[2], false, false);
     }
 
     private static Node randomNode(SemanticElement lowerBoundElement,
                                    SemanticElement upperBoundElement,
-                                   int nodeSize) {
+                                   int sequenceNumber, int nodeSize) {
 
         int[] lbCodePoints =
                 UnicodeUtils.toCodePointArray(lowerBoundElement.getValue());
@@ -75,8 +143,6 @@ public class EventGenerator {
                 UnicodeUtils.toCodePointArray(upperBoundElement.getValue());
 
         int[] result = new int[nodeSize];
-
-        Random rand = new Random();
 
         for (int i = 0; i < nodeSize; i++) {
             int lowerBound = P2PStructuredProperties.CAN_LOWER_BOUND.getValue();
@@ -101,11 +167,17 @@ public class EventGenerator {
             if (diff == 0) {
                 result[i] = lowerBound;
             } else {
-                result[i] = lowerBound + rand.nextInt(diff);
+                result[i] = lowerBound + RandomUtils.nextInt(diff);
             }
         }
 
-        return Node.createURI("urn:" + UnicodeUtils.toString(result));
+        String uri = "urn:" + UnicodeUtils.toString(result);
+
+        if (sequenceNumber > 0) {
+            uri = uri + sequenceNumber;
+        }
+
+        return Node.createURI(uri);
     }
 
     public static void main(String[] args) {
