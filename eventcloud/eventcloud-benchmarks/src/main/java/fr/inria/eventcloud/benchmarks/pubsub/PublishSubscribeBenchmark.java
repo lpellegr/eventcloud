@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployment.GcmDeploymentNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
@@ -190,6 +191,12 @@ public class PublishSubscribeBenchmark {
     private Supplier<? extends Event> supplier;
 
     public static void main(String[] args) {
+        // printable ascii codepoints interval [32,126]
+
+        // use only characters [a-z] otherwise invalid IRI may be generated
+        P2PStructuredProperties.CAN_LOWER_BOUND.setValue(97);
+        P2PStructuredProperties.CAN_UPPER_BOUND.setValue(122);
+
         PublishSubscribeBenchmark benchmark = new PublishSubscribeBenchmark();
 
         JCommander jCommander = new JCommander(benchmark);
@@ -375,8 +382,11 @@ public class PublishSubscribeBenchmark {
                 new EventCloudDeployer(new EventCloudDescription(), descriptor);
         deployer.deploy(1, this.nbPeers);
 
-        if (this.uniformDataDistribution) {
-            events = this.updateEventsForUniformDistribution(deployer);
+        if (this.uniformDataDistribution && this.rewritingLevel > 0) {
+            events =
+                    this.createEventsForUniformDistributionAndRewritingSteps(deployer);
+        } else if (this.uniformDataDistribution && this.rewritingLevel == 0) {
+            events = this.createEventsForUniformDistribution(deployer);
         }
 
         String registryURL = this.deployRegistry(deployer, nodeProvider);
@@ -544,7 +554,32 @@ public class PublishSubscribeBenchmark {
         return registryURL;
     }
 
-    private Event[] updateEventsForUniformDistribution(EventCloudDeployer deployer) {
+    private Event[] createEventsForUniformDistribution(EventCloudDeployer deployer) {
+
+        return this.createEvents(deployer, new EventProvider() {
+            @Override
+            public Event get(SemanticZone[] zones, int nbQuadruplesPerCE,
+                             int rdfTermSize) {
+                return EventGenerator.randomCompoundEvent(
+                        zones, nbQuadruplesPerCE, rdfTermSize);
+            }
+        });
+    }
+
+    private Event[] createEventsForUniformDistributionAndRewritingSteps(EventCloudDeployer deployer) {
+        return this.createEvents(deployer, new EventProvider() {
+            @Override
+            public Event get(SemanticZone[] zones, int nbQuadruplesPerCE,
+                             int rdfTermSize) {
+                return EventGenerator.randomCompoundEventForRewriting(
+                        zones, nbQuadruplesPerCE, rdfTermSize,
+                        PublishSubscribeBenchmark.this.rewritingLevel);
+            }
+        });
+    }
+
+    private Event[] createEvents(EventCloudDeployer deployer,
+                                 EventProvider provider) {
         EventGenerator.reset();
 
         Event[] events = new Event[nbPublications];
@@ -561,18 +596,21 @@ public class PublishSubscribeBenchmark {
 
         for (i = 0; i < nbPublications; i++) {
             if (this.publishIndependentQuadruples) {
-                // events[i] =
-                // EventGenerator.randomQuadruple(
-                // zones[i % this.nbPeers], 10);
-                throw new RuntimeException("Case not managed");
+                throw new UnsupportedOperationException();
             } else {
-                events[i] = EventGenerator.randomCompoundEvent(
-                // zones[i % this.nbPeers],
-                        zones, this.nbQuadruplesPerCompoundEvent, 10);
+                events[i] =
+                        provider.get(
+                                zones, this.nbQuadruplesPerCompoundEvent, 10);
             }
         }
 
         return events;
+    }
+
+    private static interface EventProvider {
+
+        Event get(SemanticZone[] zones, int nbQuadruplesPerCE, int rdfTermSize);
+
     }
 
     private EventCloudDeploymentDescriptor createDeploymentDescriptor(GcmDeploymentNodeProvider nodeProvider) {
@@ -684,9 +722,16 @@ public class PublishSubscribeBenchmark {
                     buf.append(' ');
                 }
 
-                buf.append("<urn:p");
-                buf.append(i);
-                buf.append("> ?o");
+                if (this.uniformDataDistribution) {
+                    buf.append("?p");
+                    buf.append(i);
+                } else {
+                    buf.append("<urn:p");
+                    buf.append(i);
+                    buf.append(">");
+                }
+
+                buf.append(" ?o");
                 buf.append(i);
                 buf.append(" . ");
             }
