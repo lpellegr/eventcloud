@@ -25,10 +25,12 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployment.GcmDeploymentNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
+import org.objectweb.proactive.extensions.p2p.structured.operations.GenericResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
@@ -67,11 +69,13 @@ import fr.inria.eventcloud.benchmarks.pubsub.proxies.CustomProxyFactory;
 import fr.inria.eventcloud.benchmarks.pubsub.proxies.CustomPublishProxy;
 import fr.inria.eventcloud.benchmarks.pubsub.suppliers.CompoundEventSupplier;
 import fr.inria.eventcloud.benchmarks.pubsub.suppliers.QuadrupleSupplier;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
+import fr.inria.eventcloud.operations.can.CountQuadruplesOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
@@ -89,6 +93,9 @@ public class PublishSubscribeBenchmark {
 
     private static final Logger log =
             LoggerFactory.getLogger(PublishSubscribeBenchmark.class);
+
+    private static final String NB_QUADRUPLES_PER_PEER_CATEGORY =
+            "quadsPerPeer";
 
     // parameters
 
@@ -163,7 +170,7 @@ public class PublishSubscribeBenchmark {
     /*
      * Measure the time to receive all the events by considering the time when
      * the first event is received on the subscriber and the time when the last
-     * event is received on the subscriber (used to compte the throughput in terms 
+     * event is received on the subscriber (used to count the throughput in terms 
      * of notifications per second on the subscriber side)
      */
     private Map<SubscriptionId, SimpleMeasurement> outputMeasurements;
@@ -265,15 +272,17 @@ public class PublishSubscribeBenchmark {
                         new String[] {
                                 END_TO_END_MEASUREMENT_CATEGORY,
                                 OUTPUT_MEASUREMENT_CATEGORY,
-                                POINT_TO_POINT_MEASUREMENT_CATEGORY},
-                        this.nbRuns, new MicroBenchmarkRun() {
+                                POINT_TO_POINT_MEASUREMENT_CATEGORY,
+                                NB_QUADRUPLES_PER_PEER_CATEGORY}, this.nbRuns,
+                        new MicroBenchmarkRun() {
 
                             @Override
                             public void run(StatsRecorder recorder) {
                                 try {
-                                    PublishSubscribeBenchmark.this.execute(events);
+                                    PublishSubscribeBenchmark.this.execute(
+                                            events, recorder);
 
-                                    recorder.reportTime(
+                                    recorder.reportValue(
                                             END_TO_END_MEASUREMENT_CATEGORY,
                                             PublishSubscribeBenchmark.this.endToEndMeasurement.getElapsedTime());
 
@@ -282,11 +291,11 @@ public class PublishSubscribeBenchmark {
                                                     .iterator()
                                                     .next();
 
-                                    recorder.reportTime(
+                                    recorder.reportValue(
                                             OUTPUT_MEASUREMENT_CATEGORY,
                                             outputMeasurement.getElapsedTime());
 
-                                    recorder.reportTime(
+                                    recorder.reportValue(
                                             POINT_TO_POINT_MEASUREMENT_CATEGORY,
                                             PublishSubscribeBenchmark.this.pointToPointExitMeasurements.values()
                                                     .iterator()
@@ -306,6 +315,9 @@ public class PublishSubscribeBenchmark {
         System.out.println();
         System.out.println(this.nbRuns + " run(s)");
 
+        Category nbQuadsPerPeer =
+                microBenchmark.getStatsRecorder().getCategory(
+                        NB_QUADRUPLES_PER_PEER_CATEGORY);
         Category endToEnd =
                 microBenchmark.getStatsRecorder().getCategory(
                         END_TO_END_MEASUREMENT_CATEGORY);
@@ -315,6 +327,9 @@ public class PublishSubscribeBenchmark {
         Category pointToPoint =
                 microBenchmark.getStatsRecorder().getCategory(
                         POINT_TO_POINT_MEASUREMENT_CATEGORY);
+
+        System.out.println("Average number of quadruples per peer is "
+                + nbQuadsPerPeer.getMean());
 
         System.out.println("End-to-End measurement, average="
                 + endToEnd.getMean() + ", median=" + endToEnd.getMedian()
@@ -333,8 +348,8 @@ public class PublishSubscribeBenchmark {
         return microBenchmark.getStatsRecorder();
     }
 
-    public void execute(Event[] events) throws EventCloudIdNotManaged,
-            TimeoutException, ProActiveException {
+    public void execute(Event[] events, StatsRecorder recorder)
+            throws EventCloudIdNotManaged, TimeoutException, ProActiveException {
         // clears results collected during previous run
         this.outputMeasurements.clear();
         this.pointToPointExitMeasurements.clear();
@@ -453,6 +468,54 @@ public class PublishSubscribeBenchmark {
                     entry.getKey(), entry.getValue());
         }
 
+        // count number of quadruples per peer
+        int totalNumberOfQuadruples = 0;
+
+        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+            // waits a little because some quadruples may not have been yet
+            // stored on peers due to the fact that the matching between a CE
+            // and a subscription is performed on one peer and the storage of
+            // quadruples on multiple peers. This issue does not occur with
+            // SBCE1 due to the reconstruction step that ensures all quadruples
+            // are stored before to deliver the final notification. However,
+            // this issue may occur with all the algorithms when a signal or
+            // binding notification listener is used.
+            try {
+                Thread.sleep(EventCloudProperties.PUBLISH_COMPOUND_EVENT_DELAYER_TIMEOUT.getValue() * 2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
+
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < peers.size(); i++) {
+            @SuppressWarnings("unchecked")
+            GenericResponseOperation<Integer> response =
+                    (GenericResponseOperation<Integer>) PAFuture.getFutureValue(peers.get(
+                            i)
+                            .receive(new CountQuadruplesOperation()));
+
+            totalNumberOfQuadruples += response.getValue();
+
+            buf.append(response.getValue());
+            if (i < peers.size() - 1) {
+                buf.append(" ");
+            } else {
+                buf.append(", sum=");
+                buf.append(totalNumberOfQuadruples);
+                buf.append('\n');
+            }
+        }
+
+        System.out.println("  Quadruples distribution on peer: "
+                + buf.toString());
+
+        recorder.reportValue(
+                NB_QUADRUPLES_PER_PEER_CATEGORY, totalNumberOfQuadruples
+                        / this.nbPeers);
+
         deployer.undeploy();
         ComponentUtils.terminateComponent(registryURL);
 
@@ -482,6 +545,8 @@ public class PublishSubscribeBenchmark {
     }
 
     private Event[] updateEventsForUniformDistribution(EventCloudDeployer deployer) {
+        EventGenerator.reset();
+
         Event[] events = new Event[nbPublications];
         SemanticZone[] zones = new SemanticZone[this.nbPeers];
 
@@ -496,14 +561,14 @@ public class PublishSubscribeBenchmark {
 
         for (i = 0; i < nbPublications; i++) {
             if (this.publishIndependentQuadruples) {
-                events[i] =
-                        EventGenerator.randomQuadruple(
-                                zones[i % this.nbPeers], 10);
+                // events[i] =
+                // EventGenerator.randomQuadruple(
+                // zones[i % this.nbPeers], 10);
+                throw new RuntimeException("Case not managed");
             } else {
-                events[i] =
-                        EventGenerator.randomCompoundEvent(
-                                zones[i % this.nbPeers],
-                                this.nbQuadruplesPerCompoundEvent, 10);
+                events[i] = EventGenerator.randomCompoundEvent(
+                // zones[i % this.nbPeers],
+                        zones, this.nbQuadruplesPerCompoundEvent, 10);
             }
         }
 
