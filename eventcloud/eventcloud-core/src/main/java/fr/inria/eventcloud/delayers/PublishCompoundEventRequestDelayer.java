@@ -19,6 +19,7 @@ package fr.inria.eventcloud.delayers;
 import java.util.Arrays;
 
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +93,7 @@ public class PublishCompoundEventRequestDelayer extends
             // the quadruple is stored by using its meta graph value
             for (ExtendedCompoundEvent ec : super.buffer) {
                 Quadruple q = ec.getIndexedQuadruple();
+
                 txnGraph.add(
                         q.createMetaGraphNode(), q.getSubject(),
                         q.getPredicate(), q.getObject());
@@ -124,95 +126,96 @@ public class PublishCompoundEventRequestDelayer extends
 
         Node metaGraphNode = quadruple.createMetaGraphNode();
 
-        if (this.overlay.markAsHandled(quadruple.getGraph())) {
-            TransactionalDatasetGraph txnGraph =
-                    this.overlay.getSubscriptionsDatastore().begin(
-                            AccessMode.READ_ONLY);
+        TransactionalDatasetGraph txnGraph =
+                this.overlay.getSubscriptionsDatastore().begin(
+                        AccessMode.READ_ONLY);
 
-            QueryIterator it = null;
-            try {
-                Optimize.noOptimizer();
+        QueryIterator it = null;
+        try {
+            Optimize.noOptimizer();
 
-                // finds the subscriptions that have their first sub
-                // subscription that matches one of the quadruple contained by
-                // the compound event which is published
-                it =
-                        Algebra.exec(
-                                createAlgebraRetrievingSubscriptionsMatching(compoundEvent),
-                                txnGraph.getUnderlyingDataset());
+            // finds the subscriptions that have their first sub
+            // subscription that matches one of the quadruple contained by
+            // the compound event which is published
+            it =
+                    Algebra.exec(
+                            createAlgebraRetrievingSubscriptionsMatching(compoundEvent),
+                            txnGraph.getUnderlyingDataset());
 
-                while (it.hasNext()) {
-                    final Binding binding = it.nextBinding();
+            while (it.hasNext()) {
+                final Binding binding = it.nextBinding();
 
-                    // the identifier of the subscription that is matched is
-                    // available from the result of the query which has been
-                    // executed
-                    SubscriptionId subscriptionId =
-                            SubscriptionId.parseSubscriptionId(binding.get(
-                                    PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
-                                    .getLiteralLexicalForm());
+                // the identifier of the subscription that is matched is
+                // available from the result of the query which has been
+                // executed
+                SubscriptionId subscriptionId =
+                        SubscriptionId.parseSubscriptionId(binding.get(
+                                PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
+                                .getLiteralLexicalForm());
 
-                    Subscription subscription =
-                            this.overlay.findSubscription(
-                                    txnGraph, subscriptionId);
+                Subscription subscription =
+                        this.overlay.findSubscription(txnGraph, subscriptionId);
 
-                    boolean mustIgnoreSolution =
-                            quadruple.getPublicationTime() < subscription.getIndexationTime();
+                boolean mustIgnoreSolution =
+                        quadruple.getPublicationTime() < subscription.getIndexationTime();
 
-                    if (mustIgnoreSolution) {
-                        continue;
+                if (mustIgnoreSolution) {
+                    continue;
+                }
+
+                // tries to rewrite the subscription (with the compound
+                // event published) that has the first sub subscription that
+                // is matched in order to know whether the subscription is
+                // fully satisfied or not
+                Pair<Binding, Integer> matchingResult =
+                        PublishSubscribeUtils.matches(
+                                compoundEvent, subscription);
+
+                if (matchingResult.getFirst() != null
+                // the quadruple used to route the compound event is the first
+                // quadruple matching the subscription
+                        && indexQuadrupleUsedForIndexing == matchingResult.getSecond()) {
+                    // the overall subscription is verified
+                    // we have to notify the subscriber about the solution
+                    SubscribeProxy subscriber =
+                            subscription.getSubscriberProxy();
+
+                    String source =
+                            PAActiveObject.getUrl(this.overlay.getStub());
+
+                    switch (subscription.getType()) {
+                        case BINDING:
+                            subscriber.receiveSbce3(new BindingNotification(
+                                    subscription.getOriginalId(),
+                                    metaGraphNode, source,
+                                    matchingResult.getFirst()));
+                            break;
+                        case COMPOUND_EVENT:
+                            subscriber.receiveSbce3(new QuadruplesNotification(
+                                    subscription.getOriginalId(),
+                                    metaGraphNode, source,
+                                    compoundEvent.getQuadruples()));
+                            break;
+                        case SIGNAL:
+                            subscriber.receiveSbce3(new SignalNotification(
+                                    subscription.getOriginalId(),
+                                    metaGraphNode, source));
+                            break;
                     }
 
-                    // tries to rewrite the subscription (with the compound
-                    // event published) that has the first sub subscription that
-                    // is matched in order to know whether the subscription is
-                    // fully verified or not
-                    Binding matchingResult =
-                            PublishSubscribeUtils.matches(
-                                    compoundEvent, subscription);
-
-                    if (matchingResult != null) {
-                        log.debug(
-                                "Received a CE {} matching a subscription {}",
-                                compoundEvent.getGraph(), subscriptionId);
-                        // the overall subscription is verified
-                        // we have to notify the subscriber about the solution
-
-                        SubscribeProxy subscriber =
-                                subscription.getSubscriberProxy();
-
-                        String source =
-                                PAActiveObject.getUrl(this.overlay.getStub());
-
-                        switch (subscription.getType()) {
-                            case BINDING:
-                                subscriber.receiveSbce3(new BindingNotification(
-                                        subscription.getOriginalId(),
-                                        metaGraphNode, source, matchingResult));
-                                break;
-                            case COMPOUND_EVENT:
-                                subscriber.receiveSbce3(new QuadruplesNotification(
-                                        subscription.getOriginalId(),
-                                        metaGraphNode, source,
-                                        compoundEvent.getQuadruples()));
-                                break;
-                            case SIGNAL:
-                                subscriber.receiveSbce3(new SignalNotification(
-                                        subscription.getOriginalId(),
-                                        metaGraphNode, source));
-                                break;
-                        }
-                    }
+                    log.debug(
+                            "CE with graph {} notified because subscription {} matched",
+                            compoundEvent.getGraph(), subscriptionId);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (it != null) {
-                    it.close();
-                }
-                txnGraph.end();
-                Optimize.setFactory(Optimize.stdOptimizationFactory);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+            txnGraph.end();
+            Optimize.setFactory(Optimize.stdOptimizationFactory);
         }
 
         PublishSubscribeUtils.findAndHandleEphemeralSubscriptions(
