@@ -137,7 +137,7 @@ public final class SemanticElementTest {
     @Test
     public void testParseElement16() {
         Assert.assertEquals(
-                "isbn:096139210x",
+                "096139210x",
                 SemanticElement.removePrefix(Node.createURI("urn:isbn:096139210x")));
     }
 
@@ -153,6 +153,32 @@ public final class SemanticElementTest {
         Assert.assertEquals(
                 "user@company.com",
                 SemanticElement.removePrefix(Node.createURI("mailto:user@company.com")));
+    }
+
+    @Test
+    public void testParseElement19() {
+        Assert.assertEquals(
+                "nbquads",
+                SemanticElement.removePrefix(Node.createURI("urn:ec:event:nbquads")));
+    }
+
+    @Test
+    public void testParseElement20() {
+        Assert.assertEquals(
+                "ec", SemanticElement.removePrefix(Node.createURI("urn:ec")));
+    }
+
+    @Test
+    public void testParseElement21() {
+        Assert.assertEquals(
+                "hello",
+                SemanticElement.removePrefix(Node.createURI("urn:ec#hello")));
+    }
+
+    @Test
+    public void testParseElement22() {
+        Assert.assertEquals(
+                "urn", SemanticElement.removePrefix(Node.createURI("urn")));
     }
 
 }

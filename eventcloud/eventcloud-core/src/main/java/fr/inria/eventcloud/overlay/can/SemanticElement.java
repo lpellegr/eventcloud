@@ -104,8 +104,21 @@ public class SemanticElement extends StringElement {
                 // basic support for opaque URI
                 // http://download.oracle.com/javase/6/docs/api/java/net/URI.html
                 if (uri.isOpaque()) {
-                    String scheme = uri.getScheme();
-                    return content.substring(scheme.length() + 1);
+                    int removeIndex = 0;
+
+                    if (slashIndex > sharpIndex) {
+                        removeIndex = slashIndex;
+                    } else {
+                        removeIndex = sharpIndex;
+                    }
+
+                    int colonIndex = content.lastIndexOf(':');
+                    if (colonIndex > removeIndex) {
+                        removeIndex = colonIndex;
+                    }
+
+                    // String scheme = uri.getScheme();
+                    return content.substring(removeIndex + 1);
                 }
             } catch (URISyntaxException e) {
                 return content;
