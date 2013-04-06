@@ -623,6 +623,11 @@ public final class PublishSubscribeUtils {
                             quadruple.createMetaGraphNode(), source));
                     break;
             }
+
+            log.debug(
+                    "Notification sent for graph {} because subscription {} satisfied on peer {}",
+                    quadruple.getGraph(), subscription.getId(),
+                    semanticCanOverlay.getId());
         } catch (ExecutionException e) {
             log.warn("Notification cannot be sent because no SubscribeProxy found under URL: "
                     + subscription.getSubscriberUrl());

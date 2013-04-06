@@ -203,8 +203,9 @@ public class PublishCompoundEventRequestDelayer extends
                     }
 
                     log.debug(
-                            "CE with graph {} notified because subscription {} matched",
-                            compoundEvent.getGraph(), subscriptionId);
+                            "Notification sent for graph {} because subscription {} satisfied on peer {}",
+                            compoundEvent.getGraph(), subscriptionId,
+                            super.overlay.getId());
                 }
             }
         } catch (Exception e) {
