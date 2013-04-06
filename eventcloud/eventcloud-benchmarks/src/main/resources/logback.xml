@@ -8,11 +8,12 @@
 
 	<logger name="com.hp" level="off" />
 	<logger name="com.hp.hpl.jena.tdb.info" level="off" />
-	<logger name="org.objectweb.proactive.extensions.p2p" level="off" />
-	<logger name="fr.inria.eventcloud" level="trace" />
-	<logger name="fr.inria.eventcloud.delayers" level="trace" />
-	<logger name="fr.inria.eventcloud.proxies.SubscribeProxyImpl" level="off" />
-	<logger name="fr.inria.eventcloud.benchmarks.PublishSubscribeBenchmarkTest" level="debug" />
+	<logger name="org.objectweb.proactive.extensions.p2p" level="warn" />
+	<logger name="fr.inria.eventcloud" level="off" />
+	<logger name="fr.inria.eventcloud.benchmarks.PublishSubscribeBenchmarkTest" level="info" />
+	<logger name="fr.inria.eventcloud.delayers" level="debug" />
+	<logger name="fr.inria.eventcloud.proxies.SubscribeProxyImpl" level="trace" />
+	<logger name="fr.inria.eventcloud.pubsub.PublishSubscribeUtils" level="debug" />
 	
 	<root level="off">
 		<appender-ref ref="stdout" />
