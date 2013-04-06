@@ -204,7 +204,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger EPHEMERAL_SUBSCRIPTION_EXPIRATION_TIME =
             new PropertyInteger(
-                    "eventcloud.ephemeral.subscription.expiration.time", 20000);
+                    "eventcloud.ephemeral.subscription.expiration.time", 60000);
 
     /**
      * Defines whether static load balancing must be enabled or not. When it is
