@@ -208,7 +208,7 @@ public class EventCloudProperties {
 
     /**
      * Defines whether static load balancing must be enabled or not. When it is
-     * enabled, a join operation use the statistics wich have been recorded
+     * enabled, a join operation use the statistics which have been recorded
      * during data insertion to compute a value that indicates where to split
      * the zone managed by the landmark peer. By default this property is
      * disabled. This property must be enabled in conjunction with

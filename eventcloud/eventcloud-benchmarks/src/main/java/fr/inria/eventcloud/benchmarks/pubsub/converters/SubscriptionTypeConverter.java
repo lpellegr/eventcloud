@@ -14,35 +14,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.benchmarks.pubsub;
+package fr.inria.eventcloud.benchmarks.pubsub.converters;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.JCommander;
 
-import fr.inria.eventcloud.api.listeners.NotificationListenerType;
+import fr.inria.eventcloud.benchmarks.pubsub.SubscriptionType;
 
 /**
- * Simple listener type converter for {@link JCommander}.
+ * Simple rewriting type converter for {@link JCommander}.
  * 
  * @author lpellegr
  */
-public class ListenerTypeConverter implements
-        IStringConverter<NotificationListenerType> {
+public class SubscriptionTypeConverter implements
+        IStringConverter<SubscriptionType> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NotificationListenerType convert(String value) {
-        if (value.equalsIgnoreCase("binding")) {
-            return NotificationListenerType.BINDING;
-        } else if (value.equalsIgnoreCase("compoundevent")) {
-            return NotificationListenerType.COMPOUND_EVENT;
-        } else if (value.equalsIgnoreCase("signal")) {
-            return NotificationListenerType.SIGNAL;
+    public SubscriptionType convert(String value) {
+        if (value.equalsIgnoreCase("path-query-fixed-predicate")) {
+            return SubscriptionType.PATH_QUERY_FIXED_PREDICATE;
+        } else if (value.equalsIgnoreCase("path-query-free-predicate")) {
+            return SubscriptionType.PATH_QUERY_FREE_PREDICATE;
+        } else if (value.equalsIgnoreCase("accept-all")) {
+            return SubscriptionType.ACCEPT_ALL;
         }
 
-        throw new IllegalArgumentException("Unknow listener type: " + value);
+        throw new IllegalArgumentException("Unknow subscription type: " + value);
     }
 
 }

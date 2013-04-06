@@ -37,6 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.Category;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
@@ -48,6 +49,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.common.base.Supplier;
+import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -61,6 +63,8 @@ import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
+import fr.inria.eventcloud.benchmarks.pubsub.converters.ListenerTypeConverter;
+import fr.inria.eventcloud.benchmarks.pubsub.converters.SubscriptionTypeConverter;
 import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomBindingListener;
 import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomCompoundEventListener;
 import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomSignalListener;
@@ -127,6 +131,9 @@ public class PublishSubscribeBenchmark {
     // a rewriting level of 0 means no rewrite
     @Parameter(names = {"--rewriting-level", "-rl"}, description = "Indicates the number of rewrites to force before delivering a notification")
     public int rewritingLevel = 0;
+
+    @Parameter(names = {"--subscription-type", "-st"}, description = "Indicates the type of the subscription used by the subscribers to subscribe", converter = SubscriptionTypeConverter.class)
+    public SubscriptionType subscriptionType = SubscriptionType.ACCEPT_ALL;
 
     @Parameter(names = {"--publish-quadruples"}, description = "Indicates whether events must be emitted as quadruples (default CEs)")
     public boolean publishIndependentQuadruples = false;
@@ -230,6 +237,7 @@ public class PublishSubscribeBenchmark {
         log.info("  nbSubscribers -> {}", this.nbSubscribers);
         log.info("  publishQuadruples -> {}", this.publishIndependentQuadruples);
         log.info("  rewritingLevel -> {}", this.rewritingLevel);
+        log.info("  subscriptionType -> {}", this.subscriptionType);
         log.info(
                 "  uniformDataDistribution -> {}", this.uniformDataDistribution);
         log.info(
@@ -380,11 +388,19 @@ public class PublishSubscribeBenchmark {
                 new EventCloudDeployer(new EventCloudDescription(), descriptor);
         deployer.deploy(1, this.nbPeers);
 
+        SemanticZone[] zones = this.retrievePeerZones(deployer);
+
+        Pair<String, Node[]> subscriptionElements =
+                this.createSubscription(zones);
+        String sparqlSubscription = subscriptionElements.getFirst();
+        Node[] fixedPredicateNodes = subscriptionElements.getSecond();
+
         if (this.uniformDataDistribution && this.rewritingLevel > 0) {
             events =
-                    this.createEventsForUniformDistributionAndRewritingSteps(deployer);
+                    this.createEventsForUniformDistributionAndRewritingSteps(
+                            deployer, zones, fixedPredicateNodes);
         } else if (this.uniformDataDistribution && this.rewritingLevel == 0) {
-            events = this.createEventsForUniformDistribution(deployer);
+            events = this.createEventsForUniformDistribution(deployer, zones);
         }
 
         String registryURL = this.deployRegistry(deployer, nodeProvider);
@@ -399,12 +415,15 @@ public class PublishSubscribeBenchmark {
                 this.createSubscribeProxies(
                         registryURL, id, nodeProvider, this.nbSubscribers);
 
+        log.info(
+                "The subscription used by the subscribers is {}",
+                sparqlSubscription);
+
         // subscribes
         for (int i = 0; i < this.nbSubscribers; i++) {
             final SubscribeApi subscribeProxy = subscribeProxies.get(i);
 
-            Subscription subscription =
-                    new Subscription(this.createSubscription());
+            Subscription subscription = new Subscription(sparqlSubscription);
 
             this.subscribe(
                     collector, subscribeProxy, subscription, this.listenerType);
@@ -450,14 +469,14 @@ public class PublishSubscribeBenchmark {
             proxy.publish();
         }
 
-        // timeout after 10 hours
-        collector.waitForAllPublisherReports(36000000);
+        // timeout after 1 hour
+        collector.waitForAllPublisherReports(3600000);
 
         this.pointToPointEntryMeasurements =
                 collector.getPointToPointEntryMeasurements();
 
-        // timeout after 10 hours
-        collector.waitForAllSubscriberReports(36000000);
+        // timeout after 1 hour
+        collector.waitForAllSubscriberReports(3600000);
 
         // the end to end termination time is the time at which the last
         // subscriber has notified the collector about its termination
@@ -532,6 +551,21 @@ public class PublishSubscribeBenchmark {
         }
     }
 
+    private SemanticZone[] retrievePeerZones(EventCloudDeployer deployer) {
+        SemanticZone[] zones = new SemanticZone[this.nbPeers];
+
+        List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
+
+        for (int i = 0; i < zones.length; i++) {
+            GetIdAndZoneResponseOperation<SemanticElement> response =
+                    CanOperations.getIdAndZoneResponseOperation(peers.get(i));
+            SemanticZone zone = (SemanticZone) response.getPeerZone();
+            zones[i] = zone;
+        }
+
+        return zones;
+    }
+
     private String deployRegistry(EventCloudDeployer deployer,
                                   GcmDeploymentNodeProvider nodeProvider) {
         EventCloudsRegistry registry;
@@ -552,9 +586,10 @@ public class PublishSubscribeBenchmark {
         return registryURL;
     }
 
-    private Event[] createEventsForUniformDistribution(EventCloudDeployer deployer) {
+    private Event[] createEventsForUniformDistribution(EventCloudDeployer deployer,
+                                                       SemanticZone[] zones) {
 
-        return this.createEvents(deployer, new EventProvider() {
+        return this.createEvents(deployer, zones, new EventProvider() {
             @Override
             public Event get(SemanticZone[] zones, int nbQuadruplesPerCE,
                              int rdfTermSize) {
@@ -564,35 +599,28 @@ public class PublishSubscribeBenchmark {
         });
     }
 
-    private Event[] createEventsForUniformDistributionAndRewritingSteps(EventCloudDeployer deployer) {
-        return this.createEvents(deployer, new EventProvider() {
+    private Event[] createEventsForUniformDistributionAndRewritingSteps(EventCloudDeployer deployer,
+                                                                        SemanticZone[] zones,
+                                                                        final Node[] fixedPredicateNodes) {
+        return this.createEvents(deployer, zones, new EventProvider() {
             @Override
             public Event get(SemanticZone[] zones, int nbQuadruplesPerCE,
                              int rdfTermSize) {
                 return EventGenerator.randomCompoundEventForRewriting(
                         zones, nbQuadruplesPerCE, rdfTermSize,
-                        PublishSubscribeBenchmark.this.rewritingLevel);
+                        PublishSubscribeBenchmark.this.rewritingLevel,
+                        fixedPredicateNodes);
             }
         });
     }
 
     private Event[] createEvents(EventCloudDeployer deployer,
-                                 EventProvider provider) {
+                                 SemanticZone[] zones, EventProvider provider) {
         EventGenerator.reset();
 
         Event[] events = new Event[nbPublications];
-        SemanticZone[] zones = new SemanticZone[this.nbPeers];
 
-        int i = 0;
-        for (Peer peer : deployer.getRandomSemanticTracker().getPeers()) {
-            GetIdAndZoneResponseOperation<SemanticElement> response =
-                    CanOperations.getIdAndZoneResponseOperation(peer);
-            SemanticZone zone = (SemanticZone) response.getPeerZone();
-            zones[i] = zone;
-            i++;
-        }
-
-        for (i = 0; i < nbPublications; i++) {
+        for (int i = 0; i < nbPublications; i++) {
             if (this.publishIndependentQuadruples) {
                 throw new UnsupportedOperationException();
             } else {
@@ -695,10 +723,12 @@ public class PublishSubscribeBenchmark {
         return result;
     }
 
-    private String createSubscription() {
+    private Pair<String, Node[]> createSubscription(SemanticZone[] zones) {
         String subscription;
 
-        if (this.rewritingLevel == 0) {
+        Node[] fixedPredicateNodes = null;
+
+        if (this.subscriptionType == SubscriptionType.ACCEPT_ALL) {
             subscription = "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
         } else {
             StringBuilder buf = new StringBuilder();
@@ -720,12 +750,24 @@ public class PublishSubscribeBenchmark {
                     buf.append(' ');
                 }
 
-                if (this.uniformDataDistribution) {
+                if (this.subscriptionType == SubscriptionType.PATH_QUERY_FREE_PREDICATE) {
                     buf.append("?p");
                     buf.append(i);
                 } else {
-                    buf.append("<urn:p");
-                    buf.append(i);
+                    SemanticZone zone =
+                            zones[(i - 1) % (this.rewritingLevel + 1)];
+
+                    if (fixedPredicateNodes == null) {
+                        fixedPredicateNodes = new Node[this.rewritingLevel + 1];
+                    }
+
+                    fixedPredicateNodes[i - 1] =
+                            EventGenerator.randomNode(
+                                    zone.getLowerBound((byte) 2),
+                                    zone.getUpperBound((byte) 2), -1, 10);
+
+                    buf.append("<");
+                    buf.append(fixedPredicateNodes[i - 1].getURI());
                     buf.append(">");
                 }
 
@@ -738,7 +780,7 @@ public class PublishSubscribeBenchmark {
             subscription = buf.toString();
         }
 
-        return subscription;
+        return Pair.create(subscription, fixedPredicateNodes);
     }
 
     private void assignSetOfevents(CustomPublishProxy publishProxy,
