@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends Element>
         extends Router<T, Coordinate<E>> {
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(UnicastRequestRouter.class);
 
     public UnicastRequestRouter() {
@@ -75,8 +75,8 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
      */
     @Override
     protected void handle(StructuredOverlay overlay, T request) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Peer " + overlay + " validates the contraints "
+        if (log.isDebugEnabled()) {
+            log.debug("Peer " + overlay + " validates the contraints "
                     + request.getKey() + " specified by request "
                     + request.getId());
         }
@@ -133,17 +133,21 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
                         overlayCAN);
             }
 
+            log.warn(
+                    "Trying to route a {} request but the key {} that is used "
+                            + "is managed by no peer. You are probably using a key with "
+                            + "values that are not between the minimum and the upper "
+                            + "bound managed by the network.", this.getClass()
+                            .getSimpleName(), request.getKey());
             return;
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Message routed to a neigbour because the current peer "
-                    + "managing "
-                    + overlay
+        if (log.isDebugEnabled()) {
+            log.debug("Message routed to a neigbour because the current peer "
+                    + "managing " + overlay
                     + " does not contains the key to reach ("
                     + request.getKey()
-                    + "). Neighbor is selected from dimension "
-                    + dimension
+                    + "). Neighbor is selected from dimension " + dimension
                     + " and direction " + direction + ": " + neighborChosen);
         }
 
@@ -151,10 +155,9 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
             request.incrementHopCount(1);
             neighborChosen.getStub().route(request);
         } catch (ProActiveRuntimeException e) {
-            logger.error("Error while sending the message to the neighbor managing "
+            log.error("Error while sending the message to the neighbor managing "
                     + neighborChosen.getZone());
             e.printStackTrace();
         }
     }
-
 }
