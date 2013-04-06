@@ -150,10 +150,11 @@ public class IndexSubscriptionRequestDelayer extends Delayer<Subscription> {
                 continue;
             }
 
-            if (log.isTraceEnabled() && s.getParentId() == null) {
-                log.trace(
-                        "Ordering issue detected for eventId {} with subscription {}",
-                        quadrupleMatching.getGraph(), s.getId());
+            if (log.isDebugEnabled() && s.getParentId() == null) {
+                log.debug(
+                        "Ordering issue detected for eventId {} with subscription {} on {}",
+                        quadrupleMatching.getGraph(), s.getId(),
+                        super.overlay.getId());
             }
 
             PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
