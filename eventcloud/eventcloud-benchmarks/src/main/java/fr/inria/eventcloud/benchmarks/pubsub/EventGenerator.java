@@ -103,7 +103,8 @@ public class EventGenerator {
     public static CompoundEvent randomCompoundEventForRewriting(List<SemanticZone> zones,
                                                                 int nbQuadruples,
                                                                 int nodeSize,
-                                                                int nbRewrites) {
+                                                                int nbRewrites,
+                                                                Node[] fixedPredicateNodes) {
 
         Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
 
@@ -131,10 +132,14 @@ public class EventGenerator {
                             zone.getLowerBound((byte) 3),
                             zone.getUpperBound((byte) 3), -1, nodeSize);
 
-            predicate =
-                    randomNode(
-                            zone.getLowerBound((byte) 2),
-                            zone.getUpperBound((byte) 2), -1, nodeSize);
+            if (fixedPredicateNodes.length > 0) {
+                predicate = fixedPredicateNodes[i];
+            } else {
+                predicate =
+                        randomNode(
+                                zone.getLowerBound((byte) 2),
+                                zone.getUpperBound((byte) 2), -1, nodeSize);
+            }
 
             builder.add(new Quadruple(
                     graph, subject, predicate, object, false, false));
@@ -153,9 +158,11 @@ public class EventGenerator {
     public static CompoundEvent randomCompoundEventForRewriting(SemanticZone[] zones,
                                                                 int nbQuadruples,
                                                                 int nodeSize,
-                                                                int nbRewrites) {
+                                                                int nbRewrites,
+                                                                Node[] fixedPredicateNodes) {
         return randomCompoundEventForRewriting(
-                ImmutableList.copyOf(zones), nbQuadruples, nodeSize, nbRewrites);
+                ImmutableList.copyOf(zones), nbQuadruples, nodeSize,
+                nbRewrites, fixedPredicateNodes);
     }
 
     /**
@@ -209,9 +216,9 @@ public class EventGenerator {
                 graphNode, nodes[0], nodes[1], nodes[2], false, false);
     }
 
-    private static Node randomNode(SemanticElement lowerBoundElement,
-                                   SemanticElement upperBoundElement,
-                                   int sequenceNumber, int nodeSize) {
+    public static Node randomNode(SemanticElement lowerBoundElement,
+                                  SemanticElement upperBoundElement,
+                                  int sequenceNumber, int nodeSize) {
 
         int[] lbCodePoints =
                 UnicodeUtils.toCodePointArray(lowerBoundElement.getValue());
@@ -286,7 +293,8 @@ public class EventGenerator {
 
         System.out.println("Generated compound event:");
 
-        CompoundEvent ce = randomCompoundEventForRewriting(zones, 10, 10, 3);
+        CompoundEvent ce =
+                randomCompoundEventForRewriting(zones, 10, 10, 3, new Node[0]);
 
         for (Quadruple q : ce) {
             System.out.println(q.toString(StringRepresentation.UTF_16));
