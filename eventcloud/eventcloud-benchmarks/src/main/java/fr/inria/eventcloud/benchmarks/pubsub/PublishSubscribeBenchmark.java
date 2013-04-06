@@ -191,11 +191,9 @@ public class PublishSubscribeBenchmark {
     private Supplier<? extends Event> supplier;
 
     public static void main(String[] args) {
-        // printable ascii codepoints interval [32,126]
-
-        // use only characters [a-z] otherwise invalid IRI may be generated
-        P2PStructuredProperties.CAN_LOWER_BOUND.setValue(97);
-        P2PStructuredProperties.CAN_UPPER_BOUND.setValue(122);
+        // printable ASCII codepoints interval
+        P2PStructuredProperties.CAN_LOWER_BOUND.setValue(0x20);
+        P2PStructuredProperties.CAN_UPPER_BOUND.setValue(0x7E);
 
         PublishSubscribeBenchmark benchmark = new PublishSubscribeBenchmark();
 
