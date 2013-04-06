@@ -142,7 +142,7 @@ public class EventGenerator {
             subject = object;
         }
 
-        for (int i = 0; i < nbQuadruples - nbRewrites + 1; i++) {
+        for (int i = 0; i < nbQuadruples - nbRewrites - 1; i++) {
             builder.add(randomQuadruple(zones.get((nbRewrites + 1 + i)
                     % zones.size()), graph, nodeSize));
         }
@@ -154,8 +154,8 @@ public class EventGenerator {
                                                                 int nbQuadruples,
                                                                 int nodeSize,
                                                                 int nbRewrites) {
-        return randomCompoundEvent(
-                ImmutableList.copyOf(zones), nbQuadruples, nodeSize);
+        return randomCompoundEventForRewriting(
+                ImmutableList.copyOf(zones), nbQuadruples, nodeSize, nbRewrites);
     }
 
     /**
@@ -209,57 +209,6 @@ public class EventGenerator {
                 graphNode, nodes[0], nodes[1], nodes[2], false, false);
     }
 
-    private static int[] ucscpts = {
-            45, 46, 48, 57, 65, 90, 95, 97, 122, 126, 160, 55295, 63744, 64975,
-            65008, 65519, 65536, 131069, 131072, 196605, 196608, 262141,
-            262144, 327677, 327680, 393213, 393216, 458749, 458752, 524285,
-            524288, 589821, 589824, 655357, 655360, 720893, 720896, 786429,
-            786432, 851965, 851968, 917501, 921600, 983037};
-
-    private static boolean isucschar(int codepoint) {
-        // Unicode characters I HATE you
-        return codepoint == 45 || codepoint == 46 || codepoint == 95
-                || codepoint == 126 || (codepoint >= 48 && codepoint <= 57)
-                || (codepoint >= 65 && codepoint <= 90)
-                || (codepoint >= 97 && codepoint <= 122)
-                || (codepoint >= 160 && codepoint <= 55295)
-                || (codepoint >= 63744 && codepoint <= 64975)
-                || (codepoint >= 65008 && codepoint <= 65519)
-                || (codepoint >= 65536 && codepoint <= 131069)
-                || (codepoint >= 131072 && codepoint <= 196605)
-                || (codepoint >= 196608 && codepoint <= 262141)
-                || (codepoint >= 262144 && codepoint <= 327677)
-                || (codepoint >= 327680 && codepoint <= 393213)
-                || (codepoint >= 393216 && codepoint <= 458749)
-                || (codepoint >= 458752 && codepoint <= 524285)
-                || (codepoint >= 524288 && codepoint <= 589821)
-                || (codepoint >= 589824 && codepoint <= 655357)
-                || (codepoint >= 655360 && codepoint <= 720893)
-                || (codepoint >= 720896 && codepoint <= 786429)
-                || (codepoint >= 786432 && codepoint <= 851965)
-                || (codepoint >= 851968 && codepoint <= 917501)
-                || (codepoint >= 921600 && codepoint <= 983037);
-    }
-
-    private static int findBestSubstitue(int codepoint) {
-        int bestCandidate = 0;
-        int diff = Integer.MAX_VALUE;
-
-        for (int cpt : ucscpts) {
-            int tmpDiff = Math.abs(codepoint - cpt);
-            if (tmpDiff < diff) {
-                bestCandidate = cpt;
-                diff = tmpDiff;
-            }
-
-            if (tmpDiff == 1) {
-                break;
-            }
-        }
-
-        return bestCandidate;
-    }
-
     private static Node randomNode(SemanticElement lowerBoundElement,
                                    SemanticElement upperBoundElement,
                                    int sequenceNumber, int nodeSize) {
@@ -297,11 +246,10 @@ public class EventGenerator {
                 result[i] = lowerBound + RandomUtils.nextInt(diff);
             }
 
-            // if (!isucschar(result[i])) {
-            // System.out.println("ILLEGAL CHARACTER " + result[i]);
-            // result[i] = findBestSubstitue(result[i]);
-            // System.out.println("NEW CANDIDATE " + result[i]);
-            // }
+            // replaces illegal characters by legal ones
+            if (!IRIFixer.isUnreserved(result[i])) {
+                result[i] = IRIFixer.findBestSubstitute(result[i]);
+            }
         }
 
         String uri = "urn:" + UnicodeUtils.toString(result);
