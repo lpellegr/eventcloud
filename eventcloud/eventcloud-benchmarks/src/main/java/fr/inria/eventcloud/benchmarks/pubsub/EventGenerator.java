@@ -132,7 +132,7 @@ public class EventGenerator {
                             zone.getLowerBound((byte) 3),
                             zone.getUpperBound((byte) 3), -1, nodeSize);
 
-            if (fixedPredicateNodes.length > 0) {
+            if (fixedPredicateNodes != null && fixedPredicateNodes.length > 0) {
                 predicate = fixedPredicateNodes[i];
             } else {
                 predicate =
