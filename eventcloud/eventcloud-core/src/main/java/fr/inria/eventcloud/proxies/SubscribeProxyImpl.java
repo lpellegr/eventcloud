@@ -526,7 +526,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             // delivered. In such a case we have to ignore these duplicates and
             // send a RemoveEphemeralSubscription to avoid a memory leak
             if (this.markAsDelivered(notification.getId(), subscriptionId) != null) {
-                this.handleReceiveDuplicateSolution(notification);
+                // this.handleReceiveDuplicateSolution(notification);
             } else {
                 CompoundEvent compoundEvent =
                         new CompoundEvent(solution.getChunks());
@@ -542,8 +542,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             compoundEvent.getGraph().getURI(), compoundEvent);
                 }
 
-                this.sendRemoveEphemeralSubscription(
-                        compoundEvent.getGraph(), subscriptionId);
+                // this.sendRemoveEphemeralSubscription(
+                // compoundEvent.getGraph(), subscriptionId);
                 this.quadruplesSolutions.remove(notification.getId());
             }
         }
