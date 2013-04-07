@@ -197,7 +197,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                     },
                     EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
                     EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
-                    TimeUnit.MINUTES);
+                    TimeUnit.MILLISECONDS);
         }
 
         this.indexSubscriptionRequestDelayer =

@@ -193,11 +193,11 @@ public class EventCloudProperties {
 
     /**
      * Defines at which frequence the garbage collection timeout for ephemeral
-     * subscriptions must be triggered (in minutes)
+     * subscriptions must be triggered (in ms)
      */
     public static final PropertyInteger EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT =
             new PropertyInteger(
-                    "eventcloud.ephemeral.subscriptions.gc.timeout", 10000);
+                    "eventcloud.ephemeral.subscriptions.gc.timeout", 600000);
 
     /**
      * Defines the expiration time of an ephemeral subscription (in ms).
