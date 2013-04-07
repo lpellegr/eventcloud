@@ -26,13 +26,14 @@ import java.util.List;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.annotation.multiactivity.DefinePriorities;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
-import org.objectweb.proactive.annotation.multiactivity.Priority;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.priority.PriorityConstraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
@@ -59,6 +60,7 @@ import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
+import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
@@ -85,10 +87,6 @@ import fr.inria.eventcloud.utils.Callback;
  * @author lpellegr
  * @author bsauvan
  */
-@DefinePriorities({
-        @Priority(level = 3, boostThreads = 8, name = "send", parameters = {ReconstructCompoundEventRequest.class}),
-        @Priority(level = -1, boostThreads = 1, name = "publish"),
-        @Priority(level = 0, boostThreads = 1)})
 public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
@@ -126,6 +124,33 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         this.configurationProperty = "eventcloud.configuration";
         this.propertiesClass = EventCloudProperties.class;
         super.initComponentActivity(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        this.multiActiveService = new MultiActiveService(body);
+
+        List<PriorityConstraint> priorityConstraints =
+                new ArrayList<PriorityConstraint>();
+
+        priorityConstraints.add(new PriorityConstraint(-1, 1, "publish"));
+
+        if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
+            priorityConstraints.add(new PriorityConstraint(
+                    3, 8, "send", ReconstructCompoundEventRequest.class));
+            priorityConstraints.add(new PriorityConstraint(0, 1));
+        } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
+            priorityConstraints.add(new PriorityConstraint(
+                    1, 8, "sendv", IndexEphemeralSubscriptionRequest.class));
+        }
+
+        this.multiActiveService.multiActiveServing(
+                priorityConstraints,
+                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
+                false);
     }
 
     /**
