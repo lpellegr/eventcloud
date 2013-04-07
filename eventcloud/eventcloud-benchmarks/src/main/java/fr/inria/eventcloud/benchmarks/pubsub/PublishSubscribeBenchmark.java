@@ -754,8 +754,7 @@ public class PublishSubscribeBenchmark {
                     buf.append("?p");
                     buf.append(i);
                 } else {
-                    SemanticZone zone =
-                            zones[(i - 1) % (this.rewritingLevel + 1)];
+                    SemanticZone zone = zones[(i - 1) % zones.length];
 
                     if (fixedPredicateNodes == null) {
                         fixedPredicateNodes = new Node[this.rewritingLevel + 1];
