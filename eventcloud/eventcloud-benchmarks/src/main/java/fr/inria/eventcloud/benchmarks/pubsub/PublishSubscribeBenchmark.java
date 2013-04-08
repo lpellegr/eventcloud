@@ -752,8 +752,7 @@ public class PublishSubscribeBenchmark {
             Node[] fixedPredicateNodes = null;
 
             if (this.subscriptionType == SubscriptionType.ACCEPT_ALL) {
-                subscription =
-                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
+                subscription = Subscription.ACCEPT_ALL;
             } else {
                 StringBuilder buf = new StringBuilder();
 
