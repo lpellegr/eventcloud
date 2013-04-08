@@ -490,8 +490,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Received quadruples notification subscriptionId="
+        if (log.isTraceEnabled()) {
+            log.trace("Received quadruples notification subscriptionId="
                     + subscriptionId
                     + ", contentSize="
                     + notification.getContent().size()
@@ -826,8 +826,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     }
 
     private void logNotificationReception(Notification<?> notification) {
-        if (log.isTraceEnabled()) {
-            log.trace(
+        if (log.isDebugEnabled()) {
+            log.debug(
                     "New notification received {} on {} for subscription id {}",
                     new Object[] {
                             notification.getId(), this.componentUri,
