@@ -195,7 +195,14 @@ public class PublishSubscribeBenchmark {
     private Map<SubscriptionId, NotificationListener<?>> listeners =
             new HashMap<SubscriptionId, NotificationListener<?>>();
 
+    @SuppressWarnings("unused")
     private Supplier<? extends Event> supplier;
+
+    // generated data to reuse for each run.
+    // the CAN network topology is assumed to be the same at each run
+    private Pair<String, Node[]> subscriptionElements;
+
+    private Event[] events;
 
     public static void main(String[] args) {
         // printable ASCII codepoints interval
@@ -269,16 +276,6 @@ public class PublishSubscribeBenchmark {
                 new HashMap<SubscriptionId, CumulatedMeasurement>(
                         nbPublications);
 
-        // pre-generates events so that the data are the same for all the
-        // runs and the time is not included into the benchmark execution time
-        final Event[] events = new Event[nbPublications];
-
-        if (!this.uniformDataDistribution) {
-            for (int i = 0; i < nbPublications; i++) {
-                events[i] = this.supplier.get();
-            }
-        }
-
         // creates and runs micro benchmark
         MicroBenchmark microBenchmark =
                 new MicroBenchmark(
@@ -292,8 +289,7 @@ public class PublishSubscribeBenchmark {
                             @Override
                             public void run(StatsRecorder recorder) {
                                 try {
-                                    PublishSubscribeBenchmark.this.execute(
-                                            events, recorder);
+                                    PublishSubscribeBenchmark.this.execute(recorder);
 
                                     recorder.reportValue(
                                             END_TO_END_MEASUREMENT_CATEGORY,
@@ -361,8 +357,8 @@ public class PublishSubscribeBenchmark {
         return microBenchmark.getStatsRecorder();
     }
 
-    public void execute(Event[] events, StatsRecorder recorder)
-            throws EventCloudIdNotManaged, TimeoutException, ProActiveException {
+    public void execute(StatsRecorder recorder) throws EventCloudIdNotManaged,
+            TimeoutException, ProActiveException {
         // clears results collected during previous run
         this.outputMeasurements.clear();
         this.pointToPointExitMeasurements.clear();
@@ -395,13 +391,8 @@ public class PublishSubscribeBenchmark {
         String sparqlSubscription = subscriptionElements.getFirst();
         Node[] fixedPredicateNodes = subscriptionElements.getSecond();
 
-        if (this.uniformDataDistribution && this.rewritingLevel > 0) {
-            events =
-                    this.createEventsForUniformDistributionAndRewritingSteps(
-                            deployer, zones, fixedPredicateNodes);
-        } else if (this.uniformDataDistribution && this.rewritingLevel == 0) {
-            events = this.createEventsForUniformDistribution(deployer, zones);
-        }
+        Event[] events =
+                this.createEvents(deployer, zones, fixedPredicateNodes);
 
         String registryURL = this.deployRegistry(deployer, nodeProvider);
 
@@ -536,7 +527,7 @@ public class PublishSubscribeBenchmark {
             }
         }
 
-        System.out.println("  Quadruples distribution on peer: "
+        System.out.println("  Quadruples distribution on peers: "
                 + buf.toString());
 
         recorder.reportValue(
@@ -549,6 +540,37 @@ public class PublishSubscribeBenchmark {
         if (nodeProvider != null) {
             nodeProvider.terminate();
         }
+    }
+
+    private Event[] createEvents(EventCloudDeployer deployer,
+                                 SemanticZone[] zones,
+                                 Node[] fixedPredicateNodes) {
+        if (this.events == null) {
+            // pre-generates events so that the data are the same for all the
+            // runs and the time is not included into the benchmark execution
+            // time
+            Event[] generatedEvents = new Event[nbPublications];
+
+            if (this.uniformDataDistribution && this.rewritingLevel > 0) {
+                generatedEvents =
+                        this.createEventsForUniformDistributionAndRewritingSteps(
+                                deployer, zones, fixedPredicateNodes);
+            } else {
+                // if (this.uniformDataDistribution && this.rewritingLevel == 0)
+                // {
+                generatedEvents =
+                        this.createEventsForUniformDistribution(deployer, zones);
+            }
+            // else {
+            // for (int i = 0; i < nbPublications; i++) {
+            // generatedEvents[i] = this.supplier.get();
+            // }
+            // }
+
+            this.events = generatedEvents;
+        }
+
+        return this.events;
     }
 
     private SemanticZone[] retrievePeerZones(EventCloudDeployer deployer) {
@@ -723,63 +745,71 @@ public class PublishSubscribeBenchmark {
         return result;
     }
 
-    private Pair<String, Node[]> createSubscription(SemanticZone[] zones) {
-        String subscription;
+    private synchronized Pair<String, Node[]> createSubscription(SemanticZone[] zones) {
+        if (this.subscriptionElements == null) {
+            String subscription;
 
-        Node[] fixedPredicateNodes = null;
+            Node[] fixedPredicateNodes = null;
 
-        if (this.subscriptionType == SubscriptionType.ACCEPT_ALL) {
-            subscription = "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
-        } else {
-            StringBuilder buf = new StringBuilder();
+            if (this.subscriptionType == SubscriptionType.ACCEPT_ALL) {
+                subscription =
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
+            } else {
+                StringBuilder buf = new StringBuilder();
 
-            buf.append("SELECT ?g ");
-            for (int i = 1; i <= this.rewritingLevel + 1; i++) {
-                buf.append("?o");
-                buf.append(i);
-                buf.append(' ');
-            }
-
-            buf.append("WHERE { GRAPH ?g { ");
-            for (int i = 1; i <= this.rewritingLevel + 1; i++) {
-                if (i == 1) {
-                    buf.append("?s1 ");
-                } else {
+                buf.append("SELECT ?g ");
+                for (int i = 1; i <= this.rewritingLevel + 1; i++) {
                     buf.append("?o");
-                    buf.append(i - 1);
+                    buf.append(i);
                     buf.append(' ');
                 }
 
-                if (this.subscriptionType == SubscriptionType.PATH_QUERY_FREE_PREDICATE) {
-                    buf.append("?p");
-                    buf.append(i);
-                } else {
-                    SemanticZone zone = zones[(i - 1) % zones.length];
-
-                    if (fixedPredicateNodes == null) {
-                        fixedPredicateNodes = new Node[this.rewritingLevel + 1];
+                buf.append("WHERE { GRAPH ?g { ");
+                for (int i = 1; i <= this.rewritingLevel + 1; i++) {
+                    if (i == 1) {
+                        buf.append("?s1 ");
+                    } else {
+                        buf.append("?o");
+                        buf.append(i - 1);
+                        buf.append(' ');
                     }
 
-                    fixedPredicateNodes[i - 1] =
-                            EventGenerator.randomNode(
-                                    zone.getLowerBound((byte) 2),
-                                    zone.getUpperBound((byte) 2), -1, 10);
+                    if (this.subscriptionType == SubscriptionType.PATH_QUERY_FREE_PREDICATE) {
+                        buf.append("?p");
+                        buf.append(i);
+                    } else {
+                        // fixed predicate value
+                        SemanticZone zone = zones[(i - 1) % zones.length];
 
-                    buf.append("<");
-                    buf.append(fixedPredicateNodes[i - 1].getURI());
-                    buf.append(">");
+                        if (fixedPredicateNodes == null) {
+                            fixedPredicateNodes =
+                                    new Node[this.rewritingLevel + 1];
+                        }
+
+                        fixedPredicateNodes[i - 1] =
+                                EventGenerator.randomNode(
+                                        zone.getLowerBound((byte) 2),
+                                        zone.getUpperBound((byte) 2), -1, 10);
+
+                        buf.append("<");
+                        buf.append(fixedPredicateNodes[i - 1].getURI());
+                        buf.append(">");
+                    }
+
+                    buf.append(" ?o");
+                    buf.append(i);
+                    buf.append(" . ");
                 }
+                buf.append("} }");
 
-                buf.append(" ?o");
-                buf.append(i);
-                buf.append(" . ");
+                subscription = buf.toString();
             }
-            buf.append("} }");
 
-            subscription = buf.toString();
+            this.subscriptionElements =
+                    Pair.create(subscription, fixedPredicateNodes);
         }
 
-        return Pair.create(subscription, fixedPredicateNodes);
+        return this.subscriptionElements;
     }
 
     private void assignSetOfevents(CustomPublishProxy publishProxy,
