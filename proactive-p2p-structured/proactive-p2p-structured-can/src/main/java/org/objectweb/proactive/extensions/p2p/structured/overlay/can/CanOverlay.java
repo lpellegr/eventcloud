@@ -361,7 +361,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         byte dimension = 0;
         // TODO: choose the direction according to the number of triples to
         // transfer
-        byte direction = getRandomDirection();
+        byte direction = 0; // getRandomDirection();
         byte directionInv = CanOverlay.getOppositeDirection(direction);
 
         // gets the next dimension to split into
