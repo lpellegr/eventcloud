@@ -79,6 +79,8 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
     protected Zone<E> zone;
 
+    private byte lastDirectionUsedForZoneAssignation;
+
     /**
      * Constructs a new overlay with messagingManager set to
      * {@link CanRequestResponseManager}.
@@ -97,6 +99,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
     public CanOverlay(RequestResponseManager requestResponseManager) {
         super(requestResponseManager);
 
+        this.lastDirectionUsedForZoneAssignation = 0;
         this.neighborTable = new NeighborTable<E>();
         this.splitHistory = new LinkedList<SplitEntry>();
     }
@@ -359,10 +362,13 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
     @SuppressWarnings("unchecked")
     public JoinIntroduceResponseOperation<E> handleJoinIntroduceMessage(JoinIntroduceOperation<E> msg) {
         byte dimension = 0;
-        // TODO: choose the direction according to the number of triples to
-        // transfer
-        byte direction = 0; // getRandomDirection();
+        // TODO: choose the direction according to the number of
+        // quadruples to transfer
+        byte direction = this.lastDirectionUsedForZoneAssignation;
         byte directionInv = CanOverlay.getOppositeDirection(direction);
+
+        this.lastDirectionUsedForZoneAssignation =
+                (byte) ((lastDirectionUsedForZoneAssignation + 1) % 2);
 
         // gets the next dimension to split into
         if (!this.splitHistory.isEmpty()) {
