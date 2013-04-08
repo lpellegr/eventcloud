@@ -30,9 +30,9 @@ public final class Subscription implements Serializable {
 
     /**
      * SPARQL used for any subscription object build with
-     * {@link Subscription#any()}. The value is set to {@value} .
+     * {@link Subscription#acceptAll()}. The value is set to {@value} .
      */
-    private static final String ANY =
+    public static final String ACCEPT_ALL =
             "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
 
     private static final long serialVersionUID = 140L;
@@ -100,8 +100,8 @@ public final class Subscription implements Serializable {
      *         other words the associated SPARQL query is equals to
      *         {@code SELECT ?g ?s ?p ?o WHERE \ GRAPH ?g \ ?s ?p ?o \} .
      */
-    public static Subscription any() {
-        return new Subscription(ANY);
+    public static Subscription acceptAll() {
+        return new Subscription(ACCEPT_ALL);
     }
 
 }
