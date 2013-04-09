@@ -49,6 +49,8 @@ import java.util.concurrent.ExecutionException;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -94,6 +96,8 @@ public class Subscription implements Quadruplable, Serializable {
     static {
         CacheBuilder<Object, Object> cacheBuilder =
                 CacheBuilder.newBuilder()
+                        .concurrencyLevel(
+                                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue())
                         .softValues()
                         .maximumSize(
                                 EventCloudProperties.SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE.getValue());
