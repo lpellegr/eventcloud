@@ -499,7 +499,7 @@ public class PublishSubscribeBenchmark {
             // this issue may occur with all the algorithms when a signal or
             // binding notification listener is used.
             try {
-                Thread.sleep(EventCloudProperties.PUBLISH_COMPOUND_EVENT_DELAYER_TIMEOUT.getValue() * 2);
+                Thread.sleep(EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_TIMEOUT.getValue() * 2);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -752,8 +752,7 @@ public class PublishSubscribeBenchmark {
             Node[] fixedPredicateNodes = null;
 
             if (this.subscriptionType == SubscriptionType.ACCEPT_ALL) {
-                subscription =
-                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
+                subscription = Subscription.ACCEPT_ALL;
             } else {
                 StringBuilder buf = new StringBuilder();
 

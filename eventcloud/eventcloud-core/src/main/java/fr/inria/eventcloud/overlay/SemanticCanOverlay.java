@@ -63,11 +63,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.delayers.IndexSubscriptionRequestDelayer;
-import fr.inria.eventcloud.delayers.PublishCompoundEventRequestDelayer;
-import fr.inria.eventcloud.delayers.PublishQuadrupleRequestDelayer;
-import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
-import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
+import fr.inria.eventcloud.delayers.PublishSubscribeOperationsDelayer;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -99,11 +95,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private ScheduledExecutorService ephemeralSubscriptionsGarbageColletor;
 
-    private final IndexSubscriptionRequestDelayer indexSubscriptionRequestDelayer;
-
-    private final PublishQuadrupleRequestDelayer publishQuadrupleRequestDelayer;
-
-    private final PublishCompoundEventRequestDelayer publishCompoundEventRequestDelayer;
+    private final PublishSubscribeOperationsDelayer publishSubscribeOperationsDelayer;
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -200,17 +192,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                     TimeUnit.MILLISECONDS);
         }
 
-        this.indexSubscriptionRequestDelayer =
-                new IndexSubscriptionRequestDelayer(this);
-        this.publishQuadrupleRequestDelayer =
-                new PublishQuadrupleRequestDelayer(this);
-
-        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-            this.publishCompoundEventRequestDelayer =
-                    new PublishCompoundEventRequestDelayer(this);
-        } else {
-            this.publishCompoundEventRequestDelayer = null;
-        }
+        this.publishSubscribeOperationsDelayer =
+                new PublishSubscribeOperationsDelayer(this);
     }
 
     private void removeOutdatedEphemeralSubscriptions() {
@@ -302,30 +285,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     }
 
     /**
-     * Returns the {@link IndexSubscriptionRequestDelayer} delayer instance.
+     * Returns the {@link PublishSubscribeOperationsDelayer} instance.
      * 
-     * @return the {@link IndexSubscriptionRequestDelayer} delayer instance.
+     * @return the publishSubscribeOperationsDelayer
      */
-    public IndexSubscriptionRequestDelayer getIndexSubscriptionRequestDelayer() {
-        return this.indexSubscriptionRequestDelayer;
-    }
-
-    /**
-     * Returns the {@link PublishQuadrupleRequest} delayer instance.
-     * 
-     * @return the {@link PublishQuadrupleRequest} delayer instance.
-     */
-    public PublishQuadrupleRequestDelayer getPublishQuadrupleRequestDelayer() {
-        return this.publishQuadrupleRequestDelayer;
-    }
-
-    /**
-     * Returns the {@link PublishCompoundEventRequest} delayer instance.
-     * 
-     * @return the {@link PublishCompoundEventRequest} delayer instance.
-     */
-    public PublishCompoundEventRequestDelayer getPublishCompoundEventRequestDelayer() {
-        return this.publishCompoundEventRequestDelayer;
+    public PublishSubscribeOperationsDelayer getPublishSubscribeOperationsDelayer() {
+        return this.publishSubscribeOperationsDelayer;
     }
 
     /**
@@ -957,12 +922,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             }
         }
 
-        this.indexSubscriptionRequestDelayer.close();
-        this.publishQuadrupleRequestDelayer.close();
-
-        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-            this.publishCompoundEventRequestDelayer.close();
-        }
+        this.publishSubscribeOperationsDelayer.close();
 
         this.miscDatastore.close();
         this.subscriptionsDatastore.close();

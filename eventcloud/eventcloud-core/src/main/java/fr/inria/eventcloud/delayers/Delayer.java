@@ -16,8 +16,7 @@
  **/
 package fr.inria.eventcloud.delayers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 
@@ -28,7 +27,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  * 
  * @author lpellegr
  */
-public abstract class Delayer<T> {
+public abstract class Delayer<R, B extends Collection<R>> {
 
     private final Logger log;
 
@@ -46,7 +45,7 @@ public abstract class Delayer<T> {
 
     protected final SemanticCanOverlay overlay;
 
-    protected final List<T> buffer;
+    protected final B buffer;
 
     public Delayer(SemanticCanOverlay overlay, Logger logger,
             String postActionName, String bufferedObjectName, int bufsize,
@@ -59,33 +58,39 @@ public abstract class Delayer<T> {
         this.postActionName = postActionName;
         this.bufferedObjectName = bufferedObjectName;
 
-        this.buffer = new ArrayList<T>(bufsize);
+        this.buffer = this.createEmptyBuffer(bufsize);
     }
+
+    protected abstract B createEmptyBuffer(int bufsize);
 
     protected abstract void flushBuffer();
 
-    protected abstract void postAction();
+    protected abstract void triggerAction();
 
-    public void receive(T obj) {
+    public void receive(R request) {
         synchronized (this.buffer) {
-            this.buffer.add(obj);
+            this.buffer.add(request);
 
-            if (this.buffer.size() >= this.bufsize) {
-                int nbObjectsFlushed = this.commit();
-                this.log.trace(
-                        "{} {} committed because threshold exceeded on {}",
-                        nbObjectsFlushed, this.bufferedObjectName, this.overlay);
-            } else {
-                if (!this.buffer.isEmpty()) {
-                    // check whether we have a commit thread running
-                    synchronized (this) {
-                        if (this.commitThread == null) {
-                            this.log.trace(
-                                    "Commit thread created on {}", this.overlay);
+            this.commitOrCreateCommitThread();
+        }
+    }
 
-                            this.commitThread = new CommitThread(this);
-                            this.commitThread.start();
-                        }
+    protected void commitOrCreateCommitThread() {
+        if (this.buffer.size() >= this.bufsize) {
+            int nbObjectsFlushed = this.commit();
+            this.log.trace(
+                    "{} {} committed because threshold exceeded on {}",
+                    nbObjectsFlushed, this.bufferedObjectName, this.overlay);
+        } else {
+            if (!this.buffer.isEmpty()) {
+                // check whether we have a commit thread running
+                synchronized (this) {
+                    if (this.commitThread == null) {
+                        this.log.trace(
+                                "Commit thread created on {}", this.overlay);
+
+                        this.commitThread = new CommitThread();
+                        this.commitThread.start();
                     }
                 }
             }
@@ -111,7 +116,7 @@ public abstract class Delayer<T> {
                 startTime = System.currentTimeMillis();
             }
 
-            this.postAction();
+            this.triggerAction();
 
             this.buffer.clear();
 
@@ -138,13 +143,10 @@ public abstract class Delayer<T> {
         }
     }
 
-    private static final class CommitThread extends Thread {
+    private final class CommitThread extends Thread {
 
-        private final Delayer<?> delayer;
-
-        public CommitThread(Delayer<?> delayer) {
-            super("Commit thread " + delayer.getClass().getSimpleName());
-            this.delayer = delayer;
+        public CommitThread() {
+            super("Commit thread " + Delayer.this.getClass().getSimpleName());
 
         }
 
@@ -153,9 +155,9 @@ public abstract class Delayer<T> {
          */
         @Override
         public void run() {
-            while (this.delayer.running) {
+            while (Delayer.this.running) {
                 try {
-                    Thread.sleep(this.delayer.delayerCommitTimeout);
+                    Thread.sleep(Delayer.this.delayerCommitTimeout);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     Thread.currentThread().interrupt();
@@ -163,23 +165,23 @@ public abstract class Delayer<T> {
 
                 int nbObjectsFlushed = 0;
 
-                nbObjectsFlushed = this.delayer.commit();
+                nbObjectsFlushed = Delayer.this.commit();
 
                 if (nbObjectsFlushed == 0) {
-                    this.delayer.log.trace(
+                    Delayer.this.log.trace(
                             "Commit thread terminated on {}",
-                            this.delayer.overlay);
+                            Delayer.this.overlay);
                     // nothing was committed, we should
                     // stop the thread
-                    synchronized (this.delayer) {
-                        this.delayer.commitThread = null;
+                    synchronized (Delayer.this) {
+                        Delayer.this.commitThread = null;
                     }
                     return;
                 } else {
-                    this.delayer.log.trace(
+                    Delayer.this.log.trace(
                             "{} {} committed because timeout exceeded on {}",
-                            nbObjectsFlushed, this.delayer.bufferedObjectName,
-                            this.delayer.overlay);
+                            nbObjectsFlushed, Delayer.this.bufferedObjectName,
+                            Delayer.this.overlay);
                 }
             }
         }
