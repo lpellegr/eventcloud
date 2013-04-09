@@ -58,32 +58,27 @@ import fr.inria.eventcloud.pubsub.Subscription;
  * 
  * @author lpellegr
  */
-public class PublishQuadrupleRequestDelayer extends Delayer<Quadruple> {
+public class PublishQuadrupleRequestOperator extends
+        BufferOperator<CustomBuffer> {
 
     private static final Logger log =
-            LoggerFactory.getLogger(PublishQuadrupleRequestDelayer.class);
+            LoggerFactory.getLogger(PublishQuadrupleRequestOperator.class);
 
-    public PublishQuadrupleRequestDelayer(SemanticCanOverlay overlay) {
-        super(
-                overlay,
-                log,
-                "matching subscriptions",
-                "quadruples",
-                EventCloudProperties.PUBLISH_QUADRUPLES_DELAYER_BUFFER_SIZE.getValue(),
-                EventCloudProperties.PUBLISH_QUADRUPLES_DELAYER_TIMEOUT.getValue());
+    public PublishQuadrupleRequestOperator(SemanticCanOverlay overlay) {
+        super(overlay);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void flushBuffer() {
+    public void flushBuffer(CustomBuffer buffer) {
         TransactionalDatasetGraph txnGraph =
                 super.overlay.getMiscDatastore().begin(AccessMode.WRITE);
 
         try {
             // the quadruple is stored by using its meta graph value
-            for (Quadruple q : super.buffer) {
+            for (Quadruple q : buffer.getQuadruples()) {
                 txnGraph.add(
                         q.createMetaGraphNode(), q.getSubject(),
                         q.getPredicate(), q.getObject());
@@ -101,8 +96,8 @@ public class PublishQuadrupleRequestDelayer extends Delayer<Quadruple> {
      * {@inheritDoc}
      */
     @Override
-    protected void postAction() {
-        for (Quadruple q : super.buffer) {
+    public void triggerAction(CustomBuffer buffer) {
+        for (Quadruple q : buffer.getQuadruples()) {
             this.fireMatchingSubscriptions(q);
         }
     }

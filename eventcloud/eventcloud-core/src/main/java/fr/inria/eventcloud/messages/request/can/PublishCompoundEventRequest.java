@@ -69,7 +69,7 @@ public class PublishCompoundEventRequest extends QuadrupleRequest {
     public void onDestinationReached(final StructuredOverlay overlay,
                                      final Quadruple quadruple) {
 
-        ((SemanticCanOverlay) overlay).getPublishCompoundEventRequestDelayer()
+        ((SemanticCanOverlay) overlay).getPublishSubscribeOperationsDelayer()
                 .receive(
                         new ExtendedCompoundEvent(
                                 this.compoundEvent.getValue(),
