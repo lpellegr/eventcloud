@@ -39,9 +39,9 @@ import fr.inria.eventcloud.utils.NodeSerializer;
  * from the triple value for backward compatibility with linked data tools.
  * <p>
  * Please note that a compound event is not alterable. Any attempt to update the
- * content of a compound event by calling {@link #getQuadruples()} or
- * {@link #getTriples()} followed by {@link Collection#add(Object)} will result
- * in a {@link UnsupportedOperationException}.
+ * content of a compound event by calling {@link #getTriples()} followed by
+ * {@link Collection#add(Object)} will result in a
+ * {@link UnsupportedOperationException}.
  * 
  * @author lpellegr
  */
