@@ -229,7 +229,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE =
             new PropertyInteger(
-                    "eventcloud.subscriptions.cache.maximum.size", 1000);
+                    "eventcloud.subscriptions.cache.maximum.size", 10000);
 
     /**
      * Specifies the maximum number of subscribe proxies to put in cache. This
