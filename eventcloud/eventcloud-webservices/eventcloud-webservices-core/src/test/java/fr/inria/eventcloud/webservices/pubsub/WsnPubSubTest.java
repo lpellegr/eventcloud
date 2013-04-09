@@ -16,14 +16,20 @@
  **/
 package fr.inria.eventcloud.webservices.pubsub;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.namespace.QName;
 
 import org.apache.cxf.endpoint.Server;
-import org.etsi.uri.gcm.util.GCM;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,15 +37,13 @@ import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
-import org.objectweb.fractal.api.Interface;
+import org.objectweb.proactive.core.util.ProActiveInet;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngine;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
-import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerAttributeController;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerFactory;
-import org.soceda.socialfilter.socialnetwork.SocialNetwork;
+import org.soceda.socialfilter.relationshipstrengthengine.Utils;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -168,26 +172,19 @@ public class WsnPubSubTest extends WsTest {
         // Creates and initializes the social filter
         String source1 = "http://127.0.0.1:8891/source1";
         String source2 = "http://127.0.0.1:8891/source2";
-        SocialNetwork socialNetwork = new SocialNetwork();
-        socialNetwork.add_node(source1);
-        socialNetwork.add_node(source2);
-        socialNetwork.add_node(this.notificationConsumerEndpointUrl);
-        socialNetwork.add_relationship(
-                source1, this.notificationConsumerEndpointUrl);
-        socialNetwork.add_relationship(
-                source2, this.notificationConsumerEndpointUrl);
-        socialNetwork.get_relationship(
-                source1, this.notificationConsumerEndpointUrl).set_trust(
-                (float) 0.8);
-        socialNetwork.get_relationship(
-                source2, this.notificationConsumerEndpointUrl).set_trust(
-                (float) 0.4);
+        URL nodesUrl =
+                Thread.currentThread().getContextClassLoader().getResource(
+                        "social-filter-nodes.txt");
+        URL relationshipsUrl =
+                Thread.currentThread().getContextClassLoader().getResource(
+                        "social-filter-relationships.txt");
+        this.replaceConsumerLoopbackIpInSocialFilterFile(nodesUrl);
+        this.replaceConsumerLoopbackIpInSocialFilterFile(relationshipsUrl);
         RelationshipStrengthEngineManager socialFilter =
-                RelationshipStrengthEngineManagerFactory.newRelationshipStrengthEngineManager(new RelationshipStrengthEngine(
-                        socialNetwork));
-        String socialFilterUri =
-                ((RelationshipStrengthEngineManagerAttributeController) GCM.getAttributeController(((Interface) socialFilter).getFcItfOwner())).getComponentURI();
-        EventCloudProperties.SOCIAL_FILTER_URL.setValue(socialFilterUri);
+                RelationshipStrengthEngineManagerFactory.newRelationshipStrengthEngineManager();
+        Utils.deploySocialGraph(
+                socialFilter, nodesUrl.toString(), relationshipsUrl.toString());
+        EventCloudProperties.SOCIAL_FILTER_URL.setValue(Utils.getURI(socialFilter));
 
         // Initializes the EventCloud, web services and web service clients
         this.initEventCloudEnvironmentAndClients();
@@ -317,6 +314,32 @@ public class WsnPubSubTest extends WsTest {
         }
 
         return is;
+    }
+
+    private void replaceConsumerLoopbackIpInSocialFilterFile(URL fileUrl)
+            throws URISyntaxException, IOException {
+        File file = new File(fileUrl.toURI());
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line = "";
+        String oldContent = "";
+
+        while ((line = reader.readLine()) != null) {
+            oldContent += line + "\n";
+        }
+
+        reader.close();
+
+        String newContent =
+                oldContent.replaceAll(
+                        "127.0.0.1:" + WEBSERVICES_PORT,
+                        ProActiveInet.getInstance()
+                                .getInetAddress()
+                                .getHostAddress()
+                                + ":" + WEBSERVICES_PORT);
+
+        FileWriter writer = new FileWriter(file);
+        writer.write(newContent);
+        writer.close();
     }
 
     @After

@@ -312,7 +312,7 @@
 			<dependency>
 				<groupId>com.ebmwebsourcing.projects.soceda.wp2-federated-middleware-layer.social-components</groupId>
 				<artifactId>social-filter</artifactId>
-				<version>v0.3</version>
+				<version>v0.5</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.objectweb.proactive</groupId>
