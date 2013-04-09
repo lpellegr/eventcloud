@@ -167,7 +167,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                                         subscriptionsDatastore, key);
 
                         if (subscription == null) {
-                            throw new SubscriptionNotFoundException();
+                            throw new SubscriptionNotFoundException(key);
                         }
 
                         return subscription;
@@ -937,8 +937,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         private static final long serialVersionUID = 140L;
 
-        public SubscriptionNotFoundException() {
-            super();
+        public SubscriptionNotFoundException(SubscriptionId id) {
+            super("Subscription not found: " + id);
         }
 
     }
