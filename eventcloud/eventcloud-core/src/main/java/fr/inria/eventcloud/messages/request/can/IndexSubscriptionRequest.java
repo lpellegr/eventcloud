@@ -81,7 +81,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
         log.debug("Indexing subscription {} on peer {}", subscription, overlay);
 
-        semanticOverlay.getIndexSubscriptionRequestDelayer().receive(
+        semanticOverlay.getPublishSubscribeOperationsDelayer().receive(
                 subscription);
     }
 

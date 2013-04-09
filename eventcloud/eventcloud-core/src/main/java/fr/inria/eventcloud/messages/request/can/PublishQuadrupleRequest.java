@@ -43,7 +43,7 @@ public class PublishQuadrupleRequest extends QuadrupleRequest {
     @Override
     public void onDestinationReached(final StructuredOverlay overlay,
                                      final Quadruple quadruple) {
-        ((SemanticCanOverlay) overlay).getPublishQuadrupleRequestDelayer()
+        ((SemanticCanOverlay) overlay).getPublishSubscribeOperationsDelayer()
                 .receive(quadruple);
     }
 

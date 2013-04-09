@@ -27,7 +27,6 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
@@ -42,32 +41,27 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  * 
  * @author lpellegr
  */
-public class IndexSubscriptionRequestDelayer extends Delayer<Subscription> {
+public class IndexSubscriptionRequestOperator extends
+        BufferOperator<CustomBuffer> {
 
     private static final Logger log =
-            LoggerFactory.getLogger(IndexSubscriptionRequestDelayer.class);
+            LoggerFactory.getLogger(IndexSubscriptionRequestOperator.class);
 
-    public IndexSubscriptionRequestDelayer(SemanticCanOverlay overlay) {
-        super(
-                overlay,
-                log,
-                "find matching quadruples",
-                "subscriptions",
-                EventCloudProperties.INDEX_SUBSCRIPTION_DELAYER_BUFFER_SIZE.getValue(),
-                EventCloudProperties.INDEX_SUBSCRIPTION_DELAYER_TIMEOUT.getValue());
+    public IndexSubscriptionRequestOperator(SemanticCanOverlay overlay) {
+        super(overlay);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void flushBuffer() {
+    public void flushBuffer(CustomBuffer buffer) {
         TransactionalDatasetGraph txnGraph =
                 this.overlay.getSubscriptionsDatastore()
                         .begin(AccessMode.WRITE);
 
         try {
-            for (Subscription s : super.buffer) {
+            for (Subscription s : buffer.getSubscriptions()) {
                 this.overlay.getSubscriptionsCache().put(s.getId(), s);
                 txnGraph.add(s.toQuadruples());
             }
@@ -85,13 +79,13 @@ public class IndexSubscriptionRequestDelayer extends Delayer<Subscription> {
      * {@inheritDoc}
      */
     @Override
-    protected void postAction() {
-        for (Subscription s : super.buffer) {
-            this.fireQuadrupleMatching(s);
+    public void triggerAction(CustomBuffer buffer) {
+        for (Subscription s : buffer.getSubscriptions()) {
+            this.fireQuadrupleMatching(buffer, s);
         }
     }
 
-    private void fireQuadrupleMatching(Subscription s) {
+    private void fireQuadrupleMatching(CustomBuffer buffer, Subscription s) {
         Subsubscription firstSubsubscription = s.getSubSubscriptions()[0];
 
         // stores the quadruples into a list in order to avoid a concurrent
@@ -99,7 +93,7 @@ public class IndexSubscriptionRequestDelayer extends Delayer<Subscription> {
         // done on the datastore while we are iterating on the ResultSet.
         // Indeed, the result set does not contain the solutions but knows how
         // to retrieve a solution each time a call to next is performed.
-        List<Quadruple> quadruplesMatching = new ArrayList<Quadruple>();
+        List<Quadruple> matchingQuadruples = new ArrayList<Quadruple>();
 
         QuadruplePattern qp =
                 firstSubsubscription.getAtomicQuery().getQuadruplePattern();
@@ -115,12 +109,14 @@ public class IndexSubscriptionRequestDelayer extends Delayer<Subscription> {
             while (it.hasNext()) {
                 Quadruple q = it.next();
 
-                if (!q.getPredicate().equals(
-                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)
+                if (!buffer.getQuadruples().contains(q)
+                        && !q.getPredicate()
+                                .equals(
+                                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)
                         && (qp.getGraph() == Node.ANY || q.getGraph()
                                 .getURI()
                                 .startsWith(qp.getGraph().getURI()))) {
-                    quadruplesMatching.add(q);
+                    matchingQuadruples.add(q);
                 }
             }
         } catch (Exception e) {
@@ -130,7 +126,7 @@ public class IndexSubscriptionRequestDelayer extends Delayer<Subscription> {
             txnGraph.end();
         }
 
-        for (Quadruple quadrupleMatching : quadruplesMatching) {
+        for (Quadruple quadrupleMatching : matchingQuadruples) {
             boolean mustIgnoreQuadrupleMatching =
                     quadrupleMatching.getPublicationTime() < s.getIndexationTime();
 
