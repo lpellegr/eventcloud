@@ -368,7 +368,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         byte directionInv = CanOverlay.getOppositeDirection(direction);
 
         this.lastDirectionUsedForZoneAssignation =
-                (byte) ((lastDirectionUsedForZoneAssignation + 1) % 2);
+                (byte) ((this.lastDirectionUsedForZoneAssignation + 1) % 2);
 
         // gets the next dimension to split into
         if (!this.splitHistory.isEmpty()) {
