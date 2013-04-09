@@ -28,6 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.api.PAActiveObject;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -125,6 +126,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         CacheBuilder<Object, Object> cacheBuilder =
                 CacheBuilder.newBuilder()
+                        .concurrencyLevel(
+                                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue())
                         .softValues()
                         .maximumSize(
                                 EventCloudProperties.PEER_STUBS_CACHE_MAXIMUM_SIZE.getValue());
@@ -144,6 +147,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         cacheBuilder =
                 CacheBuilder.newBuilder()
+                        .concurrencyLevel(
+                                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue())
                         .softValues()
                         .maximumSize(
                                 EventCloudProperties.SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE.getValue());

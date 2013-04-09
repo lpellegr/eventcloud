@@ -507,6 +507,10 @@ public class PublishSubscribeBenchmark {
 
         List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
 
+        // for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
+        // System.out.println(p.dump());
+        // }
+
         StringBuilder buf = new StringBuilder();
         for (int i = 0; i < peers.size(); i++) {
             @SuppressWarnings("unchecked")

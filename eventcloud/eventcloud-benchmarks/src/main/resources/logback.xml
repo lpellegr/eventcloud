@@ -11,7 +11,7 @@
 	<logger name="org.objectweb.proactive.extensions.p2p" level="warn" />
 	<logger name="fr.inria.eventcloud" level="off" />
 	<logger name="fr.inria.eventcloud.benchmarks.pubsub.PublishSubscribeBenchmark" level="info" />
-	<logger name="fr.inria.eventcloud.delayers" level="trace" />
+	<logger name="fr.inria.eventcloud.delayers" level="debug" />
 	<logger name="fr.inria.eventcloud.proxies.SubscribeProxyImpl" level="trace" />
 	<logger name="fr.inria.eventcloud.pubsub.PublishSubscribeUtils" level="debug" />
 	
