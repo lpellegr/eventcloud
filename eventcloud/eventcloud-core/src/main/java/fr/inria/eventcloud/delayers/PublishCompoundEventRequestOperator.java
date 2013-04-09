@@ -49,7 +49,6 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
@@ -66,33 +65,27 @@ import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
  * 
  * @author lpellegr
  */
-public class PublishCompoundEventRequestDelayer extends
-        Delayer<ExtendedCompoundEvent> {
+public class PublishCompoundEventRequestOperator extends
+        BufferOperator<CustomBuffer> {
 
     private static final Logger log =
-            LoggerFactory.getLogger(PublishCompoundEventRequestDelayer.class);
+            LoggerFactory.getLogger(PublishCompoundEventRequestOperator.class);
 
-    public PublishCompoundEventRequestDelayer(SemanticCanOverlay overlay) {
-        super(
-                overlay,
-                log,
-                "matching subscriptions",
-                "compound events",
-                EventCloudProperties.PUBLISH_COMPOUND_EVENT_DELAYER_BUFFER_SIZE.getValue(),
-                EventCloudProperties.PUBLISH_COMPOUND_EVENT_DELAYER_TIMEOUT.getValue());
+    public PublishCompoundEventRequestOperator(SemanticCanOverlay overlay) {
+        super(overlay);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void flushBuffer() {
+    public void flushBuffer(CustomBuffer buffer) {
         TransactionalDatasetGraph txnGraph =
                 this.overlay.getMiscDatastore().begin(AccessMode.WRITE);
 
         try {
             // the quadruple is stored by using its meta graph value
-            for (ExtendedCompoundEvent ec : super.buffer) {
+            for (ExtendedCompoundEvent ec : buffer.getCompoundEvents()) {
                 Quadruple q = ec.getIndexedQuadruple();
 
                 txnGraph.add(
@@ -112,8 +105,8 @@ public class PublishCompoundEventRequestDelayer extends
      * {@inheritDoc}
      */
     @Override
-    protected void postAction() {
-        for (ExtendedCompoundEvent ce : super.buffer) {
+    public void triggerAction(CustomBuffer buffer) {
+        for (ExtendedCompoundEvent ce : buffer.getCompoundEvents()) {
             this.fireMatchingSubscriptions(
                     ce.compoundEvent, ce.indexQuadrupleUsedForIndexing);
         }
