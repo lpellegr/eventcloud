@@ -605,7 +605,7 @@ public class PublishSubscribeBenchmark {
             DescriptiveStatistics stats = new DescriptiveStatistics();
 
             int selectedIndex = 0;
-            double bestStandardDeviation = Integer.MAX_VALUE;
+            double bestMeanDeviation = Integer.MAX_VALUE;
 
             for (int i = 0; i < eventSetsDistribution.size(); i++) {
                 for (int j = 0; j < eventSetsDistribution.get(i).length; j++) {
@@ -622,8 +622,8 @@ public class PublishSubscribeBenchmark {
                 }
                 meanDeviation /= eventSetsDistribution.get(i).length;
 
-                if (meanDeviation < bestStandardDeviation) {
-                    bestStandardDeviation = meanDeviation;
+                if (meanDeviation < bestMeanDeviation) {
+                    bestMeanDeviation = meanDeviation;
                     selectedIndex = i;
                 }
 
