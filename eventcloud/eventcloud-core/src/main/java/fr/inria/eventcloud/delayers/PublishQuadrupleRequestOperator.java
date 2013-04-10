@@ -177,6 +177,7 @@ public class PublishQuadrupleRequestOperator extends
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                txnGraph.abort();
             } finally {
                 if (it != null) {
                     it.close();
