@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -84,6 +85,17 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
             if (it.next().getTimestamp() == this.splitEntryTimestamp) {
                 it.remove();
                 break;
+            }
+        }
+
+        Iterator<SplitEntry> splitHistoryIterator =
+                canOverlay.getSplitHistory().iterator();
+
+        while (splitHistoryIterator.hasNext()) {
+            SplitEntry se = splitHistoryIterator.next();
+
+            if (se.getTimestamp() == this.splitEntryTimestamp) {
+                splitHistoryIterator.remove();
             }
         }
 
