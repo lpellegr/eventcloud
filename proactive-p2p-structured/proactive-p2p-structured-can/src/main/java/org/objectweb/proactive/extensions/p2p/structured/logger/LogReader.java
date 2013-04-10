@@ -157,7 +157,8 @@ public class LogReader {
         try {
 
             for (String hostname : hostnames) {
-                if (hostname != null && hostname != "" && hostname != " ") {
+                if (hostname != null && !hostname.equals("")
+                        && !hostname.equals(" ")) {
                     String line;
                     source =
                             new BufferedReader(new FileReader(completeFileName
