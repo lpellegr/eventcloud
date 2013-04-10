@@ -50,8 +50,8 @@ public class CustomProxyFactory extends ProxyFactory {
                 CustomPublishProxyImpl.PUBLISH_PROXY_ADL,
                 CustomPublishProxy.class,
                 AbstractFactory.getContextFromNodeProvider(
-                        nodeProvider, PublishProxyImpl.PROXY_VN), registryUrl,
-                id);
+                        nodeProvider, PublishProxyImpl.PUBLISH_PROXY_VN),
+                registryUrl, id);
     }
 
 }

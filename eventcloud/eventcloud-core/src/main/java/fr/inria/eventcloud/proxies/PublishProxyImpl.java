@@ -67,6 +67,11 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
     public static final String PUBLISH_SERVICES_ITF = "publish-services";
 
     /**
+     * GCM Virtual Node name of the publish proxy component.
+     */
+    public static final String PUBLISH_PROXY_VN = "PublishProxyVN";
+
+    /**
      * Empty constructor required by ProActive.
      */
     public PublishProxyImpl() {

@@ -143,8 +143,10 @@ public final class WsProxyFactory extends ProxyFactory {
     public static PublishApi newPublishProxy(NodeProvider nodeProvider,
                                              String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
-        return createPublishProxy(publishProxyAdl, getContextFromNodeProvider(
-                nodeProvider, PublishProxyImpl.PROXY_VN), registryUrl, id);
+        return createPublishProxy(
+                publishProxyAdl, getContextFromNodeProvider(
+                        nodeProvider, PublishProxyImpl.PUBLISH_PROXY_VN),
+                registryUrl, id);
     }
 
     /**
@@ -262,7 +264,7 @@ public final class WsProxyFactory extends ProxyFactory {
             throws EventCloudIdNotManaged {
         return createSubscribeProxy(
                 subscribeProxyAdl, getContextFromNodeProvider(
-                        nodeProvider, SubscribeProxyImpl.PROXY_VN),
+                        nodeProvider, SubscribeProxyImpl.SUBSCRIBE_PROXY_VN),
                 registryUrl, id, properties);
     }
 
@@ -358,7 +360,7 @@ public final class WsProxyFactory extends ProxyFactory {
                                            String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         return createPutGetProxy(putgetProxyAdl, getContextFromNodeProvider(
-                nodeProvider, PutGetProxyImpl.PROXY_VN), registryUrl, id);
+                nodeProvider, PutGetProxyImpl.PUTGET_PROXY_VN), registryUrl, id);
     }
 
 }

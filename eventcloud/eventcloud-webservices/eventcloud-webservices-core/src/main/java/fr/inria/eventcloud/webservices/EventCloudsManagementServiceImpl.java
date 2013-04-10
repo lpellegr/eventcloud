@@ -40,10 +40,12 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.objectweb.fractal.api.control.IllegalContentException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
+import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.PAInterface;
 import org.objectweb.proactive.core.component.Utils;
 import org.objectweb.proactive.core.component.control.PAMembraneController;
 import org.objectweb.proactive.core.component.exceptions.NoSuchComponentException;
+import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvidersManager;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 
@@ -740,8 +742,13 @@ public class EventCloudsManagementServiceImpl implements
             throws NoSuchInterfaceException, IllegalLifeCycleException,
             IllegalContentException, IllegalBindingException,
             NoSuchComponentException {
-        ProxyMonitoringManager stub =
-                ProxyMonitoringManagerFactory.newProxyMonitoringManager();
+        ProxyMonitoringManager stub;
+        try {
+            stub =
+                    ProxyMonitoringManagerFactory.newProxyMonitoringManager(PAActiveObject.getActiveObjectNode(proxy));
+        } catch (NodeException e) {
+            stub = ProxyMonitoringManagerFactory.newProxyMonitoringManager();
+        }
         Component proxyMonitoringManager = ((PAInterface) stub).getFcItfOwner();
 
         GCM.getNameController(proxyMonitoringManager).setFcName(

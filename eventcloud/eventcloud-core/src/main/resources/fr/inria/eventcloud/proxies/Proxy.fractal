@@ -5,6 +5,4 @@
 	<controller>
 		<interface role="internal-server" name="monitoring-services-controller" signature="fr.inria.eventcloud.monitoring.ProxyMonitoringActions" contingency="optional"/>
 	</controller>
-
-	<virtual-node name="ProxyVN"/>
 </definition>
