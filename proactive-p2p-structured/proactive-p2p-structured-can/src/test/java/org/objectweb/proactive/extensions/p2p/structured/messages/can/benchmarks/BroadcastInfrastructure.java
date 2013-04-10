@@ -16,12 +16,15 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmarks;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 import org.junit.Assert;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
+import org.objectweb.proactive.extensions.p2p.structured.logger.LogReader;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.EfficientBroadcastRequest;
@@ -49,7 +52,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
     private static final String LOG_FLOODING = "FloodingBroadcast";
     private static final String LOG_OPTIMAL = "OptimalBroadcast";
 
-    // private static final Coordinate<StringElement> constraint =
+    //private static final Coordinate<StringElement> constraint =
     // new Coordinate<StringElement>(new StringElement("j"), null, null);
 
     protected int nbPeers;
@@ -57,8 +60,9 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
     protected Proxy proxy;
 
-    public BroadcastInfrastructure(int nbPeers, String logDirectory) {
-        super(
+    public BroadcastInfrastructure(int nbPeers, String logDirectory, boolean fractalCAN) {
+        super(fractalCAN ?
+        		
                 new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<StringCanOverlay>() {
                             private static final long serialVersionUID = 140L;
@@ -67,8 +71,20 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                             public StringCanOverlay get() {
                                 return new StringCanOverlay();
                             }
-                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider()),
+                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider
+                        		.newFractalInjectionConstraintsProvider())
+                        		
+                        		: new CanDeploymentDescriptor<StringElement>(
+                                        new SerializableProvider<StringCanOverlay>() {
+                                            private static final long serialVersionUID = 140L;
+
+                                            @Override
+                                            public StringCanOverlay get() {
+                                                return new StringCanOverlay();
+                                            }
+                                        }),
                 1, nbPeers);
+        
         this.nbPeers = nbPeers;
         this.logDirectory = logDirectory;
     }
@@ -109,7 +125,8 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                 new AnycastRequest<StringElement>(
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
-        // constraint));
+        //constraint));
+        printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
         JobLogger.recordTime("FloodingBroadcast", request.getId());
@@ -117,14 +134,14 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(2000);
+        Thread.sleep(1000 * nbPeers / 2);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_FLOODING at the root of the logs directory (see JobLogger)
         int nbPeerReached =
-                JobLogger.logResults(
+                LogReader.logResults(
                         LOG_FLOODING, this.nbPeers, request.getId().toString()
-                                + JobLogger.PREFIX + LOG_FLOODING, "1", "");
+                                + JobLogger.getPrefix() + LOG_FLOODING, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);
@@ -142,7 +159,8 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                 new EfficientBroadcastRequest<StringElement>(
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
-        // constraint));
+        //constraint));
+        printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
         JobLogger.recordTime("EfficientBroadcast", request.getId());
@@ -150,15 +168,15 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(2000);
+        Thread.sleep(1000 * nbPeers / 2);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_EFFICIENT at the root of the logs directory (see
         // JobLogger)
         int nbPeerReached =
-                JobLogger.logResults(
+                LogReader.logResults(
                         LOG_EFFICIENT, this.nbPeers, request.getId().toString()
-                                + JobLogger.PREFIX + LOG_EFFICIENT, "1", "");
+                                + JobLogger.getPrefix() + LOG_EFFICIENT, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);
@@ -176,7 +194,8 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                 new OptimalBroadcastRequest<StringElement>(
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
-        // constraint));
+        //constraint));
+        printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
         JobLogger.recordTime("OptimalBroadcast", request.getId());
@@ -184,17 +203,35 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
         // The previous call is asynchronous, so
         // it is preferable to wait a little bit
-        Thread.sleep(2000);
+        Thread.sleep(1000 * nbPeers / 2);
 
         // This is going to log all the interesting metrics for a benchmark
         // in the LOG_OPTIMAL at the root of the logs directory (see JobLogger)
         int nbPeerReached =
-                JobLogger.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
+                LogReader.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
                         .toString()
-                        + JobLogger.PREFIX + LOG_OPTIMAL, "1", "");
+                        + JobLogger.getPrefix() + LOG_OPTIMAL, "0", "");
 
         // Checking the correctness of the run
         Assert.assertEquals(this.nbPeers, nbPeerReached);
     }
 
+    /**
+     * Displays the request size in bytes.
+     * Request size is different for the three kinds of request experimented.
+     * @param request
+     */
+    public void printRequestSize(Request<Coordinate<StringElement>> request) {
+    	ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        ObjectOutputStream oos;
+		try {
+			oos = new ObjectOutputStream(bout);
+			 oos.writeObject(request);
+		        oos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        System.out.println("The size of an " + request.getClass() + 
+        		" is : " + bout.size() + " bytes.");
+    }
 }

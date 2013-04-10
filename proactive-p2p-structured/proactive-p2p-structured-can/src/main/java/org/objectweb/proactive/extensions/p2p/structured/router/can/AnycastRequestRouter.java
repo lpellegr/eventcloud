@@ -91,7 +91,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 (CanRequestResponseManager) canOverlay.getRequestResponseManager();
         // retrieves the hostname for debugging purpose
         String hostname = "";
-        if (JobLogger.bcastDebugMode) {
+        if (JobLogger.getBcastDebug()) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
@@ -105,12 +105,14 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             logger.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
-            if (JobLogger.bcastDebugMode) {
+            if (JobLogger.getBcastDebug()) {
                 Date receiveTime = new Date();
-                String timestamp = JobLogger.DATE_FORMAT.format(receiveTime);
+                String timestamp = JobLogger.getDateFormat().format(receiveTime);
                 JobLogger.logMessage(request.getId().toString() + "_"
                         + "FloodingBroadcast_" + hostname, "1 " + timestamp
-                        + JobLogger.RETURN);
+                        + " " + canOverlay.getId() + " " + canOverlay
+                        .getNeighborTable().size() + JobLogger.getLineSeparator());
+                
             }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
@@ -129,13 +131,14 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
-                if (JobLogger.bcastDebugMode) {
+                if (JobLogger.getBcastDebug()) {
                     Date receiveTime = new Date();
                     String timestamp =
-                            JobLogger.DATE_FORMAT.format(receiveTime);
+                            JobLogger.getDateFormat().format(receiveTime);
                     JobLogger.logMessage(request.getId().toString() + "_"
                             + "FloodingBroadcast_" + hostname, "0 " + timestamp
-                            + JobLogger.RETURN);
+                            + " " + canOverlay.getId() + " " + canOverlay
+                            .getNeighborTable().size() + JobLogger.getLineSeparator());
                 }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
 
