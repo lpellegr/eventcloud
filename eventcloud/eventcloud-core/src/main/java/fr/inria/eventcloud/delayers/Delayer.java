@@ -118,13 +118,13 @@ public abstract class Delayer<R, B extends Collection<R>> {
 
             this.triggerAction();
 
-            this.buffer.clear();
-
             if (this.log.isTraceEnabled()) {
                 this.log.trace(
                         "Fired {} in {} ms on {}", this.postActionName,
                         System.currentTimeMillis() - startTime, this.overlay);
             }
+
+            this.buffer.clear();
 
             return size;
         }
