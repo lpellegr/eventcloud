@@ -149,9 +149,6 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
     public boolean inMemoryDatastore = false;
 
-    @Parameter(names = {"-udd", "--uniform-data-distribution"}, description = "Generates data so that they are distributed uniformly among the available peers")
-    public boolean uniformDataDistribution = false;
-
     @Parameter(names = {"-negr", "--nb-event-generation-rounds"}, description = "When combined with uniform data distribution, the specified number of event sets are generated and only event set with the best standard deviation is kept")
     public int nbEventGenerationRounds = 1;
 
@@ -228,7 +225,7 @@ public class PublishSubscribeBenchmark {
                 System.exit(0);
             }
         } catch (ParameterException e) {
-            jCommander.usage();
+            System.err.println(e.getMessage());
             System.exit(1);
         }
 
@@ -254,8 +251,6 @@ public class PublishSubscribeBenchmark {
         log.info("  publishQuadruples -> {}", this.publishIndependentQuadruples);
         log.info("  rewritingLevel -> {}", this.rewritingLevel);
         log.info("  subscriptionType -> {}", this.subscriptionType);
-        log.info(
-                "  uniformDataDistribution -> {}", this.uniformDataDistribution);
         log.info(
                 "  waitBetweenPublications -> {}", this.waitBetweenPublications);
     }
@@ -644,21 +639,15 @@ public class PublishSubscribeBenchmark {
         // time
         Event[] generatedEvents = new Event[nbPublications];
 
-        if (this.uniformDataDistribution && this.rewritingLevel > 0) {
+        if (this.rewritingLevel > 0) {
             generatedEvents =
                     this.createEventsForUniformDistributionAndRewritingSteps(
                             deployer, zones, fixedPredicateNodes);
         } else {
-            // if (this.uniformDataDistribution && this.rewritingLevel == 0)
-            // {
             generatedEvents =
                     this.createEventsForUniformDistribution(deployer, zones);
         }
-        // else {
-        // for (int i = 0; i < nbPublications; i++) {
-        // generatedEvents[i] = this.supplier.get();
-        // }
-        // }
+
         return generatedEvents;
     }
 
