@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveException;
@@ -53,8 +54,10 @@ import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -82,6 +85,7 @@ import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.operations.can.CountQuadruplesOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
@@ -147,6 +151,9 @@ public class PublishSubscribeBenchmark {
 
     @Parameter(names = {"-udd", "--uniform-data-distribution"}, description = "Generates data so that they are distributed uniformly among the available peers")
     public boolean uniformDataDistribution = false;
+
+    @Parameter(names = {"-negr", "--nb-event-generation-rounds"}, description = "When combined with uniform data distribution, the specified number of event sets are generated and only event set with the best standard deviation is kept")
+    public int nbEventGenerationRounds = 1;
 
     @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
     public String gcmaDescriptor = null;
@@ -237,6 +244,8 @@ public class PublishSubscribeBenchmark {
         log.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
         log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
         log.info("  listenerType -> {}", this.listenerType);
+        log.info(
+                "  nbEventGenerationRounds -> {}", this.nbEventGenerationRounds);
         log.info("  nbPeers -> {}", this.nbPeers);
         log.info("  nbPublications -> {}", nbPublications);
         log.info("  nbPublishers -> {}", this.nbPublishers);
@@ -550,31 +559,107 @@ public class PublishSubscribeBenchmark {
                                  SemanticZone[] zones,
                                  Node[] fixedPredicateNodes) {
         if (this.events == null) {
-            // pre-generates events so that the data are the same for all the
-            // runs and the time is not included into the benchmark execution
-            // time
-            Event[] generatedEvents = new Event[nbPublications];
+            List<Event[]> eventSets =
+                    new ArrayList<Event[]>(this.nbEventGenerationRounds);
+            List<Integer[]> eventSetsDistribution =
+                    new ArrayList<Integer[]>(this.nbEventGenerationRounds);
 
-            if (this.uniformDataDistribution && this.rewritingLevel > 0) {
-                generatedEvents =
-                        this.createEventsForUniformDistributionAndRewritingSteps(
+            for (int i = 0; i < this.nbEventGenerationRounds; i++) {
+                Event[] generatedEvents =
+                        this.generateEvents(
                                 deployer, zones, fixedPredicateNodes);
-            } else {
-                // if (this.uniformDataDistribution && this.rewritingLevel == 0)
-                // {
-                generatedEvents =
-                        this.createEventsForUniformDistribution(deployer, zones);
-            }
-            // else {
-            // for (int i = 0; i < nbPublications; i++) {
-            // generatedEvents[i] = this.supplier.get();
-            // }
-            // }
+                Integer[] distribution = new Integer[zones.length];
+                for (int j = 0; j < distribution.length; j++) {
+                    distribution[j] = 0;
+                }
 
-            this.events = generatedEvents;
+                for (Event e : generatedEvents) {
+                    CompoundEvent ce = (CompoundEvent) e;
+
+                    for (int j = 0; j < ce.size(); j++) {
+                        Quadruple q = ce.get(j);
+
+                        boolean belongs = false;
+
+                        for (int k = 0; k < zones.length; k++) {
+
+                            if (zones[k].contains(SemanticCoordinateFactory.newSemanticCoordinate(q))) {
+                                distribution[k] = distribution[k] + 1;
+
+                                belongs = true;
+                            }
+                        }
+
+                        if (!belongs) {
+                            throw new RuntimeException(
+                                    "Generated quadruple is not managed by the network: "
+                                            + q);
+                        }
+                    }
+                }
+
+                eventSets.add(generatedEvents);
+                eventSetsDistribution.add(distribution);
+            }
+
+            DescriptiveStatistics stats = new DescriptiveStatistics();
+
+            int selectedIndex = 0;
+            double bestStandardDeviation = Integer.MAX_VALUE;
+
+            for (int i = 0; i < eventSetsDistribution.size(); i++) {
+                for (int j = 0; j < eventSetsDistribution.get(i).length; j++) {
+                    stats.addValue(eventSetsDistribution.get(i)[j]);
+                }
+
+                double mean = stats.getMean();
+
+                // http://mathworld.wolfram.com/MeanDeviation.html
+                double meanDeviation = 0;
+                for (int j = 0; j < eventSetsDistribution.get(i).length; j++) {
+                    meanDeviation +=
+                            Math.abs(eventSetsDistribution.get(i)[j] - mean);
+                }
+                meanDeviation /= eventSetsDistribution.get(i).length;
+
+                if (meanDeviation < bestStandardDeviation) {
+                    bestStandardDeviation = meanDeviation;
+                    selectedIndex = i;
+                }
+
+                stats.clear();
+            }
+
+            this.events = eventSets.get(selectedIndex);
         }
 
         return this.events;
+    }
+
+    private Event[] generateEvents(EventCloudDeployer deployer,
+                                   SemanticZone[] zones,
+                                   Node[] fixedPredicateNodes) {
+        // pre-generates events so that the data are the same for all the
+        // runs and the time is not included into the benchmark execution
+        // time
+        Event[] generatedEvents = new Event[nbPublications];
+
+        if (this.uniformDataDistribution && this.rewritingLevel > 0) {
+            generatedEvents =
+                    this.createEventsForUniformDistributionAndRewritingSteps(
+                            deployer, zones, fixedPredicateNodes);
+        } else {
+            // if (this.uniformDataDistribution && this.rewritingLevel == 0)
+            // {
+            generatedEvents =
+                    this.createEventsForUniformDistribution(deployer, zones);
+        }
+        // else {
+        // for (int i = 0; i < nbPublications; i++) {
+        // generatedEvents[i] = this.supplier.get();
+        // }
+        // }
+        return generatedEvents;
     }
 
     private SemanticZone[] retrievePeerZones(EventCloudDeployer deployer) {
