@@ -219,11 +219,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                         findSubscriptionsSparql,
                         txnGraph.getUnderlyingDataset());
 
-        List<Node[]> solutions = null;
+        List<Node[]> solutions = new ArrayList<Node[]>();
+
         try {
             ResultSet r = qexec.execSelect();
-
-            solutions = new ArrayList<Node[]>();
 
             while (r.hasNext()) {
                 QuerySolution s = r.next();
