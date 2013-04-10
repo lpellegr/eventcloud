@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>eventcloud-parent</artifactId>
+		<groupId>fr.inria.eventcloud</groupId>
+		<version>1.4.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>fr.inria.eventcloud</groupId>
+	<artifactId>eventcloud</artifactId>
+	<version>1.4.0-SNAPSHOT</version>
+	<name>eventcloud</name>
+
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>eventcloud-adapters</module>
+		<module>eventcloud-api</module>
+		<module>eventcloud-benchmarks</module>
+		<module>eventcloud-bundle</module>
+		<module>eventcloud-configuration</module>
+		<module>eventcloud-core</module>
+		<module>eventcloud-deployment</module>
+		<module>eventcloud-translators</module>
+		<module>eventcloud-utils</module>
+		<module>eventcloud-utils-trigwriter</module>
+		<module>eventcloud-webservices</module>
+	</modules>
+
+</project>
