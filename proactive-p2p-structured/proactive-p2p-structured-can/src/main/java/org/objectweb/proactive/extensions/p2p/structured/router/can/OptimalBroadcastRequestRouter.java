@@ -127,6 +127,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
             }
         } else {
             // the current overlay validates the constraints
+        	// log "1" message
             if (request.validatesKeyConstraints(canOverlay)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Request " + request.getId() + " is on peer "
@@ -144,8 +145,21 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                 }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
             }
+            else {
+            	// The current overlay doesn't validate the constraints but 
+            	// it is needed to route the message anyway, log "-1" message
+            	if (JobLogger.getBcastDebug()) {
+                    Date receiveTime = new Date();
+                    String timestamp =
+                            JobLogger.getDateFormat().format(receiveTime);
+                    JobLogger.logMessage(request.getId().toString() + "_"
+                            + "OptimalBroadcast_" + hostname, "-1 " + timestamp
+                            + " " + canOverlay.getId() + " " + canOverlay
+                            .getNeighborTable().size() + JobLogger.getLineSeparator());
+                }
+            }
 
-            // Sends the message to the other neighbors which validates the
+            // Sends the message to the other neighbors which validate the
             // constraints and also that don't validate the constraint because
             // there is only one path to follow
             this.handle(overlay, request);
@@ -318,10 +332,10 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                             // dimension.
                             if (plane[coordinate] == null
                                     && coordinate != dimension) {
-                                if (this.contains(
+                                if (!this.contains(
                                         overlay.getZone(),
                                         neighbor.getNeighborEntry().getZone(),
-                                        coordinate) == false) {
+                                        coordinate) && request.getConstraintsValidator().validatesKeyConstraints(overlay)) {
                                     contains = false;
                                 }
                             }
@@ -329,9 +343,9 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                             // that is not null, then in order for the peer to
                             // receive the broadcast message it has to contain
                             // that value in its zone (on the given dimension).
-                            else if (this.containsCoordinate(
+                            else if (!this.containsCoordinate(
                                     neighbor.getNeighborEntry().getZone(),
-                                    plane[coordinate], coordinate) == false) {
+                                    plane[coordinate], coordinate)) {
                                 contains = false;
                             }
                         }
@@ -440,9 +454,9 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
     protected boolean containsCoordinate(
     		Zone<E> zone, Element value, byte dimension) {
         if (value != null) {
-            if (value.isBetween(
+            if (!value.isBetween(
                     zone.getLowerBound(dimension),
-                    zone.getUpperBound(dimension)) == false) {
+                    zone.getUpperBound(dimension))) {
                 return false;
             }
         }

@@ -144,6 +144,19 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                 // sends the message to the other neighbors which validates the
                 // constraints
             }
+            else {
+            	// Log "-1" message to say that the overlay is only a router,
+            	// not a receiver
+            	if (JobLogger.getBcastDebug()) {
+                    Date receiveTime = new Date();
+                    String timestamp =
+                            JobLogger.getDateFormat().format(receiveTime);
+                    JobLogger.logMessage(request.getId().toString() + "_"
+                            + "EfficientBroadcast_" + hostname, "-1 " + timestamp 
+                            + " " + canOverlay.getId() + " " + canOverlay
+                            .getNeighborTable().size() + JobLogger.getLineSeparator());
+                }
+            }
             this.handle(overlay, request);
         }
     }
@@ -281,7 +294,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
             }
         }
 
-        for (byte dimension = 0; dimension < dimensions ; dimension++) {
+        for (byte dimension = 0 ; dimension < dimensions  ; dimension++) {
 
             for (byte direction = 0; direction < 2; direction++) {
                 // A peer only needs to propagate the broadcast request only on
@@ -291,6 +304,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                     for (NeighborEntryWrapper<E> neighbor : extendedNeighbors.get(
                             dimension, direction)) {
                         boolean contains = true;
+                        if (dimension == dimensions-1) {
                         // We need to check all the constraints that are given
                         for (byte coordinate = 0; coordinate < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); coordinate++) {
                             // MCAN Strategy : If the dimension considered is
@@ -307,7 +321,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                                     contains = false;
                                 }
                             }
-                        }
+                        }}
                         // If the neighbor validates all the above constraints
                         // it will receive the broadcast request.
                         if (contains == true) {

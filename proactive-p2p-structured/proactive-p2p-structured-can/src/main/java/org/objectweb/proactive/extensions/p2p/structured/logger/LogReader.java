@@ -58,6 +58,7 @@ public class LogReader {
         Date startingDate = null;
         int nbDuplicates = 0;
         int nbPeersReached = 0;
+        int nbPeersUsedAsRouters = 0;
         List<Date> firstReceptionTimestamps = new LinkedList<Date>();
         List<Date> receptionTimestamps = new LinkedList<Date>();
         appendAllLogs(name, id);
@@ -101,6 +102,9 @@ public class LogReader {
                                         JobLogger.getDateFormat().parse(timestamp);
                                 firstReceptionTimestamps.add(firstReceptionDate);
                             }
+                            if (suspectedDuplicate == -1) {
+                            	nbPeersUsedAsRouters++;
+                            }
                             // Getting the timestamp of the reception
                             receptionDate =
                                     JobLogger.getDateFormat().parse(timestamp);
@@ -139,8 +143,8 @@ public class LogReader {
                 maxFirstReceptionDate.getTime() - startingDate.getTime();
         long waveDelay = maxReceptionDate.getTime() - startingDate.getTime();
         logRunData(
-                nbDuplicates, nbPeersReached, receptionDelay, waveDelay,
-                runNumber);
+                nbPeersUsedAsRouters, nbDuplicates, nbPeersReached, receptionDelay, 
+                waveDelay, runNumber);
         return nbPeersReached;
     }
 
@@ -195,9 +199,10 @@ public class LogReader {
      * @param waveDelay
      * @param runNumber
      */
-    private static void logRunData(int nbDuplicates, int nbPeersReached,
-                            long receptionDelay, long waveDelay,
-                            String runNumber) {
+    private static void logRunData(
+    		int nbPeersUsedAsRouter, int nbDuplicates, 
+    		int nbPeersReached, long receptionDelay, 
+    		long waveDelay, String runNumber) {
         try {
             BufferedWriter dataWriter =
                     new BufferedWriter(new FileWriter(JobLogger.getLogDirectory()
@@ -220,6 +225,8 @@ public class LogReader {
                     + nbPeersReached);
             System.out.println("Number of duplicates listed : \t\t\t\t"
                     + nbDuplicates);
+            System.out.println("Number of peers that have only been used as routers : \t"
+                    + nbPeersUsedAsRouter);
             System.out.println("Time needed to reach all the peers (ms) : \t\t"
                     + receptionDelay);
             System.out.println("Time needed for the broadcast wave to die (ms) : \t"
