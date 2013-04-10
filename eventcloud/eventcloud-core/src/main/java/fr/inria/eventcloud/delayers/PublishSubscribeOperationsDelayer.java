@@ -16,8 +16,12 @@
  **/
 package fr.inria.eventcloud.delayers;
 
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Stopwatch;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -93,14 +97,78 @@ public class PublishSubscribeOperationsDelayer extends
      * {@inheritDoc}
      */
     @Override
-    protected void flushBuffer() {
-        this.quadruplesOperator.flushBuffer(super.buffer);
+    protected int commit() {
+        synchronized (this.buffer) {
+            int size = this.buffer.size();
 
-        if (this.compoundEventsOperator != null) {
-            this.compoundEventsOperator.flushBuffer(super.buffer);
+            Stopwatch flushBufferStopwatch = null;
+            Stopwatch triggerActionStopwatch = null;
+
+            if (log.isTraceEnabled()) {
+                flushBufferStopwatch = new Stopwatch();
+                triggerActionStopwatch = new Stopwatch();
+                flushBufferStopwatch.start();
+            }
+
+            this.quadruplesOperator.flushBuffer(super.buffer);
+
+            if (this.compoundEventsOperator != null) {
+                this.compoundEventsOperator.flushBuffer(super.buffer);
+            }
+
+            if (log.isTraceEnabled()) {
+                flushBufferStopwatch.stop();
+                triggerActionStopwatch.start();
+            }
+
+            this.quadruplesOperator.triggerAction(super.buffer);
+
+            if (this.compoundEventsOperator != null) {
+                this.compoundEventsOperator.triggerAction(super.buffer);
+            }
+
+            if (log.isTraceEnabled()) {
+                triggerActionStopwatch.stop();
+                flushBufferStopwatch.start();
+            }
+
+            this.subscriptionsOperator.flushBuffer(super.buffer);
+
+            if (log.isTraceEnabled()) {
+                flushBufferStopwatch.stop();
+                triggerActionStopwatch.start();
+            }
+
+            this.subscriptionsOperator.triggerAction(super.buffer);
+
+            if (log.isTraceEnabled()) {
+                triggerActionStopwatch.stop();
+
+                log.trace(
+                        "Buffer flushed in {} ms on {}",
+                        flushBufferStopwatch.elapsed(TimeUnit.MILLISECONDS),
+                        this.overlay);
+                log.trace(
+                        "Fired {} in {} ms on {}", super.postActionName,
+                        triggerActionStopwatch.elapsed(TimeUnit.MILLISECONDS),
+                        this.overlay);
+            }
+
+            this.buffer.clear();
+
+            return size;
         }
+    }
 
-        this.subscriptionsOperator.flushBuffer(super.buffer);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void flushBuffer() {
+        // do nothing since we are overriding the commit method as the flush
+        // buffer operation is composed of multiple flush operations that
+        // should not be executed in sequence but in turns with its associated
+        // trigger action method
     }
 
     /**
@@ -108,13 +176,7 @@ public class PublishSubscribeOperationsDelayer extends
      */
     @Override
     protected void triggerAction() {
-        this.quadruplesOperator.triggerAction(super.buffer);
-
-        if (this.compoundEventsOperator != null) {
-            this.compoundEventsOperator.triggerAction(super.buffer);
-        }
-
-        this.subscriptionsOperator.triggerAction(super.buffer);
+        // do nothing, see commit method above
     }
 
     /**
