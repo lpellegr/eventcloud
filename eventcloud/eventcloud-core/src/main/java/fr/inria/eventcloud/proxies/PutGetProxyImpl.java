@@ -64,6 +64,11 @@ public class PutGetProxyImpl extends AbstractProxy implements PutGetProxy,
     public static final String PUTGET_SERVICES_ITF = "putget-services";
 
     /**
+     * GCM Virtual Node name of the put/get proxy component.
+     */
+    public static final String PUTGET_PROXY_VN = "PutGetProxyVN";
+
+    /**
      * Empty constructor required by ProActive.
      */
     public PutGetProxyImpl() {

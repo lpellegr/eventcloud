@@ -42,11 +42,6 @@ public abstract class AbstractProxy extends AbstractComponent implements
     public static final String MONITORING_SERVICES_CONTROLLER_ITF =
             "monitoring-services-controller";
 
-    /**
-     * GCM Virtual Node name of the proxy component.
-     */
-    public static final String PROXY_VN = "ProxyVN";
-
     protected EventCloudCache eventCloudCache;
 
     protected org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy proxy;

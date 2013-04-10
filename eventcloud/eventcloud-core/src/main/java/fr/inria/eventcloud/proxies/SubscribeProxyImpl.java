@@ -102,6 +102,11 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     public static final String SUBSCRIBE_SERVICES_ITF = "subscribe-services";
 
+    /**
+     * GCM Virtual Node name of the subscribe proxy component.
+     */
+    public static final String SUBSCRIBE_PROXY_VN = "SubscribeProxyVN";
+
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxyImpl.class);
 
