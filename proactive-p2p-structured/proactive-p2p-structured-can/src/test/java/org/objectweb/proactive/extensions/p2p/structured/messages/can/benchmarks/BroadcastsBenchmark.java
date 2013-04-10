@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmark
 
 import java.io.File;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
 
 /**
@@ -25,74 +26,84 @@ import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
  * be used when a message needs to be disseminated across all peers. The results
  * are given in files in the directory specified.
  * 
- * If parameters are given to the main, it sets these parameters :
- * <ol>
- * <li>The number of peers in the network</li>
- * <li>The directory where the logs are going to be written</li>
- * </ol>
+ * The number of peers can be given through the command line parameters.
  * Otherwise, the default parameters are going to be used.
  * 
  * @author jrochas
  */
 public class BroadcastsBenchmark {
+	
+	/** Number of peers in the network (can be changed through
+	 * first main method parameter) */
+	private static int nbPeers = 25;
+	/** Number of dimensions of the CAN (can be changed through
+	 * second main method parameter) */
+	private static int nbDimensions = 2;
 
-    /**
-     * Number of peers in the network (can be changed through first main method
-     * parameter)
-     */
-    private static int nbPeers = 25;
-    /**
-     * Directory of feedback files (can be changed through second main method
-     * parameter)
-     */
-    private static String logDirectory = "/tmp/broadcast_logs/";
+	public static void main(String[] args) {
 
-    public static void main(String[] args) {
+		if (args.length > 1) {
+			try {
+				nbPeers = Integer.parseInt(args[0]);
+				nbDimensions = Integer.parseInt(args[1]);
+			}
+			catch (NumberFormatException e) {
+				System.out.println("Aborting - Require arguments : " +
+						"number of peers in the network + number of dimensions " +
+						"of the CAN [-fractal], or require no arguments at all (default values : 25 4)" +
+						" + [-fractal] if the CAN must be built according to a fractal approach.");
+				System.exit(0);
+			}
+		}
+		File directory = new File(JobLogger.getLogDirectory());
+		if (directory.exists()) {
+			File[] files = directory.listFiles();
+			for (File file : files) {
+				file.delete();
+			}
+		}
 
-        if (args.length > 0) {
-            nbPeers = Integer.parseInt(args[0]);
-            if (args.length > 1) {
-                logDirectory = args[1];
-                JobLogger.logDirectory = args[1];
-            }
-        }
+		// Set the number of dimensions
+		P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) nbDimensions);
+		// Set the number of peers for the log filenames
+		JobLogger.setNbPeers(nbPeers);
 
-        // Removing all the previous logs
-        File directory = new File(logDirectory);
-        if (directory.exists()) {
-            File[] files = directory.listFiles();
-            for (File file : files) {
-                file.delete();
-            }
-        }
+		try {
+			boolean fractalCAN = false;
+			if ((args.length > 0 && args[0].equals("-fractal")) || 
+					(args.length > 2 && args[2].equals("-fractal"))) {
+				fractalCAN = true;
+				JobLogger.logMessage(BroadcastsBenchmark.class.getName(), 
+						"********** Building fractal CAN **********");
+			}
+			else {
+				JobLogger.logMessage(BroadcastsBenchmark.class.getName(),
+						"********** Building random CAN **********");
+			}
+			// Building the CAN
+			BroadcastInfrastructure broadcastInfrastructure = 
+					new BroadcastInfrastructure(
+							nbPeers, JobLogger.getLogDirectory(), fractalCAN);
+			broadcastInfrastructure.initialize();
 
-        // Set the number of peers for the log files
-        JobLogger.setNbPeers(nbPeers);
+			// Running a FloodingBroadcast
+			broadcastInfrastructure.measureFloodingBroadcast();
+			Thread.sleep(1000);
 
-        try {
-            // Building the CAN
-            BroadcastInfrastructure broadcastInfrastructure =
-                    new BroadcastInfrastructure(nbPeers, logDirectory);
-            broadcastInfrastructure.initialize();
+			// Running an EfficientBroadcast
+			broadcastInfrastructure.measureEfficientBroadcast();
+			Thread.sleep(1000);
 
-            // Running a FloodingBroadcast
-            broadcastInfrastructure.measureFloodingBroadcast();
-            Thread.sleep(2000);
+			// Running an OptimalBroadcast
+			broadcastInfrastructure.measureOptimalBroadcast();
+			Thread.sleep(1000);
 
-            // Running an EfficientBroadcast
-            broadcastInfrastructure.measureEfficientBroadcast();
-            Thread.sleep(2000);
+			broadcastInfrastructure.terminate();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
-            // Running an OptimalBroadcast
-            broadcastInfrastructure.measureOptimalBroadcast();
-            Thread.sleep(2000);
-
-            broadcastInfrastructure.terminate();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        System.exit(0);
-    }
+		System.exit(0);
+	}
 
 }
