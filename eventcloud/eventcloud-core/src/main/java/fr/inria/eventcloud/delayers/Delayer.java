@@ -39,9 +39,9 @@ public abstract class Delayer<R, B extends Collection<R>> {
 
     private final int delayerCommitTimeout;
 
-    private final String postActionName;
+    protected final String postActionName;
 
-    private final String bufferedObjectName;
+    protected final String bufferedObjectName;
 
     protected final SemanticCanOverlay overlay;
 
@@ -97,7 +97,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
         }
     }
 
-    private int commit() {
+    protected int commit() {
         synchronized (this.buffer) {
             int size = this.buffer.size();
 

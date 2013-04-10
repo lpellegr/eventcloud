@@ -81,11 +81,11 @@ public class IndexSubscriptionRequestOperator extends
     @Override
     public void triggerAction(CustomBuffer buffer) {
         for (Subscription s : buffer.getSubscriptions()) {
-            this.fireQuadrupleMatching(buffer, s);
+            this.fireQuadrupleMatching(s);
         }
     }
 
-    private void fireQuadrupleMatching(CustomBuffer buffer, Subscription s) {
+    private void fireQuadrupleMatching(Subscription s) {
         Subsubscription firstSubsubscription = s.getSubSubscriptions()[0];
 
         // stores the quadruples into a list in order to avoid a concurrent
@@ -109,10 +109,8 @@ public class IndexSubscriptionRequestOperator extends
             while (it.hasNext()) {
                 Quadruple q = it.next();
 
-                if (!buffer.getQuadruples().contains(q)
-                        && !q.getPredicate()
-                                .equals(
-                                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)
+                if (!q.getPredicate().equals(
+                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)
                         && (qp.getGraph() == Node.ANY || q.getGraph()
                                 .getURI()
                                 .startsWith(qp.getGraph().getURI()))) {
