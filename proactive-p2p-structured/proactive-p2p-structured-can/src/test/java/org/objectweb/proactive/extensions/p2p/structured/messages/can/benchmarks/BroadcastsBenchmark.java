@@ -38,7 +38,7 @@ public class BroadcastsBenchmark {
 	private static int nbPeers = 25;
 	/** Number of dimensions of the CAN (can be changed through
 	 * second main method parameter) */
-	private static int nbDimensions = 4;
+	private static int nbDimensions = 2;
 
 	public static void main(String[] args) {
 

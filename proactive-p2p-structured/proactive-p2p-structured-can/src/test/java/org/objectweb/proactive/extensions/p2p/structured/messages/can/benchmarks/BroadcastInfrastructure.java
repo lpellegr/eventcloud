@@ -52,7 +52,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
     private static final String LOG_FLOODING = "FloodingBroadcast";
     private static final String LOG_OPTIMAL = "OptimalBroadcast";
 
-    // private static final Coordinate<StringElement> constraint =
+    //private static final Coordinate<StringElement> constraint =
     // new Coordinate<StringElement>(new StringElement("j"), null, null);
 
     protected int nbPeers;
@@ -125,7 +125,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                 new AnycastRequest<StringElement>(
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
-        // constraint));
+        //constraint));
         printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
@@ -159,7 +159,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                 new EfficientBroadcastRequest<StringElement>(
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
-        // constraint));
+        //constraint));
         printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
@@ -194,7 +194,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                 new OptimalBroadcastRequest<StringElement>(
                         new DefaultAnycastConstraintsValidator<StringElement>(
                                 CoordinateFactory.newStringCoordinate()));
-        // constraint));
+        //constraint));
         printRequestSize(request);
 
         // Timestamp the beginning of the broadcast
