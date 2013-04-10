@@ -27,7 +27,6 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.inria.eventcloud.proxies.AbstractProxy;
 import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManager;
 import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManagerImpl;
 
@@ -93,14 +92,17 @@ public class ProxyMonitoringManagerFactory extends AbstractFactory {
      * 
      * @param nodeProvider
      *            the node provider to be used for deployment.
+     * @param vnName
+     *            the name of the GCM virtual node to be used for deployment.
      * 
      * @return the reference on the {@link ProxyMonitoringManager} interface of
      *         the new proxy monitoring manager non functional component
      *         created.
      */
-    public static ProxyMonitoringManager newProxyMonitoringManager(NodeProvider nodeProvider) {
+    public static ProxyMonitoringManager newProxyMonitoringManager(NodeProvider nodeProvider,
+                                                                   String vnName) {
         return ProxyMonitoringManagerFactory.createProxyMonitoringManager(getContextFromNodeProvider(
-                nodeProvider, AbstractProxy.PROXY_VN));
+                nodeProvider, vnName));
     }
 
     private static ProxyMonitoringManager createProxyMonitoringManager(Map<String, Object> context) {
