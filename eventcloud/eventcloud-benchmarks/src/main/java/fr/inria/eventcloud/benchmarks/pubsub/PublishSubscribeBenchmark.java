@@ -163,7 +163,7 @@ public class PublishSubscribeBenchmark {
     // category names
 
     public static final String END_TO_END_MEASUREMENT_CATEGORY =
-            MicroBenchmark.DEFAULT_CATEGORY_NAME;
+            "endToEndMeasurement";
 
     public static final String OUTPUT_MEASUREMENT_CATEGORY =
             "outputMeasurement";
@@ -296,12 +296,22 @@ public class PublishSubscribeBenchmark {
                         try {
                             PublishSubscribeBenchmark.this.execute(recorder);
 
+                            long maxEndToEndMeasurement = 0;
+
                             for (SubscriptionId subscriptionId : PublishSubscribeBenchmark.this.listeners.keySet()) {
+                                long endToEndEllapsedTime =
+                                        PublishSubscribeBenchmark.this.endToEndMeasurementsExitTime.get(subscriptionId)
+                                                - PublishSubscribeBenchmark.this.endToEndMeasurementEntryTime;
+
+                                if (endToEndEllapsedTime > maxEndToEndMeasurement) {
+                                    maxEndToEndMeasurement =
+                                            endToEndEllapsedTime;
+                                }
+
                                 recorder.reportValue(
                                         END_TO_END_MEASUREMENT_CATEGORY
                                                 + subscriptionId.toString(),
-                                        PublishSubscribeBenchmark.this.endToEndMeasurementsExitTime.get(subscriptionId)
-                                                - PublishSubscribeBenchmark.this.endToEndMeasurementEntryTime);
+                                        endToEndEllapsedTime);
 
                                 recorder.reportValue(
                                         OUTPUT_MEASUREMENT_CATEGORY
@@ -318,6 +328,10 @@ public class PublishSubscribeBenchmark {
                                                 .getElapsedTime(
                                                         PublishSubscribeBenchmark.this.pointToPointEntryMeasurements));
                             }
+
+                            recorder.reportValue(
+                                    MicroBenchmark.DEFAULT_CATEGORY_NAME,
+                                    maxEndToEndMeasurement);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -340,45 +354,75 @@ public class PublishSubscribeBenchmark {
         statsBuffer.append("  Average number of quadruples per peer is ");
         statsBuffer.append(nbQuadsPerPeer.getMean()).append("\n\n");
 
+        double endToEndSum = 0;
+        double pointToPointSum = 0;
+        double outputSum = 0;
+
         for (SubscriptionId subscriptionId : this.listeners.keySet()) {
             statsBuffer.append("Benchmark results for subscription ");
             statsBuffer.append(subscriptionId.toString());
             statsBuffer.append('\n');
 
-            Category endToEnd =
+            Category endToEndCategory =
                     microBenchmark.getStatsRecorder().getCategory(
                             END_TO_END_MEASUREMENT_CATEGORY
                                     + subscriptionId.toString());
-            Category output =
+            Category outputCategory =
                     microBenchmark.getStatsRecorder().getCategory(
                             OUTPUT_MEASUREMENT_CATEGORY
                                     + subscriptionId.toString());
-            Category pointToPoint =
+            Category pointToPointCategory =
                     microBenchmark.getStatsRecorder().getCategory(
                             POINT_TO_POINT_MEASUREMENT_CATEGORY
                                     + subscriptionId.toString());
 
+            double endToEndAverageThroughput =
+                    nbPublications / (endToEndCategory.getMean() / 1000);
+            double pointToPointAverageThroughput =
+                    pointToPointCategory.getMean() / nbPublications;
+            double outputAverageThroughput =
+                    nbPublications / (outputCategory.getMean() / 1000);
+
+            endToEndSum += endToEndAverageThroughput;
+            pointToPointSum += pointToPointAverageThroughput;
+            outputSum += outputAverageThroughput;
+
             statsBuffer.append("  End-to-End measurement, average=");
-            statsBuffer.append(endToEnd.getMean()).append(", median=");
-            statsBuffer.append(endToEnd.getMedian());
+            statsBuffer.append(endToEndCategory.getMean()).append(", median=");
+            statsBuffer.append(endToEndCategory.getMedian());
             statsBuffer.append(", average throughput=");
-            statsBuffer.append(nbPublications / (endToEnd.getMean() / 1000));
+            statsBuffer.append(endToEndAverageThroughput);
             statsBuffer.append('\n');
 
             statsBuffer.append("  Point-to-Point measurement, average=");
-            statsBuffer.append(pointToPoint.getMean()).append(", median=");
-            statsBuffer.append(pointToPoint.getMedian());
+            statsBuffer.append(pointToPointCategory.getMean()).append(
+                    ", median=");
+            statsBuffer.append(pointToPointCategory.getMedian());
             statsBuffer.append(", average throughput=");
-            statsBuffer.append(pointToPoint.getMean() / nbPublications);
+            statsBuffer.append(pointToPointAverageThroughput);
             statsBuffer.append('\n');
 
             statsBuffer.append("  Output measurement, average=");
-            statsBuffer.append(output.getMean()).append(", median=");
-            statsBuffer.append(output.getMedian());
+            statsBuffer.append(outputCategory.getMean()).append(", median=");
+            statsBuffer.append(outputCategory.getMedian());
             statsBuffer.append(", average throughput=");
-            statsBuffer.append(nbPublications / (output.getMean() / 1000));
+            statsBuffer.append(outputAverageThroughput);
             statsBuffer.append('\n');
         }
+
+        int nbSubscriptions = this.listeners.keySet().size();
+
+        statsBuffer.append('\n');
+        statsBuffer.append("Average benchmark results\n");
+        statsBuffer.append(" End-to-End measurement, average throughput=");
+        statsBuffer.append(endToEndSum / nbSubscriptions);
+        statsBuffer.append('\n');
+        statsBuffer.append(" Point-to-Point measurement, average throughput=");
+        statsBuffer.append(pointToPointSum / nbSubscriptions);
+        statsBuffer.append('\n');
+        statsBuffer.append(" Output measurement, average throughput=");
+        statsBuffer.append(outputSum / nbSubscriptions);
+        statsBuffer.append('\n');
 
         System.out.println(statsBuffer.toString());
 
