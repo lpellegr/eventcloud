@@ -224,8 +224,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         if (!this.publisherWakeUp) {
             throw new TimeoutException("Received only "
                     + this.nbReportsReceivedByPublishers.getValue()
-                    + " publisher report(s) whereas " + this.nbPublishers
-                    + " were expected.");
+                    + " publisher report(s) after " + timeout + " ms whereas "
+                    + this.nbPublishers + " were expected.");
         }
     }
 
@@ -254,8 +254,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         if (!this.subscriberWakeUp) {
             throw new TimeoutException("Received only "
                     + this.nbReportsReceivedBySubscribers.getValue()
-                    + " subscriber report(s) whereas " + this.nbSubscribers
-                    + " were expected.");
+                    + " subscriber report(s) after " + timeout + " ms whereas "
+                    + this.nbSubscribers + " were expected.");
         }
     }
 
