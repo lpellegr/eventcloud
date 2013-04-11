@@ -35,7 +35,7 @@ public class BroadcastsBenchmark {
 	
 	/** Number of peers in the network (can be changed through
 	 * first main method parameter) */
-	private static int nbPeers = 25;
+	private static int nbPeers = 64;
 	/** Number of dimensions of the CAN (can be changed through
 	 * second main method parameter) */
 	private static int nbDimensions = 2;
@@ -70,33 +70,36 @@ public class BroadcastsBenchmark {
 
 		try {
 			boolean fractalCAN = false;
+			boolean uniformCAN = false;
 			if ((args.length > 0 && args[0].equals("-fractal")) || 
 					(args.length > 2 && args[2].equals("-fractal"))) {
 				fractalCAN = true;
-				JobLogger.logMessage(BroadcastsBenchmark.class.getName(), 
-						"********** Building fractal CAN **********");
+				System.out.println("********** Building fractal CAN **********");
+			}
+			if ((args.length > 0 && args[0].equals("-uniform")) || 
+					(args.length > 2 && args[2].equals("-uniform"))) {
+				uniformCAN = true;
+				System.out.println("********** Building uniform CAN **********");
 			}
 			else {
-				JobLogger.logMessage(BroadcastsBenchmark.class.getName(),
-						"********** Building random CAN **********");
+				System.out.println("********** Building random CAN **********");
 			}
 			// Building the CAN
 			BroadcastInfrastructure broadcastInfrastructure = 
 					new BroadcastInfrastructure(
-							nbPeers, JobLogger.getLogDirectory(), fractalCAN);
+							nbPeers, JobLogger.getLogDirectory(), fractalCAN, uniformCAN);
 			broadcastInfrastructure.initialize();
 
 			// Running a FloodingBroadcast
-			broadcastInfrastructure.measureFloodingBroadcast();
-			Thread.sleep(1000);
+			//broadcastInfrastructure.measureFloodingBroadcast();
+			//Thread.sleep(1000);
 
 			// Running an EfficientBroadcast
 			broadcastInfrastructure.measureEfficientBroadcast();
-			Thread.sleep(1000);
 
 			// Running an OptimalBroadcast
-			broadcastInfrastructure.measureOptimalBroadcast();
-			Thread.sleep(1000);
+			//broadcastInfrastructure.measureOptimalBroadcast();
+			//Thread.sleep(1000);
 
 			broadcastInfrastructure.terminate();
 		} catch (InterruptedException e) {
