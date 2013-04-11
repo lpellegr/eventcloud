@@ -37,6 +37,14 @@ public class SimpleMeasurement implements Measurement {
         return this.exitTime - this.entryTime;
     }
 
+    public long getEntryTime() {
+        return this.entryTime;
+    }
+
+    public long getExitTime() {
+        return this.exitTime;
+    }
+
     public void setEntryTime() {
         this.entryTime = System.currentTimeMillis();
     }

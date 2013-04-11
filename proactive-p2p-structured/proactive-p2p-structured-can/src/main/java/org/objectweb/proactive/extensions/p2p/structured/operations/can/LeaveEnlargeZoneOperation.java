@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;

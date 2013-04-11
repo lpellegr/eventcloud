@@ -69,7 +69,7 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     // measurements
 
-    private long endToEndTerminationTime;
+    private Map<SubscriptionId, Long> endToEndTerminationTimes;
 
     private Map<SubscriptionId, SimpleMeasurement> outputMeasurements;
 
@@ -92,6 +92,9 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
      */
     @Override
     public void initActivity(Body body) {
+        this.endToEndTerminationTimes =
+                new HashMap<SubscriptionId, Long>(this.nbSubscribers);
+
         this.outputMeasurements =
                 new HashMap<SubscriptionId, SimpleMeasurement>(
                         this.nbSubscribers);
@@ -103,12 +106,11 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
     }
 
     @MemberOf("notify")
-    public long reportEndToEndTermination(long endTime) {
-        if (endTime > this.endToEndTerminationTime) {
-            this.endToEndTerminationTime = endTime;
-        }
+    public long reportEndToEndTermination(SubscriptionId subscriptionId,
+                                          long endTime) {
+        this.endToEndTerminationTimes.put(subscriptionId, endTime);
 
-        return this.endToEndTerminationTime;
+        return endTime;
     }
 
     @MemberOf("notify")
@@ -170,8 +172,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
                 subscriptionId, pointToPointExitMeasurement) == null;
     }
 
-    public long getEndToEndTerminationTime() {
-        return this.endToEndTerminationTime;
+    public long getEndToEndTerminationTime(SubscriptionId subscriptionId) {
+        return this.endToEndTerminationTimes.get(subscriptionId);
     }
 
     public SimpleMeasurement getOutputMeasurement(SubscriptionId subscriptionId) {
@@ -180,6 +182,10 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     public CumulatedMeasurement getPointToPointExitMeasurement(SubscriptionId subscriptionId) {
         return this.pointToPointExitMeasurements.get(subscriptionId);
+    }
+
+    public Map<SubscriptionId, Long> getEndToEndTerminationTimes() {
+        return this.endToEndTerminationTimes;
     }
 
     public Map<SubscriptionId, SimpleMeasurement> getOutputMeasurements() {

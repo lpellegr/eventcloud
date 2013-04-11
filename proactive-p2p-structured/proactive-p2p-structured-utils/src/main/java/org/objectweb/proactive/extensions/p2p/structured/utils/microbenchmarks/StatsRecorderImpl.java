@@ -16,10 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 
 /**
  * Default implementation for {@link StatsRecorder}.
@@ -30,17 +28,25 @@ public class StatsRecorderImpl implements StatsRecorder {
 
     private Map<String, Category> categories;
 
+    private final int discardFirstRuns;
+
+    private final int nbEntriesPerCategory;
+
+    public StatsRecorderImpl(int nbEntriesPerCategory, int discardFirstRuns) {
+        this(new String[0], nbEntriesPerCategory, discardFirstRuns);
+    }
+
     public StatsRecorderImpl(String[] categoryNames, int nbEntriesPerCategory,
             int discardFirstRuns) {
-        Builder<String, Category> builder =
-                ImmutableMap.<String, Category> builder();
+        this.discardFirstRuns = discardFirstRuns;
+        this.nbEntriesPerCategory = nbEntriesPerCategory;
+
+        this.categories = new HashMap<String, Category>();
 
         for (int i = 0; i < categoryNames.length; i++) {
-            builder.put(categoryNames[i], new CategoryImpl(
+            this.categories.put(categoryNames[i], new CategoryImpl(
                     nbEntriesPerCategory, discardFirstRuns));
         }
-
-        this.categories = builder.build();
     }
 
     /**
@@ -48,12 +54,19 @@ public class StatsRecorderImpl implements StatsRecorder {
      */
     @Override
     public void reportValue(String categoryName, long value) {
+        Category category;
+
+        // creates category if it does not exist
         if (!this.categories.containsKey(categoryName)) {
-            throw new IllegalArgumentException("Unknow category name "
-                    + categoryName);
+            category =
+                    new CategoryImpl(
+                            this.nbEntriesPerCategory, this.discardFirstRuns);
+            this.categories.put(categoryName, category);
+        } else {
+            category = this.categories.get(categoryName);
         }
 
-        this.categories.get(categoryName).reportTime(value);
+        category.reportTime(value);
     }
 
     /**
