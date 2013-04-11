@@ -106,6 +106,8 @@ public class PublishSubscribeBenchmark {
     private static final String NB_QUADRUPLES_PER_PEER_CATEGORY =
             "quadsPerPeer";
 
+    // -gcma /user/lpellegr/home/Desktop/GCMresources/GCMA.xml
+
     // parameters
 
     @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish")
@@ -172,18 +174,21 @@ public class PublishSubscribeBenchmark {
     // measurements
 
     /*
-     * Measure the time taken to receive all the events by considering the time 
-     * when the publications start to be published and the time when all the 
-     * notifications are received on all the subscribers
+     * Measure the time taken to receive all the events for a given 
+     * subscription id by considering the time when the publications start to 
+     * be published and the time when all the notifications are received on all 
+     * the subscribers
      */
-    private final SimpleMeasurement endToEndMeasurement =
-            new SimpleMeasurement();
+    private long endToEndMeasurementEntryTime;
+
+    private Map<SubscriptionId, Long> endToEndMeasurementsExitTime;
 
     /*
-     * Measure the time to receive all the events by considering the time when
-     * the first event is received on the subscriber and the time when the last
-     * event is received on the subscriber (used to count the throughput in terms 
-     * of notifications per second on the subscriber side)
+     * Measure the time to receive all the events for a given subscription id 
+     * by considering the time when the first event is received on the 
+     * subscriber and the time when the last event is received on the 
+     * subscriber (used to count the throughput in terms of notifications per 
+     * second on the subscriber side)
      */
     private Map<SubscriptionId, SimpleMeasurement> outputMeasurements;
 
@@ -269,6 +274,9 @@ public class PublishSubscribeBenchmark {
                                 this.nbQuadruplesPerCompoundEvent,
                                 this.rewritingLevel);
 
+        this.endToEndMeasurementsExitTime =
+                new HashMap<SubscriptionId, Long>(this.nbSubscribers);
+
         this.outputMeasurements =
                 new HashMap<SubscriptionId, SimpleMeasurement>(
                         this.nbSubscribers);
@@ -282,81 +290,97 @@ public class PublishSubscribeBenchmark {
 
         // creates and runs micro benchmark
         MicroBenchmark microBenchmark =
-                new MicroBenchmark(
-                        new String[] {
-                                END_TO_END_MEASUREMENT_CATEGORY,
-                                OUTPUT_MEASUREMENT_CATEGORY,
-                                POINT_TO_POINT_MEASUREMENT_CATEGORY,
-                                NB_QUADRUPLES_PER_PEER_CATEGORY}, this.nbRuns,
-                        new MicroBenchmarkRun() {
+                new MicroBenchmark(this.nbRuns, new MicroBenchmarkRun() {
+                    @Override
+                    public void run(StatsRecorder recorder) {
+                        try {
+                            PublishSubscribeBenchmark.this.execute(recorder);
 
-                            @Override
-                            public void run(StatsRecorder recorder) {
-                                try {
-                                    PublishSubscribeBenchmark.this.execute(recorder);
+                            for (SubscriptionId subscriptionId : PublishSubscribeBenchmark.this.listeners.keySet()) {
+                                recorder.reportValue(
+                                        END_TO_END_MEASUREMENT_CATEGORY
+                                                + subscriptionId.toString(),
+                                        PublishSubscribeBenchmark.this.endToEndMeasurementsExitTime.get(subscriptionId)
+                                                - PublishSubscribeBenchmark.this.endToEndMeasurementEntryTime);
 
-                                    recorder.reportValue(
-                                            END_TO_END_MEASUREMENT_CATEGORY,
-                                            PublishSubscribeBenchmark.this.endToEndMeasurement.getElapsedTime());
+                                recorder.reportValue(
+                                        OUTPUT_MEASUREMENT_CATEGORY
+                                                + subscriptionId.toString(),
+                                        PublishSubscribeBenchmark.this.outputMeasurements.get(
+                                                subscriptionId)
+                                                .getElapsedTime());
 
-                                    SimpleMeasurement outputMeasurement =
-                                            PublishSubscribeBenchmark.this.outputMeasurements.values()
-                                                    .iterator()
-                                                    .next();
-
-                                    recorder.reportValue(
-                                            OUTPUT_MEASUREMENT_CATEGORY,
-                                            outputMeasurement.getElapsedTime());
-
-                                    recorder.reportValue(
-                                            POINT_TO_POINT_MEASUREMENT_CATEGORY,
-                                            PublishSubscribeBenchmark.this.pointToPointExitMeasurements.values()
-                                                    .iterator()
-                                                    .next()
-                                                    .getElapsedTime(
-                                                            PublishSubscribeBenchmark.this.pointToPointEntryMeasurements));
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
+                                recorder.reportValue(
+                                        POINT_TO_POINT_MEASUREMENT_CATEGORY
+                                                + subscriptionId.toString(),
+                                        PublishSubscribeBenchmark.this.pointToPointExitMeasurements.get(
+                                                subscriptionId)
+                                                .getElapsedTime(
+                                                        PublishSubscribeBenchmark.this.pointToPointEntryMeasurements));
                             }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
 
-                        });
+                });
         microBenchmark.discardFirstRuns(this.discardFirstRuns);
         microBenchmark.showProgress();
         microBenchmark.execute();
 
-        System.out.println();
-        System.out.println(this.nbRuns + " run(s)");
+        StringBuilder statsBuffer = new StringBuilder();
+
+        statsBuffer.append('\n').append(this.nbRuns).append(" run(s)");
+        statsBuffer.append('\n');
 
         Category nbQuadsPerPeer =
                 microBenchmark.getStatsRecorder().getCategory(
                         NB_QUADRUPLES_PER_PEER_CATEGORY);
-        Category endToEnd =
-                microBenchmark.getStatsRecorder().getCategory(
-                        END_TO_END_MEASUREMENT_CATEGORY);
-        Category output =
-                microBenchmark.getStatsRecorder().getCategory(
-                        OUTPUT_MEASUREMENT_CATEGORY);
-        Category pointToPoint =
-                microBenchmark.getStatsRecorder().getCategory(
-                        POINT_TO_POINT_MEASUREMENT_CATEGORY);
 
-        System.out.println("Average number of quadruples per peer is "
-                + nbQuadsPerPeer.getMean());
+        statsBuffer.append("  Average number of quadruples per peer is ");
+        statsBuffer.append(nbQuadsPerPeer.getMean()).append("\n\n");
 
-        System.out.println("End-to-End measurement, average="
-                + endToEnd.getMean() + ", median=" + endToEnd.getMedian()
-                + ", average throughput="
-                + (nbPublications / (endToEnd.getMean() / 1000)));
+        for (SubscriptionId subscriptionId : this.listeners.keySet()) {
+            statsBuffer.append("Benchmark results for subscription ");
+            statsBuffer.append(subscriptionId.toString());
+            statsBuffer.append('\n');
 
-        System.out.println("Point-to-Point measurement, average="
-                + pointToPoint.getMean() + ", median="
-                + pointToPoint.getMedian() + ", average latency="
-                + (pointToPoint.getMean() / nbPublications));
+            Category endToEnd =
+                    microBenchmark.getStatsRecorder().getCategory(
+                            END_TO_END_MEASUREMENT_CATEGORY
+                                    + subscriptionId.toString());
+            Category output =
+                    microBenchmark.getStatsRecorder().getCategory(
+                            OUTPUT_MEASUREMENT_CATEGORY
+                                    + subscriptionId.toString());
+            Category pointToPoint =
+                    microBenchmark.getStatsRecorder().getCategory(
+                            POINT_TO_POINT_MEASUREMENT_CATEGORY
+                                    + subscriptionId.toString());
 
-        System.out.println("Output measurement, average=" + output.getMean()
-                + ", median=" + output.getMedian() + ", average throughput="
-                + (nbPublications / (output.getMean() / 1000)));
+            statsBuffer.append("  End-to-End measurement, average=");
+            statsBuffer.append(endToEnd.getMean()).append(", median=");
+            statsBuffer.append(endToEnd.getMedian());
+            statsBuffer.append(", average throughput=");
+            statsBuffer.append(nbPublications / (endToEnd.getMean() / 1000));
+            statsBuffer.append('\n');
+
+            statsBuffer.append("  Point-to-Point measurement, average=");
+            statsBuffer.append(pointToPoint.getMean()).append(", median=");
+            statsBuffer.append(pointToPoint.getMedian());
+            statsBuffer.append(", average throughput=");
+            statsBuffer.append(pointToPoint.getMean() / nbPublications);
+            statsBuffer.append('\n');
+
+            statsBuffer.append("  Output measurement, average=");
+            statsBuffer.append(output.getMean()).append(", median=");
+            statsBuffer.append(output.getMedian());
+            statsBuffer.append(", average throughput=");
+            statsBuffer.append(nbPublications / (output.getMean() / 1000));
+            statsBuffer.append('\n');
+        }
+
+        System.out.println(statsBuffer.toString());
 
         return microBenchmark.getStatsRecorder();
     }
@@ -457,7 +481,7 @@ public class PublishSubscribeBenchmark {
                     + rest - 1);
         }
 
-        this.endToEndMeasurement.setEntryTime();
+        this.endToEndMeasurementEntryTime = System.currentTimeMillis();
 
         // triggers publications (publish events)
         for (CustomPublishProxy proxy : publishProxies) {
@@ -473,9 +497,10 @@ public class PublishSubscribeBenchmark {
         // timeout after 1 hour
         collector.waitForAllSubscriberReports(3600000);
 
-        // the end to end termination time is the time at which the last
-        // subscriber has notified the collector about its termination
-        this.endToEndMeasurement.setExitTime(collector.getEndToEndTerminationTime());
+        // the end to end termination time is the time at each subscriber
+        // has notified the collector about its termination
+        this.endToEndMeasurementsExitTime =
+                collector.getEndToEndTerminationTimes();
 
         // collects output measurements
         for (Entry<SubscriptionId, SimpleMeasurement> entry : collector.getOutputMeasurements()
