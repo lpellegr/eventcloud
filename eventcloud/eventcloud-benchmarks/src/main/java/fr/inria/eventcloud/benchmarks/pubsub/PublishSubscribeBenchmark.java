@@ -431,7 +431,7 @@ public class PublishSubscribeBenchmark {
             statsBuffer.append(" End-to-End measurement, average throughput=");
             statsBuffer.append(endToEndSum / nbSubscriptions);
             statsBuffer.append('\n');
-            statsBuffer.append(" Point-to-Point measurement, average throughput=");
+            statsBuffer.append(" Point-to-Point measurement, average latency=");
             statsBuffer.append(pointToPointSum / nbSubscriptions);
             statsBuffer.append('\n');
             statsBuffer.append(" Output measurement, average throughput=");
