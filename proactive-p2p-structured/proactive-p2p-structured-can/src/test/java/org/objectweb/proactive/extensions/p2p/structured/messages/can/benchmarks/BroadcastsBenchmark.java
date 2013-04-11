@@ -35,10 +35,10 @@ public class BroadcastsBenchmark {
 	
 	/** Number of peers in the network (can be changed through
 	 * first main method parameter) */
-	private static int nbPeers = 64;
+	private static int nbPeers = 25;
 	/** Number of dimensions of the CAN (can be changed through
 	 * second main method parameter) */
-	private static int nbDimensions = 2;
+	private static int nbDimensions = 4;
 
 	public static void main(String[] args) {
 
@@ -91,15 +91,13 @@ public class BroadcastsBenchmark {
 			broadcastInfrastructure.initialize();
 
 			// Running a FloodingBroadcast
-			//broadcastInfrastructure.measureFloodingBroadcast();
-			//Thread.sleep(1000);
+			broadcastInfrastructure.measureFloodingBroadcast();
 
 			// Running an EfficientBroadcast
 			broadcastInfrastructure.measureEfficientBroadcast();
 
 			// Running an OptimalBroadcast
-			//broadcastInfrastructure.measureOptimalBroadcast();
-			//Thread.sleep(1000);
+			broadcastInfrastructure.measureOptimalBroadcast();
 
 			broadcastInfrastructure.terminate();
 		} catch (InterruptedException e) {
