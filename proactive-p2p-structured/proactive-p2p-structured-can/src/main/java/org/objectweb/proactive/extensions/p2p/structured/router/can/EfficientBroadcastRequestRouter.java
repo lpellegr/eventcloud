@@ -303,20 +303,17 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 					for (NeighborEntryWrapper<E> neighbor : extendedNeighbors.get(
 							dimension, direction)) {
 						boolean contains = true;
-						// We need to check all the constraints that are given
 						if (dimension == 0) {
 							for (byte coordinate = 1; coordinate < dimensions; coordinate++) {
 								// MCAN Strategy : If the dimension considered is
-								// lower than the
-								// dimension of the reception, then check the corner
-								// constraint
+								// the lowest, then check the corner constraint
 								// to determine whether the message must be sent to
 								// this neighbor.
 								if (coordinate > dimension) {
-									if (this.contains(
+									if (!this.contains(
 											overlay.getZone(),
 											neighbor.getNeighborEntry().getZone(),
-											coordinate) == false) {
+											coordinate)) {
 										contains = false;
 									}
 								}
@@ -324,7 +321,7 @@ extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 						}
 						// If the neighbor validates all the above constraints
 						// it will receive the broadcast request.
-						if (contains == true) {
+						if (contains) {
 							byte[][] newDirections =
 									this.copyDirections(directions);
 							// Remove from the directions array the peer's

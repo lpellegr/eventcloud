@@ -352,7 +352,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
 
                         // If the neighbor validates all the above constraints
                         // it will receive the broadcast request.
-                        if (contains == true) {
+                        if (contains) {
                             byte[][] newDirections =
                                     this.copyDirections(directions);
                             Element[] newPlan = this.copyPlan(plane);
