@@ -335,7 +335,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                                 if (!this.contains(
                                         overlay.getZone(),
                                         neighbor.getNeighborEntry().getZone(),
-                                        coordinate) && request.getConstraintsValidator().validatesKeyConstraints(overlay)) {
+                                        coordinate)) {
                                     contains = false;
                                 }
                             }
