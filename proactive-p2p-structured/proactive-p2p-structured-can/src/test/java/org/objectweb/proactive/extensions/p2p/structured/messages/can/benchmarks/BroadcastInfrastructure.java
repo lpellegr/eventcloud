@@ -60,8 +60,20 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
     protected Proxy proxy;
 
-    public BroadcastInfrastructure(int nbPeers, String logDirectory, boolean fractalCAN) {
-        super(fractalCAN ?
+    public BroadcastInfrastructure(int nbPeers, String logDirectory, boolean fractalCAN, boolean uniformCAN) {
+        super(uniformCAN ?
+        		new CanDeploymentDescriptor<StringElement>(
+                        new SerializableProvider<StringCanOverlay>() {
+                            private static final long serialVersionUID = 140L;
+
+                            @Override
+                            public StringCanOverlay get() {
+                                return new StringCanOverlay();
+                            }
+                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider
+                        		.newUniformInjectionConstraintsProvider())
+        		
+        		: fractalCAN ?
         		
                 new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<StringCanOverlay>() {
