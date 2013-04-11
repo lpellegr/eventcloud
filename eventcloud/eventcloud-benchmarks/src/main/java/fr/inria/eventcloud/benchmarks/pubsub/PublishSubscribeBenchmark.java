@@ -274,9 +274,6 @@ public class PublishSubscribeBenchmark {
                                 this.nbQuadruplesPerCompoundEvent,
                                 this.rewritingLevel);
 
-        this.endToEndMeasurementsExitTime =
-                new HashMap<SubscriptionId, Long>(this.nbSubscribers);
-
         this.outputMeasurements =
                 new HashMap<SubscriptionId, SimpleMeasurement>(
                         this.nbSubscribers);
@@ -412,17 +409,19 @@ public class PublishSubscribeBenchmark {
 
         int nbSubscriptions = this.listeners.keySet().size();
 
-        statsBuffer.append('\n');
-        statsBuffer.append("Average benchmark results\n");
-        statsBuffer.append(" End-to-End measurement, average throughput=");
-        statsBuffer.append(endToEndSum / nbSubscriptions);
-        statsBuffer.append('\n');
-        statsBuffer.append(" Point-to-Point measurement, average throughput=");
-        statsBuffer.append(pointToPointSum / nbSubscriptions);
-        statsBuffer.append('\n');
-        statsBuffer.append(" Output measurement, average throughput=");
-        statsBuffer.append(outputSum / nbSubscriptions);
-        statsBuffer.append('\n');
+        if (nbSubscriptions > 1) {
+            statsBuffer.append('\n');
+            statsBuffer.append("Average benchmark results\n");
+            statsBuffer.append(" End-to-End measurement, average throughput=");
+            statsBuffer.append(endToEndSum / nbSubscriptions);
+            statsBuffer.append('\n');
+            statsBuffer.append(" Point-to-Point measurement, average throughput=");
+            statsBuffer.append(pointToPointSum / nbSubscriptions);
+            statsBuffer.append('\n');
+            statsBuffer.append(" Output measurement, average throughput=");
+            statsBuffer.append(outputSum / nbSubscriptions);
+            statsBuffer.append('\n');
+        }
 
         System.out.println(statsBuffer.toString());
 
@@ -431,7 +430,14 @@ public class PublishSubscribeBenchmark {
 
     public void execute(StatsRecorder recorder) throws EventCloudIdNotManaged,
             TimeoutException, ProActiveException {
+
+        this.listeners.clear();
+
         // clears results collected during previous run
+        if (this.endToEndMeasurementsExitTime != null) {
+            this.endToEndMeasurementsExitTime.clear();
+        }
+
         this.outputMeasurements.clear();
         this.pointToPointExitMeasurements.clear();
         this.pointToPointEntryMeasurements.clear();
@@ -541,8 +547,8 @@ public class PublishSubscribeBenchmark {
         // timeout after 1 hour
         collector.waitForAllSubscriberReports(3600000);
 
-        // the end to end termination time is the time at each subscriber
-        // has notified the collector about its termination
+        // the end to end termination time is the time at which each
+        // subscriber has notified the collector about its termination
         this.endToEndMeasurementsExitTime =
                 collector.getEndToEndTerminationTimes();
 
