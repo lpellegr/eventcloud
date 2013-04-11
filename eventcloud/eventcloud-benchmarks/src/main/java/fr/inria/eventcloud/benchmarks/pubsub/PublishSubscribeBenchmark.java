@@ -128,7 +128,7 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"--nb-subscribers"}, description = "The number of subscribers")
     public int nbSubscribers = 1;
 
-    @Parameter(names = {"-dfr", "--discard-first-runs"}, description = "Indicates the number of first runs to discard")
+    @Parameter(names = {"-dr", "--dry-runs"}, description = "Indicates the number of first runs to discard")
     public int discardFirstRuns = 1;
 
     @Parameter(names = {"--wait-between-publications"}, description = "The time to wait (in ms) between each publication from a publisher")
@@ -201,8 +201,9 @@ public class PublishSubscribeBenchmark {
 
     // internal
 
-    private Map<SubscriptionId, NotificationListener<?>> listeners =
-            new HashMap<SubscriptionId, NotificationListener<?>>();
+    private List<Subscription> subscriptions;
+
+    private Map<SubscriptionId, NotificationListener<?>> listeners;
 
     @SuppressWarnings("unused")
     private Supplier<? extends Event> supplier;
@@ -262,28 +263,7 @@ public class PublishSubscribeBenchmark {
 
     public StatsRecorder execute() {
         this.logParameterValues();
-
-        if (this.rewritingLevel < 0) {
-            throw new IllegalStateException("Illegal rewriting level: "
-                    + this.rewritingLevel);
-        }
-
-        this.supplier =
-                this.publishIndependentQuadruples
-                        ? new QuadrupleSupplier() : new CompoundEventSupplier(
-                                this.nbQuadruplesPerCompoundEvent,
-                                this.rewritingLevel);
-
-        this.outputMeasurements =
-                new HashMap<SubscriptionId, SimpleMeasurement>(
-                        this.nbSubscribers);
-
-        this.pointToPointEntryMeasurements =
-                new HashMap<String, Long>(nbPublications);
-
-        this.pointToPointExitMeasurements =
-                new HashMap<SubscriptionId, CumulatedMeasurement>(
-                        nbPublications);
+        this.initInstanceFields();
 
         // creates and runs micro benchmark
         MicroBenchmark microBenchmark =
@@ -295,31 +275,33 @@ public class PublishSubscribeBenchmark {
 
                             long maxEndToEndMeasurement = 0;
 
-                            for (SubscriptionId subscriptionId : PublishSubscribeBenchmark.this.listeners.keySet()) {
-                                long endToEndEllapsedTime =
+                            for (int i = 0; i < PublishSubscribeBenchmark.this.subscriptions.size(); i++) {
+                                SubscriptionId subscriptionId =
+                                        PublishSubscribeBenchmark.this.subscriptions.get(
+                                                i)
+                                                .getId();
+
+                                long endToEndElapsedTime =
                                         PublishSubscribeBenchmark.this.endToEndMeasurementsExitTime.get(subscriptionId)
                                                 - PublishSubscribeBenchmark.this.endToEndMeasurementEntryTime;
 
-                                if (endToEndEllapsedTime > maxEndToEndMeasurement) {
+                                if (endToEndElapsedTime > maxEndToEndMeasurement) {
                                     maxEndToEndMeasurement =
-                                            endToEndEllapsedTime;
+                                            endToEndElapsedTime;
                                 }
 
                                 recorder.reportValue(
-                                        END_TO_END_MEASUREMENT_CATEGORY
-                                                + subscriptionId.toString(),
-                                        endToEndEllapsedTime);
+                                        END_TO_END_MEASUREMENT_CATEGORY + i,
+                                        endToEndElapsedTime);
 
                                 recorder.reportValue(
-                                        OUTPUT_MEASUREMENT_CATEGORY
-                                                + subscriptionId.toString(),
+                                        OUTPUT_MEASUREMENT_CATEGORY + i,
                                         PublishSubscribeBenchmark.this.outputMeasurements.get(
                                                 subscriptionId)
                                                 .getElapsedTime());
 
                                 recorder.reportValue(
-                                        POINT_TO_POINT_MEASUREMENT_CATEGORY
-                                                + subscriptionId.toString(),
+                                        POINT_TO_POINT_MEASUREMENT_CATEGORY + i,
                                         PublishSubscribeBenchmark.this.pointToPointExitMeasurements.get(
                                                 subscriptionId)
                                                 .getElapsedTime(
@@ -339,6 +321,41 @@ public class PublishSubscribeBenchmark {
         microBenchmark.showProgress();
         microBenchmark.execute();
 
+        System.out.println(this.createBenchmarkReport(microBenchmark));
+
+        return microBenchmark.getStatsRecorder();
+    }
+
+    private void initInstanceFields() {
+        if (this.rewritingLevel < 0) {
+            throw new IllegalStateException("Illegal rewriting level: "
+                    + this.rewritingLevel);
+        }
+
+        this.listeners =
+                new HashMap<SubscriptionId, NotificationListener<?>>(
+                        this.nbSubscribers);
+        this.subscriptions = new ArrayList<Subscription>(this.nbSubscribers);
+
+        this.supplier =
+                this.publishIndependentQuadruples
+                        ? new QuadrupleSupplier() : new CompoundEventSupplier(
+                                this.nbQuadruplesPerCompoundEvent,
+                                this.rewritingLevel);
+
+        this.outputMeasurements =
+                new HashMap<SubscriptionId, SimpleMeasurement>(
+                        this.nbSubscribers);
+
+        this.pointToPointEntryMeasurements =
+                new HashMap<String, Long>(nbPublications);
+
+        this.pointToPointExitMeasurements =
+                new HashMap<SubscriptionId, CumulatedMeasurement>(
+                        nbPublications);
+    }
+
+    private String createBenchmarkReport(MicroBenchmark microBenchmark) {
         StringBuilder statsBuffer = new StringBuilder();
 
         statsBuffer.append('\n').append(this.nbRuns).append(" run(s)");
@@ -355,23 +372,22 @@ public class PublishSubscribeBenchmark {
         double pointToPointSum = 0;
         double outputSum = 0;
 
-        for (SubscriptionId subscriptionId : this.listeners.keySet()) {
+        for (int i = 0; i < this.subscriptions.size(); i++) {
+            SubscriptionId subscriptionId = this.subscriptions.get(i).getId();
+
             statsBuffer.append("Benchmark results for subscription ");
             statsBuffer.append(subscriptionId.toString());
             statsBuffer.append('\n');
 
             Category endToEndCategory =
                     microBenchmark.getStatsRecorder().getCategory(
-                            END_TO_END_MEASUREMENT_CATEGORY
-                                    + subscriptionId.toString());
+                            END_TO_END_MEASUREMENT_CATEGORY + i);
             Category outputCategory =
                     microBenchmark.getStatsRecorder().getCategory(
-                            OUTPUT_MEASUREMENT_CATEGORY
-                                    + subscriptionId.toString());
+                            OUTPUT_MEASUREMENT_CATEGORY + i);
             Category pointToPointCategory =
                     microBenchmark.getStatsRecorder().getCategory(
-                            POINT_TO_POINT_MEASUREMENT_CATEGORY
-                                    + subscriptionId.toString());
+                            POINT_TO_POINT_MEASUREMENT_CATEGORY + i);
 
             double endToEndAverageThroughput =
                     nbPublications / (endToEndCategory.getMean() / 1000);
@@ -395,7 +411,7 @@ public class PublishSubscribeBenchmark {
             statsBuffer.append(pointToPointCategory.getMean()).append(
                     ", median=");
             statsBuffer.append(pointToPointCategory.getMedian());
-            statsBuffer.append(", average throughput=");
+            statsBuffer.append(", average latency=");
             statsBuffer.append(pointToPointAverageThroughput);
             statsBuffer.append('\n');
 
@@ -423,15 +439,14 @@ public class PublishSubscribeBenchmark {
             statsBuffer.append('\n');
         }
 
-        System.out.println(statsBuffer.toString());
-
-        return microBenchmark.getStatsRecorder();
+        return statsBuffer.toString();
     }
 
     public void execute(StatsRecorder recorder) throws EventCloudIdNotManaged,
             TimeoutException, ProActiveException {
 
         this.listeners.clear();
+        this.subscriptions.clear();
 
         // clears results collected during previous run
         if (this.endToEndMeasurementsExitTime != null) {
@@ -494,8 +509,9 @@ public class PublishSubscribeBenchmark {
 
             Subscription subscription = new Subscription(sparqlSubscription);
 
-            this.subscribe(
-                    collector, subscribeProxy, subscription, this.listenerType);
+            this.subscriptions.add(subscription);
+            this.listeners.put(subscription.getId(), this.subscribe(
+                    collector, subscribeProxy, subscription, this.listenerType));
         }
 
         // waits that subscriptions are indexed as the process is asynchronous
@@ -969,10 +985,10 @@ public class PublishSubscribeBenchmark {
         publishProxy.assignEvents(Arrays.copyOfRange(events, start, end + 1));
     }
 
-    private void subscribe(BenchmarkStatsCollector collector,
-                           SubscribeApi subscribeProxy,
-                           Subscription subscription,
-                           NotificationListenerType listenerType) {
+    private NotificationListener<?> subscribe(BenchmarkStatsCollector collector,
+                                              SubscribeApi subscribeProxy,
+                                              Subscription subscription,
+                                              NotificationListenerType listenerType) {
 
         NotificationListener<?> listener = null;
 
@@ -997,7 +1013,7 @@ public class PublishSubscribeBenchmark {
                 break;
         }
 
-        this.listeners.put(subscription.getId(), listener);
+        return listener;
     }
 
 }
