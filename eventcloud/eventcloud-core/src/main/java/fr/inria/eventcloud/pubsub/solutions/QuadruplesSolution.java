@@ -23,6 +23,7 @@ import java.util.List;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
  * Defines a solution that collects intermediate chunks (represented as
@@ -42,7 +43,10 @@ public class QuadruplesSolution extends Solution<Collection<Quadruple>> {
      */
     public QuadruplesSolution(List<Quadruple> chunk) {
         // a set is used to remove potential duplicates
-        super(new HashSet<Quadruple>(chunk.size(), 0.9f));
+        super(
+                new HashSet<Quadruple>(
+                        EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
+                        1));
         this.add(chunk);
     }
 
@@ -56,11 +60,12 @@ public class QuadruplesSolution extends Solution<Collection<Quadruple>> {
 
     private void add(Collection<Quadruple> chunk) {
         for (Quadruple quadruple : chunk) {
-            if (this.nbQuadruplesExpected == 0
-                    && quadruple.getPredicate().equals(
-                            PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
-                this.nbQuadruplesExpected =
-                        (Integer) quadruple.getObject().getLiteralValue();
+            if (quadruple.getPredicate().equals(
+                    PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
+                if (this.nbQuadruplesExpected == 0) {
+                    this.nbQuadruplesExpected =
+                            (Integer) quadruple.getObject().getLiteralValue();
+                }
             } else {
                 if (super.chunks.add(quadruple)) {
                     this.nbQuadruplesReceived++;
