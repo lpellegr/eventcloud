@@ -147,17 +147,6 @@ public class EventCloudProperties {
                     new PubSubAlgorithmPropertyValidator());
 
     /**
-     * Defines whether an intermediate datastructure must be used on the peers
-     * to prevent them to send back to a subscribe proxy some chunks that may
-     * already be sent. This property must be enabled only when SBCE2 or SBCE3
-     * is used.
-     */
-    public static final PropertyBoolean PREVENT_CHUNK_DUPLICATES =
-            new PropertyBoolean(
-                    "eventcloud.prevent.chunk.duplicates", false,
-                    new Sbce2PreventChunkDuplicates());
-
-    /**
      * Defines at which frequence the garbage collection timeout for ephemeral
      * subscriptions must be triggered (in ms). The default value is set to 15
      * minutes.
@@ -489,35 +478,6 @@ public class EventCloudProperties {
                     || propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2)
                     || propertyValue.equalsIgnoreCase(PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3);
         }
-    }
-
-    private static final class Sbce2PreventChunkDuplicates extends
-            Validator<Boolean> {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isLegalValue(Boolean propertyValue) {
-            return !(propertyValue && EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.getValue()
-                    .equalsIgnoreCase(
-                            EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1));
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected String getErrorMessage(String propertyName,
-                                         Boolean propertyValue) {
-            return "Property "
-                    + propertyName
-                    + " can only be used in conjunction with property "
-                    + EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.getName()
-                    + " set to " + PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_2 + " or "
-                    + PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3;
-        }
-
     }
 
 }

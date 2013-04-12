@@ -52,11 +52,6 @@ public class PublishSubscribeAlgorithmRunner extends BlockJUnit4ClassRunner {
             public void evaluate() throws Throwable {
                 EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.setValue(PublishSubscribeAlgorithmRunner.this.publishSubscribeAlgorithm.name());
 
-                if (PublishSubscribeAlgorithmRunner.this.publishSubscribeAlgorithm == PublishSubscribeAlgorithm.SBCE2
-                        || PublishSubscribeAlgorithmRunner.this.publishSubscribeAlgorithm == PublishSubscribeAlgorithm.SBCE3) {
-                    EventCloudProperties.PREVENT_CHUNK_DUPLICATES.setValue(true);
-                }
-
                 PublishSubscribeAlgorithmRunner.super.methodBlock(method)
                         .evaluate();
             }
