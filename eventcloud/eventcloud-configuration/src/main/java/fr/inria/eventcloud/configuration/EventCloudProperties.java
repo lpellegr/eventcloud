@@ -159,18 +159,20 @@ public class EventCloudProperties {
 
     /**
      * Defines at which frequence the garbage collection timeout for ephemeral
-     * subscriptions must be triggered (in ms)
+     * subscriptions must be triggered (in ms). The default value is set to 15
+     * minutes.
      */
     public static final PropertyInteger EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT =
             new PropertyInteger(
-                    "eventcloud.ephemeral.subscriptions.gc.timeout", 600000);
+                    "eventcloud.ephemeral.subscriptions.gc.timeout", 900000);
 
     /**
-     * Defines the expiration time of an ephemeral subscription (in ms).
+     * Defines the expiration time of an ephemeral subscription (in ms). The
+     * default value is set to 12 minutes.
      */
     public static final PropertyInteger EPHEMERAL_SUBSCRIPTION_EXPIRATION_TIME =
             new PropertyInteger(
-                    "eventcloud.ephemeral.subscription.expiration.time", 60000);
+                    "eventcloud.ephemeral.subscription.expiration.time", 720000);
 
     /**
      * Defines whether static load balancing must be enabled or not. When it is
