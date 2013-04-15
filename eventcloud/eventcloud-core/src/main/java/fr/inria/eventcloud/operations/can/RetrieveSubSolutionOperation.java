@@ -16,28 +16,31 @@
  **/
 package fr.inria.eventcloud.operations.can;
 
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.jena.riot.tokens.TokenizerFactory;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.hash.HashCode;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.core.Var;
 
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.datastore.AccessMode;
-import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
+import fr.inria.eventcloud.pubsub.PublishSubscribeUtils.BindingMap;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.notifications.BindingNotification;
 import fr.inria.eventcloud.pubsub.notifications.NotificationId;
@@ -58,11 +61,11 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
 
     private final NotificationId notificationId;
 
-    private final HashCode hash;
+    private final Set<HashCode> hashes;
 
-    public RetrieveSubSolutionOperation(NotificationId id, HashCode hash) {
+    public RetrieveSubSolutionOperation(NotificationId id, Set<HashCode> hashes) {
         this.notificationId = id;
-        this.hash = hash;
+        this.hashes = hashes;
     }
 
     /**
@@ -70,7 +73,7 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
      */
     @Override
     public void handle(StructuredOverlay overlay) {
-        // when this operation is handled we can suppose that a binding
+        // when this operation is handled we can assume that a binding
         // notification listener is used
 
         SemanticCanOverlay semanticOverlay = ((SemanticCanOverlay) overlay);
@@ -81,78 +84,85 @@ public class RetrieveSubSolutionOperation implements RunnableOperation {
         TransactionalDatasetGraph txnGraph =
                 datastore.begin(AccessMode.READ_ONLY);
 
-        Quadruple metaQuad = null;
-        try {
-            // finds the matching quadruple meta information
-            QuadrupleIterator result =
-                    txnGraph.find(
-                            PublishSubscribeUtils.createQuadrupleHashUri(this.hash),
-                            Node.ANY, Node.ANY, Node.ANY);
+        StringBuilder query = this.createQueryRetrievingIntermediateResults();
+        String subscriberURL = null;
 
-            if (!result.hasNext()) {
-                log.error(
-                        "Peer {} is expected to have a matching quadruple meta information for hash {}",
-                        overlay, this.hash);
+        BindingMap bmap = new BindingMap();
+        try {
+            QueryExecution qExec =
+                    QueryExecutionFactory.create(
+                            query.toString(), txnGraph.getUnderlyingDataset());
+            ResultSet rs = qExec.execSelect();
+            try {
+                int i = 0;
+
+                while (rs.hasNext()) {
+                    QuerySolution solution = rs.nextSolution();
+                    if (i == 0) {
+                        subscriberURL =
+                                solution.get("subscriberURL").asNode().getURI();
+                    }
+
+                    String intermediateResults =
+                            solution.getLiteral("ir").getLexicalForm();
+
+                    String[] bindings = intermediateResults.split(",");
+                    for (String binding : bindings) {
+                        String[] pair = binding.split("=");
+
+                        bmap.add(
+                                Var.alloc(pair[0]),
+                                TokenizerFactory.makeTokenizerString(pair[1])
+                                        .next()
+                                        .asNode());
+                    }
+
+                    i++;
+                }
+            } finally {
+                qExec.close();
             }
 
-            metaQuad = result.next();
         } catch (Exception e) {
             e.printStackTrace();
+            txnGraph.abort();
         } finally {
             txnGraph.end();
         }
 
-        if (metaQuad != null) {
-            Pair<Quadruple, SubscriptionId> extractedMetaInfo =
-                    PublishSubscribeUtils.extractMetaInformation(metaQuad);
+        try {
+            Subscription.getSubscriberProxy(subscriberURL).receiveSbce1Or2(
+                    new BindingNotification(
+                            this.notificationId, null,
+                            PAActiveObject.getUrl(semanticOverlay.getStub()),
+                            bmap));
+        } catch (ExecutionException e) {
+            log.error("No SubscribeProxy found under the given URL: "
+                    + subscriberURL, e);
 
-            // extracts only the variables that are declared as result variables
-            // in the original subscription
-            Subscription subscription =
-                    ((SemanticCanOverlay) overlay).findSubscription(PublishSubscribeUtils.extractSubscriptionId(metaQuad.getSubject()));
-
-            // an unsubscribe request has been sent after that a notification
-            // has been triggered because a publication matches the current
-            // subscription. However, the unsubscribe request has been handled
-            // before we send back to the subscriber all the intermediate
-            // binding values to the subscriber
-            if (subscription == null) {
-                return;
-            }
-
-            Binding binding =
-                    PublishSubscribeUtils.filter(
-                            extractedMetaInfo.getFirst(),
-                            subscription.getResultVars(),
-                            subscription.getSubSubscriptions()[0].getAtomicQuery());
-
-            try {
-                subscription.getSubscriberProxy()
-                        .receiveSbce1Or2(
-                                new BindingNotification(
-                                        this.notificationId,
-                                        extractedMetaInfo.getSecond(),
-                                        PAActiveObject.getUrl(semanticOverlay.getStub()),
-                                        binding));
-            } catch (ExecutionException e) {
-                log.error("No SubscribeProxy found under the given URL: "
-                        + subscription.getSubscriberUrl(), e);
-
-                // TODO: this could be due to a subscriber which has left
-                // without unsubscribing. In that case we can remove the
-                // subscription information associated to this subscriber
-                // and also send a message
-            }
-
-            txnGraph = datastore.begin(AccessMode.WRITE);
-            try {
-                txnGraph.delete(metaQuad);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                txnGraph.end();
-            }
+            // TODO: this could be due to a subscriber which has left
+            // without unsubscribing. In that case we can remove the
+            // subscription information associated to this subscriber
+            // and also send a message
         }
+    }
+
+    private StringBuilder createQueryRetrievingIntermediateResults() {
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ?ir ?subscriberURL WHERE { GRAPH ?g { ?subscriberURL <");
+        query.append(PublishSubscribeConstants.INTERMEDIATE_RESULTS_NODE);
+        query.append("> ?ir } VALUES ?g { ");
+
+        for (HashCode hc : this.hashes) {
+            query.append('<');
+            query.append(PublishSubscribeUtils.createQuadrupleHashUri(hc)
+                    .getURI());
+            query.append("> ");
+        }
+
+        query.append(" } }");
+
+        return query;
     }
 
 }

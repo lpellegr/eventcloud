@@ -107,8 +107,8 @@ public final class PublishSubscribeConstants {
     public static final String SUBSCRIPTION_INDEXED_WITH_PROPERTY =
             SUBSCRIPTION_NS + "iref";
 
-    public static final String SUBSCRIPTION_STUB_PROPERTY = SUBSCRIPTION_NS
-            + "stub";
+    public static final String SUBSCRIPTION_PEER_REFERENCES_PROPERTY =
+            SUBSCRIPTION_NS + "stub";
 
     public static final String SUBSCRIPTION_HAS_SUBSUBSCRIPTION_PROPERTY =
             SUBSCRIPTION_NS + "hss";
@@ -177,8 +177,8 @@ public final class PublishSubscribeConstants {
     public static final Node SUBSCRIPTION_INDEXED_WITH_NODE =
             Node.createURI(SUBSCRIPTION_INDEXED_WITH_PROPERTY);
 
-    public static final Node SUBSCRIPTION_STUB_NODE =
-            Node.createURI(SUBSCRIPTION_STUB_PROPERTY);
+    public static final Node SUBSCRIPTION_PEER_REFERENCES_NODE =
+            Node.createURI(SUBSCRIPTION_PEER_REFERENCES_PROPERTY);
 
     public static final Node SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE =
             Node.createURI(SUBSCRIPTION_HAS_SUBSUBSCRIPTION_PROPERTY);
@@ -214,6 +214,9 @@ public final class PublishSubscribeConstants {
     public static final String QUADRUPLE_MATCHES_SUBSCRIPTION_VALUE =
             SUBSCRIPTION_NS + "matches";
 
+    public static final String INTERMEDIATE_RESULTS_VALUE = SUBSCRIPTION_NS
+            + "ir";
+
     /*
      * Nodes associated to values
      */
@@ -223,6 +226,9 @@ public final class PublishSubscribeConstants {
 
     public static final Node QUADRUPLE_MATCHES_SUBSCRIPTION_NODE =
             Node.createURI(QUADRUPLE_MATCHES_SUBSCRIPTION_VALUE);
+
+    public static final Node INTERMEDIATE_RESULTS_NODE =
+            Node.createURI(INTERMEDIATE_RESULTS_VALUE);
 
     private PublishSubscribeConstants() {
 

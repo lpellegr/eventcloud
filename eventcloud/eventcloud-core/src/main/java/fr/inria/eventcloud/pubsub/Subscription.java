@@ -30,9 +30,9 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ORI
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_ORIGINAL_ID_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_PARENT_ID_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_PARENT_ID_PROPERTY;
+import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_PEER_REFERENCES_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SERIALIZED_VALUE_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SPARQL_QUERY_PROPERTY;
-import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_STUB_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_NODE;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_SUBSCRIBER_PROPERTY;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_TYPE_PROPERTY;
@@ -54,8 +54,10 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.SetMultimap;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashCodes;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -136,7 +138,9 @@ public class Subscription implements Quadruplable, Serializable {
 
     private final String subscriptionDestination;
 
-    private final List<Stub> stubs;
+    // peers to visit when the subscription is associated to a binding listener
+    // in order to retrieve intermediate results
+    private final SetMultimap<String, HashCode> intermediatePeerReferences;
 
     private final NotificationListenerType type;
 
@@ -171,11 +175,26 @@ public class Subscription implements Quadruplable, Serializable {
         this.subscriberUrl = subscriberUrl;
         this.subscriptionDestination = subscriptionDestination;
         this.type = listenerType;
-        this.stubs = new ArrayList<Stub>();
+
+        if (listenerType == NotificationListenerType.BINDING) {
+            this.intermediatePeerReferences = HashMultimap.create();
+        } else {
+            this.intermediatePeerReferences = null;
+        }
     }
 
-    public final void addStub(Stub stub) {
-        this.stubs.add(stub);
+    public final void addIntermediatePeerReference(String peerURL,
+                                                   HashCode hashValue) {
+        if (this.intermediatePeerReferences == null) {
+            throw new IllegalStateException(
+                    "Trying to add an intermediate peer reference on a subscription that does not use a binding listener");
+        }
+
+        this.intermediatePeerReferences.put(peerURL, hashValue);
+    }
+
+    public SetMultimap<String, HashCode> getIntermediatePeerReferences() {
+        return this.intermediatePeerReferences;
     }
 
     public static final Subscription parseFrom(TransactionalTdbDatastore datastore,
@@ -197,7 +216,7 @@ public class Subscription implements Quadruplable, Serializable {
         // contains the identifier of the sub-subscriptions
         List<Node> subSubscriptionIds = new ArrayList<Node>();
         // contains the stub urls associated to the subscription
-        List<String> stubs = new ArrayList<String>();
+        String peerReferences = null;
 
         QuadrupleIterator it =
                 txnGraph.find(
@@ -216,8 +235,9 @@ public class Subscription implements Quadruplable, Serializable {
             if (quad.getPredicate().equals(
                     SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE)) {
                 subSubscriptionIds.add(quad.getObject());
-            } else if (quad.getPredicate().equals(SUBSCRIPTION_STUB_NODE)) {
-                stubs.add(quad.getObject().getLiteralLexicalForm());
+            } else if (quad.getPredicate().equals(
+                    SUBSCRIPTION_PEER_REFERENCES_NODE)) {
+                peerReferences = quad.getObject().getLiteralLexicalForm();
             } else {
                 basicInfo.put(quad.getPredicate().toString(), quad.getObject());
             }
@@ -272,12 +292,9 @@ public class Subscription implements Quadruplable, Serializable {
                                 SUBSCRIPTION_TYPE_PROPERTY)
                                 .getLiteralValue()).shortValue()));
 
+        // re-insert the peer references
         // retrieves the stub urls
-        for (String stub : stubs) {
-            String[] parsedStub = stub.split(" ");
-            subscription.addStub(new Stub(
-                    parsedStub[1], fromString(parsedStub[0])));
-        }
+        intermediatePeerReferencesFromString(subscription, peerReferences);
 
         // recreates the sub-subscriptions
         subscription.subSubscriptions =
@@ -400,15 +417,16 @@ public class Subscription implements Quadruplable, Serializable {
      *             when the lookup operation fails.
      */
     public SubscribeProxy getSubscriberProxy() throws ExecutionException {
-        return SUBSCRIBE_PROXIES_CACHE.get(this.subscriberUrl);
+        return getSubscriberProxy(this.subscriberUrl);
+    }
+
+    public static SubscribeProxy getSubscriberProxy(String subscribeProxyURL)
+            throws ExecutionException {
+        return SUBSCRIBE_PROXIES_CACHE.get(subscribeProxyURL);
     }
 
     public String getSparqlQuery() {
         return this.sparqlQuery;
-    }
-
-    public List<Stub> getStubs() {
-        return this.stubs;
     }
 
     public synchronized Subsubscription[] getSubSubscriptions() {
@@ -534,12 +552,13 @@ public class Subscription implements Quadruplable, Serializable {
                 Node.createLiteral(this.getSubSubscriptions()[0].getId()
                         .toString()), false, false));
 
-        for (Stub stub : this.stubs) {
+        if (this.intermediatePeerReferences != null) {
             result.add(new Quadruple(
-                    subscriptionOriginalURI, subscriptionURI,
-                    SUBSCRIPTION_STUB_NODE,
-                    Node.createLiteral(stub.quadrupleHash.toString() + " "
-                            + stub.peerUrl), false, false));
+                    subscriptionOriginalURI,
+                    subscriptionURI,
+                    SUBSCRIPTION_PEER_REFERENCES_NODE,
+                    Node.createLiteral(this.intermediatePeerReferencesAsString()),
+                    false, false));
         }
 
         for (Subsubscription ssubscription : this.getSubSubscriptions()) {
@@ -553,6 +572,35 @@ public class Subscription implements Quadruplable, Serializable {
         }
 
         return result.build();
+    }
+
+    private static void intermediatePeerReferencesFromString(Subscription s,
+                                                             String iprs) {
+        String[] peerURLs = iprs.split(" ");
+
+        for (String peerURL : peerURLs) {
+            for (String hashCode : peerURL.split(",")) {
+                s.addIntermediatePeerReference(peerURL, fromString(hashCode));
+            }
+        }
+    }
+
+    private String intermediatePeerReferencesAsString() {
+        StringBuilder result = new StringBuilder();
+
+        for (String peerURL : this.intermediatePeerReferences.keySet()) {
+            result.append(peerURL);
+            result.append('=');
+
+            for (HashCode hc : this.intermediatePeerReferences.get(peerURL)) {
+                result.append(hc);
+                result.append(',');
+            }
+
+            result.append(' ');
+        }
+
+        return result.toString();
     }
 
     /**
@@ -582,30 +630,9 @@ public class Subscription implements Quadruplable, Serializable {
                 + this.creationTime + ", indexationTime=" + this.indexationTime
                 + ", subscriberUrl=" + this.subscriberUrl
                 + ", subscription destination=" + this.subscriptionDestination
-                + ", sparqlQuery=" + this.sparqlQuery + ", stubs=" + this.stubs
-                + ", type=" + this.type + "]";
-    }
-
-    public static final class Stub implements Serializable {
-
-        private static final long serialVersionUID = 140L;
-
-        // the url which identifies the peer to visit
-        public final String peerUrl;
-
-        // hash value that identifies the quadruple to retrieve
-        public final HashCode quadrupleHash;
-
-        public Stub(String peerUrl, HashCode quadrupleHashValue) {
-            this.peerUrl = peerUrl;
-            this.quadrupleHash = quadrupleHashValue;
-        }
-
-        @Override
-        public String toString() {
-            return this.peerUrl;
-        }
-
+                + ", sparqlQuery=" + this.sparqlQuery + ", peerReferences="
+                + this.intermediatePeerReferencesAsString() + ", type="
+                + this.type + "]";
     }
 
     public static void main(String[] args) {
