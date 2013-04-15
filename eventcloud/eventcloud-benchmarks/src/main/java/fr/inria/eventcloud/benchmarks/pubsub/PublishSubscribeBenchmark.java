@@ -639,6 +639,12 @@ public class PublishSubscribeBenchmark {
         if (nodeProvider != null) {
             nodeProvider.terminate();
         }
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private Event[] createEvents(EventCloudDeployer deployer,
