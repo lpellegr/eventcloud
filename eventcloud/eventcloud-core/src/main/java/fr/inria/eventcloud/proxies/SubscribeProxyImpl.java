@@ -427,7 +427,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             if ((tmpSolution =
                     this.bindingSolutions.putIfAbsent(
                             notification.getId(), solution)) != null) {
-                // an another thread has already put the solution
+                // another thread has already put the solution
                 solution = tmpSolution;
                 solution.merge(notification.getContent());
             }

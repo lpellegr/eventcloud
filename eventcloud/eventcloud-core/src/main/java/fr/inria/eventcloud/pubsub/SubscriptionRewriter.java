@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -108,19 +109,32 @@ public final class SubscriptionRewriter {
      */
     private static final Subscription removeFirstTriplePatternAndReplaceVars(Subscription subscription,
                                                                              TransformCopy tc) {
-        return new Subscription(
-                subscription.getOriginalId(),
-                subscription.getId(),
-                new SubscriptionId(),
-                subscription.getCreationTime(),
-                subscription.getIndexationTime(),
-                OpAsQuery.asQuery(
-                        Transformer.transform(
-                                tc,
-                                Algebra.compile(QueryFactory.create(subscription.getSparqlQuery()))))
-                        .toString(), subscription.getSubscriberUrl(),
-                subscription.getSubscriptionDestination(),
-                subscription.getType());
+        Subscription result =
+                new Subscription(
+                        subscription.getOriginalId(),
+                        subscription.getId(),
+                        new SubscriptionId(),
+                        subscription.getCreationTime(),
+                        subscription.getIndexationTime(),
+                        OpAsQuery.asQuery(
+                                Transformer.transform(
+                                        tc,
+                                        Algebra.compile(QueryFactory.create(subscription.getSparqlQuery()))))
+                                .toString(), subscription.getSubscriberUrl(),
+                        subscription.getSubscriptionDestination(),
+                        subscription.getType());
+
+        if (subscription.getIntermediatePeerReferences() != null) {
+            for (String peerURL : subscription.getIntermediatePeerReferences()
+                    .keys()) {
+                for (HashCode hc : subscription.getIntermediatePeerReferences()
+                        .get(peerURL)) {
+                    result.addIntermediatePeerReference(peerURL, hc);
+                }
+            }
+        }
+
+        return result;
     }
 
     private static final TransformCopy createBGPTransformCopy(final Quadruple quad) {

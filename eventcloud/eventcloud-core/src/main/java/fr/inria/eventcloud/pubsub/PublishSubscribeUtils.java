@@ -20,11 +20,9 @@ import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_NS;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +35,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.mutable.MutableObject;
 import org.apache.jena.riot.out.NodeFmtLib;
-import org.apache.jena.riot.out.OutputLangUtils;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.riot.tokens.TokenizerFactory;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -52,7 +49,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.query.Query;
@@ -71,6 +67,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
 import com.hp.hpl.jena.sparql.syntax.ElementWalker;
+import com.hp.hpl.jena.sparql.util.FmtUtils;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
@@ -112,49 +109,52 @@ public final class PublishSubscribeUtils {
     }
 
     /**
-     * Creates a matching quadruple meta information. This is a quadruple that
-     * indicates that a subscription identified by its {@code subscriptionIdUri}
-     * is matched for its {@code subSubscriptionId} with the
-     * {@code quadrupleMatching} value.
+     * Creates an intermediate quadruple result. This is a quadruple that embeds
+     * the intermediate values associated to a notification to send to a
+     * subscriber. The quadruple generated contains the variables that are
+     * matched and their associated value.
      * 
-     * @param quadrupleMatching
+     * @param subscription
+     *            the subscription which is matched by the specified quadruple.
+     * @param quadruple
      *            the quadruple matching the subscription.
-     * @param subscriptionIdUri
-     *            an URI identifying the subscription which is matched.
-     * @param subSubscriptionId
-     *            the subSubscription which is really matched.
      * 
-     * @return a quadruple containing the quadruple that is matched and the
-     *         information that identify the subscription which is matched.
+     * @return a quadruple embeds the intermediate values associated to a
+     *         notification to send to a subscriber
      */
-    public static final Quadruple createMetaQuadruple(Quadruple quadrupleMatching,
-                                                      Node subscriptionIdUri,
-                                                      Node subSubscriptionId) {
+    public static final Quadruple createIntermediateQuadrupleResult(Subscription subscription,
+                                                                    Quadruple quadruple) {
+        Subsubscription firstSubSubscription =
+                subscription.getSubSubscriptions()[0];
+        AtomicQuery atomicQuery = firstSubSubscription.getAtomicQuery();
+
+        StringBuilder objectValue = new StringBuilder();
+
         // generates the object value which is the concatenation of
-        // subSubscriptionId and quadrupleMatching
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(baos);
-        OutputLangUtils.output(osw, subSubscriptionId, null);
-        try {
-            osw.write(' ');
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        OutputLangUtils.output(
-                osw, quadrupleMatching.createMetaGraphNode(),
-                quadrupleMatching.getSubject(),
-                quadrupleMatching.getPredicate(),
-                quadrupleMatching.getObject(), null, null);
-        try {
-            osw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+        // the variables that are matched and their associated values
+        for (int i = 0; i < 4; i++) {
+            Node node = atomicQuery.getNode(i);
+
+            // keep only variables that are part of the result vars set
+            if (node.isVariable()
+                    && subscription.getResultVars().contains(
+                            Var.alloc(node.getName()))) {
+                objectValue.append(node.getName());
+                objectValue.append('=');
+                objectValue.append(FmtUtils.stringForNode(quadruple.getTermByIndex(i)));
+                objectValue.append(',');
+            }
         }
 
-        return new Quadruple(
-                createQuadrupleHashUri(quadrupleMatching), subscriptionIdUri,
-                PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
-                Node.createLiteral(new String(baos.toByteArray())));
+        Quadruple q =
+                new Quadruple(
+                        createQuadrupleHashUri(quadruple),
+                        Node.createURI(subscription.getSubscriberUrl()),
+                        PublishSubscribeConstants.INTERMEDIATE_RESULTS_NODE,
+                        Node.createLiteral(objectValue.substring(
+                                0, objectValue.length() - 1)));
+
+        return q;
     }
 
     /**
@@ -582,17 +582,24 @@ public final class PublishSubscribeUtils {
                     // broadcasts a message to all the stubs contained by
                     // the subscription to say to these peers to send the
                     // missing sub solutions to the subscriber
-                    for (final Subscription.Stub stub : subscription.getStubs()) {
+                    for (String peerURL : subscription.getIntermediatePeerReferences()
+                            .keySet()) {
                         final SemanticPeer peerStub =
-                                semanticCanOverlay.findPeerStub(stub.peerUrl);
+                                semanticCanOverlay.findPeerStub(peerURL);
 
                         if (peerStub != null) {
+                            Set<HashCode> hashCodes =
+                                    subscription.getIntermediatePeerReferences()
+                                            .get(peerURL);
+
                             peerStub.receive(new RetrieveSubSolutionOperation(
-                                    notification.getId(), stub.quadrupleHash));
+                                    notification.getId(),
+                                    // copy to get a serializable set
+                                    Sets.newHashSet(hashCodes)));
                         } else {
                             log.error(
-                                    "Error while retrieving peer stub for url: {}",
-                                    stub.peerUrl);
+                                    "Error while retrieving peer stub for URL: {}",
+                                    peerURL);
                         }
                     }
                     break;
@@ -744,29 +751,23 @@ public final class PublishSubscribeUtils {
                                                     final Subscription subscription,
                                                     final Quadruple quadrupleMatching) {
         if (subscription.getType() == NotificationListenerType.BINDING) {
-            // stores a quadruple that contains the information about the
-            // subscription that is matched and the quadruple that matches the
-            // subscription. This is useful to create the notification later.
-            // The matching quadruple is not sent directly to the next peers
-            // because this imply to store the quadruple value in memory on
-            // several peers. Moreover, there is no limit about the size of a
-            // quadruple.
-            Quadruple metaQuad =
-                    PublishSubscribeUtils.createMetaQuadruple(
-                            quadrupleMatching,
-                            PublishSubscribeUtils.createSubscriptionIdUri(subscription.getId()),
-                            Node.createLiteral(
-                                    subscription.getId().toString(),
-                                    XSDDatatype.XSDlong));
+            // creates an intermediate result that will be retrieved later when
+            // all subsubscriptions are matched. This is to avoid to piggyback
+            // intermediate values from peers to peers given that object values
+            // may be some bytes or mega bytes when it is a literal
+            Quadruple intermediateResult =
+                    PublishSubscribeUtils.createIntermediateQuadrupleResult(
+                            subscription, quadrupleMatching);
 
             TransactionalDatasetGraph txnGraph =
                     overlay.getSubscriptionsDatastore().begin(AccessMode.WRITE);
 
             try {
-                txnGraph.add(metaQuad);
+                txnGraph.add(intermediateResult);
                 txnGraph.commit();
             } catch (Exception e) {
                 e.printStackTrace();
+                txnGraph.abort();
             } finally {
                 txnGraph.end();
             }
@@ -779,18 +780,21 @@ public final class PublishSubscribeUtils {
         // that matches the first sub-subscription.
         Subscription rewrittenSubscription =
                 SubscriptionRewriter.rewrite(subscription, quadrupleMatching);
-        // stores the stub URL of the current peer in order to
-        // have the possibility to retrieve the sub-solution later
-        rewrittenSubscription.addStub(new Subscription.Stub(
-                PAActiveObject.getUrl(overlay.getStub()),
-                quadrupleMatching.hashValue()));
+
+        if (subscription.getType() == NotificationListenerType.BINDING) {
+            // stores the stub URL of the current peer in order to
+            // have the possibility to retrieve the sub solutions later
+            rewrittenSubscription.addIntermediatePeerReference(
+                    PAActiveObject.getUrl(overlay.getStub()),
+                    quadrupleMatching.hashValue());
+        }
 
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
             log.info("Peer "
                     + overlay
                     + " is about to dispatch a rewritten subscription, creation time = "
                     + rewrittenSubscription.getCreationTime()
-                    + " , subscription: "
+                    + ", subscription: "
                     + rewrittenSubscription.getSparqlQuery());
         }
 
