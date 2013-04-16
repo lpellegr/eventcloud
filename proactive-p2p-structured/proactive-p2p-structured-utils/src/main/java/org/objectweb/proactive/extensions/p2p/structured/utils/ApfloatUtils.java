@@ -17,7 +17,6 @@
 package org.objectweb.proactive.extensions.p2p.structured.utils;
 
 import org.apfloat.Apfloat;
-import org.apfloat.ApfloatMath;
 import org.apfloat.Apint;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
@@ -31,7 +30,8 @@ public class ApfloatUtils {
     public static long DEFAULT_PRECISION = 350;
 
     private static final Apint RADIX = new Apint(
-            P2PStructuredProperties.CAN_UPPER_BOUND.getValue() + 1);
+            P2PStructuredProperties.CAN_UPPER_BOUND.getValue()
+                    - P2PStructuredProperties.CAN_LOWER_BOUND.getValue() + 1);
 
     public static Apfloat toFloatRadix10(String value) {
         return toFloatRadix10(value, RADIX);
@@ -53,6 +53,12 @@ public class ApfloatUtils {
                                          long precision) {
         int[] codepoints = UnicodeUtils.toCodePointArray(value);
 
+        for (int i = 0; i < codepoints.length; i++) {
+            codepoints[i] =
+                    codepoints[i]
+                            - P2PStructuredProperties.CAN_LOWER_BOUND.getValue();
+        }
+
         // codepoints[0] x radix^0 = codepoints[0]
         Apfloat result = new Apfloat(codepoints[0], precision);
 
@@ -62,6 +68,7 @@ public class ApfloatUtils {
         // 2^16).
         Apint pow = new Apint(1);
 
+        // ... + codepoints[i]*RADIX^{-i} + codepoints[i+1]*RADIX^{-i-1} + ...
         for (int i = 1; i < codepoints.length; i++) {
             pow = pow.multiply(radix);
 
@@ -82,63 +89,49 @@ public class ApfloatUtils {
         return toString(apfloat, DEFAULT_PRECISION);
     }
 
+    // http://mathforum.org/library/drmath/view/55744.html
     public static String toString(Apfloat apfloat, long precision) {
-        Apint apint = apfloat.truncate();
-        Apint quotient = apint;
+        StringBuilder result = new StringBuilder();
 
-        // handle the integer part
-        StringBuilder integerPart = new StringBuilder();
-        quotient = divideQuotientRecursively(integerPart, quotient);
-        integerPart.reverse();
+        // handle integer part
+        Apint integerPart = apfloat.truncate();
+
+        Apint quotient = integerPart;
+        while (quotient.compareTo(Apint.ZERO) > 0) {
+            Apint remainder = quotient.mod(RADIX);
+            quotient = quotient.divide(RADIX);
+
+            result.append(Character.toChars(P2PStructuredProperties.CAN_LOWER_BOUND.getValue()
+                    + remainder.intValue()));
+        }
+        result.reverse();
 
         // handle the fractional part
-        // as explained at http://goo.gl/OKovZ
-        Apfloat fractionalPart = ApfloatMath.modf(apfloat)[1];
+        Apfloat fractionalPart = apfloat.frac();
 
-        // this algorithm may not terminate and loop infinitively if the
-        // apfloat precision is set as infinite
-        // TODO: detect set of digits that repeat and stop after n
-        // repetitions
-        int loop = 0;
-        while (fractionalPart.compareTo(Apfloat.ZERO) > 0) {
-            // simple test to stop after PRECISION loops and thus to avoid
-            // infinite loop
-            if (loop > precision) {
-                break;
+        for (int i = 0; i < precision; i++) {
+            if (i > 0) {
+                fractionalPart = fractionalPart.subtract(integerPart);
             }
 
             // shift radix point to right by 1.
             fractionalPart = fractionalPart.multiply(RADIX);
 
-            if (fractionalPart.compareTo(Apfloat.ONE) >= 0) {
-                Apint truncatedPart = fractionalPart.truncate();
-                // keep only the integer part
-                integerPart.append(Character.toChars(truncatedPart.intValue()));
-                // get rid of value left of radix point
-                fractionalPart = fractionalPart.subtract(truncatedPart);
-            } else {
-                integerPart.append((char) 0);
+            if (fractionalPart.compareTo(RADIX) >= 0
+                    || fractionalPart.compareTo(Apfloat.ZERO) == 0) {
+                break;
             }
 
-            loop++;
+            integerPart = fractionalPart.truncate();
+
+            // keep only the integer part
+            result.append(Character.toChars(P2PStructuredProperties.CAN_LOWER_BOUND.getValue()
+                    + integerPart.intValue()));
+
+            i++;
         }
 
-        if (integerPart.length() == 0) {
-            integerPart.append((char) Character.MIN_CODE_POINT);
-        }
-
-        return integerPart.toString();
-    }
-
-    private static Apint divideQuotientRecursively(StringBuilder result,
-                                                   Apint quotient) {
-        while (quotient.compareTo(Apint.ZERO) != 0) {
-            int remainder = quotient.mod(RADIX).intValue();
-            result.append(new String(Character.toChars(remainder)));
-            quotient = quotient.divide(RADIX);
-        }
-
-        return quotient;
+        return result.toString();
     }
 
 }
