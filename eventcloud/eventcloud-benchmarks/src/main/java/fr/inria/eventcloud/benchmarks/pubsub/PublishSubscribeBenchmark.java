@@ -493,7 +493,7 @@ public class PublishSubscribeBenchmark {
                 this.createSubscribeProxies(
                         registryURL, eventCloudId, nodeProvider);
 
-        log.info("The subscription used by the subscribers are the following:");
+        log.info("The subscriptions used by the subscribers are the following:");
         for (SyntheticSubscription subscription : subscriptions) {
             log.info("  {}", subscription.content);
         }
@@ -923,8 +923,11 @@ public class PublishSubscribeBenchmark {
             SyntheticSubscription[] result =
                     new SyntheticSubscription[this.nbSubscribers];
 
+            Node[] predicateNodes =
+                    this.generatePredicateNodes(zones, this.rewritingLevel + 1);
+
             for (int i = 0; i < this.nbSubscribers; i++) {
-                result[i] = this.createSubscription(zones);
+                result[i] = this.createSubscription(predicateNodes);
             }
 
             this.syntheticSubscriptions = result;
@@ -933,10 +936,23 @@ public class PublishSubscribeBenchmark {
         return this.syntheticSubscriptions;
     }
 
-    private SyntheticSubscription createSubscription(SemanticZone[] zones) {
-        String subscription;
+    private Node[] generatePredicateNodes(SemanticZone[] zones, int nb) {
+        Node[] result = new Node[nb];
 
-        Node[] fixedPredicateNodes = null;
+        for (int i = 0; i < nb; i++) {
+            SemanticZone zone = zones[i % zones.length];
+
+            result[i] =
+                    EventGenerator.randomNode(
+                            zone.getLowerBound((byte) 2),
+                            zone.getUpperBound((byte) 2), -1, 10);
+        }
+
+        return result;
+    }
+
+    private SyntheticSubscription createSubscription(Node[] fixedPredicates) {
+        String subscription;
 
         if (this.subscriptionType == SubscriptionType.ACCEPT_ALL) {
             subscription = Subscription.ACCEPT_ALL;
@@ -965,19 +981,9 @@ public class PublishSubscribeBenchmark {
                     buf.append(i);
                 } else {
                     // fixed predicate value
-                    SemanticZone zone = zones[(i - 1) % zones.length];
-
-                    if (fixedPredicateNodes == null) {
-                        fixedPredicateNodes = new Node[this.rewritingLevel + 1];
-                    }
-
-                    fixedPredicateNodes[i - 1] =
-                            EventGenerator.randomNode(
-                                    zone.getLowerBound((byte) 2),
-                                    zone.getUpperBound((byte) 2), -1, 10);
 
                     buf.append("<");
-                    buf.append(fixedPredicateNodes[i - 1].getURI());
+                    buf.append(fixedPredicates[i - 1].getURI());
                     buf.append(">");
                 }
 
@@ -990,7 +996,7 @@ public class PublishSubscribeBenchmark {
             subscription = buf.toString();
         }
 
-        return new SyntheticSubscription(subscription, fixedPredicateNodes);
+        return new SyntheticSubscription(subscription, fixedPredicates);
     }
 
     private void assignSetOfevents(CustomPublishProxy publishProxy,
