@@ -19,7 +19,6 @@ package fr.inria.eventcloud.pubsub;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSCRIPTION_NS;
 import static fr.inria.eventcloud.api.PublishSubscribeConstants.SUBSUBSCRIPTION_NS;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -35,8 +34,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.mutable.MutableObject;
 import org.apache.jena.riot.out.NodeFmtLib;
-import org.apache.jena.riot.tokens.Tokenizer;
-import org.apache.jena.riot.tokens.TokenizerFactory;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -213,38 +210,6 @@ public final class PublishSubscribeUtils {
         }
 
         return ids;
-    }
-
-    /**
-     * Extracts the {@link Quadruple} and the sub-subscription id contained by
-     * meta quadruple that has been previously created by a call to
-     * {@link PublishSubscribeUtils#createMetaQuadruple(Quadruple, Node, Node)}
-     * .
-     * 
-     * @param metaQuad
-     *            the meta quadruple.
-     * 
-     * @return extracts the {@link Quadruple} and the sub-subscription id
-     *         contained by a meta quadruple that has been previously created by
-     *         a call to
-     *         {@link PublishSubscribeUtils#createMetaQuadruple(Quadruple, Node, Node)}
-     *         .
-     */
-    public static final Pair<Quadruple, SubscriptionId> extractMetaInformation(Quadruple metaQuad) {
-        String objectValue = metaQuad.getObject().getLiteralLexicalForm();
-
-        ByteArrayInputStream bais =
-                new ByteArrayInputStream(objectValue.getBytes());
-
-        Tokenizer tokenizer = TokenizerFactory.makeTokenizerUTF8(bais);
-
-        Node subSubscriptionId = tokenizer.next().asNode();
-
-        return Pair.create(
-                new Quadruple(tokenizer.next().asNode(), tokenizer.next()
-                        .asNode(), tokenizer.next().asNode(), tokenizer.next()
-                        .asNode()),
-                SubscriptionId.parseSubscriptionId(subSubscriptionId.getLiteralLexicalForm()));
     }
 
     /**

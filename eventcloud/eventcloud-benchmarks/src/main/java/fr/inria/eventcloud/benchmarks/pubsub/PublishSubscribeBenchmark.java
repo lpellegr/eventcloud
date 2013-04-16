@@ -38,7 +38,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.Category;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
@@ -208,7 +207,7 @@ public class PublishSubscribeBenchmark {
 
     // generated data to reuse for each run.
     // the CAN network topology is assumed to be the same at each run
-    private Pair<String, Node[]> subscriptionElements;
+    private SyntheticSubscription[] syntheticSubscriptions;
 
     private Event[] events;
 
@@ -477,35 +476,34 @@ public class PublishSubscribeBenchmark {
 
         SemanticZone[] zones = this.retrievePeerZones(deployer);
 
-        Pair<String, Node[]> subscriptionElements =
-                this.createSubscription(zones);
-        String sparqlSubscription = subscriptionElements.getFirst();
-        Node[] fixedPredicateNodes = subscriptionElements.getSecond();
+        SyntheticSubscription[] subscriptions =
+                this.getOrCreateSubscriptions(zones);
 
-        Event[] events =
-                this.createEvents(deployer, zones, fixedPredicateNodes);
+        Event[] events = this.createEvents(deployer, zones, subscriptions);
 
         String registryURL = this.deployRegistry(deployer, nodeProvider);
 
-        EventCloudId id = deployer.getEventCloudDescription().getId();
+        EventCloudId eventCloudId = deployer.getEventCloudDescription().getId();
 
         // creates proxies
         List<CustomPublishProxy> publishProxies =
                 this.createPublishProxies(
-                        registryURL, id, nodeProvider, this.nbPublishers);
+                        registryURL, eventCloudId, nodeProvider);
         List<SubscribeApi> subscribeProxies =
                 this.createSubscribeProxies(
-                        registryURL, id, nodeProvider, this.nbSubscribers);
+                        registryURL, eventCloudId, nodeProvider);
 
-        log.info(
-                "The subscription used by the subscribers is {}",
-                sparqlSubscription);
+        log.info("The subscription used by the subscribers are the following:");
+        for (SyntheticSubscription subscription : subscriptions) {
+            log.info("  {}", subscription.content);
+        }
 
         // subscribes
         for (int i = 0; i < this.nbSubscribers; i++) {
             final SubscribeApi subscribeProxy = subscribeProxies.get(i);
 
-            Subscription subscription = new Subscription(sparqlSubscription);
+            Subscription subscription =
+                    new Subscription(subscriptions[i].content);
 
             this.subscriptions.add(subscription);
             this.listeners.put(subscription.getId(), this.subscribe(
@@ -648,7 +646,7 @@ public class PublishSubscribeBenchmark {
 
     private Event[] createEvents(EventCloudDeployer deployer,
                                  SemanticZone[] zones,
-                                 Node[] fixedPredicateNodes) {
+                                 SyntheticSubscription[] subscriptions) {
         if (this.events == null) {
             List<Event[]> eventSets =
                     new ArrayList<Event[]>(this.nbEventGenerationRounds);
@@ -658,7 +656,8 @@ public class PublishSubscribeBenchmark {
             for (int i = 0; i < this.nbEventGenerationRounds; i++) {
                 Event[] generatedEvents =
                         this.generateEvents(
-                                deployer, zones, fixedPredicateNodes);
+                                deployer, zones,
+                                subscriptions[0].fixedPredicates);
                 Integer[] distribution = new Integer[zones.length];
                 for (int j = 0; j < distribution.length; j++) {
                     distribution[j] = 0;
@@ -869,13 +868,12 @@ public class PublishSubscribeBenchmark {
 
     private List<CustomPublishProxy> createPublishProxies(String registryUrl,
                                                           EventCloudId id,
-                                                          NodeProvider nodeProvider,
-                                                          int nbPublishProxies)
+                                                          NodeProvider nodeProvider)
             throws EventCloudIdNotManaged {
         List<CustomPublishProxy> result =
-                new ArrayList<CustomPublishProxy>(nbPublishProxies);
+                new ArrayList<CustomPublishProxy>(this.nbPublishers);
 
-        for (int i = 0; i < nbPublishProxies; i++) {
+        for (int i = 0; i < this.nbPublishers; i++) {
             CustomPublishProxy publishProxy;
 
             if (nodeProvider == null) {
@@ -896,13 +894,12 @@ public class PublishSubscribeBenchmark {
 
     private List<SubscribeApi> createSubscribeProxies(String registryUrl,
                                                       EventCloudId id,
-                                                      NodeProvider nodeProvider,
-                                                      int nbSubscribeProxies)
+                                                      NodeProvider nodeProvider)
             throws EventCloudIdNotManaged {
         List<SubscribeApi> result =
-                new ArrayList<SubscribeApi>(nbSubscribeProxies);
+                new ArrayList<SubscribeApi>(this.nbSubscribers);
 
-        for (int i = 0; i < nbSubscribeProxies; i++) {
+        for (int i = 0; i < this.nbSubscribers; i++) {
             SubscribeApi subscribeProxy;
 
             if (nodeProvider == null) {
@@ -920,70 +917,80 @@ public class PublishSubscribeBenchmark {
         return result;
     }
 
-    private synchronized Pair<String, Node[]> createSubscription(SemanticZone[] zones) {
-        if (this.subscriptionElements == null) {
-            String subscription;
+    private synchronized SyntheticSubscription[] getOrCreateSubscriptions(SemanticZone[] zones) {
+        if (this.syntheticSubscriptions == null) {
 
-            Node[] fixedPredicateNodes = null;
+            SyntheticSubscription[] result =
+                    new SyntheticSubscription[this.nbSubscribers];
 
-            if (this.subscriptionType == SubscriptionType.ACCEPT_ALL) {
-                subscription = Subscription.ACCEPT_ALL;
-            } else {
-                StringBuilder buf = new StringBuilder();
+            for (int i = 0; i < this.nbSubscribers; i++) {
+                result[i] = this.createSubscription(zones);
+            }
 
-                buf.append("SELECT ?g ");
-                for (int i = 1; i <= this.rewritingLevel + 1; i++) {
+            this.syntheticSubscriptions = result;
+        }
+
+        return this.syntheticSubscriptions;
+    }
+
+    private SyntheticSubscription createSubscription(SemanticZone[] zones) {
+        String subscription;
+
+        Node[] fixedPredicateNodes = null;
+
+        if (this.subscriptionType == SubscriptionType.ACCEPT_ALL) {
+            subscription = Subscription.ACCEPT_ALL;
+        } else {
+            StringBuilder buf = new StringBuilder();
+
+            buf.append("SELECT ?g ");
+            for (int i = 1; i <= this.rewritingLevel + 1; i++) {
+                buf.append("?o");
+                buf.append(i);
+                buf.append(' ');
+            }
+
+            buf.append("WHERE { GRAPH ?g { ");
+            for (int i = 1; i <= this.rewritingLevel + 1; i++) {
+                if (i == 1) {
+                    buf.append("?s1 ");
+                } else {
                     buf.append("?o");
-                    buf.append(i);
+                    buf.append(i - 1);
                     buf.append(' ');
                 }
 
-                buf.append("WHERE { GRAPH ?g { ");
-                for (int i = 1; i <= this.rewritingLevel + 1; i++) {
-                    if (i == 1) {
-                        buf.append("?s1 ");
-                    } else {
-                        buf.append("?o");
-                        buf.append(i - 1);
-                        buf.append(' ');
-                    }
-
-                    if (this.subscriptionType == SubscriptionType.PATH_QUERY_FREE_PREDICATE) {
-                        buf.append("?p");
-                        buf.append(i);
-                    } else {
-                        // fixed predicate value
-                        SemanticZone zone = zones[(i - 1) % zones.length];
-
-                        if (fixedPredicateNodes == null) {
-                            fixedPredicateNodes =
-                                    new Node[this.rewritingLevel + 1];
-                        }
-
-                        fixedPredicateNodes[i - 1] =
-                                EventGenerator.randomNode(
-                                        zone.getLowerBound((byte) 2),
-                                        zone.getUpperBound((byte) 2), -1, 10);
-
-                        buf.append("<");
-                        buf.append(fixedPredicateNodes[i - 1].getURI());
-                        buf.append(">");
-                    }
-
-                    buf.append(" ?o");
+                if (this.subscriptionType == SubscriptionType.PATH_QUERY_FREE_PREDICATE) {
+                    buf.append("?p");
                     buf.append(i);
-                    buf.append(" . ");
+                } else {
+                    // fixed predicate value
+                    SemanticZone zone = zones[(i - 1) % zones.length];
+
+                    if (fixedPredicateNodes == null) {
+                        fixedPredicateNodes = new Node[this.rewritingLevel + 1];
+                    }
+
+                    fixedPredicateNodes[i - 1] =
+                            EventGenerator.randomNode(
+                                    zone.getLowerBound((byte) 2),
+                                    zone.getUpperBound((byte) 2), -1, 10);
+
+                    buf.append("<");
+                    buf.append(fixedPredicateNodes[i - 1].getURI());
+                    buf.append(">");
                 }
-                buf.append("} }");
 
-                subscription = buf.toString();
+                buf.append(" ?o");
+                buf.append(i);
+                buf.append(" . ");
             }
+            buf.append("} }");
 
-            this.subscriptionElements =
-                    Pair.create(subscription, fixedPredicateNodes);
+            subscription = buf.toString();
         }
 
-        return this.subscriptionElements;
+        return new SyntheticSubscription(subscription, fixedPredicateNodes);
     }
 
     private void assignSetOfevents(CustomPublishProxy publishProxy,
@@ -1020,6 +1027,19 @@ public class PublishSubscribeBenchmark {
         }
 
         return listener;
+    }
+
+    private static class SyntheticSubscription {
+
+        public final String content;
+
+        public final Node[] fixedPredicates;
+
+        public SyntheticSubscription(String content, Node[] fixedPredicates) {
+            this.content = content;
+            this.fixedPredicates = fixedPredicates;
+        }
+
     }
 
 }

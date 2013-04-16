@@ -159,6 +159,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @Override
     @MemberOf("parallel")
     public void publish(Quadruple quad) {
+        System.out.println("QUAD=" + quad);
         if (quad.getPublicationTime() == -1) {
             quad.setPublicationTime();
         }
@@ -174,6 +175,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @Override
     @MemberOf("parallel")
     public void publish(CompoundEvent compoundEvent) {
+        System.out.println("CE=" + compoundEvent);
         long publicationTime = System.currentTimeMillis();
 
         // SBCE3
