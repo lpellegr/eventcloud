@@ -51,6 +51,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
+import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -624,14 +625,19 @@ public class Subscription implements Quadruplable, Serializable {
      */
     @Override
     public String toString() {
-        return "Subscription [originalId=" + this.originalId + ", parentId="
-                + this.parentId + ", id=" + this.id + ", creationTime="
-                + this.creationTime + ", indexationTime=" + this.indexationTime
-                + ", subscriberUrl=" + this.subscriberUrl
-                + ", subscription destination=" + this.subscriptionDestination
-                + ", sparqlQuery=" + this.sparqlQuery + ", peerReferences="
-                + this.intermediatePeerReferencesAsString() + ", type="
-                + this.type + "]";
+        return Objects.toStringHelper(this.getClass())
+                .add("originalId", this.originalId)
+                .add("parentId", this.parentId)
+                .add("id", this.id)
+                .add("creationTime", this.creationTime)
+                .add("indexationTime", this.indexationTime)
+                .add("subscriberURL", this.subscriberUrl)
+                .add("subscriptionDestination", this.subscriptionDestination)
+                .add("sparqlQuery", this.sparqlQuery)
+                .add("peerReferences", this.intermediatePeerReferences != null
+                        ? this.intermediatePeerReferencesAsString() : "empty")
+                .add("type", this.creationTime)
+                .toString();
     }
 
     public static void main(String[] args) {

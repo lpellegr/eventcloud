@@ -20,6 +20,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
+
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -63,8 +66,17 @@ public class QuadruplesSolution extends Solution<Collection<Quadruple>> {
             if (quadruple.getPredicate().equals(
                     PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
                 if (this.nbQuadruplesExpected == 0) {
-                    this.nbQuadruplesExpected =
-                            (Integer) quadruple.getObject().getLiteralValue();
+                    String objectValue =
+                            quadruple.getObject().getLiteralLexicalForm();
+
+                    if ('0' < P2PStructuredProperties.CAN_LOWER_BOUND.getValue()) {
+                        objectValue =
+                                UnicodeUtils.translate(
+                                        objectValue,
+                                        P2PStructuredProperties.CAN_LOWER_BOUND.getValue() - '0');
+                    }
+
+                    this.nbQuadruplesExpected = Integer.parseInt(objectValue);
                 }
             } else {
                 if (super.chunks.add(quadruple)) {
