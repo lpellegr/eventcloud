@@ -138,6 +138,13 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"--subscription-type", "-st"}, description = "Indicates the type of the subscription used by the subscribers to subscribe", converter = SubscriptionTypeConverter.class)
     public SubscriptionType subscriptionType = SubscriptionType.ACCEPT_ALL;
 
+    // when set to true each subscriber will receive and wait for
+    // nbPublications/nbSubscribers, otherwise each one will receive and wait
+    // for nbPublications. It means that in the later case we publish
+    // nbPublications * nbSubscribers events
+    @Parameter(names = {"--different-subscriptions", "-ds"}, description = "Indicates whether different subscriptions matching different data should be used when several subscribers are defined")
+    public boolean useDifferentSubscriptions = false;
+
     @Parameter(names = {"--publish-quadruples"}, description = "Indicates whether events must be emitted as quadruples (default CEs)")
     public boolean publishIndependentQuadruples = false;
 
@@ -212,6 +219,10 @@ public class PublishSubscribeBenchmark {
     private Event[] events;
 
     public static void main(String[] args) {
+        // WARNING: setting property values here set them only for the JVM where
+        // this class is executed not on all JVMs associated to peers. This
+        // should be done through the GCMA configuration file
+
         // alphabetic lower case interval
         P2PStructuredProperties.CAN_LOWER_BOUND.setValue(0x61);
         P2PStructuredProperties.CAN_UPPER_BOUND.setValue(0x7A);
@@ -507,7 +518,8 @@ public class PublishSubscribeBenchmark {
 
             this.subscriptions.add(subscription);
             this.listeners.put(subscription.getId(), this.subscribe(
-                    collector, subscribeProxy, subscription, this.listenerType));
+                    collector, subscribeProxy, subscription, this.listenerType,
+                    subscriptions[i].nbEventsExpected));
         }
 
         // waits that subscriptions are indexed as the process is asynchronous
@@ -636,98 +648,139 @@ public class PublishSubscribeBenchmark {
         if (nodeProvider != null) {
             nodeProvider.terminate();
         }
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private Event[] createEvents(EventCloudDeployer deployer,
                                  SemanticZone[] zones,
                                  SyntheticSubscription[] subscriptions) {
         if (this.events == null) {
-            List<Event[]> eventSets =
-                    new ArrayList<Event[]>(this.nbEventGenerationRounds);
-            List<Integer[]> eventSetsDistribution =
-                    new ArrayList<Integer[]>(this.nbEventGenerationRounds);
-
-            for (int i = 0; i < this.nbEventGenerationRounds; i++) {
-                Event[] generatedEvents =
-                        this.generateEvents(
+            if (!this.useDifferentSubscriptions) {
+                this.events =
+                        this.computeGenerationsAndSelectBest(
                                 deployer, zones,
-                                subscriptions[0].fixedPredicates);
-                Integer[] distribution = new Integer[zones.length];
-                for (int j = 0; j < distribution.length; j++) {
-                    distribution[j] = 0;
+                                subscriptions[0].fixedPredicates,
+                                nbPublications);
+
+                for (int i = 0; i < subscriptions.length; i++) {
+                    subscriptions[i].nbEventsExpected = nbPublications;
+                }
+            } else {
+                Event[] events = new Event[nbPublications];
+
+                if (nbPublications < subscriptions.length) {
+                    throw new IllegalStateException(
+                            "Number of publications lower than number of subscriptions. Case not managed");
                 }
 
-                for (Event e : generatedEvents) {
-                    CompoundEvent ce = (CompoundEvent) e;
+                int nbEventsPerSubscriber =
+                        nbPublications / subscriptions.length;
+                int extraEvents = nbPublications % subscriptions.length;
 
-                    for (int j = 0; j < ce.size(); j++) {
-                        Quadruple q = ce.get(j);
+                for (int i = 0; i < subscriptions.length; i++) {
+                    Event[] generatedEvents =
+                            this.computeGenerationsAndSelectBest(
+                                    deployer, zones,
+                                    subscriptions[i].fixedPredicates,
+                                    i < subscriptions.length - 1
+                                            ? nbEventsPerSubscriber
+                                            : nbEventsPerSubscriber
+                                                    + extraEvents);
 
-                        boolean belongs = false;
+                    subscriptions[i].nbEventsExpected = generatedEvents.length;
 
-                        for (int k = 0; k < zones.length; k++) {
-
-                            if (zones[k].contains(SemanticCoordinateFactory.newSemanticCoordinate(q))) {
-                                distribution[k] = distribution[k] + 1;
-
-                                belongs = true;
-                            }
-                        }
-
-                        if (!belongs) {
-                            throw new RuntimeException(
-                                    "Generated quadruple is not managed by the network: "
-                                            + q);
-                        }
+                    for (int j = 0; j < generatedEvents.length; j++) {
+                        events[(i * nbEventsPerSubscriber) + j] =
+                                generatedEvents[j];
                     }
                 }
 
-                eventSets.add(generatedEvents);
-                eventSetsDistribution.add(distribution);
+                this.events = events;
             }
-
-            DescriptiveStatistics stats = new DescriptiveStatistics();
-
-            int selectedIndex = 0;
-            double bestMeanDeviation = Integer.MAX_VALUE;
-
-            for (int i = 0; i < eventSetsDistribution.size(); i++) {
-                for (int j = 0; j < eventSetsDistribution.get(i).length; j++) {
-                    stats.addValue(eventSetsDistribution.get(i)[j]);
-                }
-
-                double mean = stats.getMean();
-
-                // http://mathworld.wolfram.com/MeanDeviation.html
-                double meanDeviation = 0;
-                for (int j = 0; j < eventSetsDistribution.get(i).length; j++) {
-                    meanDeviation +=
-                            Math.abs(eventSetsDistribution.get(i)[j] - mean);
-                }
-                meanDeviation /= eventSetsDistribution.get(i).length;
-
-                if (meanDeviation < bestMeanDeviation) {
-                    bestMeanDeviation = meanDeviation;
-                    selectedIndex = i;
-                }
-
-                stats.clear();
-            }
-
-            this.events = eventSets.get(selectedIndex);
         }
 
         return this.events;
     }
 
+    private Event[] computeGenerationsAndSelectBest(EventCloudDeployer deployer,
+                                                    SemanticZone[] zones,
+                                                    Node[] fixedPredicates,
+                                                    int nbEvents) {
+        List<Event[]> eventSets =
+                new ArrayList<Event[]>(this.nbEventGenerationRounds);
+        List<Integer[]> eventSetsDistribution =
+                new ArrayList<Integer[]>(this.nbEventGenerationRounds);
+
+        for (int i = 0; i < this.nbEventGenerationRounds; i++) {
+            Event[] generatedEvents =
+                    this.generateEvents(
+                            deployer, zones, nbEvents, fixedPredicates);
+            Integer[] distribution = new Integer[zones.length];
+            for (int j = 0; j < distribution.length; j++) {
+                distribution[j] = 0;
+            }
+
+            for (Event e : generatedEvents) {
+                CompoundEvent ce = (CompoundEvent) e;
+
+                for (int j = 0; j < ce.size(); j++) {
+                    Quadruple q = ce.get(j);
+
+                    boolean belongs = false;
+
+                    for (int k = 0; k < zones.length; k++) {
+
+                        if (zones[k].contains(SemanticCoordinateFactory.newSemanticCoordinate(q))) {
+                            distribution[k] = distribution[k] + 1;
+
+                            belongs = true;
+                        }
+                    }
+
+                    if (!belongs) {
+                        throw new RuntimeException(
+                                "Generated quadruple is not managed by the network: "
+                                        + q);
+                    }
+                }
+            }
+
+            eventSets.add(generatedEvents);
+            eventSetsDistribution.add(distribution);
+        }
+
+        DescriptiveStatistics stats = new DescriptiveStatistics();
+
+        int selectedIndex = 0;
+        double bestMeanDeviation = Integer.MAX_VALUE;
+
+        for (int i = 0; i < eventSetsDistribution.size(); i++) {
+            for (int j = 0; j < eventSetsDistribution.get(i).length; j++) {
+                stats.addValue(eventSetsDistribution.get(i)[j]);
+            }
+
+            double mean = stats.getMean();
+
+            // http://mathworld.wolfram.com/MeanDeviation.html
+            double meanDeviation = 0;
+            for (int j = 0; j < eventSetsDistribution.get(i).length; j++) {
+                meanDeviation +=
+                        Math.abs(eventSetsDistribution.get(i)[j] - mean);
+            }
+            meanDeviation /= eventSetsDistribution.get(i).length;
+
+            if (meanDeviation < bestMeanDeviation) {
+                bestMeanDeviation = meanDeviation;
+                selectedIndex = i;
+            }
+
+            stats.clear();
+        }
+
+        return eventSets.get(selectedIndex);
+    }
+
     private Event[] generateEvents(EventCloudDeployer deployer,
-                                   SemanticZone[] zones,
+                                   SemanticZone[] zones, int nbEvents,
                                    Node[] fixedPredicateNodes) {
         // pre-generates events so that the data are the same for all the
         // runs and the time is not included into the benchmark execution
@@ -737,10 +790,11 @@ public class PublishSubscribeBenchmark {
         if (this.rewritingLevel > 0) {
             generatedEvents =
                     this.createEventsForUniformDistributionAndRewritingSteps(
-                            deployer, zones, fixedPredicateNodes);
+                            deployer, zones, nbEvents, fixedPredicateNodes);
         } else {
             generatedEvents =
-                    this.createEventsForUniformDistribution(deployer, zones);
+                    this.createEventsForUniformDistribution(
+                            deployer, zones, nbEvents);
         }
 
         return generatedEvents;
@@ -782,7 +836,8 @@ public class PublishSubscribeBenchmark {
     }
 
     private Event[] createEventsForUniformDistribution(EventCloudDeployer deployer,
-                                                       SemanticZone[] zones) {
+                                                       SemanticZone[] zones,
+                                                       int nbEvents) {
 
         return this.createEvents(deployer, zones, new EventProvider() {
             @Override
@@ -791,11 +846,12 @@ public class PublishSubscribeBenchmark {
                 return EventGenerator.randomCompoundEvent(
                         zones, eventIndex, nbQuadruplesPerCE, rdfTermSize);
             }
-        });
+        }, nbEvents);
     }
 
     private Event[] createEventsForUniformDistributionAndRewritingSteps(EventCloudDeployer deployer,
                                                                         SemanticZone[] zones,
+                                                                        int nbEvents,
                                                                         final Node[] fixedPredicateNodes) {
         return this.createEvents(deployer, zones, new EventProvider() {
             @Override
@@ -806,16 +862,17 @@ public class PublishSubscribeBenchmark {
                         PublishSubscribeBenchmark.this.rewritingLevel,
                         fixedPredicateNodes);
             }
-        });
+        }, nbEvents);
     }
 
     private Event[] createEvents(EventCloudDeployer deployer,
-                                 SemanticZone[] zones, EventProvider provider) {
+                                 SemanticZone[] zones, EventProvider provider,
+                                 int nbEvents) {
         EventGenerator.reset();
 
-        Event[] events = new Event[nbPublications];
+        Event[] events = new Event[nbEvents];
 
-        for (int i = 0; i < nbPublications; i++) {
+        for (int i = 0; i < nbEvents; i++) {
             if (this.publishIndependentQuadruples) {
                 throw new UnsupportedOperationException();
             } else {
@@ -919,14 +976,19 @@ public class PublishSubscribeBenchmark {
 
     private synchronized SyntheticSubscription[] getOrCreateSubscriptions(SemanticZone[] zones) {
         if (this.syntheticSubscriptions == null) {
-
             SyntheticSubscription[] result =
                     new SyntheticSubscription[this.nbSubscribers];
 
-            Node[] predicateNodes =
-                    this.generatePredicateNodes(zones, this.rewritingLevel + 1);
+            Node[] predicateNodes = null;
 
             for (int i = 0; i < this.nbSubscribers; i++) {
+                if (this.useDifferentSubscriptions
+                        || (!this.useDifferentSubscriptions && i == 0)) {
+                    predicateNodes =
+                            this.generatePredicateNodes(
+                                    zones, this.rewritingLevel + 1);
+                }
+
                 result[i] = this.createSubscription(predicateNodes);
             }
 
@@ -981,7 +1043,6 @@ public class PublishSubscribeBenchmark {
                     buf.append(i);
                 } else {
                     // fixed predicate value
-
                     buf.append("<");
                     buf.append(fixedPredicates[i - 1].getURI());
                     buf.append(">");
@@ -1007,26 +1068,29 @@ public class PublishSubscribeBenchmark {
     private NotificationListener<?> subscribe(BenchmarkStatsCollector collector,
                                               SubscribeApi subscribeProxy,
                                               Subscription subscription,
-                                              NotificationListenerType listenerType) {
+                                              NotificationListenerType listenerType,
+                                              int nbEventsExpected) {
 
         NotificationListener<?> listener = null;
 
         switch (listenerType) {
             case BINDING:
-                listener = new CustomBindingListener(collector, nbPublications);
+                listener =
+                        new CustomBindingListener(collector, nbEventsExpected);
                 subscribeProxy.subscribe(
                         subscription, (BindingNotificationListener) listener);
                 break;
             case COMPOUND_EVENT:
                 listener =
                         new CustomCompoundEventListener(
-                                collector, nbPublications);
+                                collector, nbEventsExpected);
                 subscribeProxy.subscribe(
                         subscription,
                         (CompoundEventNotificationListener) listener);
                 break;
             case SIGNAL:
-                listener = new CustomSignalListener(collector, nbPublications);
+                listener =
+                        new CustomSignalListener(collector, nbEventsExpected);
                 subscribeProxy.subscribe(
                         subscription, (SignalNotificationListener) listener);
                 break;
@@ -1040,6 +1104,8 @@ public class PublishSubscribeBenchmark {
         public final String content;
 
         public final Node[] fixedPredicates;
+
+        public int nbEventsExpected;
 
         public SyntheticSubscription(String content, Node[] fixedPredicates) {
             this.content = content;
