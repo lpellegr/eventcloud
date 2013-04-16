@@ -111,10 +111,9 @@ public class EventGenerator {
         SemanticZone zone = zones.get(eventIndex % zones.size());
 
         Node graph =
-                randomNode(
-                        zone.getLowerBound((byte) 0),
-                        zone.getUpperBound((byte) 0),
-                        sequenceNumber.incrementAndGet(), nodeSize);
+                randomGraphNode(
+                        zones.get(RandomUtils.nextInt(zones.size())), nodeSize);
+
         Node subject = null;
         Node predicate = null;
         Node object = null;
@@ -122,7 +121,7 @@ public class EventGenerator {
         Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
 
         for (int i = 0; i < nbRewrites + 1; i++) {
-            int zoneIndex = i % zones.size();
+            int zoneIndex = RandomUtils.nextInt(zones.size());
 
             zone = zones.get(zoneIndex);
 
@@ -133,10 +132,7 @@ public class EventGenerator {
                                 zone.getUpperBound((byte) 1), -1, nodeSize);
             }
 
-            // 1 --> subject dimension
-            // 3 --> object dimension
-            byte dimensionIndex = (i % 3 == 0)
-                    ? (byte) 1 : (byte) 3;
+            byte dimensionIndex = 3;
 
             object =
                     randomNode(
