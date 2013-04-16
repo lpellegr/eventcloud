@@ -94,6 +94,7 @@ public class EventGenerator {
     }
 
     public static CompoundEvent randomCompoundEvent(SemanticZone[] zones,
+                                                    int eventIndex,
                                                     int nbQuadruples,
                                                     int nodeSize) {
         return randomCompoundEvent(
@@ -101,36 +102,46 @@ public class EventGenerator {
     }
 
     public static CompoundEvent randomCompoundEventForRewriting(List<SemanticZone> zones,
+                                                                int eventIndex,
                                                                 int nbQuadruples,
                                                                 int nodeSize,
                                                                 int nbRewrites,
                                                                 Node[] fixedPredicateNodes) {
 
-        Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
+        SemanticZone zone = zones.get(eventIndex % zones.size());
 
         Node graph =
-                randomGraphNode(
-                        zones.get(RandomUtils.nextInt(zones.size())), nodeSize);
+                randomNode(
+                        zone.getLowerBound((byte) 0),
+                        zone.getUpperBound((byte) 0),
+                        sequenceNumber.incrementAndGet(), nodeSize);
         Node subject = null;
         Node predicate = null;
         Node object = null;
 
+        Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
+
         for (int i = 0; i < nbRewrites + 1; i++) {
             int zoneIndex = i % zones.size();
 
-            SemanticZone zone = zones.get(zoneIndex);
+            zone = zones.get(zoneIndex);
 
             if (i == 0) {
                 subject =
                         randomNode(
                                 zone.getLowerBound((byte) 1),
-                                zone.getUpperBound((byte) 2), -1, nodeSize);
+                                zone.getUpperBound((byte) 1), -1, nodeSize);
             }
+
+            // 1 --> subject dimension
+            // 3 --> object dimension
+            byte dimensionIndex = (i % 3 == 0)
+                    ? (byte) 1 : (byte) 3;
 
             object =
                     randomNode(
-                            zone.getLowerBound((byte) 3),
-                            zone.getUpperBound((byte) 3), -1, nodeSize);
+                            zone.getLowerBound(dimensionIndex),
+                            zone.getUpperBound(dimensionIndex), -1, nodeSize);
 
             if (fixedPredicateNodes != null && fixedPredicateNodes.length > 0) {
                 predicate = fixedPredicateNodes[i];
@@ -156,13 +167,14 @@ public class EventGenerator {
     }
 
     public static CompoundEvent randomCompoundEventForRewriting(SemanticZone[] zones,
+                                                                int eventIndex,
                                                                 int nbQuadruples,
                                                                 int nodeSize,
                                                                 int nbRewrites,
                                                                 Node[] fixedPredicateNodes) {
         return randomCompoundEventForRewriting(
-                ImmutableList.copyOf(zones), nbQuadruples, nodeSize,
-                nbRewrites, fixedPredicateNodes);
+                ImmutableList.copyOf(zones), eventIndex, nbQuadruples,
+                nodeSize, nbRewrites, fixedPredicateNodes);
     }
 
     /**
@@ -250,7 +262,10 @@ public class EventGenerator {
             if (diff == 0) {
                 result[i] = lowerBound;
             } else {
+                // System.out.println("lower=" + lowerBound + "upper=" +
+                // upperBound);
                 result[i] = lowerBound + RandomUtils.nextInt(diff);
+                // System.out.println("RANDOM CHAR = " + (char) result[i]);
             }
 
             // replaces illegal characters by legal ones
@@ -262,7 +277,15 @@ public class EventGenerator {
         String uri = "urn:" + UnicodeUtils.toString(result);
 
         if (sequenceNumber > 0) {
-            uri = uri + sequenceNumber;
+            String sequenceNumberAsString = Integer.toString(sequenceNumber);
+            if ('0' < P2PStructuredProperties.CAN_LOWER_BOUND.getValue()) {
+                sequenceNumberAsString =
+                        UnicodeUtils.translate(
+                                sequenceNumberAsString,
+                                P2PStructuredProperties.CAN_LOWER_BOUND.getValue() - '0');
+            }
+
+            uri = uri + sequenceNumberAsString;
         }
 
         return Node.createURI(uri);
@@ -294,7 +317,8 @@ public class EventGenerator {
         System.out.println("Generated compound event:");
 
         CompoundEvent ce =
-                randomCompoundEventForRewriting(zones, 10, 10, 3, new Node[0]);
+                randomCompoundEventForRewriting(
+                        zones, 0, 10, 10, 3, new Node[0]);
 
         for (Quadruple q : ce) {
             System.out.println(q.toString(StringRepresentation.UTF_16));

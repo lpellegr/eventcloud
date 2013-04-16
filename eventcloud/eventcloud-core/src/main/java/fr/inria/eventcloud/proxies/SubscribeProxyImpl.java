@@ -34,7 +34,9 @@ import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
+import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -745,8 +747,16 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             for (Quadruple q : quads) {
                 if (q.getPredicate().equals(
                         PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
-                    expectedNbQuadruples =
-                            (Integer) q.getObject().getLiteralValue();
+                    String objectValue = q.getObject().getLiteralLexicalForm();
+
+                    if ('0' < P2PStructuredProperties.CAN_LOWER_BOUND.getValue()) {
+                        objectValue =
+                                UnicodeUtils.translate(
+                                        objectValue,
+                                        -(P2PStructuredProperties.CAN_LOWER_BOUND.getValue() - '0'));
+                    }
+
+                    expectedNbQuadruples = Integer.parseInt(objectValue);
                 } else {
                     quadsReceived.add(q);
                 }

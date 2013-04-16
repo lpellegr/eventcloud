@@ -109,6 +109,16 @@ public final class UnicodeUtils {
         return result.toString();
     }
 
+    public static String translate(String s, int shift) {
+        int[] codePoints = UnicodeUtils.toCodePointArray(s);
+
+        for (int i = 0; i < codePoints.length; i++) {
+            codePoints[i] = codePoints[i] + shift;
+        }
+
+        return UnicodeUtils.toString(codePoints);
+    }
+
     public static String getScalarValueUtf16(int codePoint) {
         if (Character.isSupplementaryCodePoint(codePoint)) {
             return getScalarValue(highSurrogate(codePoint), false)
