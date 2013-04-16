@@ -141,7 +141,7 @@ public class Subscription implements Quadruplable, Serializable {
 
     // peers to visit when the subscription is associated to a binding listener
     // in order to retrieve intermediate results
-    private final SetMultimap<String, HashCode> intermediatePeerReferences;
+    private SetMultimap<String, HashCode> intermediatePeerReferences;
 
     private final NotificationListenerType type;
 
@@ -176,25 +176,28 @@ public class Subscription implements Quadruplable, Serializable {
         this.subscriberUrl = subscriberUrl;
         this.subscriptionDestination = subscriptionDestination;
         this.type = listenerType;
-
-        if (listenerType == NotificationListenerType.BINDING) {
-            this.intermediatePeerReferences = HashMultimap.create();
-        } else {
-            this.intermediatePeerReferences = null;
-        }
     }
 
-    public final void addIntermediatePeerReference(String peerURL,
-                                                   HashCode hashValue) {
-        if (this.intermediatePeerReferences == null) {
+    public synchronized void addIntermediatePeerReference(String peerURL,
+                                                          HashCode hashValue) {
+        if (this.type != NotificationListenerType.BINDING) {
             throw new IllegalStateException(
                     "Trying to add an intermediate peer reference on a subscription that does not use a binding listener");
         }
 
-        this.intermediatePeerReferences.put(peerURL, hashValue);
+        this.getOrCreateIntermediatePeerReferencesCollection().put(
+                peerURL, hashValue);
     }
 
-    public SetMultimap<String, HashCode> getIntermediatePeerReferences() {
+    public synchronized SetMultimap<String, HashCode> getIntermediatePeerReferences() {
+        return this.intermediatePeerReferences;
+    }
+
+    private SetMultimap<String, HashCode> getOrCreateIntermediatePeerReferencesCollection() {
+        if (this.intermediatePeerReferences == null) {
+            this.intermediatePeerReferences = HashMultimap.create();
+        }
+
         return this.intermediatePeerReferences;
     }
 
@@ -294,7 +297,9 @@ public class Subscription implements Quadruplable, Serializable {
                                 .getLiteralValue()).shortValue()));
 
         // re-insert the intermediate peer references
-        intermediatePeerReferencesFromString(subscription, peerReferences);
+        if (peerReferences != null) {
+            intermediatePeerReferencesFromString(subscription, peerReferences);
+        }
 
         // recreates the sub-subscriptions
         subscription.subSubscriptions =
