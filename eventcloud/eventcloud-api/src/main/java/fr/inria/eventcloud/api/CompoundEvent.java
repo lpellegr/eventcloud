@@ -24,10 +24,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Iterators;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
@@ -262,13 +264,20 @@ public class CompoundEvent implements Event, Externalizable,
      */
     public static final Quadruple createMetaQuadruple(Node graph,
                                                       int compoundEventSize) {
+        String objectValue = Integer.toString(compoundEventSize);
+
+        if ('0' < P2PStructuredProperties.CAN_LOWER_BOUND.getValue()) {
+            objectValue =
+                    UnicodeUtils.translate(
+                            objectValue,
+                            P2PStructuredProperties.CAN_LOWER_BOUND.getValue() - '0');
+        }
+
         Quadruple metaQuadruple =
                 new Quadruple(
                         graph, graph,
                         PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                        Node.createLiteral(
-                                Integer.toString(compoundEventSize),
-                                XSDDatatype.XSDinteger));
+                        Node.createLiteral(objectValue));
 
         return metaQuadruple;
     }

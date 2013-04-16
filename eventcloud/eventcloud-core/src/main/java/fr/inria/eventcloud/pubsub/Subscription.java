@@ -292,8 +292,7 @@ public class Subscription implements Quadruplable, Serializable {
                                 SUBSCRIPTION_TYPE_PROPERTY)
                                 .getLiteralValue()).shortValue()));
 
-        // re-insert the peer references
-        // retrieves the stub urls
+        // re-insert the intermediate peer references
         intermediatePeerReferencesFromString(subscription, peerReferences);
 
         // recreates the sub-subscriptions

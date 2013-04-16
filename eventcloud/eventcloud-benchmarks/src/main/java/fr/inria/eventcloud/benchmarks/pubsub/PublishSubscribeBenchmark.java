@@ -106,8 +106,6 @@ public class PublishSubscribeBenchmark {
     private static final String NB_QUADRUPLES_PER_PEER_CATEGORY =
             "quadsPerPeer";
 
-    // -gcma /user/lpellegr/home/Desktop/GCMresources/GCMA.xml
-
     // parameters
 
     @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish")
@@ -215,9 +213,9 @@ public class PublishSubscribeBenchmark {
     private Event[] events;
 
     public static void main(String[] args) {
-        // printable ASCII codepoints interval
-        P2PStructuredProperties.CAN_LOWER_BOUND.setValue(0x20);
-        P2PStructuredProperties.CAN_UPPER_BOUND.setValue(0x7E);
+        // alphabetic lower case interval
+        P2PStructuredProperties.CAN_LOWER_BOUND.setValue(0x61);
+        P2PStructuredProperties.CAN_UPPER_BOUND.setValue(0x7A);
 
         PublishSubscribeBenchmark benchmark = new PublishSubscribeBenchmark();
 
@@ -602,9 +600,10 @@ public class PublishSubscribeBenchmark {
 
         List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
 
-        // for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
-        // System.out.println(p.dump());
-        // }
+        log.debug("Peers dump:");
+        for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
+            log.debug(p.dump());
+        }
 
         StringBuilder buf = new StringBuilder();
         for (int i = 0; i < peers.size(); i++) {
@@ -788,10 +787,10 @@ public class PublishSubscribeBenchmark {
 
         return this.createEvents(deployer, zones, new EventProvider() {
             @Override
-            public Event get(SemanticZone[] zones, int nbQuadruplesPerCE,
-                             int rdfTermSize) {
+            public Event get(SemanticZone[] zones, int eventIndex,
+                             int nbQuadruplesPerCE, int rdfTermSize) {
                 return EventGenerator.randomCompoundEvent(
-                        zones, nbQuadruplesPerCE, rdfTermSize);
+                        zones, eventIndex, nbQuadruplesPerCE, rdfTermSize);
             }
         });
     }
@@ -801,10 +800,10 @@ public class PublishSubscribeBenchmark {
                                                                         final Node[] fixedPredicateNodes) {
         return this.createEvents(deployer, zones, new EventProvider() {
             @Override
-            public Event get(SemanticZone[] zones, int nbQuadruplesPerCE,
-                             int rdfTermSize) {
+            public Event get(SemanticZone[] zones, int eventIndex,
+                             int nbQuadruplesPerCE, int rdfTermSize) {
                 return EventGenerator.randomCompoundEventForRewriting(
-                        zones, nbQuadruplesPerCE, rdfTermSize,
+                        zones, eventIndex, nbQuadruplesPerCE, rdfTermSize,
                         PublishSubscribeBenchmark.this.rewritingLevel,
                         fixedPredicateNodes);
             }
@@ -823,7 +822,7 @@ public class PublishSubscribeBenchmark {
             } else {
                 events[i] =
                         provider.get(
-                                zones, this.nbQuadruplesPerCompoundEvent, 10);
+                                zones, i, this.nbQuadruplesPerCompoundEvent, 10);
             }
         }
 
@@ -832,7 +831,8 @@ public class PublishSubscribeBenchmark {
 
     private static interface EventProvider {
 
-        Event get(SemanticZone[] zones, int nbQuadruplesPerCE, int rdfTermSize);
+        Event get(SemanticZone[] zones, int eventIndex, int nbQuadruplesPerCE,
+                  int rdfTermSize);
 
     }
 
