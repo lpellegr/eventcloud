@@ -62,9 +62,8 @@ public class CompoundEventTest {
         CompoundEvent compoundEvent = CompoundEventGenerator.random(10);
 
         int metaQuadrupleValue =
-                (Integer) CompoundEvent.createMetaQuadruple(compoundEvent)
-                        .getObject()
-                        .getLiteralValue();
+                Integer.parseInt(CompoundEvent.createMetaQuadruple(
+                        compoundEvent).getObject().getLiteralLexicalForm());
 
         Assert.assertEquals(10, metaQuadrupleValue);
     }
