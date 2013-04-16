@@ -207,7 +207,7 @@
 			<dependency>
 				<groupId>org.mapdb</groupId>
 				<artifactId>mapdb</artifactId>
-				<version>20130406</version>
+				<version>0.9.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
