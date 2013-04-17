@@ -91,7 +91,7 @@ public class EventGenerator {
         }
 
         // shuffle elements, randomness is sometimes good :)
-        Collections.shuffle(quadruples);
+        Collections.shuffle(quadruples, RandomUtils.JVM_RANDOM);
 
         return new CompoundEvent(quadruples);
     }
@@ -163,7 +163,7 @@ public class EventGenerator {
         }
 
         // shuffle elements, randomness is sometimes good :)
-        Collections.shuffle(quadruples);
+        Collections.shuffle(quadruples, RandomUtils.JVM_RANDOM);
 
         return new CompoundEvent(quadruples);
     }
