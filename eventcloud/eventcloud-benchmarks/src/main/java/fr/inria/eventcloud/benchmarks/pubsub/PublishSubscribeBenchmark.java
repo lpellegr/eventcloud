@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -104,6 +105,9 @@ public class PublishSubscribeBenchmark {
 
     private static final String NB_QUADRUPLES_PER_PEER_CATEGORY =
             "quadsPerPeer";
+
+    private static final String BENCHMARK_STATS_COLLECTOR_NAME =
+            "benchmark-stats-collector";
 
     // parameters
 
@@ -459,7 +463,7 @@ public class PublishSubscribeBenchmark {
     }
 
     public void execute(StatsRecorder recorder) throws EventCloudIdNotManaged,
-            TimeoutException, ProActiveException {
+            TimeoutException, ProActiveException, IOException {
 
         this.listeners.clear();
         this.subscriptions.clear();
@@ -481,7 +485,7 @@ public class PublishSubscribeBenchmark {
                                 this.nbSubscriptionsPerSubscriber});
         String collectorURL =
                 PAActiveObject.registerByName(
-                        collector, "benchmark-stats-collector");
+                        collector, BENCHMARK_STATS_COLLECTOR_NAME);
 
         GcmDeploymentNodeProvider nodeProvider =
                 this.createNodeProviderIfRequired();
@@ -660,6 +664,8 @@ public class PublishSubscribeBenchmark {
         if (nodeProvider != null) {
             nodeProvider.terminate();
         }
+
+        PAActiveObject.unregister(BENCHMARK_STATS_COLLECTOR_NAME);
     }
 
     private Event[] createEvents(EventCloudDeployer deployer,
