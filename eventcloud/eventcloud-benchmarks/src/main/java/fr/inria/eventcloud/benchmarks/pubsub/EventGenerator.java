@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.benchmarks.pubsub;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,7 +31,6 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentat
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.EventCloudDescription;
@@ -79,18 +79,21 @@ public class EventGenerator {
                                                     int nbQuadruples,
                                                     int nodeSize) {
 
-        Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
+        List<Quadruple> quadruples = new ArrayList<Quadruple>(nbQuadruples);
 
         Node graphNode =
                 randomGraphNode(
                         zones.get(RandomUtils.nextInt(zones.size())), nodeSize);
 
         for (int i = 0; i < nbQuadruples; i++) {
-            builder.add(randomQuadruple(
+            quadruples.add(randomQuadruple(
                     zones.get(i % zones.size()), graphNode, nodeSize));
         }
 
-        return new CompoundEvent(builder.build());
+        // shuffle elements, randomness is sometimes good :)
+        Collections.shuffle(quadruples);
+
+        return new CompoundEvent(quadruples);
     }
 
     public static CompoundEvent randomCompoundEvent(SemanticZone[] zones,
@@ -118,7 +121,7 @@ public class EventGenerator {
         Node predicate = null;
         Node object = null;
 
-        Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
+        List<Quadruple> quadruples = new ArrayList<Quadruple>(nbQuadruples);
 
         for (int i = 0; i < nbRewrites + 1; i++) {
             int zoneIndex = RandomUtils.nextInt(zones.size());
@@ -148,18 +151,21 @@ public class EventGenerator {
                                 zone.getUpperBound((byte) 2), -1, nodeSize);
             }
 
-            builder.add(new Quadruple(
+            quadruples.add(new Quadruple(
                     graph, subject, predicate, object, false, false));
 
             subject = object;
         }
 
         for (int i = 0; i < nbQuadruples - nbRewrites - 1; i++) {
-            builder.add(randomQuadruple(zones.get((nbRewrites + 1 + i)
+            quadruples.add(randomQuadruple(zones.get((nbRewrites + 1 + i)
                     % zones.size()), graph, nodeSize));
         }
 
-        return new CompoundEvent(builder.build());
+        // shuffle elements, randomness is sometimes good :)
+        Collections.shuffle(quadruples);
+
+        return new CompoundEvent(quadruples);
     }
 
     public static CompoundEvent randomCompoundEventForRewriting(SemanticZone[] zones,
@@ -171,35 +177,6 @@ public class EventGenerator {
         return randomCompoundEventForRewriting(
                 ImmutableList.copyOf(zones), eventIndex, nbQuadruples,
                 nodeSize, nbRewrites, fixedPredicateNodes);
-    }
-
-    /**
-     * Generates a compound event whose all the quadruples fit into the
-     * specified zone.
-     * 
-     * @param zone
-     *            the zone used to generate the quadruples contained by the
-     *            compound event.
-     * @param nbQuadruples
-     *            the number of quadruples to generate for the compound event.
-     * @param nodeSize
-     *            the number of characters assigned to each RDF term of
-     *            quadruple that is generated.
-     * 
-     * @return the generated compound event.
-     */
-    public static CompoundEvent randomCompoundEvent(SemanticZone zone,
-                                                    int nbQuadruples,
-                                                    int nodeSize) {
-        Builder<Quadruple> builder = ImmutableList.<Quadruple> builder();
-
-        Node graphNode = randomGraphNode(zone, nodeSize);
-
-        for (int i = 0; i < nbQuadruples; i++) {
-            builder.add(randomQuadruple(zone, graphNode, nodeSize));
-        }
-
-        return new CompoundEvent(builder.build());
     }
 
     private static Node randomGraphNode(SemanticZone zone, int nodeSize) {
