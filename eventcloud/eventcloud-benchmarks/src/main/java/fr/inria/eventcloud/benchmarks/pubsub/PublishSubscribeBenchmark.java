@@ -501,6 +501,8 @@ public class PublishSubscribeBenchmark {
 
         Event[] events = this.createEvents(deployer, zones, subscriptions);
 
+        org.objectweb.proactive.extensions.p2p.structured.utils.Arrays.shuffle(events);
+
         String registryURL = this.deployRegistry(deployer, nodeProvider);
 
         EventCloudId eventCloudId = deployer.getEventCloudDescription().getId();
