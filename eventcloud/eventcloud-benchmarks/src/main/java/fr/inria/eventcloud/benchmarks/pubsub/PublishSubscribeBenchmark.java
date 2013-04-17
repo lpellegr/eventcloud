@@ -125,6 +125,9 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"--nb-subscribers"}, description = "The number of subscribers")
     public int nbSubscribers = 1;
 
+    @Parameter(names = {"--nb-subscriptions-per-subscriber", "-nsps"}, description = "The number of subscriptions per subscriber")
+    public int nbSubscriptionsPerSubscriber = 1;
+
     @Parameter(names = {"-dr", "--dry-runs"}, description = "Indicates the number of first runs to discard")
     public int discardFirstRuns = 1;
 
@@ -251,7 +254,7 @@ public class PublishSubscribeBenchmark {
     private void logParameterValues() {
         log.info("Benchmark starting with the following parameters:");
         log.info("  compoundEventSize -> {}", this.nbQuadruplesPerCompoundEvent);
-        log.info("  discardFirstRuns -> {}", this.discardFirstRuns);
+        log.info("  dryRuns -> {}", this.discardFirstRuns);
         log.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
         log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
         log.info("  listenerType -> {}", this.listenerType);
@@ -262,6 +265,9 @@ public class PublishSubscribeBenchmark {
         log.info("  nbPublishers -> {}", this.nbPublishers);
         log.info("  nbRuns -> {}", this.nbRuns);
         log.info("  nbSubscribers -> {}", this.nbSubscribers);
+        log.info(
+                "  nbSubscriptionsPerSubscriber -> {}",
+                this.nbSubscriptionsPerSubscriber);
         log.info("  publishQuadruples -> {}", this.publishIndependentQuadruples);
         log.info("  rewritingLevel -> {}", this.rewritingLevel);
         log.info("  subscriptionType -> {}", this.subscriptionType);
@@ -343,7 +349,9 @@ public class PublishSubscribeBenchmark {
         this.listeners =
                 new HashMap<SubscriptionId, NotificationListener<?>>(
                         this.nbSubscribers);
-        this.subscriptions = new ArrayList<Subscription>(this.nbSubscribers);
+        this.subscriptions =
+                new ArrayList<Subscription>(this.nbSubscribers
+                        * this.nbSubscriptionsPerSubscriber);
 
         this.supplier =
                 this.publishIndependentQuadruples
@@ -469,7 +477,8 @@ public class PublishSubscribeBenchmark {
         BenchmarkStatsCollector collector =
                 PAActiveObject.newActive(
                         BenchmarkStatsCollector.class, new Object[] {
-                                this.nbPublishers, this.nbSubscribers});
+                                this.nbPublishers, this.nbSubscribers,
+                                this.nbSubscriptionsPerSubscriber});
         String collectorURL =
                 PAActiveObject.registerByName(
                         collector, "benchmark-stats-collector");
@@ -510,8 +519,9 @@ public class PublishSubscribeBenchmark {
         }
 
         // subscribes
-        for (int i = 0; i < this.nbSubscribers; i++) {
-            final SubscribeApi subscribeProxy = subscribeProxies.get(i);
+        for (int i = 0; i < subscriptions.length; i++) {
+            final SubscribeApi subscribeProxy =
+                    subscribeProxies.get(i / this.nbSubscriptionsPerSubscriber);
 
             Subscription subscription =
                     new Subscription(subscriptions[i].content);
@@ -977,11 +987,13 @@ public class PublishSubscribeBenchmark {
     private synchronized SyntheticSubscription[] getOrCreateSubscriptions(SemanticZone[] zones) {
         if (this.syntheticSubscriptions == null) {
             SyntheticSubscription[] result =
-                    new SyntheticSubscription[this.nbSubscribers];
+                    new SyntheticSubscription[this.nbSubscribers
+                            * this.nbSubscriptionsPerSubscriber];
 
             Node[] predicateNodes = null;
 
-            for (int i = 0; i < this.nbSubscribers; i++) {
+            for (int i = 0; i < this.nbSubscribers
+                    * this.nbSubscriptionsPerSubscriber; i++) {
                 if (this.useDifferentSubscriptions
                         || (!this.useDifferentSubscriptions && i == 0)) {
                     predicateNodes =

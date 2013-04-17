@@ -56,6 +56,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     private final int nbSubscribers;
 
+    private final int nbSubscriptionsPerSubscriber;
+
     private MutableInteger nbReportsReceivedByPublishers = new MutableInteger();
 
     private MutableInteger nbReportsReceivedBySubscribers =
@@ -80,11 +82,14 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
     public BenchmarkStatsCollector() {
         this.nbPublishers = 0;
         this.nbSubscribers = 0;
+        this.nbSubscriptionsPerSubscriber = 0;
     }
 
-    public BenchmarkStatsCollector(int nbPublishers, int nbSubscribers) {
+    public BenchmarkStatsCollector(int nbPublishers, int nbSubscribers,
+            int nbSubscriptionsPerSubscriber) {
         this.nbPublishers = nbPublishers;
         this.nbSubscribers = nbSubscribers;
+        this.nbSubscriptionsPerSubscriber = nbSubscriptionsPerSubscriber;
     }
 
     /**
@@ -93,11 +98,12 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
     @Override
     public void initActivity(Body body) {
         this.endToEndTerminationTimes =
-                new HashMap<SubscriptionId, Long>(this.nbSubscribers);
+                new HashMap<SubscriptionId, Long>(this.nbSubscribers
+                        * this.nbSubscriptionsPerSubscriber);
 
         this.outputMeasurements =
                 new HashMap<SubscriptionId, SimpleMeasurement>(
-                        this.nbSubscribers);
+                        this.nbSubscribers * this.nbSubscriptionsPerSubscriber);
 
         this.pointToPointEntryMeasurements = new HashMap<String, Long>();
 
@@ -147,7 +153,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         if (result) {
             this.nbReportsReceivedBySubscribers.add(1);
 
-            if (this.nbReportsReceivedBySubscribers.getValue() == this.nbSubscribers) {
+            if (this.nbReportsReceivedBySubscribers.getValue() == this.nbSubscribers
+                    * this.nbSubscriptionsPerSubscriber) {
                 this.subscriberWakeUp = true;
 
                 synchronized (this.nbReportsReceivedBySubscribers) {
@@ -233,9 +240,11 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
     public void waitForAllSubscriberReports(int timeout)
             throws TimeoutException {
 
-        if (this.nbReportsReceivedBySubscribers.getValue() < this.nbSubscribers) {
+        if (this.nbReportsReceivedBySubscribers.getValue() < this.nbSubscribers
+                * this.nbSubscriptionsPerSubscriber) {
             synchronized (this.nbReportsReceivedBySubscribers) {
-                while (this.nbReportsReceivedBySubscribers.getValue() < this.nbSubscribers) {
+                while (this.nbReportsReceivedBySubscribers.getValue() < this.nbSubscribers
+                        * this.nbSubscriptionsPerSubscriber) {
                     try {
                         this.nbReportsReceivedBySubscribers.wait(timeout);
                     } catch (InterruptedException e) {
@@ -255,7 +264,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
             throw new TimeoutException("Received only "
                     + this.nbReportsReceivedBySubscribers.getValue()
                     + " subscriber report(s) after " + timeout + " ms whereas "
-                    + this.nbSubscribers + " were expected.");
+                    + (this.nbSubscribers * this.nbSubscriptionsPerSubscriber)
+                    + " were expected.");
         }
     }
 
