@@ -306,12 +306,6 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
         if (deployer != null) {
             deployer.undeploy();
 
-            try {
-                this.unregister();
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-
             return true;
         }
 
