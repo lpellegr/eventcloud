@@ -488,6 +488,32 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append('\n');
         }
 
+        TransactionalDatasetGraph txnGraph =
+                this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);
+
+        try {
+            QueryExecution qExec =
+                    QueryExecutionFactory.create(
+                            "SELECT (COUNT(*) AS ?nbSubscriptions) WHERE  { GRAPH ?g { ?s <"
+                                    + PublishSubscribeConstants.SUBSCRIPTION_ID_NODE
+                                    + ">  ?o }}",
+                            txnGraph.getUnderlyingDataset());
+
+            ResultSet rs = qExec.execSelect();
+
+            try {
+                result.append("Number of subscription(s) managed is ");
+                result.append(rs.nextSolution()
+                        .get("nbSubscriptions")
+                        .asLiteral()
+                        .getLexicalForm());
+            } finally {
+                qExec.close();
+            }
+        } finally {
+            txnGraph.end();
+        }
+
         return result.toString();
     }
 
