@@ -840,9 +840,10 @@ public final class PublishSubscribeUtils {
             return null;
         }
 
-        List<Quadruple> quadruples = Lists.newArrayList(compoundEvent);
-
         BindingMap binding = new BindingMap();
+
+        // number of sub-subscriptions contained initially by the subscription
+        // we are trying to satisfy
         int nbSubSubscriptions = subscription.getSubSubscriptions().length;
 
         int indexFirstQuadrupleMatching = -1;
@@ -851,10 +852,10 @@ public final class PublishSubscribeUtils {
             AtomicQuery aq =
                     subscription.getSubSubscriptions()[0].getAtomicQuery();
 
-            for (int j = 0; j < quadruples.size(); j++) {
+            for (int j = 0; j < compoundEvent.size(); j++) {
                 BindingMap tmpBinding;
 
-                if ((tmpBinding = matches(quadruples.get(j), aq)) == null) {
+                if ((tmpBinding = matches(compoundEvent.get(j), aq)) == null) {
                     continue;
                 } else if (indexFirstQuadrupleMatching == -1
                         && tmpBinding != null) {
@@ -866,11 +867,10 @@ public final class PublishSubscribeUtils {
                 if (i < nbSubSubscriptions - 1) {
                     subscription =
                             SubscriptionRewriter.rewrite(
-                                    subscription, quadruples.get(j));
+                                    subscription, compoundEvent.get(j));
                 }
 
-                // once a quadruple has matched it can not match again
-                quadruples.remove(quadruples.get(j));
+                // sub-subscription satisfied, look for the next
                 break;
             }
         }
