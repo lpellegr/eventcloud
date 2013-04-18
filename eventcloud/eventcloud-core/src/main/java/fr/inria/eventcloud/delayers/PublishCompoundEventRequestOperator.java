@@ -196,9 +196,30 @@ public class PublishCompoundEventRequestOperator extends
                     }
 
                     log.debug(
-                            "Notification sent for graph {} because subscription {} satisfied on peer {}",
+                            "Notification sent for graph {} because subscription {} and triggering condition satisfied on peer {}",
                             compoundEvent.getGraph(), subscriptionId,
                             super.overlay.getId());
+                } else {
+                    if (log.isTraceEnabled()) {
+                        String reason;
+
+                        if (matchingResult.getFirst() == null) {
+                            reason =
+                                    "the subscription is not satisfied, CE="
+                                            + compoundEvent;
+                        } else {
+                            reason =
+                                    "the triggering notification condition is false: "
+                                            + indexQuadrupleUsedForIndexing
+                                            + " != "
+                                            + matchingResult.getSecond();
+                        }
+
+                        log.trace(
+                                "Notification not sent for graph {} with subscription {} on peer {} because {}",
+                                compoundEvent.getGraph(), subscription.getId(),
+                                super.overlay, reason);
+                    }
                 }
             }
         } catch (Exception e) {

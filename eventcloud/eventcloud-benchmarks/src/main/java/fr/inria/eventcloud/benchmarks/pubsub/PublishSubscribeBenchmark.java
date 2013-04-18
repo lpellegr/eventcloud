@@ -139,23 +139,23 @@ public class PublishSubscribeBenchmark {
     public int waitBetweenPublications = 0;
 
     // a rewriting level of 0 means no rewrite
-    @Parameter(names = {"--rewriting-level", "-rl"}, description = "Indicates the number of rewrites to force before delivering a notification")
+    @Parameter(names = {"-rl", "--rewriting-level"}, description = "Indicates the number of rewrites to force before delivering a notification")
     public int rewritingLevel = 0;
 
-    @Parameter(names = {"--subscription-type", "-st"}, description = "Indicates the type of the subscription used by the subscribers to subscribe", converter = SubscriptionTypeConverter.class)
+    @Parameter(names = {"-st", "--subscription-type"}, description = "Indicates the type of the subscription used by the subscribers to subscribe", converter = SubscriptionTypeConverter.class)
     public SubscriptionType subscriptionType = SubscriptionType.ACCEPT_ALL;
 
     // when set to true each subscriber will receive and wait for
     // nbPublications/nbSubscribers, otherwise each one will receive and wait
     // for nbPublications. It means that in the later case we publish
     // nbPublications * nbSubscribers events
-    @Parameter(names = {"--different-subscriptions", "-ds"}, description = "Indicates whether different subscriptions matching different data should be used when several subscribers are defined")
+    @Parameter(names = {"-ds", "--different-subscriptions"}, description = "Indicates whether different subscriptions matching different data should be used when several subscribers are defined")
     public boolean useDifferentSubscriptions = false;
 
     @Parameter(names = {"--publish-quadruples"}, description = "Indicates whether events must be emitted as quadruples (default CEs)")
     public boolean publishIndependentQuadruples = false;
 
-    @Parameter(names = {"-lt", "--listener-type"}, description = "The listener type used by all the subscribers for subscribing", converter = ListenerTypeConverter.class)
+    @Parameter(names = {"--listener-type", "-lt"}, description = "The listener type used by all the subscribers for subscribing", converter = ListenerTypeConverter.class)
     public NotificationListenerType listenerType =
             NotificationListenerType.COMPOUND_EVENT;
 
@@ -167,6 +167,12 @@ public class PublishSubscribeBenchmark {
 
     @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
     public String gcmaDescriptor = null;
+
+    @Parameter(names = {"--disable-inter-ces-shuffling"}, description = "Indicates whether the shuffling of the generated set of compounds events should be disabled or not")
+    public boolean disableInterCompoundEventsShuffling = false;
+
+    @Parameter(names = {"--disable-intra-ces-shuffling"}, description = "Indicates whether the shuffling of the quadruples inside the generated compound events must be disabled or not")
+    public boolean disableIntraCompoundEventsShuffling = false;
 
     @Parameter(names = {"-h", "--help"}, description = "Print help", help = true)
     public boolean help;
@@ -274,6 +280,12 @@ public class PublishSubscribeBenchmark {
                 this.nbSubscriptionsPerSubscriber);
         log.info("  publishQuadruples -> {}", this.publishIndependentQuadruples);
         log.info("  rewritingLevel -> {}", this.rewritingLevel);
+        log.info(
+                "  disableInterCompoundEventsShuffling -> {}",
+                this.disableInterCompoundEventsShuffling);
+        log.info(
+                "  disableIntraCompoundEventsShuffling -> {}",
+                this.disableIntraCompoundEventsShuffling);
         log.info("  subscriptionType -> {}", this.subscriptionType);
         log.info(
                 "  waitBetweenPublications -> {}", this.waitBetweenPublications);
@@ -505,7 +517,9 @@ public class PublishSubscribeBenchmark {
 
         Event[] events = this.createEvents(deployer, zones, subscriptions);
 
-        org.objectweb.proactive.extensions.p2p.structured.utils.Arrays.shuffle(events);
+        if (!this.disableInterCompoundEventsShuffling) {
+            org.objectweb.proactive.extensions.p2p.structured.utils.Arrays.shuffle(events);
+        }
 
         String registryURL = this.deployRegistry(deployer, nodeProvider);
 
@@ -862,7 +876,11 @@ public class PublishSubscribeBenchmark {
             public Event get(SemanticZone[] zones, int eventIndex,
                              int nbQuadruplesPerCE, int rdfTermSize) {
                 return EventGenerator.randomCompoundEvent(
-                        zones, eventIndex, nbQuadruplesPerCE, rdfTermSize);
+                        zones,
+                        eventIndex,
+                        nbQuadruplesPerCE,
+                        rdfTermSize,
+                        !PublishSubscribeBenchmark.this.disableIntraCompoundEventsShuffling);
             }
         }, nbEvents);
     }
@@ -876,9 +894,13 @@ public class PublishSubscribeBenchmark {
             public Event get(SemanticZone[] zones, int eventIndex,
                              int nbQuadruplesPerCE, int rdfTermSize) {
                 return EventGenerator.randomCompoundEventForRewriting(
-                        zones, eventIndex, nbQuadruplesPerCE, rdfTermSize,
+                        zones,
+                        fixedPredicateNodes,
+                        eventIndex,
+                        nbQuadruplesPerCE,
+                        rdfTermSize,
                         PublishSubscribeBenchmark.this.rewritingLevel,
-                        fixedPredicateNodes);
+                        !PublishSubscribeBenchmark.this.disableIntraCompoundEventsShuffling);
             }
         }, nbEvents);
     }
