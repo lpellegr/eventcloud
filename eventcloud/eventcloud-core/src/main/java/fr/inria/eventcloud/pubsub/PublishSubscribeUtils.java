@@ -870,6 +870,13 @@ public final class PublishSubscribeUtils {
                                     subscription, compoundEvent.get(j));
                 }
 
+                if (log.isTraceEnabled()) {
+                    log.trace(
+                            "CE with graph {} matching subscription {} with {} as the index of the first quadruple matching the subscription",
+                            compoundEvent.getGraph(), subscription.getId(),
+                            indexFirstQuadrupleMatching);
+                }
+
                 // sub-subscription satisfied, look for the next
                 break;
             }

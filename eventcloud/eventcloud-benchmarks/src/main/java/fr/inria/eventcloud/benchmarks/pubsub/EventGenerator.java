@@ -77,7 +77,8 @@ public class EventGenerator {
      */
     public static CompoundEvent randomCompoundEvent(List<SemanticZone> zones,
                                                     int nbQuadruples,
-                                                    int nodeSize) {
+                                                    int nodeSize,
+                                                    boolean shuffle) {
 
         List<Quadruple> quadruples = new ArrayList<Quadruple>(nbQuadruples);
 
@@ -90,8 +91,10 @@ public class EventGenerator {
                     zones.get(i % zones.size()), graphNode, nodeSize));
         }
 
-        // shuffle elements, randomness is sometimes good :)
-        Collections.shuffle(quadruples, RandomUtils.JVM_RANDOM);
+        if (shuffle) {
+            // shuffle elements, randomness is sometimes good :)
+            Collections.shuffle(quadruples, RandomUtils.JVM_RANDOM);
+        }
 
         return new CompoundEvent(quadruples);
     }
@@ -99,17 +102,19 @@ public class EventGenerator {
     public static CompoundEvent randomCompoundEvent(SemanticZone[] zones,
                                                     int eventIndex,
                                                     int nbQuadruples,
-                                                    int nodeSize) {
+                                                    int nodeSize,
+                                                    boolean shuffle) {
         return randomCompoundEvent(
-                ImmutableList.copyOf(zones), nbQuadruples, nodeSize);
+                ImmutableList.copyOf(zones), nbQuadruples, nodeSize, shuffle);
     }
 
     public static CompoundEvent randomCompoundEventForRewriting(List<SemanticZone> zones,
+                                                                Node[] fixedPredicateNodes,
                                                                 int eventIndex,
                                                                 int nbQuadruples,
                                                                 int nodeSize,
                                                                 int nbRewrites,
-                                                                Node[] fixedPredicateNodes) {
+                                                                boolean shuffle) {
 
         SemanticZone zone = zones.get(eventIndex % zones.size());
 
@@ -162,21 +167,24 @@ public class EventGenerator {
                     % zones.size()), graph, nodeSize));
         }
 
-        // shuffle elements, randomness is sometimes good :)
-        Collections.shuffle(quadruples, RandomUtils.JVM_RANDOM);
+        if (shuffle) {
+            // shuffle elements, randomness is sometimes good :)
+            Collections.shuffle(quadruples, RandomUtils.JVM_RANDOM);
+        }
 
         return new CompoundEvent(quadruples);
     }
 
     public static CompoundEvent randomCompoundEventForRewriting(SemanticZone[] zones,
+                                                                Node[] fixedPredicateNodes,
                                                                 int eventIndex,
                                                                 int nbQuadruples,
                                                                 int nodeSize,
                                                                 int nbRewrites,
-                                                                Node[] fixedPredicateNodes) {
+                                                                boolean shuffle) {
         return randomCompoundEventForRewriting(
-                ImmutableList.copyOf(zones), eventIndex, nbQuadruples,
-                nodeSize, nbRewrites, fixedPredicateNodes);
+                ImmutableList.copyOf(zones), fixedPredicateNodes, eventIndex,
+                nbQuadruples, nodeSize, nbRewrites, shuffle);
     }
 
     private static Node randomGraphNode(SemanticZone zone, int nodeSize) {
@@ -235,10 +243,7 @@ public class EventGenerator {
             if (diff == 0) {
                 result[i] = lowerBound;
             } else {
-                // System.out.println("lower=" + lowerBound + "upper=" +
-                // upperBound);
                 result[i] = lowerBound + RandomUtils.nextInt(diff);
-                // System.out.println("RANDOM CHAR = " + (char) result[i]);
             }
 
             // replaces illegal characters by legal ones
@@ -291,7 +296,7 @@ public class EventGenerator {
 
         CompoundEvent ce =
                 randomCompoundEventForRewriting(
-                        zones, 0, 10, 10, 3, new Node[0]);
+                        zones, new Node[0], 0, 10, 10, 3, false);
 
         for (Quadruple q : ce) {
             System.out.println(q.toString(StringRepresentation.UTF_16));
