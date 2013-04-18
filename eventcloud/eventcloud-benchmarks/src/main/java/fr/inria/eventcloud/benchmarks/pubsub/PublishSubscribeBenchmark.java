@@ -665,7 +665,7 @@ public class PublishSubscribeBenchmark {
             nodeProvider.terminate();
         }
 
-        PAActiveObject.unregister(BENCHMARK_STATS_COLLECTOR_NAME);
+        PAActiveObject.unregister(collectorURL);
     }
 
     private Event[] createEvents(EventCloudDeployer deployer,
