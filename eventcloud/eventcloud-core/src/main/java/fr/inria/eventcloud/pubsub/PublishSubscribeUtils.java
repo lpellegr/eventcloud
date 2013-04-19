@@ -547,24 +547,26 @@ public final class PublishSubscribeUtils {
                     // broadcasts a message to all the stubs contained by
                     // the subscription to say to these peers to send the
                     // missing sub solutions to the subscriber
-                    for (String peerURL : subscription.getIntermediatePeerReferences()
-                            .keySet()) {
-                        final SemanticPeer peerStub =
-                                semanticCanOverlay.findPeerStub(peerURL);
+                    if (subscription.getIntermediatePeerReferences() != null) {
+                        for (String peerURL : subscription.getIntermediatePeerReferences()
+                                .keySet()) {
+                            final SemanticPeer peerStub =
+                                    semanticCanOverlay.findPeerStub(peerURL);
 
-                        if (peerStub != null) {
-                            Set<HashCode> hashCodes =
-                                    subscription.getIntermediatePeerReferences()
-                                            .get(peerURL);
+                            if (peerStub != null) {
+                                Set<HashCode> hashCodes =
+                                        subscription.getIntermediatePeerReferences()
+                                                .get(peerURL);
 
-                            peerStub.receive(new RetrieveSubSolutionOperation(
-                                    notification.getId(),
-                                    // copy to get a serializable set
-                                    Sets.newHashSet(hashCodes)));
-                        } else {
-                            log.error(
-                                    "Error while retrieving peer stub for URL: {}",
-                                    peerURL);
+                                peerStub.receive(new RetrieveSubSolutionOperation(
+                                        notification.getId(),
+                                        // copy to get a serializable set
+                                        Sets.newHashSet(hashCodes)));
+                            } else {
+                                log.error(
+                                        "Error while retrieving peer stub for URL: {}",
+                                        peerURL);
+                            }
                         }
                     }
                     break;
