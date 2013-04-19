@@ -73,7 +73,7 @@ public class QuadruplesSolution extends Solution<Collection<Quadruple>> {
                         objectValue =
                                 UnicodeUtils.translate(
                                         objectValue,
-                                        P2PStructuredProperties.CAN_LOWER_BOUND.getValue() - '0');
+                                        -(P2PStructuredProperties.CAN_LOWER_BOUND.getValue() - '0'));
                     }
 
                     this.nbQuadruplesExpected = Integer.parseInt(objectValue);
