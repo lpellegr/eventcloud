@@ -350,6 +350,9 @@ public class EventCloudProperties {
 
             // forces the number of dimensions in a CAN network to 4
             P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
+
+            // enables SBCE3 by default
+            EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.setValue(EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3);
         }
     }
 
