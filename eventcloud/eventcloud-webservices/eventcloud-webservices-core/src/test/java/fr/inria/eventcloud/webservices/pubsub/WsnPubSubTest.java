@@ -16,10 +16,7 @@
  **/
 package fr.inria.eventcloud.webservices.pubsub;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -44,6 +41,10 @@ import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManagerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.Utils;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -170,8 +171,11 @@ public class WsnPubSubTest extends WsTest {
         this.createNotificationConsumerWebService();
 
         // Creates and initializes the social filter
-        String source1 = "http://127.0.0.1:8891/source1";
-        String source2 = "http://127.0.0.1:8891/source2";
+        String source1 =
+                replaceConsumerLoopbackIp("http://127.0.0.1:8891/source1");
+        String source2 =
+                replaceConsumerLoopbackIp("http://127.0.0.1:8891/source2");
+
         URL nodesUrl =
                 Thread.currentThread().getContextClassLoader().getResource(
                         "social-filter-nodes.txt");
@@ -180,8 +184,10 @@ public class WsnPubSubTest extends WsTest {
                         "social-filter-relationships.txt");
         this.replaceConsumerLoopbackIpInSocialFilterFile(nodesUrl);
         this.replaceConsumerLoopbackIpInSocialFilterFile(relationshipsUrl);
+
         RelationshipStrengthEngineManager socialFilter =
                 RelationshipStrengthEngineManagerFactory.newRelationshipStrengthEngineManager();
+
         Utils.deploySocialGraph(
                 socialFilter, nodesUrl.toString(), relationshipsUrl.toString());
         EventCloudProperties.SOCIAL_FILTER_URL.setValue(Utils.getURI(socialFilter));
@@ -316,30 +322,21 @@ public class WsnPubSubTest extends WsTest {
         return is;
     }
 
-    private void replaceConsumerLoopbackIpInSocialFilterFile(URL fileUrl)
+    private void replaceConsumerLoopbackIpInSocialFilterFile(URL fileURL)
             throws URISyntaxException, IOException {
-        File file = new File(fileUrl.toURI());
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line = "";
-        String oldContent = "";
 
-        while ((line = reader.readLine()) != null) {
-            oldContent += line + "\n";
-        }
+        String content = Resources.toString(fileURL, Charsets.UTF_8);
 
-        reader.close();
+        Files.write(
+                replaceConsumerLoopbackIp(content).getBytes(Charsets.UTF_8),
+                new File(fileURL.toURI()));
+    }
 
-        String newContent =
-                oldContent.replaceAll(
-                        "127.0.0.1:" + WEBSERVICES_PORT,
-                        ProActiveInet.getInstance()
-                                .getInetAddress()
-                                .getHostAddress()
-                                + ":" + WEBSERVICES_PORT);
-
-        FileWriter writer = new FileWriter(file);
-        writer.write(newContent);
-        writer.close();
+    private static String replaceConsumerLoopbackIp(String URL) {
+        return URL.replaceAll(
+                "127.0.0.1",
+                ProActiveInet.getInstance().getInetAddress().getHostAddress())
+                .replaceAll(":[0-9]{1,5}/", ":" + WEBSERVICES_PORT + "/");
     }
 
     @After
