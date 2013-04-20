@@ -509,22 +509,8 @@ public final class PublishSubscribeUtils {
     private static void notifySubscriberAboutSolution(final SemanticCanOverlay semanticCanOverlay,
                                                       final Subscription subscription,
                                                       final Quadruple quadruple) {
-        if (semanticCanOverlay.hasSocialFilter()) {
-            double relationshipStrength =
-                    semanticCanOverlay.getSocialFilter()
-                            .getRelationshipStrength(
-                                    quadruple.getPublicationSource(),
-                                    subscription.getSubscriptionDestination())
-                            .getStrength();
-
-            logSocialFilterAnswer(subscription, quadruple, relationshipStrength);
-
-            if ((relationshipStrength > 0.0) // if relationshipStrength == 0.0,
-                                             // the source or the target is
-                                             // unknown
-                    && (relationshipStrength < EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue())) {
-                return;
-            }
+        if (filteredBySocialFilter(semanticCanOverlay, subscription, quadruple)) {
+            return;
         }
 
         try {
@@ -612,6 +598,28 @@ public final class PublishSubscribeUtils {
             // attempts and/or time
             handleSubscriberConnectionFailure(semanticCanOverlay, subscription);
         }
+    }
+
+    public static boolean filteredBySocialFilter(final SemanticCanOverlay semanticCanOverlay,
+                                                 final Subscription subscription,
+                                                 final Quadruple quadruple) {
+        if (semanticCanOverlay.hasSocialFilter()) {
+            double relationshipStrength =
+                    semanticCanOverlay.getSocialFilter()
+                            .getRelationshipStrength(
+                                    quadruple.getPublicationSource(),
+                                    subscription.getSubscriptionDestination())
+                            .getStrength();
+
+            logSocialFilterAnswer(subscription, quadruple, relationshipStrength);
+
+            // if relationshipStrength == 0.0, the source or
+            // the target is unknown
+            return (relationshipStrength > 0.0)
+                    && (relationshipStrength < EventCloudProperties.SOCIAL_FILTER_THRESHOLD.getValue());
+        }
+
+        return false;
     }
 
     private static void handleSubscriberConnectionFailure(final SemanticCanOverlay semanticCanOverlay,
