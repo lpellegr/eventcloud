@@ -148,6 +148,11 @@ public class PublishCompoundEventRequestOperator extends
                 Subscription subscription =
                         this.overlay.findSubscription(txnGraph, subscriptionId);
 
+                if (PublishSubscribeUtils.filteredBySocialFilter(
+                        super.overlay, subscription, quadruple)) {
+                    continue;
+                }
+
                 boolean mustIgnoreSolution =
                         quadruple.getPublicationTime() < subscription.getIndexationTime();
 
