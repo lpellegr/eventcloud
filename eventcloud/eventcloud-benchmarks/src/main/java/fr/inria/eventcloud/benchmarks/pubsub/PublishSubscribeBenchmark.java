@@ -521,7 +521,15 @@ public class PublishSubscribeBenchmark {
             org.objectweb.proactive.extensions.p2p.structured.utils.Arrays.shuffle(events);
         }
 
-        String registryURL = this.deployRegistry(deployer, nodeProvider);
+        EventCloudsRegistry registry =
+                this.deployRegistry(deployer, nodeProvider);
+
+        String registryURL = null;
+        try {
+            registryURL = registry.register("registry");
+        } catch (ProActiveException e) {
+            throw new IllegalStateException(e);
+        }
 
         EventCloudId eventCloudId = deployer.getEventCloudDescription().getId();
 
@@ -673,11 +681,13 @@ public class PublishSubscribeBenchmark {
                         / this.nbPeers);
 
         deployer.undeploy();
-        ComponentUtils.terminateComponent(registryURL);
 
         if (nodeProvider != null) {
             nodeProvider.terminate();
         }
+
+        registry.unregister();
+        ComponentUtils.terminateComponent(registry);
 
         PAActiveObject.unregister(collectorURL);
     }
@@ -847,9 +857,10 @@ public class PublishSubscribeBenchmark {
         return zones;
     }
 
-    private String deployRegistry(EventCloudDeployer deployer,
-                                  GcmDeploymentNodeProvider nodeProvider) {
+    private EventCloudsRegistry deployRegistry(EventCloudDeployer deployer,
+                                               GcmDeploymentNodeProvider nodeProvider) {
         EventCloudsRegistry registry;
+
         if (this.gcmaDescriptor == null) {
             registry = EventCloudsRegistryFactory.newEventCloudsRegistry();
         } else {
@@ -858,13 +869,7 @@ public class PublishSubscribeBenchmark {
         }
         registry.register(deployer);
 
-        String registryURL = null;
-        try {
-            registryURL = registry.register("registry");
-        } catch (ProActiveException e) {
-            e.printStackTrace();
-        }
-        return registryURL;
+        return registry;
     }
 
     private Event[] createEventsForUniformDistribution(EventCloudDeployer deployer,
