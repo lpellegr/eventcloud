@@ -38,7 +38,6 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAnd
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.Category;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
@@ -627,10 +626,8 @@ public class PublishSubscribeBenchmark {
                     entry.getKey(), entry.getValue());
         }
 
-        // count number of quadruples per peer
-        int totalNumberOfQuadruples = 0;
-
-        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             // waits a little because some quadruples may not have been yet
             // stored on peers due to the fact that the matching between a CE
             // and a subscription is performed on one peer and the storage of
@@ -646,39 +643,21 @@ public class PublishSubscribeBenchmark {
             }
         }
 
-        List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
-
-        log.debug("Peers dump:");
-        for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
-            log.debug(p.dump());
-        }
-
-        StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < peers.size(); i++) {
-            @SuppressWarnings("unchecked")
-            GenericResponseOperation<Integer> response =
-                    (GenericResponseOperation<Integer>) PAFuture.getFutureValue(peers.get(
-                            i)
-                            .receive(new CountQuadruplesOperation()));
-
-            totalNumberOfQuadruples += response.getValue();
-
-            buf.append(response.getValue());
-            if (i < peers.size() - 1) {
-                buf.append(" ");
-            } else {
-                buf.append(", sum=");
-                buf.append(totalNumberOfQuadruples);
-                buf.append('\n');
-            }
-        }
-
-        System.out.println("  Quadruples distribution on peers: "
-                + buf.toString());
+        // count number of quadruples per peer
+        int totalNumberOfQuadruples = this.logRunStatistics(deployer);
 
         recorder.reportValue(
                 NB_QUADRUPLES_PER_PEER_CATEGORY, totalNumberOfQuadruples
                         / this.nbPeers);
+
+        this.undeploy(nodeProvider, deployer, registry, collectorURL);
+    }
+
+    private void undeploy(GcmDeploymentNodeProvider nodeProvider,
+                          EventCloudDeployer deployer,
+                          EventCloudsRegistry registry, String collectorURL)
+            throws IOException {
+        registry.unregister();
 
         deployer.undeploy();
 
@@ -686,10 +665,44 @@ public class PublishSubscribeBenchmark {
             nodeProvider.terminate();
         }
 
-        registry.unregister();
-        ComponentUtils.terminateComponent(registry);
-
         PAActiveObject.unregister(collectorURL);
+    }
+
+    private int logRunStatistics(EventCloudDeployer deployer) {
+        int totalNumberOfQuadruples = 0;
+
+        if (log.isDebugEnabled()) {
+            List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
+
+            log.debug("Peers dump:");
+            for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
+                log.debug(p.dump());
+            }
+
+            StringBuilder buf = new StringBuilder();
+            for (int i = 0; i < peers.size(); i++) {
+                @SuppressWarnings("unchecked")
+                GenericResponseOperation<Integer> response =
+                        (GenericResponseOperation<Integer>) PAFuture.getFutureValue(peers.get(
+                                i)
+                                .receive(new CountQuadruplesOperation()));
+
+                totalNumberOfQuadruples += response.getValue();
+
+                buf.append(response.getValue());
+                if (i < peers.size() - 1) {
+                    buf.append(" ");
+                } else {
+                    buf.append(", sum=");
+                    buf.append(totalNumberOfQuadruples);
+                    buf.append('\n');
+                }
+            }
+
+            log.debug("Quadruples distribution on peers: " + buf.toString());
+        }
+
+        return totalNumberOfQuadruples;
     }
 
     private Event[] createEvents(EventCloudDeployer deployer,
