@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.ow2.proactive</groupId>
 		<artifactId>proactive-deployment</artifactId>
-		<version>1.4.0</version>
+		<version>1.5.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ow2.proactive</groupId>
 	<artifactId>proactive-deployment-scheduler</artifactId>
-	<version>1.4.0</version>
+	<version>1.5.0-SNAPSHOT</version>
 	<name>proactive-deployment-scheduler</name>
 
 	<dependencies>
