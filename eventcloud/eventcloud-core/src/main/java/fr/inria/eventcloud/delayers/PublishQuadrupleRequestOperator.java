@@ -72,7 +72,7 @@ public class PublishQuadrupleRequestOperator extends
      * {@inheritDoc}
      */
     @Override
-    public void flushBuffer(CustomBuffer buffer) {
+    public void _flushBuffer(CustomBuffer buffer) {
         TransactionalDatasetGraph txnGraph =
                 super.overlay.getMiscDatastore().begin(AccessMode.WRITE);
 
@@ -96,7 +96,7 @@ public class PublishQuadrupleRequestOperator extends
      * {@inheritDoc}
      */
     @Override
-    public void triggerAction(CustomBuffer buffer) {
+    public void _triggerAction(CustomBuffer buffer) {
         for (Quadruple q : buffer.getQuadruples()) {
             this.fireMatchingSubscriptions(q);
         }

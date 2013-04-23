@@ -53,7 +53,7 @@ import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 
 /**
@@ -88,7 +88,8 @@ public class DataTransferTest {
         SemanticPeer firstPeer =
                 this.deployer.getRandomSemanticPeer(this.eventCloudId);
         SemanticPeer secondPeer =
-                SemanticFactory.newSemanticPeer(new SemanticInMemoryOverlayProvider());
+                SemanticFactory.newSemanticPeer(new SemanticOverlayProvider(
+                        true));
 
         GetIdAndZoneResponseOperation<SemanticElement> response =
                 CanOperations.<SemanticElement> getIdAndZoneResponseOperation(firstPeer);
@@ -242,7 +243,8 @@ public class DataTransferTest {
         SubscriptionTestUtils.waitSubscriptionIndexation();
 
         SemanticPeer thirdPeer =
-                SemanticFactory.newSemanticPeer(new SemanticInMemoryOverlayProvider());
+                SemanticFactory.newSemanticPeer(new SemanticOverlayProvider(
+                        true));
 
         Node uri1 = Node.createURI(createDummyUri(bound1));
         Node uri2 = Node.createURI(createDummyUri(bound2));

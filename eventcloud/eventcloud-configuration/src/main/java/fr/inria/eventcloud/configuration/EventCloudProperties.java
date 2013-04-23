@@ -139,11 +139,12 @@ public class EventCloudProperties {
 
     /**
      * Defines the publish/subscribe algorithm and version used by the system.
+     * By default SBCE3 is enabled.
      */
     public static final PropertyString PUBLISH_SUBSCRIBE_ALGORITHM =
             new PropertyString(
                     "eventcloud.publish.subscribe.algorithm",
-                    PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_1,
+                    PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3,
                     new PubSubAlgorithmPropertyValidator());
 
     /**
@@ -350,9 +351,6 @@ public class EventCloudProperties {
 
             // forces the number of dimensions in a CAN network to 4
             P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
-
-            // enables SBCE3 by default
-            EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM.setValue(EventCloudProperties.PUBLISH_SUBSCRIBE_ALGORITHM_SBCE_3);
         }
     }
 

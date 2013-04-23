@@ -57,7 +57,7 @@ import fr.inria.eventcloud.operations.can.GetStatsRecorderOperation;
 import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.parsers.RdfParser;
-import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.utils.Callback;
 
 public class StaticLoadBalancingTestBuilder {
@@ -312,7 +312,8 @@ public class StaticLoadBalancingTestBuilder {
                         }
 
                         Peer newPeer =
-                                SemanticFactory.newSemanticPeer(new SemanticInMemoryOverlayProvider());
+                                SemanticFactory.newSemanticPeer(new SemanticOverlayProvider(
+                                        true));
 
                         newPeer.join(electedPeer);
 

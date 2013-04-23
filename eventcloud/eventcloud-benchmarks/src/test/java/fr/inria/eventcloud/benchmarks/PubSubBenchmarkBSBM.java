@@ -60,8 +60,7 @@ import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 
 /**
@@ -157,9 +156,9 @@ public class PubSubBenchmarkBSBM {
         SerializableProvider<? extends SemanticCanOverlay> overlayProvider;
 
         if (this.datastoreType == DatastoreType.IN_MEMORY) {
-            overlayProvider = new SemanticInMemoryOverlayProvider();
+            overlayProvider = new SemanticOverlayProvider(true);
         } else {
-            overlayProvider = new SemanticPersistentOverlayProvider();
+            overlayProvider = new SemanticOverlayProvider(false);
         }
 
         EventCloudId id =

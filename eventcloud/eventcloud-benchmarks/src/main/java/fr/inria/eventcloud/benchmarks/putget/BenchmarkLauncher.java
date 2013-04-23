@@ -42,8 +42,7 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.parsers.RdfParser;
-import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.utils.Callback;
 
@@ -171,9 +170,9 @@ public class BenchmarkLauncher {
         SerializableProvider<? extends SemanticCanOverlay> overlayProvider =
                 null;
         if (this.datastoreType.equals("persistent")) {
-            overlayProvider = new SemanticPersistentOverlayProvider();
+            overlayProvider = new SemanticOverlayProvider(false);
         } else if (this.datastoreType.equals("memory")) {
-            overlayProvider = new SemanticInMemoryOverlayProvider();
+            overlayProvider = new SemanticOverlayProvider(true);
         }
 
         this.eventCloudId =

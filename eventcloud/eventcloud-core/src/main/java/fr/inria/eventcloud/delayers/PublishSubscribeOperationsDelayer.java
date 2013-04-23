@@ -187,4 +187,16 @@ public class PublishSubscribeOperationsDelayer extends
         return new CustomBuffer(bufsize);
     }
 
+    public PublishCompoundEventRequestOperator getCompoundEventsOperator() {
+        return this.compoundEventsOperator;
+    }
+
+    public PublishQuadrupleRequestOperator getQuadruplesOperator() {
+        return this.quadruplesOperator;
+    }
+
+    public IndexSubscriptionRequestOperator getSubscriptionsOperator() {
+        return this.subscriptionsOperator;
+    }
+
 }
