@@ -409,13 +409,17 @@ public class PublishSubscribeBenchmark {
 
         statsBuffer.append("  Average number of quadruples per peer is ");
         statsBuffer.append(nbQuadsPerPeer.getMean()).append('\n');
-        statsBuffer.append("  Average time required to store publications is ");
-        statsBuffer.append(microBenchmark.getStatsRecorder().getCategory(
-                PUBLICATIONS_STORAGE_TIME).getMean());
-        statsBuffer.append('\n');
-        statsBuffer.append("  Average time required to store subscriptions is ");
-        statsBuffer.append(microBenchmark.getStatsRecorder().getCategory(
-                SUBSCRIPTIONS_STORAGE_TIME).getMean());
+
+        if (this.measureStorageTime) {
+            statsBuffer.append("  Average time required to store publications is ");
+            statsBuffer.append(microBenchmark.getStatsRecorder().getCategory(
+                    PUBLICATIONS_STORAGE_TIME).getMean());
+            statsBuffer.append('\n');
+            statsBuffer.append("  Average time required to store subscriptions is ");
+            statsBuffer.append(microBenchmark.getStatsRecorder().getCategory(
+                    SUBSCRIPTIONS_STORAGE_TIME).getMean());
+        }
+
         statsBuffer.append("\n\n");
 
         double endToEndSum = 0;
