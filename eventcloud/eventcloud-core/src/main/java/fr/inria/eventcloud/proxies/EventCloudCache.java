@@ -41,7 +41,7 @@ import fr.inria.eventcloud.factories.ProxyFactory;
  */
 public class EventCloudCache implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private final EventCloudsRegistry registry;
 

@@ -34,7 +34,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  */
 public class NotificationId implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     protected final SubscriptionId subscriptionId;
 
@@ -95,7 +95,7 @@ public class NotificationId implements Serializable {
     public static final class Serializer implements
             org.mapdb.Serializer<NotificationId>, Serializable {
 
-        private static final long serialVersionUID = 140L;
+        private static final long serialVersionUID = 150L;
 
         /**
          * {@inheritDoc}

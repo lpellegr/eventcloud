@@ -652,7 +652,7 @@ public class SubscribeProxyTest {
     private static class CustomBindingNotificationListener extends
             BindingNotificationListener {
 
-        private static final long serialVersionUID = 140L;
+        private static final long serialVersionUID = 150L;
 
         /**
          * {@inheritDoc}
@@ -672,7 +672,7 @@ public class SubscribeProxyTest {
     private static class CustomCompoundEventNotificationListener extends
             CompoundEventNotificationListener {
 
-        private static final long serialVersionUID = 140L;
+        private static final long serialVersionUID = 150L;
 
         /**
          * {@inheritDoc}
@@ -691,7 +691,7 @@ public class SubscribeProxyTest {
     private static class CustomSignalNotificationListener extends
             SignalNotificationListener {
 
-        private static final long serialVersionUID = 140L;
+        private static final long serialVersionUID = 150L;
 
         /**
          * {@inheritDoc}

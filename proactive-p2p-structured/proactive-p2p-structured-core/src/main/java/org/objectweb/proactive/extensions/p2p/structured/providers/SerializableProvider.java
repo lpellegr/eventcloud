@@ -37,7 +37,7 @@ import javax.inject.Provider;
 public abstract class SerializableProvider<T> implements Provider<T>,
         Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * Creates a provider for the specified {@code clazz}. This method is a
@@ -56,7 +56,7 @@ public abstract class SerializableProvider<T> implements Provider<T>,
     public static <T> SerializableProvider<T> create(final Class<T> clazz) {
         return new SerializableProvider<T>() {
 
-            private static final long serialVersionUID = 140L;
+            private static final long serialVersionUID = 150L;
 
             @Override
             public T get() {

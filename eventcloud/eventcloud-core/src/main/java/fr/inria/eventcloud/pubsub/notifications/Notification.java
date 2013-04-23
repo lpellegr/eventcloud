@@ -40,7 +40,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  */
 public abstract class Notification<T> implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private final NotificationId id;
 

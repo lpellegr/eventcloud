@@ -70,7 +70,7 @@ import fr.inria.eventcloud.utils.SparqlResultSerializer;
 @SuppressWarnings("deprecation")
 public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * Constructs a wrapper for the specified {@code model}.

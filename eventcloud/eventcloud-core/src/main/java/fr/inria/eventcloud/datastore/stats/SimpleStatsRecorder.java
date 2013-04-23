@@ -22,7 +22,7 @@ import com.hp.hpl.jena.graph.Node;
 
 public class SimpleStatsRecorder extends StatsRecorder {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * {@inheritDoc}

@@ -23,7 +23,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations;
  */
 public class EmptyResponseOperation implements ResponseOperation {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public EmptyResponseOperation() {
 

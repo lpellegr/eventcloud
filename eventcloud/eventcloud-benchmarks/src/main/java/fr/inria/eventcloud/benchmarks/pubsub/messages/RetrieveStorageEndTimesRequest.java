@@ -30,13 +30,13 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public class RetrieveStorageEndTimesRequest extends
         StatefulQuadruplePatternRequest<StorageTimes> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public RetrieveStorageEndTimesRequest() {
         super(
                 QuadruplePattern.ANY,
                 new ResponseProvider<RetrieveStorageEndTimesResponse, Coordinate<SemanticElement>>() {
-                    private static final long serialVersionUID = 140L;
+                    private static final long serialVersionUID = 150L;
 
                     @Override
                     public RetrieveStorageEndTimesResponse get() {

@@ -28,7 +28,7 @@ import fr.inria.eventcloud.api.Quadruplable;
  */
 public abstract class ElaProperty implements Serializable, Quadruplable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     protected String name;
 

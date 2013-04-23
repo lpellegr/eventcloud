@@ -36,7 +36,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 public class SemanticOverlayProvider extends
         SerializableProvider<SemanticCanOverlay> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private final boolean inMemory;
 

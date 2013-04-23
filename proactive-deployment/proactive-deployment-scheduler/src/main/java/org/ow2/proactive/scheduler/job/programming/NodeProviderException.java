@@ -46,7 +46,7 @@ import org.objectweb.proactive.annotation.PublicAPI;
  */
 @PublicAPI
 public class NodeProviderException extends Exception {
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public NodeProviderException() {
         super();

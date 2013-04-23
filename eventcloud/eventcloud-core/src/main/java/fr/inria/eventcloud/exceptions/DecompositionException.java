@@ -24,7 +24,7 @@ package fr.inria.eventcloud.exceptions;
  */
 public class DecompositionException extends Exception {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public DecompositionException() {
         super();

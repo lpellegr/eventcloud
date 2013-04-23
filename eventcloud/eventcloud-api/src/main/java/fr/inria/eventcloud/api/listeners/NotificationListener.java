@@ -37,7 +37,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 public abstract class NotificationListener<T> implements Serializable,
         RunActive {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * Handles a notification that has been received.

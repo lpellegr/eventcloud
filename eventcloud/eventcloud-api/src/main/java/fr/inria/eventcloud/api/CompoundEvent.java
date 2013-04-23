@@ -50,7 +50,7 @@ import fr.inria.eventcloud.utils.NodeSerializer;
 public class CompoundEvent implements Event, Externalizable,
         Iterable<Quadruple> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     // this internal list does not contain the meta quadruple
     // it is automatically injected to the network during a publish

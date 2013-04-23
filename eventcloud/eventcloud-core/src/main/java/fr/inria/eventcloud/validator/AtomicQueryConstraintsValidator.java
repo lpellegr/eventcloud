@@ -54,7 +54,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
 public final class AtomicQueryConstraintsValidator extends
         AnycastConstraintsValidator<SemanticElement> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private AtomicQuery atomicQuery;
 
@@ -116,7 +116,7 @@ public final class AtomicQueryConstraintsValidator extends
     private class FilterTransformer extends ExprTransformCopy implements
             Serializable {
 
-        private static final long serialVersionUID = 140L;
+        private static final long serialVersionUID = 150L;
 
         private AtomicQuery atomicQuery;
 

@@ -42,7 +42,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     protected Quadruple quadruple;
 
@@ -50,7 +50,7 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
         this(
                 quad,
                 new ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>>() {
-                    private static final long serialVersionUID = 140L;
+                    private static final long serialVersionUID = 150L;
 
                     @Override
                     public ForwardResponse<SemanticElement> get() {

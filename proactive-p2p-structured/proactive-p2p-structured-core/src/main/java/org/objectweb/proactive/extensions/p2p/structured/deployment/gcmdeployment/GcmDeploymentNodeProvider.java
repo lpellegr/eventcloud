@@ -38,7 +38,7 @@ import com.google.common.base.Preconditions;
  */
 public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private static final Logger log =
             LoggerFactory.getLogger(GcmDeploymentNodeProvider.class);

@@ -28,7 +28,7 @@ import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
  */
 public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     // the following fields are used exclusively for benchmarking purposes
     private int nbIntermediateResults, nbSubQueries;

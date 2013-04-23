@@ -31,7 +31,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public class PublishQuadrupleRequest extends QuadrupleRequest {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public PublishQuadrupleRequest(Quadruple quad) {
         super(quad, null);

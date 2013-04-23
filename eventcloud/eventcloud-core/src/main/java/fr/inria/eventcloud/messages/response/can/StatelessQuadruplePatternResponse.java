@@ -30,7 +30,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public class StatelessQuadruplePatternResponse extends
         AnycastResponse<SemanticElement> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public StatelessQuadruplePatternResponse() {
         super();

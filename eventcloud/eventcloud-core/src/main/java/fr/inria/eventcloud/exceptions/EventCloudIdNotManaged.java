@@ -25,7 +25,7 @@ import fr.inria.eventcloud.api.EventCloudId;
  */
 public class EventCloudIdNotManaged extends Exception {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public EventCloudIdNotManaged() {
         super();

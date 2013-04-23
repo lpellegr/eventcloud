@@ -35,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
 public abstract class RequestResponseMessage<K> implements Routable<K>,
         Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * Universally unique identifier used in order to identify the message.

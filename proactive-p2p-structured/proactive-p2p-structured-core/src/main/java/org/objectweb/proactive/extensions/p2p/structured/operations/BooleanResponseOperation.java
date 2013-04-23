@@ -23,7 +23,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations;
  */
 public class BooleanResponseOperation extends GenericResponseOperation<Boolean> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * Constructor.

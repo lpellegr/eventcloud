@@ -69,7 +69,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
  */
 public class Can2dVisualizer extends JFrame {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private static final int CANVAS_HEIGHT = 800;
 
@@ -176,7 +176,7 @@ public class Can2dVisualizer extends JFrame {
 
     public class Canvas extends JComponent {
 
-        private static final long serialVersionUID = 140L;
+        private static final long serialVersionUID = 150L;
 
         public Zone<StringElement> zoneClicked = null;
 
@@ -501,7 +501,7 @@ public class Can2dVisualizer extends JFrame {
     private static final class PrintSplitHistoryRequest extends
             AnycastRequest<StringElement> {
 
-        private static final long serialVersionUID = 140L;
+        private static final long serialVersionUID = 150L;
 
         public PrintSplitHistoryRequest() {
             super(new DefaultAnycastConstraintsValidator<StringElement>(

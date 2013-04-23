@@ -93,7 +93,7 @@ public class SubscribeEventCloudCommand extends Command<EventCloudsRegistry> {
     private static class ConsoleCompoundEventNotificationListener extends
             CompoundEventNotificationListener {
 
-        private static final long serialVersionUID = 140L;
+        private static final long serialVersionUID = 150L;
 
         private AtomicLong counter = new AtomicLong(1);
 
