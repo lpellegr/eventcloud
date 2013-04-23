@@ -41,7 +41,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 public class LeaveEnlargeZoneOperation<E extends Element> extends
         CallableOperation {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private final long splitEntryTimestamp;
 

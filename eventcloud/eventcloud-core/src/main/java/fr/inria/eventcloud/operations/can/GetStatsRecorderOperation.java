@@ -31,7 +31,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public class GetStatsRecorderOperation extends CallableOperation {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * {@inheritDoc}

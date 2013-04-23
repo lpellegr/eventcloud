@@ -53,7 +53,7 @@ import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
  */
 public class EventCloudUsageTest implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudUsageTest.class);
@@ -141,7 +141,7 @@ public class EventCloudUsageTest implements Serializable {
 
         subscribeProxy.subscribe(
                 subscription, new BindingNotificationListener() {
-                    private static final long serialVersionUID = 140L;
+                    private static final long serialVersionUID = 150L;
 
                     @Override
                     public void onNotification(SubscriptionId id,

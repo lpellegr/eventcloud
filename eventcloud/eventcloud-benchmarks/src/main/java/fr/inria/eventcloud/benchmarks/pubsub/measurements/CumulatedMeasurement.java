@@ -30,7 +30,7 @@ import com.hp.hpl.jena.graph.Node;
  */
 public class CumulatedMeasurement implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private Map<String, Long> times;
 

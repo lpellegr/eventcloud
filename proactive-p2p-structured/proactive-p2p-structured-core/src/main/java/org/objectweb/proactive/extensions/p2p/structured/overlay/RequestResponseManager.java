@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class RequestResponseManager implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private static final Logger log =
             LoggerFactory.getLogger(RequestResponseManager.class);

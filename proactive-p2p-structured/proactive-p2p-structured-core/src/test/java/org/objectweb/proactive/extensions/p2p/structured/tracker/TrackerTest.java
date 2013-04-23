@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
  */
 public class TrackerTest implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddOnNetworkWithWrongOverlayType() {
@@ -103,7 +103,7 @@ public class TrackerTest implements Serializable {
 
         public MockOverlay() {
             super(new RequestResponseManager() {
-                private static final long serialVersionUID = 140L;
+                private static final long serialVersionUID = 150L;
             });
         }
 

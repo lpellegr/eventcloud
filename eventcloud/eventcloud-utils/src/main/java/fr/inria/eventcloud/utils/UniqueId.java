@@ -30,7 +30,7 @@ import javax.xml.bind.DatatypeConverter;
  */
 public class UniqueId implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     protected final UUID value;
 

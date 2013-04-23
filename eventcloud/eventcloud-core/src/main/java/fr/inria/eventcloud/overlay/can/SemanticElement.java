@@ -33,7 +33,7 @@ import com.hp.hpl.jena.graph.Node;
  */
 public class SemanticElement extends StringElement {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     // \u00A2 -> ¢, CENT SIGN
     protected static String EMPTY_STRING_ROUTING_CHARACTER = "\u00A2";

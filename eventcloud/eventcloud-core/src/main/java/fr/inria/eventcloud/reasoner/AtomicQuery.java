@@ -65,7 +65,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
  */
 public final class AtomicQuery implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private static final char[] posNames = {'g', 's', 'p', 'o'};
 

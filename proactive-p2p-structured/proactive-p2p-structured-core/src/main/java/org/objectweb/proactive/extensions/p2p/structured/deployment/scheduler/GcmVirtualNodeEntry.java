@@ -35,7 +35,7 @@ import org.objectweb.proactive.core.UniqueID;
  */
 public class GcmVirtualNodeEntry implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private String virtualNodeName;
 

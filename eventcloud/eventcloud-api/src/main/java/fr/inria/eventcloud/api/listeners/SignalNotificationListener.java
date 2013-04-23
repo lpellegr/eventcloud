@@ -31,7 +31,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 public abstract class SignalNotificationListener extends
         NotificationListener<String> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * {@inheritDoc}

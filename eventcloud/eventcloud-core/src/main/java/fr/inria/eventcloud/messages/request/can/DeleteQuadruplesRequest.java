@@ -41,7 +41,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public class DeleteQuadruplesRequest extends
         StatefulQuadruplePatternRequest<List<Quadruple>> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public DeleteQuadruplesRequest(Node g, Node s, Node p, Node o) {
         this(new QuadruplePattern(g, s, p, o));

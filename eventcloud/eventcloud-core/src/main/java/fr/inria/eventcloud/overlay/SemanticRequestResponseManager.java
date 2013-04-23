@@ -57,7 +57,7 @@ import fr.inria.eventcloud.reasoner.SparqlReasoner;
  */
 public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private SparqlColander colander;
 

@@ -25,7 +25,7 @@ import java.io.Serializable;
  */
 public class StorageTimes implements Serializable {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private long publicationsEndTime;
 

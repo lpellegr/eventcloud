@@ -31,7 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
  */
 public class StringElement extends Element {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     protected final String value;
 

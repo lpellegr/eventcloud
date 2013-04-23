@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
 public class TrackerImpl extends AbstractComponent implements Tracker,
         TrackerAttributeController, ComponentEndActive {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * ADL name of the tracker component.

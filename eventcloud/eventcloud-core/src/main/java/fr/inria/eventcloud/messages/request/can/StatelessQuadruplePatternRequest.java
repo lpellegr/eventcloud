@@ -44,7 +44,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public abstract class StatelessQuadruplePatternRequest extends
         OptimalBroadcastRequest<SemanticElement> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     protected SerializedValue<QuadruplePattern> quadruplePattern;
 
@@ -52,7 +52,7 @@ public abstract class StatelessQuadruplePatternRequest extends
         this(
                 quadPattern,
                 new ResponseProvider<StatelessQuadruplePatternResponse, Coordinate<SemanticElement>>() {
-                    private static final long serialVersionUID = 140L;
+                    private static final long serialVersionUID = 150L;
 
                     @Override
                     public StatelessQuadruplePatternResponse get() {

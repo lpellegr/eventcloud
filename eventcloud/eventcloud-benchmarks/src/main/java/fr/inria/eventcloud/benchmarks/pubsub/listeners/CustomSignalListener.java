@@ -30,7 +30,7 @@ import fr.inria.eventcloud.benchmarks.pubsub.BenchmarkStatsCollector;
  */
 public class CustomSignalListener extends SignalNotificationListener {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private NotificationManager<String> manager;
 
@@ -40,7 +40,7 @@ public class CustomSignalListener extends SignalNotificationListener {
 
         this.manager =
                 new NotificationManager<String>(collector, nbEventsExpected) {
-                    private static final long serialVersionUID = 140L;
+                    private static final long serialVersionUID = 150L;
 
                     @Override
                     public Node getEventId(String metaGraphValue) {

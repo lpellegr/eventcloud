@@ -39,7 +39,7 @@ import fr.inria.eventcloud.utils.NodeSerializer;
  */
 public class QuadruplePattern extends Quadruple {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * QuadruplePattern that may be used to retrieve all the quadruples.

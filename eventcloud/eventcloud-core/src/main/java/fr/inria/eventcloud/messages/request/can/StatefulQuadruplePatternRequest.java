@@ -49,7 +49,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public abstract class StatefulQuadruplePatternRequest<T> extends
         StatelessQuadruplePatternRequest {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public StatefulQuadruplePatternRequest(
             QuadruplePattern quadPattern,

@@ -111,7 +111,7 @@ public abstract class Rdf2goAdapter<T> {
 
     protected static QueryResultTable toQueryResultTable(final ResultSetWrapper resultSet) {
         return new QueryResultTable() {
-            private static final long serialVersionUID = 140L;
+            private static final long serialVersionUID = 150L;
 
             @Override
             public ClosableIterator<QueryRow> iterator() {
@@ -140,7 +140,7 @@ public abstract class Rdf2goAdapter<T> {
 
     private static final <T> ClosableIterable<T> generateClosableIterable(final List<T> statements) {
         return new ClosableIterable<T>() {
-            private static final long serialVersionUID = 140L;
+            private static final long serialVersionUID = 150L;
 
             @Override
             public ClosableIterator<T> iterator() {

@@ -34,7 +34,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 public abstract class CompoundEventNotificationListener extends
         NotificationListener<CompoundEvent> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * {@inheritDoc}

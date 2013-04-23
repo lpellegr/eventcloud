@@ -32,7 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponse
  */
 public class CanRequestResponseManager extends RequestResponseManager {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /*
      * Used to maintain the list of requests which have already been 

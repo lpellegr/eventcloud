@@ -26,7 +26,7 @@ package org.objectweb.proactive.extensions.p2p.structured.utils;
  */
 public class HomogenousPair<T> extends Pair<T, T> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private HomogenousPair(T v1, T v2) {
         super(v1, v2);

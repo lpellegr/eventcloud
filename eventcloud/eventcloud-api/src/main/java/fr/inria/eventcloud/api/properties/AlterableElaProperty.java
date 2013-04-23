@@ -28,7 +28,7 @@ import fr.inria.eventcloud.api.Quadruple;
  */
 public final class AlterableElaProperty extends ElaProperty {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * Constructs a modifable ELA property with the specified name and value.

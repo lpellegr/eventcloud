@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  */
 public final class StringZone extends UnicodeZone<StringElement> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     public StringZone() {
         super(

@@ -33,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  */
 public class LookupResponse<E extends Element> extends ForwardResponse<E> {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private Peer peerFound;
 

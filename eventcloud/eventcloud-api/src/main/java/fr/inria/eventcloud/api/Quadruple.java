@@ -60,7 +60,7 @@ import fr.inria.eventcloud.utils.NodeSerializer;
  */
 public class Quadruple implements Externalizable, Event {
 
-    private static final long serialVersionUID = 140L;
+    private static final long serialVersionUID = 150L;
 
     private static final Logger log = LoggerFactory.getLogger(Quadruple.class);
 
