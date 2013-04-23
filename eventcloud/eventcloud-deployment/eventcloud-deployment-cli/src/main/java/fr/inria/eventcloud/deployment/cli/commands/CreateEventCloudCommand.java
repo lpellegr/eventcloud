@@ -25,7 +25,7 @@ import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 import fr.inria.eventcloud.deployment.cli.converters.EventCloudIdConverter;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 
 /**
  * This command creates and registers an EventCloud.
@@ -64,7 +64,7 @@ public class CreateEventCloudCommand extends Command<EventCloudsRegistry> {
                     new EventCloudDeployer(
                             new EventCloudDescription(this.id),
                             new EventCloudDeploymentDescriptor(
-                                    new SemanticPersistentOverlayProvider()));
+                                    new SemanticOverlayProvider(false)));
 
             deployer.deploy(this.nbTrackers, this.nbPeers);
 

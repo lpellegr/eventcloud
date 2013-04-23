@@ -20,7 +20,6 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitHelper;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
 
 /**
  * This class is used to specialize an {@link EventCloudDeployer} for unit

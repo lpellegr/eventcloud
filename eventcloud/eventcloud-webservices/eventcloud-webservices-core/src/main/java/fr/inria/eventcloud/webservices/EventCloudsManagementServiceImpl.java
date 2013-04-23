@@ -63,7 +63,7 @@ import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.proxies.AbstractProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
@@ -219,7 +219,7 @@ public class EventCloudsManagementServiceImpl implements
             EventCloudDescription description = new EventCloudDescription(id);
             EventCloudDeploymentDescriptor deploymentDescriptor =
                     new EventCloudDeploymentDescriptor(
-                            new SemanticPersistentOverlayProvider());
+                            new SemanticOverlayProvider(false));
             deploymentDescriptor.setNodeProvider(this.nodeProvidersManager.getNodeProvider(nodeProviderId));
             EventCloudDeployer deployer =
                     new EventCloudDeployer(description, deploymentDescriptor);

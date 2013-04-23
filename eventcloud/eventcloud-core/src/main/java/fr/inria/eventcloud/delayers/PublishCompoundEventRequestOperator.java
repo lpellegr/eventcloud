@@ -79,7 +79,7 @@ public class PublishCompoundEventRequestOperator extends
      * {@inheritDoc}
      */
     @Override
-    public void flushBuffer(CustomBuffer buffer) {
+    public void _flushBuffer(CustomBuffer buffer) {
         TransactionalDatasetGraph txnGraph =
                 this.overlay.getMiscDatastore().begin(AccessMode.WRITE);
 
@@ -105,7 +105,7 @@ public class PublishCompoundEventRequestOperator extends
      * {@inheritDoc}
      */
     @Override
-    public void triggerAction(CustomBuffer buffer) {
+    public void _triggerAction(CustomBuffer buffer) {
         for (ExtendedCompoundEvent ce : buffer.getCompoundEvents()) {
             this.fireMatchingSubscriptions(
                     ce.compoundEvent, ce.indexQuadrupleUsedForIndexing);

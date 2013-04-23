@@ -72,6 +72,9 @@ import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomCompoundEventListen
 import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomSignalListener;
 import fr.inria.eventcloud.benchmarks.pubsub.measurements.CumulatedMeasurement;
 import fr.inria.eventcloud.benchmarks.pubsub.measurements.SimpleMeasurement;
+import fr.inria.eventcloud.benchmarks.pubsub.messages.RetrieveStorageEndTimesRequest;
+import fr.inria.eventcloud.benchmarks.pubsub.messages.RetrieveStorageEndTimesResponse;
+import fr.inria.eventcloud.benchmarks.pubsub.overlay.CustomSemanticOverlayProvider;
 import fr.inria.eventcloud.benchmarks.pubsub.proxies.CustomProxyFactory;
 import fr.inria.eventcloud.benchmarks.pubsub.proxies.CustomPublishProxy;
 import fr.inria.eventcloud.benchmarks.pubsub.suppliers.CompoundEventSupplier;
@@ -87,8 +90,6 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
-import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
 
 /**
  * Simple application to evaluate the publish/subscribe algorithm on a single
@@ -104,6 +105,12 @@ public class PublishSubscribeBenchmark {
 
     private static final String NB_QUADRUPLES_PER_PEER_CATEGORY =
             "quadsPerPeer";
+
+    private static final String PUBLICATIONS_STORAGE_TIME =
+            "publicationsStorageTime";
+
+    private static final String SUBSCRIPTIONS_STORAGE_TIME =
+            "subscriptionsStorageTime";
 
     private static final String BENCHMARK_STATS_COLLECTOR_NAME =
             "benchmark-stats-collector";
@@ -172,6 +179,9 @@ public class PublishSubscribeBenchmark {
 
     @Parameter(names = {"--disable-intra-ces-shuffling"}, description = "Indicates whether the shuffling of the quadruples inside the generated compound events must be disabled or not")
     public boolean disableIntraCompoundEventsShuffling = false;
+
+    @Parameter(names = {"-mst", "--measure-storage-time"}, description = "Measure the time elapsed between the beginning of the benchmark and when the publications/subscriptions have been stored on the peers")
+    public boolean measureStorageTime = false;
 
     @Parameter(names = {"-h", "--help"}, description = "Print help", help = true)
     public boolean help;
@@ -267,6 +277,7 @@ public class PublishSubscribeBenchmark {
         log.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
         log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
         log.info("  listenerType -> {}", this.listenerType);
+        log.info("  measureStorageTime -> {}", this.measureStorageTime);
         log.info(
                 "  nbEventGenerationRounds -> {}", this.nbEventGenerationRounds);
         log.info("  nbPeers -> {}", this.nbPeers);
@@ -397,7 +408,15 @@ public class PublishSubscribeBenchmark {
                         NB_QUADRUPLES_PER_PEER_CATEGORY);
 
         statsBuffer.append("  Average number of quadruples per peer is ");
-        statsBuffer.append(nbQuadsPerPeer.getMean()).append("\n\n");
+        statsBuffer.append(nbQuadsPerPeer.getMean()).append('\n');
+        statsBuffer.append("  Average time required to store publications is ");
+        statsBuffer.append(microBenchmark.getStatsRecorder().getCategory(
+                PUBLICATIONS_STORAGE_TIME).getMean());
+        statsBuffer.append('\n');
+        statsBuffer.append("  Average time required to store subscriptions is ");
+        statsBuffer.append(microBenchmark.getStatsRecorder().getCategory(
+                SUBSCRIPTIONS_STORAGE_TIME).getMean());
+        statsBuffer.append("\n\n");
 
         double endToEndSum = 0;
         double pointToPointSum = 0;
@@ -546,6 +565,8 @@ public class PublishSubscribeBenchmark {
         }
 
         // subscribes
+        long subscribeStartTime = System.currentTimeMillis();
+
         for (int i = 0; i < subscriptions.length; i++) {
             final SubscribeApi subscribeProxy =
                     subscribeProxies.get(i / this.nbSubscriptionsPerSubscriber);
@@ -650,6 +671,32 @@ public class PublishSubscribeBenchmark {
                 NB_QUADRUPLES_PER_PEER_CATEGORY, totalNumberOfQuadruples
                         / this.nbPeers);
 
+        if (this.measureStorageTime) {
+            RetrieveStorageEndTimesResponse response =
+                    (RetrieveStorageEndTimesResponse) PAFuture.getFutureValue(deployer.getRandomPeer()
+                            .send(new RetrieveStorageEndTimesRequest()));
+
+            long publicationsStorageTime =
+                    response.getResult().getPublicationsEndTime()
+                            - this.endToEndMeasurementEntryTime;
+            long subscriptionsStorageTime =
+                    response.getResult().getSubscriptionsEndTime()
+                            - subscribeStartTime;
+
+            log.info(
+                    "Time required to store publications: {}",
+                    publicationsStorageTime);
+            log.info(
+                    "Time required to store subscriptions: {}",
+                    subscriptionsStorageTime);
+
+            recorder.reportValue(
+                    PUBLICATIONS_STORAGE_TIME, publicationsStorageTime);
+
+            recorder.reportValue(
+                    SUBSCRIPTIONS_STORAGE_TIME, subscriptionsStorageTime);
+        }
+
         this.undeploy(nodeProvider, deployer, registry, collectorURL);
     }
 
@@ -695,7 +742,10 @@ public class PublishSubscribeBenchmark {
                 } else {
                     buf.append(", sum=");
                     buf.append(totalNumberOfQuadruples);
-                    buf.append('\n');
+
+                    if (i < peers.size() - 1) {
+                        buf.append('\n');
+                    }
                 }
             }
 
@@ -974,11 +1024,8 @@ public class PublishSubscribeBenchmark {
     }
 
     private SerializableProvider<? extends SemanticCanOverlay> createOverlayProvider(boolean inMemory) {
-        if (this.inMemoryDatastore) {
-            return new SemanticInMemoryOverlayProvider();
-        } else {
-            return new SemanticPersistentOverlayProvider();
-        }
+        return new CustomSemanticOverlayProvider(
+                inMemory, this.measureStorageTime);
     }
 
     private List<CustomPublishProxy> createPublishProxies(String registryUrl,

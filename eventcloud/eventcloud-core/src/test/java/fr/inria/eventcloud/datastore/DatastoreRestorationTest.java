@@ -38,7 +38,7 @@ import fr.inria.eventcloud.deployment.JunitEventCloudDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 
 /**
  * This class defines a test that checks if an EventCloud which is created two
@@ -101,9 +101,9 @@ public class DatastoreRestorationTest {
 
     private JunitEventCloudDeployer createEventCloudDeployer() {
         return new JunitEventCloudDeployer(
-                new EventCloudDescription("http://example.org/Stream"),
-                new EventCloudDeploymentDescriptor(
-                        new SemanticPersistentOverlayProvider()));
+                new EventCloudDescription("http://example.org/stream"),
+                new EventCloudDeploymentDescriptor(new SemanticOverlayProvider(
+                        false)));
     }
 
 }

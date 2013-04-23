@@ -55,7 +55,7 @@ public class IndexSubscriptionRequestOperator extends
      * {@inheritDoc}
      */
     @Override
-    public void flushBuffer(CustomBuffer buffer) {
+    public void _flushBuffer(CustomBuffer buffer) {
         TransactionalDatasetGraph txnGraph =
                 this.overlay.getSubscriptionsDatastore()
                         .begin(AccessMode.WRITE);
@@ -79,7 +79,7 @@ public class IndexSubscriptionRequestOperator extends
      * {@inheritDoc}
      */
     @Override
-    public void triggerAction(CustomBuffer buffer) {
+    public void _triggerAction(CustomBuffer buffer) {
         for (Subscription s : buffer.getSubscriptions()) {
             this.fireQuadrupleMatching(s);
         }

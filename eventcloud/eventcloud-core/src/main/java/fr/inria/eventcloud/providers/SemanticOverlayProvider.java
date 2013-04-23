@@ -29,27 +29,70 @@ import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * This class is used to build a {@link SemanticCanOverlay} with a
- * {@link TransactionalTdbDatastore} .
+ * Provides in-memory or persistent overlay instances.
  * 
  * @author lpellegr
  */
-public final class SemanticPersistentOverlayProvider extends
+public class SemanticOverlayProvider extends
         SerializableProvider<SemanticCanOverlay> {
 
     private static final long serialVersionUID = 140L;
 
-    private String streamUrl;
+    private final boolean inMemory;
+
+    private String streamURL;
+
+    public SemanticOverlayProvider(boolean inMemory) {
+        this.inMemory = inMemory;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public SemanticCanOverlay get() {
-        Preconditions.checkNotNull(this.streamUrl);
+        TransactionalTdbDatastore[] datastores = this.createDatastores();
+
+        return new SemanticCanOverlay(
+                datastores[0], datastores[1], datastores[2]);
+    }
+
+    /**
+     * Returns the datastore instances to use for the creation of the
+     * {@link SemanticCanOverlay}.
+     * 
+     * @return the datastore instances to use for the creation of the
+     *         {@link SemanticCanOverlay}.
+     */
+    protected TransactionalTdbDatastore[] createDatastores() {
+        if (this.inMemory) {
+            return this.createInMemoryDatastores();
+        } else {
+            return this.createPersistentDatastores();
+        }
+    }
+
+    private TransactionalTdbDatastore[] createInMemoryDatastores() {
+        TransactionalTdbDatastoreBuilder miscDatastoreBuilder =
+                new TransactionalTdbDatastoreBuilder();
+
+        if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
+            miscDatastoreBuilder.recordStats();
+        }
+
+        return new TransactionalTdbDatastore[] {
+                new TransactionalTdbDatastoreBuilder().build(),
+                miscDatastoreBuilder.build(),
+                new TransactionalTdbDatastoreBuilder().build()};
+    }
+
+    private TransactionalTdbDatastore[] createPersistentDatastores() {
+        Preconditions.checkNotNull(
+                this.streamURL,
+                "Stream URL not specified for the creation of the persistent repositories");
 
         File repositoryPath =
-                EventCloudProperties.getRepositoryPath(this.streamUrl);
+                EventCloudProperties.getRepositoryPath(this.streamURL);
 
         TransactionalTdbDatastoreBuilder miscDatastoreBuilder =
                 new TransactionalTdbDatastoreBuilder(new File(
@@ -83,12 +126,12 @@ public final class SemanticPersistentOverlayProvider extends
                             .build();
         }
 
-        return new SemanticCanOverlay(
-                subscriptionsDatastore, miscDatastore, colanderDatastore);
+        return new TransactionalTdbDatastore[] {
+                subscriptionsDatastore, miscDatastore, colanderDatastore};
     }
 
-    public void setStreamUrl(String streamUrl) {
-        this.streamUrl = streamUrl;
+    public void setStreamURL(String streamURL) {
+        this.streamURL = streamURL;
     }
 
 }

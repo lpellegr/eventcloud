@@ -16,7 +16,9 @@
  **/
 package fr.inria.eventcloud.delayers;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
@@ -29,8 +31,23 @@ public abstract class BufferOperator<B extends Collection<?>> {
 
     protected final SemanticCanOverlay overlay;
 
+    private final List<Observer<B>> observers;
+
     public BufferOperator(SemanticCanOverlay overlay) {
         this.overlay = overlay;
+        this.observers = new ArrayList<Observer<B>>();
+    }
+
+    public void register(Observer<B> r) {
+        this.observers.add(r);
+    }
+
+    public void flushBuffer(B buffer) {
+        this._flushBuffer(buffer);
+
+        for (Observer<B> observer : this.observers) {
+            observer.bufferFlushed(buffer, this.overlay);
+        }
     }
 
     /**
@@ -39,7 +56,15 @@ public abstract class BufferOperator<B extends Collection<?>> {
      * @param buffer
      *            the buffer containing the objects that have to be flushed.
      */
-    public abstract void flushBuffer(B buffer);
+    protected abstract void _flushBuffer(B buffer);
+
+    public void triggerAction(B buffer) {
+        this._triggerAction(buffer);
+
+        for (Observer<B> observer : this.observers) {
+            observer.postActionTriggered(buffer, this.overlay);
+        }
+    }
 
     /**
      * The action to trigger once the buffer has been flushed.
@@ -47,6 +72,6 @@ public abstract class BufferOperator<B extends Collection<?>> {
      * @param buffer
      *            the buffer containing the objects that have been flushed.
      */
-    public abstract void triggerAction(B buffer);
+    protected abstract void _triggerAction(B buffer);
 
 }

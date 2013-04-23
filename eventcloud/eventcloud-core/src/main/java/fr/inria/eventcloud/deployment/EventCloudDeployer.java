@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -68,8 +68,8 @@ public class EventCloudDeployer extends NetworkDeployer {
                 Collections.synchronizedList(new ArrayList<SubscribeProxy>());
 
         // sets stream URL on persistent overlay provider
-        if (deploymentDescriptor.getOverlayProvider() instanceof SemanticPersistentOverlayProvider) {
-            ((SemanticPersistentOverlayProvider) deploymentDescriptor.getOverlayProvider()).setStreamUrl(description.getId()
+        if (deploymentDescriptor.getOverlayProvider() instanceof SemanticOverlayProvider) {
+            ((SemanticOverlayProvider) deploymentDescriptor.getOverlayProvider()).setStreamURL(description.getId()
                     .getStreamUrl());
         }
     }

@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
-import fr.inria.eventcloud.providers.SemanticInMemoryOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 
 /**
  * {@link DeploymentDescriptor} to use with an {@link EventCloudDeployer}.
@@ -35,11 +35,11 @@ public class EventCloudDeploymentDescriptor extends
     private static final long serialVersionUID = 140L;
 
     /**
-     * Creates a new {@link EventCloudDeploymentDescriptor} by using a
-     * {@link SemanticInMemoryOverlayProvider}.
+     * Creates a new {@link EventCloudDeploymentDescriptor} by using an
+     * in-memory {@link SemanticOverlayProvider}.
      */
     public EventCloudDeploymentDescriptor() {
-        super(new SemanticInMemoryOverlayProvider());
+        super(new SemanticOverlayProvider(true));
     }
 
     /**

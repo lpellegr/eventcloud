@@ -26,7 +26,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.providers.SemanticPersistentOverlayProvider;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 
 /**
  * This launcher is used to create a new EventCloud and to register it to the
@@ -65,7 +65,7 @@ public final class EventCloudLauncher extends Launcher {
                 new EventCloudDeployer(
                         new EventCloudDescription(new EventCloudId()),
                         new EventCloudDeploymentDescriptor(
-                                new SemanticPersistentOverlayProvider()));
+                                new SemanticOverlayProvider(false)));
 
         deployer.deploy(this.nbTrackers, this.nbPeers);
 
