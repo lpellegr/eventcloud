@@ -347,10 +347,6 @@ public class PublishSubscribeBenchmark {
                                                 .getElapsedTime(
                                                         PublishSubscribeBenchmark.this.pointToPointEntryMeasurements));
                             }
-
-                            recorder.reportValue(
-                                    MicroBenchmark.DEFAULT_CATEGORY_NAME,
-                                    maxEndToEndMeasurement);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -515,8 +511,11 @@ public class PublishSubscribeBenchmark {
         BenchmarkStatsCollector collector =
                 PAActiveObject.newActive(
                         BenchmarkStatsCollector.class, new Object[] {
-                                this.nbPublishers, this.nbSubscribers,
-                                this.nbSubscriptionsPerSubscriber});
+                                this.nbPublishers,
+                                this.nbSubscribers,
+                                this.nbSubscriptionsPerSubscriber,
+                                (this.nbQuadruplesPerCompoundEvent + 1)
+                                        * nbPublications});
         String collectorURL =
                 PAActiveObject.registerByName(
                         collector, BENCHMARK_STATS_COLLECTOR_NAME);
@@ -525,7 +524,7 @@ public class PublishSubscribeBenchmark {
                 this.createNodeProviderIfRequired();
 
         EventCloudDeploymentDescriptor descriptor =
-                this.createDeploymentDescriptor(nodeProvider);
+                this.createDeploymentDescriptor(nodeProvider, collectorURL);
 
         // creates eventcloud
         EventCloudDeployer deployer =
@@ -563,9 +562,13 @@ public class PublishSubscribeBenchmark {
                 this.createSubscribeProxies(
                         registryURL, eventCloudId, nodeProvider);
 
-        log.info("The subscriptions used by the subscribers are the following:");
-        for (SyntheticSubscription subscription : subscriptions) {
-            log.info("  {}", subscription.content);
+        if (subscriptions.length > 0) {
+            log.info("The subscriptions used by the subscribers are the following:");
+            for (SyntheticSubscription subscription : subscriptions) {
+                log.info("  {}", subscription.content);
+            }
+        } else {
+            log.info("No subscription registered");
         }
 
         // subscribes
@@ -633,6 +636,18 @@ public class PublishSubscribeBenchmark {
         // timeout after 1 hour
         collector.waitForAllSubscriberReports(3600000);
 
+        if (this.measureStorageTime) {
+            // timeout after 1 hour
+            collector.waitForStoringQuadruples(3600000);
+        }
+
+        long globalEndToEndTerminationTime = System.currentTimeMillis();
+
+        recorder.reportValue(
+                MicroBenchmark.DEFAULT_CATEGORY_NAME,
+                globalEndToEndTerminationTime
+                        - this.endToEndMeasurementEntryTime);
+
         // the end to end termination time is the time at which each
         // subscriber has notified the collector about its termination
         this.endToEndMeasurementsExitTime =
@@ -684,8 +699,10 @@ public class PublishSubscribeBenchmark {
                     response.getResult().getPublicationsEndTime()
                             - this.endToEndMeasurementEntryTime;
             long subscriptionsStorageTime =
-                    response.getResult().getSubscriptionsEndTime()
-                            - subscribeStartTime;
+                    (this.nbSubscribers == 0 || this.nbSubscriptionsPerSubscriber == 0)
+                            ? 0 : response.getResult()
+                                    .getSubscriptionsEndTime()
+                                    - subscribeStartTime;
 
             log.info(
                     "Time required to store publications: {}",
@@ -766,8 +783,9 @@ public class PublishSubscribeBenchmark {
             if (!this.useDifferentSubscriptions) {
                 this.events =
                         this.computeGenerationsAndSelectBest(
-                                deployer, zones,
-                                subscriptions[0].fixedPredicates,
+                                deployer, zones, subscriptions.length == 0
+                                        ? null
+                                        : subscriptions[0].fixedPredicates,
                                 nbPublications);
 
                 for (int i = 0; i < subscriptions.length; i++) {
@@ -1004,10 +1022,11 @@ public class PublishSubscribeBenchmark {
 
     }
 
-    private EventCloudDeploymentDescriptor createDeploymentDescriptor(GcmDeploymentNodeProvider nodeProvider) {
+    private EventCloudDeploymentDescriptor createDeploymentDescriptor(GcmDeploymentNodeProvider nodeProvider,
+                                                                      String benchmarkStatsCollectorURL) {
         EventCloudDeploymentDescriptor descriptor =
-                new EventCloudDeploymentDescriptor(
-                        this.createOverlayProvider(this.inMemoryDatastore));
+                new EventCloudDeploymentDescriptor(this.createOverlayProvider(
+                        benchmarkStatsCollectorURL, this.inMemoryDatastore));
         descriptor.setInjectionConstraintsProvider(InjectionConstraintsProvider.newUniformInjectionConstraintsProvider());
 
         if (this.gcmaDescriptor != null) {
@@ -1027,9 +1046,10 @@ public class PublishSubscribeBenchmark {
         return nodeProvider;
     }
 
-    private SerializableProvider<? extends SemanticCanOverlay> createOverlayProvider(boolean inMemory) {
+    private SerializableProvider<? extends SemanticCanOverlay> createOverlayProvider(String statsCollectorURL,
+                                                                                     boolean inMemory) {
         return new CustomSemanticOverlayProvider(
-                inMemory, this.measureStorageTime);
+                statsCollectorURL, inMemory, this.measureStorageTime);
     }
 
     private List<CustomPublishProxy> createPublishProxies(String registryUrl,
