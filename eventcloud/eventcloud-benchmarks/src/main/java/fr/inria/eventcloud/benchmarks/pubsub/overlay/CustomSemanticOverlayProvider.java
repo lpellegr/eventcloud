@@ -16,9 +16,17 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub.overlay;
 
+import java.io.IOException;
+import java.util.Set;
+
+import org.objectweb.proactive.ActiveObjectCreationException;
+import org.objectweb.proactive.api.PAActiveObject;
+
+import fr.inria.eventcloud.benchmarks.pubsub.BenchmarkStatsCollector;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.delayers.CustomBuffer;
+import fr.inria.eventcloud.delayers.ExtendedCompoundEvent;
 import fr.inria.eventcloud.delayers.Observer;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
@@ -27,12 +35,15 @@ public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
 
     private static final long serialVersionUID = 150L;
 
+    private final String statsCollectorURL;
+
     private final boolean markStorageEndTime;
 
-    public CustomSemanticOverlayProvider(boolean inMemory,
-            boolean markStorageEndTime) {
+    public CustomSemanticOverlayProvider(String statsCollectorURL,
+            boolean inMemory, boolean markStorageEndTime) {
         super(inMemory);
 
+        this.statsCollectorURL = statsCollectorURL;
         this.markStorageEndTime = markStorageEndTime;
     }
 
@@ -48,52 +59,155 @@ public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
                         datastores[0], datastores[1], datastores[2]);
 
         if (this.markStorageEndTime) {
-            Observer<CustomBuffer> observer = new Observer<CustomBuffer>() {
-                @Override
-                public void bufferFlushed(CustomBuffer buffer,
-                                          SemanticCanOverlay overlay) {
-                    CustomSemanticOverlay customOverlay =
-                            ((CustomSemanticOverlay) overlay);
-
-                    int compoundEventsBufferSize = 0;
-                    if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-                        compoundEventsBufferSize =
-                                buffer.getCompoundEvents().size();
-                    }
-
-                    if (buffer.getQuadruples().size() > 0
-                            || compoundEventsBufferSize > 0) {
-                        customOverlay.publicationsStorageEndTime =
-                                System.currentTimeMillis();
-                    }
-
-                    if (buffer.getSubscriptions().size() > 0) {
-                        customOverlay.subscriptionsStorageEndTime =
-                                System.currentTimeMillis();
-                    }
-                }
-
-                @Override
-                public void postActionTriggered(CustomBuffer buffer,
-                                                SemanticCanOverlay overlay) {
-                    // do nothing
-                }
-            };
-
             result.getPublishSubscribeOperationsDelayer()
                     .getQuadruplesOperator()
-                    .register(observer);
+                    .register(new QuadruplesObserver(this.statsCollectorURL));
             result.getPublishSubscribeOperationsDelayer()
                     .getSubscriptionsOperator()
-                    .register(observer);
+                    .register(new SubscriptionsObserver(this.statsCollectorURL));
 
             if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
                 result.getPublishSubscribeOperationsDelayer()
                         .getCompoundEventsOperator()
-                        .register(observer);
+                        .register(
+                                new CompoundEventsObserver(
+                                        this.statsCollectorURL));
             }
         }
 
         return result;
     }
+
+    private static abstract class OperatorObserver implements
+            Observer<CustomBuffer> {
+
+        protected final BenchmarkStatsCollector collector;
+
+        public OperatorObserver(String benchmarkStatsCollectorURL) {
+            this.collector =
+                    this.lookupBenchmarkStatsCollector(benchmarkStatsCollectorURL);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void bufferFlushed(CustomBuffer buffer,
+                                  SemanticCanOverlay overlay) {
+            // to be overriden if required
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void postActionTriggered(CustomBuffer buffer,
+                                        SemanticCanOverlay overlay) {
+            // to be overriden if required
+        }
+
+        private BenchmarkStatsCollector lookupBenchmarkStatsCollector(String benchmarkStatsCollectorURL) {
+            if (benchmarkStatsCollectorURL != null) {
+                try {
+                    return PAActiveObject.lookupActive(
+                            BenchmarkStatsCollector.class,
+                            benchmarkStatsCollectorURL);
+                } catch (ActiveObjectCreationException e) {
+                    throw new IllegalStateException(e);
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+
+            return null;
+        }
+
+    }
+
+    private static class CompoundEventsObserver extends OperatorObserver {
+
+        public CompoundEventsObserver(String benchmarkStatsCollectorURL) {
+            super(benchmarkStatsCollectorURL);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void bufferFlushed(CustomBuffer buffer,
+                                  SemanticCanOverlay overlay) {
+            CustomSemanticOverlay customOverlay =
+                    ((CustomSemanticOverlay) overlay);
+
+            int cumulatedSize =
+                    countNbCompoundEvents(buffer.getCompoundEvents());
+
+            if (cumulatedSize > 0) {
+                customOverlay.publicationsStorageEndTime =
+                        System.currentTimeMillis();
+
+                this.collector.reportNbQuadrupleStored(
+                        customOverlay.getId(), cumulatedSize);
+            }
+        }
+
+        private static int countNbCompoundEvents(Set<ExtendedCompoundEvent> set) {
+            if (set == null) {
+                return 0;
+            }
+
+            return set.size();
+        }
+
+    }
+
+    private static class QuadruplesObserver extends OperatorObserver {
+
+        public QuadruplesObserver(String benchmarkStatsCollectorURL) {
+            super(benchmarkStatsCollectorURL);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void bufferFlushed(CustomBuffer buffer,
+                                  SemanticCanOverlay overlay) {
+            CustomSemanticOverlay customOverlay =
+                    ((CustomSemanticOverlay) overlay);
+
+            if (buffer.getQuadruples().size() > 0) {
+                customOverlay.publicationsStorageEndTime =
+                        System.currentTimeMillis();
+
+                this.collector.reportNbQuadrupleStored(
+                        customOverlay.getId(), buffer.getQuadruples().size());
+            }
+        }
+
+    }
+
+    private static class SubscriptionsObserver extends OperatorObserver {
+
+        public SubscriptionsObserver(String benchmarkStatsCollectorURL) {
+            super(benchmarkStatsCollectorURL);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void bufferFlushed(CustomBuffer buffer,
+                                  SemanticCanOverlay overlay) {
+            CustomSemanticOverlay customOverlay =
+                    ((CustomSemanticOverlay) overlay);
+
+            if (buffer.getSubscriptions().size() > 0) {
+                customOverlay.subscriptionsStorageEndTime =
+                        System.currentTimeMillis();
+            }
+        }
+
+    }
+
 }

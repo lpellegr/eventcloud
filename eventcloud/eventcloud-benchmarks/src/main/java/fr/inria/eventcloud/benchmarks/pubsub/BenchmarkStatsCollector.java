@@ -18,7 +18,12 @@ package fr.inria.eventcloud.benchmarks.pubsub;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.Body;
@@ -56,6 +61,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     private final int nbSubscribers;
 
+    private final int nbQuadruplesPublished;
+
     private final int nbSubscriptionsPerSubscriber;
 
     private MutableInteger nbReportsReceivedByPublishers = new MutableInteger();
@@ -65,9 +72,14 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     private RequestExecutor requestExecutor;
 
-    private boolean publisherWakeUp = false;
+    // waiting states
 
-    private boolean subscriberWakeUp = false;
+    private boolean allPublisherReportsReceived = false;
+
+    private boolean allSubscriberReportsReceived = false;
+
+    private AtomicBoolean allPublishedQuadruplesStored = new AtomicBoolean(
+            false);
 
     // measurements
 
@@ -79,17 +91,21 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     private Map<SubscriptionId, CumulatedMeasurement> pointToPointExitMeasurements;
 
+    private ConcurrentMap<UUID, AtomicInteger> nbQuadrupleStoredPerPeer;
+
     public BenchmarkStatsCollector() {
         this.nbPublishers = 0;
         this.nbSubscribers = 0;
         this.nbSubscriptionsPerSubscriber = 0;
+        this.nbQuadruplesPublished = 0;
     }
 
     public BenchmarkStatsCollector(int nbPublishers, int nbSubscribers,
-            int nbSubscriptionsPerSubscriber) {
+            int nbSubscriptionsPerSubscriber, int nbQuadruplesExpected) {
         this.nbPublishers = nbPublishers;
         this.nbSubscribers = nbSubscribers;
         this.nbSubscriptionsPerSubscriber = nbSubscriptionsPerSubscriber;
+        this.nbQuadruplesPublished = nbQuadruplesExpected;
     }
 
     /**
@@ -109,6 +125,9 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
         this.pointToPointExitMeasurements =
                 new HashMap<SubscriptionId, CumulatedMeasurement>();
+
+        this.nbQuadrupleStoredPerPeer =
+                new ConcurrentHashMap<UUID, AtomicInteger>();
     }
 
     @MemberOf("notify")
@@ -126,13 +145,11 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         this.nbReportsReceivedByPublishers.add(1);
 
         if (this.nbReportsReceivedByPublishers.getValue() == this.nbPublishers) {
-            this.publisherWakeUp = true;
+            this.allPublisherReportsReceived = true;
 
             synchronized (this.nbReportsReceivedByPublishers) {
                 this.nbReportsReceivedByPublishers.notifyAll();
             }
-
-            this.requestExecutor.decrementExtraActiveRequestCount(1);
         }
 
         return true;
@@ -155,13 +172,11 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
             if (this.nbReportsReceivedBySubscribers.getValue() == this.nbSubscribers
                     * this.nbSubscriptionsPerSubscriber) {
-                this.subscriberWakeUp = true;
+                this.allSubscriberReportsReceived = true;
 
                 synchronized (this.nbReportsReceivedBySubscribers) {
                     this.nbReportsReceivedBySubscribers.notifyAll();
                 }
-
-                this.requestExecutor.decrementExtraActiveRequestCount(1);
             }
         }
 
@@ -177,6 +192,37 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
                                                       CumulatedMeasurement pointToPointExitMeasurement) {
         return this.pointToPointExitMeasurements.put(
                 subscriptionId, pointToPointExitMeasurement) == null;
+    }
+
+    @MemberOf("notify")
+    public boolean reportNbQuadrupleStored(UUID peerId, int nbQuadruples) {
+        AtomicInteger previousValue =
+                this.nbQuadrupleStoredPerPeer.putIfAbsent(
+                        peerId, new AtomicInteger(nbQuadruples));
+
+        if (previousValue != null) {
+            previousValue.addAndGet(nbQuadruples);
+        }
+
+        if (this.countTotalNumberOfQuadrupleStoredOnPeers() == this.nbQuadruplesPublished) {
+            if (this.allPublishedQuadruplesStored.compareAndSet(false, true)) {
+                synchronized (this.nbQuadrupleStoredPerPeer) {
+                    this.nbQuadrupleStoredPerPeer.notifyAll();
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private int countTotalNumberOfQuadrupleStoredOnPeers() {
+        int result = 0;
+
+        for (AtomicInteger v : this.nbQuadrupleStoredPerPeer.values()) {
+            result += v.get();
+        }
+
+        return result;
     }
 
     public long getEndToEndTerminationTime(SubscriptionId subscriptionId) {
@@ -211,24 +257,30 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
     public void waitForAllPublisherReports(int timeout) throws TimeoutException {
 
         if (this.nbReportsReceivedByPublishers.getValue() < this.nbPublishers) {
+
             synchronized (this.nbReportsReceivedByPublishers) {
+
                 while (this.nbReportsReceivedByPublishers.getValue() < this.nbPublishers) {
+                    this.requestExecutor.incrementExtraActiveRequestCount(1);
                     try {
                         this.nbReportsReceivedByPublishers.wait(timeout);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    } finally {
+                        this.requestExecutor.decrementExtraActiveRequestCount(1);
                     }
 
-                    if (!this.publisherWakeUp) {
+                    if (!this.allPublisherReportsReceived) {
                         break;
                     }
                 }
             }
 
-            this.requestExecutor.decrementExtraActiveRequestCount(1);
+        } else {
+            this.allPublisherReportsReceived = true;
         }
 
-        if (!this.publisherWakeUp) {
+        if (!this.allPublisherReportsReceived) {
             throw new TimeoutException("Received only "
                     + this.nbReportsReceivedByPublishers.getValue()
                     + " publisher report(s) after " + timeout + " ms whereas "
@@ -242,30 +294,69 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
         if (this.nbReportsReceivedBySubscribers.getValue() < this.nbSubscribers
                 * this.nbSubscriptionsPerSubscriber) {
+
             synchronized (this.nbReportsReceivedBySubscribers) {
                 while (this.nbReportsReceivedBySubscribers.getValue() < this.nbSubscribers
                         * this.nbSubscriptionsPerSubscriber) {
+                    this.requestExecutor.incrementExtraActiveRequestCount(1);
                     try {
                         this.nbReportsReceivedBySubscribers.wait(timeout);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    } finally {
+                        this.requestExecutor.decrementExtraActiveRequestCount(1);
                     }
 
-                    if (!this.subscriberWakeUp) {
+                    if (!this.allSubscriberReportsReceived) {
                         break;
                     }
                 }
             }
 
-            this.requestExecutor.decrementExtraActiveRequestCount(1);
+        } else {
+            this.allSubscriberReportsReceived = true;
         }
 
-        if (!this.subscriberWakeUp) {
+        if (!this.allSubscriberReportsReceived) {
             throw new TimeoutException("Received only "
                     + this.nbReportsReceivedBySubscribers.getValue()
                     + " subscriber report(s) after " + timeout + " ms whereas "
                     + (this.nbSubscribers * this.nbSubscriptionsPerSubscriber)
                     + " were expected.");
+        }
+    }
+
+    @MemberOf("wait")
+    public void waitForStoringQuadruples(int timeout) throws TimeoutException {
+
+        if (this.countTotalNumberOfQuadrupleStoredOnPeers() < this.nbQuadruplesPublished) {
+
+            synchronized (this.nbQuadrupleStoredPerPeer) {
+                while (this.countTotalNumberOfQuadrupleStoredOnPeers() < this.nbQuadruplesPublished) {
+                    this.requestExecutor.incrementExtraActiveRequestCount(1);
+                    try {
+                        this.nbQuadrupleStoredPerPeer.wait(timeout);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } finally {
+                        this.requestExecutor.decrementExtraActiveRequestCount(1);
+                    }
+
+                    if (!this.allPublishedQuadruplesStored.get()) {
+                        break;
+                    }
+                }
+            }
+
+        } else {
+            this.allPublishedQuadruplesStored.set(true);
+        }
+
+        if (!this.allPublishedQuadruplesStored.get()) {
+            throw new TimeoutException("Notified about "
+                    + this.countTotalNumberOfQuadrupleStoredOnPeers()
+                    + " quadruple(s) stored after " + timeout + " ms whereas "
+                    + this.nbQuadruplesPublished + " were expected.");
         }
     }
 
