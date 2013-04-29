@@ -34,11 +34,13 @@ public class ListenerTypeConverter implements
      */
     @Override
     public NotificationListenerType convert(String value) {
-        if (value.equalsIgnoreCase("binding")) {
+        if (value.equalsIgnoreCase("binding") || value.equalsIgnoreCase("b")) {
             return NotificationListenerType.BINDING;
-        } else if (value.equalsIgnoreCase("compoundevent")) {
+        } else if (value.equalsIgnoreCase("compoundevent")
+                || value.equalsIgnoreCase("ce")) {
             return NotificationListenerType.COMPOUND_EVENT;
-        } else if (value.equalsIgnoreCase("signal")) {
+        } else if (value.equalsIgnoreCase("signal")
+                || value.equalsIgnoreCase("s")) {
             return NotificationListenerType.SIGNAL;
         }
 
