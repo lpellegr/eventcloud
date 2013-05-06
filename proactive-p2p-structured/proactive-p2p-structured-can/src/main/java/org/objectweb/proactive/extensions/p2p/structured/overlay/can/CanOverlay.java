@@ -23,8 +23,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -426,8 +428,8 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         }
 
         // updates overlay information due to the split
-        this.zone = newZones.get(direction);
         this.splitHistory.add(new SplitEntry(dimension, direction, timestamp));
+        this.zone = newZones.get(direction);
 
         // removes the current peer from the neighbors that are back
         // the new peer which join and updates the zone maintained by
@@ -556,32 +558,43 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
     }
 
     private void leaveBasedOnSplitHistory() {
-        SplitEntry lastSplitEntry = this.splitHistory.getLast();
+        byte oppositeReassignmentDirection = 0;
+        byte reassignmentDimension = 0;
+        byte reassignmentDirection = 0;
 
-        byte oppositeReassignmentDirection = lastSplitEntry.getDirection();
-        byte reassignmentDimension = lastSplitEntry.getDimension();
-        byte reassignmentDirection =
-                getOppositeDirection(lastSplitEntry.getDirection());
+        ConcurrentMap<UUID, NeighborEntry<E>> reassignmentNeighbors = null;
+        E element = null;
 
-        E element =
-                reassignmentDirection > 0
-                        ? this.zone.getLowerBound(reassignmentDimension)
-                        : this.zone.getUpperBound(reassignmentDimension);
+        ListIterator<SplitEntry> it =
+                this.splitHistory.listIterator(this.splitHistory.size());
 
-        Collection<NeighborEntry<E>> reassignmentNeighbors =
-                this.neighborTable.get(
-                        reassignmentDimension, reassignmentDirection).values();
+        while ((reassignmentNeighbors == null || reassignmentNeighbors.isEmpty())
+                && it.hasPrevious()) {
+            SplitEntry lastSplitEntry = it.previous();
 
-        if (reassignmentNeighbors.isEmpty()) {
-            throw new IllegalStateException(
-                    "No neighbor to merge with found on dimension "
-                            + reassignmentDimension + " and direction "
-                            + reassignmentDirection);
+            oppositeReassignmentDirection = lastSplitEntry.getDirection();
+            reassignmentDimension = lastSplitEntry.getDimension();
+            reassignmentDirection =
+                    getOppositeDirection(lastSplitEntry.getDirection());
+
+            reassignmentNeighbors =
+                    this.neighborTable.get(
+                            reassignmentDimension, reassignmentDirection);
+
+            if (reassignmentNeighbors.isEmpty()) {
+                it.remove();
+                continue;
+            }
+
+            element =
+                    reassignmentDirection > 0
+                            ? this.zone.getLowerBound(reassignmentDimension)
+                            : this.zone.getUpperBound(reassignmentDimension);
         }
 
-        for (NeighborEntry<E> entry : reassignmentNeighbors) {
+        for (NeighborEntry<E> entry : reassignmentNeighbors.values()) {
             // enlarges the local neighbors' zones that take over the leaving
-            // zone such that we can update neighbors' pointer with local
+            // zone so that we can update neighbors' pointer with local
             // knowledge
             entry.getZone().enlarge(
                     reassignmentDimension, oppositeReassignmentDirection,
@@ -589,7 +602,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
             Serializable dataToTransfer = this.retrieveDataIn(entry.getZone());
 
-            // enlarge the remote neighbor's zone
+            // enlarges the remote neighbor's zone
             PAFuture.waitFor(entry.getStub().receive(
                     new LeaveEnlargeZoneOperation<E>(
                             this.splitHistory.getLast().getTimestamp(),

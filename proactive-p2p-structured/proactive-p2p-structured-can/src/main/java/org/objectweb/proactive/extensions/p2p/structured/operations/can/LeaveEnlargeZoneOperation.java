@@ -87,19 +87,6 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
             }
         }
 
-        Iterator<SplitEntry> splitHistoryIterator =
-                canOverlay.getSplitHistory().iterator();
-
-        while (splitHistoryIterator.hasNext()) {
-            SplitEntry se = splitHistoryIterator.next();
-
-            if (se.getTimestamp() == this.splitEntryTimestamp) {
-                splitHistoryIterator.remove();
-            }
-        }
-
-        canOverlay.getSplitHistory().remove(this.splitEntryTimestamp);
-
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry<E> entry : canOverlay.getNeighborTable()
