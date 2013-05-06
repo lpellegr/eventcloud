@@ -17,8 +17,6 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements;
 
 import org.apfloat.Apfloat;
-import org.apfloat.Apint;
-import org.apfloat.ApintMath;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
@@ -65,22 +63,28 @@ public class StringElement extends Element {
     }
 
     public double normalize(double lowerBound, double upperBound) {
-        if (lowerBound < 0) {
-            throw new IllegalArgumentException("Lower bound must be positive: "
-                    + lowerBound);
-        }
-
         if (upperBound <= lowerBound) {
             throw new IllegalArgumentException(
                     "Upper bound must be greater than lower bound");
         }
 
-        Apfloat scale =
-                new Apfloat((upperBound - lowerBound)
-                        / P2PStructuredProperties.CAN_UPPER_BOUND.getValue());
+        double w1 = upperBound - lowerBound;
+        double w2 =
+                P2PStructuredProperties.CAN_UPPER_BOUND.getValue()
+                        - P2PStructuredProperties.CAN_LOWER_BOUND.getValue();
 
-        return ApfloatUtils.toFloatRadix10(this.value).multiply(scale).add(
-                new Apfloat(lowerBound)).doubleValue();
+        double l1 = lowerBound;
+        double l2 = P2PStructuredProperties.CAN_LOWER_BOUND.getValue();
+
+        Apfloat scale = new Apfloat(w1 / w2);
+
+        return ApfloatUtils.toFloatRadix10(this.value)
+                .add(
+                        new Apfloat(
+                                P2PStructuredProperties.CAN_LOWER_BOUND.getValue()))
+                .multiply(scale)
+                .add(new Apfloat(l1 - l2).multiply(scale))
+                .doubleValue();
     }
 
     /**
@@ -145,33 +149,6 @@ public class StringElement extends Element {
 
     public String toString(StringRepresentation representation) {
         return representation.apply(this.value);
-    }
-
-    public static void main(String[] args) {
-        // StringBuilder bd = new StringBuilder(1000);
-        // for (int i = 0; i < 1000; i++) {
-        // bd.append(i + 4000);
-        // }
-        //
-        // long t2 = System.nanoTime();
-        // toFloatRadix10BasicMethod(bd.toString(), RADIX);
-        // long t3 = System.nanoTime();
-        // System.out.println("StringElement.main() toFloatRadixHorner took :  "
-        // + ((t3 - t2) / 1000 / 1000));
-        //
-        // long t0 = System.nanoTime();
-        // toFloatRadix10Horner(bd.toString());
-        // long t1 = System.nanoTime();
-        // System.out.println("StringElement.main() toFloatRadix took : "
-        // + ((t1 - t0) / 1000 / 1000));
-
-        Apint radix = new Apint(65536);
-        int exponent = 2;
-
-        Apint pow = ApintMath.pow(radix, exponent);
-        Apfloat result = new Apfloat(1, Apfloat.DEFAULT).divide(pow);
-
-        System.out.println(result);
     }
 
 }
