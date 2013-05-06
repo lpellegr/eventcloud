@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.messages.can.benchmarks;
+package org.objectweb.proactive.extensions.p2p.structured.messages.can.broadcast;
 
 import java.io.File;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 
 /**
  * This class runs a local experiment to compare different algorithms that can
@@ -31,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
  * 
  * @author jrochas
  */
-public class BroadcastsBenchmark {
+public class BroadcastTest {
 	
 	/** Number of peers in the network (can be changed through
 	 * first main method parameter) */
@@ -39,6 +41,10 @@ public class BroadcastsBenchmark {
 	/** Number of dimensions of the CAN (can be changed through
 	 * second main method parameter) */
 	private static int nbDimensions = 4;
+	/** The constraint used for the second test */
+	private static final Coordinate<StringElement> constraint = 
+			new Coordinate<StringElement>(
+					new StringElement("j"), new StringElement("j"), null);
 
 	public static void main(String[] args) {
 
@@ -55,13 +61,7 @@ public class BroadcastsBenchmark {
 				System.exit(0);
 			}
 		}
-		File directory = new File(JobLogger.getLogDirectory());
-		if (directory.exists()) {
-			File[] files = directory.listFiles();
-			for (File file : files) {
-				file.delete();
-			}
-		}
+		clearLogFiles();
 
 		// Set the number of dimensions
 		P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) nbDimensions);
@@ -84,10 +84,14 @@ public class BroadcastsBenchmark {
 			else {
 				System.out.println("********** Building random CAN **********");
 			}
-			// Building the CAN
+			
+			/* ********************************************** */
+			/* First test: without any constraint = broadcast */
+			/* ********************************************** */
 			BroadcastInfrastructure broadcastInfrastructure = 
 					new BroadcastInfrastructure(
-							nbPeers, JobLogger.getLogDirectory(), fractalCAN, uniformCAN);
+							nbPeers, JobLogger.getLogDirectory(), 
+							null, fractalCAN, uniformCAN);
 			broadcastInfrastructure.initialize();
 
 			// Running a FloodingBroadcast
@@ -98,13 +102,57 @@ public class BroadcastsBenchmark {
 
 			// Running an OptimalBroadcast
 			broadcastInfrastructure.measureOptimalBroadcast();
+			
+			broadcastInfrastructure.assertAllPeersReached();
 
 			broadcastInfrastructure.terminate();
+			
+			clearLogFiles();
+			
+			/* ***************************************** */
+			/* Second test: with constraints = multicast */
+			/* ***************************************** */
+			// The dimension of the CAN must be 3 with the constraints
+			P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 3);
+			broadcastInfrastructure = 
+					new BroadcastInfrastructure(
+							nbPeers, JobLogger.getLogDirectory(), 
+							constraint, fractalCAN, uniformCAN);
+			broadcastInfrastructure.initialize();
+
+			// Running a FloodingBroadcast
+			broadcastInfrastructure.measureFloodingBroadcast();
+
+			// Running an EfficientBroadcast
+			broadcastInfrastructure.measureEfficientBroadcast();
+
+			// Running an OptimalBroadcast
+			broadcastInfrastructure.measureOptimalBroadcast();
+			
+			broadcastInfrastructure.assertNbPeersReachedEquals();
+
+			broadcastInfrastructure.terminate();
+			
+			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
 		System.exit(0);
+	}
+
+	/**
+	 * Removes all log files to be sure that
+	 * only current logs are taken into account.
+	 */
+	private static void clearLogFiles() {
+		File directory = new File(JobLogger.getLogDirectory());
+		if (directory.exists()) {
+			File[] files = directory.listFiles();
+			for (File file : files) {
+				file.delete();
+			}
+		}
 	}
 
 }
