@@ -97,7 +97,7 @@ public class PublishSubscribeOperationsDelayer extends
      * {@inheritDoc}
      */
     @Override
-    protected int commit() {
+    public int commit() {
         synchronized (this.buffer) {
             int size = this.buffer.size();
 

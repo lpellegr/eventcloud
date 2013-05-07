@@ -34,13 +34,14 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider
 import org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployment.GcmDeploymentNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.GenericResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.Category;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
-import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkService;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,7 @@ import fr.inria.eventcloud.benchmarks.pubsub.measurements.CumulatedMeasurement;
 import fr.inria.eventcloud.benchmarks.pubsub.measurements.SimpleMeasurement;
 import fr.inria.eventcloud.benchmarks.pubsub.messages.RetrieveStorageEndTimesRequest;
 import fr.inria.eventcloud.benchmarks.pubsub.messages.RetrieveStorageEndTimesResponse;
+import fr.inria.eventcloud.benchmarks.pubsub.operations.ClearOperation;
 import fr.inria.eventcloud.benchmarks.pubsub.overlay.CustomSemanticOverlayProvider;
 import fr.inria.eventcloud.benchmarks.pubsub.proxies.CustomProxyFactory;
 import fr.inria.eventcloud.benchmarks.pubsub.proxies.CustomPublishProxy;
@@ -307,11 +309,144 @@ public class PublishSubscribeBenchmark {
 
         // creates and runs micro benchmark
         MicroBenchmark microBenchmark =
-                new MicroBenchmark(this.nbRuns, new MicroBenchmarkRun() {
+                new MicroBenchmark(this.nbRuns, new MicroBenchmarkService() {
+
+                    private EventCloudsRegistry registry;
+
+                    private BenchmarkStatsCollector collector;
+
+                    private String collectorURL;
+
+                    private GcmDeploymentNodeProvider nodeProvider;
+
+                    private EventCloudDeployer deployer;
+
+                    private List<CustomPublishProxy> publishProxies;
+
+                    private List<SubscribeApi> subscribeProxies;
+
+                    private SyntheticSubscription[] synthethicSubscriptions;
+
+                    @Override
+                    public void setup() throws Exception {
+                        this.collector =
+                                PAActiveObject.newActive(
+                                        BenchmarkStatsCollector.class,
+                                        new Object[] {
+                                                PublishSubscribeBenchmark.this.nbPublishers,
+                                                PublishSubscribeBenchmark.this.nbSubscribers,
+                                                PublishSubscribeBenchmark.this.nbSubscriptionsPerSubscriber,
+                                                (PublishSubscribeBenchmark.this.nbQuadruplesPerCompoundEvent + 1)
+                                                        * nbPublications});
+                        this.collectorURL =
+                                PAActiveObject.registerByName(
+                                        this.collector,
+                                        BENCHMARK_STATS_COLLECTOR_NAME);
+
+                        this.nodeProvider =
+                                PublishSubscribeBenchmark.this.createNodeProviderIfRequired();
+
+                        EventCloudDeploymentDescriptor descriptor =
+                                PublishSubscribeBenchmark.this.createDeploymentDescriptor(
+                                        this.nodeProvider, this.collectorURL);
+
+                        this.deployer =
+                                new EventCloudDeployer(
+                                        new EventCloudDescription(), descriptor);
+                        this.deployer.deploy(
+                                1, PublishSubscribeBenchmark.this.nbPeers);
+
+                        SemanticZone[] zones =
+                                PublishSubscribeBenchmark.this.retrievePeerZones(this.deployer);
+
+                        this.synthethicSubscriptions =
+                                PublishSubscribeBenchmark.this.getOrCreateSubscriptions(zones);
+
+                        Event[] events =
+                                PublishSubscribeBenchmark.this.createEvents(
+                                        this.deployer, zones,
+                                        this.synthethicSubscriptions);
+
+                        if (!PublishSubscribeBenchmark.this.disableInterCompoundEventsShuffling) {
+                            org.objectweb.proactive.extensions.p2p.structured.utils.Arrays.shuffle(events);
+                        }
+
+                        this.registry =
+                                PublishSubscribeBenchmark.this.deployRegistry(
+                                        this.deployer, this.nodeProvider);
+
+                        String registryURL = null;
+                        try {
+                            registryURL = this.registry.register("registry");
+                        } catch (ProActiveException e) {
+                            throw new IllegalStateException(e);
+                        }
+
+                        EventCloudId eventCloudId =
+                                this.deployer.getEventCloudDescription()
+                                        .getId();
+
+                        this.publishProxies =
+                                PublishSubscribeBenchmark.this.createPublishProxies(
+                                        registryURL, eventCloudId,
+                                        this.nodeProvider);
+                        this.subscribeProxies =
+                                PublishSubscribeBenchmark.this.createSubscribeProxies(
+                                        registryURL, eventCloudId,
+                                        this.nodeProvider);
+
+                        // init custom publish proxies
+                        for (CustomPublishProxy proxy : this.publishProxies) {
+                            proxy.init(
+                                    this.collectorURL,
+                                    PublishSubscribeBenchmark.this.waitBetweenPublications);
+                        }
+
+                        // assign events to publish proxies
+                        final int segment =
+                                (nbPublications / PublishSubscribeBenchmark.this.nbPublishers);
+
+                        for (int i = 0; i < PublishSubscribeBenchmark.this.nbPublishers; i++) {
+                            final CustomPublishProxy publishProxy =
+                                    this.publishProxies.get(i);
+
+                            int start = i * segment;
+                            int end = (i + 1) * segment - 1;
+
+                            PublishSubscribeBenchmark.this.assignSetOfevents(
+                                    publishProxy,
+                                    PublishSubscribeBenchmark.this.events,
+                                    start, end);
+
+                        }
+
+                        int rest =
+                                nbPublications
+                                        % PublishSubscribeBenchmark.this.nbPublishers;
+                        if (rest != 0) {
+                            int start =
+                                    PublishSubscribeBenchmark.this.nbPublishers
+                                            * segment;
+                            PublishSubscribeBenchmark.this.assignSetOfevents(
+                                    this.publishProxies.get(0),
+                                    PublishSubscribeBenchmark.this.events,
+                                    start, start + rest - 1);
+                        }
+
+                        if (this.synthethicSubscriptions.length > 0) {
+                            log.info("The subscriptions used by the subscriber(s) are the following:");
+                            for (SyntheticSubscription subscription : this.synthethicSubscriptions) {
+                                log.info("  {}", subscription.content);
+                            }
+                        } else {
+                            log.info("No subscription registered");
+                        }
+                    }
+
                     @Override
                     public void run(StatsRecorder recorder) {
                         try {
-                            PublishSubscribeBenchmark.this.execute(recorder);
+                            this.runBenchmark(recorder);
 
                             long maxEndToEndMeasurement = 0;
 
@@ -350,6 +485,199 @@ public class PublishSubscribeBenchmark {
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
+                    }
+
+                    public void runBenchmark(StatsRecorder recorder)
+                            throws EventCloudIdNotManaged, TimeoutException,
+                            ProActiveException, IOException {
+                        // subscribes
+                        long subscribeStartTime = System.currentTimeMillis();
+
+                        for (int i = 0; i < this.synthethicSubscriptions.length; i++) {
+                            final SubscribeApi subscribeProxy =
+                                    this.subscribeProxies.get(i
+                                            / PublishSubscribeBenchmark.this.nbSubscriptionsPerSubscriber);
+                            Subscription subscription =
+                                    new Subscription(
+                                            this.synthethicSubscriptions[i].content);
+
+                            PublishSubscribeBenchmark.this.subscriptions.add(subscription);
+
+                            PublishSubscribeBenchmark.this.listeners.put(
+                                    subscription.getId(),
+                                    PublishSubscribeBenchmark.this.subscribe(
+                                            this.collector,
+                                            subscribeProxy,
+                                            subscription,
+                                            PublishSubscribeBenchmark.this.listenerType,
+                                            this.synthethicSubscriptions[i].nbEventsExpected));
+                        }
+
+                        // waits that subscriptions are indexed as the process
+                        // is asynchronous
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        PublishSubscribeBenchmark.this.endToEndMeasurementEntryTime =
+                                System.currentTimeMillis();
+
+                        // triggers publications (publish events)
+                        for (CustomPublishProxy proxy : this.publishProxies) {
+                            proxy.publish();
+                        }
+
+                        // timeout after 1 hour
+                        this.collector.waitForAllPublisherReports(3600000);
+
+                        PublishSubscribeBenchmark.this.pointToPointEntryMeasurements =
+                                this.collector.getPointToPointEntryMeasurements();
+
+                        // timeout after 1 hour
+                        this.collector.waitForAllSubscriberReports(3600000);
+
+                        if (PublishSubscribeBenchmark.this.measureStorageTime) {
+                            // timeout after 1 hour
+                            this.collector.waitForStoringQuadruples(3600000);
+                        }
+
+                        long globalEndToEndTerminationTime =
+                                System.currentTimeMillis();
+
+                        recorder.reportValue(
+                                MicroBenchmark.DEFAULT_CATEGORY_NAME,
+                                globalEndToEndTerminationTime
+                                        - PublishSubscribeBenchmark.this.endToEndMeasurementEntryTime);
+
+                        // the end to end termination time is the time at which
+                        // each subscriber has notified the collector about its
+                        // termination
+                        PublishSubscribeBenchmark.this.endToEndMeasurementsExitTime =
+                                this.collector.getEndToEndTerminationTimes();
+
+                        // collects output measurements
+                        for (Entry<SubscriptionId, SimpleMeasurement> entry : this.collector.getOutputMeasurements()
+                                .entrySet()) {
+                            PublishSubscribeBenchmark.this.outputMeasurements.put(
+                                    entry.getKey(), entry.getValue());
+                        }
+
+                        // collects point-to-point exit measurements
+                        for (Entry<SubscriptionId, CumulatedMeasurement> entry : this.collector.getPointToPointExitMeasurements()
+                                .entrySet()) {
+                            PublishSubscribeBenchmark.this.pointToPointExitMeasurements.put(
+                                    entry.getKey(), entry.getValue());
+                        }
+
+                        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
+                                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
+                            // waits a little because some quadruples may not
+                            // have been yet stored on peers due to the fact
+                            // that the matching between a CE and a subscription
+                            // is performed on one peer and the storage of
+                            // quadruples on multiple peers. This issue does not
+                            // occur with SBCE1 due to the reconstruction step
+                            // that ensures all quadruples are stored before to
+                            // deliver the final notification. However, this
+                            // issue may occur with all the algorithms when a
+                            // signal or binding notification listener is used.
+                            try {
+                                Thread.sleep(EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_TIMEOUT.getValue() * 2);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        // count number of quadruples per peer
+                        int totalNumberOfQuadruples =
+                                PublishSubscribeBenchmark.this.logRunStatistics(this.deployer);
+
+                        recorder.reportValue(
+                                NB_QUADRUPLES_PER_PEER_CATEGORY,
+                                totalNumberOfQuadruples
+                                        / PublishSubscribeBenchmark.this.nbPeers);
+
+                        if (PublishSubscribeBenchmark.this.measureStorageTime) {
+                            RetrieveStorageEndTimesResponse response =
+                                    (RetrieveStorageEndTimesResponse) PAFuture.getFutureValue(this.deployer.getRandomPeer()
+                                            .send(
+                                                    new RetrieveStorageEndTimesRequest()));
+
+                            long publicationsStorageTime =
+                                    response.getResult()
+                                            .getPublicationsEndTime()
+                                            - PublishSubscribeBenchmark.this.endToEndMeasurementEntryTime;
+                            long subscriptionsStorageTime =
+                                    (PublishSubscribeBenchmark.this.nbSubscribers == 0 || PublishSubscribeBenchmark.this.nbSubscriptionsPerSubscriber == 0)
+                                            ? 0 : response.getResult()
+                                                    .getSubscriptionsEndTime()
+                                                    - subscribeStartTime;
+
+                            log.info(
+                                    "Time required to store publications: {}",
+                                    publicationsStorageTime);
+                            log.info(
+                                    "Time required to store subscriptions: {}",
+                                    subscriptionsStorageTime);
+
+                            recorder.reportValue(
+                                    PUBLICATIONS_STORAGE_TIME,
+                                    publicationsStorageTime);
+
+                            recorder.reportValue(
+                                    SUBSCRIPTIONS_STORAGE_TIME,
+                                    subscriptionsStorageTime);
+                        }
+                    }
+
+                    @Override
+                    public void clear() throws Exception {
+                        PublishSubscribeBenchmark.this.listeners.clear();
+                        PublishSubscribeBenchmark.this.subscriptions.clear();
+
+                        // clears results collected during previous run
+                        if (PublishSubscribeBenchmark.this.endToEndMeasurementsExitTime != null) {
+                            PublishSubscribeBenchmark.this.endToEndMeasurementsExitTime.clear();
+                        }
+
+                        PublishSubscribeBenchmark.this.outputMeasurements.clear();
+                        PublishSubscribeBenchmark.this.pointToPointExitMeasurements.clear();
+                        PublishSubscribeBenchmark.this.pointToPointEntryMeasurements.clear();
+
+                        List<ResponseOperation> futures =
+                                new ArrayList<ResponseOperation>();
+                        System.out.println("PublishSubscribeBenchmark.execute().new MicroBenchmarkService() {...}.clear() BIGDUMP-1");
+                        for (Peer p : this.deployer.getRandomTracker()
+                                .getPeers()) {
+                            System.out.println(p.dump());
+                        }
+                        for (Peer p : this.deployer.getRandomTracker()
+                                .getPeers()) {
+                            futures.add(p.receive(new ClearOperation()));
+                        }
+
+                        PAFuture.waitForAll(futures);
+
+                        this.collector.clear();
+
+                        for (CustomPublishProxy cpp : this.publishProxies) {
+                            cpp.clear();
+                        }
+
+                        System.out.println("PublishSubscribeBenchmark.execute().new MicroBenchmarkService() {...}.clear() BIGDUMP");
+                        for (Peer p : this.deployer.getRandomTracker()
+                                .getPeers()) {
+                            System.out.println(p.dump());
+                        }
+                    }
+
+                    @Override
+                    public void teardown() throws Exception {
+                        PublishSubscribeBenchmark.this.undeploy(
+                                this.nodeProvider, this.deployer,
+                                this.registry, this.collectorURL);
                     }
 
                 });
@@ -422,11 +750,10 @@ public class PublishSubscribeBenchmark {
         double pointToPointSum = 0;
         double outputSum = 0;
 
-        for (int i = 0; i < this.subscriptions.size(); i++) {
-            SubscriptionId subscriptionId = this.subscriptions.get(i).getId();
-
+        for (int i = 0; i < this.nbSubscribers
+                * this.nbSubscriptionsPerSubscriber; i++) {
             statsBuffer.append("Benchmark results for subscription ");
-            statsBuffer.append(subscriptionId.toString());
+            statsBuffer.append(i + 1);
             statsBuffer.append('\n');
 
             Category endToEndCategory =
@@ -490,235 +817,6 @@ public class PublishSubscribeBenchmark {
         }
 
         return statsBuffer.toString();
-    }
-
-    public void execute(StatsRecorder recorder) throws EventCloudIdNotManaged,
-            TimeoutException, ProActiveException, IOException {
-
-        this.listeners.clear();
-        this.subscriptions.clear();
-
-        // clears results collected during previous run
-        if (this.endToEndMeasurementsExitTime != null) {
-            this.endToEndMeasurementsExitTime.clear();
-        }
-
-        this.outputMeasurements.clear();
-        this.pointToPointExitMeasurements.clear();
-        this.pointToPointEntryMeasurements.clear();
-
-        // creates collector
-        BenchmarkStatsCollector collector =
-                PAActiveObject.newActive(
-                        BenchmarkStatsCollector.class, new Object[] {
-                                this.nbPublishers,
-                                this.nbSubscribers,
-                                this.nbSubscriptionsPerSubscriber,
-                                (this.nbQuadruplesPerCompoundEvent + 1)
-                                        * nbPublications});
-        String collectorURL =
-                PAActiveObject.registerByName(
-                        collector, BENCHMARK_STATS_COLLECTOR_NAME);
-
-        GcmDeploymentNodeProvider nodeProvider =
-                this.createNodeProviderIfRequired();
-
-        EventCloudDeploymentDescriptor descriptor =
-                this.createDeploymentDescriptor(nodeProvider, collectorURL);
-
-        // creates eventcloud
-        EventCloudDeployer deployer =
-                new EventCloudDeployer(new EventCloudDescription(), descriptor);
-        deployer.deploy(1, this.nbPeers);
-
-        SemanticZone[] zones = this.retrievePeerZones(deployer);
-
-        SyntheticSubscription[] subscriptions =
-                this.getOrCreateSubscriptions(zones);
-
-        Event[] events = this.createEvents(deployer, zones, subscriptions);
-
-        if (!this.disableInterCompoundEventsShuffling) {
-            org.objectweb.proactive.extensions.p2p.structured.utils.Arrays.shuffle(events);
-        }
-
-        EventCloudsRegistry registry =
-                this.deployRegistry(deployer, nodeProvider);
-
-        String registryURL = null;
-        try {
-            registryURL = registry.register("registry");
-        } catch (ProActiveException e) {
-            throw new IllegalStateException(e);
-        }
-
-        EventCloudId eventCloudId = deployer.getEventCloudDescription().getId();
-
-        // creates proxies
-        List<CustomPublishProxy> publishProxies =
-                this.createPublishProxies(
-                        registryURL, eventCloudId, nodeProvider);
-        List<SubscribeApi> subscribeProxies =
-                this.createSubscribeProxies(
-                        registryURL, eventCloudId, nodeProvider);
-
-        if (subscriptions.length > 0) {
-            log.info("The subscriptions used by the subscribers are the following:");
-            for (SyntheticSubscription subscription : subscriptions) {
-                log.info("  {}", subscription.content);
-            }
-        } else {
-            log.info("No subscription registered");
-        }
-
-        // subscribes
-        long subscribeStartTime = System.currentTimeMillis();
-
-        for (int i = 0; i < subscriptions.length; i++) {
-            final SubscribeApi subscribeProxy =
-                    subscribeProxies.get(i / this.nbSubscriptionsPerSubscriber);
-
-            Subscription subscription =
-                    new Subscription(subscriptions[i].content);
-
-            this.subscriptions.add(subscription);
-            this.listeners.put(subscription.getId(), this.subscribe(
-                    collector, subscribeProxy, subscription, this.listenerType,
-                    subscriptions[i].nbEventsExpected));
-        }
-
-        // waits that subscriptions are indexed as the process is asynchronous
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // init custom publish proxies
-        for (CustomPublishProxy proxy : publishProxies) {
-            proxy.init(collectorURL, this.waitBetweenPublications);
-        }
-
-        // assign events to publish proxies
-        final int segment = (nbPublications / this.nbPublishers);
-
-        for (int i = 0; i < this.nbPublishers; i++) {
-            final CustomPublishProxy publishProxy = publishProxies.get(i);
-
-            int start = i * segment;
-            int end = (i + 1) * segment - 1;
-
-            PublishSubscribeBenchmark.this.assignSetOfevents(
-                    publishProxy, events, start, end);
-
-        }
-
-        int rest = nbPublications % this.nbPublishers;
-        if (rest != 0) {
-            int start = this.nbPublishers * segment;
-            this.assignSetOfevents(publishProxies.get(0), events, start, start
-                    + rest - 1);
-        }
-
-        this.endToEndMeasurementEntryTime = System.currentTimeMillis();
-
-        // triggers publications (publish events)
-        for (CustomPublishProxy proxy : publishProxies) {
-            proxy.publish();
-        }
-
-        // timeout after 1 hour
-        collector.waitForAllPublisherReports(3600000);
-
-        this.pointToPointEntryMeasurements =
-                collector.getPointToPointEntryMeasurements();
-
-        // timeout after 1 hour
-        collector.waitForAllSubscriberReports(3600000);
-
-        if (this.measureStorageTime) {
-            // timeout after 1 hour
-            collector.waitForStoringQuadruples(3600000);
-        }
-
-        long globalEndToEndTerminationTime = System.currentTimeMillis();
-
-        recorder.reportValue(
-                MicroBenchmark.DEFAULT_CATEGORY_NAME,
-                globalEndToEndTerminationTime
-                        - this.endToEndMeasurementEntryTime);
-
-        // the end to end termination time is the time at which each
-        // subscriber has notified the collector about its termination
-        this.endToEndMeasurementsExitTime =
-                collector.getEndToEndTerminationTimes();
-
-        // collects output measurements
-        for (Entry<SubscriptionId, SimpleMeasurement> entry : collector.getOutputMeasurements()
-                .entrySet()) {
-            this.outputMeasurements.put(entry.getKey(), entry.getValue());
-        }
-
-        // collects point-to-point exit measurements
-        for (Entry<SubscriptionId, CumulatedMeasurement> entry : collector.getPointToPointExitMeasurements()
-                .entrySet()) {
-            this.pointToPointExitMeasurements.put(
-                    entry.getKey(), entry.getValue());
-        }
-
-        if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
-                || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-            // waits a little because some quadruples may not have been yet
-            // stored on peers due to the fact that the matching between a CE
-            // and a subscription is performed on one peer and the storage of
-            // quadruples on multiple peers. This issue does not occur with
-            // SBCE1 due to the reconstruction step that ensures all quadruples
-            // are stored before to deliver the final notification. However,
-            // this issue may occur with all the algorithms when a signal or
-            // binding notification listener is used.
-            try {
-                Thread.sleep(EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_TIMEOUT.getValue() * 2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // count number of quadruples per peer
-        int totalNumberOfQuadruples = this.logRunStatistics(deployer);
-
-        recorder.reportValue(
-                NB_QUADRUPLES_PER_PEER_CATEGORY, totalNumberOfQuadruples
-                        / this.nbPeers);
-
-        if (this.measureStorageTime) {
-            RetrieveStorageEndTimesResponse response =
-                    (RetrieveStorageEndTimesResponse) PAFuture.getFutureValue(deployer.getRandomPeer()
-                            .send(new RetrieveStorageEndTimesRequest()));
-
-            long publicationsStorageTime =
-                    response.getResult().getPublicationsEndTime()
-                            - this.endToEndMeasurementEntryTime;
-            long subscriptionsStorageTime =
-                    (this.nbSubscribers == 0 || this.nbSubscriptionsPerSubscriber == 0)
-                            ? 0 : response.getResult()
-                                    .getSubscriptionsEndTime()
-                                    - subscribeStartTime;
-
-            log.info(
-                    "Time required to store publications: {}",
-                    publicationsStorageTime);
-            log.info(
-                    "Time required to store subscriptions: {}",
-                    subscriptionsStorageTime);
-
-            recorder.reportValue(
-                    PUBLICATIONS_STORAGE_TIME, publicationsStorageTime);
-
-            recorder.reportValue(
-                    SUBSCRIPTIONS_STORAGE_TIME, subscriptionsStorageTime);
-        }
-
-        this.undeploy(nodeProvider, deployer, registry, collectorURL);
     }
 
     private void undeploy(GcmDeploymentNodeProvider nodeProvider,
@@ -1201,7 +1299,6 @@ public class PublishSubscribeBenchmark {
                                               Subscription subscription,
                                               NotificationListenerType listenerType,
                                               int nbEventsExpected) {
-
         NotificationListener<?> listener = null;
 
         switch (listenerType) {

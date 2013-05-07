@@ -45,9 +45,9 @@ public class TransactionalTdbDatastore extends Datastore {
 
     private final boolean autoRemove;
 
-    private final Dataset dataset;
+    private Dataset dataset;
 
-    private final Location location;
+    private Location location;
 
     private final StatsRecorder statsRecorder;
 
@@ -67,17 +67,8 @@ public class TransactionalTdbDatastore extends Datastore {
      */
     protected TransactionalTdbDatastore(Location location,
             StatsRecorder statsRecorder, boolean autoRemove) {
-        if (location != null && !location.isMem()) {
-            // creates location directory if it does not already exist
-            new File(location.getDirectoryPath()).mkdirs();
 
-            this.dataset = TDBFactory.createDataset(location);
-            this.location = location;
-        } else {
-            this.dataset = TDBFactory.createDataset();
-            this.location = null;
-        }
-
+        this.location = location;
         this.autoRemove = autoRemove;
         this.statsRecorder = statsRecorder;
 
@@ -110,7 +101,14 @@ public class TransactionalTdbDatastore extends Datastore {
      */
     @Override
     protected void _open() {
+        if (this.location != null && !this.location.isMem()) {
+            // creates location directory if it does not already exist
+            new File(this.location.getDirectoryPath()).mkdirs();
 
+            this.dataset = TDBFactory.createDataset(this.location);
+        } else {
+            this.dataset = TDBFactory.createDataset();
+        }
     }
 
     /**

@@ -21,8 +21,27 @@ package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
  * 
  * @author lpellegr
  */
-public interface MicroBenchmarkRun {
+public interface MicroBenchmarkService {
 
+    /**
+     * Invoked before the first run. The purpose of this method is to setup the
+     * infrastructure used to execute the different runs.
+     */
+    void setup() throws Exception;
+
+    /**
+     * Benchmark run to evaluate.
+     */
     void run(StatsRecorder recorder) throws Exception;
+
+    /**
+     * Invoked after each run to clean up data structures.
+     */
+    void clear() throws Exception;
+
+    /**
+     * Invoked after the last run.
+     */
+    void teardown() throws Exception;
 
 }

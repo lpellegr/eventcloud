@@ -14,24 +14,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.benchmarks.pubsub.proxies;
-
-import fr.inria.eventcloud.api.Event;
-import fr.inria.eventcloud.proxies.PublishProxy;
+package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
 
 /**
- * Custom publish proxy interface for benchmark purposes.
+ * Simple adapter for {@link MicroBenchmarkService}.
  * 
  * @author lpellegr
  */
-public interface CustomPublishProxy extends PublishProxy {
+public abstract class MicroBenchmarkServiceAdapter implements
+        MicroBenchmarkService {
 
-    boolean assignEvents(Event[] events);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setup() throws Exception {
+    }
 
-    void publish();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public abstract void run(StatsRecorder recorder) throws Exception;
 
-    boolean init(String collectorURL, int waitPeriodBetweenPublications);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clear() throws Exception {
+    }
 
-    boolean clear();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void teardown() throws Exception {
+    }
 
 }

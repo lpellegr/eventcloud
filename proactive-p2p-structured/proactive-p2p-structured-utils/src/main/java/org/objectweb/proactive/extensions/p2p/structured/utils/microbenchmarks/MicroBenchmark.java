@@ -29,7 +29,7 @@ public class MicroBenchmark {
 
     private final int nbRuns;
 
-    private final MicroBenchmarkRun benchmark;
+    private final MicroBenchmarkService benchmark;
 
     private final String[] categoryNames;
 
@@ -39,12 +39,12 @@ public class MicroBenchmark {
 
     private StatsRecorder statsRecorder;
 
-    public MicroBenchmark(int nbRuns, MicroBenchmarkRun task) {
+    public MicroBenchmark(int nbRuns, MicroBenchmarkService task) {
         this(new String[] {"default"}, nbRuns, task);
     }
 
     public MicroBenchmark(String[] categoryNames, int nbRuns,
-            MicroBenchmarkRun task) {
+            MicroBenchmarkService task) {
         this.categoryNames = categoryNames;
         this.nbRuns = nbRuns;
         this.benchmark = task;
@@ -67,11 +67,18 @@ public class MicroBenchmark {
                 new StatsRecorderImpl(
                         this.categoryNames, this.nbRuns, this.discardFirstRuns);
 
+        try {
+            this.benchmark.setup();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         for (int i = 0; i < this.nbRuns + this.discardFirstRuns; i++) {
             try {
                 this.benchmark.run(this.statsRecorder);
+                this.benchmark.clear();
             } catch (Exception e) {
-                throw new IllegalStateException(e);
+                throw new RuntimeException(e);
             }
 
             if (this.showProgress) {
@@ -86,6 +93,12 @@ public class MicroBenchmark {
                     System.out.println();
                 }
             }
+        }
+
+        try {
+            this.benchmark.teardown();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
