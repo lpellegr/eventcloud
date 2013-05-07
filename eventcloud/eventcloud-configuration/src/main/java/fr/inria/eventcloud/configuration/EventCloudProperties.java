@@ -165,15 +165,21 @@ public class EventCloudProperties {
                     "eventcloud.ephemeral.subscription.expiration.time", 720000);
 
     /**
-     * Defines whether static load balancing must be enabled or not. When it is
-     * enabled, a join operation use the statistics which have been recorded
-     * during data insertion to compute a value that indicates where to split
-     * the zone managed by the landmark peer. By default this property is
-     * disabled. This property must be enabled in conjunction with
-     * {@link #RECORD_STATS_MISC_DATASTORE} in order to work.
+     * Defines whether load-balancing is enabled or not.
      */
-    public static final PropertyBoolean STATIC_LOAD_BALANCING =
-            new PropertyBoolean("eventcloud.static.load.balancing", false);
+    public static final PropertyBoolean LOAD_BALANCING = new PropertyBoolean(
+            "eventcloud.load.balancing", false);
+
+    public static final PropertyInteger LOAD_BALANCING_HISTORY_TIME_WINDOW =
+            new PropertyInteger(
+                    "eventcloud.load.balancing.history.time.window", 3600000);
+
+    public static final PropertyInteger LOAD_BALANCING_PROBING_TIMEOUT =
+            new PropertyInteger(
+                    "eventcloud.load.balancing.probing.timeout", 10000);
+
+    public static final PropertyDouble LOAD_BALANCING_REFRESH_RATIO =
+            new PropertyDouble("eventcloud.load.balancing.refresh.ratio", 1.5);
 
     /**
      * This property is used to have the possibility to restore a repository
