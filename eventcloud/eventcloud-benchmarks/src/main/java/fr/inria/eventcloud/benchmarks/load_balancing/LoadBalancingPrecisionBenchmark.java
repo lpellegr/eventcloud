@@ -23,7 +23,7 @@ import org.apfloat.spi.BuilderFactory;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
-import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkServiceAdapter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
 import org.slf4j.LoggerFactory;
 
@@ -108,23 +108,24 @@ public class LoadBalancingPrecisionBenchmark {
         ApfloatUtils.DEFAULT_PRECISION = this.precision;
 
         MicroBenchmark microBenchmark =
-                new MicroBenchmark(this.nbRuns, new MicroBenchmarkRun() {
-                    @Override
-                    public void run(StatsRecorder recorder) {
-                        StaticLoadBalancingTestBuilder.Test test =
-                                new StaticLoadBalancingTestBuilder(
-                                        LoadBalancingPrecisionBenchmark.this.trigResource.toString()).enableLoadBalancing(
-                                        CentroidStatsRecorder.class)
-                                        .setNbPeersToInject(
-                                                LoadBalancingPrecisionBenchmark.this.nbPeersToInject)
-                                        .build();
+                new MicroBenchmark(
+                        this.nbRuns, new MicroBenchmarkServiceAdapter() {
+                            @Override
+                            public void run(StatsRecorder recorder) {
+                                StaticLoadBalancingTestBuilder.Test test =
+                                        new StaticLoadBalancingTestBuilder(
+                                                LoadBalancingPrecisionBenchmark.this.trigResource.toString()).enableLoadBalancing(
+                                                CentroidStatsRecorder.class)
+                                                .setNbPeersToInject(
+                                                        LoadBalancingPrecisionBenchmark.this.nbPeersToInject)
+                                                .build();
 
-                        test.execute();
-                        recorder.reportValue(
-                                MicroBenchmark.DEFAULT_CATEGORY_NAME,
-                                test.getExecutionTime());
-                    }
-                });
+                                test.execute();
+                                recorder.reportValue(
+                                        MicroBenchmark.DEFAULT_CATEGORY_NAME,
+                                        test.getExecutionTime());
+                            }
+                        });
         microBenchmark.showProgress();
         microBenchmark.execute();
 

@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
-import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkServiceAdapter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
 import org.slf4j.LoggerFactory;
 
@@ -121,43 +121,48 @@ public class LoadBalancingStatsOverheadBenchmark {
         final List<Quadruple> quadruples = this.loadQuadruples();
 
         MicroBenchmark microBenchmark =
-                new MicroBenchmark(this.nbRuns, new MicroBenchmarkRun() {
+                new MicroBenchmark(
+                        this.nbRuns, new MicroBenchmarkServiceAdapter() {
 
-                    @Override
-                    public void run(StatsRecorder recorder)
-                            throws ProActiveException, EventCloudIdNotManaged {
-                        EventCloudDeployer deployer =
-                                new EventCloudDeployer(
-                                        new EventCloudDescription(),
-                                        new EventCloudDeploymentDescriptor());
-                        deployer.deploy(1, 1);
+                            @Override
+                            public void run(StatsRecorder recorder)
+                                    throws ProActiveException,
+                                    EventCloudIdNotManaged {
+                                EventCloudDeployer deployer =
+                                        new EventCloudDeployer(
+                                                new EventCloudDescription(),
+                                                new EventCloudDeploymentDescriptor());
+                                deployer.deploy(1, 1);
 
-                        EventCloudsRegistry registry =
-                                EventCloudsRegistryFactory.newEventCloudsRegistry();
-                        registry.register(deployer);
+                                EventCloudsRegistry registry =
+                                        EventCloudsRegistryFactory.newEventCloudsRegistry();
+                                registry.register(deployer);
 
-                        String registryURL = registry.register("registry");
+                                String registryURL =
+                                        registry.register("registry");
 
-                        EventCloudId id =
-                                deployer.getEventCloudDescription().getId();
+                                EventCloudId id =
+                                        deployer.getEventCloudDescription()
+                                                .getId();
 
-                        final PutGetApi putgetProxy =
-                                ProxyFactory.newPutGetProxy(registryURL, id);
+                                final PutGetApi putgetProxy =
+                                        ProxyFactory.newPutGetProxy(
+                                                registryURL, id);
 
-                        Stopwatch stopwatch = new Stopwatch();
+                                Stopwatch stopwatch = new Stopwatch();
 
-                        for (int i = 0; i < LoadBalancingStatsOverheadBenchmark.this.nbPublications; i++) {
-                            stopwatch.start();
-                            putgetProxy.add(quadruples.get(i));
-                            stopwatch.stop();
-                        }
+                                for (int i = 0; i < LoadBalancingStatsOverheadBenchmark.this.nbPublications; i++) {
+                                    stopwatch.start();
+                                    putgetProxy.add(quadruples.get(i));
+                                    stopwatch.stop();
+                                }
 
-                        recorder.reportValue(
-                                MicroBenchmark.DEFAULT_CATEGORY_NAME,
-                                stopwatch.elapsed(TimeUnit.MILLISECONDS));
-                    }
+                                recorder.reportValue(
+                                        MicroBenchmark.DEFAULT_CATEGORY_NAME,
+                                        stopwatch.elapsed(TimeUnit.MILLISECONDS));
+                            }
 
-                });
+                        });
         microBenchmark.discardFirstRuns(this.discardFirstRuns);
         microBenchmark.showProgress();
         microBenchmark.execute();

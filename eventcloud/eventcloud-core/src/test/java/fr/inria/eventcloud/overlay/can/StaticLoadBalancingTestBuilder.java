@@ -156,7 +156,7 @@ public class StaticLoadBalancingTestBuilder {
                 }
 
                 if (StaticLoadBalancingTestBuilder.this.enableLoadBalancing) {
-                    EventCloudProperties.STATIC_LOAD_BALANCING.setValue(true);
+                    EventCloudProperties.LOAD_BALANCING.setValue(true);
                 }
 
                 if (StaticLoadBalancingTestBuilder.this.statsRecorderClass != null) {

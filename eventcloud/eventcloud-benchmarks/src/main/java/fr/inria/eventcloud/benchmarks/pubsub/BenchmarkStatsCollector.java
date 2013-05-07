@@ -65,10 +65,9 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     private final int nbSubscriptionsPerSubscriber;
 
-    private MutableInteger nbReportsReceivedByPublishers = new MutableInteger();
+    private MutableInteger nbReportsReceivedByPublishers;
 
-    private MutableInteger nbReportsReceivedBySubscribers =
-            new MutableInteger();
+    private MutableInteger nbReportsReceivedBySubscribers;
 
     private RequestExecutor requestExecutor;
 
@@ -108,6 +107,26 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         this.nbQuadruplesPublished = nbQuadruplesExpected;
     }
 
+    public boolean clear() {
+        // if field not null then initActivity executed
+        if (this.endToEndTerminationTimes != null) {
+            this.endToEndTerminationTimes.clear();
+            this.outputMeasurements.clear();
+            this.pointToPointEntryMeasurements.clear();
+            this.pointToPointExitMeasurements.clear();
+            this.nbQuadrupleStoredPerPeer.clear();
+
+            this.nbReportsReceivedByPublishers.setValue(0);
+            this.nbReportsReceivedBySubscribers.setValue(0);
+
+            this.allPublishedQuadruplesStored.set(false);
+            this.allPublisherReportsReceived = false;
+            this.allSubscriberReportsReceived = false;
+        }
+
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -128,6 +147,9 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
         this.nbQuadrupleStoredPerPeer =
                 new ConcurrentHashMap<UUID, AtomicInteger>();
+
+        this.nbReportsReceivedByPublishers = new MutableInteger();
+        this.nbReportsReceivedBySubscribers = new MutableInteger();
     }
 
     @MemberOf("notify")
@@ -379,7 +401,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
             TimeoutException {
         BenchmarkStatsCollector collector =
                 PAActiveObject.newActive(
-                        BenchmarkStatsCollector.class, new Object[] {2, 2});
+                        BenchmarkStatsCollector.class,
+                        new Object[] {2, 2, 1, 1});
 
         final String url = PAActiveObject.getUrl(collector);
 

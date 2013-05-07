@@ -81,4 +81,14 @@ public class CanRequestResponseManager extends RequestResponseManager {
         return this.requestsAlreadyReceived.add(requestId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clear() {
+        super.clear();
+
+        this.requestsAlreadyReceived.clear();
+    }
+
 }

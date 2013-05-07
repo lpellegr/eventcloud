@@ -200,6 +200,10 @@ public class SparqlColander implements Closeable {
         }
     }
 
+    public TransactionalTdbDatastore getDatastore() {
+        return this.datastore;
+    }
+
     /**
      * {@inheritDoc}
      */

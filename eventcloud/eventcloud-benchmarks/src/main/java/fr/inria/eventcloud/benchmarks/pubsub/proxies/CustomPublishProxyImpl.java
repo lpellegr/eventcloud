@@ -117,6 +117,12 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
         }
     }
 
+    @Override
+    public boolean clear() {
+        this.pointToPointEntryMeasurements.clear();
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */

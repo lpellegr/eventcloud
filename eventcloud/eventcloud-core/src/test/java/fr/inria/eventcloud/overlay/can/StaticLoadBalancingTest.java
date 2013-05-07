@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
-import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkRun;
+import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkServiceAdapter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
 
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
@@ -163,7 +163,7 @@ public class StaticLoadBalancingTest {
         }
 
         MicroBenchmark microBenchmark =
-                new MicroBenchmark(nbRuns, new MicroBenchmarkRun() {
+                new MicroBenchmark(nbRuns, new MicroBenchmarkServiceAdapter() {
                     @Override
                     public void run(StatsRecorder recorder) throws Exception {
                         StaticLoadBalancingTestBuilder.Test test =

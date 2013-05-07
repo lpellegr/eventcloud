@@ -65,6 +65,7 @@ import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.delayers.PublishSubscribeOperationsDelayer;
+import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -94,9 +95,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private final TransactionalTdbDatastore subscriptionsDatastore;
 
-    private ScheduledExecutorService ephemeralSubscriptionsGarbageColletor;
+    private final ScheduledExecutorService ephemeralSubscriptionsGarbageColletor;
 
     private final PublishSubscribeOperationsDelayer publishSubscribeOperationsDelayer;
+
+    private final LoadBalancingManager loadBalancingManager;
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -195,10 +198,21 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                     EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
                     EventCloudProperties.EPHEMERAL_SUBSCRIPTIONS_GC_TIMEOUT.getValue(),
                     TimeUnit.MILLISECONDS);
+        } else {
+            this.ephemeralSubscriptionsGarbageColletor = null;
         }
 
         this.publishSubscribeOperationsDelayer =
                 new PublishSubscribeOperationsDelayer(this);
+
+        if (EventCloudProperties.LOAD_BALANCING.getValue()) {
+            this.loadBalancingManager =
+                    new LoadBalancingManager(
+                            this.miscDatastore.getStatsRecorder());
+            this.loadBalancingManager.start();
+        } else {
+            this.loadBalancingManager = null;
+        }
     }
 
     private void removeOutdatedEphemeralSubscriptions() {
@@ -899,8 +913,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     protected HomogenousPair<? extends Zone<SemanticElement>> splitZones(byte dimension) {
-        if (!EventCloudProperties.STATIC_LOAD_BALANCING.getValue()
-                || (EventCloudProperties.STATIC_LOAD_BALANCING.getValue() && this.miscDatastore.getStatsRecorder() == null)) {
+        if (!EventCloudProperties.LOAD_BALANCING.getValue()) {
             return super.splitZones(dimension);
         } else {
             SemanticElement estimatedMiddle =
@@ -940,6 +953,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     public void close() {
         super.close();
 
+        if (EventCloudProperties.LOAD_BALANCING.getValue()) {
+            this.loadBalancingManager.stop();
+        }
+
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
                 || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             this.ephemeralSubscriptionsGarbageColletor.shutdown();
@@ -956,6 +973,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         this.miscDatastore.close();
         this.subscriptionsDatastore.close();
+
     }
 
     private static final class SubscriptionNotFoundException extends Exception {

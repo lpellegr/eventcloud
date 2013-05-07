@@ -177,4 +177,8 @@ public abstract class RequestResponseManager implements Serializable {
 
     }
 
+    public void clear() {
+        this.repliesReceived.clear();
+    }
+
 }

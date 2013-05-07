@@ -36,12 +36,15 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.Object
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
+import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
+import fr.inria.eventcloud.datastore.AccessMode;
+import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
@@ -269,6 +272,18 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     public SparqlColander getColander() {
         return this.colander;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+
+        this.pendingResults.clear();
+
+        TransactionalDatasetGraph txnGraph =
+                this.colander.getDatastore().begin(AccessMode.WRITE);
+        txnGraph.delete(QuadruplePattern.ANY);
+        txnGraph.commit();
     }
 
     /**

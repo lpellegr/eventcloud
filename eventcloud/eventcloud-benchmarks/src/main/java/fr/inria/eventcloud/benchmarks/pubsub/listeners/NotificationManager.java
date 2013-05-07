@@ -70,15 +70,20 @@ public abstract class NotificationManager<T> implements Serializable {
         if (nbEventsReceived == this.nbEventsExpected) {
             this.outputMeasurement.setExitTime();
 
-            // notifies the collector in two steps to avoid to take the time to
-            // transfer measurements into the end-to-end delay
+            // notifies the collector in two steps to avoid to take the time
+            // to transfer measurements into the end-to-end delay
             this.collector.reportEndToEndTermination(
                     subscriptionId, this.outputMeasurement.getExitTime());
 
-            // reports other measurements
-            this.collector.reportMeasurements(
-                    subscriptionId, this.outputMeasurement,
-                    this.pointToPointExitMeasurements);
+            // to avoid concurrent modification exception given that we may
+            // report event reception while we are trying to serialize the
+            // collection
+            synchronized (this.pointToPointExitMeasurements) {
+                // reports other measurements
+                this.collector.reportMeasurements(
+                        subscriptionId, this.outputMeasurement,
+                        this.pointToPointExitMeasurements);
+            }
         }
     }
 
