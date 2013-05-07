@@ -648,11 +648,7 @@ public class PublishSubscribeBenchmark {
 
                         List<ResponseOperation> futures =
                                 new ArrayList<ResponseOperation>();
-                        System.out.println("PublishSubscribeBenchmark.execute().new MicroBenchmarkService() {...}.clear() BIGDUMP-1");
-                        for (Peer p : this.deployer.getRandomTracker()
-                                .getPeers()) {
-                            System.out.println(p.dump());
-                        }
+
                         for (Peer p : this.deployer.getRandomTracker()
                                 .getPeers()) {
                             futures.add(p.receive(new ClearOperation()));
@@ -664,12 +660,6 @@ public class PublishSubscribeBenchmark {
 
                         for (CustomPublishProxy cpp : this.publishProxies) {
                             cpp.clear();
-                        }
-
-                        System.out.println("PublishSubscribeBenchmark.execute().new MicroBenchmarkService() {...}.clear() BIGDUMP");
-                        for (Peer p : this.deployer.getRandomTracker()
-                                .getPeers()) {
-                            System.out.println(p.dump());
                         }
                     }
 
