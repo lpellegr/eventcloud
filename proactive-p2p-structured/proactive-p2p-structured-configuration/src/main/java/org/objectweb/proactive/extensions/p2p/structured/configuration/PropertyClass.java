@@ -31,20 +31,14 @@ public class PropertyClass extends Property<Class<?>> {
         super(name, defaultValue);
 
         this.defaultClassName = defaultValue.getName();
-
-        if (this.className == null) {
-            this.className = this.defaultClassName;
-        }
+        this.className = this.defaultClassName;
     }
 
     public PropertyClass(String name, String className) {
         super(name, null);
 
         this.defaultClassName = className;
-
-        if (this.className == null) {
-            this.className = this.defaultClassName;
-        }
+        this.className = this.defaultClassName;
     }
 
     public PropertyClass(String name, Class<?> defaultValue,
@@ -52,10 +46,7 @@ public class PropertyClass extends Property<Class<?>> {
         super(name, defaultValue, validator);
 
         this.defaultClassName = defaultValue.getName();
-
-        if (this.className == null) {
-            this.className = this.defaultClassName;
-        }
+        this.className = this.defaultClassName;
     }
 
     /**
