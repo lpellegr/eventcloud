@@ -38,7 +38,7 @@ public class DiskUsageCriterion extends Criterion {
 
         this.directory = new File(directory);
 
-        if (this.virtualCapacity <= 0) {
+        if (virtualCapacity <= 0) {
             this.virtualCapacity = this.directory.getTotalSpace();
         } else {
             this.virtualCapacity = virtualCapacity;
