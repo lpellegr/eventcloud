@@ -37,30 +37,32 @@ public class ExtendedCompoundEvent {
         this.indexQuadrupleUsedForIndexing = indexQuadrupleUsedForIndexing;
     }
 
-    public Quadruple getIndexedQuadruple() {
+    public Quadruple getQuadrupleUsedForIndexation() {
         return this.compoundEvent.get(this.indexQuadrupleUsedForIndexing);
     }
 
-    /*
-     * hashCode and equals method use only the compoundEvent field so that 
-     * when the same events are indexed on the same peer they are filtered out.
-     */
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return this.compoundEvent.hashCode();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof ExtendedCompoundEvent
-                && ((ExtendedCompoundEvent) obj).compoundEvent.equals(this.compoundEvent);
-    }
+    // /*
+    // * hashCode and equals methods use only the compoundEvent field so that
+    // * when the same events are indexed on the same peer they are filtered
+    // out.
+    // */
+    //
+    // /**
+    // * {@inheritDoc}
+    // */
+    // @Override
+    // public int hashCode() {
+    // return this.compoundEvent.hashCode();
+    // }
+    //
+    // /**
+    // * {@inheritDoc}
+    // */
+    // @Override
+    // public boolean equals(Object obj) {
+    // return obj instanceof ExtendedCompoundEvent
+    // && ((ExtendedCompoundEvent)
+    // obj).compoundEvent.equals(this.compoundEvent);
+    // }
 
 }
