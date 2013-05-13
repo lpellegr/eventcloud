@@ -175,7 +175,17 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
      */
     @Override
     public int hashCode() {
-        return this.quadruples.hashCode();
+        int h = 0;
+        Iterator<Quadruple> i = this.iterator();
+
+        while (i.hasNext()) {
+            Quadruple obj = i.next();
+            if (obj != null) {
+                h += obj.hashCode();
+            }
+        }
+
+        return h;
     }
 
     /**
@@ -183,8 +193,15 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof CompoundEvent
-                && this.quadruples.equals(((CompoundEvent) obj).quadruples);
+        if (obj instanceof CompoundEvent) {
+            CompoundEvent that = (CompoundEvent) obj;
+
+            return this.quadruples.size() == that.quadruples.size()
+                    && this.quadruples.containsAll(that.quadruples);
+
+        }
+
+        return false;
     }
 
     /**
