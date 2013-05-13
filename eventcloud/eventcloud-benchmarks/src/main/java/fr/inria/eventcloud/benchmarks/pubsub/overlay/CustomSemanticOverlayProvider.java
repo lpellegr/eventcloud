@@ -140,7 +140,7 @@ public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
                     ((CustomSemanticOverlay) overlay);
 
             int cumulatedSize =
-                    countNbCompoundEvents(buffer.getCompoundEvents());
+                    countNbCompoundEvents(buffer.getExtendedCompoundEvents());
 
             if (cumulatedSize > 0) {
                 customOverlay.publicationsStorageEndTime =
