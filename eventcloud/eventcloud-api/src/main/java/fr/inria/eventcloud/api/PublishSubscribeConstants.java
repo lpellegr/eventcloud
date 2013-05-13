@@ -240,6 +240,12 @@ public final class PublishSubscribeConstants {
 
     public static final Var GRAPH_VAR = Var.alloc("g");
 
+    public static final Var SUBJECT_VAR = Var.alloc("s");
+
+    public static final Var PREDICATE_VAR = Var.alloc("p");
+
+    public static final Var OBJECT_VAR = Var.alloc("o");
+
     // sId
     public static final Var SUBSCRIPTION_ID_VAR = Var.alloc("a");
 

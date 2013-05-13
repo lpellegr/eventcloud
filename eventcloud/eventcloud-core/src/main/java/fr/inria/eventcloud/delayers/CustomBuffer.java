@@ -87,7 +87,7 @@ public class CustomBuffer implements Collection<Object> {
      * 
      * @return the compoundEvents
      */
-    public Set<ExtendedCompoundEvent> getCompoundEvents() {
+    public Set<ExtendedCompoundEvent> getExtendedCompoundEvents() {
         return this.compoundEvents;
     }
 

@@ -17,6 +17,9 @@
 package fr.inria.eventcloud.delayers;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
@@ -24,18 +27,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
+import com.hp.hpl.jena.sparql.algebra.Table;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
+import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
+import com.hp.hpl.jena.sparql.algebra.op.OpTable;
 import com.hp.hpl.jena.sparql.algebra.optimize.Optimize;
+import com.hp.hpl.jena.sparql.algebra.table.TableData;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
+import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 import com.hp.hpl.jena.sparql.expr.E_Equals;
 import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
@@ -85,8 +95,8 @@ public class PublishCompoundEventRequestOperator extends
 
         try {
             // the quadruple is stored by using its meta graph value
-            for (ExtendedCompoundEvent ec : buffer.getCompoundEvents()) {
-                Quadruple q = ec.getIndexedQuadruple();
+            for (ExtendedCompoundEvent ec : buffer.getExtendedCompoundEvents()) {
+                Quadruple q = ec.getQuadrupleUsedForIndexation();
 
                 txnGraph.add(
                         q.createMetaGraphNode(), q.getSubject(),
@@ -106,18 +116,10 @@ public class PublishCompoundEventRequestOperator extends
      */
     @Override
     public void _triggerAction(CustomBuffer buffer) {
-        for (ExtendedCompoundEvent ce : buffer.getCompoundEvents()) {
-            this.fireMatchingSubscriptions(
-                    ce.compoundEvent, ce.indexQuadrupleUsedForIndexing);
-        }
+        this.fireMatchingSubscriptions(buffer.getExtendedCompoundEvents());
     }
 
-    private void fireMatchingSubscriptions(CompoundEvent compoundEvent,
-                                           int indexQuadrupleUsedForIndexing) {
-        Quadruple quadruple = compoundEvent.get(indexQuadrupleUsedForIndexing);
-
-        Node metaGraphNode = quadruple.createMetaGraphNode();
-
+    private void fireMatchingSubscriptions(Set<ExtendedCompoundEvent> extendedCompoundEvents) {
         TransactionalDatasetGraph txnGraph =
                 this.overlay.getSubscriptionsDatastore().begin(
                         AccessMode.READ_ONLY);
@@ -126,27 +128,28 @@ public class PublishCompoundEventRequestOperator extends
         try {
             Optimize.noOptimizer();
 
-            // finds the subscriptions that have their first sub
-            // subscription that matches one of the quadruple contained by
-            // the compound event which is published
+            // finds the subscriptions that have their first sub-subscription
+            // that matches one of the quadruple contained by the compound
+            // event which is published
             it =
                     Algebra.exec(
-                            createAlgebraRetrievingSubscriptionsMatching(compoundEvent),
+                            this.createFindSubscriptionsSatisfiedAlgebra(extendedCompoundEvents),
                             txnGraph.getUnderlyingDataset());
 
-            while (it.hasNext()) {
-                final Binding binding = it.nextBinding();
+            List<MatchingResult> matchingResults =
+                    this.identifyMatchingCompoundEvents(
+                            it, extendedCompoundEvents);
 
-                // the identifier of the subscription that is matched is
-                // available from the result of the query which has been
-                // executed
-                SubscriptionId subscriptionId =
-                        SubscriptionId.parseSubscriptionId(binding.get(
-                                PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
-                                .getLiteralLexicalForm());
+            for (MatchingResult matchingResult : matchingResults) {
+                CompoundEvent compoundEvent =
+                        matchingResult.extendedCompoundEvent.compoundEvent;
+
+                Quadruple quadruple =
+                        matchingResult.extendedCompoundEvent.getQuadrupleUsedForIndexation();
 
                 Subscription subscription =
-                        this.overlay.findSubscription(txnGraph, subscriptionId);
+                        this.overlay.findSubscription(
+                                txnGraph, matchingResult.subscriptionId);
 
                 if (PublishSubscribeUtils.filteredBySocialFilter(
                         super.overlay, subscription, quadruple)) {
@@ -161,17 +164,17 @@ public class PublishCompoundEventRequestOperator extends
                 }
 
                 // tries to rewrite the subscription (with the compound
-                // event published) that has the first sub subscription that
+                // event published) that has the first sub-subscription that
                 // is matched in order to know whether the subscription is
                 // fully satisfied or not
-                Pair<Binding, Integer> matchingResult =
+                Pair<Binding, Integer> result =
                         PublishSubscribeUtils.matches(
                                 compoundEvent, subscription);
 
-                if (matchingResult.getFirst() != null
+                if (result.getFirst() != null
                 // the quadruple used to route the compound event is the first
                 // quadruple matching the subscription
-                        && indexQuadrupleUsedForIndexing == matchingResult.getSecond()) {
+                        && matchingResult.extendedCompoundEvent.indexQuadrupleUsedForIndexing == result.getSecond()) {
                     // the overall subscription is verified
                     // we have to notify the subscriber about the solution
                     SubscribeProxy subscriber =
@@ -180,18 +183,18 @@ public class PublishCompoundEventRequestOperator extends
                     String source =
                             PAActiveObject.getUrl(this.overlay.getStub());
 
+                    Node metaGraphNode = quadruple.createMetaGraphNode();
+
                     switch (subscription.getType()) {
                         case BINDING:
                             subscriber.receiveSbce3(new BindingNotification(
                                     subscription.getOriginalId(),
-                                    metaGraphNode, source,
-                                    matchingResult.getFirst()));
+                                    metaGraphNode, source, result.getFirst()));
                             break;
                         case COMPOUND_EVENT:
                             subscriber.receiveSbce3(new QuadruplesNotification(
                                     subscription.getOriginalId(),
-                                    metaGraphNode, source,
-                                    ImmutableList.copyOf(compoundEvent)));
+                                    metaGraphNode, source, compoundEvent));
                             break;
                         case SIGNAL:
                             subscriber.receiveSbce3(new SignalNotification(
@@ -202,31 +205,39 @@ public class PublishCompoundEventRequestOperator extends
 
                     log.debug(
                             "Notification sent for graph {} because subscription {} and triggering condition satisfied on peer {}",
-                            compoundEvent.getGraph(), subscriptionId,
+                            compoundEvent.getGraph(),
+                            matchingResult.subscriptionId,
                             super.overlay.getId());
                 } else {
                     if (log.isTraceEnabled()) {
                         String reason;
 
-                        if (matchingResult.getFirst() == null) {
+                        if (result.getFirst() == null) {
                             reason =
                                     "the subscription is not satisfied, CE="
                                             + compoundEvent;
                         } else {
                             reason =
                                     "the triggering notification condition is false: "
-                                            + indexQuadrupleUsedForIndexing
-                                            + " != "
-                                            + matchingResult.getSecond();
+                                            + matchingResult.extendedCompoundEvent.indexQuadrupleUsedForIndexing
+                                            + " != " + result.getSecond();
                         }
 
                         log.trace(
                                 "Notification not sent for graph {} with subscription {} on peer {} because {}",
-                                compoundEvent.getGraph(), subscription.getId(),
-                                super.overlay, reason);
+                                compoundEvent.getGraph(),
+                                matchingResult.subscriptionId, super.overlay,
+                                reason);
                     }
                 }
             }
+
+            // looks for ephemeral subscriptions that can be satisfied
+            // TODO: remove ephemeral subscriptions thanks to the meta graph
+            // values returned by the next method
+            this.findAndHandleEphemeralSubscriptions(
+                    txnGraph, extendedCompoundEvents);
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -237,11 +248,148 @@ public class PublishCompoundEventRequestOperator extends
             Optimize.setFactory(Optimize.stdOptimizationFactory);
         }
 
-        PublishSubscribeUtils.findAndHandleEphemeralSubscriptions(
-                this.overlay, quadruple, metaGraphNode);
     }
 
-    private static Op createAlgebraRetrievingSubscriptionsMatching(CompoundEvent compoundEvent) {
+    private List<Node> findAndHandleEphemeralSubscriptions(TransactionalDatasetGraph txnGraph,
+                                                           Set<ExtendedCompoundEvent> extendedCompoundEvents) {
+        Builder<Node> result = ImmutableList.builder();
+
+        try {
+            QueryIterator it =
+                    Algebra.exec(
+                            this.createFindMatchedEphemeralSubscriptionsAlgebra(extendedCompoundEvents),
+                            txnGraph.getUnderlyingDataset());
+
+            while (it.hasNext()) {
+                Binding binding = it.next();
+
+                Node metaGraphNode =
+                        binding.get(PublishSubscribeConstants.GRAPH_VAR);
+
+                for (ExtendedCompoundEvent extendedCompoundEvent : extendedCompoundEvents) {
+                    Node compoundEventMetaGraphNode =
+                            extendedCompoundEvent.compoundEvent.get(0)
+                                    .createMetaGraphNode();
+
+                    if (compoundEventMetaGraphNode.equals(metaGraphNode)) {
+                        SubscriptionId subscriptionId =
+                                PublishSubscribeUtils.extractSubscriptionId(binding.get(PublishSubscribeConstants.SUBJECT_VAR));
+
+                        String subscriberURL =
+                                binding.get(
+                                        PublishSubscribeConstants.OBJECT_VAR)
+                                        .getURI();
+
+                        final QuadruplesNotification n =
+                                new QuadruplesNotification(
+                                        subscriptionId,
+                                        metaGraphNode,
+                                        PAActiveObject.getUrl(this.overlay.getStub()),
+                                        extendedCompoundEvent.compoundEvent);
+
+                        Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberURL)
+                                .receiveSbce2(n);
+
+                        result.add(metaGraphNode);
+
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            txnGraph.end();
+        }
+
+        return result.build();
+    }
+
+    private Op createFindMatchedEphemeralSubscriptionsAlgebra(Set<ExtendedCompoundEvent> extendedCompoundEvents) {
+        BasicPattern bp = new BasicPattern();
+        bp.add(Triple.create(
+                PublishSubscribeConstants.SUBJECT_VAR,
+                PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
+                PublishSubscribeConstants.OBJECT_VAR));
+
+        Builder<Binding> bindings = ImmutableList.builder();
+
+        for (ExtendedCompoundEvent extendedCompoundEvent : extendedCompoundEvents) {
+            BindingMap binding = new BindingHashMap();
+            binding.add(
+                    PublishSubscribeConstants.GRAPH_VAR,
+                    extendedCompoundEvent.compoundEvent.get(0)
+                            .createMetaGraphNode());
+            bindings.add(binding);
+        }
+
+        Table table =
+                new TableData(
+                        ImmutableList.of(PublishSubscribeConstants.GRAPH_VAR),
+                        bindings.build());
+
+        Op result =
+                new OpGraph(PublishSubscribeConstants.GRAPH_VAR, new OpBGP(bp));
+        result = OpJoin.create(result, OpTable.create(table));
+        result =
+                new OpProject(result, ImmutableList.of(
+                        PublishSubscribeConstants.GRAPH_VAR,
+                        PublishSubscribeConstants.SUBJECT_VAR,
+                        PublishSubscribeConstants.OBJECT_VAR));
+
+        return result;
+    }
+
+    private List<MatchingResult> identifyMatchingCompoundEvents(QueryIterator it,
+                                                                Set<ExtendedCompoundEvent> extendedCompoundEvents) {
+        Builder<MatchingResult> builder = ImmutableList.builder();
+
+        while (it.hasNext()) {
+            final Binding binding = it.nextBinding();
+
+            Node ssGraph =
+                    binding.get(PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VAR);
+            Node ssSubject =
+                    binding.get(PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VAR);
+            Node ssPredicate =
+                    binding.get(PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VAR);
+            Node ssObject =
+                    binding.get(PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VAR);
+
+            for (ExtendedCompoundEvent extendedCompoundEvent : extendedCompoundEvents) {
+                for (Quadruple q : extendedCompoundEvent.compoundEvent) {
+                    if (this.matches(q.getObject(), ssObject)
+                            && this.matches(q.getPredicate(), ssPredicate)
+                            && this.matches(q.getSubject(), ssSubject)
+                            && (this.matches(q.getGraph(), ssGraph) || q.getGraph()
+                                    .getURI()
+                                    .startsWith(ssGraph.getURI()))) {
+
+                        SubscriptionId subscriptionId =
+                                SubscriptionId.parseSubscriptionId(binding.get(
+                                        PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
+                                        .getLiteralLexicalForm());
+
+                        builder.add(new MatchingResult(
+                                subscriptionId, extendedCompoundEvent));
+
+                        continue;
+                    }
+                }
+            }
+        }
+
+        return builder.build();
+    }
+
+    private final boolean matches(Node publicationTerm, Node subscriptionTerm) {
+        return subscriptionTerm.equals(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE)
+                || publicationTerm.equals(subscriptionTerm);
+    }
+
+    private Op createFindSubscriptionsSatisfiedAlgebra(Set<ExtendedCompoundEvent> compoundEvents) {
+        Iterator<ExtendedCompoundEvent> it = compoundEvents.iterator();
+
         // basic graph pattern
         BasicPattern bp = new BasicPattern();
         bp.add(Triple.create(
@@ -276,30 +424,35 @@ public class PublishCompoundEventRequestOperator extends
         // conditions
         Expr filterConditions = null;
 
-        for (Quadruple quad : compoundEvent) {
-            NodeValue graphExpr = NodeValue.makeNode(quad.getGraph());
+        while (it.hasNext()) {
+            CompoundEvent compoundEvent = it.next().compoundEvent;
 
-            E_LogicalOr graphConditions = createGraphConditions(graphExpr);
+            for (Quadruple q : compoundEvent) {
+                NodeValue graphExpr = NodeValue.makeNode(q.getGraph());
 
-            E_LogicalOr subjectConditions =
-                    createSubjectConditions(NodeValue.makeNode(quad.getSubject()));
+                E_LogicalOr graphConditions =
+                        this.createGraphConditions(graphExpr);
 
-            E_LogicalOr predicateConditions =
-                    createPredicateConditions(NodeValue.makeNode(quad.getPredicate()));
+                E_LogicalOr subjectConditions =
+                        this.createSubjectConditions(NodeValue.makeNode(q.getSubject()));
 
-            E_LogicalOr objectConditions =
-                    createObjectConditions(NodeValue.makeNode(quad.getObject()));
+                E_LogicalOr predicateConditions =
+                        this.createPredicateConditions(NodeValue.makeNode(q.getPredicate()));
 
-            Expr conditions =
-                    new E_LogicalAnd(graphConditions, new E_LogicalAnd(
-                            subjectConditions, new E_LogicalAnd(
-                                    predicateConditions, objectConditions)));
+                E_LogicalOr objectConditions =
+                        this.createObjectConditions(NodeValue.makeNode(q.getObject()));
 
-            if (filterConditions == null) {
-                filterConditions = conditions;
-            } else {
-                filterConditions =
-                        new E_LogicalOr(filterConditions, conditions);
+                Expr conditions =
+                        new E_LogicalAnd(graphConditions, new E_LogicalAnd(
+                                subjectConditions, new E_LogicalAnd(
+                                        predicateConditions, objectConditions)));
+
+                if (filterConditions == null) {
+                    filterConditions = conditions;
+                } else {
+                    filterConditions =
+                            new E_LogicalOr(filterConditions, conditions);
+                }
             }
         }
 
@@ -307,12 +460,20 @@ public class PublishCompoundEventRequestOperator extends
         Op filter = OpFilter.filter(filterConditions, new OpBGP(bp));
 
         // named graph + projection
-        return new OpProject(
-                new OpGraph(PublishSubscribeConstants.GRAPH_VAR, filter),
-                Arrays.asList(PublishSubscribeConstants.SUBSCRIPTION_ID_VAR));
+        Op result =
+                new OpProject(
+                        new OpGraph(PublishSubscribeConstants.GRAPH_VAR, filter),
+                        Arrays.asList(
+                                PublishSubscribeConstants.SUBSCRIPTION_ID_VAR,
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_GRAPH_VAR,
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_VAR,
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_VAR,
+                                PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VAR));
+
+        return result;
     }
 
-    private static E_LogicalOr createGraphConditions(NodeValue graphExpr) {
+    private E_LogicalOr createGraphConditions(NodeValue graphExpr) {
         return new E_LogicalOr(
                 new E_StrStartsWith(
                         new E_Str(
@@ -332,7 +493,7 @@ public class PublishCompoundEventRequestOperator extends
                                 graphExpr)));
     }
 
-    private static E_LogicalOr createSubjectConditions(NodeValue subjectExpr) {
+    private E_LogicalOr createSubjectConditions(NodeValue subjectExpr) {
         return new E_LogicalOr(new E_SameTerm(
                 PublishSubscribeConstants.SUBSUBSCRIPTION_SUBJECT_EXPR_VAR,
                 subjectExpr), new E_Equals(
@@ -340,7 +501,7 @@ public class PublishCompoundEventRequestOperator extends
                 PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
     }
 
-    private static E_LogicalOr createPredicateConditions(NodeValue predicateExpr) {
+    private E_LogicalOr createPredicateConditions(NodeValue predicateExpr) {
         return new E_LogicalOr(new E_SameTerm(
                 PublishSubscribeConstants.SUBSUBSCRIPTION_PREDICATE_EXPR_VAR,
                 predicateExpr), new E_Equals(
@@ -348,12 +509,26 @@ public class PublishCompoundEventRequestOperator extends
                 PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
     }
 
-    private static E_LogicalOr createObjectConditions(NodeValue objectExpr) {
+    private E_LogicalOr createObjectConditions(NodeValue objectExpr) {
         return new E_LogicalOr(new E_SameTerm(
                 PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR,
                 objectExpr), new E_Equals(
                 PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_EXPR_VAR,
                 PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
+    }
+
+    private static class MatchingResult {
+
+        public final SubscriptionId subscriptionId;
+
+        public final ExtendedCompoundEvent extendedCompoundEvent;
+
+        public MatchingResult(SubscriptionId subscriptionId,
+                ExtendedCompoundEvent extendedCompoundEvent) {
+            this.subscriptionId = subscriptionId;
+            this.extendedCompoundEvent = extendedCompoundEvent;
+        }
+
     }
 
 }

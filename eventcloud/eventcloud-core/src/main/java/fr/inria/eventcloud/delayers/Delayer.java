@@ -101,6 +101,10 @@ public abstract class Delayer<R, B extends Collection<R>> {
         synchronized (this.buffer) {
             int size = this.buffer.size();
 
+            if (size == 0) {
+                return size;
+            }
+
             long startTime = 0;
 
             if (this.log.isTraceEnabled()) {
@@ -163,9 +167,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
                     Thread.currentThread().interrupt();
                 }
 
-                int nbObjectsFlushed = 0;
-
-                nbObjectsFlushed = Delayer.this.commit();
+                int nbObjectsFlushed = Delayer.this.commit();
 
                 if (nbObjectsFlushed == 0) {
                     Delayer.this.log.trace(
