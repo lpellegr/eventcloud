@@ -16,11 +16,14 @@
  **/
 package fr.inria.eventcloud.delayers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
- * Stupid abstraction to maintain together a compound event and the index of the
+ * Simple abstraction to maintain together a compound event and the index of the
  * quadruple used to publish the compound event.
  * 
  * @author lpellegr
@@ -29,40 +32,53 @@ public class ExtendedCompoundEvent {
 
     public final CompoundEvent compoundEvent;
 
-    public final int indexQuadrupleUsedForIndexing;
+    public final List<Integer> quadrupleIndexesUsedForIndexing;
 
     public ExtendedCompoundEvent(CompoundEvent compoundEvent,
-            int indexQuadrupleUsedForIndexing) {
+            int quadrupleIndexUsedForIndexing) {
         this.compoundEvent = compoundEvent;
-        this.indexQuadrupleUsedForIndexing = indexQuadrupleUsedForIndexing;
+
+        this.quadrupleIndexesUsedForIndexing =
+                new ArrayList<Integer>(compoundEvent.size());
+        this.quadrupleIndexesUsedForIndexing.add(quadrupleIndexUsedForIndexing);
     }
 
-    public Quadruple getQuadrupleUsedForIndexation() {
-        return this.compoundEvent.get(this.indexQuadrupleUsedForIndexing);
+    public void addQuadrupleIndexesUsedForIndexing(List<Integer> quadrupleIndexesUsedForIndexing) {
+        this.quadrupleIndexesUsedForIndexing.addAll(quadrupleIndexesUsedForIndexing);
     }
 
-    // /*
-    // * hashCode and equals methods use only the compoundEvent field so that
-    // * when the same events are indexed on the same peer they are filtered
-    // out.
-    // */
-    //
-    // /**
-    // * {@inheritDoc}
-    // */
-    // @Override
-    // public int hashCode() {
-    // return this.compoundEvent.hashCode();
-    // }
-    //
-    // /**
-    // * {@inheritDoc}
-    // */
-    // @Override
-    // public boolean equals(Object obj) {
-    // return obj instanceof ExtendedCompoundEvent
-    // && ((ExtendedCompoundEvent)
-    // obj).compoundEvent.equals(this.compoundEvent);
-    // }
+    public Quadruple[] getQuadruplesUsedForIndexing() {
+        Quadruple[] result =
+                new Quadruple[this.quadrupleIndexesUsedForIndexing.size()];
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] =
+                    this.compoundEvent.get(this.quadrupleIndexesUsedForIndexing.get(i));
+        }
+
+        return result;
+    }
+
+    /*
+     * hashCode and equals methods use only the compoundEvent field so that
+     * when the same events are indexed on the same peer they are filtered out.
+     */
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return this.compoundEvent.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof ExtendedCompoundEvent
+                && ((ExtendedCompoundEvent) obj).compoundEvent.equals(this.compoundEvent);
+    }
 
 }
