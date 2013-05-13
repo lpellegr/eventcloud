@@ -101,6 +101,13 @@ public class PublishSubscribeOperationsDelayer extends
         synchronized (this.buffer) {
             int size = this.buffer.size();
 
+            boolean compoundEventsBufferNotEmpty =
+                    !super.buffer.getExtendedCompoundEvents().isEmpty();
+            boolean quadruplesBufferNotEmpty =
+                    !super.buffer.getQuadruples().isEmpty();
+            boolean subscriptionsBufferNotEmpty =
+                    !super.buffer.getSubscriptions().isEmpty();
+
             Stopwatch flushBufferStopwatch = null;
             Stopwatch triggerActionStopwatch = null;
 
@@ -110,9 +117,12 @@ public class PublishSubscribeOperationsDelayer extends
                 flushBufferStopwatch.start();
             }
 
-            this.quadruplesOperator.flushBuffer(super.buffer);
+            if (quadruplesBufferNotEmpty) {
+                this.quadruplesOperator.flushBuffer(super.buffer);
+            }
 
-            if (this.compoundEventsOperator != null) {
+            if (this.compoundEventsOperator != null
+                    && compoundEventsBufferNotEmpty) {
                 this.compoundEventsOperator.flushBuffer(super.buffer);
             }
 
@@ -121,9 +131,12 @@ public class PublishSubscribeOperationsDelayer extends
                 triggerActionStopwatch.start();
             }
 
-            this.quadruplesOperator.triggerAction(super.buffer);
+            if (quadruplesBufferNotEmpty) {
+                this.quadruplesOperator.triggerAction(super.buffer);
+            }
 
-            if (this.compoundEventsOperator != null) {
+            if (this.compoundEventsOperator != null
+                    && compoundEventsBufferNotEmpty) {
                 this.compoundEventsOperator.triggerAction(super.buffer);
             }
 
@@ -132,14 +145,18 @@ public class PublishSubscribeOperationsDelayer extends
                 flushBufferStopwatch.start();
             }
 
-            this.subscriptionsOperator.flushBuffer(super.buffer);
+            if (subscriptionsBufferNotEmpty) {
+                this.subscriptionsOperator.flushBuffer(super.buffer);
+            }
 
             if (log.isTraceEnabled()) {
                 flushBufferStopwatch.stop();
                 triggerActionStopwatch.start();
             }
 
-            this.subscriptionsOperator.triggerAction(super.buffer);
+            if (subscriptionsBufferNotEmpty) {
+                this.subscriptionsOperator.triggerAction(super.buffer);
+            }
 
             if (log.isTraceEnabled()) {
                 triggerActionStopwatch.stop();
