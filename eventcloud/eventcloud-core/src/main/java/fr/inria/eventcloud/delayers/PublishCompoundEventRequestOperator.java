@@ -374,7 +374,7 @@ public class PublishCompoundEventRequestOperator extends
                         builder.add(new MatchingResult(
                                 subscriptionId, extendedCompoundEvent));
 
-                        continue;
+                        break;
                     }
                 }
             }
