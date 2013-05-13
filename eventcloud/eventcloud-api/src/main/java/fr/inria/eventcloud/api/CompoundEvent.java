@@ -23,6 +23,7 @@ import java.io.ObjectOutput;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
@@ -36,9 +37,9 @@ import com.hp.hpl.jena.graph.Triple;
 import fr.inria.eventcloud.utils.NodeSerializer;
 
 /**
- * A compound event is a collection of {@link Quadruple}s such that each
- * quadruple share the same graph value. The graph value could be kept separated
- * from the triple value for backward compatibility with linked data tools.
+ * A compound event is a list of {@link Quadruple}s so that each quadruple share
+ * the same graph value. The graph value could be kept separated from the triple
+ * value for backward compatibility with linked data tools.
  * <p>
  * Please note that a compound event is not alterable. Any attempt to update the
  * content of a compound event by calling {@link #getTriples()} followed by
@@ -47,8 +48,7 @@ import fr.inria.eventcloud.utils.NodeSerializer;
  * 
  * @author lpellegr
  */
-public class CompoundEvent implements Event, Externalizable,
-        Iterable<Quadruple> {
+public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
 
     private static final long serialVersionUID = 150L;
 
@@ -131,6 +131,7 @@ public class CompoundEvent implements Event, Externalizable,
      * 
      * @return the quadruple at the specified {@code index}.
      */
+    @Override
     public Quadruple get(int index) {
         return this.quadruples.get(index);
     }
@@ -183,7 +184,7 @@ public class CompoundEvent implements Event, Externalizable,
     @Override
     public boolean equals(Object obj) {
         return obj instanceof CompoundEvent
-                && this.quadruples.containsAll(((CompoundEvent) obj).quadruples);
+                && this.quadruples.equals(((CompoundEvent) obj).quadruples);
     }
 
     /**
@@ -220,6 +221,7 @@ public class CompoundEvent implements Event, Externalizable,
      * @return the size of this compound event (i.e. the number of quadruples
      *         contained by this compound event).
      */
+    @Override
     public int size() {
         return this.quadruples.size();
     }
@@ -384,6 +386,216 @@ public class CompoundEvent implements Event, Externalizable,
         }
 
         this.quadruples = quadruples.build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isEmpty() {
+        return this.size() == 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean contains(Object o) {
+        return this.quadruples.contains(o);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object[] toArray() {
+        return this.quadruples.toArray();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return this.quadruples.toArray(a);
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public boolean add(Quadruple e) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public boolean remove(Object o) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return this.quadruples.containsAll(c);
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public boolean addAll(Collection<? extends Quadruple> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public boolean addAll(int index, Collection<? extends Quadruple> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public Quadruple set(int index, Quadruple element) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public void add(int index, Quadruple element) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Guaranteed to throw an exception and leave the list unmodified.
+     * 
+     * @throws UnsupportedOperationException
+     *             always
+     * @deprecated Unsupported operation.
+     */
+    @Deprecated
+    @Override
+    public Quadruple remove(int index) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int indexOf(Object o) {
+        return this.quadruples.indexOf(o);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int lastIndexOf(Object o) {
+        return this.quadruples.lastIndexOf(o);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ListIterator<Quadruple> listIterator() {
+        return this.quadruples.listIterator();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ListIterator<Quadruple> listIterator(int index) {
+        return this.quadruples.listIterator(index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Quadruple> subList(int fromIndex, int toIndex) {
+        return this.quadruples.subList(fromIndex, toIndex);
     }
 
 }

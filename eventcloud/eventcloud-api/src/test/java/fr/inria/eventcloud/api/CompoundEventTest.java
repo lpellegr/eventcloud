@@ -69,12 +69,77 @@ public class CompoundEventTest {
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testImmutability1() {
+    public void testImmutabilityGetTriplesAddTriple() {
         CompoundEvent compoundEvent = CompoundEventGenerator.random(10);
         compoundEvent.getTriples().add(
                 new Triple(
                         NodeGenerator.randomUri(), NodeGenerator.randomUri(),
                         NodeGenerator.randomUri()));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityAddQuadruple() {
+        CompoundEventGenerator.random(10).add(QuadrupleGenerator.random());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityAddIntQuadruple() {
+        CompoundEventGenerator.random(10).add(0, QuadrupleGenerator.random());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityAddAllCollection() {
+        CompoundEventGenerator.random(10).addAll(
+                ImmutableList.of(QuadrupleGenerator.random()));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityAddAllIntCollection() {
+        CompoundEventGenerator.random(10).addAll(
+                0, ImmutableList.of(QuadrupleGenerator.random()));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityClear() {
+        CompoundEventGenerator.random(10).clear();
+
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityRemoveIndex() {
+        CompoundEventGenerator.random(10).remove(0);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityRemoveObject() {
+        CompoundEventGenerator.random(10).remove(QuadrupleGenerator.random());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityRemoveCollection() {
+        CompoundEventGenerator.random(10).removeAll(
+                ImmutableList.of(QuadrupleGenerator.random()));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilityRetainAllCollection() {
+        CompoundEventGenerator.random(10).retainAll(
+                ImmutableList.of(QuadrupleGenerator.random()));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
+    public void testImmutabilitySetIntQuadruple() {
+        CompoundEventGenerator.random(10).set(0, QuadrupleGenerator.random());
     }
 
     @Test(expected = IllegalArgumentException.class)
