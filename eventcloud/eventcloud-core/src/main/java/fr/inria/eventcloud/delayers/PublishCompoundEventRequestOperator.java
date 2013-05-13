@@ -95,12 +95,12 @@ public class PublishCompoundEventRequestOperator extends
 
         try {
             // the quadruple is stored by using its meta graph value
-            for (ExtendedCompoundEvent ec : buffer.getExtendedCompoundEvents()) {
-                Quadruple q = ec.getQuadrupleUsedForIndexation();
-
-                txnGraph.add(
-                        q.createMetaGraphNode(), q.getSubject(),
-                        q.getPredicate(), q.getObject());
+            for (ExtendedCompoundEvent extendedCompoundEvent : buffer.getExtendedCompoundEvents()) {
+                for (Quadruple q : extendedCompoundEvent.getQuadruplesUsedForIndexing()) {
+                    txnGraph.add(
+                            q.createMetaGraphNode(), q.getSubject(),
+                            q.getPredicate(), q.getObject());
+                }
             }
             txnGraph.commit();
         } catch (Exception e) {
@@ -145,7 +145,7 @@ public class PublishCompoundEventRequestOperator extends
                         matchingResult.extendedCompoundEvent.compoundEvent;
 
                 Quadruple quadruple =
-                        matchingResult.extendedCompoundEvent.getQuadrupleUsedForIndexation();
+                        matchingResult.extendedCompoundEvent.getQuadruplesUsedForIndexing()[0];
 
                 Subscription subscription =
                         this.overlay.findSubscription(
@@ -174,7 +174,7 @@ public class PublishCompoundEventRequestOperator extends
                 if (result.getFirst() != null
                 // the quadruple used to route the compound event is the first
                 // quadruple matching the subscription
-                        && matchingResult.extendedCompoundEvent.indexQuadrupleUsedForIndexing == result.getSecond()) {
+                        && matchingResult.extendedCompoundEvent.quadrupleIndexesUsedForIndexing.contains(result.getSecond())) {
                     // the overall subscription is verified
                     // we have to notify the subscriber about the solution
                     SubscribeProxy subscriber =
@@ -219,8 +219,9 @@ public class PublishCompoundEventRequestOperator extends
                         } else {
                             reason =
                                     "the triggering notification condition is false: "
-                                            + matchingResult.extendedCompoundEvent.indexQuadrupleUsedForIndexing
-                                            + " != " + result.getSecond();
+                                            + matchingResult.extendedCompoundEvent.quadrupleIndexesUsedForIndexing
+                                            + " does not contains "
+                                            + result.getSecond();
                         }
 
                         log.trace(
