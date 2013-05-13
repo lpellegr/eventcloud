@@ -102,7 +102,9 @@ public class PublishSubscribeOperationsDelayer extends
             int size = this.buffer.size();
 
             boolean compoundEventsBufferNotEmpty =
-                    !super.buffer.getExtendedCompoundEvents().isEmpty();
+                    super.buffer.getExtendedCompoundEvents() != null
+                            ? !super.buffer.getExtendedCompoundEvents()
+                                    .isEmpty() : false;
             boolean quadruplesBufferNotEmpty =
                     !super.buffer.getQuadruples().isEmpty();
             boolean subscriptionsBufferNotEmpty =
@@ -121,8 +123,7 @@ public class PublishSubscribeOperationsDelayer extends
                 this.quadruplesOperator.flushBuffer(super.buffer);
             }
 
-            if (this.compoundEventsOperator != null
-                    && compoundEventsBufferNotEmpty) {
+            if (compoundEventsBufferNotEmpty) {
                 this.compoundEventsOperator.flushBuffer(super.buffer);
             }
 
@@ -135,8 +136,7 @@ public class PublishSubscribeOperationsDelayer extends
                 this.quadruplesOperator.triggerAction(super.buffer);
             }
 
-            if (this.compoundEventsOperator != null
-                    && compoundEventsBufferNotEmpty) {
+            if (compoundEventsBufferNotEmpty) {
                 this.compoundEventsOperator.triggerAction(super.buffer);
             }
 
