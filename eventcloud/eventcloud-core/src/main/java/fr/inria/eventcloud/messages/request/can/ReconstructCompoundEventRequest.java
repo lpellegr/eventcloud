@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -106,7 +107,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
             // source)
             QuadrupleIterator iterator =
                     txnGraph.find(
-                            Node.createURI(this.metaGraphValue.getValue()),
+                            NodeFactory.createURI(this.metaGraphValue.getValue()),
                             Node.ANY, Node.ANY, Node.ANY);
 
             while (iterator.hasNext()) {

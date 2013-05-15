@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
@@ -127,7 +128,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Assert.assertEquals(10, super.getRandomSemanticPeer().count(
                 QuadruplePattern.ANY));
 
-        Node graph = Node.createURI("http://example.org/graph");
+        Node graph = NodeFactory.createURI("http://example.org/graph");
         for (int i = 0; i < 5; i++) {
             super.getRandomSemanticPeer().add(QuadrupleGenerator.random(graph));
         }
@@ -216,7 +217,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
         Quadruple quad =
-                QuadrupleGenerator.random(Node.createURI("http://sparql.org"));
+                QuadrupleGenerator.random(NodeFactory.createURI("http://sparql.org"));
         super.getRandomSemanticPeer().add(quad);
 
         Assert.assertTrue(super.getRandomSemanticPeer().executeSparqlAsk(

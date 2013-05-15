@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
  * Test cases for class {@link Skolemizator}.
@@ -33,21 +34,24 @@ public class SkolemizatorTest {
 
     @Test
     public void testSkolemization() {
-        Node graph = Node.createURI("http://example.org/graph");
+        Node graph = NodeFactory.createURI("http://example.org/graph");
 
-        Node b1 = Node.createAnon();
-        Node b2 = Node.createAnon();
+        Node b1 = NodeFactory.createAnon();
+        Node b2 = NodeFactory.createAnon();
 
         Quadruple q1 =
                 new Quadruple(
-                        graph, b1,
-                        Node.createURI("http://example.org/properties/p1"),
-                        Node.createLiteral("Literal Value"), false, false);
+                        graph,
+                        b1,
+                        NodeFactory.createURI("http://example.org/properties/p1"),
+                        NodeFactory.createLiteral("Literal Value"), false,
+                        false);
         Quadruple q2 =
                 new Quadruple(
-                        graph, b1,
-                        Node.createURI("http://example.org/properties/p1"), b2,
-                        false, false);
+                        graph,
+                        b1,
+                        NodeFactory.createURI("http://example.org/properties/p1"),
+                        b2, false, false);
 
         List<Quadruple> skolemizedQuadruples =
                 Skolemizator.skolemize(Arrays.asList(q1, q2));

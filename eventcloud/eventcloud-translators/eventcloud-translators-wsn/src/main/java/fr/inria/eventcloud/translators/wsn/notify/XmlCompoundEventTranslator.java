@@ -33,7 +33,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import eu.play_project.play_commons.constants.Stream;
 import eu.play_project.play_commons.eventformat.xml.DocumentBuilder;
@@ -84,9 +84,10 @@ public class XmlCompoundEventTranslator extends
         boolean hasSimpleExpressionType = false;
 
         for (Quadruple quad : event) {
-            if (quad.getPredicate().equals(
-                    Node.createURI(PublishSubscribeConstants.EVENTCLOUD_NS
-                            + "event/" + "nbquads"))) {
+            if (quad.getPredicate()
+                    .equals(
+                            NodeFactory.createURI(PublishSubscribeConstants.EVENTCLOUD_NS
+                                    + "event/" + "nbquads"))) {
                 continue;
             }
 

@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
-import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -202,23 +202,24 @@ public class PubSubBenchmarkBSBM {
                     List<Quadruple> quadsForCompoundEvent1 =
                             new ArrayList<Quadruple>();
                     quadsForCompoundEvent1.add(new Quadruple(
-                            Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
-                            Node.createURI("http://www.w3.org/2000/01/rdf-schema#label"),
-                            Node.createURI("manner gatemen"), false, false));
+                            NodeFactory.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
+                            NodeFactory.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
+                            NodeFactory.createURI("http://www.w3.org/2000/01/rdf-schema#label"),
+                            NodeFactory.createURI("manner gatemen"), false,
+                            false));
 
                     quadsForCompoundEvent1.add(new Quadruple(
-                            Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature142"),
+                            NodeFactory.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
+                            NodeFactory.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
+                            NodeFactory.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature"),
+                            NodeFactory.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature142"),
                             false, false));
 
                     quadsForCompoundEvent1.add(new Quadruple(
-                            Node.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature"),
-                            Node.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature144"),
+                            NodeFactory.createURI("http://events.event-processing.org/ids/Graph-2003-06-15"),
+                            NodeFactory.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product1"),
+                            NodeFactory.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature"),
+                            NodeFactory.createURI("http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature144"),
                             false, false));
 
                     this.compoundEvent =

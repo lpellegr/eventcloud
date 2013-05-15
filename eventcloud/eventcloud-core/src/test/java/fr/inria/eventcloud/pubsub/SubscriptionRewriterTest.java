@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
@@ -40,7 +41,7 @@ public class SubscriptionRewriterTest {
             "rmi://oops.inria.fr:1099/32bf1d5d-131240b729f--7f6e--6f9e1f1e514bea7c-32bf1d5d-131240b729f--8000";
 
     private static final Node defaultNode =
-            Node.createURI("http://www.inria.fr/");;
+            NodeFactory.createURI("http://www.inria.fr/");;
 
     private static final Quadruple defaultQuadruple;
 
@@ -78,7 +79,7 @@ public class SubscriptionRewriterTest {
         Assert.assertEquals(defaultNode, subsubscriptions[0].getAtomicQuery()
                 .getSubject());
         Assert.assertEquals(
-                Node.createURI("http://v3"),
+                NodeFactory.createURI("http://v3"),
                 subsubscriptions[0].getAtomicQuery().getPredicate());
         Assert.assertEquals("a1", subsubscriptions[0].getAtomicQuery()
                 .getObject()
@@ -87,7 +88,7 @@ public class SubscriptionRewriterTest {
         Assert.assertEquals(defaultNode, subsubscriptions[1].getAtomicQuery()
                 .getSubject());
         Assert.assertEquals(
-                Node.createURI("http://v4"),
+                NodeFactory.createURI("http://v4"),
                 subsubscriptions[1].getAtomicQuery().getPredicate());
         Assert.assertEquals("a2", subsubscriptions[1].getAtomicQuery()
                 .getObject()
@@ -96,8 +97,8 @@ public class SubscriptionRewriterTest {
 
     @Test
     public void testRewriteWithQuadrupleFreeVariables() {
-        Node v3 = Node.createURI("http://v3");
-        Node v4 = Node.createURI("http://v4");
+        Node v3 = NodeFactory.createURI("http://v3");
+        Node v4 = NodeFactory.createURI("http://v4");
 
         String sparqlQuery =
                 "SELECT ?s ?o WHERE { GRAPH ?g { ?s <http://v1> <http://v2> . <http://v3> <http://v4> ?o } }";
@@ -138,7 +139,7 @@ public class SubscriptionRewriterTest {
 
     @Test
     public void testRewriteWithBindingAndBoundVariables() {
-        Node id = Node.createURI("http://www.inria.fr/member/6609");
+        Node id = NodeFactory.createURI("http://www.inria.fr/member/6609");
 
         String sparqlQuery =
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?mail WHERE { GRAPH ?g { ?id foaf:name ?name . ?id foaf:email ?email . ?id foaf:phone ?phone } }";
@@ -146,7 +147,7 @@ public class SubscriptionRewriterTest {
 
         BindingMap b = BindingFactory.create();
         b.add(Var.alloc("id"), id);
-        b.add(Var.alloc("name"), Node.createLiteral("lpellegr"));
+        b.add(Var.alloc("name"), NodeFactory.createLiteral("lpellegr"));
 
         Subscription rewrittenSubscription =
                 SubscriptionRewriter.rewrite(subscription, b);
@@ -160,7 +161,7 @@ public class SubscriptionRewriterTest {
         Assert.assertEquals(id, subsubscriptions[0].getAtomicQuery()
                 .getSubject());
         Assert.assertEquals(
-                Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
                 subsubscriptions[0].getAtomicQuery().getPredicate());
         Assert.assertEquals("email", subsubscriptions[0].getAtomicQuery()
                 .getObject()
@@ -169,7 +170,7 @@ public class SubscriptionRewriterTest {
         Assert.assertEquals(id, subsubscriptions[0].getAtomicQuery()
                 .getSubject());
         Assert.assertEquals(
-                Node.createURI("http://xmlns.com/foaf/0.1/phone"),
+                NodeFactory.createURI("http://xmlns.com/foaf/0.1/phone"),
                 subsubscriptions[1].getAtomicQuery().getPredicate());
         Assert.assertEquals("phone", subsubscriptions[1].getAtomicQuery()
                 .getObject()
@@ -184,8 +185,8 @@ public class SubscriptionRewriterTest {
         BindingMap b = BindingFactory.create();
         b.add(
                 Var.alloc("id1"),
-                Node.createURI("http://www.inria.fr/member/6609"));
-        b.add(Var.alloc("name"), Node.createLiteral("lpellegr"));
+                NodeFactory.createURI("http://www.inria.fr/member/6609"));
+        b.add(Var.alloc("name"), NodeFactory.createLiteral("lpellegr"));
 
         Subscription subscription = createSubscription(sparqlQuery);
 
@@ -203,7 +204,7 @@ public class SubscriptionRewriterTest {
 
         Assert.assertTrue(aq.getSubject().isVariable());
         Assert.assertEquals(
-                Node.createURI("http://xmlns.com/foaf/0.1/email"),
+                NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
                 aq.getPredicate());
         Assert.assertTrue(aq.getObject().isVariable());
     }

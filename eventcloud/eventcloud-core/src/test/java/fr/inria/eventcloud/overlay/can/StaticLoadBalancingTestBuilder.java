@@ -56,9 +56,9 @@ import fr.inria.eventcloud.operations.can.GetStatsRecordeResponseOperation;
 import fr.inria.eventcloud.operations.can.GetStatsRecorderOperation;
 import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.overlay.SemanticPeer;
-import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.utils.RDFReader;
 
 public class StaticLoadBalancingTestBuilder {
 
@@ -234,7 +234,7 @@ public class StaticLoadBalancingTestBuilder {
                         }
                     }
 
-                    RdfParser.parse(
+                    RDFReader.read(
                             new BufferedInputStream(is),
                             SerializationFormat.TriG,
                             new Callback<Quadruple>() {

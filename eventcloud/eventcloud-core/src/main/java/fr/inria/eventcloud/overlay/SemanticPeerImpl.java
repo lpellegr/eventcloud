@@ -38,6 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -69,9 +71,9 @@ import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
 import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
-import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.utils.RDFReader;
 
 /**
  * SemanticPeerImpl is a concrete implementation of {@link SemanticPeer}. It is
@@ -270,11 +272,10 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     @MemberOf("parallel")
     public boolean add(URL url, SerializationFormat format) {
         try {
-            final List<BooleanWrapper> results =
-                    new ArrayList<BooleanWrapper>();
+            final Builder<BooleanWrapper> results = ImmutableList.builder();
             InputStream in = url.openConnection().getInputStream();
 
-            RdfParser.parse(in, format, new Callback<Quadruple>() {
+            RDFReader.read(in, format, new Callback<Quadruple>() {
                 @Override
                 public void execute(Quadruple quad) {
                     results.add(SemanticPeerImpl.this.addAsync(quad));
@@ -282,11 +283,12 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
             });
 
             in.close();
-            PAFuture.waitForAll(results);
+            PAFuture.waitForAll(results.build());
 
             return true;
         } catch (IOException ioe) {
-            log.error("An error occurred when reading from the given URL", ioe);
+            log.error("An error occurred when reading from the given URL "
+                    + url, ioe);
             return false;
         }
     }

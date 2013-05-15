@@ -32,6 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 
 import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -266,7 +267,7 @@ public class EventGenerator {
             uri = uri + sequenceNumberAsString;
         }
 
-        return Node.createURI(uri);
+        return NodeFactory.createURI(uri);
     }
 
     public static void main(String[] args) {
