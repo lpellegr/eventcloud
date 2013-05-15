@@ -19,7 +19,6 @@ package fr.inria.eventcloud.delayers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,14 +36,14 @@ import fr.inria.eventcloud.pubsub.Subscription;
  */
 public class CustomBuffer implements Collection<Object> {
 
-    private final Set<Quadruple> quadruples;
+    private final List<Quadruple> quadruples;
 
     private final List<Subscription> subscriptions;
 
     private final Map<ExtendedCompoundEvent, ExtendedCompoundEvent> extendedCompoundEvents;
 
     public CustomBuffer(int bufsize) {
-        this.quadruples = new HashSet<Quadruple>(bufsize);
+        this.quadruples = new ArrayList<Quadruple>(bufsize);
         this.subscriptions = new ArrayList<Subscription>(bufsize);
 
         if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
@@ -80,7 +79,7 @@ public class CustomBuffer implements Collection<Object> {
      * 
      * @return the quadruples
      */
-    public Set<Quadruple> getQuadruples() {
+    public List<Quadruple> getQuadruples() {
         return this.quadruples;
     }
 

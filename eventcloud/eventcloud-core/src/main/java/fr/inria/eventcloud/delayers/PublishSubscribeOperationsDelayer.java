@@ -101,15 +101,6 @@ public class PublishSubscribeOperationsDelayer extends
         synchronized (this.buffer) {
             int size = this.buffer.size();
 
-            boolean compoundEventsBufferNotEmpty =
-                    super.buffer.getExtendedCompoundEvents() != null
-                            ? !super.buffer.getExtendedCompoundEvents()
-                                    .isEmpty() : false;
-            boolean quadruplesBufferNotEmpty =
-                    !super.buffer.getQuadruples().isEmpty();
-            boolean subscriptionsBufferNotEmpty =
-                    !super.buffer.getSubscriptions().isEmpty();
-
             Stopwatch flushBufferStopwatch = null;
             Stopwatch triggerActionStopwatch = null;
 
@@ -119,11 +110,11 @@ public class PublishSubscribeOperationsDelayer extends
                 flushBufferStopwatch.start();
             }
 
-            if (quadruplesBufferNotEmpty) {
+            if (this.isQuadruplesBufferNotEmpty()) {
                 this.quadruplesOperator.flushBuffer(super.buffer);
             }
 
-            if (compoundEventsBufferNotEmpty) {
+            if (this.isCompoundEventsBufferNotEmpty()) {
                 this.compoundEventsOperator.flushBuffer(super.buffer);
             }
 
@@ -132,11 +123,11 @@ public class PublishSubscribeOperationsDelayer extends
                 triggerActionStopwatch.start();
             }
 
-            if (quadruplesBufferNotEmpty) {
+            if (this.isQuadruplesBufferNotEmpty()) {
                 this.quadruplesOperator.triggerAction(super.buffer);
             }
 
-            if (compoundEventsBufferNotEmpty) {
+            if (this.isCompoundEventsBufferNotEmpty()) {
                 this.compoundEventsOperator.triggerAction(super.buffer);
             }
 
@@ -145,7 +136,7 @@ public class PublishSubscribeOperationsDelayer extends
                 flushBufferStopwatch.start();
             }
 
-            if (subscriptionsBufferNotEmpty) {
+            if (this.isSubscriptionsBufferNotEmpty()) {
                 this.subscriptionsOperator.flushBuffer(super.buffer);
             }
 
@@ -154,7 +145,7 @@ public class PublishSubscribeOperationsDelayer extends
                 triggerActionStopwatch.start();
             }
 
-            if (subscriptionsBufferNotEmpty) {
+            if (this.isSubscriptionsBufferNotEmpty()) {
                 this.subscriptionsOperator.triggerAction(super.buffer);
             }
 
@@ -175,6 +166,19 @@ public class PublishSubscribeOperationsDelayer extends
 
             return size;
         }
+    }
+
+    private boolean isCompoundEventsBufferNotEmpty() {
+        return super.buffer.getExtendedCompoundEvents() != null
+                ? !super.buffer.getExtendedCompoundEvents().isEmpty() : false;
+    }
+
+    private boolean isQuadruplesBufferNotEmpty() {
+        return !super.buffer.getQuadruples().isEmpty();
+    }
+
+    private boolean isSubscriptionsBufferNotEmpty() {
+        return !super.buffer.getSubscriptions().isEmpty();
     }
 
     /**

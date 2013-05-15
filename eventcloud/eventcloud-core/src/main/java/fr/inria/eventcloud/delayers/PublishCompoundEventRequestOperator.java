@@ -125,6 +125,7 @@ public class PublishCompoundEventRequestOperator extends
                         AccessMode.READ_ONLY);
 
         QueryIterator it = null;
+
         try {
             Optimize.noOptimizer();
 
@@ -133,7 +134,7 @@ public class PublishCompoundEventRequestOperator extends
             // event which is published
             it =
                     Algebra.exec(
-                            this.createFindSubscriptionsSatisfiedAlgebra(extendedCompoundEvents),
+                            this.createFindSubscriptionsMatchingAlgebra(extendedCompoundEvents),
                             txnGraph.getUnderlyingDataset());
 
             List<MatchingResult> matchingResults =
@@ -235,7 +236,7 @@ public class PublishCompoundEventRequestOperator extends
 
             // looks for ephemeral subscriptions that can be satisfied
             // TODO: remove ephemeral subscriptions thanks to the meta graph
-            // values returned by the next method
+            // values returned by the following method call
             this.findAndHandleEphemeralSubscriptions(
                     txnGraph, extendedCompoundEvents);
 
@@ -357,6 +358,11 @@ public class PublishCompoundEventRequestOperator extends
             Node ssObject =
                     binding.get(PublishSubscribeConstants.SUBSUBSCRIPTION_OBJECT_VAR);
 
+            SubscriptionId subscriptionId =
+                    SubscriptionId.parseSubscriptionId(binding.get(
+                            PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
+                            .getLiteralLexicalForm());
+
             for (ExtendedCompoundEvent extendedCompoundEvent : extendedCompoundEvents) {
                 for (Quadruple q : extendedCompoundEvent.compoundEvent) {
                     if (this.matches(q.getObject(), ssObject)
@@ -365,11 +371,6 @@ public class PublishCompoundEventRequestOperator extends
                             && (this.matches(q.getGraph(), ssGraph) || q.getGraph()
                                     .getURI()
                                     .startsWith(ssGraph.getURI()))) {
-
-                        SubscriptionId subscriptionId =
-                                SubscriptionId.parseSubscriptionId(binding.get(
-                                        PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
-                                        .getLiteralLexicalForm());
 
                         builder.add(new MatchingResult(
                                 subscriptionId, extendedCompoundEvent));
@@ -383,12 +384,12 @@ public class PublishCompoundEventRequestOperator extends
         return builder.build();
     }
 
-    private final boolean matches(Node publicationTerm, Node subscriptionTerm) {
+    private boolean matches(Node publicationTerm, Node subscriptionTerm) {
         return subscriptionTerm.equals(PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_NODE)
                 || publicationTerm.equals(subscriptionTerm);
     }
 
-    private Op createFindSubscriptionsSatisfiedAlgebra(Set<ExtendedCompoundEvent> compoundEvents) {
+    private Op createFindSubscriptionsMatchingAlgebra(Set<ExtendedCompoundEvent> compoundEvents) {
         Iterator<ExtendedCompoundEvent> it = compoundEvents.iterator();
 
         // basic graph pattern
