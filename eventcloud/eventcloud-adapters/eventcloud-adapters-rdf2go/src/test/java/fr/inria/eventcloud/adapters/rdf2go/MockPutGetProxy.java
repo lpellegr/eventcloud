@@ -19,10 +19,11 @@ package fr.inria.eventcloud.adapters.rdf2go;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -42,8 +43,8 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
-import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.utils.RDFReader;
 
 /**
  * This class is assumed to play the role of a mock PutGetProxy in order to test
@@ -108,16 +109,16 @@ public class MockPutGetProxy implements PutGetApi {
     public boolean add(URL url, SerializationFormat format) {
         try {
             InputStream in = url.openConnection().getInputStream();
-            final List<Quadruple> quadruples = new ArrayList<Quadruple>();
+            final Builder<Quadruple> quadruples = ImmutableList.builder();
 
-            RdfParser.parse(in, format, new Callback<Quadruple>() {
+            RDFReader.read(in, format, new Callback<Quadruple>() {
                 @Override
                 public void execute(Quadruple quad) {
                     quadruples.add(quad);
                 }
             });
 
-            this.add(quadruples);
+            this.add(quadruples.build());
 
             in.close();
 

@@ -22,6 +22,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -82,7 +83,7 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
         Builder<Quadruple> builder = new ImmutableList.Builder<Quadruple>();
 
         Node graph =
-                Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
+                NodeFactory.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
                         + UuidGenerator.randomUuid()
                         + this.sequenceNumber.incrementAndGet());
 
@@ -104,7 +105,7 @@ public class CompoundEventSupplier implements Supplier<CompoundEvent> {
                 }
 
                 builder.add(new Quadruple(
-                        graph, subject, Node.createURI("urn:p" + i),
+                        graph, subject, NodeFactory.createURI("urn:p" + i),
                         randomlyGenerateNodes[i - 1], false, false));
             }
         }

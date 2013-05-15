@@ -19,6 +19,7 @@ package fr.inria.eventcloud.api.generators;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -93,9 +94,9 @@ public class CompoundEventGenerator {
         if (streamUrl != null) {
             builder.add(new Quadruple(
                     graphNode,
-                    Node.createURI(graphNode.getURI() + "#event"),
-                    Node.createURI("http://events.event-processing.org/types/stream"),
-                    Node.createURI(streamUrl + "#stream"), false, true));
+                    NodeFactory.createURI(graphNode.getURI() + "#event"),
+                    NodeFactory.createURI("http://events.event-processing.org/types/stream"),
+                    NodeFactory.createURI(streamUrl + "#stream"), false, true));
         }
 
         return new CompoundEvent(builder.build());

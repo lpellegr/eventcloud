@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -86,7 +87,7 @@ public class SubscribeProxyTest {
     private static String eventId =
             EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue();
 
-    private static Node eventIdNode = Node.createURI(eventId);
+    private static Node eventIdNode = NodeFactory.createURI(eventId);
 
     private EventCloudId eventCloudId;
 
@@ -150,7 +151,7 @@ public class SubscribeProxyTest {
                         List<Quadruple> quadruples = new ArrayList<Quadruple>();
 
                         Node graphValue =
-                                Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
+                                NodeFactory.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
                                         + UuidGenerator.randomUuid());
 
                         for (int j = 0; j < 1 + RandomUtils.nextInt(30); j++) {
@@ -214,19 +215,19 @@ public class SubscribeProxyTest {
         // from the publish proxy it is possible to publish quadruples (events)
         Quadruple q1 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user1@company.com"));
+                        NodeFactory.createURI("https://plus.google.com/825349613"),
+                        NodeFactory.createURI("https://plus.google.com/107234124364605485774"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
+                        NodeFactory.createLiteral("user1@company.com"));
         q1.setPublicationTime(publicationTime);
         this.publishProxy.publish(q1);
 
         Quadruple q2 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User1"));
+                        NodeFactory.createURI("https://plus.google.com/825349613"),
+                        NodeFactory.createURI("https://plus.google.com/107234124364605485774"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User1"));
         q2.setPublicationTime(publicationTime);
         this.publishProxy.publish(q2);
 
@@ -234,28 +235,28 @@ public class SubscribeProxyTest {
 
         Quadruple q3 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
-                        Node.createURI("https://plus.google.com/107545688688906540962"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user2@company.com"));
+                        NodeFactory.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
+                        NodeFactory.createURI("https://plus.google.com/107545688688906540962"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
+                        NodeFactory.createLiteral("user2@company.com"));
         q3.setPublicationTime(publicationTime);
         this.publishProxy.publish(q3);
 
         Quadruple q4 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
-                        Node.createURI("https://plus.google.com/14023231238123495031/"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User 3"));
+                        NodeFactory.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
+                        NodeFactory.createURI("https://plus.google.com/14023231238123495031/"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User 3"));
         q4.setPublicationTime();
         this.publishProxy.publish(q4);
 
         Quadruple q5 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
-                        Node.createURI("https://plus.google.com/107545688688906540962"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User 2"));
+                        NodeFactory.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
+                        NodeFactory.createURI("https://plus.google.com/107545688688906540962"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User 2"));
         q5.setPublicationTime(publicationTime);
         this.publishProxy.publish(q5);
 
@@ -386,10 +387,10 @@ public class SubscribeProxyTest {
 
         Quadruple q =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user1@company.com"));
+                        NodeFactory.createURI("https://plus.google.com/825349613"),
+                        NodeFactory.createURI("https://plus.google.com/107234124364605485774"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
+                        NodeFactory.createLiteral("user1@company.com"));
         this.publishProxy.publish(q);
 
         while (notificationListener.getBindings().size() != 1) {
@@ -452,7 +453,7 @@ public class SubscribeProxyTest {
 
         SubscriptionTestUtils.waitSubscriptionIndexation();
 
-        Node subject = Node.createURI("urn:city:Nice");
+        Node subject = NodeFactory.createURI("urn:city:Nice");
 
         List<Quadruple> quads;
 
@@ -460,17 +461,19 @@ public class SubscribeProxyTest {
 
         for (int i = 0; i < nbDays; i++) {
             Node graphId =
-                    Node.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
+                    NodeFactory.createURI(EventCloudProperties.EVENTCLOUD_ID_PREFIX.getValue()
                             + Integer.toString(i));
             quads = new ArrayList<Quadruple>(2);
             quads.add(new Quadruple(
-                    graphId, subject, Node.createURI("urn:weather:avgtemp"),
-                    Node.createLiteral(
+                    graphId, subject,
+                    NodeFactory.createURI("urn:weather:avgtemp"),
+                    NodeFactory.createLiteral(
                             Integer.toString(RandomUtils.nextInt(30)),
                             XSDDatatype.XSDint)));
             quads.add(new Quadruple(
-                    graphId, subject, Node.createURI("urn:weather:datetime"),
-                    Node.createLiteral(datetime.toString())));
+                    graphId, subject,
+                    NodeFactory.createURI("urn:weather:datetime"),
+                    NodeFactory.createLiteral(datetime.toString())));
 
             CompoundEvent ce = new CompoundEvent(quads);
 

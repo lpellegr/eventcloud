@@ -24,6 +24,7 @@ import org.junit.Test;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.Var;
@@ -106,24 +107,23 @@ public class PublishSubscribeUtilsTest {
     @Test
     public void testMatchingCompoundEventSubscription() {
         ImmutableList<Quadruple> quadruples =
-                ImmutableList.of(
-                        new Quadruple(
-                                Node.createURI("urn:g"),
-                                Node.createURI("urn:s1"),
-                                Node.createURI("urn:p1"),
-                                Node.createURI("urn:o1")), new Quadruple(
-                                Node.createURI("urn:g"),
-                                Node.createURI("urn:s1"),
-                                Node.createURI("urn:p2"),
-                                Node.createURI("urn:o2")), new Quadruple(
-                                Node.createURI("urn:g"),
-                                Node.createURI("urn:s1"),
-                                Node.createURI("urn:p3"),
-                                Node.createURI("urn:o3")), new Quadruple(
-                                Node.createURI("urn:g"),
-                                Node.createURI("urn:s4"),
-                                Node.createURI("urn:p4"),
-                                Node.createURI("urn:o4")));
+                ImmutableList.of(new Quadruple(
+                        NodeFactory.createURI("urn:g"),
+                        NodeFactory.createURI("urn:s1"),
+                        NodeFactory.createURI("urn:p1"),
+                        NodeFactory.createURI("urn:o1")), new Quadruple(
+                        NodeFactory.createURI("urn:g"),
+                        NodeFactory.createURI("urn:s1"),
+                        NodeFactory.createURI("urn:p2"),
+                        NodeFactory.createURI("urn:o2")), new Quadruple(
+                        NodeFactory.createURI("urn:g"),
+                        NodeFactory.createURI("urn:s1"),
+                        NodeFactory.createURI("urn:p3"),
+                        NodeFactory.createURI("urn:o3")), new Quadruple(
+                        NodeFactory.createURI("urn:g"),
+                        NodeFactory.createURI("urn:s4"),
+                        NodeFactory.createURI("urn:p4"),
+                        NodeFactory.createURI("urn:o4")));
 
         Subscription subscription =
                 new Subscription(

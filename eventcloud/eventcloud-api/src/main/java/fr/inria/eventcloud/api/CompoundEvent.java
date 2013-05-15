@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Iterators;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 
 import fr.inria.eventcloud.utils.NodeSerializer;
@@ -296,7 +297,7 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
                 new Quadruple(
                         graph, graph,
                         PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE,
-                        Node.createLiteral(objectValue));
+                        NodeFactory.createLiteral(objectValue));
 
         return metaQuadruple;
     }
@@ -335,7 +336,7 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
         int nbQuads = this.quadruples.size();
 
         // writes the meta graph value
-        NodeSerializer.writeUri(out, this.quadruples.get(0)
+        NodeSerializer.writeURI(out, this.quadruples.get(0)
                 .createMetaGraphNode());
 
         // writes the number of quadruples contained by the CE
@@ -361,7 +362,7 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
 
         // writes the object values
         for (int i = 0; i < nbQuads; i++) {
-            NodeSerializer.writeLiteralOrUri(out, this.quadruples.get(i)
+            NodeSerializer.writeLiteralOrURI(out, this.quadruples.get(i)
                     .getObject());
         }
     }
@@ -384,7 +385,7 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
     @Override
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
-        Node metaGraphNode = NodeSerializer.readUri(in);
+        Node metaGraphNode = NodeSerializer.readURI(in);
 
         int nbQuads = in.readInt();
 
@@ -394,11 +395,12 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
         Builder<Quadruple> quadruples = new ImmutableList.Builder<Quadruple>();
 
         for (int i = 0; i < nbQuads; i++) {
-            Node object = NodeSerializer.readLiteralOrUri(in);
+            Node object = NodeSerializer.readLiteralOrURI(in);
 
             quadruples.add(new Quadruple(
-                    metaGraphNode, Node.createURI(subjectPredicateValues[i]),
-                    Node.createURI(subjectPredicateValues[i + nbQuads]),
+                    metaGraphNode,
+                    NodeFactory.createURI(subjectPredicateValues[i]),
+                    NodeFactory.createURI(subjectPredicateValues[i + nbQuads]),
                     object, false, true));
         }
 

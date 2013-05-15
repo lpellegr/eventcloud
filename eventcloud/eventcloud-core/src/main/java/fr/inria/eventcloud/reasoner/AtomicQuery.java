@@ -33,6 +33,7 @@ import org.apache.jena.riot.tokens.TokenizerFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Op;
@@ -162,7 +163,7 @@ public final class AtomicQuery implements Serializable {
         for (int i = 0; i < tokens.length; i++) {
             String posName = tokens[i].substring(0, 1);
             Node var =
-                    Node.createVariable(tokens[i].substring(
+                    NodeFactory.createVariable(tokens[i].substring(
                             2, tokens[i].length()));
 
             if (posName.equals("g")) {
@@ -444,7 +445,7 @@ public final class AtomicQuery implements Serializable {
 
                 Node node;
                 if (token.getType() == TokenType.VAR) {
-                    node = Node.createVariable(token.getImage());
+                    node = NodeFactory.createVariable(token.getImage());
                 } else {
                     node = token.asNode();
                 }

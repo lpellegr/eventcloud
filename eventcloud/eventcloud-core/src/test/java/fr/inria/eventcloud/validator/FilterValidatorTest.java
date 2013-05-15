@@ -22,7 +22,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -49,10 +49,10 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
 
         Quadruple quadruple =
                 new Quadruple(
-                        Node.createURI("http://www.namespace.org/g_abcde"),
-                        Node.createURI("http://www.namespace.org/s_abcde"),
-                        Node.createURI("http://www.namespace.org/predicate_abcde"),
-                        Node.createLiteral("abcde"));
+                        NodeFactory.createURI("http://www.namespace.org/g_abcde"),
+                        NodeFactory.createURI("http://www.namespace.org/s_abcde"),
+                        NodeFactory.createURI("http://www.namespace.org/predicate_abcde"),
+                        NodeFactory.createLiteral("abcde"));
         quadruples.add(quadruple);
         super.getRandomSemanticPeer().add(quadruple);
 
@@ -91,10 +91,10 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
 
         Quadruple quadruple =
                 new Quadruple(
-                        Node.createURI("http://www.namespace.org/g_abcde"),
-                        Node.createURI("http://www.namespace.org/s_abcde"),
-                        Node.createURI("http://www.namespace.org/predicate_abcde"),
-                        Node.createURI("http://www.namespace.org/abcde"));
+                        NodeFactory.createURI("http://www.namespace.org/g_abcde"),
+                        NodeFactory.createURI("http://www.namespace.org/s_abcde"),
+                        NodeFactory.createURI("http://www.namespace.org/predicate_abcde"),
+                        NodeFactory.createURI("http://www.namespace.org/abcde"));
         quadruples.add(quadruple);
         super.getRandomSemanticPeer().add(quadruple);
 

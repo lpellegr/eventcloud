@@ -53,7 +53,7 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
-import fr.inria.eventcloud.parsers.RdfParser;
+import fr.inria.eventcloud.utils.RDFReader;
 
 /**
  * Load-balancing benchmark to evaluate the impact of the stats computed in
@@ -178,9 +178,9 @@ public class LoadBalancingStatsOverheadBenchmark {
         if (this.inputFile != null) {
             try {
                 QuadrupleIterator it =
-                        RdfParser.parse(
+                        RDFReader.pipe(
                                 new FileInputStream(this.inputFile),
-                                SerializationFormat.NQuads, false);
+                                SerializationFormat.NQuads, false, true);
                 int c = 0;
                 while (it.hasNext()) {
                     quadruples.add(it.next());

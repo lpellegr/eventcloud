@@ -22,6 +22,7 @@ import java.io.ObjectOutput;
 
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
  * Some utility methods to serialize Jena {@link Node}s.
@@ -30,7 +31,7 @@ import com.hp.hpl.jena.graph.Node;
  */
 public class NodeSerializer {
 
-    public static Node readLiteralOrUri(ObjectInput in) throws IOException {
+    public static Node readLiteralOrURI(ObjectInput in) throws IOException {
         byte bitmap = in.readByte();
 
         boolean isLiteral = (1 & (bitmap >> 2)) == 1;
@@ -50,23 +51,24 @@ public class NodeSerializer {
                 datatypeURI = readString(in);
             }
 
-            return Node.createLiteral(literalValue, languageTag, hasDatatype
-                    ? TypeMapper.getInstance().getSafeTypeByName(datatypeURI)
-                    : null);
+            return NodeFactory.createLiteral(
+                    literalValue, languageTag, hasDatatype
+                            ? TypeMapper.getInstance().getSafeTypeByName(
+                                    datatypeURI) : null);
         } else {
-            return readUri(in);
+            return readURI(in);
         }
     }
 
-    public static Node readUri(ObjectInput in) throws IOException {
-        return Node.createURI(readString(in));
+    public static Node readURI(ObjectInput in) throws IOException {
+        return NodeFactory.createURI(readString(in));
     }
 
     public static String readString(ObjectInput in) throws IOException {
         return in.readUTF();
     }
 
-    public static void writeLiteralOrUri(ObjectOutput out, Node node)
+    public static void writeLiteralOrURI(ObjectOutput out, Node node)
             throws IOException {
         boolean isLiteral = node.isLiteral();
         boolean hasLanguageTag = false;
@@ -120,7 +122,7 @@ public class NodeSerializer {
         return result;
     }
 
-    public static void writeUri(ObjectOutput out, Node node) throws IOException {
+    public static void writeURI(ObjectOutput out, Node node) throws IOException {
         writeString(out, node.getURI());
     }
 

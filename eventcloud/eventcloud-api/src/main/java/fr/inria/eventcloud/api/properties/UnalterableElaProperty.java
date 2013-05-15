@@ -69,9 +69,9 @@ public final class UnalterableElaProperty extends ElaProperty {
         // quads.add(new Quadruple("eventCloud", "hasUnalterableElaProperty",
         // "UUID", graph));
         // quads.add(new Quadruple("UUID", "name",
-        // Node.createLiteral(super.name), graph));
+        // NodeFactory.createLiteral(super.name), graph));
         // quads.add(new Quadruple("UUID", "value",
-        // Node.createLiteral(super.value), graph));
+        // NodeFactory.createLiteral(super.value), graph));
         return quads;
     }
 

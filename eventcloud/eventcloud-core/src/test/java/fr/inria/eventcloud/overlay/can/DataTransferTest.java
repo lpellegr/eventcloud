@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -122,24 +123,24 @@ public class DataTransferTest {
                         .getValue()
                         .codePointAt(0) + 1));
 
-        Node node1 = Node.createURI(elt1);
-        Node node2 = Node.createURI(elt2);
+        Node node1 = NodeFactory.createURI(elt1);
+        Node node2 = NodeFactory.createURI(elt2);
 
         Quadruple quadruple1 =
-                new Quadruple(node1, Node.createURI(res.getFirst()
+                new Quadruple(node1, NodeFactory.createURI(res.getFirst()
                         .getLowerBound((byte) 1)
-                        .getValue()), Node.createURI(res.getFirst()
+                        .getValue()), NodeFactory.createURI(res.getFirst()
                         .getLowerBound((byte) 2)
-                        .getValue()), Node.createURI(res.getFirst()
+                        .getValue()), NodeFactory.createURI(res.getFirst()
                         .getLowerBound((byte) 3)
                         .getValue()));
 
         Quadruple quadruple2 =
-                new Quadruple(node2, Node.createURI(res.getSecond()
+                new Quadruple(node2, NodeFactory.createURI(res.getSecond()
                         .getLowerBound((byte) 1)
-                        .getValue()), Node.createURI(res.getSecond()
+                        .getValue()), NodeFactory.createURI(res.getSecond()
                         .getLowerBound((byte) 2)
-                        .getValue()), Node.createURI(res.getSecond()
+                        .getValue()), NodeFactory.createURI(res.getSecond()
                         .getLowerBound((byte) 3)
                         .getValue()));
 
@@ -246,8 +247,8 @@ public class DataTransferTest {
                 SemanticFactory.newSemanticPeer(new SemanticOverlayProvider(
                         true));
 
-        Node uri1 = Node.createURI(createDummyUri(bound1));
-        Node uri2 = Node.createURI(createDummyUri(bound2));
+        Node uri1 = NodeFactory.createURI(createDummyUri(bound1));
+        Node uri2 = NodeFactory.createURI(createDummyUri(bound2));
 
         publishProxy.publish(new CompoundEvent(new Quadruple(
                 uri1, uri1, uri1, uri1)));

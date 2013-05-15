@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -670,8 +671,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         if (subscriptionEntry != null) {
             CompoundEvent compoundEvent =
                     this.reconstructCompoundEvent(
-                            notification.getId(), subscriptionId,
-                            Node.createURI(notification.getMetaEventId()));
+                            notification.getId(),
+                            subscriptionId,
+                            NodeFactory.createURI(notification.getMetaEventId()));
 
             if (compoundEvent != null) {
                 this.deliver(
@@ -830,7 +832,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
             if (graph != null) {
                 msg += " ";
-                msg += Quadruple.removeMetaInformation(Node.createURI(graph));
+                msg +=
+                        Quadruple.removeMetaInformation(NodeFactory.createURI(graph));
             }
 
             msg += " ";
