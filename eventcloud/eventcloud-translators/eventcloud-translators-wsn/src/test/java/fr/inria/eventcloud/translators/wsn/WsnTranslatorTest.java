@@ -16,10 +16,7 @@
  **/
 package fr.inria.eventcloud.translators.wsn;
 
-import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -29,10 +26,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.jena.riot.RiotReader;
-import org.apache.jena.riot.lang.LangRIOT;
-import org.apache.jena.riot.system.StreamRDF;
-import org.apache.jena.riot.system.StreamRDFBase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
@@ -40,10 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import com.hp.hpl.jena.sparql.core.Quad;
-
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.utils.RDFReader;
 
 /**
  * Tests cases associated to {@link WsnTranslator}.
@@ -65,7 +58,10 @@ public class WsnTranslatorTest {
     public void testTranslation() throws TranslationException {
         // creates an event from a notification example
         CompoundEvent initialEvent =
-                new CompoundEvent(read("/notification-01.trig"));
+                new CompoundEvent(RDFReader.read(
+                        this.getClass().getResourceAsStream(
+                                "/notification-01.trig"),
+                        SerializationFormat.TriG));
 
         log.info("Initial quadruples are:");
         logInfo(initialEvent);
@@ -130,36 +126,6 @@ public class WsnTranslatorTest {
         for (Quadruple quad : event) {
             log.info(quad.toString());
         }
-    }
-
-    private static InputStream inputStreamFrom(String file) {
-        InputStream is = null;
-
-        if (file != null) {
-            is = WsnTranslatorTest.class.getResourceAsStream(file);
-        }
-
-        return is;
-    }
-
-    private static List<Quadruple> read(String file) {
-        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
-
-        StreamRDF sink = new StreamRDFBase() {
-            @Override
-            public void quad(Quad quad) {
-                quadruples.add(new Quadruple(
-                        quad.getGraph(), quad.getSubject(),
-                        quad.getPredicate(), quad.getObject()));
-            }
-        };
-
-        LangRIOT parser =
-                RiotReader.createParserTriG(inputStreamFrom(file), null, sink);
-
-        parser.parse();
-
-        return quadruples;
     }
 
 }

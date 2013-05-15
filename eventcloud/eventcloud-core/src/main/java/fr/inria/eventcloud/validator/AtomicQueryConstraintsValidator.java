@@ -27,6 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
 import com.hp.hpl.jena.sparql.expr.Expr;
@@ -174,11 +175,11 @@ public final class AtomicQueryConstraintsValidator extends
 
                     if (func.getArg1().isConstant()) {
                         constant =
-                                SemanticElement.removePrefix(Node.createURI(expr1.getConstant()
+                                SemanticElement.removePrefix(NodeFactory.createURI(expr1.getConstant()
                                         .asString()));
                     } else {
                         constant =
-                                SemanticElement.removePrefix(Node.createURI(expr2.getConstant()
+                                SemanticElement.removePrefix(NodeFactory.createURI(expr2.getConstant()
                                         .asString()));
                     }
 
@@ -187,14 +188,16 @@ public final class AtomicQueryConstraintsValidator extends
 
                     int compareToLowerBound =
                             SemanticElement.removePrefix(
-                                    Node.createURI(this.zone.getLowerBound(
-                                            (byte) dimension).getValue()))
+                                    NodeFactory.createURI(this.zone.getLowerBound(
+                                            (byte) dimension)
+                                            .getValue()))
                                     .compareTo(constant);
 
                     int compareToUpperBound =
                             SemanticElement.removePrefix(
-                                    Node.createURI(this.zone.getUpperBound(
-                                            (byte) dimension).getValue()))
+                                    NodeFactory.createURI(this.zone.getUpperBound(
+                                            (byte) dimension)
+                                            .getValue()))
                                     .compareTo(constant);
 
                     if (func.getArg1().isVariable()) {

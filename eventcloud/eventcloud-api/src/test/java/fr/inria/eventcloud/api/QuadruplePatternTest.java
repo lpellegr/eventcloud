@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
  * Tests cases associated to the {@link Quadruple} class.
@@ -42,8 +43,8 @@ public class QuadruplePatternTest {
     public void testSerialization() throws IOException, ClassNotFoundException {
         QuadruplePattern quadPattern =
                 new QuadruplePattern(
-                        Node.ANY, Node.ANY, Node.createURI(DEFAULT_URI),
-                        Node.createLiteral("Literal Value"));
+                        Node.ANY, Node.ANY, NodeFactory.createURI(DEFAULT_URI),
+                        NodeFactory.createLiteral("Literal Value"));
 
         QuadruplePattern quadPatternDeepCopy =
                 (QuadruplePattern) MakeDeepCopy.makeDeepCopy(quadPattern);

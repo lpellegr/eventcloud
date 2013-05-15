@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
-import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 
@@ -57,27 +57,29 @@ public class AtomicQueryConstraintsValidatorTest {
                 new SemanticZone(
                         new Coordinate<SemanticElement>(
                                 new SemanticElement(
-                                        Node.createURI("http://www.graph.fr/eventcloud/begin_graph")),
+                                        NodeFactory.createURI("http://www.graph.fr/eventcloud/begin_graph")),
                                 new SemanticElement(
-                                        Node.createURI("http://www.subject.fr/eventcloud/begin_subject")),
+                                        NodeFactory.createURI("http://www.subject.fr/eventcloud/begin_subject")),
                                 new SemanticElement(
-                                        Node.createURI("http://www.predicate.fr/eventcloud/begin_predicate")),
+                                        NodeFactory.createURI("http://www.predicate.fr/eventcloud/begin_predicate")),
                                 new SemanticElement(
-                                        Node.createURI("http://www.object.fr/eventcloud/begin_object"))),
+                                        NodeFactory.createURI("http://www.object.fr/eventcloud/begin_object"))),
                         new Coordinate<SemanticElement>(
                                 new SemanticElement(
-                                        Node.createURI("http://www.unice.fr/eventcloud/stop_graph")),
+                                        NodeFactory.createURI("http://www.unice.fr/eventcloud/stop_graph")),
                                 new SemanticElement(
-                                        Node.createURI("http://www.unice.fr/eventcloud/stop_subject")),
+                                        NodeFactory.createURI("http://www.unice.fr/eventcloud/stop_subject")),
                                 new SemanticElement(
-                                        Node.createURI("http://www.unice.fr/eventcloud/stop_predicate")),
+                                        NodeFactory.createURI("http://www.unice.fr/eventcloud/stop_predicate")),
                                 new SemanticElement(
-                                        Node.createURI("http://www.unice.fr/eventcloud/stop_object"))));
+                                        NodeFactory.createURI("http://www.unice.fr/eventcloud/stop_object"))));
 
         this.atomicQuery =
                 new AtomicQuery(
-                        Node.createVariable("g"), Node.createVariable("s"),
-                        Node.createVariable("p"), Node.createVariable("o"));
+                        NodeFactory.createVariable("g"),
+                        NodeFactory.createVariable("s"),
+                        NodeFactory.createVariable("p"),
+                        NodeFactory.createVariable("o"));
         this.exprList = new ExprList();
         this.exprListList = new ArrayList<ExprList>();
     }

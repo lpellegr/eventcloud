@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.benchmarks.pubsub.listeners;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -44,7 +45,7 @@ public class CustomSignalListener extends SignalNotificationListener {
 
                     @Override
                     public Node getEventId(String metaGraphValue) {
-                        return Node.createURI(Quadruple.removeMetaInformation(metaGraphValue));
+                        return NodeFactory.createURI(Quadruple.removeMetaInformation(metaGraphValue));
                     }
                 };
     }

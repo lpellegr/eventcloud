@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -137,19 +137,19 @@ public class PubSubTest extends WsTest {
 
         Quadruple q1 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user1@company.com"));
+                        NodeFactory.createURI("https://plus.google.com/825349613"),
+                        NodeFactory.createURI("https://plus.google.com/107234124364605485774"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
+                        NodeFactory.createLiteral("user1@company.com"));
         q1.setPublicationTime(publicationTime);
         this.publishWsClient.publish(q1);
 
         Quadruple q2 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User1"));
+                        NodeFactory.createURI("https://plus.google.com/825349613"),
+                        NodeFactory.createURI("https://plus.google.com/107234124364605485774"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User1"));
         q2.setPublicationTime(publicationTime);
         this.publishWsClient.publish(q2);
 
@@ -157,28 +157,28 @@ public class PubSubTest extends WsTest {
 
         Quadruple q3 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
-                        Node.createURI("https://plus.google.com/107545688688906540962"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user2@company.com"));
+                        NodeFactory.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
+                        NodeFactory.createURI("https://plus.google.com/107545688688906540962"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
+                        NodeFactory.createLiteral("user2@company.com"));
         q3.setPublicationTime(publicationTime);
         this.publishWsClient.publish(q3);
 
         Quadruple q4 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
-                        Node.createURI("https://plus.google.com/14023231238123495031/"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User 3"));
+                        NodeFactory.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
+                        NodeFactory.createURI("https://plus.google.com/14023231238123495031/"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User 3"));
         q4.setPublicationTime();
         this.publishWsClient.publish(q4);
 
         Quadruple q5 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
-                        Node.createURI("https://plus.google.com/107545688688906540962"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User 2"));
+                        NodeFactory.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
+                        NodeFactory.createURI("https://plus.google.com/107545688688906540962"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User 2"));
         q5.setPublicationTime(publicationTime);
         this.publishWsClient.publish(q5);
 
@@ -198,10 +198,10 @@ public class PubSubTest extends WsTest {
         // Publishes a 6th quadruple
         Quadruple q6 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
-                        Node.createURI("https://plus.google.com/14023231238123495031/"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user3@company.com"));
+                        NodeFactory.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
+                        NodeFactory.createURI("https://plus.google.com/14023231238123495031/"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
+                        NodeFactory.createLiteral("user3@company.com"));
         q6.setPublicationTime(publicationTime);
         this.publishWsClient.publish(q6);
 

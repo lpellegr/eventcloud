@@ -33,6 +33,7 @@ import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.primitives.Longs;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_ANY;
 import com.hp.hpl.jena.graph.Node_Blank;
 import com.hp.hpl.jena.graph.Triple;
@@ -81,13 +82,13 @@ public class Quadruple implements Externalizable, Event {
      * write quadruples from and/or to an input stream.
      */
     public enum SerializationFormat {
-        TriG, NQuads;
+        NQuads, TriG;
 
         public Lang toJenaLang() {
             if (super.ordinal() == 0) {
-                return Lang.TRIG;
-            } else {
                 return Lang.NQUADS;
+            } else {
+                return Lang.TRIG;
             }
         }
     }
@@ -384,7 +385,7 @@ public class Quadruple implements Externalizable, Event {
                 uri.append(this.publicationSource);
             }
 
-            return Node.createURI(uri.toString());
+            return NodeFactory.createURI(uri.toString());
         }
 
         return this.nodes[0];
@@ -487,7 +488,7 @@ public class Quadruple implements Externalizable, Event {
             }
 
             // returns a graph value without any meta information
-            return Node.createURI(metaGraph.graph);
+            return NodeFactory.createURI(metaGraph.graph);
         }
 
         return graph;
@@ -577,7 +578,7 @@ public class Quadruple implements Externalizable, Event {
     }
 
     public static Node removeMetaInformation(Node graph) {
-        return Node.createURI(removeMetaInformation(graph.getURI()));
+        return NodeFactory.createURI(removeMetaInformation(graph.getURI()));
     }
 
     public static String removeMetaInformation(String graph) {
@@ -757,7 +758,7 @@ public class Quadruple implements Externalizable, Event {
 
         out.writeUTF(gsp.toString());
 
-        NodeSerializer.writeLiteralOrUri(out, this.nodes[3]);
+        NodeSerializer.writeLiteralOrURI(out, this.nodes[3]);
     }
 
     /**
@@ -769,10 +770,10 @@ public class Quadruple implements Externalizable, Event {
         String[] chunks = new String(in.readUTF()).split(" ");
 
         this.nodes[0] =
-                this.extractAndSetMetaInformation(Node.createURI(chunks[0]));
-        this.nodes[1] = Node.createURI(chunks[1]);
-        this.nodes[2] = Node.createURI(chunks[2]);
-        this.nodes[3] = NodeSerializer.readLiteralOrUri(in);
+                this.extractAndSetMetaInformation(NodeFactory.createURI(chunks[0]));
+        this.nodes[1] = NodeFactory.createURI(chunks[1]);
+        this.nodes[2] = NodeFactory.createURI(chunks[2]);
+        this.nodes[3] = NodeSerializer.readLiteralOrURI(in);
     }
 
 }

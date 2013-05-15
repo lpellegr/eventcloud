@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
@@ -83,7 +84,7 @@ public class IndexEphemeralSubscriptionRequest extends
             return;
         }
 
-        Node metaGraphNode = Node.createURI(this.metaGraph.getValue());
+        Node metaGraphNode = NodeFactory.createURI(this.metaGraph.getValue());
 
         TransactionalDatasetGraph txnGraph =
                 semanticOverlay.getMiscDatastore().begin(AccessMode.READ_ONLY);
@@ -130,7 +131,7 @@ public class IndexEphemeralSubscriptionRequest extends
             // already indexed
             QuadrupleIterator it =
                     txnGraph.find(
-                            Node.createURI(this.metaGraph.getValue()),
+                            NodeFactory.createURI(this.metaGraph.getValue()),
                             Node.ANY,
                             PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
                             Node.ANY);
@@ -154,7 +155,7 @@ public class IndexEphemeralSubscriptionRequest extends
     }
 
     private final List<Quadruple> createEphemeralSubscriptionQuadruples() {
-        Node graph = Node.createURI(this.metaGraph.getValue());
+        Node graph = NodeFactory.createURI(this.metaGraph.getValue());
         Node sId =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.subscriptionId.getValue());
 
@@ -163,13 +164,13 @@ public class IndexEphemeralSubscriptionRequest extends
                         graph,
                         sId,
                         PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE,
-                        Node.createURI(this.subscriberUrl.getValue()), false,
-                        false),
+                        NodeFactory.createURI(this.subscriberUrl.getValue()),
+                        false, false),
                 new Quadruple(
                         graph,
                         sId,
                         PublishSubscribeConstants.EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE,
-                        Node.createLiteral(
+                        NodeFactory.createLiteral(
                                 Long.toString(System.currentTimeMillis()),
                                 XSDDatatype.XSDlong), false, false));
     }

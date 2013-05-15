@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_Literal;
 
 import fr.inria.eventcloud.utils.UniqueId;
@@ -55,7 +56,7 @@ public class SubscriptionId extends UniqueId {
      * @return a Jena {@link Node_Literal} representing the subscription id.
      */
     public Node toJenaNode() {
-        return Node.createLiteral(super.toString());
+        return NodeFactory.createLiteral(super.toString());
     }
 
     public static SubscriptionId parseSubscriptionId(String subscriptionId) {

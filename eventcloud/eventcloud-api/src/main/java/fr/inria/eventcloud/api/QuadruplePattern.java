@@ -21,6 +21,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_Variable;
 
 import fr.inria.eventcloud.utils.NodeSerializer;
@@ -129,7 +130,7 @@ public class QuadruplePattern extends Quadruple {
         }
 
         if (isObjectSet) {
-            NodeSerializer.writeLiteralOrUri(out, super.nodes[3]);
+            NodeSerializer.writeLiteralOrURI(out, super.nodes[3]);
         }
     }
 
@@ -152,22 +153,22 @@ public class QuadruplePattern extends Quadruple {
             int i = 0;
 
             if (isGraphSet) {
-                super.nodes[0] = Node.createURI(chunks[i]);
+                super.nodes[0] = NodeFactory.createURI(chunks[i]);
                 i++;
             }
 
             if (isSubjectSet) {
-                super.nodes[1] = Node.createURI(chunks[i]);
+                super.nodes[1] = NodeFactory.createURI(chunks[i]);
                 i++;
             }
 
             if (isPredicateSet) {
-                super.nodes[2] = Node.createURI(chunks[i]);
+                super.nodes[2] = NodeFactory.createURI(chunks[i]);
             }
         }
 
         if (isObjectSet) {
-            super.nodes[3] = NodeSerializer.readLiteralOrUri(in);
+            super.nodes[3] = NodeSerializer.readLiteralOrURI(in);
         }
     }
 

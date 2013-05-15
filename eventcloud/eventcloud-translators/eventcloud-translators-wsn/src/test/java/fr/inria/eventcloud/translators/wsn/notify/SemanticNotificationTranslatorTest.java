@@ -16,16 +16,6 @@
  **/
 package fr.inria.eventcloud.translators.wsn.notify;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
@@ -35,10 +25,9 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnTranslator;
-import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.utils.RDFReader;
 
 /**
  * Tests cases associated to {@link WsnTranslator}.
@@ -59,8 +48,10 @@ public class SemanticNotificationTranslatorTest {
     @Test
     public void testTranslation() throws TranslationException {
         CompoundEvent initialEvent =
-                new CompoundEvent(read(
-                        "/example.trig", SerializationFormat.TriG));
+                new CompoundEvent(RDFReader.read(
+                        this.getClass().getResourceAsStream("/example.trig"),
+                        SerializationFormat.TriG));
+
         log.info("Initial quadruples are:");
         logInfo(initialEvent);
         // printQuadruples(initialEvent.getQuadruples());
@@ -91,8 +82,10 @@ public class SemanticNotificationTranslatorTest {
     @Test
     public void testTranslationWithBlankNodes() throws TranslationException {
         CompoundEvent event =
-                new CompoundEvent(read(
-                        "/example-blanknodes.trig", SerializationFormat.TriG));
+                new CompoundEvent(RDFReader.read(
+                        this.getClass().getResourceAsStream(
+                                "/example-blanknodes.trig"),
+                        SerializationFormat.TriG, false, false));
 
         CompoundEvent translatedEvent =
                 this.translator.translateSemanticNotification(this.translator.translateSemanticCompoundEvent(event));
@@ -117,81 +110,6 @@ public class SemanticNotificationTranslatorTest {
     private static void logInfo(CompoundEvent event) {
         for (Quadruple quad : event) {
             log.info(quad.toString());
-        }
-    }
-
-    private static InputStream inputStreamFrom(String file) {
-        InputStream is = null;
-
-        if (file != null) {
-            is =
-                    SemanticNotificationTranslatorTest.class.getResourceAsStream(file);
-        }
-
-        return is;
-    }
-
-    private static List<Quadruple> read(String file, SerializationFormat format) {
-        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
-
-        RdfParser.parse(
-                inputStreamFrom(file), format, new Callback<Quadruple>() {
-                    @Override
-                    public void execute(Quadruple quad) {
-                        quadruples.add(quad);
-                    }
-
-                }, false);
-
-        return quadruples;
-    }
-
-    @SuppressWarnings("unused")
-    private static String readFileAsString(String filePath)
-            throws java.io.IOException {
-        byte[] buffer = new byte[(int) new File(filePath).length()];
-        BufferedInputStream f = null;
-        try {
-            f = new BufferedInputStream(new FileInputStream(filePath));
-            f.read(buffer);
-        } finally {
-            if (f != null) {
-                try {
-                    f.close();
-                } catch (IOException ignored) {
-                }
-            }
-        }
-        return new String(buffer);
-    }
-
-    @SuppressWarnings("unused")
-    private String convertStreamToString(InputStream is) throws IOException {
-        /*BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-          sb.append(line+"\n");
-        }
-        is.close();
-        return sb.toString();*/
-
-        if (is != null) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-
-            try {
-                BufferedReader r1 =
-                        new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                while ((line = r1.readLine()) != null) {
-                    sb.append(line).append('\n');
-                }
-            } finally {
-                is.close();
-            }
-            return sb.toString();
-        } else {
-            return "";
         }
     }
 

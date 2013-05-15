@@ -41,10 +41,10 @@ import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.reasoner.SparqlReasoner;
 import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.utils.RDFReader;
 
 /**
  * Launcher for running benchmarks with historical queries.
@@ -157,11 +157,10 @@ public class BenchmarkLauncher {
 
         this.quadruples = new ArrayList<Quadruple>();
         try {
-            RdfParser.parse(
+            RDFReader.read(
                     new FileInputStream(new File(this.fileToParse)),
                     SerializationFormat.TriG, this.callback);
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

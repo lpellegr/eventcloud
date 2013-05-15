@@ -33,6 +33,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -67,7 +68,7 @@ public class SparqlResultSerializerTest {
         this.datastore = DatasetGraphFactory.createMem();
         // fills the datastore with some data
         for (int i = 0; i < 10; i++) {
-            Node node = Node.createURI("http://abc" + i);
+            Node node = NodeFactory.createURI("http://abc" + i);
             this.datastore.add(node, node, node, node);
         }
     }
@@ -101,7 +102,7 @@ public class SparqlResultSerializerTest {
 
     @Test
     public void testBindingSerialization() {
-        Node defaultNode = Node.createURI("http://www.inria.fr");
+        Node defaultNode = NodeFactory.createURI("http://www.inria.fr");
 
         BindingMap binding = BindingFactory.create();
         binding.add(Var.alloc("var1"), defaultNode);

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
@@ -62,23 +63,24 @@ public class PutGetTest extends WsTest {
     @Test(timeout = 180000)
     public void testPutGetWsProxy() throws Exception {
         this.putgetWsClient.add(new Quadruple(
-                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
-                Node.createURI("http://www.nice.fr"),
-                Node.createURI("http://france.meteofrance.com/france/meteo"),
-                Node.createURI("http://france.meteofrance.com/france/meteo?PREVISIONS_PORTLET.path=previsionsville/060880")));
+                NodeFactory.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                NodeFactory.createURI("http://www.nice.fr"),
+                NodeFactory.createURI("http://france.meteofrance.com/france/meteo"),
+                NodeFactory.createURI("http://france.meteofrance.com/france/meteo?PREVISIONS_PORTLET.path=previsionsville/060880")));
 
         Node expectedNodeResult =
-                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011-2012/");
+                NodeFactory.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011-2012/");
         this.putgetWsClient.add(new Quadruple(
-                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
-                Node.createURI("http://www.nice.fr"), expectedNodeResult,
-                Node.createLiteral("29", XSDDatatype.XSDint)));
+                NodeFactory.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                NodeFactory.createURI("http://www.nice.fr"),
+                expectedNodeResult, NodeFactory.createLiteral(
+                        "29", XSDDatatype.XSDint)));
 
         this.putgetWsClient.add(new Quadruple(
-                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
-                Node.createURI("http://www.nice.fr"),
-                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011-2012/"),
-                Node.createLiteral("26", XSDDatatype.XSDint)));
+                NodeFactory.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                NodeFactory.createURI("http://www.nice.fr"),
+                NodeFactory.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011-2012/"),
+                NodeFactory.createLiteral("26", XSDDatatype.XSDint)));
 
         List<Quadruple> result = this.putgetWsClient.find(QuadruplePattern.ANY);
         log.info("Quadruples contained by the EventCloud:");

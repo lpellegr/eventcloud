@@ -63,6 +63,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashCodes;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 
@@ -493,13 +494,14 @@ public class Subscription implements Quadruplable, Serializable {
 
         result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI, SUBSCRIPTION_ID_NODE,
-                Node.createLiteral(this.id.toString()), false, false));
+                NodeFactory.createLiteral(this.id.toString()), false, false));
 
         if (this.parentId != null) {
             result.add(new Quadruple(
                     subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_PARENT_ID_NODE,
-                    Node.createLiteral(this.parentId.toString()), false, false));
+                    NodeFactory.createLiteral(this.parentId.toString()), false,
+                    false));
         }
 
         if (this.originalId != null) {
@@ -514,47 +516,48 @@ public class Subscription implements Quadruplable, Serializable {
         result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SERIALIZED_VALUE_NODE,
-                Node.createLiteral(this.sparqlQuery), false, false));
+                NodeFactory.createLiteral(this.sparqlQuery), false, false));
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(this.creationTime);
         result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
-                SUBSCRIPTION_CREATION_DATETIME_NODE, Node.createLiteral(
+                SUBSCRIPTION_CREATION_DATETIME_NODE, NodeFactory.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime), false, false));
 
         result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 PublishSubscribeConstants.SUBSCRIPTION_TYPE_NODE,
-                Node.createLiteral(
+                NodeFactory.createLiteral(
                         Short.toString(this.type.convert()),
                         XSDDatatype.XSDshort), false, false));
 
         calendar.setTimeInMillis(this.indexationTime);
         result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
-                SUBSCRIPTION_INDEXATION_DATETIME_NODE, Node.createLiteral(
+                SUBSCRIPTION_INDEXATION_DATETIME_NODE,
+                NodeFactory.createLiteral(
                         DatatypeConverter.printDateTime(calendar),
                         XSDDatatype.XSDdateTime), false, false));
 
         result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_SUBSCRIBER_NODE,
-                Node.createURI(this.subscriberUrl), false, false));
+                NodeFactory.createURI(this.subscriberUrl), false, false));
 
         if (this.subscriptionDestination != null) {
             result.add(new Quadruple(
                     subscriptionOriginalURI, subscriptionURI,
                     SUBSCRIPTION_DESTINATION_NODE,
-                    Node.createLiteral(this.subscriptionDestination), false,
-                    false));
+                    NodeFactory.createLiteral(this.subscriptionDestination),
+                    false, false));
         }
 
         result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_INDEXED_WITH_NODE,
-                Node.createLiteral(this.getSubSubscriptions()[0].getId()
+                NodeFactory.createLiteral(this.getSubSubscriptions()[0].getId()
                         .toString()), false, false));
 
         if (this.intermediatePeerReferences != null) {
@@ -562,7 +565,7 @@ public class Subscription implements Quadruplable, Serializable {
                     subscriptionOriginalURI,
                     subscriptionURI,
                     SUBSCRIPTION_PEER_REFERENCES_NODE,
-                    Node.createLiteral(this.intermediatePeerReferencesAsString()),
+                    NodeFactory.createLiteral(this.intermediatePeerReferencesAsString()),
                     false, false));
         }
 

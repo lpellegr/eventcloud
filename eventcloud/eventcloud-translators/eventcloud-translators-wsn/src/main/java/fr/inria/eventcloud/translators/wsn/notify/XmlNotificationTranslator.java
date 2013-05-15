@@ -52,6 +52,7 @@ import org.xml.sax.SAXException;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import eu.play_project.play_commons.constants.Stream;
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -131,7 +132,7 @@ public class XmlNotificationTranslator extends
                 topicNamespace = this.defaultTopicNamespace;
             }
             topicNode =
-                    Node.createURI(topicNamespace + topic.getLocalPart()
+                    NodeFactory.createURI(topicNamespace + topic.getLocalPart()
                             + Stream.STREAM_ID_SUFFIX);
         } else {
             throw new TranslationException(
@@ -151,7 +152,7 @@ public class XmlNotificationTranslator extends
                                 producerAddress, "uri");
                 if (producerAddressUri != null) {
                     producerAddressNode =
-                            Node.createLiteral(producerAddressUri);
+                            NodeFactory.createLiteral(producerAddressUri);
                 } else {
                     throw new TranslationException("No producer uri specified");
                 }
@@ -203,8 +204,8 @@ public class XmlNotificationTranslator extends
                 && !eventId.endsWith(WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER)) {
             eventId += WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER;
         }
-        eventIdNode = Node.createURI(eventId);
-        subjectNode = Node.createURI(eventId + "#event");
+        eventIdNode = NodeFactory.createURI(eventId);
+        subjectNode = NodeFactory.createURI(eventId + "#event");
 
         Message message = notificationMessage.getMessage();
         if (message != null) {
@@ -328,14 +329,14 @@ public class XmlNotificationTranslator extends
             Node predicateNode = null;
             if (!metadata) {
                 predicateNode =
-                        Node.createURI(WsnConstants.MESSAGE_TEXT
+                        NodeFactory.createURI(WsnConstants.MESSAGE_TEXT
                                 + WsnConstants.URI_SEPARATOR
                                 + predicate.toString());
             } else {
-                predicateNode = Node.createURI(predicate.toString());
+                predicateNode = NodeFactory.createURI(predicate.toString());
             }
 
-            result.put(predicateNode, Node.createLiteral(
+            result.put(predicateNode, NodeFactory.createLiteral(
                     literalValue, this.findDatatype(literalValue)));
         } else {
             if (predicate.length() > 0) {

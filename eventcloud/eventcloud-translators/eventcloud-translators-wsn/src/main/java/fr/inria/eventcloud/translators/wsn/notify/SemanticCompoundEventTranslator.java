@@ -16,10 +16,12 @@
  **/
 package fr.inria.eventcloud.translators.wsn.notify;
 
-import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
 
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
 
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WebContent;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType.Message;
@@ -27,9 +29,9 @@ import org.w3c.dom.Element;
 
 import eu.play_project.play_commons.eventformat.EventFormatHelpers;
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.parsers.RdfSerializer;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.Translator;
+import fr.inria.eventcloud.utils.JenaConverter;
 
 /**
  * Translator for {@link CompoundEvent compound events} to
@@ -63,19 +65,21 @@ public class SemanticCompoundEventTranslator extends
     @Override
     public NotificationMessageHolderType translate(CompoundEvent event)
             throws TranslationException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StringWriter out = new StringWriter();
 
-        RdfSerializer.triGWriter(out, event);
+        RDFDataMgr.write(
+                out, JenaConverter.toDatasetGraph(event), RDFFormat.TRIG_BLOCKS);
 
         Element any =
-                EventFormatHelpers.wrapWithDomNativeMessageElement(new String(
-                        out.toByteArray()), WebContent.contentTypeTriGAlt1);
+                EventFormatHelpers.wrapWithDomNativeMessageElement(
+                        out.toString(), WebContent.contentTypeTriGAlt1);
 
         Message message = new Message();
         message.setAny(any);
 
         NotificationMessageHolderType notificationMessage =
                 new NotificationMessageHolderType();
+
         if (event.size() > 0) {
             String publicationSource = event.get(0).getPublicationSource();
 
@@ -86,6 +90,7 @@ public class SemanticCompoundEventTranslator extends
                 notificationMessage.setProducerReference(endPointReferenceBuilder.build());
             }
         }
+
         notificationMessage.setMessage(message);
 
         return notificationMessage;

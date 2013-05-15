@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.EventCloudId;
@@ -81,23 +82,24 @@ public class EventCloudUsageTest implements Serializable {
         // historical quadruples (although these quadruples may trigger
         // a notification)
         putGetProxy.add(new Quadruple(
-                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
-                Node.createURI("http://www.nice.fr"),
-                Node.createURI("http://france.meteofrance.com/france/meteo"),
-                Node.createURI("http://france.meteofrance.com/france/meteo?PREVISIONS_PORTLET.path=previsionsville/060880")));
+                NodeFactory.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                NodeFactory.createURI("http://www.nice.fr"),
+                NodeFactory.createURI("http://france.meteofrance.com/france/meteo"),
+                NodeFactory.createURI("http://france.meteofrance.com/france/meteo?PREVISIONS_PORTLET.path=previsionsville/060880")));
 
         Node expectedNodeResult =
-                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011-2012/");
+                NodeFactory.createURI("http://france.meteofrance.com/france/meteo/max-temperature/08082011-2012/");
         putGetProxy.add(new Quadruple(
-                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
-                Node.createURI("http://www.nice.fr"), expectedNodeResult,
-                Node.createLiteral("29", XSDDatatype.XSDint)));
+                NodeFactory.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                NodeFactory.createURI("http://www.nice.fr"),
+                expectedNodeResult, NodeFactory.createLiteral(
+                        "29", XSDDatatype.XSDint)));
 
         putGetProxy.add(new Quadruple(
-                Node.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
-                Node.createURI("http://www.nice.fr"),
-                Node.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011-2012/"),
-                Node.createLiteral("26", XSDDatatype.XSDint)));
+                NodeFactory.createURI("http://sources.event-processing.org/ids/NiceWeatherStation01#source"),
+                NodeFactory.createURI("http://www.nice.fr"),
+                NodeFactory.createURI("http://france.meteofrance.com/france/meteo/max-temperature/09082011-2012/"),
+                NodeFactory.createLiteral("26", XSDDatatype.XSDint)));
 
         // Once a quadruple is inserted, it is possible to retrieve some
         // quadruples (historical data) by using a quadruple pattern.
@@ -169,19 +171,19 @@ public class EventCloudUsageTest implements Serializable {
         // From the publish proxy it is possible to publish quadruples (events)
         Quadruple q1 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user1@company.com"));
+                        NodeFactory.createURI("https://plus.google.com/825349613"),
+                        NodeFactory.createURI("https://plus.google.com/107234124364605485774"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
+                        NodeFactory.createLiteral("user1@company.com"));
         q1.setPublicationTime(publicationTime);
         publishProxy.publish(q1);
 
         Quadruple q2 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/825349613"),
-                        Node.createURI("https://plus.google.com/107234124364605485774"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User1"));
+                        NodeFactory.createURI("https://plus.google.com/825349613"),
+                        NodeFactory.createURI("https://plus.google.com/107234124364605485774"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User1"));
         q2.setPublicationTime(publicationTime);
         publishProxy.publish(q2);
 
@@ -189,28 +191,28 @@ public class EventCloudUsageTest implements Serializable {
 
         Quadruple q3 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
-                        Node.createURI("https://plus.google.com/107545688688906540962"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/email"),
-                        Node.createLiteral("user2@company.com"));
+                        NodeFactory.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
+                        NodeFactory.createURI("https://plus.google.com/107545688688906540962"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/email"),
+                        NodeFactory.createLiteral("user2@company.com"));
         q3.setPublicationTime(publicationTime);
         publishProxy.publish(q3);
 
         Quadruple q4 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
-                        Node.createURI("https://plus.google.com/14023231238123495031/"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User 3"));
+                        NodeFactory.createURI("https://plus.google.com/124324034/2011-2012-08-30-19:04:54"),
+                        NodeFactory.createURI("https://plus.google.com/14023231238123495031/"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User 3"));
         q4.setPublicationTime();
         publishProxy.publish(q4);
 
         Quadruple q5 =
                 new Quadruple(
-                        Node.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
-                        Node.createURI("https://plus.google.com/107545688688906540962"),
-                        Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                        Node.createLiteral("User 2"));
+                        NodeFactory.createURI("https://plus.google.com/3283940594/2011-2012-08-30-18:13:05"),
+                        NodeFactory.createURI("https://plus.google.com/107545688688906540962"),
+                        NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                        NodeFactory.createLiteral("User 2"));
         q5.setPublicationTime(publicationTime);
         publishProxy.publish(q5);
 
@@ -233,10 +235,10 @@ public class EventCloudUsageTest implements Serializable {
 
         // one new quadruple that matches the subscription is published
         publishProxy.publish(new Quadruple(
-                Node.createURI("https://plus.google.com/"),
-                Node.createURI("https://plus.google.com/4879854879797418743/"),
-                Node.createURI("http://xmlns.com/foaf/0.1/name"),
-                Node.createLiteral("Firstname Lastname")));
+                NodeFactory.createURI("https://plus.google.com/"),
+                NodeFactory.createURI("https://plus.google.com/4879854879797418743/"),
+                NodeFactory.createURI("http://xmlns.com/foaf/0.1/name"),
+                NodeFactory.createLiteral("Firstname Lastname")));
 
         try {
             Thread.sleep(5000);

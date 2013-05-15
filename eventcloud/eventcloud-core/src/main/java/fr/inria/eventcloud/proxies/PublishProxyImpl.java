@@ -36,8 +36,8 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.utils.RDFReader;
 
 /**
  * PublishProxyImpl is a concrete implementation of {@link PublishProxy}. This
@@ -138,7 +138,7 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
         try {
             InputStream in = url.openConnection().getInputStream();
 
-            RdfParser.parse(in, format, new Callback<Quadruple>() {
+            RDFReader.read(in, format, new Callback<Quadruple>() {
                 @Override
                 public void execute(Quadruple quad) {
                     PublishProxyImpl.this.publish(quad);

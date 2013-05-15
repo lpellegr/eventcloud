@@ -25,7 +25,6 @@
 		<module>eventcloud-deployment</module>
 		<module>eventcloud-translators</module>
 		<module>eventcloud-utils</module>
-		<module>eventcloud-utils-trigwriter</module>
 		<module>eventcloud-webservices</module>
 	</modules>
 

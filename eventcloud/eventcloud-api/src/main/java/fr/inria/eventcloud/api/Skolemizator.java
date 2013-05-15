@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
  * Blank nodes do not have identifiers in the RDF abstract syntax. The blank
@@ -109,8 +110,8 @@ public class Skolemizator {
         hasher.putLong(randomId.getLeastSignificantBits());
 
         Node skolem =
-                Node.createURI(SKOLEM_URI_SUFFIX + SKOLEM_URI_PATH_COMPONENT
-                        + hasher.hash().toString());
+                NodeFactory.createURI(SKOLEM_URI_SUFFIX
+                        + SKOLEM_URI_PATH_COMPONENT + hasher.hash().toString());
 
         assignedSkolems.put(subjectOrObject, skolem);
 

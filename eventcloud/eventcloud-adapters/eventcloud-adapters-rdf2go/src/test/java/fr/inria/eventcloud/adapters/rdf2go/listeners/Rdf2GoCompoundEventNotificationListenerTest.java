@@ -30,6 +30,7 @@ import org.ontoware.rdf2go.model.node.Variable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -45,7 +46,7 @@ public class Rdf2GoCompoundEventNotificationListenerTest {
 
     @Test
     public void test() {
-        Node graph = Node.createURI("http://example.org/graph");
+        Node graph = NodeFactory.createURI("http://example.org/graph");
 
         Builder<Quadruple> builder = new ImmutableList.Builder<Quadruple>();
 

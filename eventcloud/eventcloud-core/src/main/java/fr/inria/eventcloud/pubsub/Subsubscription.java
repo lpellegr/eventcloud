@@ -39,6 +39,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruplable;
@@ -122,16 +123,16 @@ public class Subsubscription implements Quadruplable {
         Node originalSubscriptionURI =
                 PublishSubscribeUtils.createSubscriptionIdUri(this.originalId);
         Node subSubscriptionURI =
-                Node.createURI(SUBSUBSCRIPTION_NS + this.id.toString());
+                NodeFactory.createURI(SUBSUBSCRIPTION_NS + this.id.toString());
 
         result.add(new Quadruple(
                 originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_ID_NODE,
-                Node.createLiteral(this.id.toString()), false, false));
+                NodeFactory.createLiteral(this.id.toString()), false, false));
 
         result.add(new Quadruple(
                 originalSubscriptionURI, subSubscriptionURI,
-                SUBSUBSCRIPTION_INDEX_NODE, Node.createLiteral(
+                SUBSUBSCRIPTION_INDEX_NODE, NodeFactory.createLiteral(
                         Integer.toString(this.index), XSDDatatype.XSDint),
                 false, false));
 
@@ -287,7 +288,7 @@ public class Subsubscription implements Quadruplable {
         return new Quadruple(
                 originalSubscriptionURI, subSubscriptionURI,
                 SUBSUBSCRIPTION_VAR_NAMES_NODE,
-                Node.createLiteral(atomicQuery.getVarNamesAsString()));
+                NodeFactory.createLiteral(atomicQuery.getVarNamesAsString()));
     }
 
     private static Node replaceVarNodeByConstant(Node node) {

@@ -24,6 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDe
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
@@ -38,17 +39,17 @@ public class QuadrupleTest {
     @Test(expected = IllegalArgumentException.class)
     public void testInstantiationWithBlankNode() {
         new Quadruple(
-                Node.createAnon(), NodeGenerator.randomUri(),
+                NodeFactory.createAnon(), NodeGenerator.randomUri(),
                 NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.randomUri(), Node.createAnon(),
+                NodeGenerator.randomUri(), NodeFactory.createAnon(),
                 NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
                 NodeGenerator.randomUri(), NodeGenerator.randomUri(),
-                Node.createAnon(), NodeGenerator.random());
+                NodeFactory.createAnon(), NodeGenerator.random());
         new Quadruple(
                 NodeGenerator.randomUri(), NodeGenerator.randomUri(),
-                NodeGenerator.randomUri(), Node.createAnon());
+                NodeGenerator.randomUri(), NodeFactory.createAnon());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -67,17 +68,17 @@ public class QuadrupleTest {
                 NodeGenerator.randomUri(), Node.ANY);
 
         new Quadruple(
-                Node.createVariable("test"), NodeGenerator.randomUri(),
+                NodeFactory.createVariable("test"), NodeGenerator.randomUri(),
                 NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
-                NodeGenerator.randomUri(), Node.createVariable("test"),
+                NodeGenerator.randomUri(), NodeFactory.createVariable("test"),
                 NodeGenerator.randomUri(), NodeGenerator.random());
         new Quadruple(
                 NodeGenerator.randomUri(), NodeGenerator.randomUri(),
-                Node.createVariable("test"), NodeGenerator.random());
+                NodeFactory.createVariable("test"), NodeGenerator.random());
         new Quadruple(
                 NodeGenerator.randomUri(), NodeGenerator.randomUri(),
-                NodeGenerator.randomUri(), Node.createVariable("test"));
+                NodeGenerator.randomUri(), NodeFactory.createVariable("test"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -235,7 +236,7 @@ public class QuadrupleTest {
             ClassNotFoundException {
         testQuadrupleSerialization(new Quadruple(
                 NodeGenerator.randomUri(), NodeGenerator.randomUri(),
-                NodeGenerator.randomUri(), Node.createLiteral(
+                NodeGenerator.randomUri(), NodeFactory.createLiteral(
                         "hello", "en", null)));
     }
 
@@ -244,7 +245,7 @@ public class QuadrupleTest {
             ClassNotFoundException {
         testQuadrupleSerialization(new Quadruple(
                 NodeGenerator.randomUri(), NodeGenerator.randomUri(),
-                NodeGenerator.randomUri(), Node.createLiteral(
+                NodeGenerator.randomUri(), NodeFactory.createLiteral(
                         "true", null, XSDDatatype.XSDboolean)));
     }
 
