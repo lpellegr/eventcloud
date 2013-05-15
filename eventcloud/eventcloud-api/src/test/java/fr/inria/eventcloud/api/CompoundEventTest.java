@@ -26,6 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDe
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 
 import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
@@ -149,7 +150,7 @@ public class CompoundEventTest {
 
     @Test
     public void testInstanciation() {
-        Node graphValue = Node.createURI("urn:g");
+        Node graphValue = NodeFactory.createURI("urn:g");
 
         Builder<Quadruple> builder = new ImmutableList.Builder<Quadruple>();
         for (int i = 0; i < 10; i++) {

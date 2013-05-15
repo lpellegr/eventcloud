@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.api.generators;
 
-import static com.hp.hpl.jena.graph.Node.createLiteral;
+import static com.hp.hpl.jena.graph.NodeFactory.createLiteral;
 
 import com.hp.hpl.jena.graph.Node;
 

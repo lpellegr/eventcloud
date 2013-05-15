@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.api;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
@@ -52,18 +53,19 @@ public final class PublishSubscribeConstants {
      * Nodes associated to namespaces
      */
 
-    public static final Node EVENT_NS_NODE = Node.createURI(EVENT_NS);
+    public static final Node EVENT_NS_NODE = NodeFactory.createURI(EVENT_NS);
 
     public static final Node PUBLICATION_NS_NODE =
-            Node.createURI(PUBLICATION_NS);
+            NodeFactory.createURI(PUBLICATION_NS);
 
-    public static final Node QUADRUPLE_NS_NODE = Node.createURI(QUADRUPLE_NS);
+    public static final Node QUADRUPLE_NS_NODE =
+            NodeFactory.createURI(QUADRUPLE_NS);
 
     public static final Node SUBSCRIPTION_NS_NODE =
-            Node.createURI(SUBSCRIPTION_NS);
+            NodeFactory.createURI(SUBSCRIPTION_NS);
 
     public static final Node SUBSUBSCRIPTION_NS_NODE =
-            Node.createURI(SUBSUBSCRIPTION_NS);
+            NodeFactory.createURI(SUBSUBSCRIPTION_NS);
 
     /*
      * Properties
@@ -139,70 +141,70 @@ public final class PublishSubscribeConstants {
      */
 
     public static final Node EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_NODE =
-            Node.createURI(EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY);
+            NodeFactory.createURI(EPHEMERAL_SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY);
 
     public static final Node EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_NODE =
-            Node.createURI(EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_PROPERTY);
+            NodeFactory.createURI(EPHEMERAL_SUBSCRIPTION_SUBSCRIBER_PROPERTY);
 
     public static final Node EVENT_NB_QUADRUPLES_NODE =
-            Node.createURI(EVENT_NB_QUADRUPLES);
+            NodeFactory.createURI(EVENT_NB_QUADRUPLES);
 
     public static final Node SUBSCRIPTION_ID_NODE =
-            Node.createURI(SUBSCRIPTION_ID_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_ID_PROPERTY);
 
     public static final Node SUBSCRIPTION_PARENT_ID_NODE =
-            Node.createURI(SUBSCRIPTION_PARENT_ID_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_PARENT_ID_PROPERTY);
 
     public static final Node SUBSCRIPTION_ORIGINAL_ID_NODE =
-            Node.createURI(SUBSCRIPTION_ORIGINAL_ID_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_ORIGINAL_ID_PROPERTY);
 
     public static final Node SUBSCRIPTION_SERIALIZED_VALUE_NODE =
-            Node.createURI(SUBSCRIPTION_SPARQL_QUERY_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_SPARQL_QUERY_PROPERTY);
 
     public static final Node SUBSCRIPTION_CREATION_DATETIME_NODE =
-            Node.createURI(SUBSCRIPTION_CREATION_DATETIME_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_CREATION_DATETIME_PROPERTY);
 
     public static final Node SUBSCRIPTION_INDEXATION_DATETIME_NODE =
-            Node.createURI(SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_INDEXATION_DATETIME_PROPERTY);
 
     public static final Node SUBSCRIPTION_TYPE_NODE =
-            Node.createURI(SUBSCRIPTION_TYPE_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_TYPE_PROPERTY);
 
     public static final Node SUBSCRIPTION_SUBSCRIBER_NODE =
-            Node.createURI(SUBSCRIPTION_SUBSCRIBER_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_SUBSCRIBER_PROPERTY);
 
     public static final Node SUBSCRIPTION_DESTINATION_NODE =
-            Node.createURI(SUBSCRIPTION_DESTINATION_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_DESTINATION_PROPERTY);
 
     public static final Node SUBSCRIPTION_INDEXED_WITH_NODE =
-            Node.createURI(SUBSCRIPTION_INDEXED_WITH_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_INDEXED_WITH_PROPERTY);
 
     public static final Node SUBSCRIPTION_PEER_REFERENCES_NODE =
-            Node.createURI(SUBSCRIPTION_PEER_REFERENCES_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_PEER_REFERENCES_PROPERTY);
 
     public static final Node SUBSCRIPTION_HAS_SUBSUBSCRIPTION_NODE =
-            Node.createURI(SUBSCRIPTION_HAS_SUBSUBSCRIPTION_PROPERTY);
+            NodeFactory.createURI(SUBSCRIPTION_HAS_SUBSUBSCRIPTION_PROPERTY);
 
     public static final Node SUBSUBSCRIPTION_ID_NODE =
-            Node.createURI(SUBSUBSCRIPTION_ID_PROPERTY);
+            NodeFactory.createURI(SUBSUBSCRIPTION_ID_PROPERTY);
 
     public static final Node SUBSUBSCRIPTION_INDEX_NODE =
-            Node.createURI(SUBSUBSCRIPTION_INDEX_PROPERTY);
+            NodeFactory.createURI(SUBSUBSCRIPTION_INDEX_PROPERTY);
 
     public static final Node SUBSUBSCRIPTION_GRAPH_VALUE_NODE =
-            Node.createURI(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY);
+            NodeFactory.createURI(SUBSUBSCRIPTION_GRAPH_VALUE_PROPERTY);
 
     public static final Node SUBSUBSCRIPTION_SUBJECT_VALUE_NODE =
-            Node.createURI(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY);
+            NodeFactory.createURI(SUBSUBSCRIPTION_SUBJECT_VALUE_PROPERTY);
 
     public static final Node SUBSUBSCRIPTION_PREDICATE_VALUE_NODE =
-            Node.createURI(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY);
+            NodeFactory.createURI(SUBSUBSCRIPTION_PREDICATE_VALUE_PROPERTY);
 
     public static final Node SUBSUBSCRIPTION_OBJECT_VALUE_NODE =
-            Node.createURI(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY);
+            NodeFactory.createURI(SUBSUBSCRIPTION_OBJECT_VALUE_PROPERTY);
 
     public static final Node SUBSUBSCRIPTION_VAR_NAMES_NODE =
-            Node.createURI(SUBSUBSCRIPTION_VAR_NAMES_PROPERTY);
+            NodeFactory.createURI(SUBSUBSCRIPTION_VAR_NAMES_PROPERTY);
 
     /*
      * Values
@@ -222,13 +224,13 @@ public final class PublishSubscribeConstants {
      */
 
     public static final Node SUBSCRIPTION_VARIABLE_NODE =
-            Node.createURI(SUBSCRIPTION_VARIABLE_VALUE);
+            NodeFactory.createURI(SUBSCRIPTION_VARIABLE_VALUE);
 
     public static final Node QUADRUPLE_MATCHES_SUBSCRIPTION_NODE =
-            Node.createURI(QUADRUPLE_MATCHES_SUBSCRIPTION_VALUE);
+            NodeFactory.createURI(QUADRUPLE_MATCHES_SUBSCRIPTION_VALUE);
 
     public static final Node INTERMEDIATE_RESULTS_NODE =
-            Node.createURI(INTERMEDIATE_RESULTS_VALUE);
+            NodeFactory.createURI(INTERMEDIATE_RESULTS_VALUE);
 
     private PublishSubscribeConstants() {
 

@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.api.generators;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 
 /**
  * Utility class that defines some convenient methods to create arbitrary
@@ -92,7 +93,7 @@ public class NodeGenerator extends Generator {
      * @return the randomly generated node.
      */
     public static Node randomUri(String prefix) {
-        return Node.createURI(UriGenerator.randomPrefixed(
+        return NodeFactory.createURI(UriGenerator.randomPrefixed(
                 DEFAULT_LENGTH, prefix));
     }
 
@@ -107,7 +108,7 @@ public class NodeGenerator extends Generator {
      * @return the randomly generated node.
      */
     public static Node randomUri(String prefix, int length) {
-        return Node.createURI(UriGenerator.randomPrefixed(length, prefix));
+        return NodeFactory.createURI(UriGenerator.randomPrefixed(length, prefix));
     }
 
     /**
@@ -116,7 +117,7 @@ public class NodeGenerator extends Generator {
      * @return the randomly generated node.
      */
     public static Node randomUri() {
-        return Node.createURI(UriGenerator.random(
+        return NodeFactory.createURI(UriGenerator.random(
                 DEFAULT_LENGTH, DEFAULT_URI_SCHEME_NAME));
     }
 
@@ -130,7 +131,7 @@ public class NodeGenerator extends Generator {
      * @return the randomly generated node.
      */
     public static Node randomUri(int length) {
-        return Node.createURI(UriGenerator.random(
+        return NodeFactory.createURI(UriGenerator.random(
                 length, DEFAULT_URI_SCHEME_NAME));
     }
 
@@ -156,7 +157,7 @@ public class NodeGenerator extends Generator {
      * @return the randomly generated node.
      */
     public static Node randomLiteral(String prefix, int length) {
-        return Node.createLiteral(prefix
+        return NodeFactory.createLiteral(prefix
                 + StringGenerator.randomPrintableAscii(length));
     }
 
@@ -170,7 +171,7 @@ public class NodeGenerator extends Generator {
      * @return the randomly generated node.
      */
     public static Node randomLiteral(int length) {
-        return Node.createLiteral(StringGenerator.randomPrintableAscii(length));
+        return NodeFactory.createLiteral(StringGenerator.randomPrintableAscii(length));
     }
 
 }

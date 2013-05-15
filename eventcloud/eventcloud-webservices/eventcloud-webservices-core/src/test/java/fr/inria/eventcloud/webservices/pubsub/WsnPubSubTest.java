@@ -18,10 +18,8 @@ package fr.inria.eventcloud.webservices.pubsub;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -43,6 +41,8 @@ import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEn
 import org.soceda.socialfilter.relationshipstrengthengine.Utils;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
@@ -54,10 +54,10 @@ import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
-import fr.inria.eventcloud.parsers.RdfParser;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.utils.Callback;
+import fr.inria.eventcloud.utils.RDFReader;
 import fr.inria.eventcloud.webservices.CompoundEventNotificationConsumer;
 import fr.inria.eventcloud.webservices.WsTest;
 import fr.inria.eventcloud.webservices.api.PublishWsnApi;
@@ -137,8 +137,7 @@ public class WsnPubSubTest extends WsTest {
                 WsnHelper.createNotifyMessage(
                         this.publishWsnServiceInfo.getWsEndpointUrl(), topic,
                         new CompoundEvent(this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, null)));
+                                "/notification-01.trig", null)));
 
         // Publishes the event
         this.publishWsnClient.notify(notifyRequest);
@@ -218,8 +217,7 @@ public class WsnPubSubTest extends WsTest {
                 WsnHelper.createNotifyMessage(
                         this.publishWsnServiceInfo.getWsEndpointUrl(), topic,
                         new CompoundEvent(this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, source1)));
+                                "/notification-01.trig", source1)));
 
         // Publishes the event
         this.publishWsnClient.notify(notifyRequest);
@@ -237,8 +235,7 @@ public class WsnPubSubTest extends WsTest {
                 WsnHelper.createNotifyMessage(
                         this.publishWsnServiceInfo.getWsEndpointUrl(), topic,
                         new CompoundEvent(this.read(
-                                "/notification-01.trig",
-                                SerializationFormat.TriG, source2)));
+                                "/notification-01.trig", source2)));
 
         // Publishes the event
         this.publishWsnClient.notify(notifyRequest);
@@ -293,33 +290,24 @@ public class WsnPubSubTest extends WsTest {
                         .getAddress();
     }
 
-    private List<Quadruple> read(String file, SerializationFormat format,
-                                 final String publicationSource) {
-        final List<Quadruple> quadruples = new ArrayList<Quadruple>();
+    private List<Quadruple> read(String uri, final String publicationSource) {
+        final Builder<Quadruple> result = ImmutableList.builder();
 
-        RdfParser.parse(
-                this.inputStreamFrom(file), format, new Callback<Quadruple>() {
+        RDFReader.read(
+                this.getClass().getResourceAsStream(uri),
+                SerializationFormat.TriG, new Callback<Quadruple>() {
+
                     @Override
-                    public void execute(Quadruple quad) {
+                    public void execute(Quadruple quadruple) {
                         if (publicationSource != null) {
-                            quad.setPublicationSource(publicationSource);
+                            quadruple.setPublicationSource(publicationSource);
                         }
-                        quadruples.add(quad);
+                        result.add(quadruple);
                     }
 
                 });
 
-        return quadruples;
-    }
-
-    private InputStream inputStreamFrom(String file) {
-        InputStream is = null;
-
-        if (file != null) {
-            is = WsnPubSubTest.class.getResourceAsStream(file);
-        }
-
-        return is;
+        return result.build();
     }
 
     private void replaceConsumerLoopbackIpInSocialFilterFile(URL fileURL)

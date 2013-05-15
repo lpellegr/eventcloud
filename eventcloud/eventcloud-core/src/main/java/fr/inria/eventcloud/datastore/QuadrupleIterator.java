@@ -21,6 +21,7 @@ import java.util.Iterator;
 import com.hp.hpl.jena.sparql.core.Quad;
 
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.utils.JenaConverter;
 
 /**
  * Defines a quadruple iterator to have the possibility to convert Jena
@@ -67,10 +68,8 @@ public class QuadrupleIterator implements Iterator<Quadruple> {
      */
     @Override
     public Quadruple next() {
-        Quad q = this.it.next();
-        return new Quadruple(
-                q.getGraph(), q.getSubject(), q.getPredicate(), q.getObject(),
-                this.checkType, this.parseMetaInformation);
+        return JenaConverter.toQuadruple(
+                this.it.next(), this.checkType, this.parseMetaInformation);
     }
 
     /**
@@ -86,7 +85,7 @@ public class QuadrupleIterator implements Iterator<Quadruple> {
      * <strong>this operation is destructive</strong>; it consumes the iterator.
      * This operation is useful for testing purposes.
      * 
-     * @return the number of elements provided by the iterator
+     * @return the number of elements provided by the iterator.
      */
     public long count() {
         long result = 0;

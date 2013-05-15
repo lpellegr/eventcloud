@@ -20,6 +20,7 @@ import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
 
@@ -56,7 +57,7 @@ public final class VariableDatatype extends BaseDatatype {
      */
     @Override
     public Object parse(String lexicalForm) throws DatatypeFormatException {
-        return Node.createVariable(lexicalForm);
+        return NodeFactory.createVariable(lexicalForm);
     }
 
     /**

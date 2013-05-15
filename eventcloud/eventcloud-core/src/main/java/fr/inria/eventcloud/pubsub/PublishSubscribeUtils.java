@@ -47,6 +47,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -146,9 +147,9 @@ public final class PublishSubscribeUtils {
         Quadruple q =
                 new Quadruple(
                         createQuadrupleHashUri(quadruple),
-                        Node.createURI(subscription.getSubscriberUrl()),
+                        NodeFactory.createURI(subscription.getSubscriberUrl()),
                         PublishSubscribeConstants.INTERMEDIATE_RESULTS_NODE,
-                        Node.createLiteral(objectValue.substring(
+                        NodeFactory.createLiteral(objectValue.substring(
                                 0, objectValue.length() - 1)));
 
         return q;
@@ -234,7 +235,7 @@ public final class PublishSubscribeUtils {
      * @return a quadruple hash URI as a Jena {@link Node_URI}.
      */
     public static final Node createQuadrupleHashUri(HashCode quadHash) {
-        return Node.createURI(PublishSubscribeConstants.QUADRUPLE_NS.concat(quadHash.toString()));
+        return NodeFactory.createURI(PublishSubscribeConstants.QUADRUPLE_NS.concat(quadHash.toString()));
     }
 
     /**
@@ -259,7 +260,7 @@ public final class PublishSubscribeUtils {
      * @return the sub subscription id URI as a Jena {@link Node_URI}.
      */
     public static final Node createSubSubscriptionIdUri(String subSubscriptionId) {
-        return Node.createURI(SUBSUBSCRIPTION_NS + subSubscriptionId);
+        return NodeFactory.createURI(SUBSUBSCRIPTION_NS + subSubscriptionId);
     }
 
     /**
@@ -284,7 +285,7 @@ public final class PublishSubscribeUtils {
      * @return the subscription id URI as a Jena {@link Node_URI}.
      */
     public static final Node createSubscriptionIdUri(String subscriptionId) {
-        return Node.createURI(SUBSCRIPTION_NS + subscriptionId);
+        return NodeFactory.createURI(SUBSCRIPTION_NS + subscriptionId);
     }
 
     /**
