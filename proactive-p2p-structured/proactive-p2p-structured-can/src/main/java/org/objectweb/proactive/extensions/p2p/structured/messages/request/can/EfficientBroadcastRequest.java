@@ -52,9 +52,6 @@ public class EfficientBroadcastRequest<E extends Element> extends
     // The directions on which the broadcast request has to be propagated by the
     // peer receiving it.
     private byte[][] directions;
-    // The coordinates that describe the splitting plan (the coordinates that
-    // need to be contained by the neighbors that will receive the request).
-    private Element[] splitPlans;
 
     /**
      * Constructs a new message with the specified {@code validator} but with no
@@ -95,8 +92,6 @@ public class EfficientBroadcastRequest<E extends Element> extends
         } else {
             this.originalMessageId = messageId;
         }
-
-        this.splitPlans = splitPlans;
         this.directions = directions;
     }
 
@@ -161,24 +156,8 @@ public class EfficientBroadcastRequest<E extends Element> extends
         return this.directions[i][j];
     }
 
-    public Element[] getSplitPlans() {
-        return this.splitPlans;
-    }
-
-    public Element getSplitPlan(int index) {
-        return this.splitPlans[index];
-    }
-
     public void setDirections(byte[][] directions) {
         this.directions = directions;
-    }
-
-    public void setSplitPlans(Element[] splitPlans) {
-        this.splitPlans = splitPlans;
-    }
-
-    public void setSplitPlan(int index, Element splitPlan) {
-        this.splitPlans[index] = splitPlan;
     }
 
     public UUID getOriginalMessageId() {
