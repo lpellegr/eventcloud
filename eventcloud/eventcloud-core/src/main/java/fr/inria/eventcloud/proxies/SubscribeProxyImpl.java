@@ -47,7 +47,6 @@ import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscriptionId;
@@ -747,8 +746,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                                             quadHashesReceived)))).getResult();
 
             for (Quadruple q : quads) {
-                if (q.getPredicate().equals(
-                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
+                if (PublishSubscribeUtils.isMetaQuadruple(q)) {
                     String objectValue = q.getObject().getLiteralLexicalForm();
 
                     if ('0' < P2PStructuredProperties.CAN_LOWER_BOUND.getValue()) {
