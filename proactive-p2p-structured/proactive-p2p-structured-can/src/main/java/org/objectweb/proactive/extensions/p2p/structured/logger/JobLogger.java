@@ -47,7 +47,7 @@ public class JobLogger {
 	private static final String LOG_DIRECTORY = System.getProperty("java.io.tmpdir")
 			+ File.separator + "broadcast_logs" + File.separator;
 	/** If true, trigger the code to monitor messages when messages are received */
-	private static final boolean BCAST_DEBUG = true;
+	private static final boolean BCAST_DEBUG = false;
 	/** Determine if the logs should be written on the console as well.
 	 * Warning : logging to the console might slow down the execution */
 	private static final boolean LOG_TO_CONSOLE = false;
@@ -62,7 +62,7 @@ public class JobLogger {
 	/** Number of peers in the created network */
 	private static int nbPeers;
 	/** Prefix of the logs' filenames */
-	private static String prefix;	
+	private static String prefix;
 	
 	public static String getLogDirectory() {
 		return LOG_DIRECTORY;
