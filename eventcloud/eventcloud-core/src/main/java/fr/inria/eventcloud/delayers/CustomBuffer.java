@@ -36,14 +36,14 @@ import fr.inria.eventcloud.pubsub.Subscription;
  */
 public class CustomBuffer implements Collection<Object> {
 
-    private final List<Quadruple> quadruples;
+    private final QuadrupleList quadruples;
 
     private final List<Subscription> subscriptions;
 
     private final Map<ExtendedCompoundEvent, ExtendedCompoundEvent> extendedCompoundEvents;
 
     public CustomBuffer(int bufsize) {
-        this.quadruples = new ArrayList<Quadruple>(bufsize);
+        this.quadruples = new QuadrupleList(bufsize);
         this.subscriptions = new ArrayList<Subscription>(bufsize);
 
         if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
@@ -74,29 +74,14 @@ public class CustomBuffer implements Collection<Object> {
         this.subscriptions.add(s);
     }
 
-    /**
-     * 
-     * 
-     * @return the quadruples
-     */
-    public List<Quadruple> getQuadruples() {
+    public QuadrupleList getQuadruples() {
         return this.quadruples;
     }
 
-    /**
-     * 
-     * 
-     * @return the subscriptions
-     */
     public List<Subscription> getSubscriptions() {
         return this.subscriptions;
     }
 
-    /**
-     * 
-     * 
-     * @return the compoundEvents
-     */
     public Set<ExtendedCompoundEvent> getExtendedCompoundEvents() {
         if (this.extendedCompoundEvents == null) {
             return null;

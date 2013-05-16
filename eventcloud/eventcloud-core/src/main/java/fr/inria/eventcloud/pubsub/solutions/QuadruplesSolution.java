@@ -24,9 +24,9 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 
 /**
  * Defines a solution that collects intermediate chunks (represented as
@@ -63,8 +63,7 @@ public class QuadruplesSolution extends Solution<Collection<Quadruple>> {
 
     private void add(Collection<Quadruple> chunk) {
         for (Quadruple quadruple : chunk) {
-            if (quadruple.getPredicate().equals(
-                    PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
+            if (PublishSubscribeUtils.isMetaQuadruple(quadruple)) {
                 if (this.nbQuadruplesExpected == 0) {
                     String objectValue =
                             quadruple.getObject().getLiteralLexicalForm();

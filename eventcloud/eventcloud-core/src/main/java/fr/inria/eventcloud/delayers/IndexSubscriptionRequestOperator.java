@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
@@ -109,8 +108,7 @@ public class IndexSubscriptionRequestOperator extends
             while (it.hasNext()) {
                 Quadruple q = it.next();
 
-                if (!q.getPredicate().equals(
-                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)
+                if (!PublishSubscribeUtils.isMetaQuadruple(q)
                         && (qp.getGraph() == Node.ANY || q.getGraph()
                                 .getURI()
                                 .startsWith(qp.getGraph().getURI()))) {

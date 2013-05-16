@@ -100,20 +100,6 @@ public class PublishQuadrupleRequestOperator extends
                 txnGraph.add(
                         q.createMetaGraphNode(), q.getSubject(),
                         q.getPredicate(), q.getObject());
-
-                // remove meta-quadruples from the buffer once they are stored
-                // since they are not useful to find the subscriptions that are
-                // satisfied
-                if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()
-                        && q.getPredicate()
-                                .equals(
-                                        PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE)) {
-                    // this operation is not performed with SBCE2 because even
-                    // if the meta-quadruple is not useful to find the
-                    // subscriptions that are matched it must be used to find
-                    // the ephemeral subscriptions that are satisfied!
-                    it.remove();
-                }
             }
 
             txnGraph.commit();
@@ -133,73 +119,84 @@ public class PublishQuadrupleRequestOperator extends
         this.fireMatchingSubscriptions(buffer.getQuadruples());
     }
 
-    private void fireMatchingSubscriptions(List<Quadruple> quadruples) {
+    private void fireMatchingSubscriptions(QuadrupleList quadruples) {
         // finds the sub-subscriptions which are stored locally and that are
         // matching the quadruple which have been just inserted into the
         // local datastore
-        TransactionalDatasetGraph txnGraph =
-                super.overlay.getSubscriptionsDatastore().begin(
-                        AccessMode.READ_ONLY);
+        TransactionalDatasetGraph txnGraph;
 
         QueryIterator it = null;
         List<MatchingResult> matchingResults = null;
 
-        try {
-            Optimize.noOptimizer();
-            it =
-                    Algebra.exec(
-                            this.createFindSubscriptionsMatchingAlgebra(quadruples),
-                            txnGraph.getUnderlyingDataset());
+        // meta-quadruples are not necessary to find the subscriptions that are
+        // matched
+        List<Quadruple> nonMetaQuadruples = quadruples.getNonMetaQuadruples();
 
-            matchingResults =
-                    this.identifySubscriptionsMatched(txnGraph, it, quadruples);
+        if (!nonMetaQuadruples.isEmpty()) {
+            txnGraph =
+                    super.overlay.getSubscriptionsDatastore().begin(
+                            AccessMode.READ_ONLY);
 
-            Iterator<MatchingResult> matchingResultsIterator =
-                    matchingResults.iterator();
+            try {
+                Optimize.noOptimizer();
+                it =
+                        Algebra.exec(
+                                this.createFindSubscriptionsMatchingAlgebra(nonMetaQuadruples),
+                                txnGraph.getUnderlyingDataset());
 
-            while (matchingResultsIterator.hasNext()) {
-                MatchingResult matchingResult = matchingResultsIterator.next();
-                Quadruple quadruple = matchingResult.quadruple;
-                Subscription subscription = matchingResult.subscription;
+                matchingResults =
+                        this.identifySubscriptionsMatched(
+                                txnGraph, it, nonMetaQuadruples);
 
-                log.debug(
-                        "Peer {} has a sub subscription that matches the quadruple {} ",
-                        super.overlay, quadruple);
+                Iterator<MatchingResult> matchingResultsIterator =
+                        matchingResults.iterator();
 
-                boolean mustIgnoreQuadrupleMatching =
-                        quadruple.getPublicationTime() < subscription.getIndexationTime();
+                while (matchingResultsIterator.hasNext()) {
+                    MatchingResult matchingResult =
+                            matchingResultsIterator.next();
+                    Quadruple quadruple = matchingResult.quadruple;
+                    Subscription subscription = matchingResult.subscription;
 
-                if (log.isDebugEnabled()) {
                     log.debug(
-                            "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
-                            subscription.getIndexationTime(),
-                            quadruple.getPublicationTime(),
-                            quadruple.getGraph(), mustIgnoreQuadrupleMatching);
-                }
+                            "Peer {} has a sub subscription that matches the quadruple {} ",
+                            super.overlay, quadruple);
 
-                // if s sent before q but q indexed before s then q must not
-                // be notified
-                if (mustIgnoreQuadrupleMatching) {
-                    matchingResultsIterator.remove();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            txnGraph.abort();
-        } finally {
-            if (it != null) {
-                it.close();
-            }
-            txnGraph.end();
-            Optimize.setFactory(Optimize.stdOptimizationFactory);
-        }
+                    boolean mustIgnoreQuadrupleMatching =
+                            quadruple.getPublicationTime() < subscription.getIndexationTime();
 
-        for (MatchingResult matchingResult : matchingResults) {
-            // a subscription with only one sub-subscription (that matches
-            // the quadruple which has been inserted) has been detected
-            PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
-                    super.overlay, matchingResult.subscription,
-                    matchingResult.quadruple);
+                    if (log.isDebugEnabled()) {
+                        log.debug(
+                                "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
+                                subscription.getIndexationTime(),
+                                quadruple.getPublicationTime(),
+                                quadruple.getGraph(),
+                                mustIgnoreQuadrupleMatching);
+                    }
+
+                    // if s sent before q but q indexed before s then q must not
+                    // be notified
+                    if (mustIgnoreQuadrupleMatching) {
+                        matchingResultsIterator.remove();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                txnGraph.abort();
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+                txnGraph.end();
+                Optimize.setFactory(Optimize.stdOptimizationFactory);
+            }
+
+            for (MatchingResult matchingResult : matchingResults) {
+                // a subscription with only one sub-subscription (that matches
+                // the quadruple which has been inserted) has been detected
+                PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(
+                        super.overlay, matchingResult.subscription,
+                        matchingResult.quadruple);
+            }
         }
 
         // finds the ephemeral subscriptions that are satisfied
@@ -210,6 +207,7 @@ public class PublishQuadrupleRequestOperator extends
                             AccessMode.READ_ONLY);
 
             try {
+                // the quadruple list contains meta and non meta-quadruples
                 this.findAndHandleEphemeralSubscriptions(txnGraph, quadruples);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -20,8 +20,8 @@ import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.sparql.core.Quad;
 
-import fr.inria.eventcloud.api.PublishSubscribeConstants;
 import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 
 /**
  * Some utility methods to perform conversion from or to Jena objects.
@@ -43,7 +43,7 @@ public class JenaConverter {
         DatasetGraph dsg = DatasetGraphFactory.createMem();
 
         for (Quadruple quadruple : quadruples) {
-            if (quadruple.getPredicate() != PublishSubscribeConstants.EVENT_NB_QUADRUPLES_NODE) {
+            if (!PublishSubscribeUtils.isMetaQuadruple(quadruple)) {
                 dsg.add(
                         quadruple.getGraph(), quadruple.getSubject(),
                         quadruple.getPredicate(), quadruple.getObject());
