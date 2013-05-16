@@ -18,12 +18,9 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
 import java.util.UUID;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
@@ -44,15 +41,16 @@ public class OptimalBroadcastRequest<E extends Element> extends
 
     private static final long serialVersionUID = 150L;
 
-    private boolean alreadyReceived = false;
-
     // The identifier of the broadcast request.
     private UUID originalMessageId;
+    
+    // Aims to know if the request must be forwarded again
+    private boolean constraintReached;
 
-    private AnycastRoutingList broadcastRoutingList = new AnycastRoutingList();
     // The directions on which the broadcast request has to be propagated by the
     // peer receiving it.
     private byte[][] directions;
+    
     // The coordinates that describe the splitting plan (the coordinates that
     // need to be contained by the neighbors that will receive the request).
     private Element[] splitPlans;
@@ -89,8 +87,8 @@ public class OptimalBroadcastRequest<E extends Element> extends
             ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
             UUID messageId, byte[][] directions, Element[] splitPlans) {
         super(validator, provider);
-        // if messageId==null then this is the request received by the
-        // initiator.
+        // if messageId==null then this is the request 
+        // received by the initiator.
         if (messageId == null) {
             this.originalMessageId = this.getId();
         } else {
@@ -99,28 +97,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
 
         this.splitPlans = splitPlans;
         this.directions = directions;
-    }
-
-    @Override
-    public void markAsAlreadyReceived() {
-        this.alreadyReceived = true;
-    }
-
-    @Override
-    public boolean isAlreadyReceived() {
-        return this.alreadyReceived;
-    }
-
-    /**
-     * Returns the {@link AnycastRoutingList} containing the
-     * {@link AnycastRoutingEntry} to use in order to route the response.
-     * 
-     * @return the {@link AnycastRoutingList} containing the
-     *         {@link AnycastRoutingEntry} to use in order to route the
-     *         response.
-     */
-    public AnycastRoutingList getBroadcastRoutingList() {
-        return this.broadcastRoutingList;
+        this.constraintReached = false;
     }
 
     /**
@@ -130,28 +107,25 @@ public class OptimalBroadcastRequest<E extends Element> extends
     public Router<? extends RequestResponseMessage<Coordinate<E>>, Coordinate<E>> getRouter() {
         return new OptimalBroadcastRequestRouter<OptimalBroadcastRequest<E>, E>();
     }
-
-    @Override
-    public boolean validatesKeyConstraints(Zone<E> zone) {
-        return ((AnycastConstraintsValidator<E>) super.constraintsValidator).validatesKeyConstraints(zone);
-    }
-
+    
     /**
-     * {@inheritDoc}
+     * Changes the status of the request to inform that the 
+     * constraint limits have been reached. Call this to cut 
+     * off the forwarding as soon as possible. 
+     * 
+     * @param overlay
      */
-    @Override
-    public String toString() {
-        StringBuffer buf = new StringBuffer("AnycastQueryMessage ID=");
-        buf.append(this.getId());
-
-        buf.append("\nStack: \n");
-        for (AnycastRoutingEntry entry : this.broadcastRoutingList) {
-            buf.append("  - ");
-            buf.append(entry.getPeerStub());
-            buf.append('\n');
-        }
-
-        return buf.toString();
+    public void turnConstraintReached() {
+    	this.constraintReached = true;
+    }
+    
+    /**
+     * Says whether the request has already reached the constraint that 
+     * has been given to it.
+     * @return true if the request has already satisfied the constraint.
+     */
+    public boolean getConstraintReached() {
+    	return this.constraintReached;
     }
 
     public byte[][] getDirections() {
