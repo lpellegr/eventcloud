@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-
 /**
  * Utility class that provides some metrics about a type of broadcast algorithm.
  * 
@@ -40,12 +39,13 @@ public class LogReader {
     private static String filePath;
     private static String loggerName;
     private static int nbPeers;
-    
+
     public static String getSeparator() {
-    	return SEPARATOR;
+        return SEPARATOR;
     }
 
-    private static void setAttributes(String _loggerName, int _nbPeers, String _filePath) {
+    private static void setAttributes(String _loggerName, int _nbPeers,
+                                      String _filePath) {
         loggerName = _loggerName;
         nbPeers = _nbPeers;
         filePath = _filePath;
@@ -54,7 +54,8 @@ public class LogReader {
     /**
      * Read the log file and count how many duplicated the broadcast generated
      */
-    private static int scanNprintResults(String name, String runNumber, String id) {
+    private static int scanNprintResults(String name, String runNumber,
+                                         String id) {
         Date startingDate = null;
         int nbDuplicates = 0;
         int nbPeersReached = 0;
@@ -88,9 +89,10 @@ public class LogReader {
                         // 0 : it is a first received message
                         // 1 : it is a duplicate
                         if (line.length() > 0) {
-                        	String[] lineArray = line.split(" ");
+                            String[] lineArray = line.split(" ");
                             String type = lineArray[0];
-                            String timestamp = lineArray[1] + " " + lineArray[2];
+                            String timestamp =
+                                    lineArray[1] + " " + lineArray[2];
                             int suspectedDuplicate = Integer.parseInt(type);
                             if (suspectedDuplicate == 1) {
                                 nbDuplicates++;
@@ -99,11 +101,12 @@ public class LogReader {
                                 nbPeersReached++;
                                 // Getting the timestamp of the first reception
                                 firstReceptionDate =
-                                        JobLogger.getDateFormat().parse(timestamp);
+                                        JobLogger.getDateFormat().parse(
+                                                timestamp);
                                 firstReceptionTimestamps.add(firstReceptionDate);
                             }
                             if (suspectedDuplicate == -1) {
-                            	nbPeersUsedAsRouters++;
+                                nbPeersUsedAsRouters++;
                             }
                             // Getting the timestamp of the reception
                             receptionDate =
@@ -143,8 +146,8 @@ public class LogReader {
                 maxFirstReceptionDate.getTime() - startingDate.getTime();
         long waveDelay = maxReceptionDate.getTime() - startingDate.getTime();
         logRunData(
-                nbPeersUsedAsRouters, nbDuplicates, nbPeersReached, receptionDelay, 
-                waveDelay, runNumber);
+                nbPeersUsedAsRouters, nbDuplicates, nbPeersReached,
+                receptionDelay, waveDelay, runNumber);
         return nbPeersReached;
     }
 
@@ -200,15 +203,14 @@ public class LogReader {
      * @param waveDelay
      * @param runNumber
      */
-    private static void logRunData(
-    		int nbPeersUsedAsRouter, int nbDuplicates, 
-    		int nbPeersReached, long receptionDelay, 
-    		long waveDelay, String runNumber) {
+    private static void logRunData(int nbPeersUsedAsRouter, int nbDuplicates,
+                                   int nbPeersReached, long receptionDelay,
+                                   long waveDelay, String runNumber) {
         try {
             BufferedWriter dataWriter =
-                    new BufferedWriter(new FileWriter(JobLogger.getLogDirectory()
-                            + JobLogger.getPrefix() + loggerName + "_"
-                            + runNumber + ".data"));
+                    new BufferedWriter(new FileWriter(
+                            JobLogger.getLogDirectory() + JobLogger.getPrefix()
+                                    + loggerName + "_" + runNumber + ".data"));
             dataWriter.write("peers" + SEPARATOR + nbPeersReached);
             dataWriter.newLine();
             dataWriter.write("duplicates" + SEPARATOR + nbDuplicates);
@@ -236,7 +238,7 @@ public class LogReader {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Logs the results of a broadcast execution.
      * 
@@ -249,11 +251,10 @@ public class LogReader {
      * @return the number of peers reached.
      */
     public static int logResults(String loggerName, int nbPeers,
-                                              String filename,
-                                              String runNumber, String id) {
-        setAttributes(loggerName, nbPeers, JobLogger.getLogDirectory() + filename);
-        int nbPeersReached =
-                scanNprintResults(loggerName, runNumber, id);
+                                 String filename, String runNumber, String id) {
+        setAttributes(loggerName, nbPeers, JobLogger.getLogDirectory()
+                + filename);
+        int nbPeersReached = scanNprintResults(loggerName, runNumber, id);
         return nbPeersReached;
     }
 }

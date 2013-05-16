@@ -107,12 +107,14 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                     request.getId(), canOverlay.getZone().toString());
             if (JobLogger.getBcastDebug()) {
                 Date receiveTime = new Date();
-                String timestamp = JobLogger.getDateFormat().format(receiveTime);
+                String timestamp =
+                        JobLogger.getDateFormat().format(receiveTime);
                 JobLogger.logMessage(request.getId().toString() + "_"
                         + "FloodingBroadcast_" + hostname, "1 " + timestamp
-                        + " " + canOverlay.getId() + " " + canOverlay
-                        .getNeighborTable().size() + JobLogger.getLineSeparator());
-                
+                        + " " + canOverlay.getId() + " "
+                        + canOverlay.getNeighborTable().size()
+                        + JobLogger.getLineSeparator());
+
             }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
@@ -137,8 +139,9 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             JobLogger.getDateFormat().format(receiveTime);
                     JobLogger.logMessage(request.getId().toString() + "_"
                             + "FloodingBroadcast_" + hostname, "0 " + timestamp
-                            + " " + canOverlay.getId() + " " + canOverlay
-                            .getNeighborTable().size() + JobLogger.getLineSeparator());
+                            + " " + canOverlay.getId() + " "
+                            + canOverlay.getNeighborTable().size()
+                            + JobLogger.getLineSeparator());
                 }
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
 

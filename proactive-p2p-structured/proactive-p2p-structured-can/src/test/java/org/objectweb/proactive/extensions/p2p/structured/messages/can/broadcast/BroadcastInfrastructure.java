@@ -48,240 +48,245 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
  */
 public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
-	private static final String LOG_EFFICIENT = "EfficientBroadcast";
-	private static final String LOG_FLOODING = "FloodingBroadcast";
-	private static final String LOG_OPTIMAL = "OptimalBroadcast";
+    private static final String LOG_EFFICIENT = "EfficientBroadcast";
+    private static final String LOG_FLOODING = "FloodingBroadcast";
+    private static final String LOG_OPTIMAL = "OptimalBroadcast";
 
-	private static int nbPeersReachedFlooding;
-	private static int nbPeersReachedEfficient;
-	private static int nbPeersReachedOptimal;
+    private static int nbPeersReachedFlooding;
+    private static int nbPeersReachedEfficient;
+    private static int nbPeersReachedOptimal;
 
-	protected int nbPeers;
-	protected String logDirectory;
-	protected Coordinate<StringElement> constraint;
+    protected int nbPeers;
+    protected String logDirectory;
+    protected Coordinate<StringElement> constraint;
 
-	protected Proxy proxy;
+    protected Proxy proxy;
 
-	public BroadcastInfrastructure(int nbPeers, String logDirectory, 
-			Coordinate<StringElement> constraint, boolean fractalCAN, boolean uniformCAN) {
-		super(uniformCAN ?
-				new CanDeploymentDescriptor<StringElement>(
-						new SerializableProvider<StringCanOverlay>() {
-							private static final long serialVersionUID = 140L;
+    public BroadcastInfrastructure(int nbPeers, String logDirectory,
+            Coordinate<StringElement> constraint, boolean fractalCAN,
+            boolean uniformCAN) {
+        super(
+                uniformCAN
+                        ? new CanDeploymentDescriptor<StringElement>(
+                                new SerializableProvider<StringCanOverlay>() {
+                                    private static final long serialVersionUID =
+                                            140L;
 
-							@Override
-							public StringCanOverlay get() {
-								return new StringCanOverlay();
-							}
-						}).setInjectionConstraintsProvider(InjectionConstraintsProvider
-								.newUniformInjectionConstraintsProvider())
+                                    @Override
+                                    public StringCanOverlay get() {
+                                        return new StringCanOverlay();
+                                    }
+                                }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newUniformInjectionConstraintsProvider())
 
-								: fractalCAN ?
+                        : fractalCAN
+                                ?
 
-										new CanDeploymentDescriptor<StringElement>(
-												new SerializableProvider<StringCanOverlay>() {
-													private static final long serialVersionUID = 140L;
+                                new CanDeploymentDescriptor<StringElement>(
+                                        new SerializableProvider<StringCanOverlay>() {
+                                            private static final long serialVersionUID =
+                                                    140L;
 
-													@Override
-													public StringCanOverlay get() {
-														return new StringCanOverlay();
-													}
-												}).setInjectionConstraintsProvider(InjectionConstraintsProvider
-														.newFractalInjectionConstraintsProvider())
+                                            @Override
+                                            public StringCanOverlay get() {
+                                                return new StringCanOverlay();
+                                            }
+                                        }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider())
 
-														: new CanDeploymentDescriptor<StringElement>(
-																new SerializableProvider<StringCanOverlay>() {
-																	private static final long serialVersionUID = 140L;
+                                : new CanDeploymentDescriptor<StringElement>(
+                                        new SerializableProvider<StringCanOverlay>() {
+                                            private static final long serialVersionUID =
+                                                    140L;
 
-																	@Override
-																	public StringCanOverlay get() {
-																		return new StringCanOverlay();
-																	}
-																}),
-																1, nbPeers);
+                                            @Override
+                                            public StringCanOverlay get() {
+                                                return new StringCanOverlay();
+                                            }
+                                        }), 1, nbPeers);
 
-		this.nbPeers = nbPeers;
-		this.logDirectory = logDirectory;
-		this.constraint = constraint;
-	}
+        this.nbPeers = nbPeers;
+        this.logDirectory = logDirectory;
+        this.constraint = constraint;
+    }
 
-	public void setProxy(Proxy proxy) {
-		this.proxy = proxy;
-	}
+    public void setProxy(Proxy proxy) {
+        this.proxy = proxy;
+    }
 
-	/**
-	 * Picks a random peer in the CAN to perform the broadcast.
-	 */
-	public void initialize() {
-		super.setUp();
-		this.proxy = Proxies.newProxy(super.getRandomTracker());
-	}
+    /**
+     * Picks a random peer in the CAN to perform the broadcast.
+     */
+    public void initialize() {
+        super.setUp();
+        this.proxy = Proxies.newProxy(super.getRandomTracker());
+    }
 
-	/**
-	 * Shuts down the initiator of the broadcast.
-	 */
-	public void terminate() {
-		super.tearDown();
-		try {
-			this.proxy.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    /**
+     * Shuts down the initiator of the broadcast.
+     */
+    public void terminate() {
+        super.tearDown();
+        try {
+            this.proxy.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Log the metrics extracted from a FloodingBroadcast run in a file.
-	 * 
-	 * @throws InterruptedException
-	 */
-	public void measureFloodingBroadcast() throws InterruptedException {
+    /**
+     * Log the metrics extracted from a FloodingBroadcast run in a file.
+     * 
+     * @throws InterruptedException
+     */
+    public void measureFloodingBroadcast() throws InterruptedException {
 
-		// Sending the broadcast via an AnycastRequest (= flood)
-		Request<Coordinate<StringElement>> request ;
-		if (constraint == null) {
-			request = new AnycastRequest<StringElement>(
-					new DefaultAnycastConstraintsValidator<StringElement>(
-							CoordinateFactory.newStringCoordinate()));
-		}
-		else {
-			request = new AnycastRequest<StringElement>(
-					new DefaultAnycastConstraintsValidator<StringElement>(
-							constraint));
-		}
-		printRequestSize(request);
+        // Sending the broadcast via an AnycastRequest (= flood)
+        Request<Coordinate<StringElement>> request;
+        if (this.constraint == null) {
+            request =
+                    new AnycastRequest<StringElement>(
+                            new DefaultAnycastConstraintsValidator<StringElement>(
+                                    CoordinateFactory.newStringCoordinate()));
+        } else {
+            request =
+                    new AnycastRequest<StringElement>(
+                            new DefaultAnycastConstraintsValidator<StringElement>(
+                                    this.constraint));
+        }
+        this.printRequestSize(request);
 
-		// Timestamp the beginning of the broadcast
-		JobLogger.recordTime("FloodingBroadcast", request.getId());
-		this.proxy.sendv(request);
+        // Timestamp the beginning of the broadcast
+        JobLogger.recordTime("FloodingBroadcast", request.getId());
+        this.proxy.sendv(request);
 
-		// The previous call is asynchronous, so
-		// it is preferable to wait a little bit
-		Thread.sleep(1000 * nbPeers / 2);
+        // The previous call is asynchronous, so
+        // it is preferable to wait a little bit
+        Thread.sleep(1000 * this.nbPeers / 2);
 
-		// This is going to log all the interesting metrics for a benchmark
-		// in the LOG_FLOODING at the root of the logs directory (see JobLogger)
-		nbPeersReachedFlooding =
-				LogReader.logResults(
-						LOG_FLOODING, this.nbPeers, request.getId().toString()
-						+ JobLogger.getPrefix() + LOG_FLOODING, "0", "");
-	}
+        // This is going to log all the interesting metrics for a benchmark
+        // in the LOG_FLOODING at the root of the logs directory (see JobLogger)
+        nbPeersReachedFlooding =
+                LogReader.logResults(
+                        LOG_FLOODING, this.nbPeers, request.getId().toString()
+                                + JobLogger.getPrefix() + LOG_FLOODING, "0", "");
+    }
 
-	/**
-	 * Log the metrics extracted from an EfficientBroadcast run in a file.
-	 * 
-	 * @throws InterruptedException
-	 */
-	public void measureEfficientBroadcast() throws InterruptedException {
+    /**
+     * Log the metrics extracted from an EfficientBroadcast run in a file.
+     * 
+     * @throws InterruptedException
+     */
+    public void measureEfficientBroadcast() throws InterruptedException {
 
-		// Sending the broadcast via an EfficientBroadcastRequest
-		Request<Coordinate<StringElement>> request;
-		if (constraint == null) {
-			request = new EfficientBroadcastRequest<StringElement>(
-					new DefaultAnycastConstraintsValidator<StringElement>(
-							CoordinateFactory.newStringCoordinate()));
-		}
-		else {
-			request = new EfficientBroadcastRequest<StringElement>(
-					new DefaultAnycastConstraintsValidator<StringElement>(
-							constraint));
-		}
-		printRequestSize(request);
+        // Sending the broadcast via an EfficientBroadcastRequest
+        Request<Coordinate<StringElement>> request;
+        if (this.constraint == null) {
+            request =
+                    new EfficientBroadcastRequest<StringElement>(
+                            new DefaultAnycastConstraintsValidator<StringElement>(
+                                    CoordinateFactory.newStringCoordinate()));
+        } else {
+            request =
+                    new EfficientBroadcastRequest<StringElement>(
+                            new DefaultAnycastConstraintsValidator<StringElement>(
+                                    this.constraint));
+        }
+        this.printRequestSize(request);
 
-		// Timestamp the beginning of the broadcast
-		JobLogger.recordTime("EfficientBroadcast", request.getId());
-		this.proxy.sendv(request);
+        // Timestamp the beginning of the broadcast
+        JobLogger.recordTime("EfficientBroadcast", request.getId());
+        this.proxy.sendv(request);
 
-		// The previous call is asynchronous, so
-		// it is preferable to wait a little bit
-		Thread.sleep(1000 * nbPeers / 2);
+        // The previous call is asynchronous, so
+        // it is preferable to wait a little bit
+        Thread.sleep(1000 * this.nbPeers / 2);
 
-		// This is going to log all the interesting metrics for a benchmark
-		// in the LOG_EFFICIENT at the root of the logs directory (see
-		// JobLogger)
-		nbPeersReachedEfficient =
-				LogReader.logResults(
-						LOG_EFFICIENT, this.nbPeers, request.getId().toString()
-						+ JobLogger.getPrefix() + LOG_EFFICIENT, "0", "");
-	}
+        // This is going to log all the interesting metrics for a benchmark
+        // in the LOG_EFFICIENT at the root of the logs directory (see
+        // JobLogger)
+        nbPeersReachedEfficient =
+                LogReader.logResults(
+                        LOG_EFFICIENT, this.nbPeers, request.getId().toString()
+                                + JobLogger.getPrefix() + LOG_EFFICIENT, "0",
+                        "");
+    }
 
-	/**
-	 * Log the metrics extracted from an OptimalBroadcast run in a file.
-	 * 
-	 * @throws InterruptedException
-	 */
-	public void measureOptimalBroadcast() throws InterruptedException {
+    /**
+     * Log the metrics extracted from an OptimalBroadcast run in a file.
+     * 
+     * @throws InterruptedException
+     */
+    public void measureOptimalBroadcast() throws InterruptedException {
 
-		// Sending the broadcast via an EfficientBroadcastRequest
-		Request<Coordinate<StringElement>> request;
-		if (constraint == null) {
-			request = new OptimalBroadcastRequest<StringElement>(
-					new DefaultAnycastConstraintsValidator<StringElement>(
-							CoordinateFactory.newStringCoordinate()));
-		}
-		else {
-			request = new OptimalBroadcastRequest<StringElement>(
-					new DefaultAnycastConstraintsValidator<StringElement>(
-							constraint));
+        // Sending the broadcast via an EfficientBroadcastRequest
+        Request<Coordinate<StringElement>> request;
+        if (this.constraint == null) {
+            request =
+                    new OptimalBroadcastRequest<StringElement>(
+                            new DefaultAnycastConstraintsValidator<StringElement>(
+                                    CoordinateFactory.newStringCoordinate()));
+        } else {
+            request =
+                    new OptimalBroadcastRequest<StringElement>(
+                            new DefaultAnycastConstraintsValidator<StringElement>(
+                                    this.constraint));
 
-		}
-		printRequestSize(request);
+        }
+        this.printRequestSize(request);
 
-		// Timestamp the beginning of the broadcast
-		JobLogger.recordTime("OptimalBroadcast", request.getId());
-		this.proxy.sendv(request);
+        // Timestamp the beginning of the broadcast
+        JobLogger.recordTime("OptimalBroadcast", request.getId());
+        this.proxy.sendv(request);
 
-		// The previous call is asynchronous, so
-		// it is preferable to wait a little bit
-		Thread.sleep(1000 * nbPeers / 2);
+        // The previous call is asynchronous, so
+        // it is preferable to wait a little bit
+        Thread.sleep(1000 * this.nbPeers / 2);
 
-		// This is going to log all the interesting metrics for a benchmark
-		// in the LOG_OPTIMAL at the root of the logs directory (see JobLogger)
-		nbPeersReachedOptimal =
-				LogReader.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
-						.toString()
-						+ JobLogger.getPrefix() + LOG_OPTIMAL, "0", "");
-	}
+        // This is going to log all the interesting metrics for a benchmark
+        // in the LOG_OPTIMAL at the root of the logs directory (see JobLogger)
+        nbPeersReachedOptimal =
+                LogReader.logResults(LOG_OPTIMAL, this.nbPeers, request.getId()
+                        .toString()
+                        + JobLogger.getPrefix() + LOG_OPTIMAL, "0", "");
+    }
 
-	/**
-	 * Displays the request size in bytes.
-	 * Request size is different for the three kinds of request experimented.
-	 * @param request
-	 */
-	public void printRequestSize(Request<Coordinate<StringElement>> request) {
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		ObjectOutputStream oos;
-		try {
-			oos = new ObjectOutputStream(bout);
-			oos.writeObject(request);
-			oos.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("The size of an " + request.getClass() + 
-				" is : " + bout.size() + " bytes.");
-	}
+    /**
+     * Displays the request size in bytes. Request size is different for the
+     * three kinds of request experimented.
+     * 
+     * @param request
+     */
+    public void printRequestSize(Request<Coordinate<StringElement>> request) {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        ObjectOutputStream oos;
+        try {
+            oos = new ObjectOutputStream(bout);
+            oos.writeObject(request);
+            oos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("The size of an " + request.getClass() + " is : "
+                + bout.size() + " bytes.");
+    }
 
-	/**
-	 * Checks if the number of peers reached by the multicast
-	 * is the same for all the experimented broadcast.
-	 */
-	public void assertNbPeersReachedEquals() {
-		Assert.assertTrue(
-				nbPeersReachedFlooding != 0 &&
-				nbPeersReachedEfficient != 0 &&
-				nbPeersReachedOptimal != 0 &&
-				nbPeersReachedFlooding == nbPeersReachedOptimal &&
-				nbPeersReachedEfficient == nbPeersReachedOptimal);
-	}
+    /**
+     * Checks if the number of peers reached by the multicast is the same for
+     * all the experimented broadcast.
+     */
+    public void assertNbPeersReachedEquals() {
+        Assert.assertTrue(nbPeersReachedFlooding != 0
+                && nbPeersReachedEfficient != 0 && nbPeersReachedOptimal != 0
+                && nbPeersReachedFlooding == nbPeersReachedOptimal
+                && nbPeersReachedEfficient == nbPeersReachedOptimal);
+    }
 
-	/**
-	 * Checks if all the peers received the message.
-	 */
-	public void assertAllPeersReached() {
-		Assert.assertTrue(
-				nbPeersReachedFlooding == this.nbPeers &&
-				nbPeersReachedEfficient == this.nbPeers &&
-				nbPeersReachedOptimal == this.nbPeers);
-	}
+    /**
+     * Checks if all the peers received the message.
+     */
+    public void assertAllPeersReached() {
+        Assert.assertTrue(nbPeersReachedFlooding == this.nbPeers
+                && nbPeersReachedEfficient == this.nbPeers
+                && nbPeersReachedOptimal == this.nbPeers);
+    }
 
 }
