@@ -43,14 +43,14 @@ public class OptimalBroadcastRequest<E extends Element> extends
 
     // The identifier of the broadcast request.
     private UUID originalMessageId;
-    
+
     // Aims to know if the request must be forwarded again
     private boolean constraintReached;
 
     // The directions on which the broadcast request has to be propagated by the
     // peer receiving it.
     private byte[][] directions;
-    
+
     // The coordinates that describe the splitting plan (the coordinates that
     // need to be contained by the neighbors that will receive the request).
     private Element[] splitPlans;
@@ -87,7 +87,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
             ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
             UUID messageId, byte[][] directions, Element[] splitPlans) {
         super(validator, provider);
-        // if messageId==null then this is the request 
+        // if messageId==null then this is the request
         // received by the initiator.
         if (messageId == null) {
             this.originalMessageId = this.getId();
@@ -107,25 +107,26 @@ public class OptimalBroadcastRequest<E extends Element> extends
     public Router<? extends RequestResponseMessage<Coordinate<E>>, Coordinate<E>> getRouter() {
         return new OptimalBroadcastRequestRouter<OptimalBroadcastRequest<E>, E>();
     }
-    
+
     /**
-     * Changes the status of the request to inform that the 
-     * constraint limits have been reached. Call this to cut 
-     * off the forwarding as soon as possible. 
+     * Changes the status of the request to inform that the constraint limits
+     * have been reached. Call this to cut off the forwarding as soon as
+     * possible.
      * 
      * @param overlay
      */
     public void turnConstraintReached() {
-    	this.constraintReached = true;
+        this.constraintReached = true;
     }
-    
+
     /**
-     * Says whether the request has already reached the constraint that 
-     * has been given to it.
+     * Says whether the request has already reached the constraint that has been
+     * given to it.
+     * 
      * @return true if the request has already satisfied the constraint.
      */
     public boolean getConstraintReached() {
-    	return this.constraintReached;
+        return this.constraintReached;
     }
 
     public byte[][] getDirections() {
