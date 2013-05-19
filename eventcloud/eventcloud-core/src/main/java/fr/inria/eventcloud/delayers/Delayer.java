@@ -33,8 +33,6 @@ public abstract class Delayer<R, B extends Collection<R>> {
 
     private Thread commitThread;
 
-    private boolean running = true;
-
     private final int bufsize;
 
     private final int delayerCommitTimeout;
@@ -82,17 +80,11 @@ public abstract class Delayer<R, B extends Collection<R>> {
                     "{} {} committed because threshold exceeded on {}",
                     nbObjectsFlushed, this.bufferedObjectName, this.overlay);
         } else {
-            if (!this.buffer.isEmpty()) {
-                // check whether we have a commit thread running
-                synchronized (this) {
-                    if (this.commitThread == null) {
-                        this.log.trace(
-                                "Commit thread created on {}", this.overlay);
+            if (!this.buffer.isEmpty() && this.commitThread == null) {
+                this.log.trace("Commit thread created on {}", this.overlay);
 
-                        this.commitThread = new CommitThread();
-                        this.commitThread.start();
-                    }
-                }
+                this.commitThread = new CommitThread();
+                this.commitThread.start();
             }
         }
     }
@@ -136,8 +128,6 @@ public abstract class Delayer<R, B extends Collection<R>> {
 
     public synchronized void close() {
         if (this.commitThread != null) {
-            this.running = false;
-
             try {
                 this.commitThread.join();
             } catch (InterruptedException e) {
@@ -159,7 +149,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
          */
         @Override
         public void run() {
-            while (Delayer.this.running) {
+            while (true) {
                 try {
                     Thread.sleep(Delayer.this.delayerCommitTimeout);
                 } catch (InterruptedException e) {
@@ -175,9 +165,8 @@ public abstract class Delayer<R, B extends Collection<R>> {
                             Delayer.this.overlay);
                     // nothing was committed, we should
                     // stop the thread
-                    synchronized (Delayer.this) {
-                        Delayer.this.commitThread = null;
-                    }
+                    Delayer.this.commitThread = null;
+
                     return;
                 } else {
                     Delayer.this.log.trace(
