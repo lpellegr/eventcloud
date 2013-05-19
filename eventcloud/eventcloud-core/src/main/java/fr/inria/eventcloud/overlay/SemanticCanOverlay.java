@@ -969,7 +969,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             }
         }
 
-        this.publishSubscribeOperationsDelayer.close();
+        this.publishSubscribeOperationsDelayer.flush();
 
         this.miscDatastore.close();
         this.subscriptionsDatastore.close();
