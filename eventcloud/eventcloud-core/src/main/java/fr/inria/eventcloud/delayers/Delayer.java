@@ -126,7 +126,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
         }
     }
 
-    public synchronized void close() {
+    public synchronized void flush() {
         if (this.commitThread != null) {
             try {
                 this.commitThread.join();
