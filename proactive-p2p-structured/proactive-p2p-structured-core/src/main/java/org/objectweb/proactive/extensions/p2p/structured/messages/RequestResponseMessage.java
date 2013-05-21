@@ -167,6 +167,10 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      *         otherwise.
      */
     public boolean validatesKeyConstraints(StructuredOverlay overlay) {
+        if (this.constraintsValidator == null) {
+            return true;
+        }
+
         return this.constraintsValidator.validatesKeyConstraints(overlay);
     }
 

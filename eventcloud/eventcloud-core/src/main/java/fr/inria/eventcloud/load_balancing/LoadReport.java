@@ -18,8 +18,6 @@ package fr.inria.eventcloud.load_balancing;
 
 import java.io.Serializable;
 
-import org.joda.time.DateTime;
-
 import fr.inria.eventcloud.load_balancing.criteria.Criterion;
 
 /**
@@ -45,6 +43,21 @@ public class LoadReport implements Serializable {
         this.creationTime = System.currentTimeMillis();
     }
 
+    public double computeWeightedSum(Criterion[] criteria) {
+        if (criteria.length != this.values.length) {
+            throw new IllegalArgumentException(
+                    "Criteria length different from the number of load report values");
+        }
+
+        double result = 0;
+
+        for (int i = 0; i < criteria.length; i++) {
+            result += this.values[i] * criteria[i].getWeight();
+        }
+
+        return result;
+    }
+
     public long getCreationTime() {
         return this.creationTime;
     }
@@ -59,17 +72,16 @@ public class LoadReport implements Serializable {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("Load information retrieved at ");
-        result.append(new DateTime(this.creationTime));
-        result.append(":\n");
-        // result.append("  directory usage=");
-        // result.append(this.values[0]);
-        // result.append("\n");
-        // result.append("  nb quadruples stored=");
-        // result.append(this.values[1]);
-        // result.append("\n");
-        // result.append("  system load=");
-        // result.append(this.values[2]);
+        result.append(this.creationTime);
+        result.append(" -> ");
+
+        for (int i = 0; i < this.values.length; i++) {
+            result.append(this.values[i]);
+
+            if (i < this.values.length - 1) {
+                result.append(' ');
+            }
+        }
 
         return result.toString();
     }

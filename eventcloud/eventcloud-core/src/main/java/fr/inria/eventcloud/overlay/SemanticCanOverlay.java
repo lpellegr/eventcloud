@@ -66,6 +66,8 @@ import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.delayers.PublishSubscribeOperationsDelayer;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
+import fr.inria.eventcloud.load_balancing.criteria.Criterion;
+import fr.inria.eventcloud.load_balancing.criteria.NbQuadrupleStoredCriterion;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -208,11 +210,14 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         if (EventCloudProperties.LOAD_BALANCING.getValue()) {
             this.loadBalancingManager =
                     new LoadBalancingManager(
-                            this.miscDatastore.getStatsRecorder());
+                            this,
+                            new Criterion[] {new NbQuadrupleStoredCriterion(
+                                    this.miscDatastore.getStatsRecorder())});
             this.loadBalancingManager.start();
         } else {
             this.loadBalancingManager = null;
         }
+
     }
 
     private void removeOutdatedEphemeralSubscriptions() {
@@ -296,6 +301,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     public boolean hasSocialFilter() {
         return this.socialFilter != null;
+    }
+
+    public LoadBalancingManager getLoadBalancingManager() {
+        return this.loadBalancingManager;
     }
 
     public LoadingCache<SubscriptionId, Subscription> getSubscriptionsCache() {

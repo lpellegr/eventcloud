@@ -29,9 +29,20 @@ public abstract class Criterion {
 
     private final Range<Double> domain;
 
+    private final double emergencyThreshold;
+
+    private final int weight;
+
     public Criterion(String name, Range<Double> domain) {
+        this(name, domain, domain.upperEndpoint(), 1);
+    }
+
+    public Criterion(String name, Range<Double> domain,
+            double emergencyThreshold, int weight) {
         this.name = name;
         this.domain = domain;
+        this.emergencyThreshold = emergencyThreshold;
+        this.weight = weight;
     }
 
     public String getName() {
@@ -42,10 +53,18 @@ public abstract class Criterion {
         return this.domain;
     }
 
+    public double getEmergencyThreshold() {
+        return this.emergencyThreshold;
+    }
+
     public double normalize(double value) {
         return value / this.domain.upperEndpoint();
     }
 
     public abstract double getLoad();
+
+    public int getWeight() {
+        return this.weight;
+    }
 
 }
