@@ -31,7 +31,7 @@ public class NbQuadrupleStoredCriterion extends Criterion {
 
     public NbQuadrupleStoredCriterion(StatsRecorder statsRecorder) {
         super("nb quadruples stored",
-                Range.closed(0.0, (double) Long.MAX_VALUE));
+                Range.closed(0.0, (double) Long.MAX_VALUE), 1, 1);
 
         this.statsRecorder = statsRecorder;
     }

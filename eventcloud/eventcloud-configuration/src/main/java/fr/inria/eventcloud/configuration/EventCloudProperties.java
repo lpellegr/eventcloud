@@ -170,6 +170,15 @@ public class EventCloudProperties {
     public static final PropertyBoolean LOAD_BALANCING = new PropertyBoolean(
             "eventcloud.load.balancing", false);
 
+    /**
+     * Defines which gossip strategy is applied for reporting load. Any class
+     * implementing GossipStrategy may be used.
+     */
+    public static final PropertyClass LOAD_BALANCING_GOSSIP_STRATEGY =
+            new PropertyClass(
+                    "eventcloud.load.balancing.gossip.strategy",
+                    "fr.inria.eventcloud.load_balancing.gossip.FloodingStrategy");
+
     public static final PropertyInteger LOAD_BALANCING_HISTORY_TIME_WINDOW =
             new PropertyInteger(
                     "eventcloud.load.balancing.history.time.window", 3600000);
@@ -178,8 +187,21 @@ public class EventCloudProperties {
             new PropertyInteger(
                     "eventcloud.load.balancing.probing.timeout", 10000);
 
-    public static final PropertyDouble LOAD_BALANCING_REFRESH_RATIO =
-            new PropertyDouble("eventcloud.load.balancing.refresh.ratio", 1.5);
+    /**
+     * This ratio is used to determine when a peer should report its load to
+     * others. It may affect the load balancing convergence time but also the
+     * accuracy.
+     */
+    public static final PropertyDouble LOAD_BALANCING_GOSSIP_RATIO =
+            new PropertyDouble("eventcloud.load.balancing.gossip.ratio", 2.0);
+
+    public static final PropertyDouble LOAD_BALANCING_IMBALANCE_RATIO =
+            new PropertyDouble("eventcloud.load.balancing.imbalance.ratio", 2.0);
+
+    public static final PropertyDouble LOAD_BALANCING_CRITERION_NB_QUADS_STORED_EMERGENCY_THRESHOLD =
+            new PropertyDouble(
+                    "eventcloud.load.balancing.criterion.nb.quadruples.stored.emergency.threshold",
+                    (double) Long.MAX_VALUE);
 
     /**
      * This property is used to have the possibility to restore a repository
