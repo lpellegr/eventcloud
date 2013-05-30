@@ -20,8 +20,7 @@ import java.io.File;
 
 import com.hp.hpl.jena.tdb.base.file.Location;
 
-import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
+import fr.inria.eventcloud.datastore.stats.NullStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
 /**
@@ -43,7 +42,7 @@ public class TransactionalTdbDatastoreBuilder {
      * purposes.
      */
     public TransactionalTdbDatastoreBuilder() {
-        this.location = null;
+        this(null, NullStatsRecorder.getInstance());
     }
 
     public TransactionalTdbDatastoreBuilder(String location) {
@@ -55,7 +54,13 @@ public class TransactionalTdbDatastoreBuilder {
     }
 
     public TransactionalTdbDatastoreBuilder(Location location) {
+        this(location, NullStatsRecorder.getInstance());
+    }
+
+    public TransactionalTdbDatastoreBuilder(Location location,
+            StatsRecorder statsRecorder) {
         this.location = location;
+        this.statsRecorder = statsRecorder;
     }
 
     public TransactionalTdbDatastoreBuilder deleteFilesAfterClose() {
@@ -65,24 +70,6 @@ public class TransactionalTdbDatastoreBuilder {
     public TransactionalTdbDatastoreBuilder deleteFilesAfterClose(boolean value) {
         this.deleteFilesAfterClose = value;
         return this;
-    }
-
-    /**
-     * Record statistics during insertions. It uses the default
-     * {@link StatsRecorder} which is an instance of
-     * {@link CentroidStatsRecorder}.
-     * 
-     * @return the current builder instance.
-     */
-    public TransactionalTdbDatastoreBuilder recordStats() {
-        try {
-            return this.recordStats((StatsRecorder) EventCloudProperties.STATS_RECORDER_CLASS.getValue()
-                    .newInstance());
-        } catch (InstantiationException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     public TransactionalTdbDatastoreBuilder recordStats(StatsRecorder statsRecorder) {

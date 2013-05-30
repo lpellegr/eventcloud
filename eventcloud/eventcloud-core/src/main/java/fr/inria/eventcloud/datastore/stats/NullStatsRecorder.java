@@ -20,22 +20,40 @@ import org.apfloat.Apfloat;
 
 import com.hp.hpl.jena.graph.Node;
 
-public class SimpleStatsRecorder extends StatsRecorder {
+import fr.inria.eventcloud.overlay.can.SemanticElement;
+
+/**
+ * A Null StatRecorder. It does nothing but it exists to avoid multiple if test
+ * in several classes which is ugly.
+ * 
+ * @author lpellegr
+ */
+public class NullStatsRecorder implements StatsRecorder {
 
     private static final long serialVersionUID = 150L;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void quadrupleAddedComputeStats(Node g, Node s, Node p, Node o) {
+    private static class Singleton {
+
+        public static NullStatsRecorder instance = new NullStatsRecorder();
+
+    }
+
+    public static NullStatsRecorder getInstance() {
+        return Singleton.instance;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void quadrupleRemovedComputeStats(Node g, Node s, Node p, Node o) {
+    public void register(Node g, Node s, Node p, Node o) {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unregister(Node g, Node s, Node p, Node o) {
     }
 
     /**
@@ -43,7 +61,7 @@ public class SimpleStatsRecorder extends StatsRecorder {
      */
     @Override
     public Apfloat computeGraphEstimation() {
-        return null;
+        return Apfloat.ZERO;
     }
 
     /**
@@ -51,7 +69,7 @@ public class SimpleStatsRecorder extends StatsRecorder {
      */
     @Override
     public Apfloat computeSubjectEstimation() {
-        return null;
+        return Apfloat.ZERO;
     }
 
     /**
@@ -59,7 +77,7 @@ public class SimpleStatsRecorder extends StatsRecorder {
      */
     @Override
     public Apfloat computePredicateEstimation() {
-        return null;
+        return Apfloat.ZERO;
     }
 
     /**
@@ -67,7 +85,37 @@ public class SimpleStatsRecorder extends StatsRecorder {
      */
     @Override
     public Apfloat computeObjectEstimation() {
+        return Apfloat.ZERO;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SemanticElement computeSplitEstimation(byte dimension) {
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getNbQuadruples() {
+        return -1;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reset() {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void sync() {
     }
 
 }

@@ -30,7 +30,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * 
  * @author lpellegr
  */
-public class CentroidStatsRecorder extends StatsRecorder {
+public class CentroidStatsRecorder extends AbstractStatsRecorder {
 
     private static final long serialVersionUID = 150L;
 
@@ -54,9 +54,7 @@ public class CentroidStatsRecorder extends StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void quadrupleAddedComputeStats(Node g, Node s, Node p,
-                                                        Node o) {
-
+    public synchronized void _register(Node g, Node s, Node p, Node o) {
         String gs = SemanticElement.removePrefix(g);
         String ss = SemanticElement.removePrefix(s);
         String ps = SemanticElement.removePrefix(p);
@@ -87,8 +85,7 @@ public class CentroidStatsRecorder extends StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized void quadrupleRemovedComputeStats(Node g, Node s,
-                                                             Node p, Node o) {
+    protected synchronized void _unregister(Node g, Node s, Node p, Node o) {
         String gs = SemanticElement.removePrefix(g);
         String ss = SemanticElement.removePrefix(s);
         String ps = SemanticElement.removePrefix(p);

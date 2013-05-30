@@ -18,6 +18,7 @@ package fr.inria.eventcloud.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 
+import fr.inria.eventcloud.datastore.stats.AbstractStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
 /**
@@ -36,11 +37,11 @@ public class GetStatsRecordeResponseOperation implements ResponseOperation {
     }
 
     /**
-     * Returns a deep copy of the {@link StatsRecorder} instance contained by
-     * the misc datastore.
+     * Returns a deep copy of the {@link AbstractStatsRecorder} instance
+     * contained by the misc datastore.
      * 
-     * @return a deep copy of the {@link StatsRecorder} instance contained by
-     *         the misc datastore.
+     * @return a deep copy of the {@link AbstractStatsRecorder} instance
+     *         contained by the misc datastore.
      */
     public StatsRecorder getStatsRecorder() {
         return this.statsRecorder;
