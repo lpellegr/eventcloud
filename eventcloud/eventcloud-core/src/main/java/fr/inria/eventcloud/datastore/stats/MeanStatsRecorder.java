@@ -29,7 +29,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * 
  * @author lpellegr
  */
-public class MeanStatsRecorder extends StatsRecorder {
+public class MeanStatsRecorder extends AbstractStatsRecorder {
 
     private static final long serialVersionUID = 150L;
 
@@ -45,8 +45,7 @@ public class MeanStatsRecorder extends StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void quadrupleAddedComputeStats(Node g, Node s, Node p,
-                                                        Node o) {
+    public synchronized void _register(Node g, Node s, Node p, Node o) {
         Apfloat gf = toRadix10(g);
         Apfloat sf = toRadix10(s);
         Apfloat pf = toRadix10(p);
@@ -62,8 +61,7 @@ public class MeanStatsRecorder extends StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized void quadrupleRemovedComputeStats(Node g, Node s,
-                                                             Node p, Node o) {
+    protected synchronized void _unregister(Node g, Node s, Node p, Node o) {
         Apfloat gf = toRadix10(g);
         Apfloat sf = toRadix10(s);
         Apfloat pf = toRadix10(p);
@@ -84,7 +82,7 @@ public class MeanStatsRecorder extends StatsRecorder {
      */
     @Override
     public Apfloat computeGraphEstimation() {
-        return this.gsum.divide(new Apfloat(super.getNbQuads()));
+        return this.gsum.divide(new Apfloat(super.getNbQuadruples()));
     }
 
     /**
@@ -92,7 +90,7 @@ public class MeanStatsRecorder extends StatsRecorder {
      */
     @Override
     public Apfloat computeSubjectEstimation() {
-        return this.ssum.divide(new Apfloat(super.getNbQuads()));
+        return this.ssum.divide(new Apfloat(super.getNbQuadruples()));
     }
 
     /**
@@ -100,7 +98,7 @@ public class MeanStatsRecorder extends StatsRecorder {
      */
     @Override
     public Apfloat computePredicateEstimation() {
-        return this.psum.divide(new Apfloat(super.getNbQuads()));
+        return this.psum.divide(new Apfloat(super.getNbQuadruples()));
     }
 
     /**
@@ -108,7 +106,7 @@ public class MeanStatsRecorder extends StatsRecorder {
      */
     @Override
     public Apfloat computeObjectEstimation() {
-        return this.osum.divide(new Apfloat(super.getNbQuads()));
+        return this.osum.divide(new Apfloat(super.getNbQuadruples()));
     }
 
 }

@@ -17,164 +17,43 @@
 package fr.inria.eventcloud.datastore.stats;
 
 import java.io.Serializable;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apfloat.Apfloat;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 /**
- * Defines methods to record statistics about {@link Quadruple}s which are
- * inserted into a {@link TransactionalTdbDatastore}.
+ * Defines operation available on any StatsRecorder.
  * 
  * @author lpellegr
  */
-public abstract class StatsRecorder implements Serializable {
+public interface StatsRecorder extends Serializable {
 
-    private static final long serialVersionUID = 150L;
+    void register(Node g, Node s, Node p, Node o);
 
-    private AtomicLong nbQuads;
+    void unregister(Node g, Node s, Node p, Node o);
 
-    private transient final ListeningExecutorService threadPool;
+    Apfloat computeGraphEstimation();
 
-    private transient Queue<ListenableFuture<?>> futures;
+    Apfloat computeSubjectEstimation();
 
-    public StatsRecorder() {
-        this.nbQuads = new AtomicLong();
-        this.threadPool =
-                MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
-        this.futures = new ConcurrentLinkedQueue<ListenableFuture<?>>();
-    }
+    Apfloat computePredicateEstimation();
 
-    public void quadrupleAdded(final Node g, final Node s, final Node p,
-                               final Node o) {
-        final ListenableFuture<?> future =
-                this.threadPool.submit(new Runnable() {
+    Apfloat computeObjectEstimation();
 
-                    @Override
-                    public void run() {
-                        StatsRecorder.this.quadrupleAddedComputeStats(
-                                g, s, p, o);
-                        StatsRecorder.this.nbQuads.incrementAndGet();
-                    }
-                });
-
-        this.futures.add(future);
-
-        future.addListener(new Runnable() {
-
-            @Override
-            public void run() {
-                StatsRecorder.this.futures.remove(future);
-            }
-        }, MoreExecutors.sameThreadExecutor());
-    }
-
-    protected abstract void quadrupleAddedComputeStats(final Node g,
-                                                       final Node s,
-                                                       final Node p,
-                                                       final Node o);
-
-    public void quadrupleRemoved(final Node g, final Node s, final Node p,
-                                 final Node o) {
-        final ListenableFuture<?> future =
-                this.threadPool.submit(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        StatsRecorder.this.quadrupleRemovedComputeStats(
-                                g, s, p, o);
-                        StatsRecorder.this.nbQuads.decrementAndGet();
-                    }
-                });
-
-        this.futures.add(future);
-
-        future.addListener(new Runnable() {
-            @Override
-            public void run() {
-                StatsRecorder.this.futures.remove(future);
-            }
-        }, MoreExecutors.sameThreadExecutor());
-    }
-
-    protected abstract void quadrupleRemovedComputeStats(Node g, Node s,
-                                                         Node p, Node o);
-
-    public abstract Apfloat computeGraphEstimation();
-
-    public abstract Apfloat computeSubjectEstimation();
-
-    public abstract Apfloat computePredicateEstimation();
-
-    public abstract Apfloat computeObjectEstimation();
-
-    public SemanticElement computeSplitEstimation(byte dimension) {
-        Apfloat estimatedSplitValue = null;
-
-        if (this.nbQuads.get() == 0) {
-            // no quadruple has been recorded, no estimation can be computed
-            return null;
-        }
-
-        switch (dimension) {
-            case 0:
-                estimatedSplitValue = this.computeGraphEstimation();
-                break;
-            case 1:
-                estimatedSplitValue = this.computeSubjectEstimation();
-                break;
-            case 2:
-                estimatedSplitValue = this.computePredicateEstimation();
-                break;
-            case 3:
-                estimatedSplitValue = this.computeObjectEstimation();
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Invalid dimension specified: " + dimension);
-        }
-
-        return new SemanticElement(estimatedSplitValue);
-    }
+    SemanticElement computeSplitEstimation(byte dimension);
 
     /**
      * Returns the number of quadruples which have been recorded.
      * 
      * @return the number of quadruples which have been recorded.
      */
-    public long getNbQuads() {
-        return this.nbQuads.get();
-    }
+    long getNbQuadruples();
 
-    /**
-     * Statistics are computed in background by using threads. When this method
-     * is called, we wait for the termination of all the threads.
-     */
-    public void sync() {
-        Future<?> future;
+    void reset();
 
-        while ((future = this.futures.poll()) != null) {
-            try {
-                future.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+    void sync();
 
 }

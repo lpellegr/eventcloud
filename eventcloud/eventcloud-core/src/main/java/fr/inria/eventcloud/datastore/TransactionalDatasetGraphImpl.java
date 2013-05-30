@@ -52,7 +52,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public void add(final Node g, final Node s, final Node p, final Node o) {
-        this.recordQuadrupleAddedIfNecessary(g, s, p, o);
+        this.statsRecorder.register(g, s, p, o);
         this.dataset.asDatasetGraph().add(g, s, p, o);
     }
 
@@ -91,7 +91,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public void delete(final Quadruple quadruple) {
-        this.recordQuadrupleRemovedIfNecessary(
+        this.statsRecorder.unregister(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
         this.dataset.asDatasetGraph().delete(
@@ -125,6 +125,9 @@ public final class TransactionalDatasetGraphImpl implements
     @Override
     public void delete(Node g, Node s, Node p, Node o) {
         this.dataset.asDatasetGraph().deleteAny(g, s, p, o);
+
+        // TODO: perform unregister on the statsRecorder instance for the
+        // quadruples that are removed
     }
 
     /**
@@ -176,20 +179,6 @@ public final class TransactionalDatasetGraphImpl implements
     @Override
     public Dataset getUnderlyingDataset() {
         return this.dataset;
-    }
-
-    private void recordQuadrupleAddedIfNecessary(final Node g, final Node s,
-                                                 final Node p, final Node o) {
-        if (this.statsRecorder != null) {
-            this.statsRecorder.quadrupleAdded(g, s, p, o);
-        }
-    }
-
-    private void recordQuadrupleRemovedIfNecessary(final Node g, final Node s,
-                                                   final Node p, final Node o) {
-        if (this.statsRecorder != null) {
-            this.statsRecorder.quadrupleRemoved(g, s, p, o);
-        }
     }
 
 }
