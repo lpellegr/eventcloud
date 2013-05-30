@@ -18,6 +18,7 @@ package fr.inria.eventcloud.load_balancing.criteria;
 
 import com.google.common.collect.Range;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
 /**
@@ -30,8 +31,12 @@ public class NbQuadrupleStoredCriterion extends Criterion {
     private final StatsRecorder statsRecorder;
 
     public NbQuadrupleStoredCriterion(StatsRecorder statsRecorder) {
-        super("nb quadruples stored",
-                Range.closed(0.0, (double) Long.MAX_VALUE), 1, 1);
+        super(
+                "nb quadruples stored",
+                Range.closed(0.0, (double) Long.MAX_VALUE),
+                5,
+                EventCloudProperties.LOAD_BALANCING_CRITERION_NB_QUADS_STORED_EMERGENCY_THRESHOLD.getValue(),
+                1);
 
         this.statsRecorder = statsRecorder;
     }
@@ -41,7 +46,7 @@ public class NbQuadrupleStoredCriterion extends Criterion {
      */
     @Override
     public double getLoad() {
-        return this.statsRecorder.getNbQuads();
+        return this.statsRecorder.getNbQuadruples();
     }
 
 }
