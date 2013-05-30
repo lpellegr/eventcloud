@@ -21,9 +21,6 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOper
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
-import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.datastore.AccessMode;
-import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -40,24 +37,7 @@ public class ClearOperation extends CallableOperation {
      */
     @Override
     public ResponseOperation handle(StructuredOverlay overlay) {
-        SemanticCanOverlay canOverlay = (SemanticCanOverlay) overlay;
-
-        canOverlay.getPublishSubscribeOperationsDelayer().commit();
-
-        TransactionalDatasetGraph txnGraph =
-                canOverlay.getMiscDatastore().begin(AccessMode.WRITE);
-        txnGraph.delete(QuadruplePattern.ANY);
-        txnGraph.commit();
-
-        txnGraph =
-                canOverlay.getSubscriptionsDatastore().begin(AccessMode.WRITE);
-        txnGraph.delete(QuadruplePattern.ANY);
-        txnGraph.commit();
-
-        canOverlay.getSubscriptionsCache().invalidateAll();
-        canOverlay.getSubscriberConnectionFailures().clear();
-
-        canOverlay.getRequestResponseManager().clear();
+        ((SemanticCanOverlay) overlay).clear();
 
         return new BooleanResponseOperation(true);
     }

@@ -25,6 +25,7 @@ import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.DefineRules;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
+import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -135,7 +136,9 @@ public class PeerImpl extends AbstractComponent implements Peer,
                               SerializableProvider<? extends StructuredOverlay> overlayProvider) {
         if (this.overlay == null) {
             this.overlay = overlayProvider.get();
+            this.overlay.overlayProvider = overlayProvider;
             this.overlay.stub = stub;
+            this.overlay.url = PAActiveObject.getUrl(stub);
             this.overlay.getRequestResponseManager().multiActiveService =
                     this.multiActiveService;
         }

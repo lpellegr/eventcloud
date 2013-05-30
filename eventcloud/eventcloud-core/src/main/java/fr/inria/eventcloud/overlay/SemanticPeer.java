@@ -37,7 +37,7 @@ public interface SemanticPeer extends Peer, PutGetApi {
      * @param quad
      *            the quadruple to publish.
      */
-    public void publish(Quadruple quad);
+    void publish(Quadruple quad);
 
     /**
      * Publishes the specified compound event.
@@ -45,7 +45,7 @@ public interface SemanticPeer extends Peer, PutGetApi {
      * @param event
      *            the compound event to publish.
      */
-    public void publish(CompoundEvent event);
+    void publish(CompoundEvent event);
 
     /**
      * Indexes the specified subscription.
@@ -53,6 +53,6 @@ public interface SemanticPeer extends Peer, PutGetApi {
      * @param subscription
      *            the subscription to index.
      */
-    public void subscribe(Subscription subscription);
+    void subscribe(Subscription subscription);
 
 }

@@ -21,7 +21,7 @@ import java.io.Serializable;
 import fr.inria.eventcloud.load_balancing.criteria.Criterion;
 
 /**
- * Provides load information. Mainly used to broadcast load to peers.
+ * Provides load information. Mainly used to forward load to peers.
  * 
  * @author lpellegr
  */
@@ -29,11 +29,14 @@ public class LoadReport implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private final String peerURL;
+
     private final long creationTime;
 
     private final double[] values;
 
-    protected LoadReport(Criterion[] criteria) {
+    protected LoadReport(String peerURL, Criterion[] criteria) {
+        this.peerURL = peerURL;
         this.values = new double[criteria.length];
 
         for (int i = 0; i < criteria.length; i++) {
@@ -60,6 +63,10 @@ public class LoadReport implements Serializable {
 
     public long getCreationTime() {
         return this.creationTime;
+    }
+
+    public String getPeerURL() {
+        return this.peerURL;
     }
 
     public double[] getValues() {

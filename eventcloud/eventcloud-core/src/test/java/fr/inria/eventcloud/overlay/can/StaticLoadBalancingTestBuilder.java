@@ -46,6 +46,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.datastore.stats.AbstractStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -81,7 +82,7 @@ public class StaticLoadBalancingTestBuilder {
 
     private final int rdfTermSize;
 
-    private Class<? extends StatsRecorder> statsRecorderClass;
+    private Class<? extends AbstractStatsRecorder> statsRecorderClass;
 
     private String trigResource;
 
@@ -117,13 +118,13 @@ public class StaticLoadBalancingTestBuilder {
         return this;
     }
 
-    public StaticLoadBalancingTestBuilder enableStatsRecording(Class<? extends StatsRecorder> statsRecorderClass) {
+    public StaticLoadBalancingTestBuilder enableStatsRecording(Class<? extends AbstractStatsRecorder> statsRecorderClass) {
         this.enableStatsRecording = true;
         this.statsRecorderClass = statsRecorderClass;
         return this;
     }
 
-    public StaticLoadBalancingTestBuilder enableLoadBalancing(Class<? extends StatsRecorder> statsRecorderClass) {
+    public StaticLoadBalancingTestBuilder enableLoadBalancing(Class<? extends AbstractStatsRecorder> statsRecorderClass) {
         this.enableLoadBalancing = true;
         this.enableStatsRecording = true;
         this.statsRecorderClass = statsRecorderClass;
@@ -151,12 +152,12 @@ public class StaticLoadBalancingTestBuilder {
                     NetworkAlreadyJoinedException, FileNotFoundException,
                     PeerNotActivatedException {
 
-                if (StaticLoadBalancingTestBuilder.this.enableStatsRecording) {
-                    EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
+                if (StaticLoadBalancingTestBuilder.this.enableLoadBalancing) {
+                    EventCloudProperties.STATIC_LOAD_BALANCING.setValue(true);
                 }
 
-                if (StaticLoadBalancingTestBuilder.this.enableLoadBalancing) {
-                    EventCloudProperties.LOAD_BALANCING.setValue(true);
+                if (StaticLoadBalancingTestBuilder.this.enableStatsRecording) {
+                    EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
                 }
 
                 if (StaticLoadBalancingTestBuilder.this.statsRecorderClass != null) {
@@ -303,10 +304,10 @@ public class StaticLoadBalancingTestBuilder {
                             GetStatsRecordeResponseOperation response =
                                     (GetStatsRecordeResponseOperation) PAFuture.getFutureValue(p.receive(new GetStatsRecorderOperation()));
 
-                            if (response.getStatsRecorder().getNbQuads() > maxNumQuads) {
+                            if (response.getStatsRecorder().getNbQuadruples() > maxNumQuads) {
                                 maxNumQuads =
                                         response.getStatsRecorder()
-                                                .getNbQuads();
+                                                .getNbQuadruples();
                                 electedPeer = p;
                             }
                         }
@@ -319,6 +320,7 @@ public class StaticLoadBalancingTestBuilder {
 
                         this.deployer.getRandomSemanticTracker(
                                 this.eventCloudId).storePeer(newPeer);
+
                         log.info("Join operation " + (i + 1));
                     }
 
@@ -423,7 +425,7 @@ public class StaticLoadBalancingTestBuilder {
             try {
                 this._execute();
 
-                if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
+                if (EventCloudProperties.isRecordStatsMiscDatastoreEnabled()) {
                     Pair<String, Double> stats = this.computeStats();
 
                     logDistribution(stats.getFirst());
@@ -447,9 +449,9 @@ public class StaticLoadBalancingTestBuilder {
             for (int i = 0; i < peers.size(); i++) {
                 StatsRecorder statsRecorder =
                         Operations.getStatsRecorder(peers.get(i));
-                stats.addValue(statsRecorder.getNbQuads());
+                stats.addValue(statsRecorder.getNbQuadruples());
 
-                distribution.append(statsRecorder.getNbQuads());
+                distribution.append(statsRecorder.getNbQuadruples());
                 if (i < peers.size() - 1) {
                     distribution.append(' ');
                 }
