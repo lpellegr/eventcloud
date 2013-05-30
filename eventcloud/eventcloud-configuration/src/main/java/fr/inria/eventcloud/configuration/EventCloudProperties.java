@@ -165,10 +165,32 @@ public class EventCloudProperties {
                     "eventcloud.ephemeral.subscription.expiration.time", 720000);
 
     /**
-     * Defines whether load-balancing is enabled or not.
+     * Defines whether dynamic load balancing is enabled or not. Setting dynamic
+     * load balancing to {@code true} enables
+     * {@link EventCloudProperties#STATIC_LOAD_BALANCING}.
      */
-    public static final PropertyBoolean LOAD_BALANCING = new PropertyBoolean(
-            "eventcloud.load.balancing", false);
+    public static final PropertyBoolean DYNAMIC_LOAD_BALANCING =
+            new PropertyBoolean("eventcloud.load.balancing.dynamic", false);
+
+    /**
+     * Defines whether static load balancing is enabled or not. Settings static
+     * load balancing to {@code true} enables
+     * {@link EventCloudProperties#RECORD_STATS_MISC_DATASTORE}. To know whether
+     * static load balancing is enabled or you should use
+     * {@link #isStaticLoadBalancingEnabled()} and no the value returned for
+     * this property since static load balancing may be enabled due to dynamic
+     * load balancing.
+     */
+    public static final PropertyBoolean STATIC_LOAD_BALANCING =
+            new PropertyBoolean("eventcloud.load.balancing.static", false);
+
+    /**
+     * This ratio is used to determine when a peer should report its load to
+     * others. It may affect the load balancing convergence time but also the
+     * accuracy.
+     */
+    public static final PropertyDouble LOAD_BALANCING_GOSSIP_RATIO =
+            new PropertyDouble("eventcloud.load.balancing.gossip.ratio", 2.0);
 
     /**
      * Defines which gossip strategy is applied for reporting load. Any class
@@ -185,15 +207,7 @@ public class EventCloudProperties {
 
     public static final PropertyInteger LOAD_BALANCING_PROBING_TIMEOUT =
             new PropertyInteger(
-                    "eventcloud.load.balancing.probing.timeout", 10000);
-
-    /**
-     * This ratio is used to determine when a peer should report its load to
-     * others. It may affect the load balancing convergence time but also the
-     * accuracy.
-     */
-    public static final PropertyDouble LOAD_BALANCING_GOSSIP_RATIO =
-            new PropertyDouble("eventcloud.load.balancing.gossip.ratio", 2.0);
+                    "eventcloud.load.balancing.probing.timeout", 1000);
 
     public static final PropertyDouble LOAD_BALANCING_IMBALANCE_RATIO =
             new PropertyDouble("eventcloud.load.balancing.imbalance.ratio", 2.0);
@@ -276,10 +290,18 @@ public class EventCloudProperties {
     public static final PropertyDouble SOCIAL_FILTER_THRESHOLD =
             new PropertyDouble("eventcloud.socialfilter.threshold", 0.5);
 
+    public static final PropertyInteger STATS_RECORDER_NB_BACKGROUND_THREADS =
+            new PropertyInteger(
+                    "eventcloud.stats.recorder.nb.background.threads", 2);
+
     /**
      * Defines whether statistics recording must be enabled or not for the misc
      * datastore. When it is enabled, some statistics like the number of
-     * quadruples added, etc. are recorded during each data insertion.
+     * quadruples added, etc. are recorded during each data insertion. To know
+     * whether stats recording for the misc datastore is enabled, you should use
+     * {@link #isRecordStatsMiscDatastoreEnabled()} and no the value returned
+     * for this property since stats recording may be enabled due to dynamic or
+     * static load balancing.
      */
     public static final PropertyBoolean RECORD_STATS_MISC_DATASTORE =
             new PropertyBoolean("eventcloud.record.stats.misc.datastore", false);
@@ -398,7 +420,6 @@ public class EventCloudProperties {
         if (REPOSITORIES_RESTORE.getValue()
                 && !REPOSITORIES_AUTO_REMOVE.getValue()
                 && repositoryPath.exists()) {
-
             File[] files = repositoryPath.listFiles();
 
             for (File f : files) {
@@ -477,6 +498,20 @@ public class EventCloudProperties {
         return System.getProperty("java.io.tmpdir") + File.separatorChar
                 + "eventcloud-" + System.getProperty("user.name")
                 + File.separatorChar;
+    }
+
+    public static final boolean isDynamicLoadBalancingEnabled() {
+        return DYNAMIC_LOAD_BALANCING.getValue();
+    }
+
+    public static final boolean isStaticLoadBalancingEnabled() {
+        return STATIC_LOAD_BALANCING.getValue()
+                || isDynamicLoadBalancingEnabled();
+    }
+
+    public static final boolean isRecordStatsMiscDatastoreEnabled() {
+        return RECORD_STATS_MISC_DATASTORE.getValue()
+                || isStaticLoadBalancingEnabled();
     }
 
     public static final boolean isSbce1PubSubAlgorithmUsed() {
