@@ -26,6 +26,7 @@ import com.google.common.base.Preconditions;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
+import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -76,9 +77,7 @@ public class SemanticOverlayProvider extends
         TransactionalTdbDatastoreBuilder miscDatastoreBuilder =
                 new TransactionalTdbDatastoreBuilder();
 
-        if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
-            miscDatastoreBuilder.recordStats();
-        }
+        this.enableStatsRecording(miscDatastoreBuilder);
 
         return new TransactionalTdbDatastore[] {
                 new TransactionalTdbDatastoreBuilder().build(),
@@ -98,9 +97,7 @@ public class SemanticOverlayProvider extends
                 new TransactionalTdbDatastoreBuilder(new File(
                         repositoryPath, "misc")).deleteFilesAfterClose(EventCloudProperties.REPOSITORIES_AUTO_REMOVE.getValue());
 
-        if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
-            miscDatastoreBuilder.recordStats();
-        }
+        this.enableStatsRecording(miscDatastoreBuilder);
 
         // datastore used to store publications, historical data, etc.
         TransactionalTdbDatastore miscDatastore = miscDatastoreBuilder.build();
@@ -128,6 +125,17 @@ public class SemanticOverlayProvider extends
 
         return new TransactionalTdbDatastore[] {
                 subscriptionsDatastore, miscDatastore, colanderDatastore};
+    }
+
+    private void enableStatsRecording(TransactionalTdbDatastoreBuilder miscDatastoreBuilder) {
+        if (EventCloudProperties.isRecordStatsMiscDatastoreEnabled()) {
+            try {
+                miscDatastoreBuilder.recordStats((StatsRecorder) EventCloudProperties.STATS_RECORDER_CLASS.getValue()
+                        .newInstance());
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
     public void setStreamURL(String streamURL) {

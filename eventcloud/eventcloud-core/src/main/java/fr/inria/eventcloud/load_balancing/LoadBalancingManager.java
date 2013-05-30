@@ -16,18 +16,32 @@
  **/
 package fr.inria.eventcloud.load_balancing;
 
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Doubles;
 import com.google.common.util.concurrent.AbstractScheduledService;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.load_balancing.criteria.Criterion;
 import fr.inria.eventcloud.load_balancing.gossip.GossipStrategy;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
  * Entity in charge of managing load-balancing features.
@@ -45,18 +59,19 @@ public class LoadBalancingManager {
 
     private final Criterion[] criteria;
 
-    // sliding window that keeps only the last NB_MAX_ENTRIES reports
-    private final Queue<LoadReport> loadReportsReceived;
-
     private final LoadBalancingService scheduledService;
 
     private final GossipStrategy<LoadReport> gossiper;
 
     private final SemanticCanOverlay overlay;
 
-    private enum LoadState {
-        UNDERLOADED, NORMAL, OVERLOADED
-    };
+    private AtomicBoolean handlingImbalance;
+
+    private AtomicInteger nbLoadReportsReceived;
+
+    private final ConcurrentMap<String, List<LoadReport>> loadReportsReceived;
+
+    private final ConcurrentSkipListMap<Long, String> loadReportsReceivedOrdered;
 
     @SuppressWarnings("unchecked")
     public LoadBalancingManager(final SemanticCanOverlay overlay,
@@ -71,58 +86,109 @@ public class LoadBalancingManager {
             throw new IllegalStateException(e);
         }
 
-        this.loadReportsReceived = EvictingQueue.create(NB_MAX_ENTRIES);
+        this.handlingImbalance = new AtomicBoolean();
+        this.nbLoadReportsReceived = new AtomicInteger();
+
+        this.loadReportsReceived =
+                new ConcurrentHashMap<String, List<LoadReport>>(NB_MAX_ENTRIES);
+        this.loadReportsReceivedOrdered =
+                new ConcurrentSkipListMap<Long, String>();
+
         this.overlay = overlay;
         this.scheduledService = new LoadBalancingService();
     }
 
-    public LoadState getLoadState() {
-        LoadReport currentLoadReport = new LoadReport(this.criteria);
+    public double getLocalLoad() {
+        return this.getCurrentLoad().computeWeightedSum(this.criteria);
+    }
 
-        double currentLoad =
-                currentLoadReport.computeWeightedSum(this.criteria);
+    public double getSystemLoad() {
+        return summarize(this.loadReportsReceived, this.criteria);
+    }
 
-        for (int i = 0; i < this.criteria.length; i++) {
-            if (currentLoadReport.getValues()[i] >= this.criteria[i].getEmergencyThreshold()) {
-                log.info(
-                        "Peer {} detected as overloaded due to criteria {} equals or higher than emergency threshold",
-                        this.overlay.getId(), this.criteria[i].getName());
-
-                return LoadState.OVERLOADED;
-            }
-        }
-
-        double overlayLoad = summarize(this.loadReportsReceived, this.criteria);
+    public boolean exceedsAverageSystemLoadHighThreshold(double value) {
+        double overlayLoad = this.getSystemLoad();
 
         double threshold =
                 EventCloudProperties.LOAD_BALANCING_IMBALANCE_RATIO.getDefaultValue()
                         * overlayLoad;
 
-        if (currentLoad > threshold) {
-            log.info(
-                    "Peer {} detected as overloaded because current load is {} times greater than average network load",
-                    this.overlay.getId(),
-                    EventCloudProperties.LOAD_BALANCING_IMBALANCE_RATIO.getDefaultValue());
-
-            return LoadState.OVERLOADED;
-        } else if (currentLoad < threshold) {
-            log.info(
-                    "Peer {} detected as underloaded because current load is {} times lower than average network load",
-                    this.overlay.getId(),
-                    EventCloudProperties.LOAD_BALANCING_IMBALANCE_RATIO.getDefaultValue());
-
-            return LoadState.UNDERLOADED;
-        } else {
-            return LoadState.NORMAL;
-        }
+        return value > threshold;
     }
 
-    public synchronized void save(LoadReport loadReport) {
-        this.loadReportsReceived.add(loadReport);
+    public boolean exceedsAverageSystemLoadLowThreshold(double value) {
+        double overlayLoad = summarize(this.loadReportsReceived, this.criteria);
 
-        // TODO: improve synchronization
-        // TODO: check for load state and trigger load balancing operation if
-        // required
+        double threshold =
+                EventCloudProperties.LOAD_BALANCING_IMBALANCE_RATIO.getDefaultValue()
+                        / overlayLoad;
+
+        return value > threshold;
+    }
+
+    public LoadState getLoadState() {
+        LoadReport currentLoadReport = this.getCurrentLoad();
+
+        double currentLoad =
+                currentLoadReport.computeWeightedSum(this.criteria);
+
+        boolean warmupEnded = true;
+
+        for (int i = 0; i < this.criteria.length; i++) {
+            if (currentLoadReport.getValues()[i] <= this.criteria[i].getWarmupThreshold()) {
+                warmupEnded &= false;
+                continue;
+            }
+
+            if (currentLoadReport.getValues()[i] >= this.criteria[i].getEmergencyThreshold()) {
+                return LoadState.OVERLOADED;
+            }
+        }
+
+        if (warmupEnded) {
+            if (this.exceedsAverageSystemLoadHighThreshold(currentLoad)) {
+                return LoadState.OVERLOADED;
+            } else if (this.exceedsAverageSystemLoadLowThreshold(currentLoad)) {
+                return LoadState.UNDERLOADED;
+            }
+        }
+
+        return LoadState.NORMAL;
+    }
+
+    public void save(LoadReport loadReport) {
+        if (this.handlingImbalance.get()) {
+            return;
+        }
+
+        // TODO replace list by concurrent map
+        List<LoadReport> l =
+                Collections.synchronizedList(Lists.newArrayList(loadReport));
+
+        if ((l =
+                this.loadReportsReceived.putIfAbsent(loadReport.getPeerURL(), l)) != null) {
+            l.add(loadReport);
+        }
+
+        this.loadReportsReceivedOrdered.put(
+                loadReport.getCreationTime(), loadReport.getPeerURL());
+
+        if (this.nbLoadReportsReceived.incrementAndGet() > NB_MAX_ENTRIES) {
+            Entry<Long, String> entry =
+                    this.loadReportsReceivedOrdered.pollFirstEntry();
+
+            Iterator<LoadReport> it =
+                    this.loadReportsReceived.get(entry.getValue()).iterator();
+            while (it.hasNext()) {
+                LoadReport r = it.next();
+
+                if (r.getCreationTime() == entry.getKey()) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+
     }
 
     public void start() {
@@ -133,15 +199,21 @@ public class LoadBalancingManager {
         this.scheduledService.stop();
     }
 
-    public static double summarize(Queue<LoadReport> reports,
+    public LoadReport getCurrentLoad() {
+        return new LoadReport(this.overlay.getPeerURL(), this.criteria);
+    }
+
+    public static double summarize(ConcurrentMap<String, List<LoadReport>> reports,
                                    Criterion[] criteria) {
         double result = 0;
 
-        for (LoadReport report : reports) {
-            result += report.computeWeightedSum(criteria);
+        for (List<LoadReport> reportList : reports.values()) {
+            for (LoadReport report : reportList) {
+                result += report.computeWeightedSum(criteria);
+            }
         }
 
-        result /= criteria.length;
+        result /= reports.size();
 
         return result;
     }
@@ -158,26 +230,149 @@ public class LoadBalancingManager {
                 startTime = System.currentTimeMillis();
             }
 
-            LoadReport report =
-                    new LoadReport(LoadBalancingManager.this.criteria);
+            LoadReport currentLoad = LoadBalancingManager.this.getCurrentLoad();
 
-            if (this.lastReport == null
-                    || report.computeWeightedSum(LoadBalancingManager.this.criteria) > EventCloudProperties.LOAD_BALANCING_GOSSIP_RATIO.getDefaultValue()
-                            * this.lastReport.computeWeightedSum(LoadBalancingManager.this.criteria)) {
-                log.debug(
-                        "Gossiping current load ({}) from peer {}", report,
-                        LoadBalancingManager.this.overlay.getId());
+            // push the current load report to others in an epidemic-style if it
+            // large enough compared to the previous sent
+            if (!LoadBalancingManager.this.handlingImbalance.get()) {
 
-                LoadBalancingManager.this.gossiper.push(
-                        LoadBalancingManager.this.overlay, report);
+                double currentLocalLoad = 0;
+                double lastLocalLoad = 0;
+                double imbalanceRatio = 0;
 
-                this.lastReport = report;
+                if (this.lastReport != null) {
+                    currentLocalLoad =
+                            currentLoad.computeWeightedSum(LoadBalancingManager.this.criteria);
+                    lastLocalLoad =
+                            this.lastReport.computeWeightedSum(LoadBalancingManager.this.criteria);
+                    imbalanceRatio =
+                            EventCloudProperties.LOAD_BALANCING_GOSSIP_RATIO.getDefaultValue();
+                }
+
+                if (this.lastReport == null
+                        || currentLocalLoad > imbalanceRatio * lastLocalLoad
+                        || currentLocalLoad < lastLocalLoad / imbalanceRatio) {
+                    log.debug(
+                            "Gossiping current load ({}) from peer {}",
+                            currentLoad,
+                            LoadBalancingManager.this.overlay.getId());
+
+                    LoadBalancingManager.this.gossiper.push(
+                            LoadBalancingManager.this.overlay, currentLoad);
+
+                    this.lastReport = currentLoad;
+
+                    switch (LoadBalancingManager.this.getLoadState()) {
+                        case UNDERLOADED:
+                            log.info(
+                                    "Peer {} detected as underloaded and load balancing operation triggered",
+                                    LoadBalancingManager.this.overlay.getId());
+
+                            LoadBalancingManager.this.handlingImbalance.set(true);
+                            LoadBalancingManager.this.overlay.getStub().leave();
+                            LoadBalancingManager.this.handlingImbalance.set(false);
+                            break;
+                        case OVERLOADED:
+                            log.info(
+                                    "Peer {} detected as overloaded and load balancing operation triggered",
+                                    LoadBalancingManager.this.overlay.getId());
+                            LoadBalancingManager.this.handlingImbalance.set(true);
+
+                            String bestSuitedPeerURL =
+                                    this.findBestSuitedPeerForHandlingOverload();
+
+                            if (bestSuitedPeerURL != null) {
+                                SemanticPeer bestSuitedPeer =
+                                        LoadBalancingManager.this.overlay.findPeerStub(bestSuitedPeerURL);
+
+                                log.debug(
+                                        "Found peer {} to force to rejoin on peer {}",
+                                        bestSuitedPeer,
+                                        LoadBalancingManager.this.overlay.getId());
+
+                                bestSuitedPeer.leave();
+                                bestSuitedPeer.join(LoadBalancingManager.this.overlay.getStub());
+                            } else {
+                                log.debug("Allocating a new peer in the cloud");
+
+                                // TODO: allocate a new machine in the cloud and
+                                // deploy a new peer on it before to force this
+                                // peer to join the current one
+                                SemanticPeer peer =
+                                        SemanticFactory.newSemanticPeer(LoadBalancingManager.this.overlay.getOverlayProvider());
+                                peer.join(LoadBalancingManager.this.overlay.getStub());
+                            }
+
+                            LoadBalancingManager.this.handlingImbalance.set(false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
             if (log.isTraceEnabled()) {
                 log.trace("Load balancing service iteration done in "
                         + (System.currentTimeMillis() - startTime) + " ms");
             }
+        }
+
+        private String findBestSuitedPeerForHandlingOverload() {
+            List<LoadReport> reports =
+                    new ArrayList<LoadReport>(
+                            LoadBalancingManager.this.loadReportsReceived.size());
+
+            for (Entry<String, List<LoadReport>> entry : LoadBalancingManager.this.loadReportsReceived.entrySet()) {
+                reports.add(entry.getValue().get(entry.getValue().size() - 1));
+            }
+
+            // sort entries from the least loaded to the most loaded
+            Collections.sort(reports, new Comparator<LoadReport>() {
+                @Override
+                public int compare(LoadReport r1, LoadReport r2) {
+                    return Doubles.compare(
+                            r1.computeWeightedSum(LoadBalancingManager.this.criteria),
+                            r2.computeWeightedSum(LoadBalancingManager.this.criteria));
+                }
+            });
+
+            LoadReport currentLoad = LoadBalancingManager.this.getCurrentLoad();
+
+            log.debug("Current load={}", currentLoad);
+
+            // among the available entries, we have to find one that will not be
+            // overloaded once half of the current peer load is transfered to it
+            for (LoadReport possibleSolution : reports) {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Possible solution={}, average system load={}",
+                            possibleSolution,
+                            LoadBalancingManager.this.getSystemLoad());
+                }
+
+                // compare to average system load
+                if (!LoadBalancingManager.this.exceedsAverageSystemLoadHighThreshold(possibleSolution.computeWeightedSum(LoadBalancingManager.this.criteria)
+                        + (currentLoad.computeWeightedSum(LoadBalancingManager.this.criteria) / 2))
+                        // compare to emergency thresholds
+                        && this.satisfyEmergencyThresholds(
+                                currentLoad, possibleSolution)) {
+                    return possibleSolution.getPeerURL();
+                }
+            }
+
+            // no solution found
+            return null;
+        }
+
+        private boolean satisfyEmergencyThresholds(LoadReport current,
+                                                   LoadReport solution) {
+            for (int i = 0; i < LoadBalancingManager.this.criteria.length; i++) {
+                if (current.getValues()[i] + (solution.getValues()[i] / 2) > LoadBalancingManager.this.criteria[i].getEmergencyThreshold()) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         @Override

@@ -207,7 +207,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         this.publishSubscribeOperationsDelayer =
                 new PublishSubscribeOperationsDelayer(this);
 
-        if (EventCloudProperties.LOAD_BALANCING.getValue()) {
+        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
             this.loadBalancingManager =
                     new LoadBalancingManager(
                             this,
@@ -469,6 +469,14 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         return this.miscDatastore;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SemanticPeer getStub() {
+        return (SemanticPeer) super.getStub();
+    }
+
     public TransactionalTdbDatastore getSubscriptionsDatastore() {
         return this.subscriptionsDatastore;
     }
@@ -502,12 +510,13 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             result.append('\n');
         }
 
-        if (EventCloudProperties.RECORD_STATS_MISC_DATASTORE.getValue()) {
+        if (EventCloudProperties.isRecordStatsMiscDatastoreEnabled()) {
             result.append("Misc datastore stats recorded with ");
             result.append(this.miscDatastore.getStatsRecorder().getClass());
             result.append('\n');
             result.append("Misc datastore size: ");
-            result.append(this.miscDatastore.getStatsRecorder().getNbQuads());
+            result.append(this.miscDatastore.getStatsRecorder()
+                    .getNbQuadruples());
             result.append('\n');
         }
 
@@ -608,6 +617,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     @Override
     public void join(Peer landmarkPeer) {
         super.join(landmarkPeer);
+
+        this.miscDatastore.getStatsRecorder().sync();
     }
 
     /**
@@ -615,19 +626,31 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     public JoinIntroduceResponseOperation<SemanticElement> handleJoinIntroduceMessage(JoinIntroduceOperation<SemanticElement> msg) {
+        this.getPublishSubscribeOperationsDelayer().flush();
+
+        // We have to sync in order to ensure that there is no background
+        // threads updating the stats fields otherwise when someone will
+        // call the method to know what is the point where the split should
+        // be done it may returns a value that is not between the bounds
+        // managed by the peer
+        this.miscDatastore.getStatsRecorder().sync();
+
         JoinIntroduceResponseOperation<SemanticElement> response =
                 super.handleJoinIntroduceMessage(msg);
 
-        if (this.miscDatastore.getStatsRecorder() != null) {
-            // We have to sync in order to ensure that there is no background
-            // threads updating the stats fields otherwise when someone will
-            // call the method to know what is the point where the split should
-            // be done it may returns a value that is not between the bounds
-            // managed by the peer
-            this.miscDatastore.getStatsRecorder().sync();
-        }
+        this.miscDatastore.getStatsRecorder().sync();
 
         return response;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void leave() {
+        super.leave();
+
+        this.clear();
     }
 
     /**
@@ -651,6 +674,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     private SemanticData retrieveDataIn(Zone<SemanticElement> zone,
                                         boolean remove) {
         List<Quadruple> miscData = this.retrieveMiscDataIn(zone, remove);
+
         List<Quadruple> subscriptions =
                 this.retrieveSubscriptionsIn(zone, remove);
 
@@ -922,37 +946,62 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     protected HomogenousPair<? extends Zone<SemanticElement>> splitZones(byte dimension) {
-        if (!EventCloudProperties.LOAD_BALANCING.getValue()) {
-            return super.splitZones(dimension);
-        } else {
-            SemanticElement estimatedMiddle =
-                    this.miscDatastore.getStatsRecorder()
-                            .computeSplitEstimation(dimension);
-
-            // no estimation can performed because no quadruple has
-            // been recorded, thus we apply the default split method
-            if (estimatedMiddle == null) {
+        try {
+            if (!EventCloudProperties.isStaticLoadBalancingEnabled()) {
                 return super.splitZones(dimension);
+            } else {
+                SemanticElement estimatedMiddle =
+                        this.miscDatastore.getStatsRecorder()
+                                .computeSplitEstimation(dimension);
+
+                // no estimation can be performed because no quadruple has
+                // been recorded, thus we apply the default split method
+                if (estimatedMiddle == null) {
+                    return super.splitZones(dimension);
+                }
+
+                try {
+                    Coordinate<SemanticElement> lowerBoundCopy =
+                            super.zone.getLowerBound().clone();
+                    Coordinate<SemanticElement> upperBoundCopy =
+                            super.zone.getUpperBound().clone();
+
+                    lowerBoundCopy.setElement(dimension, estimatedMiddle);
+                    upperBoundCopy.setElement(dimension, estimatedMiddle);
+
+                    return HomogenousPair.createHomogenous(
+                            new SemanticZone(
+                                    super.zone.getLowerBound(), upperBoundCopy),
+                            new SemanticZone(
+                                    lowerBoundCopy, super.zone.getUpperBound()));
+                } catch (CloneNotSupportedException e) {
+                    throw new IllegalStateException(e);
+                }
             }
-
-            try {
-                Coordinate<SemanticElement> lowerBoundCopy =
-                        super.zone.getLowerBound().clone();
-                Coordinate<SemanticElement> upperBoundCopy =
-                        super.zone.getUpperBound().clone();
-
-                lowerBoundCopy.setElement(dimension, estimatedMiddle);
-                upperBoundCopy.setElement(dimension, estimatedMiddle);
-
-                return HomogenousPair.createHomogenous(
-                        new SemanticZone(
-                                super.zone.getLowerBound(), upperBoundCopy),
-                        new SemanticZone(
-                                lowerBoundCopy, super.zone.getUpperBound()));
-            } catch (CloneNotSupportedException e) {
-                throw new IllegalStateException(e);
-            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return null;
         }
+    }
+
+    public void clear() {
+        this.getPublishSubscribeOperationsDelayer().flush();
+
+        this.miscDatastore.getStatsRecorder().reset();
+
+        TransactionalDatasetGraph txnGraph =
+                this.miscDatastore.begin(AccessMode.WRITE);
+        txnGraph.delete(QuadruplePattern.ANY);
+        txnGraph.commit();
+
+        txnGraph = this.subscriptionsDatastore.begin(AccessMode.WRITE);
+        txnGraph.delete(QuadruplePattern.ANY);
+        txnGraph.commit();
+
+        this.subscriptionsCache.invalidateAll();
+        this.subscriberConnectionFailures.clear();
+
+        super.messageManager.clear();
     }
 
     /**
@@ -962,7 +1011,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     public void close() {
         super.close();
 
-        if (EventCloudProperties.LOAD_BALANCING.getValue()) {
+        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
             this.loadBalancingManager.stop();
         }
 

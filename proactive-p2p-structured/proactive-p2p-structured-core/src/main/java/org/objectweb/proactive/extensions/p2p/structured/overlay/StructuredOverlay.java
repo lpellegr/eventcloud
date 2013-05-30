@@ -24,6 +24,7 @@ import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
  * The StructuredOverlay class contains the logic associated to methods exposed
@@ -48,6 +49,13 @@ public abstract class StructuredOverlay implements DataHandler {
      * The ProActive stub reference to the outer peer active object.
      */
     protected Peer stub;
+
+    /**
+     * Stub URL
+     */
+    protected String url;
+
+    protected SerializableProvider<? extends StructuredOverlay> overlayProvider;
 
     protected StructuredOverlay() {
         this.activated = false;
@@ -114,6 +122,14 @@ public abstract class StructuredOverlay implements DataHandler {
      */
     public UUID getId() {
         return this.id;
+    }
+
+    public SerializableProvider<? extends StructuredOverlay> getOverlayProvider() {
+        return this.overlayProvider;
+    }
+
+    public String getPeerURL() {
+        return this.url;
     }
 
     /**
