@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -26,6 +27,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 /**
  * Data structure used in order to store the neighbors of a {@link Peer} of type
@@ -122,6 +126,20 @@ public class NeighborTable<E extends Element> implements Serializable {
                 this.entries[dim][direction].putAll(table.get(dim, direction));
             }
         }
+    }
+
+    public List<Peer> getStubs() {
+        Builder<Peer> result = ImmutableList.builder();
+
+        for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                for (NeighborEntry<E> entry : this.entries[dim][direction].values()) {
+                    result.add(entry.getStub());
+                }
+            }
+        }
+
+        return result.build();
     }
 
     /**
