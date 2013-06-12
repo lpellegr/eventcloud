@@ -17,56 +17,65 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.LinkedList;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.SplitEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
- * {@code LeaveOperation} is used to transfer information from the peer which
- * leaves to the peer which takes over the zone.
+ * Operation used to send back to the peer that joins the network its overlay
+ * information.
  * 
  * @param <E>
  *            the {@link Element}s type manipulated.
  * 
  * @author lpellegr
  */
-public class LeaveOperation<E extends Element> extends CallableOperation {
+public class JoinWelcomeOperation<E extends Element> extends CallableOperation {
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID peerLeavingId;
+    private final UUID peerId;
 
-    private final Zone<E> peerLeavingZone;
+    private final Zone<E> zone;
 
-    private final Set<NeighborEntry<E>> newNeighborsToSet;
+    private final LinkedList<SplitEntry> splitHistory;
+
+    private final NeighborTable<E> neighbors;
 
     private final Serializable data;
 
-    public LeaveOperation(UUID peerLeavingId, Zone<E> peerLeavingZone,
-            Set<NeighborEntry<E>> newNeighborsToSet, Serializable data) {
-        this.peerLeavingId = peerLeavingId;
-        this.peerLeavingZone = peerLeavingZone;
-        this.newNeighborsToSet = newNeighborsToSet;
+    public JoinWelcomeOperation(UUID peerId, Zone<E> zone,
+            LinkedList<SplitEntry> splitHistory, NeighborTable<E> neighbors,
+            Serializable data) {
+        this.peerId = peerId;
+        this.zone = zone;
+        this.splitHistory = splitHistory;
+        this.neighbors = neighbors;
         this.data = data;
     }
 
-    public UUID getPeerLeavingId() {
-        return this.peerLeavingId;
+    public UUID getPeerId() {
+        return this.peerId;
     }
 
-    public Zone<E> getPeerLeavingZone() {
-        return this.peerLeavingZone;
+    public Zone<E> getZone() {
+        return this.zone;
     }
 
-    public Set<NeighborEntry<E>> getNewNeighborsToSet() {
-        return this.newNeighborsToSet;
+    public LinkedList<SplitEntry> getSplitHistory() {
+        return this.splitHistory;
+    }
+
+    public NeighborTable<E> getNeighbors() {
+        return this.neighbors;
     }
 
     public Serializable getData() {
@@ -78,8 +87,16 @@ public class LeaveOperation<E extends Element> extends CallableOperation {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public EmptyResponseOperation handle(StructuredOverlay overlay) {
-        return ((CanOverlay<E>) overlay).processLeave(this);
+    public ResponseOperation handle(StructuredOverlay overlay) {
+        return ((CanOverlay<E>) overlay).handleJoinWelcomeOperation(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithJoin() {
+        return true;
     }
 
 }

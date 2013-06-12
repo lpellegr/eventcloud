@@ -57,14 +57,30 @@ import org.slf4j.LoggerFactory;
  * @author bsauvan
  */
 @DefineGroups({
+        @Group(name = "commonObjectMethods", selfCompatible = true),
         @Group(name = "join", selfCompatible = false),
         @Group(name = "leave", selfCompatible = false),
-        @Group(name = "parallel", selfCompatible = true),
-        @Group(name = "receiveCallableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation", condition = "isCompatible")})
+        @Group(name = "receiveCallableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation", condition = "isCompatible"),
+        @Group(name = "receiveRunnableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation", condition = "isCompatible"),
+        @Group(name = "routing", selfCompatible = true)})
 @DefineRules({
-        @Compatible(value = {"receiveCallableOperation", "join"}, condition = "!isJoinOperation"),
-        @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "!isLeaveOperation"),
-        @Compatible(value = {"receiveCallableOperation", "parallel"}),})
+        // common object methods group is compatible with all other groups
+        @Compatible(value = {"commonObjectMethods", "join"}),
+        @Compatible(value = {"commonObjectMethods", "leave"}),
+        @Compatible(value = {"commonObjectMethods", "receiveCallableOperation"}),
+        @Compatible(value = {"commonObjectMethods", "receiveRunnableOperation"}),
+        @Compatible(value = {"commonObjectMethods", "routing"}),
+        // callable operations compatibility
+        @Compatible(value = {"receiveCallableOperation", "join"}, condition = "isCompatibleWithJoin"),
+        @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "isCompatibleWithLeave"),
+        @Compatible(value = {"receiveCallableOperation", "routing"}, condition = "isCompatibleWithRouting"),
+        // runnable operation compatibility
+        @Compatible(value = {"receiveRunnableOperation", "join"}, condition = "isCompatibleWithJoin"),
+        @Compatible(value = {"receiveRunnableOperation", "leave"}, condition = "isCompatibleWithLeave"),
+        @Compatible(value = {"receiveRunnableOperation", "routing"}, condition = "isCompatibleWithRouting"),
+        // callable and runnable operations are compatible under some conditions
+        @Compatible(value = {
+                "receiveCallableOperation", "receiveRunnableOperation"}, condition = "this.areCompatible")})
 public class PeerImpl extends AbstractComponent implements Peer,
         PeerAttributeController, ComponentEndActive, Serializable {
 
@@ -139,8 +155,8 @@ public class PeerImpl extends AbstractComponent implements Peer,
             this.overlay.overlayProvider = overlayProvider;
             this.overlay.stub = stub;
             this.overlay.url = PAActiveObject.getUrl(stub);
-            this.overlay.getRequestResponseManager().multiActiveService =
-                    this.multiActiveService;
+            this.overlay.multiActiveService = this.multiActiveService;
+            this.overlay.getRequestResponseManager().overlay = this.overlay;
         }
     }
 
@@ -148,7 +164,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("commonObjectMethods")
     public UUID getId() {
         return this.overlay.id;
     }
@@ -157,7 +173,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("commonObjectMethods")
     public OverlayType getType() {
         return this.overlay.getType();
     }
@@ -166,7 +182,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("commonObjectMethods")
     public boolean isActivated() {
         return this.overlay.activated;
     }
@@ -191,9 +207,6 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @MemberOf("join")
     public void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
             PeerNotActivatedException {
-        // the update to the internal variables do not have to be synchronized
-        // because this operation is supposed to be handled in FIFO (i.e. in
-        // exclusion with all other methods)
         if (this.overlay.isActivated()) {
             throw new NetworkAlreadyJoinedException();
         }
@@ -212,8 +225,6 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @Override
     @MemberOf("leave")
     public void leave() throws NetworkNotJoinedException {
-        // same as the join this method should be handled in FIFO order
-        // regarding other methods
         if (this.overlay.isActivated()) {
             this.overlay.leave();
             this.overlay.activated = false;
@@ -235,7 +246,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("receiveRunnableOperation")
     public void receive(RunnableOperation operation) {
         operation.handle(this.overlay);
     }
@@ -244,7 +255,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public void route(RequestResponseMessage<?> msg) {
         msg.route(this.overlay);
     }
@@ -253,7 +264,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public void sendv(Request<?> request) {
         this.overlay.dispatchv(request);
     }
@@ -262,7 +273,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public Response<?> send(Request<?> request) {
         return this.overlay.dispatch(request);
     }
@@ -279,7 +290,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("commonObjectMethods")
     public boolean equals(Object obj) {
         return obj instanceof PeerImpl
                 && this.getId().equals(((PeerImpl) obj).getId());
@@ -289,7 +300,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("commonObjectMethods")
     public int hashCode() {
         return this.getId().hashCode();
     }
@@ -298,7 +309,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("commonObjectMethods")
     public String toString() {
         if (this.overlay == null) {
             // toString is performed on a stub
@@ -306,6 +317,11 @@ public class PeerImpl extends AbstractComponent implements Peer,
         }
 
         return this.overlay.toString();
+    }
+
+    protected boolean areCompatible(CallableOperation callableOperation,
+                                    RunnableOperation runnableOperation) {
+        return runnableOperation.isMutualExclusionOperation();
     }
 
 }

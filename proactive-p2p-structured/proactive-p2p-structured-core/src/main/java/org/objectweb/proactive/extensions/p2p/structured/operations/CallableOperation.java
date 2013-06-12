@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 /**
@@ -43,44 +42,31 @@ public abstract class CallableOperation implements Operation {
      */
 
     /**
-     * Indicates whether the operation is used to transfer some information
-     * between {@link Peer}s during a join operation.
-     * 
-     * @return {@code true} if the operation is used to transfer some
-     *         information between {@link Peer}s during a join operation,
-     *         {@code false} otherwise.
+     * {@inheritDoc}
      */
-    public boolean isJoinOperation() {
+    @Override
+    public boolean isCompatibleWithJoin() {
         return false;
     }
 
     /**
-     * Indicates whether the operation is used to transfer some information
-     * between {@link Peer}s during a leave operation.
-     * 
-     * @return {@code true} if the operation is used to transfer some
-     *         information between {@link Peer}s during a leave operation,
-     *         {@code false} otherwise.
+     * {@inheritDoc}
      */
-    public boolean isLeaveOperation() {
+    @Override
+    public boolean isCompatibleWithLeave() {
         return false;
     }
 
-    public boolean isCompatible(CallableOperation op) {
-        /* 
-         * Truth table
-         * ----------------------
-         * First request   Second request   Compatible?
-         * isJoinOrLeave   !isJoinOrLeave   no
-         * isJoinOrLeave   isJoinOrLeave    no
-         * !isJoinOrLeave  !isJoinOrLeave   yes
-         * !isJoinOrLeave  isJoinOrLeave    no
-         */
-        return !this.isJoinOrLeaveOperation() && !op.isJoinOrLeaveOperation();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithRouting() {
+        return false;
     }
 
-    private boolean isJoinOrLeaveOperation() {
-        return this.isJoinOperation() || this.isLeaveOperation();
+    public boolean isCompatible(CallableOperation other) {
+        return false;
     }
 
 }

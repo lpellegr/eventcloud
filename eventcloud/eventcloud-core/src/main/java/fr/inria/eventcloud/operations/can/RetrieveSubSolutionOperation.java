@@ -52,7 +52,7 @@ import fr.inria.eventcloud.pubsub.notifications.NotificationId;
  * 
  * @author lpellegr
  */
-public class RetrieveSubSolutionOperation implements RunnableOperation {
+public class RetrieveSubSolutionOperation extends RunnableOperation {
 
     private static final long serialVersionUID = 150L;
 

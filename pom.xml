@@ -269,7 +269,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming-mao-bundle</artifactId>
-				<version>5.2.0-v8</version>
+				<version>5.2.0-v9</version>
 				<exclusions>
 					<exclusion>
 						<groupId>log4j</groupId>
@@ -432,7 +432,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.14.1</version>
+					<version>2.15</version>
 				</plugin>
 				<plugin>
 					<groupId>org.objectweb.proactive</groupId>

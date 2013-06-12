@@ -23,7 +23,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  * 
  * @author lpellegr
  */
-public interface RunnableOperation extends Operation {
+public abstract class RunnableOperation implements Operation {
+
+    private static final long serialVersionUID = 150L;
 
     /**
      * Handles the operation by using the specified {@code overlay}.
@@ -31,6 +33,39 @@ public interface RunnableOperation extends Operation {
      * @param overlay
      *            the overlay receiving the operation.
      */
-    void handle(StructuredOverlay overlay);
+    public abstract void handle(StructuredOverlay overlay);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithJoin() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithLeave() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithRouting() {
+        return false;
+    }
+
+    public boolean isMutualExclusionOperation() {
+        return false;
+    }
+
+    public boolean isCompatible(RunnableOperation other) {
+        return this.isMutualExclusionOperation()
+                && other.isMutualExclusionOperation();
+    }
 
 }

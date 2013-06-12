@@ -33,7 +33,7 @@ public abstract class MutualExclusionOperation extends RunnableOperation {
      */
     @Override
     public boolean isCompatibleWithJoin() {
-        return false;
+        return true;
     }
 
     /**
@@ -41,7 +41,7 @@ public abstract class MutualExclusionOperation extends RunnableOperation {
      */
     @Override
     public boolean isCompatibleWithLeave() {
-        return false;
+        return true;
     }
 
     /**

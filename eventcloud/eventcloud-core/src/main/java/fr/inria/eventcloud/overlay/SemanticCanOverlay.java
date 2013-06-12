@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
@@ -625,7 +625,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
-    public JoinIntroduceResponseOperation<SemanticElement> handleJoinIntroduceMessage(JoinIntroduceOperation<SemanticElement> msg) {
+    public EmptyResponseOperation handleJoinIntroduceOperation(JoinIntroduceOperation<SemanticElement> msg) {
         this.getPublishSubscribeOperationsDelayer().flush();
 
         // We have to sync in order to ensure that there is no background
@@ -635,8 +635,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         // managed by the peer
         this.miscDatastore.getStatsRecorder().sync();
 
-        JoinIntroduceResponseOperation<SemanticElement> response =
-                super.handleJoinIntroduceMessage(msg);
+        EmptyResponseOperation response =
+                super.handleJoinIntroduceOperation(msg);
 
         this.miscDatastore.getStatsRecorder().sync();
 
@@ -1000,8 +1000,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         this.subscriptionsCache.invalidateAll();
         this.subscriberConnectionFailures.clear();
-
-        super.messageManager.clear();
     }
 
     /**

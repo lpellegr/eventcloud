@@ -109,11 +109,6 @@ public class PeerTest {
             return new BooleanResponseOperation(result);
         }
 
-        @Override
-        public boolean isJoinOperation() {
-            return true;
-        }
-
     }
 
     private static final class CanMockOverlayProvider extends
