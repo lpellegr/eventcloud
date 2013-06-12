@@ -9,6 +9,7 @@
 	<logger name="fr.inria.eventcloud" level="debug" />
 	<logger name="org.objectweb.proactive.extensions.p2p" level="info" />
 	<logger name="fr.inria.eventcloud.load_balancing" level="debug" />
+	<logger name="org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion" level="trace" />
 	
 	<!--<logger name="fr.inria.eventcloud.datastore.stats" level="trace" /> -->
 	<!--<logger name="fr.inria.eventcloud.load_balancing" level="trace" /> -->

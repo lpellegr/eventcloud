@@ -58,7 +58,7 @@ public class ReplaceNeighborOperation<E extends Element> extends
         HomogenousPair<Byte> dimAndDir = table.remove(this.peerIdToReplace);
         table.add(this.entry, dimAndDir.getFirst(), dimAndDir.getSecond());
 
-        return new EmptyResponseOperation();
+        return EmptyResponseOperation.getInstance();
     }
 
 }

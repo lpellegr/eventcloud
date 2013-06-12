@@ -490,7 +490,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         this.getMutualExclusionManager().releaseCriticalSection();
 
-        return new EmptyResponseOperation();
+        return EmptyResponseOperation.getInstance();
     }
 
     /**
@@ -508,7 +508,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         this.splitHistory = op.getSplitHistory();
         this.neighborTable = op.getNeighbors();
 
-        return new EmptyResponseOperation();
+        return EmptyResponseOperation.getInstance();
     }
 
     protected HomogenousPair<? extends Zone<E>> splitZones(byte dimension) {
@@ -767,7 +767,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             this.neighborTable.add(entry, dim, dir);
         }
 
-        return new EmptyResponseOperation();
+        return EmptyResponseOperation.getInstance();
     }
 
     public void update() {

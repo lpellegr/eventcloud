@@ -105,7 +105,7 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
             }
         }
 
-        return new EmptyResponseOperation();
+        return EmptyResponseOperation.getInstance();
     }
 
     /**

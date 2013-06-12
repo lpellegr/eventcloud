@@ -78,7 +78,7 @@ public class UpdateNeighborOperation<E extends Element> extends
                 this.dimension, this.direction).replace(
                 this.entry.getId(), this.entry);
 
-        return new EmptyResponseOperation();
+        return EmptyResponseOperation.getInstance();
     }
 
 }
