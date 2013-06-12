@@ -24,7 +24,11 @@ import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.MutualExclusionManager;
+import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.RicartAgrawalaManager;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 
 /**
  * The StructuredOverlay class contains the logic associated to methods exposed
@@ -35,9 +39,13 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
  */
 public abstract class StructuredOverlay implements DataHandler {
 
-    protected final UUID id;
+    protected UUID id;
 
     protected RequestResponseManager messageManager;
+
+    protected MultiActiveService multiActiveService;
+
+    protected MutualExclusionManager mutualExclusionManager;
 
     /**
      * Indicates whether the current peer is activated (i.e. if the peer has
@@ -60,6 +68,7 @@ public abstract class StructuredOverlay implements DataHandler {
     protected StructuredOverlay() {
         this.activated = false;
         this.id = UUID.randomUUID();
+        this.mutualExclusionManager = new RicartAgrawalaManager(this);
     }
 
     protected StructuredOverlay(RequestResponseManager messageManager) {
@@ -122,6 +131,15 @@ public abstract class StructuredOverlay implements DataHandler {
      */
     public UUID getId() {
         return this.id;
+    }
+
+    /**
+     * Returns the mutual exclusion manager.
+     * 
+     * @return the mutualExclusionManager
+     */
+    public MutualExclusionManager getMutualExclusionManager() {
+        return this.mutualExclusionManager;
     }
 
     public SerializableProvider<? extends StructuredOverlay> getOverlayProvider() {
@@ -213,6 +231,22 @@ public abstract class StructuredOverlay implements DataHandler {
         if (this.messageManager != null) {
             this.messageManager.close();
         }
+    }
+
+    /*
+     * MultiActiveService extra methods
+     */
+
+    public void incrementExtraActiveRequestCount(int count) {
+        this.getRequestExecutor().incrementExtraActiveRequestCount(count);
+    }
+
+    public void decrementExtraActiveRequestCount(int count) {
+        this.getRequestExecutor().decrementExtraActiveRequestCount(count);
+    }
+
+    private RequestExecutor getRequestExecutor() {
+        return (RequestExecutor) this.multiActiveService.getServingController();
     }
 
 }

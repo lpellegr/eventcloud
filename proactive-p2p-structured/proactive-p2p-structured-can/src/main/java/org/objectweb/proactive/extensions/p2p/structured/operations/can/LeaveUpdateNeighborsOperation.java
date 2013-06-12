@@ -98,8 +98,17 @@ public class LeaveUpdateNeighborsOperation<E extends Element> extends
      * {@inheritDoc}
      */
     @Override
-    public boolean isLeaveOperation() {
+    public boolean isCompatibleWithLeave() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatible(CallableOperation other) {
+        return other instanceof LeaveEnlargeZoneOperation
+                || other instanceof JoinIntroduceOperation;
     }
 
 }

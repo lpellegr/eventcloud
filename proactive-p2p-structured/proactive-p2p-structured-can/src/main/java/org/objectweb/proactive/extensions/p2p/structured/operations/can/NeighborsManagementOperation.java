@@ -14,25 +14,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.operations;
+package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.io.Serializable;
-
-import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 
 /**
- * An operation is a special message that is sent from a {@link Peer} to an
- * another {@link Peer} in one hop by using a RPC call (via ProActive) without
- * routing steps.
+ * Abstract class defining compatibility for neighbors management operations.
  * 
  * @author lpellegr
  */
-public interface Operation extends Serializable {
+public abstract class NeighborsManagementOperation extends CallableOperation {
 
-    boolean isCompatibleWithJoin();
+    private static final long serialVersionUID = 1L;
 
-    boolean isCompatibleWithLeave();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatible(CallableOperation other) {
+        return other instanceof JoinIntroduceOperation;
+    }
 
-    boolean isCompatibleWithRouting();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithLeave() {
+        return true;
+    }
 
 }

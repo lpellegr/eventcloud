@@ -19,16 +19,16 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
- * This operation is used to performed the join introduce phase: it consists in
- * retrieving the information (i.e. the zone, the neighbors and the data) the
- * peer which join the network have to set. It also update the neighbors on the
- * landmark peer.
+ * This operation is used to performed the join introduce phase: it aks to the
+ * landmark peer the overlay information that should be affected to him and
+ * updates the neighbors .
  * 
  * @param <E>
  *            the {@link Element}s type manipulated.
@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @author lpellegr
  * 
  * @see CanOverlay#join(Peer)
- * @see CanOverlay#handleJoinIntroduceMessage(JoinIntroduceOperation)
+ * @see CanOverlay#handleJoinIntroduceOperation(JoinIntroduceOperation)
  */
 public class JoinIntroduceOperation<E extends Element> extends
         CallableOperation {
@@ -66,16 +66,8 @@ public class JoinIntroduceOperation<E extends Element> extends
      */
     @Override
     @SuppressWarnings("unchecked")
-    public JoinIntroduceResponseOperation<E> handle(StructuredOverlay overlay) {
-        return ((CanOverlay<E>) overlay).handleJoinIntroduceMessage(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isJoinOperation() {
-        return true;
+    public EmptyResponseOperation handle(StructuredOverlay overlay) {
+        return ((CanOverlay<E>) overlay).handleJoinIntroduceOperation(this);
     }
 
 }

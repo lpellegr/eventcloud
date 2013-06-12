@@ -94,4 +94,12 @@ public class CountQuadruplesOperation extends CallableOperation {
         return new GenericResponseOperation<Integer>(result);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithRouting() {
+        return true;
+    }
+
 }

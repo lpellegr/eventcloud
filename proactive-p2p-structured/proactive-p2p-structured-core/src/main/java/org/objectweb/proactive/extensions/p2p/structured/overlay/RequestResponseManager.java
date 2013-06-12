@@ -25,8 +25,6 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.multiactivity.MultiActiveService;
-import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +43,7 @@ public abstract class RequestResponseManager implements Serializable {
 
     private Map<UUID, ResponseEntry> repliesReceived;
 
-    public MultiActiveService multiActiveService;
+    protected StructuredOverlay overlay;
 
     protected RequestResponseManager() {
         this.repliesReceived =
@@ -103,7 +101,7 @@ public abstract class RequestResponseManager implements Serializable {
      * @return the response for the specified requestId.
      */
     protected Response<?> pullResponse(UUID requestId) {
-        ((RequestExecutor) this.multiActiveService.getServingController()).incrementExtraActiveRequestCount(this.getResponsesReceived()
+        this.overlay.incrementExtraActiveRequestCount(this.getResponsesReceived()
                 .get(requestId)
                 .getExpectedResponsesCount());
 
@@ -145,9 +143,8 @@ public abstract class RequestResponseManager implements Serializable {
             }
         }
 
-        ((RequestExecutor) this.multiActiveService.getServingController()).decrementExtraActiveRequestCount(this.repliesReceived.get(
-                requestId)
-                .getExpectedResponsesCount());
+        this.overlay.decrementExtraActiveRequestCount(this.repliesReceived.get(
+                requestId).getExpectedResponsesCount());
     }
 
     /**

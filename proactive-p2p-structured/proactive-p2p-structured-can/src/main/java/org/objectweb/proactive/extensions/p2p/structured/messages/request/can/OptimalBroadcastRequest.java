@@ -112,8 +112,6 @@ public class OptimalBroadcastRequest<E extends Element> extends
      * Changes the status of the request to inform that the constraint limits
      * have been reached. Call this to cut off the forwarding as soon as
      * possible.
-     * 
-     * @param overlay
      */
     public void turnConstraintReached() {
         this.constraintReached = true;

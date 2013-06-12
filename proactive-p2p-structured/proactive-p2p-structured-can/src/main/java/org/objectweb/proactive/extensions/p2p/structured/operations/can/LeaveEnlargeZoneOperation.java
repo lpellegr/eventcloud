@@ -112,8 +112,16 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
      * {@inheritDoc}
      */
     @Override
-    public boolean isLeaveOperation() {
+    public boolean isCompatibleWithLeave() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatible(CallableOperation other) {
+        return other instanceof JoinIntroduceOperation;
     }
 
 }

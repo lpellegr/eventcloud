@@ -33,11 +33,11 @@ import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.mop.ClassNotReifiableException;
-import org.objectweb.proactive.core.util.ProActiveRandom;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -233,7 +233,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
 
             remotePeer.join(landmarkPeer);
 
-            if (ProActiveRandom.nextDouble() <= this.getProbabilityToStorePeer()) {
+            if (RandomUtils.nextDouble() <= this.getProbabilityToStorePeer()) {
                 this.storePeer(remotePeer);
             }
 
@@ -241,6 +241,16 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
                     "Peer managing {} has joined from {}", remotePeer,
                     landmarkPeer);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void takeout(Peer remotePeer) throws NetworkNotJoinedException,
+            PeerNotActivatedException {
+        remotePeer.leave();
+        this.removePeer(remotePeer);
     }
 
     /**

@@ -73,7 +73,7 @@ public class NeighborEntry<E extends Element> implements Serializable {
         return this.neighborZone;
     }
 
-    public void setZone(Zone<E> newZone) {
+    public synchronized void setZone(Zone<E> newZone) {
         this.neighborZone = newZone;
     }
 

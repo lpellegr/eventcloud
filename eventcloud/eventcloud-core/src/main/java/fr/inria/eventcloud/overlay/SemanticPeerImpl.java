@@ -159,7 +159,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public void publish(Quadruple quad) {
         if (quad.getPublicationTime() == -1) {
             quad.setPublicationTime();
@@ -174,7 +174,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public void publish(CompoundEvent compoundEvent) {
         long publicationTime = System.currentTimeMillis();
 
@@ -216,7 +216,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public void subscribe(Subscription subscription) {
         subscription.setIndexationTime();
 
@@ -234,14 +234,14 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public boolean add(Quadruple quad) {
         PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
 
         return true;
     }
 
-    @MemberOf("parallel")
+    @MemberOf("routing")
     private BooleanWrapper addAsync(Quadruple quad) {
         PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
 
@@ -252,7 +252,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public boolean add(Collection<Quadruple> quads) {
         List<BooleanWrapper> results = new ArrayList<BooleanWrapper>();
 
@@ -269,7 +269,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public boolean add(URL url, SerializationFormat format) {
         try {
             final Builder<BooleanWrapper> results = ImmutableList.builder();
@@ -297,7 +297,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public boolean contains(Quadruple quad) {
         return ((BooleanForwardResponse) PAFuture.getFutureValue(super.send(new ContainsQuadrupleRequest(
                 quad)))).getResult();
@@ -307,14 +307,14 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public boolean delete(Quadruple quad) {
         PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
 
         return true;
     }
 
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public BooleanWrapper deleteAsync(Quadruple quad) {
         PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
 
@@ -325,7 +325,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public boolean delete(Collection<Quadruple> quads) {
         List<BooleanWrapper> results = new ArrayList<BooleanWrapper>();
 
@@ -342,7 +342,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public List<Quadruple> delete(QuadruplePattern quadPattern) {
         QuadruplePatternResponse response =
                 (QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new DeleteQuadruplesRequest(
@@ -355,7 +355,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public long count(QuadruplePattern quadPattern) {
         return ((CountQuadruplePatternResponse) PAFuture.getFutureValue((super.send(new CountQuadruplePatternRequest(
                 quadPattern.getGraph(), quadPattern.getSubject(),
@@ -366,7 +366,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public long count(String sparqlQuery) throws MalformedSparqlQueryException {
         SparqlResponse<?> response = this.executeSparqlQuery(sparqlQuery);
 
@@ -400,7 +400,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public List<Quadruple> find(QuadruplePattern quadPattern) {
         return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
                 quadPattern.getGraph(), quadPattern.getSubject(),
@@ -411,7 +411,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
             throws MalformedSparqlQueryException {
         sparqlQuery = sparqlQuery.trim();
@@ -434,7 +434,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
             throws MalformedSparqlQueryException {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(
@@ -445,7 +445,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct)
             throws MalformedSparqlQueryException {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(
@@ -456,7 +456,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery)
             throws MalformedSparqlQueryException {
         throw new UnsupportedOperationException();
@@ -466,7 +466,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("routing")
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelect)
             throws MalformedSparqlQueryException {
         return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(

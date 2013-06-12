@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.TrackerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
@@ -57,7 +58,7 @@ public interface Tracker extends Serializable {
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise (e.g. if a join has already be done).
      */
-    public boolean join(Tracker landmarkTracker);
+    boolean join(Tracker landmarkTracker);
 
     /**
      * Adds the given {@code remotePeer} on the network managed by the tracker.
@@ -73,7 +74,7 @@ public interface Tracker extends Serializable {
      *             overlay type as the peers that are already maintained by the
      *             tracker.
      */
-    public void inject(Peer remotePeer) throws NetworkAlreadyJoinedException;
+    void inject(Peer remotePeer) throws NetworkAlreadyJoinedException;
 
     /**
      * Adds the given {@code remotePeer} on the network managed by the tracker
@@ -94,8 +95,23 @@ public interface Tracker extends Serializable {
      *             overlay type as the peers that are already maintained by the
      *             tracker.
      */
-    public void inject(Peer remotePeer, Peer landmarkPeer)
+    void inject(Peer remotePeer, Peer landmarkPeer)
             throws NetworkAlreadyJoinedException, PeerNotActivatedException;
+
+    /**
+     * Forces the specified peer to leave the network and removes the associated
+     * reference from the trackers.
+     * 
+     * @param remotePeer
+     *            the peer to make it left.
+     * 
+     * @throws NetworkNotJoinedException
+     *             if the specified {@code remotePeer} belongs to no network.
+     * @throws PeerNotActivatedException
+     *             if the specified {@code landmarkPeer} is not activated.
+     */
+    void takeout(Peer remotePeer) throws NetworkNotJoinedException,
+            PeerNotActivatedException;
 
     /**
      * Stores the specified {@code peerReference} locally and call
@@ -105,7 +121,7 @@ public interface Tracker extends Serializable {
      * @param peerReference
      *            the peer reference to store.
      */
-    public void storePeer(Peer peerReference);
+    void storePeer(Peer peerReference);
 
     /**
      * Removes the specified {@code peerReference} locally and call
@@ -115,7 +131,7 @@ public interface Tracker extends Serializable {
      * @param peerReference
      *            the peer reference to remove.
      */
-    public void removePeer(Peer peerReference);
+    void removePeer(Peer peerReference);
 
     /**
      * Adds the specified {@code peerReference} into the list of peer references
@@ -129,7 +145,7 @@ public interface Tracker extends Serializable {
      * @return {@code true} if the operation has succeed, {@code false}
      *         otherwise.
      */
-    public BooleanWrapper internalStorePeer(Peer peerReference);
+    BooleanWrapper internalStorePeer(Peer peerReference);
 
     /**
      * Removes the specified {@code peerReference} from the list of peer
@@ -143,7 +159,7 @@ public interface Tracker extends Serializable {
      * @return {@code true} if the operation has succeed, {@code false}
      *         otherwise.
      */
-    public BooleanWrapper internalRemovePeer(Peer peerReference);
+    BooleanWrapper internalRemovePeer(Peer peerReference);
 
     /**
      * Adds the specified {@code trackerReference} into the tracker group. This
@@ -156,7 +172,7 @@ public interface Tracker extends Serializable {
      * @return {@code true} if the operation has succeed, {@code false}
      *         otherwise.
      */
-    public BooleanWrapper internalAddTracker(Tracker trackerReference);
+    BooleanWrapper internalAddTracker(Tracker trackerReference);
 
     /**
      * Removes the specified {@code trackerReference} from the tracker group.
@@ -169,35 +185,35 @@ public interface Tracker extends Serializable {
      * @return {@code true} if the operation has succeed, {@code false}
      *         otherwise.
      */
-    public BooleanWrapper internalRemoveTracker(Tracker trackerReference);
+    BooleanWrapper internalRemoveTracker(Tracker trackerReference);
 
     /**
      * Register the tracker into the RMI registry.
      * 
      * @return the URL where the object has been bind to.
      */
-    public String register();
+    String register();
 
     /**
      * Returns the unique identifier associated to this tracker.
      * 
      * @return the unique identifier associated to this tracker.
      */
-    public UUID getId();
+    UUID getId();
 
     /**
      * Returns the network name the tracker belongs to.
      * 
      * @return the network name the tracker belongs to.
      */
-    public String getNetworkName();
+    String getNetworkName();
 
     /**
      * Returns the probability to store a {@link Peer} reference.
      * 
      * @return the probability to store a {@link Peer} reference.
      */
-    public double getProbabilityToStorePeer();
+    double getProbabilityToStorePeer();
 
     /**
      * Returns the {@link Peer} stored at the specified index.
@@ -206,21 +222,21 @@ public interface Tracker extends Serializable {
      *            the index to use.
      * @return a {@link Peer}.
      */
-    public Peer getPeer(int index);
+    Peer getPeer(int index);
 
     /**
      * Returns a list containing all the peer references that are maintained.
      * 
      * @return a list containing all the peer references that are maintained.
      */
-    public List<Peer> getPeers();
+    List<Peer> getPeers();
 
     /**
      * Returns a random and valid peer from the stored peers list.
      * 
      * @return a random and valid peer.
      */
-    public Peer getRandomPeer();
+    Peer getRandomPeer();
 
     /**
      * Returns the typed group view (the group contains the trackers that have
@@ -229,7 +245,7 @@ public interface Tracker extends Serializable {
      * @return the typed group view (the group contains the trackers that have
      *         been joined and that belongs to the same network name).
      */
-    public Group<Tracker> getTypedGroupView();
+    Group<Tracker> getTypedGroupView();
 
     /**
      * Returns the type of peer references the tracker maintain. The type is
@@ -237,7 +253,7 @@ public interface Tracker extends Serializable {
      * 
      * @return the type of peer references the tracker maintain
      */
-    public OverlayType getType();
+    OverlayType getType();
 
     /**
      * Sets the probability to keep in mind a peer reference to the specified
@@ -246,6 +262,6 @@ public interface Tracker extends Serializable {
      * @param value
      *            the new value to set.
      */
-    public void setProbabilityToStorePeer(double value);
+    void setProbabilityToStorePeer(double value);
 
 }

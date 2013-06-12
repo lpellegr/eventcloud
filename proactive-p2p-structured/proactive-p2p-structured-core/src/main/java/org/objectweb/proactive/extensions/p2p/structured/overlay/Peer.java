@@ -43,14 +43,14 @@ public interface Peer extends Serializable {
      * 
      * @return the unique identifier associated to this peer.
      */
-    public UUID getId();
+    UUID getId();
 
     /**
      * Returns the overlay type for the current peer.
      * 
      * @return the overlay type for the current peer.
      */
-    public OverlayType getType();
+    OverlayType getType();
 
     /**
      * Returns a boolean indicating the current peer is activated (i.e. it has
@@ -59,7 +59,7 @@ public interface Peer extends Serializable {
      * @return {@code true} if the peer has already joined a network and has not
      *         yet left, {@code false} otherwise.
      */
-    public boolean isActivated();
+    boolean isActivated();
 
     /**
      * This method is used to initialize the state of the peer in the special
@@ -71,7 +71,7 @@ public interface Peer extends Serializable {
      *             if the peer has already joined or created an existing
      *             network.
      */
-    public boolean create() throws NetworkAlreadyJoinedException;
+    boolean create() throws NetworkAlreadyJoinedException;
 
     /**
      * Forces the current peer to join an existing network by using the
@@ -87,7 +87,7 @@ public interface Peer extends Serializable {
      * @throws PeerNotActivatedException
      *             if the specified {@code landmarkPeer} is not activated.
      */
-    public void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
+    void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
             PeerNotActivatedException;
 
     /**
@@ -97,7 +97,7 @@ public interface Peer extends Serializable {
      *             if the current peer try leave without having joined a
      *             network.
      */
-    public void leave() throws NetworkNotJoinedException;
+    void leave() throws NetworkNotJoinedException;
 
     /**
      * Receives and handles the specified {@code operation} asynchronously by
@@ -108,7 +108,7 @@ public interface Peer extends Serializable {
      * 
      * @return a response according to the operation type handled.
      */
-    public ResponseOperation receive(CallableOperation operation);
+    ResponseOperation receive(CallableOperation operation);
 
     /**
      * Receives and handles the specified {@code operation} asynchronously.
@@ -116,7 +116,7 @@ public interface Peer extends Serializable {
      * @param operation
      *            the operation to handle.
      */
-    public void receive(RunnableOperation operation);
+    void receive(RunnableOperation operation);
 
     /**
      * Routes the specified {@code msg}.
@@ -124,7 +124,7 @@ public interface Peer extends Serializable {
      * @param msg
      *            the message to route.
      */
-    public void route(RequestResponseMessage<?> msg);
+    void route(RequestResponseMessage<?> msg);
 
     /**
      * Sends a request over the overlay by using message passing but without any
@@ -133,7 +133,7 @@ public interface Peer extends Serializable {
      * @param request
      *            the request to handle.
      */
-    public void sendv(Request<?> request);
+    void sendv(Request<?> request);
 
     /**
      * Sends a request over the overlay by using message passing.
@@ -143,19 +143,19 @@ public interface Peer extends Serializable {
      * 
      * @return the response in agreement with the request type sent.
      */
-    public Response<?> send(Request<?> request);
+    Response<?> send(Request<?> request);
 
     /**
      * Returns debug information as String.
      * 
      * @return debug information as String.
      */
-    public String dump();
+    String dump();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String toString();
+    String toString();
 
 }
