@@ -71,7 +71,7 @@ public class LeaveAddNeighborsOperation<E extends Element> extends
             }
         }
 
-        return new EmptyResponseOperation();
+        return EmptyResponseOperation.getInstance();
     }
 
     /**

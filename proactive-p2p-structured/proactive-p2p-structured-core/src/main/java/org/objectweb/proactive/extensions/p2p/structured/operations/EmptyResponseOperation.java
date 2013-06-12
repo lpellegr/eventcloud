@@ -25,8 +25,15 @@ public class EmptyResponseOperation implements ResponseOperation {
 
     private static final long serialVersionUID = 150L;
 
-    public EmptyResponseOperation() {
+    private static final EmptyResponseOperation INSTANCE =
+            new EmptyResponseOperation();
 
+    private EmptyResponseOperation() {
+
+    }
+
+    public static EmptyResponseOperation getInstance() {
+        return INSTANCE;
     }
 
 }
