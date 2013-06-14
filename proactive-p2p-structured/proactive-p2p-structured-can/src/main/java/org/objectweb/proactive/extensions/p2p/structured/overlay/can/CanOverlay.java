@@ -847,7 +847,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         if (this.zone == null) {
             return super.id.toString();
         } else {
-            return super.id.toString();
+            return this.zone.toString();
         }
     }
 
