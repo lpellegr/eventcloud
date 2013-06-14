@@ -46,7 +46,7 @@ import fr.inria.eventcloud.messages.response.can.StatefulQuadruplePatternRespons
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * 
+ * Dynamic load balancing test.
  * 
  * @author lpellegr
  */

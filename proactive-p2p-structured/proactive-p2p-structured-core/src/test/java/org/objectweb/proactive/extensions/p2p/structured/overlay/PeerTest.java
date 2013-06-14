@@ -106,7 +106,7 @@ public class PeerTest {
                 canOverlay.lock.set(false);
             }
 
-            return new BooleanResponseOperation(result);
+            return BooleanResponseOperation.getInstance(result);
         }
 
     }

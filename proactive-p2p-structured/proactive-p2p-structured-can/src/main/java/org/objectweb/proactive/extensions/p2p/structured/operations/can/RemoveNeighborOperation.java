@@ -134,7 +134,7 @@ public class RemoveNeighborOperation<E extends Element> extends
                             this.peerIdentifier, this.dimension, this.direction);
         }
 
-        return new BooleanResponseOperation(result);
+        return BooleanResponseOperation.getInstance(result);
     }
 
 }
