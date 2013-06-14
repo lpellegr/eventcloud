@@ -19,7 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.util.Map;
 import java.util.UUID;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -38,7 +37,7 @@ import com.google.common.collect.ImmutableMap;
  * @author lpellegr
  */
 public class LeaveUpdateNeighborsOperation<E extends Element> extends
-        CallableOperation {
+        LeaveNeighborsManagementOperation {
 
     private static final long serialVersionUID = 150L;
 
@@ -92,23 +91,6 @@ public class LeaveUpdateNeighborsOperation<E extends Element> extends
         }
 
         return EmptyResponseOperation.getInstance();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithLeave() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatible(CallableOperation other) {
-        return other instanceof LeaveEnlargeZoneOperation
-                || other instanceof JoinIntroduceOperation;
     }
 
 }

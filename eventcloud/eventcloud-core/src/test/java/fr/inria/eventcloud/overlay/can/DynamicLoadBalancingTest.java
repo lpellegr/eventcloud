@@ -81,7 +81,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
 
         while (true) {
             try {
-                Thread.sleep(RandomUtils.nextIntClosed(50, 500));
+                Thread.sleep(RandomUtils.nextIntClosed(50, 100));
 
                 super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
 

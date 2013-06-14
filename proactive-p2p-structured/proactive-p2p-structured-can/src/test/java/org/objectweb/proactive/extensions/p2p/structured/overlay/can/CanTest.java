@@ -32,12 +32,15 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlrea
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,13 +61,13 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     @Test
     public void testConcurrentJoinRequests() throws InterruptedException {
-        final ExecutorService threadPool = Executors.newFixedThreadPool(8);
-        final Peer[] peers = new Peer[64];
+        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+        final Peer[] peers = new Peer[54];
 
         log.info("Preallocating {} peers", peers.length);
 
         for (int i = 0; i < peers.length; i++) {
-            peers[i] = PeerFactory.newPeer(new CustomOverlayProvider());
+            peers[i] = createCustomPeer();
         }
 
         log.info("Performing concurrent joins");
@@ -101,7 +104,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         threadPool.shutdown();
 
-        if (!threadPool.awaitTermination(100, TimeUnit.SECONDS)) {
+        if (!threadPool.awaitTermination(30, TimeUnit.SECONDS)) {
             Assert.fail("Concurrent joins timeout");
         }
     }
@@ -114,21 +117,21 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         log.info("Inserting {} additional peers", extraPeers.length);
 
         for (int i = 0; i < extraPeers.length; i++) {
-            extraPeers[i] = PeerFactory.newPeer(new CustomOverlayProvider());
-            extraPeers[i].join(this.getRandomPeer());
+            super.getRandomTracker().inject(createCustomPeer());
         }
 
         log.info("Performing concurrent leaves");
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(8);
-        for (int i = 0; i < extraPeers.length - 1; i++) {
-            final int k = i;
-            threadPool.execute(new Runnable() {
+        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
+        for (int i = 0; i < extraPeers.length - 1; i++) {
+            threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        extraPeers[k].leave();
+                        CanTest.this.getRandomTracker()
+                                .removeRandomPeer()
+                                .leave();
                     } catch (NetworkNotJoinedException e) {
                         e.printStackTrace();
                     }
@@ -138,53 +141,54 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         threadPool.shutdown();
 
-        if (!threadPool.awaitTermination(100, TimeUnit.SECONDS)) {
+        if (!threadPool.awaitTermination(30, TimeUnit.SECONDS)) {
             Assert.fail("Concurrent leaves timeout");
         }
     }
 
     @Test
-    public void testMixedConcurrentJoinAndLeaveRequests()
+    public void testConcurrentJoinAndLeaveRequests()
             throws NetworkAlreadyJoinedException, PeerNotActivatedException,
             InterruptedException {
-        // among the pre-defined number of loops, select some to inject peers
-        log.info("Inserting additional peers");
+        final RequestType[] requests = new RequestType[54];
 
-        for (int i = 0; i < 45; i++) {
-            Peer newPeer = PeerFactory.newPeer(new CustomOverlayProvider());
-            super.getRandomTracker().inject(newPeer);
+        final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
+                new ConcurrentLinkedQueue<Peer>();
+
+        int nbLeaveRequests = 0;
+
+        // pre-allocates peers since it is not possible to instantiate them in
+        // parallel and takes advantage of this operation to pre define the
+        // number of join and leave requests to perform
+        for (int i = 0; i < requests.length; i++) {
+            if (RandomUtils.nextInt(2) == 0) {
+                requests[i] = RequestType.JOIN;
+                preAllocatedPeers.add(createCustomPeer());
+            } else {
+                requests[i] = RequestType.LEAVE;
+                nbLeaveRequests++;
+            }
+        }
+
+        log.info("Inserting additional peers for leave requests");
+
+        for (int i = 0; i < nbLeaveRequests; i++) {
+            super.getRandomTracker().inject(createCustomPeer());
         }
 
         log.info(
                 "At the beginning {} peers are maintained by the trackers",
                 this.getRandomTracker().getPeers().size());
 
-        // 0 means join, 1 leave
-        final byte[] operations = new byte[54];
-
-        final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
-                new ConcurrentLinkedQueue<Peer>();
-        // pre-allocates peers since it is not possible to instantiate them in
-        // parallel and takes advantage of this operation to pre define the
-        // number of join and leave requests to perform
-        for (int i = 0; i < operations.length; i++) {
-            if (RandomUtils.nextInt(2) == 0) {
-                preAllocatedPeers.add(PeerFactory.newPeer(new CustomOverlayProvider()));
-                operations[i] = 0;
-            } else {
-                operations[i] = 1;
-            }
-        }
-
         log.info(
                 "Scheduled {} join and {} leave requests",
-                preAllocatedPeers.size(), operations.length
+                preAllocatedPeers.size(), requests.length
                         - preAllocatedPeers.size());
 
         log.info("Performing concurrent join or leave requests");
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
-        for (int i = 0; i < operations.length; i++) {
+        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+        for (int i = 0; i < requests.length; i++) {
             final int k = i;
 
             threadPool.execute(new Runnable() {
@@ -192,12 +196,13 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
                 @Override
                 public void run() {
                     try {
-                        if (operations[k] == 1) {
-                            CanTest.this.getRandomTracker().takeout(
-                                    CanTest.this.getRandomPeer());
-                        } else if (operations[k] == 0) {
+                        if (requests[k] == RequestType.JOIN) {
                             preAllocatedPeers.poll().join(
                                     CanTest.this.getRandomPeer());
+                        } else if (requests[k] == RequestType.LEAVE) {
+                            CanTest.this.getRandomTracker()
+                                    .removeRandomPeer()
+                                    .leave();
                         }
                     } catch (NetworkNotJoinedException e) {
                         e.printStackTrace();
@@ -212,13 +217,170 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         threadPool.shutdown();
 
-        if (!threadPool.awaitTermination(100, TimeUnit.SECONDS)) {
+        if (!threadPool.awaitTermination(30, TimeUnit.SECONDS)) {
             Assert.fail("Concurrent join and leave requests timeout");
         }
 
         log.info(
                 "At the end {} peers are still maintained by the trackers",
                 this.getRandomTracker().getPeers().size());
+    }
+
+    @Test
+    public void testConcurrentJoinAndRoutingRequests()
+            throws NetworkAlreadyJoinedException, InterruptedException {
+        final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
+                new ConcurrentLinkedQueue<Peer>();
+
+        for (int i = 0; i < 54; i++) {
+            preAllocatedPeers.add(createCustomPeer());
+        }
+
+        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+
+        for (int i = 0; i < preAllocatedPeers.size(); i++) {
+            threadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (RandomUtils.nextInt(2) == 0) {
+                            CanTest.this.getRandomPeer().send(
+                                    createFloodingRequest());
+                        } else {
+                            preAllocatedPeers.poll().join(
+                                    CanTest.this.getRandomPeer());
+                        }
+                    } catch (NetworkAlreadyJoinedException e) {
+                        e.printStackTrace();
+                    } catch (PeerNotActivatedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        threadPool.shutdown();
+
+        if (!threadPool.awaitTermination(30, TimeUnit.SECONDS)) {
+            Assert.fail("Concurrent join and routing requests timeout");
+        }
+    }
+
+    @Test
+    public void testConcurrentLeaveAndRoutingRequests()
+            throws NetworkAlreadyJoinedException, InterruptedException {
+        final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
+                new ConcurrentLinkedQueue<Peer>();
+
+        for (int i = 0; i < 54; i++) {
+            super.getRandomTracker().inject(createCustomPeer());
+        }
+
+        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+
+        for (int i = 0; i < preAllocatedPeers.size(); i++) {
+
+            threadPool.execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        if (RandomUtils.nextInt(2) == 0) {
+                            CanTest.this.getRandomPeer().send(
+                                    createFloodingRequest());
+                        } else {
+                            CanTest.this.getRandomTracker()
+                                    .removeRandomPeer()
+                                    .leave();
+                        }
+                    } catch (NetworkNotJoinedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        threadPool.shutdown();
+
+        if (!threadPool.awaitTermination(30, TimeUnit.SECONDS)) {
+            Assert.fail("Concurrent leave and routing requests timeout");
+        }
+    }
+
+    @Test
+    public void testConcurrentJoinLeaveAndRoutingRequests()
+            throws NetworkAlreadyJoinedException, InterruptedException {
+
+        int nbLeaveRequests = 0;
+
+        final RequestType[] requests = new RequestType[54];
+
+        final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
+                new ConcurrentLinkedQueue<Peer>();
+
+        // pre-allocates peers since it is not possible to instantiate them in
+        // parallel and takes advantage of this operation to pre define the
+        // number of join, leave and routing requests to perform
+        for (int i = 0; i < requests.length; i++) {
+            requests[i] = electRandomRequestType();
+
+            if (requests[i] == RequestType.JOIN) {
+                preAllocatedPeers.add(createCustomPeer());
+            }
+
+            if (requests[i] == RequestType.LEAVE) {
+                nbLeaveRequests++;
+            }
+        }
+
+        log.info("Inserting additional peers for leave requests");
+
+        for (int i = 0; i < nbLeaveRequests; i++) {
+            super.getRandomTracker().inject(createCustomPeer());
+        }
+
+        log.info("Performing concurrent join, leave and routing requests");
+
+        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
+        for (int i = 0; i < requests.length; i++) {
+            final int k = i;
+
+            threadPool.execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        switch (requests[k]) {
+                            case JOIN:
+                                preAllocatedPeers.poll().join(
+                                        CanTest.this.getRandomPeer());
+                                break;
+                            case LEAVE:
+                                CanTest.this.getRandomTracker()
+                                        .removeRandomPeer()
+                                        .leave();
+                                break;
+                            case ROUTING:
+                                CanTest.this.getRandomPeer().send(
+                                        createFloodingRequest());
+                                break;
+                        }
+                    } catch (NetworkNotJoinedException e) {
+                        e.printStackTrace();
+                    } catch (NetworkAlreadyJoinedException e) {
+                        e.printStackTrace();
+                    } catch (PeerNotActivatedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        threadPool.shutdown();
+
+        if (!threadPool.awaitTermination(30, TimeUnit.SECONDS)) {
+            Assert.fail("Concurrent join, leave and routing requests timeout");
+        }
     }
 
     @Test
@@ -242,6 +404,33 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
                 }
             }
         }
+    }
+
+    private enum RequestType {
+        JOIN, LEAVE, ROUTING
+    }
+
+    private static OptimalBroadcastRequest<StringElement> createFloodingRequest() {
+        return new OptimalBroadcastRequest<StringElement>(
+                new DefaultAnycastConstraintsValidator<StringElement>(
+                        CoordinateFactory.newStringCoordinate()));
+    }
+
+    private static Peer createCustomPeer() {
+        return PeerFactory.newPeer(new CustomOverlayProvider());
+    }
+
+    private static RequestType electRandomRequestType() {
+        switch (RandomUtils.nextInt(3)) {
+            case 0:
+                return RequestType.JOIN;
+            case 1:
+                return RequestType.LEAVE;
+            case 2:
+                return RequestType.ROUTING;
+        }
+
+        throw new IllegalStateException();
     }
 
     private static class CustomOverlayProvider extends

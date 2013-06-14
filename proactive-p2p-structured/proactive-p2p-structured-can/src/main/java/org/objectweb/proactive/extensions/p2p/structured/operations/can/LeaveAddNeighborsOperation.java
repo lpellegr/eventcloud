@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.util.Collection;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -35,7 +34,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @author lpellegr
  */
 public class LeaveAddNeighborsOperation<E extends Element> extends
-        CallableOperation {
+        LeaveNeighborsManagementOperation {
 
     private static final long serialVersionUID = 150L;
 
@@ -72,22 +71,6 @@ public class LeaveAddNeighborsOperation<E extends Element> extends
         }
 
         return EmptyResponseOperation.getInstance();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithLeave() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatible(CallableOperation other) {
-        return other instanceof JoinIntroduceOperation;
     }
 
 }

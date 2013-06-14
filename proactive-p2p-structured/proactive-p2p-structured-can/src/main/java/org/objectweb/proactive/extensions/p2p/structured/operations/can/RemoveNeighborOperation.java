@@ -19,6 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -36,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @author lpellegr
  */
 public class RemoveNeighborOperation<E extends Element> extends
-        NeighborsManagementOperation {
+        JoinNeighborsManagementOperation {
 
     private static final long serialVersionUID = 150L;
 
@@ -121,7 +122,7 @@ public class RemoveNeighborOperation<E extends Element> extends
      */
     @Override
     @SuppressWarnings("unchecked")
-    public BooleanResponseOperation handle(StructuredOverlay overlay) {
+    public ResponseOperation handle(StructuredOverlay overlay) {
         NeighborTable<E> table = ((CanOverlay<E>) overlay).getNeighborTable();
         boolean result;
 

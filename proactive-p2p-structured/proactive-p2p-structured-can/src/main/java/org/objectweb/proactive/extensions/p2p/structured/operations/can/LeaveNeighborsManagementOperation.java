@@ -17,22 +17,24 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 /**
- * Abstract class defining compatibility for neighbors management operations.
+ * 
  * 
  * @author lpellegr
  */
-public abstract class NeighborsManagementOperation extends CallableOperation {
+public class LeaveNeighborsManagementOperation extends CallableOperation {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean isCompatible(CallableOperation other) {
-        return other instanceof JoinIntroduceOperation;
+    public ResponseOperation handle(StructuredOverlay overlay) {
+        return null;
     }
 
     /**
@@ -41,6 +43,22 @@ public abstract class NeighborsManagementOperation extends CallableOperation {
     @Override
     public boolean isCompatibleWithLeave() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithRouting() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatible(CallableOperation other) {
+        return other instanceof JoinIntroduceOperation;
     }
 
 }

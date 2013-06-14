@@ -397,6 +397,17 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("peers")
+    public Peer removeRandomPeer() {
+        Peer p = this.peers.remove(0);
+        PAGroup.waitAll(this.untypedGroupView.internalRemovePeer(p));
+        return p;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @MemberOf("parallel")
     public OverlayType getType() {
         return this.type;
