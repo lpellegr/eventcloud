@@ -158,11 +158,12 @@ public class EventCloudProperties {
 
     /**
      * Defines the expiration time of an ephemeral subscription (in ms). The
-     * default value is set to 12 minutes.
+     * default value is set to 1 hour.
      */
     public static final PropertyInteger EPHEMERAL_SUBSCRIPTION_EXPIRATION_TIME =
             new PropertyInteger(
-                    "eventcloud.ephemeral.subscription.expiration.time", 720000);
+                    "eventcloud.ephemeral.subscription.expiration.time",
+                    3600000);
 
     /**
      * Defines whether dynamic load balancing is enabled or not. Setting dynamic
