@@ -588,7 +588,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         this.leaveBasedOnSplitHistory();
 
         super.messageManager.clear();
-        super.id = UUID.randomUUID();
+        // super.id = UUID.randomUUID();
     }
 
     private void leaveBasedOnSplitHistory() {
@@ -717,9 +717,9 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
                             dim, dir).values()) {
                         if (dim != neighborDimDir.getFirst()
                                 && dir != neighborDimDir.getSecond()) {
-                            PAFuture.waitFor(entry.getStub().receive(
+                            entry.getStub().receive(
                                     new ReplaceNeighborOperation<E>(
-                                            super.id, entry)));
+                                            super.id, entry));
                         }
                     }
                 }
@@ -847,7 +847,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         if (this.zone == null) {
             return super.id.toString();
         } else {
-            return this.zone.toString();
+            return super.id.toString();
         }
     }
 

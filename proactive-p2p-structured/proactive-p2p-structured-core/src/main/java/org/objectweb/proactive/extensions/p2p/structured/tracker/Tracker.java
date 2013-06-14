@@ -239,6 +239,13 @@ public interface Tracker extends Serializable {
     Peer getRandomPeer();
 
     /**
+     * Removes a peer reference maitained by the tracker at random.
+     * 
+     * @return the peer reference which has been removed.
+     */
+    Peer removeRandomPeer();
+
+    /**
      * Returns the typed group view (the group contains the trackers that have
      * been joined and that belongs to the same network name).
      * 

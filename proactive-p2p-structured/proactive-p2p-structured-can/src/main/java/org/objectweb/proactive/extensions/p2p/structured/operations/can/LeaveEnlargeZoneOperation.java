@@ -19,7 +19,6 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
@@ -39,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @author lpellegr
  */
 public class LeaveEnlargeZoneOperation<E extends Element> extends
-        CallableOperation {
+        LeaveNeighborsManagementOperation {
 
     private static final long serialVersionUID = 150L;
 
@@ -94,12 +93,12 @@ public class LeaveEnlargeZoneOperation<E extends Element> extends
                         .values()) {
                     if (dimension != this.reassignmentDimension
                             || direction != CanOverlay.getOppositeDirection(this.reassignmentDirection)) {
-                        PAFuture.waitFor(entry.getStub().receive(
+                        entry.getStub().receive(
                                 new LeaveUpdateNeighborsOperation<E>(
                                         new NeighborEntry<E>(
                                                 overlay.getId(),
                                                 overlay.getStub(),
-                                                canOverlay.getZone()))));
+                                                canOverlay.getZone())));
                     }
                 }
             }

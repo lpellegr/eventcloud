@@ -103,6 +103,12 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
             log.trace("  replying CASE 2");
         } else if (this.requestingCS && timestamp == this.localTimestamp
                 && requestSource.getId().compareTo(this.overlay.getId()) < 0) {
+            // TODO: Ideally we should use another local information that
+            // guarantees a total order (e.g. the lower zone coordinate for a
+            // CAN network) because the identifier is unique with a high
+            // probability only. Or we could update the identifier of peers to
+            // assign a unique identifier based on the split history but it
+            // implies a refactoring of the peer identifier
             requestSource.receive(this.getGenericReply());
             log.trace("  replying CASE 3");
         } else {

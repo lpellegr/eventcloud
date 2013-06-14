@@ -19,6 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -36,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  * @author lpellegr
  */
 public class ReplaceNeighborOperation<E extends Element> extends
-        NeighborsManagementOperation {
+        JoinNeighborsManagementOperation {
 
     private static final long serialVersionUID = 150L;
 
@@ -52,7 +53,7 @@ public class ReplaceNeighborOperation<E extends Element> extends
 
     @Override
     @SuppressWarnings("unchecked")
-    public EmptyResponseOperation handle(StructuredOverlay overlay) {
+    public ResponseOperation handle(StructuredOverlay overlay) {
         NeighborTable<E> table = ((CanOverlay<E>) overlay).getNeighborTable();
 
         HomogenousPair<Byte> dimAndDir = table.remove(this.peerIdToReplace);
