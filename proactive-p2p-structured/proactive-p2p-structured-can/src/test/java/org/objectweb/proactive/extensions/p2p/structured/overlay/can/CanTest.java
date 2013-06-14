@@ -61,8 +61,8 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     @Test
     public void testConcurrentJoinRequests() throws InterruptedException {
-        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
-        final Peer[] peers = new Peer[54];
+        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
+        final Peer[] peers = new Peer[34];
 
         log.info("Preallocating {} peers", peers.length);
 
@@ -112,7 +112,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
     @Test
     public void testConcurrentLeaveRequests() throws InterruptedException,
             NetworkAlreadyJoinedException, PeerNotActivatedException {
-        final Peer[] extraPeers = new Peer[55];
+        final Peer[] extraPeers = new Peer[35];
 
         log.info("Inserting {} additional peers", extraPeers.length);
 
@@ -122,7 +122,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         log.info("Performing concurrent leaves");
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
 
         for (int i = 0; i < extraPeers.length - 1; i++) {
             threadPool.execute(new Runnable() {
@@ -150,7 +150,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
     public void testConcurrentJoinAndLeaveRequests()
             throws NetworkAlreadyJoinedException, PeerNotActivatedException,
             InterruptedException {
-        final RequestType[] requests = new RequestType[54];
+        final RequestType[] requests = new RequestType[34];
 
         final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
                 new ConcurrentLinkedQueue<Peer>();
@@ -187,7 +187,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         log.info("Performing concurrent join or leave requests");
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
         for (int i = 0; i < requests.length; i++) {
             final int k = i;
 
@@ -232,11 +232,11 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
                 new ConcurrentLinkedQueue<Peer>();
 
-        for (int i = 0; i < 54; i++) {
+        for (int i = 0; i < 34; i++) {
             preAllocatedPeers.add(createCustomPeer());
         }
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
 
         for (int i = 0; i < preAllocatedPeers.size(); i++) {
             threadPool.execute(new Runnable() {
@@ -272,11 +272,11 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
                 new ConcurrentLinkedQueue<Peer>();
 
-        for (int i = 0; i < 54; i++) {
+        for (int i = 0; i < 34; i++) {
             super.getRandomTracker().inject(createCustomPeer());
         }
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
+        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
 
         for (int i = 0; i < preAllocatedPeers.size(); i++) {
 
@@ -313,7 +313,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         int nbLeaveRequests = 0;
 
-        final RequestType[] requests = new RequestType[54];
+        final RequestType[] requests = new RequestType[34];
 
         final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
                 new ConcurrentLinkedQueue<Peer>();
