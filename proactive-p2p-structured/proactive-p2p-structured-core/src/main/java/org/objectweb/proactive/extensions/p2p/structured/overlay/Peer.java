@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOper
  * 
  * @author lpellegr
  */
-public interface Peer extends Serializable {
+public interface Peer extends Comparable<Peer>, Serializable {
 
     /**
      * Returns the unique identifier associated to this peer.

@@ -282,6 +282,14 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    public int compareTo(Peer other) {
+        return this.overlay.id.compareTo(other.getId());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String dump() {
         return this.overlay.dump();
     }
