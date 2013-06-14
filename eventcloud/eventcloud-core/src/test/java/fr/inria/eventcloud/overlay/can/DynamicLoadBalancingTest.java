@@ -64,7 +64,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
     public static DeploymentConfiguration createDeploymentConfiguration() {
         return new TestingDeploymentConfiguration() {
 
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 150L;
 
             @Override
             public void configure() {

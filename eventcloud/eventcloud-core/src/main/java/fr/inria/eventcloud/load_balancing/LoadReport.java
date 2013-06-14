@@ -27,7 +27,7 @@ import fr.inria.eventcloud.load_balancing.criteria.Criterion;
  */
 public class LoadReport implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 150L;
 
     private final String peerURL;
 

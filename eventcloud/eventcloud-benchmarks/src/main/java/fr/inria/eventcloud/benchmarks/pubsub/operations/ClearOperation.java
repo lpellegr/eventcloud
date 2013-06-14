@@ -30,7 +30,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public class ClearOperation extends CallableOperation {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 150L;
 
     /**
      * {@inheritDoc}
