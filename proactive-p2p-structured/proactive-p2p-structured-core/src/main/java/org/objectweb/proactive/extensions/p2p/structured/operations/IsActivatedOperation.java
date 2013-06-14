@@ -41,7 +41,7 @@ public class IsActivatedOperation extends CallableOperation {
      */
     @Override
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        return new BooleanResponseOperation(overlay.isActivated());
+        return BooleanResponseOperation.getInstance(overlay.isActivated());
     }
 
 }

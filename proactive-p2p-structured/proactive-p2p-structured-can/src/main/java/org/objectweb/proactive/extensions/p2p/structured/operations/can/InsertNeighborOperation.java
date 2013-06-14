@@ -16,7 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -102,7 +102,7 @@ public class InsertNeighborOperation<E extends Element> extends
                 this.dimension, this.direction).put(
                 this.entry.getId(), this.entry);
 
-        return new BooleanResponseOperation(true);
+        return EmptyResponseOperation.getInstance();
     }
 
 }

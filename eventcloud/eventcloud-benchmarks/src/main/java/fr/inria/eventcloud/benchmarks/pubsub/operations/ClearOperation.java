@@ -16,8 +16,8 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub.operations;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
@@ -39,7 +39,7 @@ public class ClearOperation extends CallableOperation {
     public ResponseOperation handle(StructuredOverlay overlay) {
         ((SemanticCanOverlay) overlay).clear();
 
-        return new BooleanResponseOperation(true);
+        return EmptyResponseOperation.getInstance();
     }
 
 }

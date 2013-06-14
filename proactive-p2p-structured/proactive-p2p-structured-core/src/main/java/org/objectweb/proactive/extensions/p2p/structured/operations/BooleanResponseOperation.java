@@ -25,13 +25,36 @@ public class BooleanResponseOperation extends GenericResponseOperation<Boolean> 
 
     private static final long serialVersionUID = 150L;
 
+    private static BooleanResponseOperation NEGATIVE_INSTANCE =
+            new BooleanResponseOperation(false);
+
+    private static BooleanResponseOperation POSITIVE_INSTANCE =
+            new BooleanResponseOperation(true);
+
     /**
      * Constructor.
      * 
-     * Indicates if the neighbor has been correctly removed.
+     * @param value
+     *            Indicates whether the operation has been handled properly.
      */
-    public BooleanResponseOperation(boolean value) {
+    private BooleanResponseOperation(boolean value) {
         super(value);
+    }
+
+    public static BooleanResponseOperation getInstance(boolean value) {
+        if (value) {
+            return POSITIVE_INSTANCE;
+        }
+
+        return NEGATIVE_INSTANCE;
+    }
+
+    public static BooleanResponseOperation getNegativeInstance() {
+        return NEGATIVE_INSTANCE;
+    }
+
+    public static BooleanResponseOperation getPositiveInstance() {
+        return POSITIVE_INSTANCE;
     }
 
 }

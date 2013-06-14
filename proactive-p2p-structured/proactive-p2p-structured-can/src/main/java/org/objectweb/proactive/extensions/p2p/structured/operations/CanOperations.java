@@ -59,11 +59,11 @@ public final class CanOperations {
                 neighborID)))).getValue();
     }
 
-    public static <E extends Element> BooleanResponseOperation insertNeighbor(Peer peer,
-                                                                              NeighborEntry<E> entry,
-                                                                              byte dimension,
-                                                                              byte direction) {
-        return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new InsertNeighborOperation<E>(
+    public static <E extends Element> void insertNeighbor(Peer peer,
+                                                          NeighborEntry<E> entry,
+                                                          byte dimension,
+                                                          byte direction) {
+        PAFuture.waitFor(peer.receive(new InsertNeighborOperation<E>(
                 entry, dimension, direction)));
     }
 

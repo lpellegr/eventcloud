@@ -51,8 +51,7 @@ public class HasNeighborOperation<E extends Element> extends CallableOperation {
     @Override
     @SuppressWarnings("unchecked")
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        return new BooleanResponseOperation(
-                ((CanOverlay<E>) overlay).hasNeighbor(this.uuid));
+        return BooleanResponseOperation.getInstance(((CanOverlay<E>) overlay).hasNeighbor(this.uuid));
     }
 
 }
