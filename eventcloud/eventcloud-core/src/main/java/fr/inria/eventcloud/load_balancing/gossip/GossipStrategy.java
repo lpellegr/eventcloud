@@ -27,7 +27,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  * 
  * @author lpellegr
  * 
- * @param T
+ * @param <T>
  *            the type of the rumor to propagate to neighbors.
  */
 public interface GossipStrategy<T> {

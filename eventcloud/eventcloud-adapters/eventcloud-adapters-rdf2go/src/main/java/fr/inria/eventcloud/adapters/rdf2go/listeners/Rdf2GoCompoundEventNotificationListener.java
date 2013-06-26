@@ -16,8 +16,8 @@
  **/
 package fr.inria.eventcloud.adapters.rdf2go.listeners;
 
-import org.ontoware.rdf2go.impl.jena29.ModelFactoryImpl;
-import org.ontoware.rdf2go.impl.jena29.TypeConversion;
+import org.ontoware.rdf2go.impl.jena.ModelFactoryImpl;
+import org.ontoware.rdf2go.impl.jena.TypeConversion;
 import org.ontoware.rdf2go.model.Model;
 
 import fr.inria.eventcloud.api.CompoundEvent;

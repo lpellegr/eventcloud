@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.ontoware.aifbcommons.collection.ClosableIterable;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
-import org.ontoware.rdf2go.impl.jena29.TypeConversion;
+import org.ontoware.rdf2go.impl.jena.TypeConversion;
 import org.ontoware.rdf2go.model.QuadPattern;
 import org.ontoware.rdf2go.model.QueryResultTable;
 import org.ontoware.rdf2go.model.QueryRow;
