@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>com.ebmwebsourcing.easyesb</groupId>
 			<artifactId>ws-binding-rawreport</artifactId>
-			<version>v2012-12-05</version>
+			<version>v2013-03-11</version>
 		</dependency>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
