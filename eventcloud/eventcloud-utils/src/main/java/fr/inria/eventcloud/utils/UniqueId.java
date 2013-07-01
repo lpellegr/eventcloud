@@ -72,13 +72,13 @@ public class UniqueId implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
         }
 
-        return obj instanceof UniqueId
-                && this.value.equals(((UniqueId) obj).value);
+        return other instanceof UniqueId
+                && this.value.equals(((UniqueId) other).value);
     }
 
     /**
