@@ -25,7 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
  * 
  * @author lpellegr
  */
-public class MessageId implements Serializable {
+public final class MessageId implements Serializable {
 
     private static final long serialVersionUID = 150L;
 
@@ -56,7 +56,7 @@ public class MessageId implements Serializable {
         if (this == obj) {
             return true;
         }
-        
+
         if (obj instanceof MessageId) {
             MessageId other = (MessageId) obj;
 
