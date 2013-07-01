@@ -18,8 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-
 /**
  * {@link ResponseEntry} is used for storing some information (e.g. the number
  * of replies expected, the number of replies received, etc.) about a request

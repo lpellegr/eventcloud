@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;

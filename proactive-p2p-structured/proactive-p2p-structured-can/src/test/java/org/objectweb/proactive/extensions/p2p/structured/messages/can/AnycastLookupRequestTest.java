@@ -27,9 +27,9 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;

@@ -16,12 +16,11 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import java.util.UUID;
-
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
+import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -47,7 +46,7 @@ public class EfficientBroadcastRequest<E extends Element> extends
     private boolean alreadyReceived = false;
 
     // The identifier of the broadcast request.
-    private UUID originalMessageId;
+    private MessageId originalMessageId;
     private AnycastRoutingList broadcastRoutingList = new AnycastRoutingList();
     // The directions on which the broadcast request has to be propagated by the
     // peer receiving it.
@@ -83,7 +82,7 @@ public class EfficientBroadcastRequest<E extends Element> extends
     public EfficientBroadcastRequest(
             AnycastConstraintsValidator<E> validator,
             ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
-            UUID messageId, byte[][] directions, Element[] splitPlans) {
+            MessageId messageId, byte[][] directions, Element[] splitPlans) {
         super(validator, provider);
         // if messageId==null then this is the request received by the
         // initiator.
@@ -160,11 +159,11 @@ public class EfficientBroadcastRequest<E extends Element> extends
         this.directions = directions;
     }
 
-    public UUID getOriginalMessageId() {
+    public MessageId getOriginalMessageId() {
         return this.originalMessageId;
     }
 
-    public void setOriginalMessageId(UUID originalMessageId) {
+    public void setOriginalMessageId(MessageId originalMessageId) {
         this.originalMessageId = originalMessageId;
     }
 

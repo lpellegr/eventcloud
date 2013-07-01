@@ -18,7 +18,6 @@ package fr.inria.eventcloud.benchmarks.pubsub;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
@@ -37,6 +36,7 @@ import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.core.util.MutableInteger;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 
@@ -90,7 +90,7 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
     private Map<SubscriptionId, CumulatedMeasurement> pointToPointExitMeasurements;
 
-    private ConcurrentMap<UUID, AtomicInteger> nbQuadrupleStoredPerPeer;
+    private ConcurrentMap<OverlayId, AtomicInteger> nbQuadrupleStoredPerPeer;
 
     public BenchmarkStatsCollector() {
         this.nbPublishers = 0;
@@ -146,7 +146,7 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
                 new HashMap<SubscriptionId, CumulatedMeasurement>();
 
         this.nbQuadrupleStoredPerPeer =
-                new ConcurrentHashMap<UUID, AtomicInteger>();
+                new ConcurrentHashMap<OverlayId, AtomicInteger>();
 
         this.nbReportsReceivedByPublishers = new MutableInteger();
         this.nbReportsReceivedBySubscribers = new MutableInteger();
@@ -217,7 +217,7 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
     }
 
     @MemberOf("notify")
-    public boolean reportNbQuadrupleStored(UUID peerId, int nbQuadruples) {
+    public boolean reportNbQuadrupleStored(OverlayId peerId, int nbQuadruples) {
         AtomicInteger previousValue =
                 this.nbQuadrupleStoredPerPeer.putIfAbsent(
                         peerId, new AtomicInteger(nbQuadruples));

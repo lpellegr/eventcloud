@@ -18,12 +18,14 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
+import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.MutualExclusionManager;
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.RicartAgrawalaManager;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -39,7 +41,9 @@ import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
  */
 public abstract class StructuredOverlay implements DataHandler {
 
-    protected UUID id;
+    protected OverlayId id;
+
+    protected AtomicLong sequencer;
 
     protected RequestResponseManager messageManager;
 
@@ -67,8 +71,9 @@ public abstract class StructuredOverlay implements DataHandler {
 
     protected StructuredOverlay() {
         this.activated = false;
-        this.id = UUID.randomUUID();
+        this.id = new OverlayId();
         this.mutualExclusionManager = new RicartAgrawalaManager(this);
+        this.sequencer = new AtomicLong();
     }
 
     protected StructuredOverlay(RequestResponseManager messageManager) {
@@ -129,7 +134,7 @@ public abstract class StructuredOverlay implements DataHandler {
      * 
      * @return the unique identifier associated to the overlay.
      */
-    public UUID getId() {
+    public OverlayId getId() {
         return this.id;
     }
 
@@ -140,6 +145,14 @@ public abstract class StructuredOverlay implements DataHandler {
      */
     public MutualExclusionManager getMutualExclusionManager() {
         return this.mutualExclusionManager;
+    }
+
+    private long getNextSequenceNumber() {
+        return this.sequencer.getAndIncrement();
+    }
+
+    public MessageId newMessageId() {
+        return new MessageId(this.id, this.getNextSequenceNumber());
     }
 
     public SerializableProvider<? extends StructuredOverlay> getOverlayProvider() {
@@ -174,11 +187,11 @@ public abstract class StructuredOverlay implements DataHandler {
      * @return the {@link ResponseEntry} associated to the given
      *         {@code responseId} or {@code null} if no entry was found.
      */
-    public ResponseEntry getResponseEntry(UUID responseId) {
+    public ResponseEntry getResponseEntry(MessageId responseId) {
         return this.messageManager.getResponsesReceived().get(responseId);
     }
 
-    public Map<UUID, ResponseEntry> getResponseEntries() {
+    public Map<MessageId, ResponseEntry> getResponseEntries() {
         return this.messageManager.getResponsesReceived();
     }
 

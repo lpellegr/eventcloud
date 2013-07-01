@@ -20,8 +20,8 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;

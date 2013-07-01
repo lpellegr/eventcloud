@@ -16,13 +16,12 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.util.UUID;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -41,8 +40,8 @@ public class RemoveNeighborOperationTest extends JunitByClassCanNetworkDeployer 
         Peer firstPeer = super.getPeer(0);
         Peer secondPeer = super.getPeer(1);
 
-        UUID firstPeerID = firstPeer.getId();
-        UUID secondPeerID = secondPeer.getId();
+        OverlayId firstPeerID = firstPeer.getId();
+        OverlayId secondPeerID = secondPeer.getId();
 
         Assert.assertTrue(CanOperations.hasNeighbor(firstPeer, secondPeerID));
         Assert.assertTrue(CanOperations.hasNeighbor(secondPeer, firstPeerID));

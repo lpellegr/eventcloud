@@ -20,9 +20,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
@@ -60,7 +60,7 @@ public class NeighborTableWrapper<E extends Element> implements Serializable {
     }
 
     public void addAll(byte dimension, byte direction,
-                       Map<UUID, NeighborEntry<E>> peers) {
+                       Map<OverlayId, NeighborEntry<E>> peers) {
         for (NeighborEntry<E> neighEntry : peers.values()) {
             this.add(dimension, direction, new NeighborEntryWrapper<E>(
                     neighEntry, dimension, direction));
@@ -82,7 +82,7 @@ public class NeighborTableWrapper<E extends Element> implements Serializable {
         return this.entries[dimension][direction].get(index);
     }
 
-    public NeighborEntryWrapper<E> getPeerInformation(UUID peerIdentifier) {
+    public NeighborEntryWrapper<E> getPeerInformation(OverlayId peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 for (int position = 0; position < this.entries[dim][direction].size(); position++) {
@@ -95,7 +95,7 @@ public class NeighborTableWrapper<E extends Element> implements Serializable {
         return null;
     }
 
-    public boolean remove(UUID peerIdentifier) {
+    public boolean remove(OverlayId peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 NeighborEntryWrapper<E> peer =
@@ -108,7 +108,8 @@ public class NeighborTableWrapper<E extends Element> implements Serializable {
         return false;
     }
 
-    public boolean remove(UUID peerIdentifier, byte dimension, byte direction) {
+    public boolean remove(OverlayId peerIdentifier, byte dimension,
+                          byte direction) {
         return this.entries[dimension][direction].remove(peerIdentifier) == true;
     }
 

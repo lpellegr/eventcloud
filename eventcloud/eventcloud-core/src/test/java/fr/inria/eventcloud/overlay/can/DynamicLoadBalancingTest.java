@@ -22,13 +22,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -89,15 +89,16 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
                         (GetLoadInformationResponse) PAFuture.getFutureValue(super.getRandomSemanticPeer()
                                 .send(new GetLoadInformationRequest()));
 
-                Map<UUID, LoadInformation> map = loadInformation.getResult();
+                Map<OverlayId, LoadInformation> map =
+                        loadInformation.getResult();
 
                 StringBuilder buf = new StringBuilder();
 
-                Iterator<Entry<UUID, LoadInformation>> iter =
+                Iterator<Entry<OverlayId, LoadInformation>> iter =
                         map.entrySet().iterator();
 
                 while (iter.hasNext()) {
-                    Entry<UUID, LoadInformation> entry = iter.next();
+                    Entry<OverlayId, LoadInformation> entry = iter.next();
 
                     buf.append(entry.getKey());
                     buf.append(" => ");
@@ -121,7 +122,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
     }
 
     private static class GetLoadInformationRequest extends
-            StatefulQuadruplePatternRequest<Map<UUID, LoadInformation>> {
+            StatefulQuadruplePatternRequest<Map<OverlayId, LoadInformation>> {
 
         private static final long serialVersionUID = 150L;
 
@@ -142,13 +143,13 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
          * {@inheritDoc}
          */
         @Override
-        public Map<UUID, LoadInformation> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                                         AnycastRequest<SemanticElement> request,
-                                                                         QuadruplePattern quadruplePattern) {
+        public Map<OverlayId, LoadInformation> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
+                                                                              AnycastRequest<SemanticElement> request,
+                                                                              QuadruplePattern quadruplePattern) {
             SemanticCanOverlay customOverlay = (SemanticCanOverlay) overlay;
 
-            Map<UUID, LoadInformation> result =
-                    new HashMap<UUID, LoadInformation>();
+            Map<OverlayId, LoadInformation> result =
+                    new HashMap<OverlayId, LoadInformation>();
             result.put(overlay.getId(), new LoadInformation(
                     customOverlay.getLoadBalancingManager().getLocalLoad(),
                     customOverlay.getLoadBalancingManager().getSystemLoad()));
@@ -159,7 +160,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
     }
 
     private static class GetLoadInformationResponse extends
-            StatefulQuadruplePatternResponse<Map<UUID, LoadInformation>> {
+            StatefulQuadruplePatternResponse<Map<OverlayId, LoadInformation>> {
 
         private static final long serialVersionUID = 150L;
 
@@ -171,11 +172,11 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
          * {@inheritDoc}
          */
         @Override
-        public synchronized Map<UUID, LoadInformation> merge(List<SerializedValue<Map<UUID, LoadInformation>>> intermediateResults) {
-            Map<UUID, LoadInformation> result = null;
+        public synchronized Map<OverlayId, LoadInformation> merge(List<SerializedValue<Map<OverlayId, LoadInformation>>> intermediateResults) {
+            Map<OverlayId, LoadInformation> result = null;
 
-            for (SerializedValue<Map<UUID, LoadInformation>> subResult : intermediateResults) {
-                Map<UUID, LoadInformation> i = subResult.getValue();
+            for (SerializedValue<Map<OverlayId, LoadInformation>> subResult : intermediateResults) {
+                Map<OverlayId, LoadInformation> i = subResult.getValue();
 
                 if (result == null) {
                     result = subResult.getValue();

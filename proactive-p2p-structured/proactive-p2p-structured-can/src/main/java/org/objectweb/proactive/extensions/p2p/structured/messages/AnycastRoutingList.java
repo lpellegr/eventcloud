@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -38,14 +39,14 @@ public class AnycastRoutingList extends LinkedList<AnycastRoutingEntry> {
      * Search the specified {@link UUID} which is associated to a {@link Peer}
      * identifier in the current list composed of {@link AnycastRoutingEntry}.
      * 
-     * @param peerID
+     * @param peerId
      *            the {@link UUID} to look for.
      * @return the {@link AnycastRoutingEntry} found or <code>null</code> if not
      *         found.
      */
-    public AnycastRoutingEntry getRoutingResponseEntryBy(UUID peerID) {
+    public AnycastRoutingEntry getRoutingResponseEntryBy(OverlayId peerId) {
         for (AnycastRoutingEntry entry : this) {
-            if (entry.getPeerId().equals(peerID)) {
+            if (entry.getPeerId().equals(peerId)) {
                 return entry;
             }
         }

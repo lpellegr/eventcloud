@@ -78,6 +78,11 @@ public class Quadruple implements Externalizable, Event {
     protected transient String publicationSource;
 
     /**
+     * Cached nodes hashCode (field is immutable)
+     */
+    private transient int nodesHashCode;
+
+    /**
      * Defines the different formats that are allowed to read quadruples or to
      * write quadruples from and/or to an input stream.
      */
@@ -282,9 +287,11 @@ public class Quadruple implements Externalizable, Event {
      */
     @Override
     public int hashCode() {
-        int hash = 1;
+        if (this.nodesHashCode == 0) {
+            this.nodesHashCode = 31 + Arrays.hashCode(this.nodes);
+        }
 
-        hash = hash * 31 + Arrays.hashCode(this.nodes);
+        int hash = this.nodesHashCode;
         hash = hash * 31 + Longs.hashCode(this.publicationTime);
         if (this.publicationSource != null) {
             hash = hash * 31 + this.publicationSource.hashCode();
@@ -298,6 +305,10 @@ public class Quadruple implements Externalizable, Event {
      */
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
         if (obj instanceof Quadruple) {
             Quadruple other = (Quadruple) obj;
 

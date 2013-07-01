@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.overlay;
+package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -22,9 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +39,13 @@ public abstract class RequestResponseManager implements Serializable {
     private static final Logger log =
             LoggerFactory.getLogger(RequestResponseManager.class);
 
-    private Map<UUID, ResponseEntry> repliesReceived;
+    private Map<MessageId, ResponseEntry> repliesReceived;
 
     protected StructuredOverlay overlay;
 
     protected RequestResponseManager() {
         this.repliesReceived =
-                new ConcurrentHashMap<UUID, ResponseEntry>(
+                new ConcurrentHashMap<MessageId, ResponseEntry>(
                         16, 0.75f,
                         P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
     }
@@ -66,6 +64,7 @@ public abstract class RequestResponseManager implements Serializable {
      */
     public Response<?> dispatch(Request<?> request, StructuredOverlay overlay) {
 
+        this.setMessageId(request);
         this.dispatchv(request, overlay);
 
         return this.pullResponse(request.getId());
@@ -87,7 +86,14 @@ public abstract class RequestResponseManager implements Serializable {
                     + " with id " + request.getId() + " from " + overlay);
         }
 
+        this.setMessageId(request);
         request.route(overlay);
+    }
+
+    private void setMessageId(Request<?> request) {
+        if (request.id == null) {
+            request.id = this.overlay.newMessageId();
+        }
     }
 
     /**
@@ -100,7 +106,7 @@ public abstract class RequestResponseManager implements Serializable {
      * 
      * @return the response for the specified requestId.
      */
-    protected Response<?> pullResponse(UUID requestId) {
+    protected Response<?> pullResponse(MessageId requestId) {
         this.overlay.incrementExtraActiveRequestCount(this.getResponsesReceived()
                 .get(requestId)
                 .getExpectedResponsesCount());
@@ -125,7 +131,7 @@ public abstract class RequestResponseManager implements Serializable {
      * @param requestId
      *            indicates for which request we are waiting a response.
      */
-    private void waitForFinalResponse(UUID requestId) {
+    private void waitForFinalResponse(MessageId requestId) {
         log.debug(
                 "Waiting for {} response(s) with id {}",
                 this.repliesReceived.get(requestId).getExpectedResponsesCount(),
@@ -166,8 +172,12 @@ public abstract class RequestResponseManager implements Serializable {
         }
     }
 
-    public Map<UUID, ResponseEntry> getResponsesReceived() {
+    public Map<MessageId, ResponseEntry> getResponsesReceived() {
         return this.repliesReceived;
+    }
+
+    public void setOverlay(StructuredOverlay overlay) {
+        this.overlay = overlay;
     }
 
     public void close() {

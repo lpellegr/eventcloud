@@ -17,11 +17,11 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -38,7 +38,7 @@ public class NeighborEntry<E extends Element> implements Serializable {
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID neighborIdentifier;
+    private final OverlayId neighborIdentifier;
 
     private final Peer neighborStub;
 
@@ -55,13 +55,14 @@ public class NeighborEntry<E extends Element> implements Serializable {
         this.neighborZone = response.getPeerZone();
     }
 
-    public NeighborEntry(UUID peerIdentifier, Peer peerStub, Zone<E> peerZone) {
+    public NeighborEntry(OverlayId peerIdentifier, Peer peerStub,
+            Zone<E> peerZone) {
         this.neighborIdentifier = peerIdentifier;
         this.neighborStub = peerStub;
         this.neighborZone = peerZone;
     }
 
-    public UUID getId() {
+    public OverlayId getId() {
         return this.neighborIdentifier;
     }
 

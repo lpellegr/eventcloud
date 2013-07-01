@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.messages.response;
+package org.objectweb.proactive.extensions.p2p.structured.messages;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 

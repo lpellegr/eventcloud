@@ -23,8 +23,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.core.ProActiveRuntimeException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;

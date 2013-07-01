@@ -16,7 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.response.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;

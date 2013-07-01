@@ -308,11 +308,9 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                         if (dimension == 0) {
                             for (byte coordinate = 1; coordinate < dimensions; coordinate++) {
                                 // MCAN Strategy : If the dimension considered
-                                // is
-                                // the lowest, then check the corner constraint
-                                // to determine whether the message must be sent
-                                // to
-                                // this neighbor.
+                                // is the lowest, then check the corner
+                                // constraint to determine whether the message
+                                // must be sent to this neighbor.
                                 if (coordinate > dimension) {
                                     if (!this.contains(
                                             overlay.getZone(),

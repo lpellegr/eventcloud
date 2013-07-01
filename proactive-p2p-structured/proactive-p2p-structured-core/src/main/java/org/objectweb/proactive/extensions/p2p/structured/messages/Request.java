@@ -14,13 +14,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.messages.request;
+package org.objectweb.proactive.extensions.p2p.structured.messages;
 
-import java.util.UUID;
-
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
@@ -68,8 +63,7 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
      */
     public Request(ConstraintsValidator<K> validator,
             ResponseProvider<? extends Response<K>, K> responseProvider) {
-        this(UUID.randomUUID(), validator, responseProvider,
-                System.currentTimeMillis());
+        this(validator, responseProvider, System.currentTimeMillis());
     }
 
     /**
@@ -77,8 +71,8 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
      * {@code validator}, {@code responseProvider} and {@code dispatchTimestamp}
      * .
      * 
-     * @param uuid
-     *            the universally unique identifier associated to the query.
+     * @param requestId
+     *            request identifier.
      * @param validator
      *            the constraints validator used for routing decisions.
      * @param responseProvider
@@ -86,10 +80,10 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
      * @param dispatchTimestamp
      *            the dispatch timestamp of the query.
      */
-    private Request(UUID uuid, ConstraintsValidator<K> validator,
+    private Request(ConstraintsValidator<K> validator,
             ResponseProvider<? extends Response<K>, K> responseProvider,
             long dispatchTimestamp) {
-        super(uuid, validator);
+        super(validator);
 
         this.dispatchTimestamp = dispatchTimestamp;
         this.responseProvider = responseProvider;
