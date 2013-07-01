@@ -18,8 +18,8 @@ package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
 import java.io.Closeable;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**

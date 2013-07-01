@@ -35,6 +35,16 @@ public class UniqueId implements Serializable {
     protected final UUID value;
 
     /**
+     * Cached hashCode value (class is immutable)
+     */
+    private transient int hashCode;
+
+    /**
+     * Cached toString value (class is immutable)
+     */
+    private transient String toString;
+
+    /**
      * Creates a unique identifier.
      */
     public UniqueId() {
@@ -63,6 +73,10 @@ public class UniqueId implements Serializable {
      */
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
         return obj instanceof UniqueId
                 && this.value.equals(((UniqueId) obj).value);
     }
@@ -72,7 +86,11 @@ public class UniqueId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return this.value.hashCode();
+        if (this.hashCode == 0) {
+            this.hashCode = this.value.hashCode();
+        }
+
+        return this.hashCode;
     }
 
     /**
@@ -80,7 +98,11 @@ public class UniqueId implements Serializable {
      */
     @Override
     public String toString() {
-        return encode(this.value);
+        if (this.toString == null) {
+            this.toString = encode(this.value);
+        }
+
+        return this.toString;
     }
 
     public static String encode(UUID uuid) {
@@ -96,6 +118,10 @@ public class UniqueId implements Serializable {
                 ByteBuffer.wrap(DatatypeConverter.parseHexBinary(uuid));
 
         return new UUID(buffer.getLong(), buffer.getLong());
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new UniqueId());
     }
 
 }

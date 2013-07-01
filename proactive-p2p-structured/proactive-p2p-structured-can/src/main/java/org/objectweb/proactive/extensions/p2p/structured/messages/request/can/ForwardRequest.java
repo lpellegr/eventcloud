@@ -16,9 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;

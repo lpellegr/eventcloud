@@ -17,14 +17,13 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
@@ -43,7 +42,7 @@ public interface Peer extends Comparable<Peer>, Serializable {
      * 
      * @return the unique identifier associated to this peer.
      */
-    UUID getId();
+    OverlayId getId();
 
     /**
      * Returns the overlay type for the current peer.

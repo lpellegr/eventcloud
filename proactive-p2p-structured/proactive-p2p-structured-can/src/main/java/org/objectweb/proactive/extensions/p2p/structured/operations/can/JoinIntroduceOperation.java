@@ -16,10 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.util.UUID;
-
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -43,17 +42,17 @@ public class JoinIntroduceOperation<E extends Element> extends
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID peerID;
+    private final OverlayId peerID;
 
     private final Peer remotePeer;
 
-    public JoinIntroduceOperation(UUID peerID, Peer remotePeer) {
+    public JoinIntroduceOperation(OverlayId peerID, Peer remotePeer) {
         super();
         this.peerID = peerID;
         this.remotePeer = remotePeer;
     }
 
-    public UUID getPeerID() {
+    public OverlayId getPeerID() {
         return this.peerID;
     }
 

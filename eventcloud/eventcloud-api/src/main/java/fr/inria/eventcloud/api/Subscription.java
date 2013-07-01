@@ -87,6 +87,10 @@ public final class Subscription implements Serializable {
      */
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
         return (obj instanceof Subscription)
                 && this.id.equals(((Subscription) obj).id);
     }

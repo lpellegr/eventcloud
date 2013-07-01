@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
@@ -43,9 +43,9 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveOpe
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveUpdateNeighborsOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.ReplaceNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -598,7 +598,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         byte reassignmentDimension = 0;
         byte reassignmentDirection = 0;
 
-        ConcurrentMap<UUID, NeighborEntry<E>> reassignmentNeighbors = null;
+        ConcurrentMap<OverlayId, NeighborEntry<E>> reassignmentNeighbors = null;
         E element = null;
 
         ListIterator<SplitEntry> it =
@@ -897,13 +897,13 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      * Indicates if the data structure contains the specified {@link Peer}
      * identifier as neighbor.
      * 
-     * @param peerID
+     * @param overlayId
      *            the peer identifier to look for.
      * @return {@code true} if the {@link NeighborTable} contains the peer
      *         identifier as neighbor, {@code false} otherwise.
      */
-    public boolean hasNeighbor(UUID peerID) {
-        return this.neighborTable.contains(peerID);
+    public boolean hasNeighbor(OverlayId overlayId) {
+        return this.neighborTable.contains(overlayId);
     }
 
     /**

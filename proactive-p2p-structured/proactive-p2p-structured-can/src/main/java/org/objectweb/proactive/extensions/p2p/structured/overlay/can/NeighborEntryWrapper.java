@@ -17,9 +17,9 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
@@ -106,7 +106,7 @@ public class NeighborEntryWrapper<E extends Element> implements Serializable {
         this.neighborEntry = neighborEntry;
     }
 
-    public UUID getId() {
+    public OverlayId getId() {
         return this.neighborEntry.getId();
     }
 

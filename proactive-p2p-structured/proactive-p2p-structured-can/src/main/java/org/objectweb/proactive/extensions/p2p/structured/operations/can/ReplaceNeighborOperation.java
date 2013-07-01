@@ -16,10 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.util.UUID;
-
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -41,11 +40,12 @@ public class ReplaceNeighborOperation<E extends Element> extends
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID peerIdToReplace;
+    private final OverlayId peerIdToReplace;
 
     private final NeighborEntry<E> entry;
 
-    public ReplaceNeighborOperation(UUID peerIdToReplace, NeighborEntry<E> entry) {
+    public ReplaceNeighborOperation(OverlayId peerIdToReplace,
+            NeighborEntry<E> entry) {
         super();
         this.peerIdToReplace = peerIdToReplace;
         this.entry = entry;

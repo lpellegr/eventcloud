@@ -16,9 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.util.UUID;
-
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
@@ -35,16 +34,17 @@ public class GetIdAndZoneResponseOperation<E extends Element> implements
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID peerIdentifier;
+    private final OverlayId peerIdentifier;
 
     private final Zone<E> peerZone;
 
-    public GetIdAndZoneResponseOperation(UUID peerIdentifier, Zone<E> peerZone) {
+    public GetIdAndZoneResponseOperation(OverlayId peerIdentifier,
+            Zone<E> peerZone) {
         this.peerIdentifier = peerIdentifier;
         this.peerZone = peerZone;
     }
 
-    public UUID getPeerIdentifier() {
+    public OverlayId getPeerIdentifier() {
         return this.peerIdentifier;
     }
 

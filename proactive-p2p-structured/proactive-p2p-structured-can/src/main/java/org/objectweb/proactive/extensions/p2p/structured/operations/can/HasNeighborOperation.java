@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -39,10 +40,10 @@ public class HasNeighborOperation<E extends Element> extends CallableOperation {
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID uuid;
+    private final OverlayId overlayId;
 
-    public HasNeighborOperation(UUID uuid) {
-        this.uuid = uuid;
+    public HasNeighborOperation(OverlayId overlayId) {
+        this.overlayId = overlayId;
     }
 
     /**
@@ -51,7 +52,7 @@ public class HasNeighborOperation<E extends Element> extends CallableOperation {
     @Override
     @SuppressWarnings("unchecked")
     public BooleanResponseOperation handle(StructuredOverlay overlay) {
-        return BooleanResponseOperation.getInstance(((CanOverlay<E>) overlay).hasNeighbor(this.uuid));
+        return BooleanResponseOperation.getInstance(((CanOverlay<E>) overlay).hasNeighbor(this.overlayId));
     }
 
 }

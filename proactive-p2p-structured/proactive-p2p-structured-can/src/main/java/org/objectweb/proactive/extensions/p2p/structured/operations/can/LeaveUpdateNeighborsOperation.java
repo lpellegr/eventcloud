@@ -17,9 +17,9 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.util.Map;
-import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -41,22 +41,23 @@ public class LeaveUpdateNeighborsOperation<E extends Element> extends
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID peerIdToRemove;
+    private final OverlayId peerIdToRemove;
 
-    private final Map<UUID, NeighborEntry<E>> entries;
+    private final Map<OverlayId, NeighborEntry<E>> entries;
 
     public LeaveUpdateNeighborsOperation(NeighborEntry<E> entry) {
         this.entries = ImmutableMap.of(entry.getId(), entry);
         this.peerIdToRemove = null;
     }
 
-    public LeaveUpdateNeighborsOperation(Map<UUID, NeighborEntry<E>> entries) {
+    public LeaveUpdateNeighborsOperation(
+            Map<OverlayId, NeighborEntry<E>> entries) {
         this.peerIdToRemove = null;
         this.entries = entries;
     }
 
-    public LeaveUpdateNeighborsOperation(UUID peerIdToRemove,
-            Map<UUID, NeighborEntry<E>> entries) {
+    public LeaveUpdateNeighborsOperation(OverlayId peerIdToRemove,
+            Map<OverlayId, NeighborEntry<E>> entries) {
         this.peerIdToRemove = peerIdToRemove;
         this.entries = entries;
     }

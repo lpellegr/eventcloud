@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;

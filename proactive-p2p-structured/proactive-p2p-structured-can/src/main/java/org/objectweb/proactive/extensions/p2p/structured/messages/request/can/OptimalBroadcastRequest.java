@@ -16,10 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import java.util.UUID;
-
+import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -42,7 +41,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
     private static final long serialVersionUID = 150L;
 
     // The identifier of the broadcast request.
-    private UUID originalMessageId;
+    private MessageId originalMessageId;
 
     // Aims to know if the request must be forwarded again
     private boolean constraintReached;
@@ -85,7 +84,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
     public OptimalBroadcastRequest(
             AnycastConstraintsValidator<E> validator,
             ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
-            UUID messageId, byte[][] directions, Element[] splitPlans) {
+            MessageId messageId, byte[][] directions, Element[] splitPlans) {
         super(validator, provider);
         // if messageId==null then this is the request
         // received by the initiator.
@@ -155,11 +154,11 @@ public class OptimalBroadcastRequest<E extends Element> extends
         this.splitPlans[index] = splitPlan;
     }
 
-    public UUID getOriginalMessageId() {
+    public MessageId getOriginalMessageId() {
         return this.originalMessageId;
     }
 
-    public void setOriginalMessageId(UUID originalMessageId) {
+    public void setOriginalMessageId(MessageId originalMessageId) {
         this.originalMessageId = originalMessageId;
     }
 

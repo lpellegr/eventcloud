@@ -22,7 +22,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
+import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
 
 /**
  * A request manager specific to CAN peers in order to maintain some information
@@ -38,17 +39,17 @@ public class CanRequestResponseManager extends RequestResponseManager {
      * Used to maintain the list of requests which have already been 
      * received when anycast requests are executed.
      */
-    private Set<UUID> requestsAlreadyReceived;
+    private Set<MessageId> requestsAlreadyReceived;
 
     public CanRequestResponseManager() {
         super();
         this.requestsAlreadyReceived =
-                Collections.newSetFromMap(new ConcurrentHashMap<UUID, Boolean>(
+                Collections.newSetFromMap(new ConcurrentHashMap<MessageId, Boolean>(
                         16, 0.75f,
                         P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue()));
     }
 
-    public void markRequestAsReceived(UUID requestId) {
+    public void markRequestAsReceived(MessageId requestId) {
         this.requestsAlreadyReceived.add(requestId);
     }
 
@@ -77,7 +78,7 @@ public class CanRequestResponseManager extends RequestResponseManager {
      * @return {@code false} if the current peer has already received the
      *         request, {@code true} otherwise.
      */
-    public boolean receiveRequest(UUID requestId) {
+    public boolean receiveRequest(MessageId requestId) {
         return this.requestsAlreadyReceived.add(requestId);
     }
 

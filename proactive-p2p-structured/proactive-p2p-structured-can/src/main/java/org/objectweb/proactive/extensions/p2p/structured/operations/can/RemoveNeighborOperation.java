@@ -16,10 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.util.UUID;
-
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -44,7 +43,7 @@ public class RemoveNeighborOperation<E extends Element> extends
     /**
      * The identifier pointing to the neighbor to remove.
      */
-    private final UUID peerIdentifier;
+    private final OverlayId peerIdentifier;
 
     /**
      * The dimension in which the neighbor to remove is.
@@ -69,7 +68,7 @@ public class RemoveNeighborOperation<E extends Element> extends
      * @param direction
      *            the direction in which the neighbor to remove is.
      */
-    public RemoveNeighborOperation(UUID peerIdentifier, byte dimension,
+    public RemoveNeighborOperation(OverlayId peerIdentifier, byte dimension,
             byte direction) {
         this.peerIdentifier = peerIdentifier;
         this.dimension = dimension;
@@ -84,7 +83,7 @@ public class RemoveNeighborOperation<E extends Element> extends
      * @param peerIdentifier
      *            the identifier pointing to the neighbor to remove.
      */
-    public RemoveNeighborOperation(UUID peerIdentifier) {
+    public RemoveNeighborOperation(OverlayId peerIdentifier) {
         this.peerIdentifier = peerIdentifier;
         this.dimension = -1;
         this.direction = -1;
@@ -95,7 +94,7 @@ public class RemoveNeighborOperation<E extends Element> extends
      * 
      * @return the identifier pointing to the neighbor to remove.
      */
-    public UUID getPeerIdentifier() {
+    public OverlayId getPeerIdentifier() {
         return this.peerIdentifier;
     }
 

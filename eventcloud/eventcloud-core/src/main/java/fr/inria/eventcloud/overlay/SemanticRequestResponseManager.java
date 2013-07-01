@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,6 +28,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ObjectToByteConverter;
@@ -64,7 +64,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
 
     private SparqlColander colander;
 
-    private final ConcurrentHashMap<UUID, Future<? extends Object>> pendingResults;
+    private final ConcurrentHashMap<MessageId, Future<? extends Object>> pendingResults;
 
     // this thread pool is used to execute an atomic query on the underlying
     // semantic datastore while the request continue to be forwarded to
@@ -79,7 +79,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
         this.colander = new SparqlColander(colanderDatastore);
 
         this.pendingResults =
-                new ConcurrentHashMap<UUID, Future<? extends Object>>(
+                new ConcurrentHashMap<MessageId, Future<? extends Object>>(
                         16, 0.75f,
                         P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
 
@@ -266,7 +266,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
         return replies;
     }
 
-    public ConcurrentHashMap<UUID, Future<? extends Object>> getPendingResults() {
+    public ConcurrentHashMap<MessageId, Future<? extends Object>> getPendingResults() {
         return this.pendingResults;
     }
 

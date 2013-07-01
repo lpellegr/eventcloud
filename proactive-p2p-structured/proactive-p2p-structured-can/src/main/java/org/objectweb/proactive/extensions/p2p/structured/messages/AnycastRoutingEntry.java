@@ -17,9 +17,9 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -32,15 +32,15 @@ public class AnycastRoutingEntry implements Serializable {
 
     private static final long serialVersionUID = 150L;
 
-    private UUID peerId;
+    private OverlayId peerId;
 
     private Peer peerStub;
 
-    public UUID getPeerId() {
+    public OverlayId getPeerId() {
         return this.peerId;
     }
 
-    public AnycastRoutingEntry(UUID peerID, Peer peerStub) {
+    public AnycastRoutingEntry(OverlayId peerID, Peer peerStub) {
         super();
         this.peerId = peerID;
         this.peerStub = peerStub;

@@ -16,8 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.exceptions;
 
-import java.util.UUID;
-
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -30,13 +29,13 @@ public class PeerNotActivatedException extends Exception {
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID peerId;
+    private final OverlayId peerId;
 
     /**
      * Constructs a {@code PeerNotActivatedRuntimeException} with no specified
      * detail message.
      */
-    public PeerNotActivatedException(UUID peerId) {
+    public PeerNotActivatedException(OverlayId peerId) {
         super("The landmark peer to join is not activated: " + peerId);
         this.peerId = peerId;
     }
@@ -46,7 +45,7 @@ public class PeerNotActivatedException extends Exception {
      * 
      * @return the identifier of the peer which is not activated.
      */
-    public UUID getPeerId() {
+    public OverlayId getPeerId() {
         return this.peerId;
     }
 

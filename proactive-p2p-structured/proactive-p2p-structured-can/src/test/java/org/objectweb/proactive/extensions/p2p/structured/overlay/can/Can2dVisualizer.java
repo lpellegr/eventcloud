@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -58,6 +57,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.An
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetSplitHistoryOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetSplitHistoryResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -99,7 +99,7 @@ public class Can2dVisualizer extends JFrame {
 
     private PeersCache cache;
 
-    private Map<UUID, Color> peerColors;
+    private Map<OverlayId, Color> peerColors;
 
     private enum Mode {
         JOIN, LEAVE, SHOW_NEIGHBORS
@@ -109,7 +109,7 @@ public class Can2dVisualizer extends JFrame {
 
     public Can2dVisualizer(List<Peer> peers) {
         this.cache = new PeersCache();
-        this.peerColors = new HashMap<UUID, Color>();
+        this.peerColors = new HashMap<OverlayId, Color>();
 
         for (Peer peer : peers) {
             this.cache.addEntry(peer);
@@ -120,7 +120,7 @@ public class Can2dVisualizer extends JFrame {
         this.createAndShowGUI();
     }
 
-    public Color getPeerColor(UUID peerId) {
+    public Color getPeerColor(OverlayId peerId) {
         Color color = this.peerColors.get(peerId);
 
         if (color == null) {
@@ -377,13 +377,13 @@ public class Can2dVisualizer extends JFrame {
 
         private final List<SplitEntry> splitHistory;
 
-        private final UUID id;
+        private final OverlayId id;
 
         private final Peer stub;
 
         private final List<Zone<StringElement>> neighbors;
 
-        public PeerEntry(final UUID id, final Peer stub,
+        public PeerEntry(final OverlayId id, final Peer stub,
                 final Zone<StringElement> zone,
                 final List<Zone<StringElement>> neighbors,
                 List<SplitEntry> splitHistory) {
@@ -394,7 +394,7 @@ public class Can2dVisualizer extends JFrame {
             this.splitHistory = splitHistory;
         }
 
-        public UUID getId() {
+        public OverlayId getId() {
             return this.id;
         }
 
@@ -432,20 +432,20 @@ public class Can2dVisualizer extends JFrame {
 
     private static class PeersCache implements Iterable<PeerEntry> {
 
-        private Map<UUID, Peer> stubEntries;
+        private Map<OverlayId, Peer> stubEntries;
 
-        private Map<UUID, PeerEntry> cacheEntries;
+        private Map<OverlayId, PeerEntry> cacheEntries;
 
         public PeersCache() {
-            this.stubEntries = new HashMap<UUID, Peer>();
-            this.cacheEntries = new HashMap<UUID, PeerEntry>();
+            this.stubEntries = new HashMap<OverlayId, Peer>();
+            this.cacheEntries = new HashMap<OverlayId, PeerEntry>();
         }
 
         public void addEntry(Peer peer) {
             this.stubEntries.put(peer.getId(), peer);
         }
 
-        public void removeEntry(UUID peerId) {
+        public void removeEntry(OverlayId peerId) {
             this.stubEntries.remove(peerId);
         }
 
@@ -503,7 +503,7 @@ public class Can2dVisualizer extends JFrame {
 
         private void fixCacheCoherence() {
             if (this.stubEntries.size() != this.cacheEntries.size()) {
-                for (UUID id : this.stubEntries.keySet()) {
+                for (OverlayId id : this.stubEntries.keySet()) {
                     if (!this.cacheEntries.containsKey(id)) {
                         this.populate(id);
                     }
@@ -511,7 +511,7 @@ public class Can2dVisualizer extends JFrame {
             }
         }
 
-        private void populate(UUID id) {
+        private void populate(OverlayId id) {
             NeighborTable<StringElement> table = null;
             List<Zone<StringElement>> neighbors =
                     new ArrayList<Zone<StringElement>>();

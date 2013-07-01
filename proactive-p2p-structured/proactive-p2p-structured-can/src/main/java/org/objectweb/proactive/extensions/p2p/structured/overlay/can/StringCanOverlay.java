@@ -18,7 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.Serializable;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.RequestResponseManager;
+import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.StringZone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
