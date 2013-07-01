@@ -788,7 +788,7 @@ public final class PublishSubscribeUtils {
                     + rewrittenSubscription.getSparqlQuery());
         }
 
-        overlay.getStub().route(
+        overlay.getStub().sendv(
                 new IndexSubscriptionRequest(rewrittenSubscription));
     }
 
