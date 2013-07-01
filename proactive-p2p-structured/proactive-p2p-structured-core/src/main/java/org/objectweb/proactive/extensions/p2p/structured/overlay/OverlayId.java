@@ -24,7 +24,7 @@ import java.util.UUID;
  * 
  * @author lpellegr
  */
-public class OverlayId implements Comparable<OverlayId>, Serializable {
+public final class OverlayId implements Comparable<OverlayId>, Serializable {
 
     private static final long serialVersionUID = 150L;
 
