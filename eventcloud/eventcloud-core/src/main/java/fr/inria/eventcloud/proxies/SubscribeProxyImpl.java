@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.proxies;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
@@ -123,6 +125,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     // it is used to remove duplicates that may be received with SBCE1 and 2
     private Cache eventsDeliveredCache;
 
+    private String cacheRepositoryPath;
+
     // contains the subscriptions that have been registered from this proxy
     private ConcurrentMap<SubscriptionId, SubscriptionEntry<?>> subscriptions;
 
@@ -132,7 +136,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     // contains the quadruples solutions that are being received
     private ConcurrentMap<NotificationId, QuadruplesSolution> quadruplesSolutions;
 
-    private String componentUri;
+    private String componentURI;
 
     /**
      * Empty constructor required by ProActive.
@@ -153,8 +157,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // configuration should be done in the ProActive source code.
         body.setImmediateService("setImmediateServices", false);
         body.setImmediateService("setAttributes", false);
-
-        this.createEventsDeliveredCache(body);
     }
 
     /**
@@ -175,14 +177,19 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         this.closeEventsDeliveredCache();
     }
 
-    private void createEventsDeliveredCache(Body body) {
-        String cachePath =
+    private void createEventsDeliveredCache() {
+        String subscribeProxyIdentifier =
+                this.componentURI.substring(
+                        this.componentURI.lastIndexOf('/') + 1,
+                        this.componentURI.length());
+
+        this.cacheRepositoryPath =
                 EventCloudProperties.getDefaultTemporaryPath() + "ehcache"
-                        + File.separatorChar + body.getID().toString();
+                        + File.separatorChar + subscribeProxyIdentifier;
 
         Cache eventsDeliveredCache =
                 new Cache(
-                        new CacheConfiguration("cache", 0).memoryStoreEvictionPolicy(
+                        new CacheConfiguration(subscribeProxyIdentifier, 0).memoryStoreEvictionPolicy(
                                 MemoryStoreEvictionPolicy.LRU)
                                 .eternal(true)
                                 .persistence(
@@ -190,12 +197,29 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                                 .transactionalMode(TransactionalMode.OFF));
         eventsDeliveredCache.disableDynamicFeatures();
 
-        Configuration cacheManagerConfig =
-                new Configuration().diskStore(new DiskStoreConfiguration().path(cachePath));
-        this.cacheManager = CacheManager.create(cacheManagerConfig);
+        this.cacheManager =
+                this.getOrCreateCacheManager(this.cacheRepositoryPath);
         this.cacheManager.addCache(eventsDeliveredCache);
+        this.eventsDeliveredCache = eventsDeliveredCache;
+    }
 
-        this.eventsDeliveredCache = this.cacheManager.getCache("cache");
+    private CacheManager getOrCreateCacheManager(String diskStorePath) {
+        CacheManager cacheManager = CacheManager.getCacheManager("default");
+
+        if (cacheManager == null) {
+            cacheManager = this.createCacheManager(diskStorePath);
+        }
+
+        return cacheManager;
+    }
+
+    private CacheManager createCacheManager(String diskStorePath) {
+        Configuration cacheManagerConfig =
+                new Configuration().dynamicConfig(false).diskStore(
+                        new DiskStoreConfiguration().path(diskStorePath)).name(
+                        "default").updateCheck(false);
+
+        return CacheManager.create(cacheManagerConfig);
     }
 
     /**
@@ -208,7 +232,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             super.eventCloudCache = proxy;
             super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
 
-            this.componentUri = componentUri;
+            this.componentURI = componentUri;
 
             // even if we could have
             // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
@@ -242,6 +266,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             0.75f,
                             EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
+            this.createEventsDeliveredCache();
+
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -253,6 +279,14 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private void closeEventsDeliveredCache() {
         this.cacheManager.shutdown();
+
+        try {
+            Files.deleteDirectory(this.cacheRepositoryPath);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "There was an issue while trying to remove cache directory "
+                            + this.cacheRepositoryPath);
+        }
     }
 
     /**
@@ -312,7 +346,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                                    NotificationListener<?> listener) {
         Subscription internalSubscription =
                 createInternalSubscription(
-                        subscription, this.componentUri, sparqlQuery,
+                        subscription, this.componentURI, sparqlQuery,
                         listener.getType());
 
         if (this.subscriptions.putIfAbsent(
@@ -802,7 +836,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             }
 
             if (destination == null) {
-                destination = this.componentUri;
+                destination = this.componentURI;
             }
 
             long eventPublicationTimestamp =
@@ -836,7 +870,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             log.debug(
                     "New notification received {} on {} for subscription id {}",
                     new Object[] {
-                            notification.getId(), this.componentUri,
+                            notification.getId(), this.componentURI,
                             notification.getSubscriptionId()});
         }
     }
@@ -857,7 +891,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @MemberOf("parallel")
     public String getComponentUri() {
-        return this.componentUri;
+        return this.componentURI;
     }
 
     private static final class SubscriptionEntry<T extends NotificationListener<?>> {
