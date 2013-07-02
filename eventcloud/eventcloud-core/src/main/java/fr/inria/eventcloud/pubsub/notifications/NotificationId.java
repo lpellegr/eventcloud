@@ -16,9 +16,6 @@
  **/
 package fr.inria.eventcloud.pubsub.notifications;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.io.Serializable;
 
 import com.google.common.base.Objects;
@@ -32,7 +29,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  * 
  * @author lpellegr
  */
-public class NotificationId implements Serializable {
+public final class NotificationId implements Serializable {
 
     private static final long serialVersionUID = 150L;
 
@@ -73,6 +70,10 @@ public class NotificationId implements Serializable {
      */
     @Override
     public boolean equals(Object that) {
+        if (this == that) {
+            return true;
+        }
+
         if (that instanceof NotificationId) {
             NotificationId other = (NotificationId) that;
 
@@ -83,6 +84,10 @@ public class NotificationId implements Serializable {
         return false;
     }
 
+    public boolean isFor(SubscriptionId subscriptionId) {
+        return this.subscriptionId.equals(subscriptionId);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -90,39 +95,6 @@ public class NotificationId implements Serializable {
     public String toString() {
         return this.getClass().getSimpleName() + "{eventId=" + this.eventId
                 + ", subscriptionId=" + this.subscriptionId.toString() + "}";
-    }
-
-    public static final class Serializer implements
-            org.mapdb.Serializer<NotificationId>, Serializable {
-
-        private static final long serialVersionUID = 150L;
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void serialize(DataOutput out, NotificationId notificationId)
-                throws IOException {
-            out.writeUTF(notificationId.eventId);
-
-            SubscriptionId.SERIALIZER.serialize(
-                    out, notificationId.subscriptionId);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public NotificationId deserialize(DataInput in, int available)
-                throws IOException {
-            String eventId = in.readUTF();
-
-            SubscriptionId subscriptionId =
-                    SubscriptionId.SERIALIZER.deserialize(in, available);
-
-            return new NotificationId(subscriptionId, eventId);
-        }
-
     }
 
 }
