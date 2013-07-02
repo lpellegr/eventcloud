@@ -84,7 +84,6 @@
 								<include>fr.inria.eventcloud.api.Event</include>
 								<include>fr.inria.eventcloud.api.Quadruple</include>
 								<include>fr.inria.eventcloud.api.QuadruplePattern</include>
-								<include>fr.inria.eventcloud.api.SubscriptionId</include>
 								<include>fr.inria.eventcloud.proxies.PublishProxyImpl</include>
 								<include>fr.inria.eventcloud.proxies.PutGetProxyImpl</include>
 								<include>fr.inria.eventcloud.overlay.SemanticPeerImpl</include>
