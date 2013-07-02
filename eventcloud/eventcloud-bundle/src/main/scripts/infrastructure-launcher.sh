@@ -138,7 +138,7 @@ function deploy_eventclouds_registry() {
 
 function deploy_ws_eventclouds_management() {
     java -Xms256m -Xmx10240m \
-     -server \
+     -server -XX:+UseCompressedOops \
      -Djava.security.policy=$PATH_TO_RESOURCES/proactive.security.policy \
      -Deventcloud.bundle.home=$BUNDLE_HOME \
      -Deventcloud.configuration=$PATH_TO_RESOURCES/eventcloud.properties \
