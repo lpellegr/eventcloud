@@ -92,6 +92,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * Simple application to evaluate the publish/subscribe algorithm on a single
@@ -660,6 +661,10 @@ public class PublishSubscribeBenchmark {
 
                         for (CustomPublishProxy cpp : this.publishProxies) {
                             cpp.clear();
+                        }
+
+                        for (SubscribeApi subscribeProxy : this.subscribeProxies) {
+                            ((SubscribeProxy) subscribeProxy).clear();
                         }
                     }
 

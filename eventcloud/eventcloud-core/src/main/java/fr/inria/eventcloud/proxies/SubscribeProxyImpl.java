@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
@@ -177,11 +178,22 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         this.closeEventsDeliveredCache();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean clear() {
+        try {
+            this.cacheManager.clearAllStartingWith(this.getComponentId());
+            return true;
+        } catch (CacheException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private void createEventsDeliveredCache() {
-        String subscribeProxyIdentifier =
-                this.componentURI.substring(
-                        this.componentURI.lastIndexOf('/') + 1,
-                        this.componentURI.length());
+        String subscribeProxyIdentifier = this.getComponentId();
 
         this.cacheRepositoryPath =
                 EventCloudProperties.getDefaultTemporaryPath() + "ehcache"
@@ -201,6 +213,12 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                 this.getOrCreateCacheManager(this.cacheRepositoryPath);
         this.cacheManager.addCache(eventsDeliveredCache);
         this.eventsDeliveredCache = eventsDeliveredCache;
+    }
+
+    private String getComponentId() {
+        return this.componentURI.substring(
+                this.componentURI.lastIndexOf('/') + 1,
+                this.componentURI.length());
     }
 
     private CacheManager getOrCreateCacheManager(String diskStorePath) {
