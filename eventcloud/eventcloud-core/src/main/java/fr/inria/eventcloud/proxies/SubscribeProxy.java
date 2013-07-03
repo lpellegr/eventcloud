@@ -68,6 +68,15 @@ import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
 public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
 
     /**
+     * Clears the subscribe proxy state by removing all the content in cache.
+     * Calling this method while receiving events may lead to duplicates since
+     * the identifiers of the events already received are no longer available.
+     * 
+     * @return {@code true} if the operation suceeded, {@code false} otherwise.
+     */
+    public boolean clear();
+
+    /**
      * Searches the {@link Subscription} associated to the specified
      * {@link SubscriptionId}.
      * 
