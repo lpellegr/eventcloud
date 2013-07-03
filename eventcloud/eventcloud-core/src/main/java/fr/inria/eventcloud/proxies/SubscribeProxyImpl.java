@@ -183,6 +183,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     public boolean clear() {
+        this.bindingSolutions.clear();
+        this.quadruplesSolutions.clear();
+        this.subscriptions.clear();
+
         try {
             this.cacheManager.clearAllStartingWith(this.getComponentId());
             return true;
