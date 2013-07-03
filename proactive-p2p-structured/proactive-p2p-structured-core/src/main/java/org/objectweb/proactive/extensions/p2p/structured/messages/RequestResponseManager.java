@@ -63,7 +63,6 @@ public abstract class RequestResponseManager implements Serializable {
      * @return a response associated to the type of the request.
      */
     public Response<?> dispatch(Request<?> request, StructuredOverlay overlay) {
-
         this.setMessageId(request);
         this.dispatchv(request, overlay);
 
@@ -81,11 +80,6 @@ public abstract class RequestResponseManager implements Serializable {
      *            the overlay from where the request is sent.
      */
     public void dispatchv(Request<?> request, StructuredOverlay overlay) {
-        if (log.isDebugEnabled()) {
-            log.debug("Dispatching " + request.getClass().getSimpleName()
-                    + " with id " + request.getId() + " from " + overlay);
-        }
-
         this.setMessageId(request);
         request.route(overlay);
     }
