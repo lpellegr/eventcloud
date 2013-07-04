@@ -48,7 +48,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
-import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,7 +165,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     public void runComponentActivity(Body body) {
-        new MultiActiveService(body).multiActiveServing(
+        new ComponentMultiActiveService(body).multiActiveServing(
                 EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue(),
                 true, false);
     }

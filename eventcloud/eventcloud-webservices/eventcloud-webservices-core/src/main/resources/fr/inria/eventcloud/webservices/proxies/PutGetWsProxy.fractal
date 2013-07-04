@@ -6,5 +6,5 @@
 
 	<content class="fr.inria.eventcloud.webservices.proxies.PutGetWsProxyImpl"/>
 
-	<controller desc="/org/objectweb/proactive/extensions/webservices/cxf/component/controller/cxf-component-config.xml"/>
+	<controller desc="/fr/inria/eventcloud/webservices/proxies/cxf-component-config.xml"/>
 </definition>
