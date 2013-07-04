@@ -41,6 +41,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +131,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     public void runComponentActivity(Body body) {
-        this.multiActiveService = new MultiActiveService(body);
+        this.multiActiveService = new ComponentMultiActiveService(body);
         this.multiActiveService.multiActiveServing(
                 P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
                 false);
