@@ -1000,12 +1000,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             builder.loaders()
                     .passivation(true)
                     .addFileCacheStore()
-
-                    .location(
-                            System.getProperty("java.io.tmpdir")
-                                    + File.separatorChar + "infinispan-"
-                                    + System.getProperty("user.name"))
-
+                    .location(super.diskStorePath)
                     .purgeOnStartup(true)
                     .async()
                     .eviction()
