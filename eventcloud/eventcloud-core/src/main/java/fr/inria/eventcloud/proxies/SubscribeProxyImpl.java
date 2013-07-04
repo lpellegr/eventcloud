@@ -37,6 +37,7 @@ import net.sf.ehcache.config.PersistenceConfiguration.Strategy;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.eviction.EvictionStrategy;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -896,10 +897,10 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
             this.proxyIdentifier = subscribeProxyIdentifier;
 
-            this.createCache();
+            this.cache = this.createCache();
         }
 
-        private void createCache() {
+        private Cache createCache() {
             Cache eventsDeliveredCache =
                     new Cache(
                             new CacheConfiguration(this.proxyIdentifier, 0).memoryStoreEvictionPolicy(
@@ -914,7 +915,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                     this.getOrCreateCacheManager(super.diskStorePath);
             this.cacheManager.addCache(eventsDeliveredCache);
 
-            this.cache = this.cacheManager.getCache(this.proxyIdentifier);
+            return this.cacheManager.getCache(this.proxyIdentifier);
         }
 
         private CacheManager getOrCreateCacheManager(String diskStorePath) {
@@ -984,18 +985,27 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     private static class InfinispanEventsDeliveredCache extends
             EventsDeliveredCache {
 
-        private org.infinispan.Cache<NotificationId, SubscriptionId> cache;
+        private final EmbeddedCacheManager cacheManager;
+
+        private final org.infinispan.Cache<NotificationId, SubscriptionId> cache;
 
         public InfinispanEventsDeliveredCache(String subscribeProxyIdentifier) {
             super(EventCloudProperties.getDefaultTemporaryPath() + "infinispan"
                     + File.separatorChar + subscribeProxyIdentifier);
 
-            this.createCache();
+            GlobalConfigurationBuilder config =
+                    new GlobalConfigurationBuilder();
+            config.globalJmxStatistics().allowDuplicateDomains(true).disable();
+            config.serialization().addAdvancedExternalizer(
+                    NotificationId.SERIALIZER).addAdvancedExternalizer(
+                    SubscriptionId.SERIALIZER);
+
+            this.cacheManager = new DefaultCacheManager(config.build());
+
+            this.cache = this.createCache();
         }
 
-        private void createCache() {
-            EmbeddedCacheManager manager = new DefaultCacheManager();
-
+        private org.infinispan.Cache<NotificationId, SubscriptionId> createCache() {
             ConfigurationBuilder builder = new ConfigurationBuilder();
             builder.loaders()
                     .passivation(true)
@@ -1007,27 +1017,25 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                     .maxEntries(
                             EventCloudProperties.SUBSCRIBER_CACHE_MAX_ENTRIES.getValue())
                     .strategy(EvictionStrategy.LRU)
+                    .jmxStatistics()
+                    .disable()
                     .locking()
                     .isolationLevel(IsolationLevel.NONE);
 
-            org.infinispan.configuration.cache.Configuration config =
-                    builder.build();
+            this.cacheManager.defineConfiguration("default", builder.build());
 
-            manager.defineConfiguration("custom-cache", config);
-            this.cache = manager.getCache("custom-cache");
-
+            return this.cacheManager.<NotificationId, SubscriptionId> getCache("default");
         }
 
         @Override
         public void clear() {
-            this.cache.clear();
             this.cache.stop();
             this.cache.start();
         }
 
         @Override
         public void close() {
-            this.cache.stop();
+            this.cacheManager.stop();
             super.close();
         }
 

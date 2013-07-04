@@ -19,10 +19,12 @@ package fr.inria.eventcloud.api;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Set;
 import java.util.UUID;
 
-import org.infinispan.marshall.Externalizer;
+import org.infinispan.marshall.AdvancedExternalizer;
 import org.infinispan.marshall.SerializeWith;
+import org.infinispan.util.Util;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
@@ -68,7 +70,7 @@ public final class SubscriptionId extends UniqueId {
     }
 
     public static class SubscriptionIdExternalizer implements
-            Externalizer<SubscriptionId> {
+            AdvancedExternalizer<SubscriptionId> {
 
         private static final long serialVersionUID = 150L;
 
@@ -86,6 +88,21 @@ public final class SubscriptionId extends UniqueId {
             return new SubscriptionId(new UUID(
                     input.readLong(), input.readLong()));
         }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Set<Class<? extends SubscriptionId>> getTypeClasses() {
+            return Util.<Class<? extends SubscriptionId>> asSet(SubscriptionId.class);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Integer getId() {
+            return 2;
+        }
+
     }
 
 }
