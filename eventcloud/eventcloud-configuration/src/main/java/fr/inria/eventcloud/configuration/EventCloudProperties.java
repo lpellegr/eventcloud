@@ -341,10 +341,12 @@ public class EventCloudProperties {
 
     /**
      * Defines the maximum number of entries that are kept in-memory on the
-     * subscriber side before to be evicted on disk.
+     * subscriber side before to be moved on disk. Default value is set to
+     * 200000 which requires about 100MB of heap.
      */
     public static final PropertyInteger SUBSCRIBER_CACHE_MAX_ENTRIES =
-            new PropertyInteger("eventcloud.subscriber.cache.max.entries", 100);
+            new PropertyInteger(
+                    "eventcloud.subscriber.cache.max.entries", 200000);
 
     /**
      * Defines the soft limit used by each EventClouds registry that runs with
