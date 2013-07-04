@@ -16,7 +16,13 @@
  **/
 package fr.inria.eventcloud.pubsub.notifications;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
+
+import org.infinispan.marshall.Externalizer;
+import org.infinispan.marshall.SerializeWith;
 
 import com.google.common.base.Objects;
 import com.hp.hpl.jena.graph.Node;
@@ -29,6 +35,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  * 
  * @author lpellegr
  */
+@SerializeWith(NotificationId.NotificationIdExternalizer.class)
 public final class NotificationId implements Serializable {
 
     private static final long serialVersionUID = 150L;
@@ -95,6 +102,29 @@ public final class NotificationId implements Serializable {
     public String toString() {
         return this.getClass().getSimpleName() + "{eventId=" + this.eventId
                 + ", subscriptionId=" + this.subscriptionId.toString() + "}";
+    }
+
+    public static class NotificationIdExternalizer implements
+            Externalizer<NotificationId> {
+
+        private static final long serialVersionUID = 150L;
+
+        @Override
+        public void writeObject(ObjectOutput output,
+                                NotificationId notificationId)
+                throws IOException {
+            SubscriptionId.SERIALIZER.writeObject(
+                    output, notificationId.subscriptionId);
+            output.writeUTF(notificationId.eventId);
+        }
+
+        @Override
+        public NotificationId readObject(ObjectInput input) throws IOException,
+                ClassNotFoundException {
+            return new NotificationId(
+                    SubscriptionId.SERIALIZER.readObject(input),
+                    input.readUTF());
+        }
     }
 
 }
