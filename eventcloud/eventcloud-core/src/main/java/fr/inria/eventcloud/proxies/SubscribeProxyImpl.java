@@ -36,6 +36,11 @@ import net.sf.ehcache.config.PersistenceConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration.Strategy;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.eviction.EvictionStrategy;
+import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.util.concurrent.IsolationLevel;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
@@ -231,7 +236,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
             this.eventsDeliveredCache =
-                    new EhcacheEventsDeliveredCache(this.getComponentId());
+                    new InfinispanEventsDeliveredCache(this.getComponentId());
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
@@ -967,6 +972,85 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
             // TODO we should avoid to iterate all the keys
             for (NotificationId nid : notificationIds) {
+                if (nid.isFor(subscriptionId)) {
+                    this.cache.remove(nid);
+                }
+            }
+        }
+
+    }
+
+    private static class InfinispanEventsDeliveredCache extends
+            EventsDeliveredCache {
+
+        private org.infinispan.Cache<NotificationId, SubscriptionId> cache;
+
+        public InfinispanEventsDeliveredCache(String subscribeProxyIdentifier) {
+            super(EventCloudProperties.getDefaultTemporaryPath() + "infinispan"
+                    + File.separatorChar + subscribeProxyIdentifier);
+
+            this.createCache();
+        }
+
+        private void createCache() {
+            EmbeddedCacheManager manager = new DefaultCacheManager();
+
+            ConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.loaders()
+                    .passivation(true)
+                    .addFileCacheStore()
+
+                    .location(
+                    // System.getProperty("java.io.tmpdir")
+                            "/home/lpellegr/Desktop" + File.separatorChar
+                                    + "infinispan-"
+                                    + System.getProperty("user.name"))
+
+                    .purgeOnStartup(true)
+                    .async()
+                    .eviction()
+                    .maxEntries(
+                            EventCloudProperties.SUBSCRIBER_CACHE_MAX_ENTRIES.getValue())
+                    .strategy(EvictionStrategy.LRU)
+                    .locking()
+                    .isolationLevel(IsolationLevel.NONE);
+
+            org.infinispan.configuration.cache.Configuration config =
+                    builder.build();
+
+            manager.defineConfiguration("custom-cache", config);
+            this.cache = manager.getCache("custom-cache");
+
+        }
+
+        @Override
+        public void clear() {
+            this.cache.clear();
+            this.cache.stop();
+            this.cache.start();
+        }
+
+        @Override
+        public void close() {
+            this.cache.stop();
+            super.close();
+        }
+
+        @Override
+        public boolean contains(NotificationId notificationId) {
+            return this.cache.containsKey(notificationId);
+        }
+
+        @Override
+        public boolean markAsDelivered(NotificationId notificationId,
+                                       SubscriptionId subscriptionId) {
+            return this.cache.putIfAbsent(notificationId, subscriptionId) == null;
+        }
+
+        @Override
+        public void removeEntriesFor(SubscriptionId subscriptionId) {
+            // TODO we should avoid to iterate all the keys
+            for (NotificationId nid : this.cache.keySet()) {
                 if (nid.isFor(subscriptionId)) {
                     this.cache.remove(nid);
                 }

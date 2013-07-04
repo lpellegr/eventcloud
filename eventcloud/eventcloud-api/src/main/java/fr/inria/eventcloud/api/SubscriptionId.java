@@ -16,7 +16,13 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.UUID;
+
+import org.infinispan.marshall.Externalizer;
+import org.infinispan.marshall.SerializeWith;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
@@ -29,9 +35,13 @@ import fr.inria.eventcloud.utils.UniqueId;
  * 
  * @author lpellegr
  */
+@SerializeWith(SubscriptionId.SubscriptionIdExternalizer.class)
 public final class SubscriptionId extends UniqueId {
 
     private static final long serialVersionUID = 150L;
+
+    public static final SubscriptionIdExternalizer SERIALIZER =
+            new SubscriptionIdExternalizer();
 
     /**
      * Creates a unique subscription id .
@@ -55,6 +65,27 @@ public final class SubscriptionId extends UniqueId {
 
     public static SubscriptionId parseSubscriptionId(String subscriptionId) {
         return new SubscriptionId(decode(subscriptionId));
+    }
+
+    public static class SubscriptionIdExternalizer implements
+            Externalizer<SubscriptionId> {
+
+        private static final long serialVersionUID = 150L;
+
+        @Override
+        public void writeObject(ObjectOutput output,
+                                SubscriptionId subscriptionId)
+                throws IOException {
+            output.writeLong(subscriptionId.value.getMostSignificantBits());
+            output.writeLong(subscriptionId.value.getLeastSignificantBits());
+        }
+
+        @Override
+        public SubscriptionId readObject(ObjectInput input) throws IOException,
+                ClassNotFoundException {
+            return new SubscriptionId(new UUID(
+                    input.readLong(), input.readLong()));
+        }
     }
 
 }
