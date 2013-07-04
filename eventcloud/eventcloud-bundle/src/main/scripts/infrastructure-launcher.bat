@@ -130,7 +130,7 @@ goto:eof
 :deploy_ws_eventclouds_management
   for /F %%i in ("%WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE%") do set BASENAME_WS_EVENTCLOUDS_MANAGEMENT_INSTANCE_FILE=%%~ni
   start "EventCloudsManagementWebservice" /b javaw -Xms256m -Xmx10240m ^
-     -server -XX:+UseCompressedOops ^
+     -server ^
      -Djava.security.policy="%PATH_TO_RESOURCES%/proactive.security.policy" ^
      -Deventcloud.bundle.home="%BUNDLE_HOME%" ^
      -Deventcloud.configuration="%PATH_TO_RESOURCES%/eventcloud.properties" ^
