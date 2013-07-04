@@ -19,13 +19,12 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.UUID;
-
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByMethodCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.StringCanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.StringZone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZone;
@@ -74,7 +73,7 @@ public class LeaveOperationTest extends
     public void testLeaveWithTwoPeers() throws NetworkNotJoinedException {
         super.deploy(2);
 
-        UUID peerLeavingId = super.getPeer(0).getId();
+        OverlayId peerLeavingId = super.getPeer(0).getId();
 
         super.getPeer(0).leave();
 

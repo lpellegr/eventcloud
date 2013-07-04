@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.proxies;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,9 +25,18 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.HTreeMap;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheException;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.config.CacheConfiguration.TransactionalMode;
+import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.DiskStoreConfiguration;
+import net.sf.ehcache.config.PersistenceConfiguration;
+import net.sf.ehcache.config.PersistenceConfiguration.Strategy;
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
+
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
@@ -36,6 +46,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
+import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.slf4j.Logger;
@@ -90,9 +101,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private static final long serialVersionUID = 150L;
 
-    private static final String NOTIFICATIONS_DELIVERED_MAP_NAME =
-            "notificationsDelivered";
-
     /**
      * ADL name of the subscribe proxy component.
      */
@@ -112,6 +120,14 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxyImpl.class);
 
+    private CacheManager cacheManager;
+
+    // contains the ids of the events that have been delivered.
+    // it is used to remove duplicates that may be received with SBCE1 and 2
+    private Cache eventsDeliveredCache;
+
+    private String cacheRepositoryPath;
+
     // contains the subscriptions that have been registered from this proxy
     private ConcurrentMap<SubscriptionId, SubscriptionEntry<?>> subscriptions;
 
@@ -121,9 +137,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     // contains the quadruples solutions that are being received
     private ConcurrentMap<NotificationId, QuadruplesSolution> quadruplesSolutions;
 
-    private DB notificationsDeliveredDB;
-
-    private String componentUri;
+    private String componentURI;
 
     /**
      * Empty constructor required by ProActive.
@@ -144,8 +158,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // configuration should be done in the ProActive source code.
         body.setImmediateService("setImmediateServices", false);
         body.setImmediateService("setAttributes", false);
-
-        this.createAndRegisterNotificationsDeliveredDB(body);
     }
 
     /**
@@ -163,47 +175,73 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     public void endComponentActivity(Body body) {
-        this.closeNotificationsDeliveredDb();
+        this.closeEventsDeliveredCache();
     }
 
-    private void createAndRegisterNotificationsDeliveredDB(Body body) {
-        String dbPath =
-                EventCloudProperties.getDefaultTemporaryPath() + "mapdb"
-                        + File.separatorChar;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean clear() {
+        this.bindingSolutions.clear();
+        this.quadruplesSolutions.clear();
+        this.subscriptions.clear();
 
-        new File(dbPath).mkdirs();
+        try {
+            this.cacheManager.clearAllStartingWith(this.getComponentId());
+            return true;
+        } catch (CacheException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-        String dbFilename = dbPath + body.getID();
+    private void createEventsDeliveredCache() {
+        String subscribeProxyIdentifier = this.getComponentId();
 
-        // TODO: find a lightweight key/value store to replace the current MapDB
-        // implementation which is unstable.
-        // Several alternatives exist such as BerkeleyDB (API is really
-        // horrible), hawtdb (low level API and seems no longer maintained),
-        // leveldb (really good but the original implementation is c++, some
-        // Java port exists but not really maintained), kyoto cabinet (seems to
-        // be the best alternative even if only a Java binding is provided)
-        //
-        // The features we are interested in:
-        // - concurrent/lock-free reads
-        // - put/get/contains and putIfAbsent (compare-and-swap) operations
-        // - configurable cache size (cache should be evictable or size very
-        // low)
-        // - no write durability (entries should only eventually be written on
-        // the disk but not necessary when the put/commit operation is executed
-        // Optional (i.e. could be implemented ourself):
-        // - database deletion after close
-        this.notificationsDeliveredDB =
-                DBMaker.newFileDB(new File(dbFilename))
-                        .cacheSoftRefEnable()
-                        .closeOnJvmShutdown()
-                        .deleteFilesAfterClose()
-                        .writeAheadLogDisable()
-                        .make();
+        this.cacheRepositoryPath =
+                EventCloudProperties.getDefaultTemporaryPath() + "ehcache"
+                        + File.separatorChar + subscribeProxyIdentifier;
 
-        this.notificationsDeliveredDB.createHashMap(
-                NOTIFICATIONS_DELIVERED_MAP_NAME, false,
-                new NotificationId.Serializer(),
-                new SubscriptionId.Serializer());
+        Cache eventsDeliveredCache =
+                new Cache(
+                        new CacheConfiguration(subscribeProxyIdentifier, 0).memoryStoreEvictionPolicy(
+                                MemoryStoreEvictionPolicy.LRU)
+                                .eternal(true)
+                                .persistence(
+                                        new PersistenceConfiguration().strategy(Strategy.LOCALTEMPSWAP))
+                                .transactionalMode(TransactionalMode.OFF));
+        eventsDeliveredCache.disableDynamicFeatures();
+
+        this.cacheManager =
+                this.getOrCreateCacheManager(this.cacheRepositoryPath);
+        this.cacheManager.addCache(eventsDeliveredCache);
+        this.eventsDeliveredCache = eventsDeliveredCache;
+    }
+
+    private String getComponentId() {
+        return this.componentURI.substring(
+                this.componentURI.lastIndexOf('/') + 1,
+                this.componentURI.length());
+    }
+
+    private CacheManager getOrCreateCacheManager(String diskStorePath) {
+        CacheManager cacheManager = CacheManager.getCacheManager("default");
+
+        if (cacheManager == null) {
+            cacheManager = this.createCacheManager(diskStorePath);
+        }
+
+        return cacheManager;
+    }
+
+    private CacheManager createCacheManager(String diskStorePath) {
+        Configuration cacheManagerConfig =
+                new Configuration().dynamicConfig(false).diskStore(
+                        new DiskStoreConfiguration().path(diskStorePath)).name(
+                        "default").updateCheck(false);
+
+        return CacheManager.create(cacheManagerConfig);
     }
 
     /**
@@ -216,7 +254,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             super.eventCloudCache = proxy;
             super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
 
-            this.componentUri = componentUri;
+            this.componentURI = componentUri;
 
             // even if we could have
             // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
@@ -250,18 +288,26 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             0.75f,
                             EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
+            this.createEventsDeliveredCache();
+
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    SubscribeProxyImpl.this.closeNotificationsDeliveredDb();
+                    SubscribeProxyImpl.this.closeEventsDeliveredCache();
                 }
             }));
         }
     }
 
-    private synchronized void closeNotificationsDeliveredDb() {
-        if (this.notificationsDeliveredDB != null) {
-            this.notificationsDeliveredDB.close();
+    private void closeEventsDeliveredCache() {
+        this.cacheManager.shutdown();
+
+        try {
+            Files.deleteDirectory(this.cacheRepositoryPath);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "There was an issue while trying to remove cache directory "
+                            + this.cacheRepositoryPath);
         }
     }
 
@@ -322,7 +368,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                                    NotificationListener<?> listener) {
         Subscription internalSubscription =
                 createInternalSubscription(
-                        subscription, this.componentUri, sparqlQuery,
+                        subscription, this.componentURI, sparqlQuery,
                         listener.getType());
 
         if (this.subscriptions.putIfAbsent(
@@ -359,16 +405,16 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     @MemberOf("parallel")
-    public void unsubscribe(SubscriptionId id) {
+    public void unsubscribe(SubscriptionId sid) {
         // once the subscription id is removed from the list of the
         // subscriptions which are matched, the notifications which are received
         // for this subscription are ignored
-        SubscriptionEntry<?> subscriptionEntry = this.subscriptions.remove(id);
+        SubscriptionEntry<?> subscriptionEntry = this.subscriptions.remove(sid);
 
         if (subscriptionEntry == null) {
             throw new IllegalArgumentException(
                     "No subscription registered with the specified subscription id: "
-                            + id);
+                            + sid);
         }
 
         Subscription subscription = subscriptionEntry.subscription;
@@ -383,15 +429,16 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                                     subscription.getType() == NotificationListenerType.BINDING));
         }
 
-        // remove entries marked as delivered for the specified subscription
-        // TODO: the following method is really not efficient because it will
-        // iterate on all the entries to remove the correct ones. A better
-        // solution, such as a hashmultimap backed on disk should be found.
-        for (java.util.Map.Entry<NotificationId, SubscriptionId> entry : this.getNotificationsDeliveredMap()
-                .snapshot()
-                .entrySet()) {
-            if (entry.getValue().equals(id)) {
-                this.getNotificationsDeliveredMap().remove(entry.getKey());
+        @SuppressWarnings("unchecked")
+        List<NotificationId> notificationIds =
+                this.eventsDeliveredCache.getKeysNoDuplicateCheck();
+
+        // TODO we should avoid to iterate on all the keys
+        // a solution is to maintain the reverse mapping subscriptionId ->
+        // notificationId
+        for (NotificationId nid : notificationIds) {
+            if (nid.isFor(sid)) {
+                this.eventsDeliveredCache.remove(nid);
             }
         }
     }
@@ -441,7 +488,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // notification has not been yet delivered for the eventId associated to
         // this notification
         if (solution.isReady()) {
-            if (this.markAsDelivered(notification.getId(), subscriptionId) == null) {
+            if (this.markAsDelivered(notification.getId(), subscriptionId)) {
                 this.deliver(subscriptionEntry, solution.getChunks());
             }
 
@@ -467,7 +514,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // which has been unregistered but also notifications that have been
         // already received for a same event
         if (subscriptionEntry != null
-                && this.markAsDelivered(notification.getId(), subscriptionId) == null) {
+                && this.markAsDelivered(notification.getId(), subscriptionId)) {
             this.deliver(subscriptionEntry, notification.getContent());
         }
     }
@@ -491,8 +538,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
-        if (this.getNotificationsDeliveredMap().containsKey(
-                notification.getId())) {
+        if (this.eventsDeliveredCache.getQuiet(notification.getId()) != null) {
             this.handleReceiveDuplicateSolution(notification);
             return;
         }
@@ -532,7 +578,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             // received some quadruple duplicates for a CE which has already be
             // delivered. In such a case we have to ignore these duplicates and
             // send a RemoveEphemeralSubscription to avoid a memory leak
-            if (this.markAsDelivered(notification.getId(), subscriptionId) != null) {
+            if (!this.markAsDelivered(notification.getId(), subscriptionId)) {
                 // this.handleReceiveDuplicateSolution(notification);
             } else {
                 CompoundEvent compoundEvent =
@@ -592,7 +638,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // event
         if (subscriptionEntry != null
                 && this.markAsDelivered(
-                        notification.getId(), notification.getSubscriptionId()) == null) {
+                        notification.getId(), notification.getSubscriptionId())) {
 
             CompoundEvent compoundEvent =
                     new CompoundEvent(notification.getContent());
@@ -635,7 +681,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // already received for a same event
         if (subscriptionEntry != null
                 && this.markAsDelivered(
-                        notification.getId(), notification.getSubscriptionId()) == null) {
+                        notification.getId(), notification.getSubscriptionId())) {
             this.deliver(subscriptionEntry, notification.getMetaEventId());
         }
     }
@@ -709,7 +755,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // solution. Thus, the subscribe proxy receives a notification for each
         // quadruple even if all these quadruples are part of the same compound
         // event.
-        if (this.markAsDelivered(notificationId, subscriptionId) != null) {
+        if (!this.markAsDelivered(notificationId, subscriptionId)) {
             return null;
         }
 
@@ -812,7 +858,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             }
 
             if (destination == null) {
-                destination = this.componentUri;
+                destination = this.componentURI;
             }
 
             long eventPublicationTimestamp =
@@ -846,13 +892,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             log.debug(
                     "New notification received {} on {} for subscription id {}",
                     new Object[] {
-                            notification.getId(), this.componentUri,
+                            notification.getId(), this.componentURI,
                             notification.getSubscriptionId()});
         }
-    }
-
-    private HTreeMap<NotificationId, SubscriptionId> getNotificationsDeliveredMap() {
-        return this.notificationsDeliveredDB.<NotificationId, SubscriptionId> getHashMap(NOTIFICATIONS_DELIVERED_MAP_NAME);
     }
 
     /**
@@ -871,7 +913,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @MemberOf("parallel")
     public String getComponentUri() {
-        return this.componentUri;
+        return this.componentURI;
     }
 
     private static final class SubscriptionEntry<T extends NotificationListener<?>> {
@@ -887,10 +929,13 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     }
 
-    private SubscriptionId markAsDelivered(NotificationId notificationId,
-                                           SubscriptionId subscriptionId) {
-        return this.getNotificationsDeliveredMap().putIfAbsent(
-                notificationId, subscriptionId);
+    private boolean markAsDelivered(NotificationId notificationId,
+                                    SubscriptionId subscriptionId) {
+        Element existing =
+                this.eventsDeliveredCache.putIfAbsent(new Element(
+                        notificationId, subscriptionId));
+
+        return existing == null;
     }
 
 }

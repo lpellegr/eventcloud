@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
@@ -40,7 +39,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     /**
      * Universally unique identifier used in order to identify the message.
      */
-    protected UUID uuid;
+    protected MessageId id;
 
     /**
      * Constraints validator used to make the routing decision possible.
@@ -60,22 +59,6 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      *            the constraints validator to use for routing the message.
      */
     public RequestResponseMessage(ConstraintsValidator<K> constraintsValidator) {
-        this.constraintsValidator = constraintsValidator;
-    }
-
-    /**
-     * Constructs a new RequestResponseMessage with the specified
-     * {@code identifier} and {@code constraintsValidator}.
-     * 
-     * @param identifier
-     *            the unique identifier associated to the message.
-     * 
-     * @param constraintsValidator
-     *            the constraints validator to use for routing the message.
-     */
-    public RequestResponseMessage(UUID identifier,
-            ConstraintsValidator<K> constraintsValidator) {
-        this.uuid = identifier;
         this.constraintsValidator = constraintsValidator;
     }
 
@@ -100,8 +83,8 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      * 
      * @return the universally unique identifier which identifies the message.
      */
-    public UUID getId() {
-        return this.uuid;
+    public MessageId getId() {
+        return this.id;
     }
 
     /**
@@ -179,7 +162,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      */
     @Override
     public String toString() {
-        return "RequestResponseMessage [id=" + this.uuid
+        return "RequestResponseMessage [id=" + this.id
                 + ", constraintsValidator=" + this.constraintsValidator
                 + ", hopCount=" + this.hopCount + "]";
     }

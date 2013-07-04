@@ -17,7 +17,6 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.Compatible;
@@ -33,9 +32,9 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlrea
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
@@ -157,7 +156,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
             this.overlay.stub = stub;
             this.overlay.url = PAActiveObject.getUrl(stub);
             this.overlay.multiActiveService = this.multiActiveService;
-            this.overlay.getRequestResponseManager().overlay = this.overlay;
+            this.overlay.getRequestResponseManager().setOverlay(this.overlay);
         }
     }
 
@@ -166,7 +165,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     @MemberOf("commonObjectMethods")
-    public UUID getId() {
+    public OverlayId getId() {
         return this.overlay.id;
     }
 

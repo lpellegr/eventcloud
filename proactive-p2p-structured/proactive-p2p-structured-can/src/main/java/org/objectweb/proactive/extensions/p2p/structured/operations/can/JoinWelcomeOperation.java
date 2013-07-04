@@ -18,10 +18,10 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.io.Serializable;
 import java.util.LinkedList;
-import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
@@ -42,7 +42,7 @@ public class JoinWelcomeOperation<E extends Element> extends CallableOperation {
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID peerId;
+    private final OverlayId peerId;
 
     private final Zone<E> zone;
 
@@ -52,7 +52,7 @@ public class JoinWelcomeOperation<E extends Element> extends CallableOperation {
 
     private final Serializable data;
 
-    public JoinWelcomeOperation(UUID peerId, Zone<E> zone,
+    public JoinWelcomeOperation(OverlayId peerId, Zone<E> zone,
             LinkedList<SplitEntry> splitHistory, NeighborTable<E> neighbors,
             Serializable data) {
         this.peerId = peerId;
@@ -62,7 +62,7 @@ public class JoinWelcomeOperation<E extends Element> extends CallableOperation {
         this.data = data;
     }
 
-    public UUID getPeerId() {
+    public OverlayId getPeerId() {
         return this.peerId;
     }
 

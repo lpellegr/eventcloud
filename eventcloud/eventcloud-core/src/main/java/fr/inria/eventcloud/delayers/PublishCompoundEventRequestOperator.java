@@ -172,7 +172,7 @@ public class PublishCompoundEventRequestOperator extends
                         PublishSubscribeUtils.matches(
                                 compoundEvent, subscription);
 
-                if (result.getFirst() != null
+                if (result != null
                 // the quadruple used to route the compound event is the first
                 // quadruple matching the subscription
                         && matchingResult.extendedCompoundEvent.quadrupleIndexesUsedForIndexing.contains(result.getSecond())) {
@@ -213,7 +213,7 @@ public class PublishCompoundEventRequestOperator extends
                     if (log.isTraceEnabled()) {
                         String reason;
 
-                        if (result.getFirst() == null) {
+                        if (result == null) {
                             reason =
                                     "the subscription is not satisfied, CE="
                                             + compoundEvent;

@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.messages.response.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.ResponseProvider;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 import fr.inria.eventcloud.overlay.can.SemanticElement;

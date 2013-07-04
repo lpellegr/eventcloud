@@ -7,6 +7,7 @@
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
+		<relativePath></relativePath>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
@@ -205,9 +206,9 @@
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>org.mapdb</groupId>
-				<artifactId>mapdb</artifactId>
-				<version>20130626</version>
+				<groupId>net.sf.ehcache</groupId>
+				<artifactId>ehcache</artifactId>
+				<version>2.7.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -275,6 +276,10 @@
 						<groupId>log4j</groupId>
 						<artifactId>log4j</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -285,6 +290,10 @@
 					<exclusion>
 						<groupId>log4j</groupId>
 						<artifactId>log4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -408,7 +417,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.9</version>
+					<version>2.9.1</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-plugin-plugin</artifactId>
@@ -458,6 +467,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<forkCount>1</forkCount>
+					<argLine>-server -Xmx4096m -XX:MaxPermSize=512M</argLine>
 					<reuseForks>false</reuseForks>
 				</configuration>
 			</plugin>

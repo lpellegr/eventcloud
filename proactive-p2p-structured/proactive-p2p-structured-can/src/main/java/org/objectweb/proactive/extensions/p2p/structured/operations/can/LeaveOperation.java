@@ -18,10 +18,10 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import java.io.Serializable;
 import java.util.Set;
-import java.util.UUID;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -41,7 +41,7 @@ public class LeaveOperation<E extends Element> extends CallableOperation {
 
     private static final long serialVersionUID = 150L;
 
-    private final UUID peerLeavingId;
+    private final OverlayId peerLeavingId;
 
     private final Zone<E> peerLeavingZone;
 
@@ -49,7 +49,7 @@ public class LeaveOperation<E extends Element> extends CallableOperation {
 
     private final Serializable data;
 
-    public LeaveOperation(UUID peerLeavingId, Zone<E> peerLeavingZone,
+    public LeaveOperation(OverlayId peerLeavingId, Zone<E> peerLeavingZone,
             Set<NeighborEntry<E>> newNeighborsToSet, Serializable data) {
         this.peerLeavingId = peerLeavingId;
         this.peerLeavingZone = peerLeavingZone;
@@ -57,7 +57,7 @@ public class LeaveOperation<E extends Element> extends CallableOperation {
         this.data = data;
     }
 
-    public UUID getPeerLeavingId() {
+    public OverlayId getPeerLeavingId() {
         return this.peerLeavingId;
     }
 

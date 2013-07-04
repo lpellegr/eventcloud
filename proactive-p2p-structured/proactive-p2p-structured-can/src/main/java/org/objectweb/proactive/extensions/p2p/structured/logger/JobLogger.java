@@ -33,6 +33,7 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 
 /**
  * Class used to write information in a log file. Used to check if there is any
@@ -169,7 +170,7 @@ public class JobLogger {
      * @param name
      * @param id
      */
-    public static synchronized void recordTime(String name, UUID id) {
+    public static synchronized void recordTime(String name, MessageId id) {
         Date startingDate = new Date();
         String timestamp = DATE_FORMAT.format(startingDate);
         try {

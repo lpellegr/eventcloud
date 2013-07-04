@@ -788,7 +788,7 @@ public final class PublishSubscribeUtils {
                     + rewrittenSubscription.getSparqlQuery());
         }
 
-        overlay.getStub().route(
+        overlay.getStub().sendv(
                 new IndexSubscriptionRequest(rewrittenSubscription));
     }
 
@@ -801,7 +801,8 @@ public final class PublishSubscribeUtils {
      * @param subscription
      *            the subscription to rewrite.
      * 
-     * @return a {@link Pair} whose the first element contains the bindings
+     * @return {@code null} if the compound event does not match the or a
+     *         {@link Pair} whose the first element contains the bindings
      *         associated to the parts of the subscription that are satisfied or
      *         {@code null}. The second element contains the index of the first
      *         quadruple that satisfies the subscription or {@code -1}.
@@ -852,6 +853,10 @@ public final class PublishSubscribeUtils {
                 // sub-subscription satisfied, look for the next
                 break;
             }
+        }
+
+        if (binding.isEmpty()) {
+            return null;
         }
 
         return Pair.create((Binding) binding, indexFirstQuadrupleMatching);

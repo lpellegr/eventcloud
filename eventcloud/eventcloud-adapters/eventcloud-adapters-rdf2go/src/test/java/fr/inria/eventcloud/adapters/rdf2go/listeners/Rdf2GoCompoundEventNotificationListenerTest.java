@@ -18,7 +18,7 @@ package fr.inria.eventcloud.adapters.rdf2go.listeners;
 
 import java.util.List;
 
-import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang.mutable.MutableInt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.ontoware.aifbcommons.collection.ClosableIterator;
@@ -92,7 +92,7 @@ public class Rdf2GoCompoundEventNotificationListenerTest {
 
         listener.onNotification(new SubscriptionId(), ce);
 
-        Assert.assertEquals(1, (int) nbCalls.getValue());
+        Assert.assertEquals(1, nbCalls.intValue());
     }
 
 }

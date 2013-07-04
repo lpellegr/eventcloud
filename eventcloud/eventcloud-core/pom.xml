@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
-			<artifactId>eventcloud-utils-trigwriter</artifactId>
+			<artifactId>eventcloud-utils</artifactId>
 			<version>1.5.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -31,16 +31,13 @@
 			<version>1.5.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-tdb</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-core</artifactId>
 			<version>1.5.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.ebmwebsourcing.projects.soceda.wp2-federated-middleware-layer.social-components</groupId>
 			<artifactId>social-filter</artifactId>
@@ -49,6 +46,15 @@
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-tdb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -84,7 +90,6 @@
 								<include>fr.inria.eventcloud.api.Event</include>
 								<include>fr.inria.eventcloud.api.Quadruple</include>
 								<include>fr.inria.eventcloud.api.QuadruplePattern</include>
-								<include>fr.inria.eventcloud.api.SubscriptionId</include>
 								<include>fr.inria.eventcloud.proxies.PublishProxyImpl</include>
 								<include>fr.inria.eventcloud.proxies.PutGetProxyImpl</include>
 								<include>fr.inria.eventcloud.overlay.SemanticPeerImpl</include>
@@ -106,7 +111,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>-Xmx4096m -XX:MaxPermSize=512M</argLine>
 					<systemPropertyVariables>
 						<java.security.policy>${project.build.testOutputDirectory}/proactive.security.policy</java.security.policy>
 						<log4j.configuration>file:${project.build.testOutputDirectory}/log4j.xml</log4j.configuration>

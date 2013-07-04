@@ -18,11 +18,11 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -68,7 +68,7 @@ public class NeighborTable<E extends Element> implements Serializable {
      * two (which corresponds to the upper and lower directions).
      */
     @SuppressWarnings("unchecked")
-    private ConcurrentMap<UUID, NeighborEntry<E>>[][] entries =
+    private ConcurrentMap<OverlayId, NeighborEntry<E>>[][] entries =
             new ConcurrentHashMap[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()][2];
 
     /**
@@ -84,12 +84,12 @@ public class NeighborTable<E extends Element> implements Serializable {
             // we over provision the number of neighbors per dimension but not
             // too much: 2*d per dimension for a total of 2*d^2
             this.entries[i][NeighborTable.DIRECTION_INFERIOR] =
-                    new ConcurrentHashMap<UUID, NeighborEntry<E>>(
+                    new ConcurrentHashMap<OverlayId, NeighborEntry<E>>(
                             nbNeighbors,
                             0.75f,
                             P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
             this.entries[i][NeighborTable.DIRECTION_SUPERIOR] =
-                    new ConcurrentHashMap<UUID, NeighborEntry<E>>(
+                    new ConcurrentHashMap<OverlayId, NeighborEntry<E>>(
                             nbNeighbors,
                             0.75f,
                             P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
@@ -156,12 +156,12 @@ public class NeighborTable<E extends Element> implements Serializable {
      * 
      * @return all the neighbors on the specified dimension and direction.
      */
-    public ConcurrentMap<UUID, NeighborEntry<E>> get(byte dimension,
-                                                     byte direction) {
+    public ConcurrentMap<OverlayId, NeighborEntry<E>> get(byte dimension,
+                                                          byte direction) {
         return this.entries[dimension][direction];
     }
 
-    public ConcurrentMap<UUID, NeighborEntry<E>>[] get(byte dimension) {
+    public ConcurrentMap<OverlayId, NeighborEntry<E>>[] get(byte dimension) {
         return this.entries[dimension];
     }
 
@@ -188,7 +188,7 @@ public class NeighborTable<E extends Element> implements Serializable {
      * 
      * @return the {@link NeighborEntry} found or <code>null</code>.
      */
-    public NeighborEntry<E> getNeighborEntry(UUID peerIdentifier) {
+    public NeighborEntry<E> getNeighborEntry(OverlayId peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 NeighborEntry<E> result =
@@ -213,7 +213,7 @@ public class NeighborTable<E extends Element> implements Serializable {
      * @return <code>true</code> if the data structure contains the peer
      *         identifier, <code>false</code> otherwise.
      */
-    public boolean contains(UUID peerIdentifier) {
+    public boolean contains(OverlayId peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
@@ -238,11 +238,12 @@ public class NeighborTable<E extends Element> implements Serializable {
      * @return {@code true }if the data structure contains the peer as neighbor,
      *         {@code false} otherwise.
      */
-    public boolean contains(UUID peerIdentifier, byte dimension, byte direction) {
+    public boolean contains(OverlayId peerIdentifier, byte dimension,
+                            byte direction) {
         return this.entries[dimension][direction].containsKey(peerIdentifier);
     }
 
-    public HomogenousPair<Byte> findDimensionAndDirection(UUID peerIdentifier) {
+    public HomogenousPair<Byte> findDimensionAndDirection(OverlayId peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
@@ -254,7 +255,7 @@ public class NeighborTable<E extends Element> implements Serializable {
         return null;
     }
 
-    public byte findDimension(UUID peerIdentifier) {
+    public byte findDimension(OverlayId peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
@@ -266,7 +267,7 @@ public class NeighborTable<E extends Element> implements Serializable {
         return -1;
     }
 
-    public byte findDirection(UUID peerIdentifier) {
+    public byte findDirection(OverlayId peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].containsKey(peerIdentifier)) {
@@ -289,7 +290,7 @@ public class NeighborTable<E extends Element> implements Serializable {
      *         table or {@code null} if the peer identified with
      *         {@code peerIdentifier} has not been found in the table.
      */
-    public HomogenousPair<Byte> remove(UUID peerIdentifier) {
+    public HomogenousPair<Byte> remove(OverlayId peerIdentifier) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 if (this.entries[dim][direction].remove(peerIdentifier) != null) {
@@ -301,7 +302,8 @@ public class NeighborTable<E extends Element> implements Serializable {
         return null;
     }
 
-    public boolean remove(UUID peerIdentifier, byte dimension, byte direction) {
+    public boolean remove(OverlayId peerIdentifier, byte dimension,
+                          byte direction) {
         return this.entries[dimension][direction].remove(peerIdentifier) != null;
     }
 
