@@ -880,6 +880,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     }
 
+    @SuppressWarnings("unused")
     private static class EhcacheEventsDeliveredCache extends
             EventsDeliveredCache {
 
@@ -1001,9 +1002,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                     .addFileCacheStore()
 
                     .location(
-                    // System.getProperty("java.io.tmpdir")
-                            "/home/lpellegr/Desktop" + File.separatorChar
-                                    + "infinispan-"
+                            System.getProperty("java.io.tmpdir")
+                                    + File.separatorChar + "infinispan-"
                                     + System.getProperty("user.name"))
 
                     .purgeOnStartup(true)
