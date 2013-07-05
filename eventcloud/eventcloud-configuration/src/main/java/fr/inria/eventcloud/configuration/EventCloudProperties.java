@@ -349,6 +349,12 @@ public class EventCloudProperties {
                     "eventcloud.subscriber.cache.max.entries", 200000);
 
     /**
+     * Defines whether JMX statistics must be exposed or not.
+     */
+    public static final PropertyBoolean EXPOSE_JMX_STATISTICS =
+            new PropertyBoolean("eventcloud.expose.jmx.statistics", false);
+
+    /**
      * Defines the soft limit used by each EventClouds registry that runs with
      * multi active serving.
      */
