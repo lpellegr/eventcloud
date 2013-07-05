@@ -99,6 +99,18 @@ public interface Peer extends Comparable<Peer>, Serializable {
     void leave() throws NetworkNotJoinedException;
 
     /**
+     * Reassigns the peer to another part of the overlay by forcing it to leave
+     * its position and joining the specified {@code landmarkPeer}.
+     * 
+     * @param landmarkPeer
+     *            the new peer to join.
+     * 
+     * @throws NetworkNotJoinException
+     *             if the current peer is not member of a network.
+     */
+    void reassign(Peer landmarkPeer) throws NetworkNotJoinedException;
+
+    /**
      * Receives and handles the specified {@code operation} asynchronously by
      * returning a future.
      * 
