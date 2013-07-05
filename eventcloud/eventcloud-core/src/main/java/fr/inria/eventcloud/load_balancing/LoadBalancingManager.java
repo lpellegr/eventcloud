@@ -65,6 +65,7 @@ public class LoadBalancingManager {
 
     private final SemanticCanOverlay overlay;
 
+    // indicates whether a load-balancing operation is in progress ot not
     private AtomicBoolean handlingImbalance;
 
     private AtomicInteger nbLoadReportsReceived;
@@ -207,13 +208,15 @@ public class LoadBalancingManager {
                                    Criterion[] criteria) {
         double result = 0;
 
-        for (List<LoadReport> reportList : reports.values()) {
-            for (LoadReport report : reportList) {
-                result += report.computeWeightedSum(criteria);
+        if (reports.size() > 0) {
+            for (List<LoadReport> reportList : reports.values()) {
+                for (LoadReport report : reportList) {
+                    result += report.computeWeightedSum(criteria);
+                }
             }
-        }
 
-        result /= reports.size();
+            result /= reports.size();
+        }
 
         return result;
     }
@@ -235,18 +238,16 @@ public class LoadBalancingManager {
             // push the current load report to others in an epidemic-style if it
             // large enough compared to the previous sent
             if (!LoadBalancingManager.this.handlingImbalance.get()) {
-
                 double currentLocalLoad = 0;
                 double lastLocalLoad = 0;
-                double imbalanceRatio = 0;
+                double imbalanceRatio =
+                        EventCloudProperties.LOAD_BALANCING_GOSSIP_RATIO.getDefaultValue();
 
                 if (this.lastReport != null) {
                     currentLocalLoad =
                             currentLoad.computeWeightedSum(LoadBalancingManager.this.criteria);
                     lastLocalLoad =
                             this.lastReport.computeWeightedSum(LoadBalancingManager.this.criteria);
-                    imbalanceRatio =
-                            EventCloudProperties.LOAD_BALANCING_GOSSIP_RATIO.getDefaultValue();
                 }
 
                 if (this.lastReport == null
