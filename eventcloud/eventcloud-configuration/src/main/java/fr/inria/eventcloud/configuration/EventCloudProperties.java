@@ -340,6 +340,21 @@ public class EventCloudProperties {
             "fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder");
 
     /**
+     * Defines the maximum number of entries that are kept in-memory on the
+     * subscriber side before to be moved on disk. Default value is set to
+     * 200000 which requires about 100MB of heap.
+     */
+    public static final PropertyInteger SUBSCRIBER_CACHE_MAX_ENTRIES =
+            new PropertyInteger(
+                    "eventcloud.subscriber.cache.max.entries", 200000);
+
+    /**
+     * Defines whether JMX statistics must be exposed or not.
+     */
+    public static final PropertyBoolean EXPOSE_JMX_STATISTICS =
+            new PropertyBoolean("eventcloud.expose.jmx.statistics", false);
+
+    /**
      * Defines the soft limit used by each EventClouds registry that runs with
      * multi active serving.
      */

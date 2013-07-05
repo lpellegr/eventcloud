@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
@@ -37,6 +36,12 @@ import net.sf.ehcache.config.PersistenceConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration.Strategy;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.global.GlobalConfigurationBuilder;
+import org.infinispan.eviction.EvictionStrategy;
+import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.util.concurrent.IsolationLevel;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
@@ -120,13 +125,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     private static final Logger log =
             LoggerFactory.getLogger(SubscribeProxyImpl.class);
 
-    private CacheManager cacheManager;
-
     // contains the ids of the events that have been delivered.
     // it is used to remove duplicates that may be received with SBCE1 and 2
-    private Cache eventsDeliveredCache;
-
-    private String cacheRepositoryPath;
+    private EventsDeliveredCache eventsDeliveredCache;
 
     // contains the subscriptions that have been registered from this proxy
     private ConcurrentMap<SubscriptionId, SubscriptionEntry<?>> subscriptions;
@@ -175,7 +176,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @Override
     public void endComponentActivity(Body body) {
-        this.closeEventsDeliveredCache();
+        this.eventsDeliveredCache.close();
     }
 
     /**
@@ -186,62 +187,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         this.bindingSolutions.clear();
         this.quadruplesSolutions.clear();
         this.subscriptions.clear();
+        this.eventsDeliveredCache.clear();
 
-        try {
-            this.cacheManager.clearAllStartingWith(this.getComponentId());
-            return true;
-        } catch (CacheException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private void createEventsDeliveredCache() {
-        String subscribeProxyIdentifier = this.getComponentId();
-
-        this.cacheRepositoryPath =
-                EventCloudProperties.getDefaultTemporaryPath() + "ehcache"
-                        + File.separatorChar + subscribeProxyIdentifier;
-
-        Cache eventsDeliveredCache =
-                new Cache(
-                        new CacheConfiguration(subscribeProxyIdentifier, 0).memoryStoreEvictionPolicy(
-                                MemoryStoreEvictionPolicy.LRU)
-                                .eternal(true)
-                                .persistence(
-                                        new PersistenceConfiguration().strategy(Strategy.LOCALTEMPSWAP))
-                                .transactionalMode(TransactionalMode.OFF));
-        eventsDeliveredCache.disableDynamicFeatures();
-
-        this.cacheManager =
-                this.getOrCreateCacheManager(this.cacheRepositoryPath);
-        this.cacheManager.addCache(eventsDeliveredCache);
-        this.eventsDeliveredCache = eventsDeliveredCache;
-    }
-
-    private String getComponentId() {
-        return this.componentURI.substring(
-                this.componentURI.lastIndexOf('/') + 1,
-                this.componentURI.length());
-    }
-
-    private CacheManager getOrCreateCacheManager(String diskStorePath) {
-        CacheManager cacheManager = CacheManager.getCacheManager("default");
-
-        if (cacheManager == null) {
-            cacheManager = this.createCacheManager(diskStorePath);
-        }
-
-        return cacheManager;
-    }
-
-    private CacheManager createCacheManager(String diskStorePath) {
-        Configuration cacheManagerConfig =
-                new Configuration().dynamicConfig(false).diskStore(
-                        new DiskStoreConfiguration().path(diskStorePath)).name(
-                        "default").updateCheck(false);
-
-        return CacheManager.create(cacheManagerConfig);
+        return true;
     }
 
     /**
@@ -288,26 +236,15 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             0.75f,
                             EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
-            this.createEventsDeliveredCache();
+            this.eventsDeliveredCache =
+                    new InfinispanEventsDeliveredCache(this.getComponentId());
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    SubscribeProxyImpl.this.closeEventsDeliveredCache();
+                    SubscribeProxyImpl.this.eventsDeliveredCache.close();
                 }
             }));
-        }
-    }
-
-    private void closeEventsDeliveredCache() {
-        this.cacheManager.shutdown();
-
-        try {
-            Files.deleteDirectory(this.cacheRepositoryPath);
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "There was an issue while trying to remove cache directory "
-                            + this.cacheRepositoryPath);
         }
     }
 
@@ -429,18 +366,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                                     subscription.getType() == NotificationListenerType.BINDING));
         }
 
-        @SuppressWarnings("unchecked")
-        List<NotificationId> notificationIds =
-                this.eventsDeliveredCache.getKeysNoDuplicateCheck();
-
-        // TODO we should avoid to iterate on all the keys
-        // a solution is to maintain the reverse mapping subscriptionId ->
-        // notificationId
-        for (NotificationId nid : notificationIds) {
-            if (nid.isFor(sid)) {
-                this.eventsDeliveredCache.remove(nid);
-            }
-        }
+        this.eventsDeliveredCache.removeEntriesFor(sid);
     }
 
     /**
@@ -488,7 +414,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // notification has not been yet delivered for the eventId associated to
         // this notification
         if (solution.isReady()) {
-            if (this.markAsDelivered(notification.getId(), subscriptionId)) {
+            if (this.eventsDeliveredCache.markAsDelivered(
+                    notification.getId(), subscriptionId)) {
                 this.deliver(subscriptionEntry, solution.getChunks());
             }
 
@@ -514,7 +441,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // which has been unregistered but also notifications that have been
         // already received for a same event
         if (subscriptionEntry != null
-                && this.markAsDelivered(notification.getId(), subscriptionId)) {
+                && this.eventsDeliveredCache.markAsDelivered(
+                        notification.getId(), subscriptionId)) {
             this.deliver(subscriptionEntry, notification.getContent());
         }
     }
@@ -538,7 +466,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         SubscriptionId subscriptionId = notification.getSubscriptionId();
 
-        if (this.eventsDeliveredCache.getQuiet(notification.getId()) != null) {
+        if (this.eventsDeliveredCache.contains(notification.getId())) {
             this.handleReceiveDuplicateSolution(notification);
             return;
         }
@@ -578,7 +506,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             // received some quadruple duplicates for a CE which has already be
             // delivered. In such a case we have to ignore these duplicates and
             // send a RemoveEphemeralSubscription to avoid a memory leak
-            if (!this.markAsDelivered(notification.getId(), subscriptionId)) {
+            if (!this.eventsDeliveredCache.markAsDelivered(
+                    notification.getId(), subscriptionId)) {
                 // this.handleReceiveDuplicateSolution(notification);
             } else {
                 CompoundEvent compoundEvent =
@@ -637,7 +566,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // notifications that have been already received for a same
         // event
         if (subscriptionEntry != null
-                && this.markAsDelivered(
+                && this.eventsDeliveredCache.markAsDelivered(
                         notification.getId(), notification.getSubscriptionId())) {
 
             CompoundEvent compoundEvent =
@@ -680,7 +609,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // which has been unregistered but also notifications that have been
         // already received for a same event
         if (subscriptionEntry != null
-                && this.markAsDelivered(
+                && this.eventsDeliveredCache.markAsDelivered(
                         notification.getId(), notification.getSubscriptionId())) {
             this.deliver(subscriptionEntry, notification.getMetaEventId());
         }
@@ -755,7 +684,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         // solution. Thus, the subscribe proxy receives a notification for each
         // quadruple even if all these quadruples are part of the same compound
         // event.
-        if (!this.markAsDelivered(notificationId, subscriptionId)) {
+        if (!this.eventsDeliveredCache.markAsDelivered(
+                notificationId, subscriptionId)) {
             return null;
         }
 
@@ -916,6 +846,222 @@ public class SubscribeProxyImpl extends AbstractProxy implements
         return this.componentURI;
     }
 
+    private String getComponentId() {
+        return this.componentURI.substring(
+                this.componentURI.lastIndexOf('/') + 1,
+                this.componentURI.length());
+    }
+
+    private static abstract class EventsDeliveredCache {
+
+        protected final String diskStorePath;
+
+        public EventsDeliveredCache(String diskStorePath) {
+            this.diskStorePath = diskStorePath;
+        }
+
+        public abstract void clear();
+
+        public abstract boolean contains(NotificationId notificationId);
+
+        public abstract boolean markAsDelivered(NotificationId notificationId,
+                                                SubscriptionId subscriptionId);
+
+        public abstract void removeEntriesFor(SubscriptionId subscriptionId);
+
+        public void close() {
+            try {
+                Files.deleteDirectory(this.diskStorePath);
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        "There was an issue while trying to remove cache directory "
+                                + this.diskStorePath);
+            }
+        }
+
+    }
+
+    @SuppressWarnings("unused")
+    private static class EhcacheEventsDeliveredCache extends
+            EventsDeliveredCache {
+
+        private CacheManager cacheManager;
+
+        private Cache cache;
+
+        private String proxyIdentifier;
+
+        public EhcacheEventsDeliveredCache(String subscribeProxyIdentifier) {
+            super(EventCloudProperties.getDefaultTemporaryPath() + "ehcache"
+                    + File.separatorChar + subscribeProxyIdentifier);
+
+            this.proxyIdentifier = subscribeProxyIdentifier;
+
+            this.cache = this.createCache();
+        }
+
+        private Cache createCache() {
+            Cache eventsDeliveredCache =
+                    new Cache(
+                            new CacheConfiguration(this.proxyIdentifier, 0).memoryStoreEvictionPolicy(
+                                    MemoryStoreEvictionPolicy.LRU)
+                                    .eternal(true)
+                                    .persistence(
+                                            new PersistenceConfiguration().strategy(Strategy.LOCALTEMPSWAP))
+                                    .transactionalMode(TransactionalMode.OFF));
+            eventsDeliveredCache.disableDynamicFeatures();
+
+            this.cacheManager =
+                    this.getOrCreateCacheManager(super.diskStorePath);
+            this.cacheManager.addCache(eventsDeliveredCache);
+
+            return this.cacheManager.getCache(this.proxyIdentifier);
+        }
+
+        private CacheManager getOrCreateCacheManager(String diskStorePath) {
+            CacheManager cacheManager = CacheManager.getCacheManager("default");
+
+            if (cacheManager == null) {
+                cacheManager = this.createCacheManager(diskStorePath);
+            }
+
+            return cacheManager;
+        }
+
+        private CacheManager createCacheManager(String diskStorePath) {
+            Configuration cacheManagerConfig =
+                    new Configuration().dynamicConfig(false)
+                            .diskStore(
+                                    new DiskStoreConfiguration().path(diskStorePath))
+                            .name("default")
+                            .updateCheck(false);
+
+            return CacheManager.create(cacheManagerConfig);
+        }
+
+        @Override
+        public void clear() {
+            this.cacheManager.clearAllStartingWith(this.proxyIdentifier);
+        }
+
+        @Override
+        public void close() {
+            this.cacheManager.shutdown();
+
+            super.close();
+        }
+
+        @Override
+        public boolean contains(NotificationId notificationId) {
+            return this.cache.getQuiet(notificationId) != null;
+        }
+
+        @Override
+        public boolean markAsDelivered(NotificationId notificationId,
+                                       SubscriptionId subscriptionId) {
+            Element existing =
+                    this.cache.putIfAbsent(new Element(
+                            notificationId, subscriptionId));
+
+            return existing == null;
+        }
+
+        @Override
+        public void removeEntriesFor(SubscriptionId subscriptionId) {
+            @SuppressWarnings("unchecked")
+            List<NotificationId> notificationIds =
+                    this.cache.getKeysNoDuplicateCheck();
+
+            // TODO we should avoid to iterate all the keys
+            for (NotificationId nid : notificationIds) {
+                if (nid.isFor(subscriptionId)) {
+                    this.cache.remove(nid);
+                }
+            }
+        }
+
+    }
+
+    private static class InfinispanEventsDeliveredCache extends
+            EventsDeliveredCache {
+
+        private final EmbeddedCacheManager cacheManager;
+
+        private final org.infinispan.Cache<NotificationId, SubscriptionId> cache;
+
+        public InfinispanEventsDeliveredCache(String subscribeProxyIdentifier) {
+            super(EventCloudProperties.getDefaultTemporaryPath() + "infinispan"
+                    + File.separatorChar + subscribeProxyIdentifier);
+
+            GlobalConfigurationBuilder config =
+                    new GlobalConfigurationBuilder();
+            config.globalJmxStatistics().allowDuplicateDomains(true).disable();
+            config.serialization().addAdvancedExternalizer(
+                    NotificationId.SERIALIZER).addAdvancedExternalizer(
+                    SubscriptionId.SERIALIZER);
+
+            this.cacheManager = new DefaultCacheManager(config.build());
+
+            this.cache = this.createCache();
+        }
+
+        private org.infinispan.Cache<NotificationId, SubscriptionId> createCache() {
+            ConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.loaders()
+                    .passivation(true)
+                    .addFileCacheStore()
+                    .location(super.diskStorePath)
+                    .purgeOnStartup(true)
+                    .async()
+                    .eviction()
+                    .maxEntries(
+                            EventCloudProperties.SUBSCRIBER_CACHE_MAX_ENTRIES.getValue())
+                    .strategy(EvictionStrategy.LRU)
+                    .jmxStatistics()
+                    .disable()
+                    .locking()
+                    .isolationLevel(IsolationLevel.NONE);
+
+            this.cacheManager.defineConfiguration("default", builder.build());
+
+            return this.cacheManager.<NotificationId, SubscriptionId> getCache("default");
+        }
+
+        @Override
+        public void clear() {
+            this.cache.stop();
+            this.cache.start();
+        }
+
+        @Override
+        public void close() {
+            this.cacheManager.stop();
+            super.close();
+        }
+
+        @Override
+        public boolean contains(NotificationId notificationId) {
+            return this.cache.containsKey(notificationId);
+        }
+
+        @Override
+        public boolean markAsDelivered(NotificationId notificationId,
+                                       SubscriptionId subscriptionId) {
+            return this.cache.putIfAbsent(notificationId, subscriptionId) == null;
+        }
+
+        @Override
+        public void removeEntriesFor(SubscriptionId subscriptionId) {
+            // TODO we should avoid to iterate all the keys
+            for (NotificationId nid : this.cache.keySet()) {
+                if (nid.isFor(subscriptionId)) {
+                    this.cache.remove(nid);
+                }
+            }
+        }
+
+    }
+
     private static final class SubscriptionEntry<T extends NotificationListener<?>> {
 
         private final Subscription subscription;
@@ -927,15 +1073,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             this.listener = listener;
         }
 
-    }
-
-    private boolean markAsDelivered(NotificationId notificationId,
-                                    SubscriptionId subscriptionId) {
-        Element existing =
-                this.eventsDeliveredCache.putIfAbsent(new Element(
-                        notificationId, subscriptionId));
-
-        return existing == null;
     }
 
 }
