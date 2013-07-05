@@ -44,7 +44,8 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
- * Entity in charge of managing load-balancing features.
+ * Entity in charge of managing load-balancing features. All the job is made is
+ * the internal {@link LoadBalancingService#runOneIteration()} method.
  * 
  * @author lpellegr
  */
@@ -99,10 +100,20 @@ public class LoadBalancingManager {
         this.scheduledService = new LoadBalancingService();
     }
 
+    /**
+     * Returns the local load factor at the time the method is called.
+     * 
+     * @return the local load factor at the time the method is called.
+     */
     public double getLocalLoad() {
         return this.getCurrentLoad().computeWeightedSum(this.criteria);
     }
 
+    /**
+     * Returns the current approximate system load.
+     * 
+     * @return the current approximate system load.
+     */
     public double getSystemLoad() {
         return summarize(this.loadReportsReceived, this.criteria);
     }
@@ -223,7 +234,7 @@ public class LoadBalancingManager {
 
     public class LoadBalancingService extends AbstractScheduledService {
 
-        private LoadReport lastReport;
+        private LoadReport lastReportGossiped;
 
         @Override
         protected void runOneIteration() throws Exception {
@@ -235,22 +246,23 @@ public class LoadBalancingManager {
 
             LoadReport currentLoad = LoadBalancingManager.this.getCurrentLoad();
 
-            // push the current load report to others in an epidemic-style if it
-            // large enough compared to the previous sent
             if (!LoadBalancingManager.this.handlingImbalance.get()) {
                 double currentLocalLoad = 0;
                 double lastLocalLoad = 0;
+
                 double imbalanceRatio =
                         EventCloudProperties.LOAD_BALANCING_GOSSIP_RATIO.getDefaultValue();
 
-                if (this.lastReport != null) {
+                if (this.lastReportGossiped != null) {
                     currentLocalLoad =
                             currentLoad.computeWeightedSum(LoadBalancingManager.this.criteria);
                     lastLocalLoad =
-                            this.lastReport.computeWeightedSum(LoadBalancingManager.this.criteria);
+                            this.lastReportGossiped.computeWeightedSum(LoadBalancingManager.this.criteria);
                 }
 
-                if (this.lastReport == null
+                // push the current load report to others in an epidemic-style
+                // if it is large enough compared to the previous sent
+                if (this.lastReportGossiped == null
                         || currentLocalLoad > imbalanceRatio * lastLocalLoad
                         || currentLocalLoad < lastLocalLoad / imbalanceRatio) {
                     log.debug(
@@ -261,7 +273,7 @@ public class LoadBalancingManager {
                     LoadBalancingManager.this.gossiper.push(
                             LoadBalancingManager.this.overlay, currentLoad);
 
-                    this.lastReport = currentLoad;
+                    this.lastReportGossiped = currentLoad;
 
                     switch (LoadBalancingManager.this.getLoadState()) {
                         case UNDERLOADED:
@@ -291,8 +303,7 @@ public class LoadBalancingManager {
                                         bestSuitedPeer,
                                         LoadBalancingManager.this.overlay.getId());
 
-                                bestSuitedPeer.leave();
-                                bestSuitedPeer.join(LoadBalancingManager.this.overlay.getStub());
+                                bestSuitedPeer.reassign(LoadBalancingManager.this.overlay.getStub());
                             } else {
                                 log.debug("Allocating a new peer in the cloud");
 

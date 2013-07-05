@@ -236,6 +236,22 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    public void reassign(Peer landmarkPeer) throws NetworkNotJoinedException {
+        this.leave();
+
+        try {
+            this.join(landmarkPeer);
+        } catch (NetworkAlreadyJoinedException e) {
+            throw new IllegalStateException(e);
+        } catch (PeerNotActivatedException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @MemberOf("receiveCallableOperation")
     public ResponseOperation receive(CallableOperation operation) {
         return operation.handle(this.overlay);
