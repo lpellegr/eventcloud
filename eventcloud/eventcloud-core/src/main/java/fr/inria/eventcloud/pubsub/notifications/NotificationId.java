@@ -16,7 +16,14 @@
  **/
 package fr.inria.eventcloud.pubsub.notifications;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
+import java.util.Set;
+
+import org.infinispan.marshall.AdvancedExternalizer;
+import org.infinispan.util.Util;
 
 import com.google.common.base.Objects;
 import com.hp.hpl.jena.graph.Node;
@@ -32,6 +39,9 @@ import fr.inria.eventcloud.api.SubscriptionId;
 public final class NotificationId implements Serializable {
 
     private static final long serialVersionUID = 150L;
+
+    public static final NotificationIdExternalizer SERIALIZER =
+            new NotificationIdExternalizer();
 
     protected final SubscriptionId subscriptionId;
 
@@ -95,6 +105,44 @@ public final class NotificationId implements Serializable {
     public String toString() {
         return this.getClass().getSimpleName() + "{eventId=" + this.eventId
                 + ", subscriptionId=" + this.subscriptionId.toString() + "}";
+    }
+
+    public static class NotificationIdExternalizer implements
+            AdvancedExternalizer<NotificationId> {
+
+        private static final long serialVersionUID = 150L;
+
+        @Override
+        public void writeObject(ObjectOutput output,
+                                NotificationId notificationId)
+                throws IOException {
+            SubscriptionId.SERIALIZER.writeObject(
+                    output, notificationId.subscriptionId);
+            output.writeUTF(notificationId.eventId);
+        }
+
+        @Override
+        public NotificationId readObject(ObjectInput input) throws IOException,
+                ClassNotFoundException {
+            return new NotificationId(
+                    SubscriptionId.SERIALIZER.readObject(input),
+                    input.readUTF());
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Set<Class<? extends NotificationId>> getTypeClasses() {
+            return Util.<Class<? extends NotificationId>> asSet(NotificationId.class);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Integer getId() {
+            return 1;
+        }
+
     }
 
 }

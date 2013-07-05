@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.overlay;
 
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +27,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -102,6 +110,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     private final PublishSubscribeOperationsDelayer publishSubscribeOperationsDelayer;
 
     private final LoadBalancingManager loadBalancingManager;
+
+    /*
+     * Timestamp that indicates at which time the peer has performed a join operation. 
+     */
+    private long joinTime;
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -218,6 +231,25 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             this.loadBalancingManager = null;
         }
 
+        if (EventCloudProperties.EXPOSE_JMX_STATISTICS.getValue()) {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
+            try {
+                mbs.registerMBean(
+                        new fr.inria.eventcloud.jmx.SemanticPeer(this),
+                        new ObjectName(
+                                "fr.inria.eventcloud:type=SemanticPeer,id="
+                                        + super.id));
+            } catch (InstanceAlreadyExistsException e) {
+                e.printStackTrace();
+            } catch (MBeanRegistrationException e) {
+                e.printStackTrace();
+            } catch (NotCompliantMBeanException e) {
+                e.printStackTrace();
+            } catch (MalformedObjectNameException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void removeOutdatedEphemeralSubscriptions() {
@@ -301,6 +333,15 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     public boolean hasSocialFilter() {
         return this.socialFilter != null;
+    }
+
+    /**
+     * Returns the time at which the peer has performed the last join operation.
+     * 
+     * @return the time at which the peer has performed the last join operation.
+     */
+    public long getJoinTime() {
+        return this.joinTime;
     }
 
     public LoadBalancingManager getLoadBalancingManager() {
@@ -619,6 +660,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         super.join(landmarkPeer);
 
         this.miscDatastore.getStatsRecorder().sync();
+
+        this.joinTime = System.currentTimeMillis();
     }
 
     /**
