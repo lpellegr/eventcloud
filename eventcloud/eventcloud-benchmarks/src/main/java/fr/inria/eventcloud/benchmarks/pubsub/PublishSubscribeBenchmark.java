@@ -484,7 +484,8 @@ public class PublishSubscribeBenchmark {
                                                         PublishSubscribeBenchmark.this.pointToPointEntryMeasurements));
                             }
                         } catch (Exception e) {
-                            throw new RuntimeException(e);
+                            e.printStackTrace();
+                            System.exit(1);
                         }
                     }
 
