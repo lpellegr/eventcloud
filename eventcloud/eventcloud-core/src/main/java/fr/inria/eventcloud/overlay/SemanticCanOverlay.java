@@ -226,7 +226,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                             this,
                             new Criterion[] {new NbQuadrupleStoredCriterion(
                                     this.miscDatastore.getStatsRecorder())});
-            this.loadBalancingManager.start();
         } else {
             this.loadBalancingManager = null;
         }
@@ -660,8 +659,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         super.join(landmarkPeer);
 
         this.miscDatastore.getStatsRecorder().sync();
-
         this.joinTime = System.currentTimeMillis();
+
+        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+            this.loadBalancingManager.start();
+        }
+
     }
 
     /**
@@ -691,6 +694,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      */
     @Override
     public void leave() {
+        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+            this.loadBalancingManager.stop();
+        }
+
         super.leave();
 
         this.clear();

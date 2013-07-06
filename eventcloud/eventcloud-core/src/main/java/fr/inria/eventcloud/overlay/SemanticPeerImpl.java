@@ -132,6 +132,19 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    public void endComponentActivity(Body body) {
+        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+            ((SemanticCanOverlay) super.overlay).getLoadBalancingManager()
+                    .stop();
+        }
+
+        super.endComponentActivity(body);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void runComponentActivity(Body body) {
         this.multiActiveService = new MultiActiveService(body);
 
