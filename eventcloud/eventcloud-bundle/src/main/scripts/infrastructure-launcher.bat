@@ -102,6 +102,8 @@ goto:eof
   for /F %%i in ("%REGISTRY_INSTANCE_FILE%") do set BASENAME_REGISTRY_INSTANCE_FILE=%%~ni
   start "EventCloudsRegistry" /b javaw -Xms128m -Xmx256m ^
      -server ^
+     -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.local.only=false ^
+     -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false ^ 
      -Djava.security.policy="%PATH_TO_RESOURCES%/proactive.security.policy" ^
      -Deventcloud.bundle.home="%BUNDLE_HOME%" ^
      -Deventcloud.configuration="%PATH_TO_RESOURCES%/eventcloud.properties" ^
