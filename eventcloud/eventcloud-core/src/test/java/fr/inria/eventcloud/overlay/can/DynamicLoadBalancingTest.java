@@ -77,7 +77,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
         };
     }
 
-    @Test
+    // @Test
     public void test() {
 
         while (true) {
