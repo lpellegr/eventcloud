@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.jmx;
 
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
@@ -24,11 +27,17 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  * 
  * @author lpellegr
  */
-public class SemanticPeer implements SemanticPeerMBean {
+public class SemanticPeerMBeanImpl extends StandardMBean implements
+        SemanticPeerMBean {
+
+    // TODO: could be improved by using a StandardEmitterMBean to push updates
+    // when required only
 
     private final SemanticCanOverlay overlay;
 
-    public SemanticPeer(SemanticCanOverlay semanticCanOverlay) {
+    public SemanticPeerMBeanImpl(SemanticCanOverlay semanticCanOverlay)
+            throws NotCompliantMBeanException {
+        super(SemanticPeerMBean.class);
         this.overlay = semanticCanOverlay;
     }
 

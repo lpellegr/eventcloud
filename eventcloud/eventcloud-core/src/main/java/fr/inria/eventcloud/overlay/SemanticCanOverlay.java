@@ -236,7 +236,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
             try {
                 mbs.registerMBean(
-                        new fr.inria.eventcloud.jmx.SemanticPeer(this),
+                        new fr.inria.eventcloud.jmx.SemanticPeerMBeanImpl(this),
                         new ObjectName(
                                 "fr.inria.eventcloud:type=SemanticPeer,id="
                                         + super.id));
