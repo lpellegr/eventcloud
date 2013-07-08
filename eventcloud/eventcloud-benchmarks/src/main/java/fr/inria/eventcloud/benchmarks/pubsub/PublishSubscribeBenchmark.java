@@ -490,8 +490,7 @@ public class PublishSubscribeBenchmark {
                     }
 
                     public void runBenchmark(StatsRecorder recorder)
-                            throws EventCloudIdNotManaged, TimeoutException,
-                            ProActiveException, IOException {
+                            throws TimeoutException {
                         // subscribes
                         long subscribeStartTime = System.currentTimeMillis();
 

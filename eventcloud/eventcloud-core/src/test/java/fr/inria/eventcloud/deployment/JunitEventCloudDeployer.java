@@ -23,7 +23,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 
 /**
  * This class is used to specialize an {@link EventCloudDeployer} for unit
- * testing by using by default a {@link SemanticInMemoryOverlayProvider}.
+ * testing.
  * 
  * @author lpellegr
  */

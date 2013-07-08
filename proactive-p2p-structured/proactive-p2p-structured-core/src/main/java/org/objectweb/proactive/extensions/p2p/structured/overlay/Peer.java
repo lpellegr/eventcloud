@@ -105,7 +105,7 @@ public interface Peer extends Comparable<Peer>, Serializable {
      * @param landmarkPeer
      *            the new peer to join.
      * 
-     * @throws NetworkNotJoinException
+     * @throws NetworkNotJoinedException
      *             if the current peer is not member of a network.
      */
     void reassign(Peer landmarkPeer) throws NetworkNotJoinedException;

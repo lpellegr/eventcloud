@@ -16,8 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import java.util.UUID;
-
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
@@ -34,7 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  * 
- * @see CanOverlay#hasNeighbor(UUID)
+ * @see CanOverlay#hasNeighbor(OverlayId)
  */
 public class HasNeighborOperation<E extends Element> extends CallableOperation {
 

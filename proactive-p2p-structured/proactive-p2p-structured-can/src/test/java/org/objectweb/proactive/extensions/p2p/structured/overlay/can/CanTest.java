@@ -111,7 +111,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     @Test
     public void testConcurrentLeaveRequests() throws InterruptedException,
-            NetworkAlreadyJoinedException, PeerNotActivatedException {
+            NetworkAlreadyJoinedException {
         final Peer[] extraPeers = new Peer[35];
 
         log.info("Inserting {} additional peers", extraPeers.length);
@@ -148,8 +148,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     @Test
     public void testConcurrentJoinAndLeaveRequests()
-            throws NetworkAlreadyJoinedException, PeerNotActivatedException,
-            InterruptedException {
+            throws NetworkAlreadyJoinedException, InterruptedException {
         final RequestType[] requests = new RequestType[34];
 
         final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
@@ -228,7 +227,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     @Test
     public void testConcurrentJoinAndRoutingRequests()
-            throws NetworkAlreadyJoinedException, InterruptedException {
+            throws InterruptedException {
         final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
                 new ConcurrentLinkedQueue<Peer>();
 
