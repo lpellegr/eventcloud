@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -151,7 +150,7 @@ public abstract class RequestResponseManager implements Serializable {
      * Pushes the final response and notify the initial sender that a new
      * response has been received. The notification is done to remove the
      * synchronization point (which has been previously set by
-     * {@link #waitForFinalResponse(UUID)}).
+     * {@link #waitForFinalResponse(MessageId)}).
      * 
      * @param response
      *            the response to add to the list of responses received.
