@@ -32,7 +32,7 @@ import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.objectweb.proactive.multiactivity.priority.PriorityConstraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,7 +146,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public void runComponentActivity(Body body) {
-        this.multiActiveService = new MultiActiveService(body);
+        this.multiActiveService = new ComponentMultiActiveService(body);
 
         List<PriorityConstraint> priorityConstraints =
                 new ArrayList<PriorityConstraint>();

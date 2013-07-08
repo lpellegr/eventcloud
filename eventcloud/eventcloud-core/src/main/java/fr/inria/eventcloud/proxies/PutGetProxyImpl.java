@@ -25,7 +25,7 @@ import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
-import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
@@ -230,7 +230,7 @@ public class PutGetProxyImpl extends AbstractProxy implements PutGetProxy,
      */
     @Override
     public void runComponentActivity(Body body) {
-        new MultiActiveService(body).multiActiveServing(
+        new ComponentMultiActiveService(body).multiActiveServing(
                 EventCloudProperties.MAO_HARD_LIMIT_PUTGET_PROXIES.getValue(),
                 true, false);
     }

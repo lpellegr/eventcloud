@@ -27,7 +27,7 @@ import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
-import org.objectweb.proactive.multiactivity.MultiActiveService;
+import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,7 +156,7 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
      */
     @Override
     public void runComponentActivity(Body body) {
-        new MultiActiveService(body).multiActiveServing(
+        new ComponentMultiActiveService(body).multiActiveServing(
                 EventCloudProperties.MAO_HARD_LIMIT_PUBLISH_PROXIES.getValue(),
                 true, false);
     }
