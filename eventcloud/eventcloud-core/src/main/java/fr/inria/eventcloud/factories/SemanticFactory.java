@@ -286,8 +286,8 @@ public final class SemanticFactory extends AbstractFactory {
                         nodeProvider, SemanticPeerImpl.PEER_VN));
     }
 
-    private static <T extends StructuredOverlay> SemanticPeer createSemanticPeer(SerializableProvider<T> overlayProvider,
-                                                                                 Map<String, Object> context) {
+    private synchronized static <T extends StructuredOverlay> SemanticPeer createSemanticPeer(SerializableProvider<T> overlayProvider,
+                                                                                              Map<String, Object> context) {
         try {
             SemanticPeer peer =
                     ComponentUtils.createComponentAndGetInterface(

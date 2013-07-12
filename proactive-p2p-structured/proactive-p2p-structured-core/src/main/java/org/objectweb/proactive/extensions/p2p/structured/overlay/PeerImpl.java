@@ -16,7 +16,9 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.Compatible;
@@ -26,6 +28,7 @@ import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
+import org.objectweb.proactive.core.security.exceptions.RenegotiateSessionException;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
@@ -35,6 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
+import org.objectweb.proactive.extensions.p2p.structured.multiactivies.PeerServingPolicy;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
@@ -60,6 +64,7 @@ import org.slf4j.LoggerFactory;
         @Group(name = "commonObjectMethods", selfCompatible = true),
         @Group(name = "join", selfCompatible = false),
         @Group(name = "leave", selfCompatible = false),
+        @Group(name = "reassign", selfCompatible = false),
         @Group(name = "receiveCallableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation", condition = "isCompatible"),
         @Group(name = "receiveRunnableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation", condition = "isCompatible"),
         @Group(name = "routing", selfCompatible = true)})
@@ -67,16 +72,19 @@ import org.slf4j.LoggerFactory;
         // common object methods group is compatible with all other groups
         @Compatible(value = {"commonObjectMethods", "join"}),
         @Compatible(value = {"commonObjectMethods", "leave"}),
+        @Compatible(value = {"commonObjectMethods", "reassign"}),
         @Compatible(value = {"commonObjectMethods", "receiveCallableOperation"}),
         @Compatible(value = {"commonObjectMethods", "receiveRunnableOperation"}),
         @Compatible(value = {"commonObjectMethods", "routing"}),
         // callable operations compatibility
         @Compatible(value = {"receiveCallableOperation", "join"}, condition = "isCompatibleWithJoin"),
         @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "isCompatibleWithLeave"),
+        @Compatible(value = {"receiveCallableOperation", "reassign"}, condition = "isCompatibleWithReassign"),
         @Compatible(value = {"receiveCallableOperation", "routing"}, condition = "isCompatibleWithRouting"),
         // runnable operation compatibility
         @Compatible(value = {"receiveRunnableOperation", "join"}, condition = "isCompatibleWithJoin"),
         @Compatible(value = {"receiveRunnableOperation", "leave"}, condition = "isCompatibleWithLeave"),
+        @Compatible(value = {"receiveRunnableOperation", "reassign"}, condition = "isCompatibleWithReassign"),
         @Compatible(value = {"receiveRunnableOperation", "routing"}, condition = "isCompatibleWithRouting"),
         // callable and runnable operations are compatible under some conditions
         @Compatible(value = {
@@ -131,7 +139,8 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @Override
     public void runComponentActivity(Body body) {
         this.multiActiveService = new ComponentMultiActiveService(body);
-        this.multiActiveService.multiActiveServing(
+        this.multiActiveService.policyServing(
+                new PeerServingPolicy(), null,
                 P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
                 false);
     }
@@ -237,6 +246,7 @@ public class PeerImpl extends AbstractComponent implements Peer,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("reassign")
     public void reassign(Peer landmarkPeer) throws NetworkNotJoinedException {
         this.leave();
 
@@ -308,6 +318,24 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @Override
     public String dump() {
         return this.overlay.dump();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void inject(List<org.objectweb.proactive.core.body.request.Request> requests) {
+        Body body = PAActiveObject.getBodyOnThis();
+
+        for (org.objectweb.proactive.core.body.request.Request request : requests) {
+            try {
+                body.receiveRequest(request);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (RenegotiateSessionException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

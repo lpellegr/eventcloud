@@ -216,7 +216,7 @@ public class EventCloudProperties {
     public static final PropertyDouble LOAD_BALANCING_CRITERION_NB_QUADS_STORED_EMERGENCY_THRESHOLD =
             new PropertyDouble(
                     "eventcloud.load.balancing.criterion.nb.quadruples.stored.emergency.threshold",
-                    (double) Long.MAX_VALUE);
+                    10000000.0);
 
     /**
      * This property is used to have the possibility to restore a repository

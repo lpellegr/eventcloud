@@ -30,6 +30,7 @@ import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.multiactivies.PeerServingPolicy;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
@@ -162,8 +163,8 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
                     1, 8, "sendv", IndexEphemeralSubscriptionRequest.class));
         }
 
-        this.multiActiveService.multiActiveServing(
-                priorityConstraints,
+        this.multiActiveService.policyServing(
+                new PeerServingPolicy(), priorityConstraints,
                 P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
                 false);
     }
@@ -256,7 +257,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
 
     @MemberOf("routing")
     private BooleanWrapper addAsync(Quadruple quad) {
-        PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
+        super.send(new AddQuadrupleRequest(quad));
 
         return new BooleanWrapper(true);
     }

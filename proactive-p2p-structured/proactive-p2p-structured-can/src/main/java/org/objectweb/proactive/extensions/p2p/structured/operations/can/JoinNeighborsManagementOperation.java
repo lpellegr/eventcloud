@@ -51,4 +51,13 @@ public abstract class JoinNeighborsManagementOperation extends
     public boolean isCompatible(CallableOperation other) {
         return other instanceof JoinIntroduceOperation;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isJoinOperation() {
+        return true;
+    }
+
 }

@@ -33,6 +33,12 @@ public interface Operation extends Serializable {
 
     boolean isCompatibleWithLeave();
 
+    boolean isCompatibleWithReassign();
+
     boolean isCompatibleWithRouting();
+
+    boolean isJoinOperation();
+
+    boolean isLeaveOperation();
 
 }

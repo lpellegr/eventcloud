@@ -99,4 +99,20 @@ public class JoinWelcomeOperation<E extends Element> extends CallableOperation {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithReassign() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isJoinOperation() {
+        return true;
+    }
+
 }

@@ -16,6 +16,9 @@
  **/
 package fr.inria.eventcloud.jmx;
 
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
+
+import fr.inria.eventcloud.load_balancing.LoadState;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -30,9 +33,13 @@ public interface SemanticPeerMBean {
 
     boolean isStaticLoadBalancingEnabled();
 
+    OverlayId getId();
+
     double getLocalLoad();
 
-    double getAverageSystemLoad();
+    double getAverageOverlayLoad();
+
+    LoadState getLoadState();
 
     long getJoinTime();
 

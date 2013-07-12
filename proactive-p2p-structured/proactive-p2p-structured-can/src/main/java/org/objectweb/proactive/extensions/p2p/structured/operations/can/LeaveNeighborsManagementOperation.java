@@ -61,4 +61,12 @@ public class LeaveNeighborsManagementOperation extends CallableOperation {
         return other instanceof JoinIntroduceOperation;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isLeaveOperation() {
+        return true;
+    }
+
 }

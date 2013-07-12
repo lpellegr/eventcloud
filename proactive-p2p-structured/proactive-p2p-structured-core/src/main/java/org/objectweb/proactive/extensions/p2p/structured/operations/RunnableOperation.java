@@ -55,7 +55,31 @@ public abstract class RunnableOperation implements Operation {
      * {@inheritDoc}
      */
     @Override
+    public boolean isCompatibleWithReassign() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isCompatibleWithRouting() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isJoinOperation() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isLeaveOperation() {
         return false;
     }
 
