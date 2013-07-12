@@ -48,6 +48,14 @@ public abstract class MutualExclusionOperation extends RunnableOperation {
      * {@inheritDoc}
      */
     @Override
+    public boolean isCompatibleWithReassign() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isCompatibleWithRouting() {
         return true;
     }

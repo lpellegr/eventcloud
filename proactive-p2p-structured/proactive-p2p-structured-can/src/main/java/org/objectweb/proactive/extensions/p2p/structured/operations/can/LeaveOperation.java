@@ -82,4 +82,12 @@ public class LeaveOperation<E extends Element> extends CallableOperation {
         return ((CanOverlay<E>) overlay).processLeave(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isLeaveOperation() {
+        return true;
+    }
+
 }

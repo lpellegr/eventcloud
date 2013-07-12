@@ -69,4 +69,12 @@ public class JoinIntroduceOperation<E extends Element> extends
         return ((CanOverlay<E>) overlay).handleJoinIntroduceOperation(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isJoinOperation() {
+        return true;
+    };
+
 }

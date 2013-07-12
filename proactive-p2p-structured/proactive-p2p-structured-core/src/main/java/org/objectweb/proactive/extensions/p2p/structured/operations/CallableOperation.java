@@ -61,11 +61,35 @@ public abstract class CallableOperation implements Operation {
      * {@inheritDoc}
      */
     @Override
+    public boolean isCompatibleWithReassign() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isCompatibleWithRouting() {
         return false;
     }
 
     public boolean isCompatible(CallableOperation other) {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isJoinOperation() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isLeaveOperation() {
         return false;
     }
 

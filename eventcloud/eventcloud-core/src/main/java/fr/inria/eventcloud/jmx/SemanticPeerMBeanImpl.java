@@ -19,7 +19,10 @@ package fr.inria.eventcloud.jmx;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
+
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.load_balancing.LoadState;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -61,6 +64,26 @@ public class SemanticPeerMBeanImpl extends StandardMBean implements
      * {@inheritDoc}
      */
     @Override
+    public OverlayId getId() {
+        return this.overlay.getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LoadState getLoadState() {
+        if (this.isDynamicLoadBalancingEnabled()) {
+            return this.overlay.getLoadBalancingManager().getState();
+        }
+
+        return LoadState.NORMAL;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public double getLocalLoad() {
         if (this.isDynamicLoadBalancingEnabled()) {
             return this.overlay.getLoadBalancingManager().getLocalLoad();
@@ -73,9 +96,10 @@ public class SemanticPeerMBeanImpl extends StandardMBean implements
      * {@inheritDoc}
      */
     @Override
-    public double getAverageSystemLoad() {
+    public double getAverageOverlayLoad() {
         if (this.isDynamicLoadBalancingEnabled()) {
-            return this.overlay.getLoadBalancingManager().getSystemLoad();
+            return this.overlay.getLoadBalancingManager()
+                    .getAverageOverlayLoad();
         }
 
         return 0;

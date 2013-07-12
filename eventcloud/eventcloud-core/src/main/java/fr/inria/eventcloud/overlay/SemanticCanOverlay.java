@@ -655,6 +655,20 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
+    public void create() {
+        super.create();
+
+        this.joinTime = System.currentTimeMillis();
+
+        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+            this.loadBalancingManager.start();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void join(Peer landmarkPeer) {
         super.join(landmarkPeer);
 
@@ -1050,6 +1064,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
         this.subscriptionsCache.invalidateAll();
         this.subscriberConnectionFailures.clear();
+
+        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+            this.loadBalancingManager.clear();
+        }
     }
 
     /**

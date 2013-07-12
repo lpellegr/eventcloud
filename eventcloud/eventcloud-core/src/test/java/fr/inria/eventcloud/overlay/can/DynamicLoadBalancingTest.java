@@ -18,12 +18,9 @@ package fr.inria.eventcloud.overlay.can;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
@@ -58,7 +55,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
     public DynamicLoadBalancingTest() {
         super(
                 (EventCloudDeploymentDescriptor) new EventCloudDeploymentDescriptor().setDeploymentConfiguration(createDeploymentConfiguration()),
-                1, 10);
+                1, 2);
     }
 
     public static DeploymentConfiguration createDeploymentConfiguration() {
@@ -71,50 +68,50 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
                 super.configure();
 
                 EventCloudProperties.DYNAMIC_LOAD_BALANCING.setValue(true);
-                EventCloudProperties.LOAD_BALANCING_CRITERION_NB_QUADS_STORED_EMERGENCY_THRESHOLD.setValue(10d);
+                // EventCloudProperties.LOAD_BALANCING_CRITERION_NB_QUADS_STORED_EMERGENCY_THRESHOLD.setValue(10d);
             }
         };
     }
 
     // @Test
     public void test() {
-
         while (true) {
             try {
                 Thread.sleep(RandomUtils.nextIntClosed(50, 100));
 
                 super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
 
-                GetLoadInformationResponse loadInformation =
-                        (GetLoadInformationResponse) PAFuture.getFutureValue(super.getRandomSemanticPeer()
-                                .send(new GetLoadInformationRequest()));
-
-                Map<OverlayId, LoadInformation> map =
-                        loadInformation.getResult();
-
-                StringBuilder buf = new StringBuilder();
-
-                Iterator<Entry<OverlayId, LoadInformation>> iter =
-                        map.entrySet().iterator();
-
-                while (iter.hasNext()) {
-                    Entry<OverlayId, LoadInformation> entry = iter.next();
-
-                    buf.append(entry.getKey());
-                    buf.append(" => ");
-                    buf.append(entry.getValue());
-
-                    if (iter.hasNext()) {
-                        buf.append(',');
-                    }
-
-                    buf.append("\n");
-                }
-
-                buf.append("Number of peers is ");
-                buf.append(map.size());
-
-                log.info(buf.toString());
+                // GetLoadInformationResponse loadInformation =
+                // (GetLoadInformationResponse)
+                // PAFuture.getFutureValue(super.getRandomSemanticPeer()
+                // .send(new GetLoadInformationRequest()));
+                //
+                // Map<OverlayId, LoadInformation> map =
+                // loadInformation.getResult();
+                //
+                // StringBuilder buf = new StringBuilder();
+                //
+                // Iterator<Entry<OverlayId, LoadInformation>> iter =
+                // map.entrySet().iterator();
+                //
+                // while (iter.hasNext()) {
+                // Entry<OverlayId, LoadInformation> entry = iter.next();
+                //
+                // buf.append(entry.getKey());
+                // buf.append(" => ");
+                // buf.append(entry.getValue());
+                //
+                // if (iter.hasNext()) {
+                // buf.append(',');
+                // }
+                //
+                // buf.append("\n");
+                // }
+                //
+                // buf.append("Number of peers is ");
+                // buf.append(map.size());
+                //
+                // log.info(buf.toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -152,7 +149,8 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
                     new HashMap<OverlayId, LoadInformation>();
             result.put(overlay.getId(), new LoadInformation(
                     customOverlay.getLoadBalancingManager().getLocalLoad(),
-                    customOverlay.getLoadBalancingManager().getSystemLoad()));
+                    customOverlay.getLoadBalancingManager()
+                            .getAverageOverlayLoad()));
 
             return result;
         }

@@ -31,6 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.api.PAFuture;
+import org.objectweb.proactive.core.body.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
@@ -53,6 +54,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
+import org.objectweb.proactive.multiactivity.execution.RunnableRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -587,8 +589,8 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         this.leaveBasedOnSplitHistory();
 
-        super.messageManager.clear();
-        // super.id = UUID.randomUUID();
+        // TODO uncomment once load balancing issues are fixed
+        // super.messageManager.clear();
     }
 
     private void leaveBasedOnSplitHistory() {
@@ -686,6 +688,71 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         }
 
         this.mutualExclusionManager.releaseCriticalSection();
+
+        // TODO: uncomment once load balancing issues fixed
+        // this.transferPendingRequests(reassignmentNeighbors);
+    }
+
+    private void transferPendingRequests(ConcurrentMap<OverlayId, NeighborEntry<E>> reassignmentNeighbors) {
+        // stop component activity
+        // Component component = ((Interface) this.stub).getFcItfOwner();
+        //
+        // System.err.println("CanOverlay.transferPendingRequests() A " +
+        // this.id);
+        //
+        // PAGCMLifeCycleController controller = null;
+        // try {
+        // controller = Utils.getPAGCMLifeCycleController(component);
+        // } catch (NoSuchInterfaceException e) {
+        // e.printStackTrace();
+        // }
+        //
+        // System.err.println("CanOverlay.transferPendingRequests() B " +
+        // this.id);
+        //
+        // try {
+        // controller.stopFc();
+        // } catch (IllegalLifeCycleException e) {
+        // e.printStackTrace();
+        // }
+        //
+        // System.err.println("CanOverlay.transferPendingRequests() C " +
+        // this.id);
+        //
+        // remove and transfer pending requesting from the request queue
+        List<Request> pendingRequests = new ArrayList<Request>();
+
+        synchronized (this.multiActiveService.getRequestExecutor()) {
+            pendingRequests.addAll(this.multiActiveService.getRequestExecutor()
+                    .getRequestQueue()
+                    .getInternalQueue());
+
+            this.multiActiveService.getRequestExecutor()
+                    .getRequestQueue()
+                    .clear();
+
+            for (RunnableRequest runnableRequest : this.multiActiveService.getPriorityConstraints()
+                    .clear()) {
+                pendingRequests.add(runnableRequest.getRequest());
+            }
+        }
+
+        // TODO: share with all reassignmentNeighbors
+        if (pendingRequests.size() > 0) {
+            reassignmentNeighbors.values().iterator().next().getStub().inject(
+                    pendingRequests);
+        }
+
+        // // restarts the component activity to handle new join or create
+        // request
+        // try {
+        // controller.startFc();
+        // } catch (IllegalLifeCycleException e) {
+        // e.printStackTrace();
+        // }
+        //
+        // System.err.println("CanOverlay.transferPendingRequests() F " +
+        // this.id);
     }
 
     @SuppressWarnings("unused")
@@ -847,7 +914,8 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         if (this.zone == null) {
             return super.id.toString();
         } else {
-            return this.zone.toString();
+            // return this.zone.toString();
+            return super.id.toString();
         }
     }
 

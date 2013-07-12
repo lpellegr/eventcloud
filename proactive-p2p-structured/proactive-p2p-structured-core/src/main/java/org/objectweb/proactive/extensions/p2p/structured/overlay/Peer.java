@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
@@ -162,6 +163,8 @@ public interface Peer extends Comparable<Peer>, Serializable {
      * @return debug information as String.
      */
     String dump();
+
+    void inject(List<org.objectweb.proactive.core.body.request.Request> requests);
 
     /**
      * {@inheritDoc}
